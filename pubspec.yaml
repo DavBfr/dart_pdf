@@ -1,0 +1,13 @@
+name: pdf
+author: David PHAM-VAN <dev.nfet.net@gmail.com>
+description: A pdf producer for Dart
+homepage: https://github.com/davbfr/dart_pdf
+version: 1.0.0
+
+dependencies:
+  image: "^1.1.29"
+  ttf_parser: "^1.0.0"
+  vector_math:
+
+dev_dependencies:
+  test: "^0.12.32+1"
