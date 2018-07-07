@@ -58,7 +58,7 @@ class PDFFont extends PDFObject {
   }
 
   PDFRect stringBounds(String s) {
-    var chars = LATIN1.encode(s);
+    var chars = latin1.encode(s);
 
     if (chars.length == 0) return const PDFRect(0.0, 0.0, 0.0, 0.0);
 
@@ -82,7 +82,7 @@ class PDFFont extends PDFObject {
   }
 
   PDFPoint stringSize(String s) {
-    var chars = LATIN1.encode(s);
+    var chars = latin1.encode(s);
 
     var w = 0.0;
     var h = 0.0;

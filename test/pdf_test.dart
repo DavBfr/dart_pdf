@@ -51,7 +51,7 @@ void main() {
     for (var i = 10.0; i < 90.0; i += 5.0) {
       g.saveContext();
       var tm = new Matrix4.identity();
-      tm.rotateZ(i * PI / 360.0);
+      tm.rotateZ(i * pi / 360.0);
       tm.translate(300.0, -100.0);
       g.setTransform(tm);
       g.drawString(font1, 12.0, "Hello $i", 20.0, 100.0);
