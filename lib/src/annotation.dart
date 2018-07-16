@@ -59,7 +59,18 @@ class PDFAnnot extends PDFObject {
   PDFBorder border;
 
   PDFAnnot(PDFPage pdfPage,
-      {String type, this.s, this.l, this.b, this.r, this.t, this.subtype, this.dest, this.fl, this.fb, this.fr, this.ft})
+      {String type,
+      this.s,
+      this.l,
+      this.b,
+      this.r,
+      this.t,
+      this.subtype,
+      this.dest,
+      this.fl,
+      this.fb,
+      this.fr,
+      this.ft})
       : super(pdfPage.pdfDocument, type) {
     pdfPage.annotations.add(this);
   }
@@ -70,7 +81,8 @@ class PDFAnnot extends PDFObject {
   /// @param b Bottom coordinate
   /// @param r Right coordinate
   /// @param t Top coordinate
-  factory PDFAnnot.annotation(PDFPage pdfPage, String s, double l, double b, double r, double t) =>
+  factory PDFAnnot.annotation(
+          PDFPage pdfPage, String s, double l, double b, double r, double t) =>
       new PDFAnnot(pdfPage, type: "/Annot", s: s, l: l, b: b, r: r, t: t);
 
   /// Creates a text annotation
@@ -94,9 +106,14 @@ class PDFAnnot extends PDFObject {
   /// @param ft Top coordinate
   /// <br><br>Rectangle describing what part of the page to be displayed
   /// (must be in User Coordinates)
-  factory PDFAnnot.link(PDFPage pdfPage, double l, double b, double r, double t, PDFObject dest,
-          [double fl = FULL_PAGE, double fb = FULL_PAGE, double fr = FULL_PAGE, double ft = FULL_PAGE]) =>
-      new PDFAnnot(pdfPage, type: "/Link", l: l, b: b, r: r, t: t, dest: dest, fl: fl, fb: fb, fr: fr, ft: ft);
+  factory PDFAnnot.link(
+          PDFPage pdfPage, double l, double b, double r, double t, PDFObject dest,
+          [double fl = FULL_PAGE,
+          double fb = FULL_PAGE,
+          double fr = FULL_PAGE,
+          double ft = FULL_PAGE]) =>
+      new PDFAnnot(pdfPage,
+          type: "/Link", l: l, b: b, r: r, t: t, dest: dest, fl: fl, fb: fb, fr: fr, ft: ft);
 
   /// Sets the border for the annotation. By default, no border is defined.
   ///

@@ -28,7 +28,8 @@ class PDFTTFFont extends PDFFont {
   int _charMax;
 
   /// Constructs a PDFTTFFont
-  PDFTTFFont(PDFDocument pdfDocument, Uint8List bytes) : super(pdfDocument, subtype: "/TrueType") {
+  PDFTTFFont(PDFDocument pdfDocument, Uint8List bytes)
+      : super(pdfDocument, subtype: "/TrueType") {
     _font = new TtfParser().parse(bytes);
     baseFont = "/" + _font.name.fontName.replaceAll(" ", "");
 

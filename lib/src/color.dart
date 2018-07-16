@@ -29,8 +29,8 @@ class PDFColor {
   PDFColor(this.r, this.g, this.b, [this.a = 1.0]);
 
   factory PDFColor.fromInt(int color) {
-    return new PDFColor(
-        (color >> 16 & 0xff) / 255.0, (color >> 8 & 0xff) / 255.0, (color & 0xff) / 255.0, (color >> 24 & 0xff) / 255.0);
+    return new PDFColor((color >> 16 & 0xff) / 255.0, (color >> 8 & 0xff) / 255.0,
+        (color & 0xff) / 255.0, (color >> 24 & 0xff) / 255.0);
   }
 
   factory PDFColor.fromHex(String color) {
@@ -43,8 +43,8 @@ class PDFColor {
 
   int toInt() =>
       ((((a * 255.0).round() & 0xff) << 24) |
-      (((r * 255.0).round() & 0xff) << 16) |
-      (((g * 255.0).round() & 0xff) << 8) |
-      (((b * 255.0).round() & 0xff) << 0)) &
+          (((r * 255.0).round() & 0xff) << 16) |
+          (((g * 255.0).round() & 0xff) << 8) |
+          (((b * 255.0).round() & 0xff) << 0)) &
       0xFFFFFFFF;
 }

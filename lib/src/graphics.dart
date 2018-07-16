@@ -174,8 +174,7 @@ class PDFGraphics {
   ///
   /// @param c Color to use
   void setColor(PDFColor color) {
-    buf.putString("${color.r} ${color.g} ${color.b} rg ${color.r} ${color.g} ${color
-            .b} RG\n");
+    buf.putString("${color.r} ${color.g} ${color.b} rg ${color.r} ${color.g} ${color.b} RG\n");
   }
 
   /// Set the transformation Matrix

@@ -36,7 +36,8 @@ class PDFBorder extends PDFObject {
   /// @param style The style of the border
   /// @param dash The line pattern definition
   /// @see PDFAnnot
-  PDFBorder(PDFDocument pdfDocument, this.width, {this.style = 0, this.dash}) : super(pdfDocument);
+  PDFBorder(PDFDocument pdfDocument, this.width, {this.style = 0, this.dash})
+      : super(pdfDocument);
 
   /// @param os OutputStream to send the object to
   @override

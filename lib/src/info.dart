@@ -26,7 +26,8 @@ class PDFInfo extends PDFObject {
   String keywords;
 
   /// @param title Title of this document
-  PDFInfo(PDFDocument pdfDocument, {this.title, this.author, this.creator, this.subject, this.keywords})
+  PDFInfo(PDFDocument pdfDocument,
+      {this.title, this.author, this.creator, this.subject, this.keywords})
       : super(pdfDocument, null) {
     params["/Producer"] = PDFStream.text("dpdf - David PHAM-VAN");
   }

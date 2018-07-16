@@ -72,7 +72,12 @@ class PDFDocument {
   /// <p>
   /// These map the page modes just defined to the pagemodes setting of PDF.
   /// </p>
-  static const _PDF_PAGE_MODES = const ["/UseNone", "/UseOutlines", "/UseThumbs", "/FullScreen"];
+  static const _PDF_PAGE_MODES = const [
+    "/UseNone",
+    "/UseOutlines",
+    "/UseThumbs",
+    "/FullScreen"
+  ];
 
   /// This holds the current fonts
   final Set<PDFFont> fonts = new Set<PDFFont>();

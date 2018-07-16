@@ -23,7 +23,8 @@ class PDFFontDescriptor extends PDFObject {
   final TtfFont font;
   final PDFTTFFont ttfFont;
 
-  PDFFontDescriptor(this.ttfFont, this.file, this.font) : super(ttfFont.pdfDocument, "/FontDescriptor");
+  PDFFontDescriptor(this.ttfFont, this.file, this.font)
+      : super(ttfFont.pdfDocument, "/FontDescriptor");
 
   @override
   void prepare() {
@@ -32,7 +33,8 @@ class PDFFontDescriptor extends PDFObject {
     params["/FontName"] = PDFStream.string(ttfFont.baseFont);
     params["/FontFile2"] = file.ref();
     params["/Flags"] = PDFStream.intNum(32);
-    params["/FontBBox"] = new PDFStream()..putStringArray([font.head.xMin, font.head.yMin, font.head.xMax, font.head.yMax]);
+    params["/FontBBox"] = new PDFStream()
+      ..putStringArray([font.head.xMin, font.head.yMin, font.head.xMax, font.head.yMax]);
     params["/Ascent"] = PDFStream.intNum(font.hhea.ascent);
     params["/Descent"] = PDFStream.intNum(font.hhea.descent);
     params["/ItalicAngle"] = PDFStream.intNum(0);

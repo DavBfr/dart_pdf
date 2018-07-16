@@ -34,7 +34,8 @@ class PDFCatalog extends PDFObject {
   ///        of the documents page tree
   /// @param pagemode How the document should appear when opened.
   /// Allowed values are USENONE, USEOUTLINES, USETHUMBS or FULLSCREEN.
-  PDFCatalog(PDFDocument pdfDocument, this.pdfPageList, this.pageMode) : super(pdfDocument, "/Catalog");
+  PDFCatalog(PDFDocument pdfDocument, this.pdfPageList, this.pageMode)
+      : super(pdfDocument, "/Catalog");
 
   /// @param os OutputStream to send the object to
   @override

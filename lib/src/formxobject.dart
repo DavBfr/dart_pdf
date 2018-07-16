@@ -33,7 +33,8 @@ class PDFFormXObject extends PDFXObject {
   /// set matrix
   void setMatrix(Matrix4 t) {
     var s = t.storage;
-    params["/Matrix"] = PDFStream.string("[${s[0]} ${s[1]} ${s[4]} ${s[5]} ${s[12]} ${s[13]}]");
+    params["/Matrix"] =
+        PDFStream.string("[${s[0]} ${s[1]} ${s[4]} ${s[5]} ${s[12]} ${s[13]}]");
   }
 
   @override

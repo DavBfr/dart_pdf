@@ -119,7 +119,8 @@ class PDFStream {
     putString(">>");
   }
 
-  static PDFStream dictionary(Map<String, PDFStream> values) => new PDFStream()..putDictionary(values);
+  static PDFStream dictionary(Map<String, PDFStream> values) =>
+      new PDFStream()..putDictionary(values);
 
   void putObjectDictionary(Map<String, PDFObject> values) {
     putString("<< ");

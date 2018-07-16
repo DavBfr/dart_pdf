@@ -76,7 +76,8 @@ class PDFOutline extends PDFObject {
   PDFOutline add({String title, PDFPage dest, double x, y, w, h}) {
     var xy1 = dest.cxy(x, y + h);
     var xy2 = dest.cxy(x + w, y);
-    PDFOutline outline = new PDFOutline(pdfDocument, title: title, dest: dest, l: xy1.w, b: xy1.h, r: xy2.w, t: xy2.h);
+    PDFOutline outline = new PDFOutline(pdfDocument,
+        title: title, dest: dest, l: xy1.w, b: xy1.h, r: xy2.w, t: xy2.h);
     // Tell the outline of ourselves
     outline.parent = this;
     return outline;

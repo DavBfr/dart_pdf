@@ -64,4 +64,3 @@ part 'src/stream.dart';
 part 'src/ttffont.dart';
 part 'src/xobject.dart';
 part 'src/xref.dart';
-

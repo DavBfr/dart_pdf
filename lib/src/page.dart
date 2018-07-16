@@ -48,7 +48,8 @@ class PDFPage extends PDFObject {
   /// @see PageFormat#LANDSCAPE
   /// @see PageFormat#REVERSE_LANDSCAPE
   /// @param pageFormat PageFormat describing the page size
-  PDFPage(PDFDocument pdfDocument, {int orientation, this.pageFormat}) : super(pdfDocument, "/Page") {
+  PDFPage(PDFDocument pdfDocument, {int orientation, this.pageFormat})
+      : super(pdfDocument, "/Page") {
     pdfDocument.pdfPageList.pages.add(this);
     if (pageFormat == null) pageFormat = new PDFPageFormat();
     setOrientation(orientation);
@@ -132,12 +133,16 @@ class PDFPage extends PDFObject {
   /// @param vh Height of the view area
   /// @return Returns the annotation, so other settings can be changed.
   PDFAnnot addLink(double x, y, w, h, PDFObject dest,
-      [double vx = PDFAnnot.FULL_PAGE, vy = PDFAnnot.FULL_PAGE, vw = PDFAnnot.FULL_PAGE, vh = PDFAnnot.FULL_PAGE]) {
+      [double vx = PDFAnnot.FULL_PAGE,
+      vy = PDFAnnot.FULL_PAGE,
+      vw = PDFAnnot.FULL_PAGE,
+      vh = PDFAnnot.FULL_PAGE]) {
     var xy1 = cxy(x, y + h);
     var xy2 = cxy(x + w, y);
     var xy3 = cxy(vx, vy + vh);
     var xy4 = cxy(vx + vw, vy);
-    PDFAnnot ob = new PDFAnnot.link(this, xy1.w, xy1.h, xy2.w, xy2.h, dest, xy3.w, xy3.h, xy4.w, xy4.h);
+    PDFAnnot ob =
+        new PDFAnnot.link(this, xy1.w, xy1.h, xy2.w, xy2.h, dest, xy3.w, xy3.h, xy4.w, xy4.h);
     return ob;
   }
 
@@ -152,7 +157,8 @@ class PDFPage extends PDFObject {
   PDFOutline addOutline(String title, {double x, double y, double w, double h}) {
     PDFPoint xy1 = cxy(x, y + h);
     PDFPoint xy2 = cxy(x + w, y);
-    PDFOutline outline = new PDFOutline(pdfDocument, title: title, dest: this, l: xy1.w, b: xy1.h, r: xy2.w, t: xy2.h);
+    PDFOutline outline = new PDFOutline(pdfDocument,
+        title: title, dest: this, l: xy1.w, b: xy1.h, r: xy2.w, t: xy2.h);
     pdfDocument.outline.outlines.add(outline);
     return outline;
   }
@@ -166,7 +172,8 @@ class PDFPage extends PDFObject {
     params["/Parent"] = pdfDocument.pdfPageList.ref();
 
     // the /MediaBox for the page size
-    params["/MediaBox"] = new PDFStream()..putStringArray([0, 0, pageFormat.getWidth(), pageFormat.getHeight()]);
+    params["/MediaBox"] = new PDFStream()
+      ..putStringArray([0, 0, pageFormat.getWidth(), pageFormat.getHeight()]);
 
     // Rotation (if not zero)
 //        if(rotate!=0) {
