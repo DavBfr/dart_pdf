@@ -19,10 +19,22 @@
 part of pdf;
 
 class PDFImage extends PDFXObject {
-  final Image _img;
+  /// RGBA Image Data
+  final Uint8List image;
+
+  /// Image width
+  final int width;
+
+  /// Image height
+  final int height;
+
+  /// Image has alpha channel
+  final bool alpha;
+
   String _name;
 
-  final bool _alphaChannel;
+  /// Process alphaChannel only
+  final bool alphaChannel;
 
   /// Creates a new <code>PDFImage</code> instance.
   ///
@@ -32,63 +44,62 @@ class PDFImage extends PDFXObject {
   /// @param w an <code>int</code> value
   /// @param h an <code>int</code> value
   /// @param obs an <code>ImageObserver</code> value
-  PDFImage(PDFDocument pdfDocument, this._img, [this._alphaChannel = false]) : super(pdfDocument, "/Image", isBinary: true) {
+  PDFImage(PDFDocument pdfDocument,
+      {@required this.image,
+      @required this.width,
+      @required this.height,
+      this.alpha = true,
+      this.alphaChannel = false})
+      : assert(alphaChannel == false || alpha == true),
+        assert(width != null),
+        assert(height != null),
+        super(pdfDocument, "/Image", isBinary: true) {
     _name = "/Image$objser";
-    params["/Width"] = PDFStream.string(_img.width.toString());
-    params["/Height"] = PDFStream.string(_img.height.toString());
+    params["/Width"] = PDFStream.string(width.toString());
+    params["/Height"] = PDFStream.string(height.toString());
     params["/BitsPerComponent"] = PDFStream.intNum(8);
     params['/Name'] = PDFStream.string(_name);
 
-    if (_alphaChannel == false && _img.numChannels == 4) {
-      var _sMask = new PDFImage(pdfDocument, this._img, true);
+    if (alphaChannel == false && alpha) {
+      var _sMask = new PDFImage(pdfDocument,
+          image: image, width: width, height: height, alpha: alpha, alphaChannel: true);
       params["/SMask"] = PDFStream.string("${_sMask.objser} 0 R");
     }
 
-    if (_alphaChannel) {
+    if (alphaChannel) {
       params["/ColorSpace"] = PDFStream.string("/DeviceGray");
     } else {
       params["/ColorSpace"] = PDFStream.string("/DeviceRGB");
     }
+  }
 
+  @override
+  void prepare() {
     // write the pixels to the stream
     // print("Processing image ${img.width}x${img.height} pixels");
 
-    int w = _img.width;
-    int h = _img.height;
+    int w = width;
+    int h = height;
     int s = w * h;
 
-    Uint8List out = new Uint8List(_alphaChannel ? s : s * 3);
+    Uint8List out = new Uint8List(alphaChannel ? s : s * 3);
 
-    if (_alphaChannel) {
+    if (alphaChannel) {
       for (int i = 0; i < s; i++) {
-        final p = _img.data[i];
-        final int alpha = (p >> 24) & 0xff;
-
-        out[i] = alpha;
+        out[i] = image[i * 4 + 3];
       }
     } else {
       for (int i = 0; i < s; i++) {
-        final p = _img.data[i];
-        final int blue = (p >> 16) & 0xff;
-        final int green = (p >> 8) & 0xff;
-        final int red = p & 0xff;
-
-        out[i * 3] = red;
-        out[i * 3 + 1] = green;
-        out[i * 3 + 2] = blue;
+        out[i * 3] = image[i * 4];
+        out[i * 3 + 1] = image[i * 4 + 1];
+        out[i * 3 + 2] = image[i * 4 + 2];
       }
     }
 
     buf.putBytes(out);
+
+    super.prepare();
   }
-
-  /// Get the value of width.
-  /// @return value of width.
-  int get width => _img.width;
-
-  /// Get the value of height.
-  /// @return value of height.
-  int get height => _img.height;
 
   /// Get the name
   ///

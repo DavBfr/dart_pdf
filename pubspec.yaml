@@ -5,7 +5,6 @@ homepage: https://github.com/davbfr/dart_pdf
 version: 1.0.0
 
 dependencies:
-  image: "^1.1.29"
   ttf_parser: "^1.0.0"
   vector_math:
 

@@ -16,8 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-library pdf;
-
 /// http://www.mactech.com/articles/mactech/Vol.15/15.09/PDFIntro/index.html
 /// https://brendanzagaeski.appspot.com/0004.html
 /// http://blog.idrsolutions.com/?s=%22Make+your+own+PDF+file%22
@@ -29,15 +27,19 @@ library pdf;
 /// https://www.w3.org/TR/SVG/paths.html#PathDataGeneralInformation
 /// https://www.pdf-online.com/osa/validate.aspx
 
+library pdf;
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:vector_math/vector_math_64.dart';
-import 'package:image/image.dart';
-import 'package:ttf_parser/ttf_parser.dart';
 
-part 'src/ascii85.dart';
+import 'package:meta/meta.dart';
+import 'package:ttf_parser/ttf_parser.dart';
+import 'package:vector_math/vector_math_64.dart';
+
+part 'src/annotation.dart';
 part 'src/array.dart';
+part 'src/ascii85.dart';
 part 'src/border.dart';
 part 'src/catalog.dart';
 part 'src/color.dart';
@@ -45,6 +47,8 @@ part 'src/document.dart';
 part 'src/font.dart';
 part 'src/font_descriptor.dart';
 part 'src/formxobject.dart';
+part 'src/graphics.dart';
+part 'src/image.dart';
 part 'src/info.dart';
 part 'src/object.dart';
 part 'src/object_stream.dart';
@@ -55,11 +59,9 @@ part 'src/page_format.dart';
 part 'src/page_list.dart';
 part 'src/point.dart';
 part 'src/polygon.dart';
-part 'src/annotation.dart';
-part 'src/graphics.dart';
-part 'src/image.dart';
 part 'src/rect.dart';
 part 'src/stream.dart';
 part 'src/ttffont.dart';
 part 'src/xobject.dart';
 part 'src/xref.dart';
+

@@ -57,6 +57,7 @@ class PDFObject {
   }
 
   /// Prepare the object to be written to the stream
+  @mustCallSuper
   void prepare() {}
 
   /// The write method should call this before writing anything to the

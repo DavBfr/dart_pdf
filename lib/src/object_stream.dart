@@ -31,7 +31,8 @@ class PDFObjectStream extends PDFObject {
   /// <p>By default, the stream will be compressed.
   /// @param type type for the stream
   /// @see PDFImage
-  PDFObjectStream(PDFDocument pdfDocument, {String type, this.isBinary = false}) : super(pdfDocument, type);
+  PDFObjectStream(PDFDocument pdfDocument, {String type, this.isBinary = false})
+      : super(pdfDocument, type);
 
   Uint8List _data;
 
@@ -40,7 +41,7 @@ class PDFObjectStream extends PDFObject {
     super.prepare();
 
     if (pdfDocument.deflate) {
-      var z = new ZLibCodec(level: ZLibOption.MAX_LEVEL);
+      var z = new ZLibCodec(level: ZLibOption.maxLevel);
       _data = z.encode(buf.output());
       params["/Filter"] = PDFStream.string("/FlateDecode");
     } else if (isBinary) {

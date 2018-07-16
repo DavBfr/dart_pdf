@@ -1,16 +1,14 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:image/image.dart';
 import 'package:pdf/pdf.dart';
 import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-
 void main() {
   test('Pdf', () {
-    Image img = new Image(10, 10);
-    img.fill(0x12345678);
+//    Image img = new Image(10, 10);
+//    img.fill(0x12345678);
 
     var pdf = new PDFDocument(deflate: false);
     var i = pdf.info;
@@ -29,7 +27,8 @@ void main() {
     g.restoreContext();
     var font1 = new PDFFont(pdf);
 
-    var font2 = new PDFTTFFont(pdf, new File("../assets/Nunito-Regular.ttf").readAsBytesSync());
+    var font2 =
+        new PDFTTFFont(pdf, new File("../assets/Nunito-Regular.ttf").readAsBytesSync());
     var s = "Hello World!";
     var r = font2.stringBounds(s);
     const FS = 20.0;
@@ -47,7 +46,8 @@ void main() {
     g.drawRect(300.0, 150.0, 50.0, 50.0);
     g.fillPath();
     g.setColor(new PDFColor(0.0, 0.5, 0.0));
-    var image = new PDFImage(pdf, img);
+//    var image = new PDFImage(pdf,
+//        image: img.data.buffer.asUint8List(), width: img.width, height: img.height);
     for (var i = 10.0; i < 90.0; i += 5.0) {
       g.saveContext();
       var tm = new Matrix4.identity();
@@ -55,7 +55,7 @@ void main() {
       tm.translate(300.0, -100.0);
       g.setTransform(tm);
       g.drawString(font1, 12.0, "Hello $i", 20.0, 100.0);
-      g.drawImage(image, 100.0, 100.0, 80.0);
+//      g.drawImage(image, 100.0, 100.0, 80.0);
       g.restoreContext();
     }
 
