@@ -2,7 +2,7 @@ name: pdf
 author: David PHAM-VAN <dev.nfet.net@gmail.com>
 description: A pdf producer for Dart
 homepage: https://github.com/davbfr/dart_pdf
-version: 1.0.0
+version: 1.0.1
 
 environment:
   sdk: ">=1.8.0 <2.0.0"
