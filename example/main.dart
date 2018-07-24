@@ -4,7 +4,7 @@ import 'package:pdf/pdf.dart';
 
 void main() {
   final pdf = new PDFDocument();
-  final page = new PDFPage(pdf, pageFormat: new PDFPageFormat(PDFPageFormat.LETTER));
+  final page = new PDFPage(pdf, pageFormat: PDFPageFormat.LETTER);
   final g = page.getGraphics();
   final font = new PDFFont(pdf);
 

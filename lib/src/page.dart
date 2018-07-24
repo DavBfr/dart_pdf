@@ -48,11 +48,9 @@ class PDFPage extends PDFObject {
   /// @see PageFormat#LANDSCAPE
   /// @see PageFormat#REVERSE_LANDSCAPE
   /// @param pageFormat PageFormat describing the page size
-  PDFPage(PDFDocument pdfDocument, {int orientation, this.pageFormat})
-      : super(pdfDocument, "/Page") {
+  PDFPage(PDFDocument pdfDocument, {this.pageFormat}) : super(pdfDocument, "/Page") {
     pdfDocument.pdfPageList.pages.add(this);
-    if (pageFormat == null) pageFormat = new PDFPageFormat();
-    setOrientation(orientation);
+    if (pageFormat == null) pageFormat = PDFPageFormat.A4;
   }
 
   /// This returns a PDFGraphics object, which can then be used to render
@@ -76,25 +74,7 @@ class PDFPage extends PDFObject {
 
   /// Gets the dimensions of the page.
   /// @return a Dimension object containing the width and height of the page.
-  PDFPoint getDimension() => new PDFPoint(pageFormat.getWidth(), pageFormat.getHeight());
-
-  /// Sets the page's orientation.
-  ///
-  /// <p>Normally, this should be done when the page is created, to avoid
-  /// problems.
-  ///
-  /// @param orientation a PageFormat orientation constant:
-  /// PageFormat.PORTRAIT, PageFormat.LANDSACPE or PageFromat.REVERSE_LANDSACPE
-  void setOrientation(int orientation) {
-    pageFormat.setOrientation(orientation);
-  }
-
-  /// Returns the pages orientation:
-  /// PageFormat.PORTRAIT, PageFormat.LANDSACPE or PageFromat.REVERSE_LANDSACPE
-  ///
-  /// @see java.awt.print.PageFormat
-  /// @return current orientation of the page
-  int getOrientation() => pageFormat.getOrientation();
+  PDFPoint getDimension() => new PDFPoint(pageFormat.width, pageFormat.height);
 
   /// This adds an Annotation to the page.
   ///
@@ -173,7 +153,7 @@ class PDFPage extends PDFObject {
 
     // the /MediaBox for the page size
     params["/MediaBox"] = new PDFStream()
-      ..putStringArray([0, 0, pageFormat.getWidth(), pageFormat.getHeight()]);
+      ..putStringArray([0, 0, pageFormat.width, pageFormat.height]);
 
     // Rotation (if not zero)
 //        if(rotate!=0) {
@@ -237,5 +217,5 @@ class PDFPage extends PDFObject {
   /// @param x Coordinate in Java space
   /// @param y Coordinate in Java space
   /// @return array containing the x & y Coordinate in User space
-  PDFPoint cxy(double x, double y) => new PDFPoint(x, pageFormat.getHeight() - y);
+  PDFPoint cxy(double x, double y) => new PDFPoint(x, pageFormat.height - y);
 }

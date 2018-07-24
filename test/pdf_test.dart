@@ -16,7 +16,7 @@ void main() {
     i.creator = i.author;
     i.title = "My Title";
     i.subject = "My Subject";
-    var page = new PDFPage(pdf, pageFormat: new PDFPageFormat([500.0, 300.0]));
+    var page = new PDFPage(pdf, pageFormat: const PDFPageFormat(500.0, 300.0));
 
     var g = page.getGraphics();
     g.saveContext();
