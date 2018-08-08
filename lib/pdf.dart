@@ -16,17 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/// http://www.mactech.com/articles/mactech/Vol.15/15.09/PDFIntro/index.html
-/// https://brendanzagaeski.appspot.com/0004.html
-/// http://blog.idrsolutions.com/?s=%22Make+your+own+PDF+file%22
-/// https://brendanzagaeski.appspot.com/0005.html
-/// https://github.com/Setasign/FPDF
-/// https://github.com/rev42/tfpdf/blob/master/src/tFPDF.php
-/// http://gnujpdf.sourceforge.net
-/// http://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_reference_1-7.pdf
-/// https://www.w3.org/TR/SVG/paths.html#PathDataGeneralInformation
-/// https://www.pdf-online.com/osa/validate.aspx
-
 library pdf;
 
 import 'dart:convert';
