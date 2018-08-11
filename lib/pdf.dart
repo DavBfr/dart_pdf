@@ -23,7 +23,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
-import 'package:ttf_parser/ttf_parser.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 part 'src/annotation.dart';
@@ -50,6 +49,7 @@ part 'src/point.dart';
 part 'src/polygon.dart';
 part 'src/rect.dart';
 part 'src/stream.dart';
+part 'src/ttf_parser.dart';
 part 'src/ttffont.dart';
 part 'src/xobject.dart';
 part 'src/xref.dart';

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:test/test.dart';
@@ -27,8 +28,11 @@ void main() {
     g.restoreContext();
     var font1 = new PDFFont(pdf);
 
-    var font2 =
-        new PDFTTFFont(pdf, new File("../assets/Nunito-Regular.ttf").readAsBytesSync());
+    var font2 = new PDFTTFFont(
+        pdf,
+        (new File("../assets/Nunito-Regular.ttf").readAsBytesSync() as Uint8List)
+            .buffer
+            .asByteData());
     var s = "Hello World!";
     var r = font2.stringBounds(s);
     const FS = 20.0;

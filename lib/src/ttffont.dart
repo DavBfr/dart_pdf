@@ -23,19 +23,20 @@ class PDFTTFFont extends PDFFont {
   PDFFontDescriptor descriptor;
   PDFArrayObject widthsObject;
   final widths = new List<String>();
-  TtfFont _font;
+  final TTFParser font;
   int _charMin;
   int _charMax;
 
   /// Constructs a PDFTTFFont
-  PDFTTFFont(PDFDocument pdfDocument, Uint8List bytes)
-      : super(pdfDocument, subtype: "/TrueType") {
-    _font = new TtfParser().parse(bytes);
-    baseFont = "/" + _font.name.fontName.replaceAll(" ", "");
+  PDFTTFFont(PDFDocument pdfDocument, ByteData bytes)
+      : font = new TTFParser(bytes),
+        super(pdfDocument, subtype: "/TrueType") {
+    baseFont = "/" + font.fontName.replaceAll(" ", "");
 
     PDFObjectStream file = new PDFObjectStream(pdfDocument, isBinary: true);
-    file.buf.putBytes(bytes);
-    file.params["/Length1"] = PDFStream.intNum(bytes.length);
+    final data = bytes.buffer.asUint8List();
+    file.buf.putBytes(data);
+    file.params["/Length1"] = PDFStream.intNum(data.length);
 
     _charMin = 32;
     _charMax = 255;
@@ -45,35 +46,30 @@ class PDFTTFFont extends PDFFont {
     }
 
     unicodeCMap = new PDFObject(pdfDocument);
-    descriptor = new PDFFontDescriptor(this, file, _font);
+    descriptor = new PDFFontDescriptor(this, file);
     widthsObject = new PDFArrayObject(pdfDocument, widths);
   }
 
   @override
   double glyphAdvance(int charCode) {
-    var g = _font.cmap.charToGlyphIndexMap[charCode];
+    var g = font.charToGlyphIndexMap[charCode];
 
     if (g == null) {
       return super.glyphAdvance(charCode);
     }
 
-    return _font.hmtx.metrics[g].advanceWidth / _font.head.unitsPerEm;
+    return (font.advanceWidth[g]) ?? super.glyphAdvance(charCode);
   }
 
   @override
   PDFRect glyphBounds(int charCode) {
-    var g = _font.cmap.charToGlyphIndexMap[charCode];
+    var g = font.charToGlyphIndexMap[charCode];
 
     if (g == null) {
       return super.glyphBounds(charCode);
     }
 
-    var info = _font.glyf.glyphInfoMap[g];
-    return new PDFRect(
-        info.xMin.toDouble() / _font.head.unitsPerEm,
-        info.yMin.toDouble() / _font.head.unitsPerEm,
-        (info.xMax - info.xMin).toDouble() / _font.head.unitsPerEm,
-        (info.yMax - info.yMin).toDouble() / _font.head.unitsPerEm);
+    return font.glyphInfoMap[g] ?? super.glyphBounds(charCode);
   }
 
   @override
