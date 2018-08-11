@@ -30,7 +30,7 @@ void main() {
 
     var font2 = new PDFTTFFont(
         pdf,
-        (new File("../assets/Nunito-Regular.ttf").readAsBytesSync() as Uint8List)
+        (new File("open-sans.ttf").readAsBytesSync() as Uint8List)
             .buffer
             .asByteData());
     var s = "Hello World!";

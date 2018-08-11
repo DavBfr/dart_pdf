@@ -1,7 +1,7 @@
 name: pdf
 author: David PHAM-VAN <dev.nfet.net@gmail.com>
 description: A pdf producer for Dart. It can create pdf files for both web or flutter.
-homepage: https://github.com/davbfr/dart_pdf
+homepage: https://github.com/davbfr/dart_pdf/pdf
 version: 1.0.3
 
 environment:

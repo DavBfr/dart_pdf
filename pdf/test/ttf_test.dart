@@ -17,7 +17,7 @@ void main() {
     var g = page.getGraphics();
     var ttf = new PDFTTFFont(
         pdf,
-        (new File("../assets/Nunito-Regular.ttf").readAsBytesSync() as Uint8List)
+        (new File("open-sans.ttf").readAsBytesSync() as Uint8List)
             .buffer
             .asByteData());
     var s = "Hello World!";
@@ -30,7 +30,7 @@ void main() {
     g.setColor(new PDFColor(0.3, 0.3, 0.3));
     g.drawString(ttf, FS, s, 50.0, 30.0);
 
-    var file = new File('file.pdf');
+    var file = new File('file2.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

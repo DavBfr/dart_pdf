@@ -34,4 +34,6 @@ class PDFPageFormat {
   final double height;
 
   const PDFPageFormat(this.width, this.height);
+
+  PDFPoint get dimension => new PDFPoint(width, height);
 }

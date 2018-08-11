@@ -68,12 +68,16 @@ class PDFPage extends PDFObject {
 
   /// Returns the page's PageFormat.
   /// @return PageFormat describing the page size in device units (72dpi)
+  /// use pageFormat
+  @deprecated
   PDFPageFormat getPageFormat() {
     return pageFormat;
   }
 
   /// Gets the dimensions of the page.
   /// @return a Dimension object containing the width and height of the page.
+  /// use pageFormat.dimension
+  @deprecated
   PDFPoint getDimension() => new PDFPoint(pageFormat.width, pageFormat.height);
 
   /// This adds an Annotation to the page.
