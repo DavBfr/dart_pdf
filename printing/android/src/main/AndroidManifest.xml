@@ -1,0 +1,16 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="net.nfet.flutter.printing">
+
+    <application>
+        <provider
+            android:name=".PrintFileProvider"
+            android:authorities="${applicationId}.flutter.printing"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/flutter_printing_file_paths"/>
+        </provider>
+    </application>
+
+</manifest>

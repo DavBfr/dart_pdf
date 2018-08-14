@@ -12,3 +12,14 @@ doc/api/
 
 *.pdf
 *.ttf
+.DS_Store
+.dart_tool/
+
+.packages
+.pub/
+pubspec.lock
+
+build/
+printing/android/local.properties
+.idea
+*.iml
