@@ -2,10 +2,10 @@ name: printing
 author: David PHAM-VAN <dev.nfet.net@gmail.com>
 description: Plugin that allows Flutter apps to generate and print documents to android or ios compatible printers
 homepage: https://github.com/davbfr/dart_pdf/printing
-version: 1.0.0
+version: 1.0.1
 
 environment:
-  sdk: ">=1.19.0 <2.0.0"
+  sdk: ">=1.19.0 <3.0.0"
 
 dependencies:
   flutter:
