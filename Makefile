@@ -37,4 +37,10 @@ test: pdf/open-sans.ttf
 clean:
 	git clean -fdx
 
-.PHONY: test format format-dart format-clang clean
+publish-pdf: format clean pdf/open-sans.ttf
+	cd pdf; pub publish -f
+
+publish-printing: format clean
+	cd printing; pub publish -f
+
+.PHONY: test format format-dart format-clang clean publish-pdf publish-printing
