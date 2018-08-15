@@ -1,5 +1,6 @@
 # 1.0.4
 * Updated homepage
+* Update source formatting
 
 # 1.0.3
 * Remove dependency to ttf_parser

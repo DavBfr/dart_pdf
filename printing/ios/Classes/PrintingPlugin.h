@@ -18,5 +18,6 @@
 
 #import <Flutter/Flutter.h>
 
-@interface PrintingPlugin : NSObject<FlutterPlugin, UIPrintInteractionControllerDelegate>
+@interface PrintingPlugin
+    : NSObject <FlutterPlugin, UIPrintInteractionControllerDelegate>
 @end

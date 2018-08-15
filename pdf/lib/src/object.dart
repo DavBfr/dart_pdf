@@ -34,7 +34,8 @@ class PDFObject {
   /// This is usually called by extensors to this class, and sets the
   /// PDF Object Type
   /// @param type the PDF Object Type
-  PDFObject(this.pdfDocument, [String type]) : objser = pdfDocument._genSerial() {
+  PDFObject(this.pdfDocument, [String type])
+      : objser = pdfDocument._genSerial() {
     if (type != null) {
       params["/Type"] = PDFStream.string(type);
     }

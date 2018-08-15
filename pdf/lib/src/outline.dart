@@ -52,7 +52,8 @@ class PDFOutline extends PDFObject {
   /// @param b bottom coordinate
   /// @param r right coordinate
   /// @param t top coordinate
-  PDFOutline(PDFDocument pdfDocument, {this.title, this.dest, this.l, this.b, this.r, this.t})
+  PDFOutline(PDFDocument pdfDocument,
+      {this.title, this.dest, this.l, this.b, this.r, this.t})
       : super(pdfDocument, "/Outlines");
 
   /// This method creates an outline, and attaches it to this one.

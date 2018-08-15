@@ -62,7 +62,11 @@ class PDFImage extends PDFXObject {
 
     if (alphaChannel == false && alpha) {
       var _sMask = new PDFImage(pdfDocument,
-          image: image, width: width, height: height, alpha: alpha, alphaChannel: true);
+          image: image,
+          width: width,
+          height: height,
+          alpha: alpha,
+          alphaChannel: true);
       params["/SMask"] = PDFStream.string("${_sMask.objser} 0 R");
     }
 

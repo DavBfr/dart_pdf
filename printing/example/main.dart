@@ -22,8 +22,8 @@ class MyApp extends StatelessWidget {
     g.fillPath();
 
     g.setColor(new PDFColor(0.3, 0.3, 0.3));
-    g.drawString(
-        font, 12.0, "Hello World!", 10.0 * PDFPageFormat.MM, top - 10.0 * PDFPageFormat.MM);
+    g.drawString(font, 12.0, "Hello World!", 10.0 * PDFPageFormat.MM,
+        top - 10.0 * PDFPageFormat.MM);
 
     return pdf;
   }
@@ -39,9 +39,12 @@ class MyApp extends StatelessWidget {
     final pdf = _generateDocument();
 
     // Calculate the widget center for iPad sharing popup position
-    final RenderBox referenceBox = shareWidget.currentContext.findRenderObject();
-    final topLeft = referenceBox.localToGlobal(referenceBox.paintBounds.topLeft);
-    final bottomRight = referenceBox.localToGlobal(referenceBox.paintBounds.bottomRight);
+    final RenderBox referenceBox =
+        shareWidget.currentContext.findRenderObject();
+    final topLeft =
+        referenceBox.localToGlobal(referenceBox.paintBounds.topLeft);
+    final bottomRight =
+        referenceBox.localToGlobal(referenceBox.paintBounds.bottomRight);
     final bounds = new Rect.fromPoints(topLeft, bottomRight);
 
     Printing.sharePdf(document: pdf, bounds: bounds);
@@ -57,9 +60,12 @@ class MyApp extends StatelessWidget {
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            new RaisedButton(child: new Text('Print Document'), onPressed: _printPdf),
             new RaisedButton(
-                key: shareWidget, child: new Text('Share Document'), onPressed: _sharePdf),
+                child: new Text('Print Document'), onPressed: _printPdf),
+            new RaisedButton(
+                key: shareWidget,
+                child: new Text('Share Document'),
+                onPressed: _sharePdf),
           ],
         ),
       ),

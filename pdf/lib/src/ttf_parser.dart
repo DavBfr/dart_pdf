@@ -86,8 +86,8 @@ class TTFParser {
       int offset = bytes.getUint16(pos + 10);
       pos += 12;
       if (platformID == 1 && nameID == 6) {
-        _fontName = utf8
-            .decode(bytes.buffer.asUint8List(basePosition + stringOffset + offset, length));
+        _fontName = utf8.decode(bytes.buffer
+            .asUint8List(basePosition + stringOffset + offset, length));
       }
     }
   }
@@ -164,7 +164,8 @@ class TTFParser {
         if (idRangeOffset == 0) {
           glyphIndex = (idDelta + c) % 65536;
         } else {
-          final glyphIndexAddress = idRangeOffset + 2 * (c - startCode) + idRangeOffsetAddress;
+          final glyphIndexAddress =
+              idRangeOffset + 2 * (c - startCode) + idRangeOffsetAddress;
           glyphIndex = bytes.getUint16(glyphIndexAddress);
         }
         charToGlyphIndexMap[c] = glyphIndex;

@@ -20,5 +20,4 @@ package net.nfet.flutter.printing;
 
 import android.support.v4.content.FileProvider;
 
-public class PrintFileProvider extends FileProvider {
-}
+public class PrintFileProvider extends FileProvider {}

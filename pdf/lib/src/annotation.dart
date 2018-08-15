@@ -91,7 +91,8 @@ class PDFAnnot extends PDFObject {
   /// @param r Right coordinate
   /// @param t Top coordinate
   /// @param s Text for this annotation
-  factory PDFAnnot.text(PDFPage pdfPage, double l, double b, double r, double t, String s) =>
+  factory PDFAnnot.text(
+          PDFPage pdfPage, double l, double b, double r, double t, String s) =>
       new PDFAnnot(pdfPage, type: "/Text", l: l, b: b, r: r, t: t, s: s);
 
   /// Creates a link annotation
@@ -106,14 +107,23 @@ class PDFAnnot extends PDFObject {
   /// @param ft Top coordinate
   /// <br><br>Rectangle describing what part of the page to be displayed
   /// (must be in User Coordinates)
-  factory PDFAnnot.link(
-          PDFPage pdfPage, double l, double b, double r, double t, PDFObject dest,
+  factory PDFAnnot.link(PDFPage pdfPage, double l, double b, double r, double t,
+          PDFObject dest,
           [double fl = FULL_PAGE,
           double fb = FULL_PAGE,
           double fr = FULL_PAGE,
           double ft = FULL_PAGE]) =>
       new PDFAnnot(pdfPage,
-          type: "/Link", l: l, b: b, r: r, t: t, dest: dest, fl: fl, fb: fb, fr: fr, ft: ft);
+          type: "/Link",
+          l: l,
+          b: b,
+          r: r,
+          t: t,
+          dest: dest,
+          fl: fl,
+          fb: fb,
+          fr: fr,
+          ft: ft);
 
   /// Sets the border for the annotation. By default, no border is defined.
   ///

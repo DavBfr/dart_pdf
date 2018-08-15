@@ -133,10 +133,14 @@ class PDFGraphics {
     // Starting point
     moveTo(x, y - r2);
 
-    buf.putString("${x + m4 * r1} ${y - r2} ${x + r1} ${y - m4 * r2} ${x + r1} $y c\n");
-    buf.putString("${x + r1} ${y + m4 * r2} ${x + m4 * r1} ${y + r2} $x ${y + r2} c\n");
-    buf.putString("${x - m4 * r1} ${y + r2} ${x - r1} ${y + m4 * r2} ${x - r1} $y c\n");
-    buf.putString("${x - r1} ${y - m4 * r2} ${x - m4 * r1} ${y - r2} $x ${y - r2} c\n");
+    buf.putString(
+        "${x + m4 * r1} ${y - r2} ${x + r1} ${y - m4 * r2} ${x + r1} $y c\n");
+    buf.putString(
+        "${x + r1} ${y + m4 * r2} ${x + m4 * r1} ${y + r2} $x ${y + r2} c\n");
+    buf.putString(
+        "${x - m4 * r1} ${y + r2} ${x - r1} ${y + m4 * r2} ${x - r1} $y c\n");
+    buf.putString(
+        "${x - r1} ${y - m4 * r2} ${x - m4 * r1} ${y - r2} $x ${y - r2} c\n");
   }
 
   /// We override Graphics.drawRect as it doesn't join the 4 lines.
@@ -174,7 +178,8 @@ class PDFGraphics {
   ///
   /// @param c Color to use
   void setColor(PDFColor color) {
-    buf.putString("${color.r} ${color.g} ${color.b} rg ${color.r} ${color.g} ${color.b} RG\n");
+    buf.putString(
+        "${color.r} ${color.g} ${color.b} rg ${color.r} ${color.g} ${color.b} RG\n");
   }
 
   /// Set the transformation Matrix

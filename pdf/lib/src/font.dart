@@ -32,7 +32,8 @@ class PDFFont extends PDFObject {
   /// @param type The pdf type, ie /Type1
   /// @param font The font name, ie Helvetica
   /// @param style The java.awt.Font style, ie: Font.PLAIN
-  PDFFont(PDFDocument pdfDocument, {this.subtype = "/Type1", this.baseFont = "/Helvetica"})
+  PDFFont(PDFDocument pdfDocument,
+      {this.subtype = "/Type1", this.baseFont = "/Helvetica"})
       : super(pdfDocument, "/Font") {
     pdfDocument.fonts.add(this);
   }

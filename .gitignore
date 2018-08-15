@@ -23,3 +23,7 @@ build/
 printing/android/local.properties
 .idea
 *.iml
+.flutter-plugins
+printing/*.log
+printing/ios/Flutter
+printing/ios/Runner

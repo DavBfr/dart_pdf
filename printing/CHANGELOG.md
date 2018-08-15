@@ -1,3 +1,6 @@
+# 1.0.3
+* Update source formatting
+
 # 1.0.2
 * Add License file
 * Updated homepage

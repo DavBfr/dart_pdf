@@ -38,7 +38,8 @@ class Printing {
     await _channel.invokeMethod('printPdf', params);
   }
 
-  static Future<Null> sharePdf({PDFDocument document, List<int> bytes, Rect bounds}) async {
+  static Future<Null> sharePdf(
+      {PDFDocument document, List<int> bytes, Rect bounds}) async {
     assert(document != null || bytes != null);
     assert(!(document == null && bytes == null));
 

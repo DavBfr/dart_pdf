@@ -50,6 +50,7 @@ class PDFCatalog extends PDFObject {
     }
 
     // the /PageMode setting
-    params["/PageMode"] = PDFStream.string(PDFDocument._PDF_PAGE_MODES[pageMode.index]);
+    params["/PageMode"] =
+        PDFStream.string(PDFDocument._PDF_PAGE_MODES[pageMode.index]);
   }
 }

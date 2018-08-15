@@ -107,7 +107,8 @@ class PDFStream {
     putString("[" + values.join(" ") + "]");
   }
 
-  static PDFStream array(List<PDFStream> values) => new PDFStream()..putArray(values);
+  static PDFStream array(List<PDFStream> values) =>
+      new PDFStream()..putArray(values);
 
   void putDictionary(Map<String, PDFStream> values) {
     putString("<< ");

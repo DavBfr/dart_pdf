@@ -49,118 +49,121 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
  * PrintingPlugin
  */
 public class PrintingPlugin implements MethodCallHandler {
-	private static PrintManager printManager;
-	private final Activity activity;
+    private static PrintManager printManager;
+    private final Activity activity;
 
-	private PrintingPlugin(Activity activity) {
-		this.activity = activity;
-	}
+    private PrintingPlugin(Activity activity) {
+        this.activity = activity;
+    }
 
-	/**
-	 * Plugin registration.
-	 */
-	public static void registerWith(Registrar registrar) {
-		final MethodChannel channel = new MethodChannel(registrar.messenger(), "printing");
-		channel.setMethodCallHandler(new PrintingPlugin(registrar.activity()));
-		printManager = (PrintManager) registrar.activity().getSystemService(Context.PRINT_SERVICE);
-	}
+    /**
+     * Plugin registration.
+     */
+    public static void registerWith(Registrar registrar) {
+        final MethodChannel channel = new MethodChannel(registrar.messenger(), "printing");
+        channel.setMethodCallHandler(new PrintingPlugin(registrar.activity()));
+        printManager = (PrintManager) registrar.activity().getSystemService(Context.PRINT_SERVICE);
+    }
 
-	@Override
-	public void onMethodCall(MethodCall call, Result result) {
-		switch (call.method) {
-			case "printPdf":
-				printPdf((byte[]) call.argument("doc"));
-				result.success(0);
-				break;
-			case "sharePdf":
-				sharePdf((byte[]) call.argument("doc"));
-				result.success(0);
-				break;
-			default:
-				result.notImplemented();
-				break;
-		}
-	}
+    @Override
+    public void onMethodCall(MethodCall call, Result result) {
+        switch (call.method) {
+            case "printPdf":
+                printPdf((byte[]) call.argument("doc"));
+                result.success(0);
+                break;
+            case "sharePdf":
+                sharePdf((byte[]) call.argument("doc"));
+                result.success(0);
+                break;
+            default:
+                result.notImplemented();
+                break;
+        }
+    }
 
+    private void printPdf(final byte[] badgeData) {
+        PrintDocumentAdapter pda = new PrintDocumentAdapter() {
+            PrintedPdfDocument mPdfDocument;
 
-	private void printPdf(final byte[] badgeData) {
-		PrintDocumentAdapter pda = new PrintDocumentAdapter() {
-			PrintedPdfDocument mPdfDocument;
+            @Override
+            public void onWrite(PageRange[] pageRanges, ParcelFileDescriptor parcelFileDescriptor,
+                    CancellationSignal cancellationSignal,
+                    WriteResultCallback writeResultCallback) {
+                OutputStream output = null;
+                try {
+                    output = new FileOutputStream(parcelFileDescriptor.getFileDescriptor());
+                    output.write(badgeData, 0, badgeData.length);
+                    writeResultCallback.onWriteFinished(new PageRange[] {PageRange.ALL_PAGES});
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        if (output != null) {
+                            output.close();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
 
-			@Override
-			public void onWrite(PageRange[] pageRanges, ParcelFileDescriptor parcelFileDescriptor, CancellationSignal cancellationSignal, WriteResultCallback writeResultCallback) {
+            @Override
+            public void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
+                    CancellationSignal cancellationSignal, LayoutResultCallback callback,
+                    Bundle extras) {
+                // Create a new PdfDocument with the requested page attributes
+                mPdfDocument = new PrintedPdfDocument(activity, newAttributes);
 
-				OutputStream output = null;
-				try {
-					output = new FileOutputStream(parcelFileDescriptor.getFileDescriptor());
-					output.write(badgeData, 0, badgeData.length);
-					writeResultCallback.onWriteFinished(new PageRange[]{PageRange.ALL_PAGES});
-				} catch (IOException e) {
-					e.printStackTrace();
-				} finally {
-					try {
-						if (output != null) {
-							output.close();
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
+                // Respond to cancellation request
+                if (cancellationSignal.isCanceled()) {
+                    callback.onLayoutCancelled();
+                    return;
+                }
 
-			@Override
-			public void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes, CancellationSignal cancellationSignal, LayoutResultCallback callback, Bundle extras) {
-				// Create a new PdfDocument with the requested page attributes
-				mPdfDocument = new PrintedPdfDocument(activity, newAttributes);
+                // Return print information to print framework
+                PrintDocumentInfo info =
+                        new PrintDocumentInfo.Builder("badge.pdf")
+                                .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
+                                .setPageCount(1)
+                                .build();
+                // Content layout reflow is complete
+                callback.onLayoutFinished(info, true);
+            }
 
-				// Respond to cancellation request
-				if (cancellationSignal.isCanceled()) {
-					callback.onLayoutCancelled();
-					return;
-				}
+            @Override
+            public void onFinish() {
+                // noinspection ResultOfMethodCallIgnored
+            }
+        };
+        String jobName = "Badge";
+        printManager.print(jobName, pda, null);
+    }
 
-				// Return print information to print framework
-				PrintDocumentInfo info = new PrintDocumentInfo
-					.Builder("badge.pdf")
-					.setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
-					.setPageCount(1).build();
-				// Content layout reflow is complete
-				callback.onLayoutFinished(info, true);
-			}
+    private void sharePdf(byte[] data) {
+        try {
+            final File externalFilesDirectory =
+                    activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File shareFile = File.createTempFile("badge", ".pdf", externalFilesDirectory);
 
-			@Override
-			public void onFinish() {
-				//noinspection ResultOfMethodCallIgnored
-			}
-		};
-		String jobName = "Badge";
-		printManager.print(jobName, pda, null);
-	}
+            FileOutputStream stream = new FileOutputStream(shareFile);
+            stream.write(data);
+            stream.close();
 
-	private void sharePdf(byte[] data) {
-		try {
+            Uri apkURI = FileProvider.getUriForFile(activity,
+                    activity.getApplicationContext().getPackageName() + ".flutter.printing",
+                    shareFile);
 
-			final File externalFilesDirectory = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-			File shareFile = File.createTempFile("badge", ".pdf", externalFilesDirectory);
-
-			FileOutputStream stream = new FileOutputStream(shareFile);
-			stream.write(data);
-			stream.close();
-
-			Uri apkURI = FileProvider.getUriForFile(activity,
-				activity.getApplicationContext().getPackageName() + ".flutter.printing", shareFile);
-
-			Intent shareIntent = new Intent();
-			shareIntent.setAction(Intent.ACTION_SEND);
-			shareIntent.setType("application/pdf");
-			shareIntent.putExtra(Intent.EXTRA_STREAM, apkURI);
-			shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-			Intent chooserIntent = Intent.createChooser(shareIntent, null);
-			activity.startActivity(chooserIntent);
-			shareFile.deleteOnExit();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
+            Intent shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.setType("application/pdf");
+            shareIntent.putExtra(Intent.EXTRA_STREAM, apkURI);
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Intent chooserIntent = Intent.createChooser(shareIntent, null);
+            activity.startActivity(chooserIntent);
+            shareFile.deleteOnExit();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

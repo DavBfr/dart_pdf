@@ -36,8 +36,9 @@ class PDFXref {
 
   /// @return The xref in the format of the xref section in the PDF file
   String ref() {
-    String rs =
-        offset.toString().padLeft(10, '0') + " " + generation.toString().padLeft(5, '0');
+    String rs = offset.toString().padLeft(10, '0') +
+        " " +
+        generation.toString().padLeft(5, '0');
 
     if (generation == 65535) return rs + " f ";
     return rs + " n ";

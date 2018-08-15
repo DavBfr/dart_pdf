@@ -48,7 +48,8 @@ class PDFPage extends PDFObject {
   /// @see PageFormat#LANDSCAPE
   /// @see PageFormat#REVERSE_LANDSCAPE
   /// @param pageFormat PageFormat describing the page size
-  PDFPage(PDFDocument pdfDocument, {this.pageFormat}) : super(pdfDocument, "/Page") {
+  PDFPage(PDFDocument pdfDocument, {this.pageFormat})
+      : super(pdfDocument, "/Page") {
     pdfDocument.pdfPageList.pages.add(this);
     if (pageFormat == null) pageFormat = PDFPageFormat.A4;
   }
@@ -125,8 +126,8 @@ class PDFPage extends PDFObject {
     var xy2 = cxy(x + w, y);
     var xy3 = cxy(vx, vy + vh);
     var xy4 = cxy(vx + vw, vy);
-    PDFAnnot ob =
-        new PDFAnnot.link(this, xy1.w, xy1.h, xy2.w, xy2.h, dest, xy3.w, xy3.h, xy4.w, xy4.h);
+    PDFAnnot ob = new PDFAnnot.link(
+        this, xy1.w, xy1.h, xy2.w, xy2.h, dest, xy3.w, xy3.h, xy4.w, xy4.h);
     return ob;
   }
 
@@ -138,7 +139,8 @@ class PDFPage extends PDFObject {
   /// @param w Width of region
   /// @param h Height coordinate of region
   /// @return PDFOutline object created, for addSubOutline if required.
-  PDFOutline addOutline(String title, {double x, double y, double w, double h}) {
+  PDFOutline addOutline(String title,
+      {double x, double y, double w, double h}) {
     PDFPoint xy1 = cxy(x, y + h);
     PDFPoint xy2 = cxy(x + w, y);
     PDFOutline outline = new PDFOutline(pdfDocument,
