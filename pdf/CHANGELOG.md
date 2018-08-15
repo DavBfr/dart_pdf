@@ -1,3 +1,6 @@
+# 1.0.4
+* Updated homepage
+
 # 1.0.3
 * Remove dependency to ttf_parser
 
