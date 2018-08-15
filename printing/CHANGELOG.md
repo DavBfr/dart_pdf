@@ -1,5 +1,6 @@
 # 1.0.3
 * Update source formatting
+* Update README
 
 # 1.0.2
 * Add License file

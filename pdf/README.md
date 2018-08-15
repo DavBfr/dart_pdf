@@ -4,6 +4,9 @@ This is a low-level Pdf creation library.
 It can create a full multi-pages document with graphics,
 images and text using TrueType fonts.
 
+> Use `printing` package <https://pub.dartlang.org/packages/printing>
+> for full flutter print and share operation.
+
 The coordinate system is using the internal Pdf system:
  * (0.0, 0.0) is bottom-left
  * 1.0 is defined as 1 / 72.0 inch
@@ -27,7 +30,7 @@ var file = new File('file.pdf');
 file.writeAsBytesSync(pdf.save());
 ```
 
-To load an image it is possible to use the dart library `image`
+To load an image it is possible to use the dart library [image](https://pub.dartlang.org/packages/image):
 
 ```dart
 Image image = decodeImage(new Io.File('test.webp').readAsBytesSync());
