@@ -8,10 +8,11 @@ import 'package:vector_math/vector_math_64.dart';
 
 void main() {
   test('Pdf', () {
-//    Image img = new Image(10, 10);
-//    img.fill(0x12345678);
+    var img = new Uint32List(10 * 10);
+    print(img.length);
+    img.fillRange(0, img.length - 1, 0x12345678);
 
-    var pdf = new PDFDocument(deflate: false);
+    var pdf = new PDFDocument(deflate: zlib.encode);
     var i = pdf.info;
     i.author = "David PHAM-VAN";
     i.creator = i.author;
@@ -50,8 +51,8 @@ void main() {
     g.drawRect(300.0, 150.0, 50.0, 50.0);
     g.fillPath();
     g.setColor(new PDFColor(0.0, 0.5, 0.0));
-//    var image = new PDFImage(pdf,
-//        image: img.data.buffer.asUint8List(), width: img.width, height: img.height);
+    var image = new PDFImage(pdf,
+        image: img.buffer.asUint8List(), width: 10, height: 10);
     for (var i = 10.0; i < 90.0; i += 5.0) {
       g.saveContext();
       var tm = new Matrix4.identity();
@@ -59,7 +60,7 @@ void main() {
       tm.translate(300.0, -100.0);
       g.setTransform(tm);
       g.drawString(font1, 12.0, "Hello $i", 20.0, 100.0);
-//      g.drawImage(image, 100.0, 100.0, 80.0);
+      g.drawImage(image, 100.0, 100.0);
       g.restoreContext();
     }
 

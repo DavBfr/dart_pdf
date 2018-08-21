@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -10,7 +11,7 @@ class MyApp extends StatelessWidget {
   final shareWidget = new GlobalKey();
 
   PDFDocument _generateDocument() {
-    final pdf = new PDFDocument();
+    final pdf = new PDFDocument(deflate: zlib.encode);
     final page = new PDFPage(pdf, pageFormat: PDFPageFormat.A4);
     final g = page.getGraphics();
     final font = new PDFFont(pdf);

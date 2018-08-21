@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('Pdf', () {
-    var pdf = new PDFDocument(deflate: false);
+    var pdf = new PDFDocument();
     var i = pdf.info;
     i.author = "David PHAM-VAN";
     i.creator = i.author;

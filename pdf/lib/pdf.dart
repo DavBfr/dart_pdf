@@ -19,7 +19,6 @@
 library pdf;
 
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';

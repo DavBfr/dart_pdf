@@ -1,3 +1,7 @@
+# 1.0.5
+* Remove dependency to dart:io
+* Add Contributing
+
 # 1.0.4
 * Updated homepage
 * Update source formatting

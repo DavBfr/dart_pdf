@@ -1,3 +1,7 @@
+# 1.0.4
+* Update example for pdf 1.0.5
+* Add Contributing
+
 # 1.0.3
 * Update source formatting
 * Update README

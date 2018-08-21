@@ -18,8 +18,8 @@
 
 part of pdf;
 
-class Ascii85Encoder extends Converter<Uint8List, Uint8List> {
-  Uint8List convert(Uint8List input) {
+class Ascii85Encoder extends Converter<List<int>, List<int>> {
+  List<int> convert(List<int> input) {
     Uint8List buffer = new Uint8List(_maxEncodedLen(input.length) + 2);
 
     var b = 0;

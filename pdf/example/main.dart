@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:pdf/pdf.dart';
 
 void main() {
-  final pdf = new PDFDocument();
+  final pdf = new PDFDocument(deflate: zlib.encode);
   final page = new PDFPage(pdf, pageFormat: PDFPageFormat.LETTER);
   final g = page.getGraphics();
   final font = new PDFFont(pdf);

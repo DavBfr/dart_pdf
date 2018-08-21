@@ -5,7 +5,7 @@ import "package:test/test.dart";
 
 void main() {
   test('Pdf1', () {
-    var pdf = new PDFDocument(deflate: false);
+    var pdf = new PDFDocument();
     var page = new PDFPage(pdf, pageFormat: PDFPageFormat.A4);
 
     var g = page.getGraphics();

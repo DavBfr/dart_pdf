@@ -34,15 +34,14 @@ class PDFObjectStream extends PDFObject {
   PDFObjectStream(PDFDocument pdfDocument, {String type, this.isBinary = false})
       : super(pdfDocument, type);
 
-  Uint8List _data;
+  List<int> _data;
 
   @override
   void prepare() {
     super.prepare();
 
-    if (pdfDocument.deflate) {
-      var z = new ZLibCodec(level: ZLibOption.maxLevel);
-      _data = z.encode(buf.output());
+    if (pdfDocument.deflate != null) {
+      _data = pdfDocument.deflate(buf.output());
       params["/Filter"] = PDFStream.string("/FlateDecode");
     } else if (isBinary) {
       // This is a Ascii85 stream

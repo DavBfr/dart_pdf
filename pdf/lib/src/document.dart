@@ -37,6 +37,8 @@ enum PDFPageMode {
   FULLSCREEN
 }
 
+typedef List<int> DeflateCallback(List<int> data);
+
 /// <p>This class is the base of the PDF generator. A PDFDocument class is
 /// created for a document, and each page, object, annotation,
 /// etc is added to the document.
@@ -66,8 +68,10 @@ class PDFDocument {
   /// It's only used when the document is being written.
   PDFObject defaultOutlineBorder;
 
-  /// True if we will compress the stream in the pdf file
-  final bool deflate;
+  /// Callback to compress the stream in the pdf file.
+  /// Use `deflate: zlib.encode` if using dart:io
+  /// No compression by default
+  final DeflateCallback deflate;
 
   /// <p>
   /// These map the page modes just defined to the pagemodes setting of PDF.
@@ -88,7 +92,7 @@ class PDFDocument {
   /// <p>This creates a PDF document</p>
   /// @param pagemode an int, determines how the document will present itself to
   /// the viewer when it first opens.
-  PDFDocument({PDFPageMode pageMode = PDFPageMode.NONE, this.deflate = true}) {
+  PDFDocument({PDFPageMode pageMode = PDFPageMode.NONE, this.deflate}) {
     _objser = 1;
 
     // Now create some standard objects
@@ -141,7 +145,7 @@ class PDFDocument {
     pos.close();
   }
 
-  Uint8List save() {
+  List<int> save() {
     PDFStream os = new PDFStream();
     write(os);
     return os.output();

@@ -19,18 +19,18 @@
 part of pdf;
 
 class PDFStream {
-  final _stream = new BytesBuilder(copy: false);
+  final _stream = List<int>();
 
   void putStream(PDFStream s) {
-    _stream.add(s._stream.toBytes());
+    _stream.addAll(s._stream);
   }
 
   void putString(String s) {
     for (int codeUnit in s.codeUnits) {
       if (codeUnit <= 0x7f) {
-        _stream.addByte(codeUnit);
+        _stream.add(codeUnit);
       } else {
-        _stream.addByte(0x20);
+        _stream.add(0x20);
       }
     }
   }
@@ -39,13 +39,13 @@ class PDFStream {
 
   void putStringUtf16(String s) {
     for (int codeUnit in s.codeUnits) {
-      _stream.addByte(codeUnit & 0xff);
-      _stream.addByte((codeUnit >> 8) & 0xff);
+      _stream.add(codeUnit & 0xff);
+      _stream.add((codeUnit >> 8) & 0xff);
     }
   }
 
   void putBytes(List<int> s) {
-    _stream.add(s);
+    _stream.addAll(s);
   }
 
   void putNum(double d) {
@@ -135,5 +135,5 @@ class PDFStream {
 
   int get offset => _stream.length;
 
-  Uint8List output() => _stream.toBytes();
+  List<int> output() => _stream;
 }
