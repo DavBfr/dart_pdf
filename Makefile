@@ -32,7 +32,7 @@ format-clang: $(CLNG_SRC)
 
 test: pdf/open-sans.ttf
 	cd pdf; for TEST in $(shell cd pdf; find test -name '*.dart'); do dart $$TEST; done
-	cd printing; flutter test
+	# cd printing; flutter test
 
 clean:
 	git clean -fdx
