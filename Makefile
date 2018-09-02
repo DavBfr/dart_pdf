@@ -31,6 +31,7 @@ format-clang: $(CLNG_SRC)
 	clang-format -style=Chromium -i $^
 
 test: pdf/open-sans.ttf
+	cd pdf; for EXAMPLE in $(shell cd pdf; find example -name '*.dart'); do dart $$EXAMPLE; done
 	cd pdf; for TEST in $(shell cd pdf; find test -name '*.dart'); do dart $$TEST; done
 	# cd printing; flutter test
 
