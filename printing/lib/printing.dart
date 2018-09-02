@@ -17,6 +17,7 @@
  */
 
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/services.dart';
@@ -33,8 +34,9 @@ class Printing {
     if (document != null) bytes = document.save();
 
     final Map<String, dynamic> params = <String, dynamic>{
-      'doc': bytes,
+      'doc': new Uint8List.fromList(bytes),
     };
+
     await _channel.invokeMethod('printPdf', params);
   }
 
@@ -50,7 +52,7 @@ class Printing {
     }
 
     final Map<String, dynamic> params = <String, dynamic>{
-      'doc': bytes,
+      'doc': new Uint8List.fromList(bytes),
       'x': bounds.left,
       'y': bounds.top,
       'w': bounds.width,

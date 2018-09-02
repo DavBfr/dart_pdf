@@ -1,3 +1,6 @@
+# 1.0.5
+* Fix printing from pdf document
+
 # 1.0.4
 * Update example for pdf 1.0.5
 * Add Contributing
