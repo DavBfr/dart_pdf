@@ -1,3 +1,6 @@
+# 1.0.6
+* Fix TTF font name lookup
+
 # 1.0.5
 * Remove dependency to dart:io
 * Add Contributing

@@ -88,8 +88,10 @@ class TTFParser {
       if (platformID == 1 && nameID == 6) {
         _fontName = utf8.decode(bytes.buffer
             .asUint8List(basePosition + stringOffset + offset, length));
+        return;
       }
     }
+    _fontName = hashCode.toString();
   }
 
   void _parseHmtx() {
