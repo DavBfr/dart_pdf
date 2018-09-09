@@ -125,7 +125,6 @@ public class PrintingPlugin implements MethodCallHandler {
                 PrintDocumentInfo info =
                         new PrintDocumentInfo.Builder("badge.pdf")
                                 .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
-                                .setPageCount(1)
                                 .build();
                 // Content layout reflow is complete
                 callback.onLayoutFinished(info, true);
