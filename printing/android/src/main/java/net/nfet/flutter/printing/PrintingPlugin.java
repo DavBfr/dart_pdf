@@ -82,7 +82,7 @@ public class PrintingPlugin implements MethodCallHandler {
         }
     }
 
-    private void printPdf(final byte[] badgeData) {
+    private void printPdf(final byte[] documentData) {
         PrintDocumentAdapter pda = new PrintDocumentAdapter() {
             PrintedPdfDocument mPdfDocument;
 
@@ -93,7 +93,7 @@ public class PrintingPlugin implements MethodCallHandler {
                 OutputStream output = null;
                 try {
                     output = new FileOutputStream(parcelFileDescriptor.getFileDescriptor());
-                    output.write(badgeData, 0, badgeData.length);
+                    output.write(documentData, 0, documentData.length);
                     writeResultCallback.onWriteFinished(new PageRange[] {PageRange.ALL_PAGES});
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -123,7 +123,7 @@ public class PrintingPlugin implements MethodCallHandler {
 
                 // Return print information to print framework
                 PrintDocumentInfo info =
-                        new PrintDocumentInfo.Builder("badge.pdf")
+                        new PrintDocumentInfo.Builder("document.pdf")
                                 .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
                                 .build();
                 // Content layout reflow is complete
@@ -135,7 +135,7 @@ public class PrintingPlugin implements MethodCallHandler {
                 // noinspection ResultOfMethodCallIgnored
             }
         };
-        String jobName = "Badge";
+        String jobName = "Document";
         printManager.print(jobName, pda, null);
     }
 
@@ -143,7 +143,7 @@ public class PrintingPlugin implements MethodCallHandler {
         try {
             final File externalFilesDirectory =
                     activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-            File shareFile = File.createTempFile("badge", ".pdf", externalFilesDirectory);
+            File shareFile = File.createTempFile("document", ".pdf", externalFilesDirectory);
 
             FileOutputStream stream = new FileOutputStream(shareFile);
             stream.write(data);
