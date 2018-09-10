@@ -55,7 +55,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: const Text('Printing example'),
+        title: const Text('Pdf Printing Example'),
       ),
       body: new Center(
         child: new Column(
