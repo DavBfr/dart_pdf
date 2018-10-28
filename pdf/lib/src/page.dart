@@ -51,7 +51,7 @@ class PDFPage extends PDFObject {
   PDFPage(PDFDocument pdfDocument, {this.pageFormat})
       : super(pdfDocument, "/Page") {
     pdfDocument.pdfPageList.pages.add(this);
-    if (pageFormat == null) pageFormat = PDFPageFormat.A4;
+    if (pageFormat == null) pageFormat = PDFPageFormat.a4;
   }
 
   /// This returns a PDFGraphics object, which can then be used to render

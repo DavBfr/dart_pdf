@@ -15,7 +15,7 @@ The coordinate system is using the internal Pdf system:
 Example:
 ```dart
 final pdf = new PDFDocument();
-final page = new PDFPage(pdf, pageFormat: PDFPageFormat.LETTER);
+final page = new PDFPage(pdf, pageFormat: PDFPageFormat.letter);
 final g = page.getGraphics();
 final font = new PDFFont(pdf);
 
@@ -24,7 +24,7 @@ g.drawRect(50.0, 30.0, 100.0, 50.0);
 g.fillPath();
 
 g.setColor(new PDFColor(0.3, 0.3, 0.3));
-g.drawString(font, 12.0, "Hello World!", 5.0 * PDFPageFormat.MM, 300.0);
+g.drawString(font, 12.0, "Hello World!", 5.0 * PDFPageFormat.mm, 300.0);
 
 var file = new File('file.pdf');
 file.writeAsBytesSync(pdf.save());
