@@ -61,4 +61,9 @@ class PDFPageFormat {
 
   PDFPageFormat get portrait =>
       height >= width ? this : PDFPageFormat(height, width);
+
+  @override
+  String toString() {
+    return "${width}x${height}";
+  }
 }
