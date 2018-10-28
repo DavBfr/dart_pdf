@@ -25,8 +25,9 @@ class MyAppState extends State<MyApp> {
 
   void _printPdf() async {
     print("Print ...");
-    final pdf = await generateDocument(PdfPageFormat.a4);
-    Printing.printPdf(document: pdf);
+    await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async =>
+            (await generateDocument(format)).save());
   }
 
   void _sharePdf() async {
@@ -46,45 +47,49 @@ class MyAppState extends State<MyApp> {
   }
 
   Future<void> _printScreen() async {
-    final pdf = PdfDocument(deflate: zlib.encode);
-    final page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
-    final g = page.getGraphics();
-
     RenderRepaintBoundary boundary =
         previewContainer.currentContext.findRenderObject();
     final im = await boundary.toImage();
     final bytes = await im.toByteData(format: ImageByteFormat.rawRgba);
     print("Print Screen ${im.width}x${im.height} ...");
 
-    // Center the image
-    final w = page.pageFormat.width -
-        page.pageFormat.marginLeft -
-        page.pageFormat.marginRight;
-    final h = page.pageFormat.height -
-        page.pageFormat.marginTop -
-        page.pageFormat.marginBottom;
-    double iw, ih;
-    if (im.width.toDouble() / im.height.toDouble() < 1.0) {
-      ih = h;
-      iw = im.width.toDouble() * ih / im.height.toDouble();
-    } else {
-      iw = w;
-      ih = im.height.toDouble() * iw / im.width.toDouble();
-    }
+    Printing.layoutPdf(onLayout: (PdfPageFormat format) {
+      final pdf = PdfDocument(deflate: zlib.encode);
+      final page = PdfPage(pdf, pageFormat: format);
+      final g = page.getGraphics();
 
-    PdfImage image = PdfImage(pdf,
-        image: bytes.buffer.asUint8List(), width: im.width, height: im.height);
-    g.drawImage(
-        image,
-        page.pageFormat.marginLeft + (w - iw) / 2.0,
-        page.pageFormat.height -
-            page.pageFormat.marginTop -
-            ih -
-            (h - ih) / 2.0,
-        iw,
-        ih);
+      // Center the image
+      final w = page.pageFormat.width -
+          page.pageFormat.marginLeft -
+          page.pageFormat.marginRight;
+      final h = page.pageFormat.height -
+          page.pageFormat.marginTop -
+          page.pageFormat.marginBottom;
+      double iw, ih;
+      if (im.width.toDouble() / im.height.toDouble() < 1.0) {
+        ih = h;
+        iw = im.width.toDouble() * ih / im.height.toDouble();
+      } else {
+        iw = w;
+        ih = im.height.toDouble() * iw / im.width.toDouble();
+      }
 
-    Printing.printPdf(document: pdf);
+      PdfImage image = PdfImage(pdf,
+          image: bytes.buffer.asUint8List(),
+          width: im.width,
+          height: im.height);
+      g.drawImage(
+          image,
+          page.pageFormat.marginLeft + (w - iw) / 2.0,
+          page.pageFormat.height -
+              page.pageFormat.marginTop -
+              ih -
+              (h - ih) / 2.0,
+          iw,
+          ih);
+
+      return pdf.save();
+    });
   }
 
   @override

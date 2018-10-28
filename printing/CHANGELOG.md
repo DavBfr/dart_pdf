@@ -1,6 +1,7 @@
 # 1.2.0
 * Fix compileSdkVersion to match appcompat
 * Change license to Apache 2.0
+* Implement asynchronous printing driven by the OS
 
 # 1.1.0
 * Rename classes to satisfy Dart conventions

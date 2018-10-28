@@ -16,20 +16,47 @@
 
 part of printing;
 
+typedef LayoutCallback = FutureOr<List<int>> Function(PdfPageFormat format);
+
 class Printing {
   static const MethodChannel _channel = MethodChannel('printing');
+  static LayoutCallback _onLayout;
 
+  static Future<dynamic> _handleMethod(MethodCall call) async {
+    switch (call.method) {
+      case "onLayout":
+        final bytes = await _onLayout(PdfPageFormat(
+          call.arguments['width'],
+          call.arguments['height'],
+          marginLeft: call.arguments['marginLeft'],
+          marginTop: call.arguments['marginTop'],
+          marginRight: call.arguments['marginRight'],
+          marginBottom: call.arguments['marginBottom'],
+        ));
+        final Map<String, dynamic> params = <String, dynamic>{
+          'doc': Uint8List.fromList(bytes),
+        };
+        await _channel.invokeMethod('writePdf', params);
+        return Future.value("");
+    }
+  }
+
+  static Future<Null> layoutPdf(
+      {@required LayoutCallback onLayout, String name = "Document"}) async {
+    _onLayout = onLayout;
+    _channel.setMethodCallHandler(_handleMethod);
+    final Map<String, dynamic> params = <String, dynamic>{'name': name};
+    await _channel.invokeMethod('printPdf', params);
+  }
+
+  @deprecated
   static Future<Null> printPdf({PdfDocument document, List<int> bytes}) async {
     assert(document != null || bytes != null);
     assert(!(document == null && bytes == null));
 
-    if (document != null) bytes = document.save();
-
-    final Map<String, dynamic> params = <String, dynamic>{
-      'doc': Uint8List.fromList(bytes),
-    };
-
-    await _channel.invokeMethod('printPdf', params);
+    layoutPdf(
+        onLayout: (PdfPageFormat format) =>
+            document != null ? document.save() : bytes);
   }
 
   static Future<Null> sharePdf(

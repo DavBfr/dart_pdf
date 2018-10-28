@@ -16,6 +16,8 @@
 
 package net.nfet.flutter.printing;
 
+import static java.lang.StrictMath.max;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +38,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -46,12 +49,18 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 /**
  * PrintingPlugin
  */
-public class PrintingPlugin implements MethodCallHandler {
+public class PrintingPlugin extends PrintDocumentAdapter implements MethodCallHandler {
     private static PrintManager printManager;
     private final Activity activity;
+    private final MethodChannel channel;
+    private PrintedPdfDocument mPdfDocument;
+    private byte[] documentData;
+    private String jobName;
+    private LayoutResultCallback callback;
 
-    private PrintingPlugin(Activity activity) {
+    private PrintingPlugin(Activity activity, MethodChannel channel) {
         this.activity = activity;
+        this.channel = channel;
     }
 
     /**
@@ -59,15 +68,87 @@ public class PrintingPlugin implements MethodCallHandler {
      */
     public static void registerWith(Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "printing");
-        channel.setMethodCallHandler(new PrintingPlugin(registrar.activity()));
+        channel.setMethodCallHandler(new PrintingPlugin(registrar.activity(), channel));
         printManager = (PrintManager) registrar.activity().getSystemService(Context.PRINT_SERVICE);
+    }
+
+    @Override
+    public void onWrite(PageRange[] pageRanges, ParcelFileDescriptor parcelFileDescriptor,
+            CancellationSignal cancellationSignal, WriteResultCallback writeResultCallback) {
+        OutputStream output = null;
+        try {
+            output = new FileOutputStream(parcelFileDescriptor.getFileDescriptor());
+            output.write(documentData, 0, documentData.length);
+            writeResultCallback.onWriteFinished(new PageRange[] {PageRange.ALL_PAGES});
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (output != null) {
+                    output.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
+            CancellationSignal cancellationSignal, LayoutResultCallback callback, Bundle extras) {
+        // Create a new PdfDocument with the requested page attributes
+        mPdfDocument = new PrintedPdfDocument(activity, newAttributes);
+
+        // Respond to cancellation request
+        if (cancellationSignal.isCanceled()) {
+            callback.onLayoutCancelled();
+            return;
+        }
+
+        this.callback = callback;
+
+        HashMap<String, Double> args = new HashMap<>();
+
+        PrintAttributes.MediaSize size = newAttributes.getMediaSize();
+        args.put("width", size.getWidthMils() * 72.0 / 1000.0);
+        args.put("height", size.getHeightMils() * 72.0 / 1000.0);
+
+        PrintAttributes.Margins margins = newAttributes.getMinMargins();
+        args.put("marginLeft", margins.getLeftMils() * 72.0 / 1000.0);
+        args.put("marginTop", margins.getTopMils() * 72.0 / 1000.0);
+        args.put("marginRight", margins.getRightMils() * 72.0 / 1000.0);
+        args.put("marginBottom", margins.getBottomMils() * 72.0 / 1000.0);
+
+        channel.invokeMethod("onLayout", args);
+    }
+
+    @Override
+    public void onFinish() {
+        // noinspection ResultOfMethodCallIgnored
     }
 
     @Override
     public void onMethodCall(MethodCall call, Result result) {
         switch (call.method) {
             case "printPdf":
-                printPdf((byte[]) call.argument("doc"));
+                jobName =
+                        call.argument("name") == null ? "Document" : (String) call.argument("name");
+                assert jobName != null;
+                printManager.print(jobName, this, null);
+                result.success(0);
+                break;
+            case "writePdf":
+                documentData = (byte[]) call.argument("doc");
+
+                // Return print information to print framework
+                PrintDocumentInfo info =
+                        new PrintDocumentInfo.Builder(jobName + ".pdf")
+                                .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
+                                .build();
+
+                // Content layout reflow is complete
+                callback.onLayoutFinished(info, true);
+
                 result.success(0);
                 break;
             case "sharePdf":
@@ -78,63 +159,6 @@ public class PrintingPlugin implements MethodCallHandler {
                 result.notImplemented();
                 break;
         }
-    }
-
-    private void printPdf(final byte[] documentData) {
-        PrintDocumentAdapter pda = new PrintDocumentAdapter() {
-            PrintedPdfDocument mPdfDocument;
-
-            @Override
-            public void onWrite(PageRange[] pageRanges, ParcelFileDescriptor parcelFileDescriptor,
-                    CancellationSignal cancellationSignal,
-                    WriteResultCallback writeResultCallback) {
-                OutputStream output = null;
-                try {
-                    output = new FileOutputStream(parcelFileDescriptor.getFileDescriptor());
-                    output.write(documentData, 0, documentData.length);
-                    writeResultCallback.onWriteFinished(new PageRange[] {PageRange.ALL_PAGES});
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        if (output != null) {
-                            output.close();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
-                    CancellationSignal cancellationSignal, LayoutResultCallback callback,
-                    Bundle extras) {
-                // Create a new PdfDocument with the requested page attributes
-                mPdfDocument = new PrintedPdfDocument(activity, newAttributes);
-
-                // Respond to cancellation request
-                if (cancellationSignal.isCanceled()) {
-                    callback.onLayoutCancelled();
-                    return;
-                }
-
-                // Return print information to print framework
-                PrintDocumentInfo info =
-                        new PrintDocumentInfo.Builder("document.pdf")
-                                .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
-                                .build();
-                // Content layout reflow is complete
-                callback.onLayoutFinished(info, true);
-            }
-
-            @Override
-            public void onFinish() {
-                // noinspection ResultOfMethodCallIgnored
-            }
-        };
-        String jobName = "Document";
-        printManager.print(jobName, pda, null);
     }
 
     private void sharePdf(byte[] data) {
