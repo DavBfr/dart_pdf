@@ -1,3 +1,6 @@
+# 1.0.6
+* Add screenshot example
+
 # 1.0.5
 * Fix printing from pdf document
 

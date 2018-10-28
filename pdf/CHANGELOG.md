@@ -1,3 +1,6 @@
+# 1.0.7
+* Use lowercase page dimension constants
+
 # 1.0.6
 * Fix TTF font name lookup
 
