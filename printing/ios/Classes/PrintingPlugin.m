@@ -74,8 +74,8 @@
 
 - (void)sharePdf:(nonnull FlutterStandardTypedData*)data
     withSourceRect:(CGRect)rect {
-  NSURL* tmpDirURL =
-      [NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory:YES];
+  NSURL* tmpDirURL = [NSURL fileURLWithPath:NSTemporaryDirectory()
+                                isDirectory:YES];
 
   CFUUIDRef uuid = CFUUIDCreate(NULL);
   assert(uuid != NULL);
@@ -95,8 +95,9 @@
   NSString* path = [fileURL path];
 
   NSError* error;
-  if (!
-      [[data data] writeToFile:path options:NSDataWritingAtomic error:&error]) {
+  if (![[data data] writeToFile:path
+                        options:NSDataWritingAtomic
+                          error:&error]) {
     NSLog(@"sharePdf error: %@", [error localizedDescription]);
     return;
   }
