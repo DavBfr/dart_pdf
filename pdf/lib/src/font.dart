@@ -56,12 +56,12 @@ class PdfFont extends PdfObject {
   }
 
   PdfRect stringBounds(String s) {
-    var chars = latin1.encode(s);
+    if (s.length == 0) return const PdfRect(0.0, 0.0, 0.0, 0.0);
 
-    if (chars.length == 0) return const PdfRect(0.0, 0.0, 0.0, 0.0);
+    var chars = s.runes;
 
     var n = 0;
-    var c = chars[n];
+    var c = chars.elementAt(0);
     var r = glyphBounds(c);
     var x = r.x;
     var y = r.y;
@@ -69,7 +69,7 @@ class PdfFont extends PdfObject {
     var w = n == chars.length - 1 ? r.w : glyphAdvance(c);
 
     while (++n < chars.length) {
-      c = chars[n];
+      c = chars.elementAt(n);
       r = glyphBounds(c);
       if (r.y < y) y = r.y;
       if (r.h > h) h = r.h;

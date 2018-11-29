@@ -22,6 +22,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
+import 'package:utf/utf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 part 'src/annotation.dart';
