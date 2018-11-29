@@ -1,3 +1,7 @@
+# 1.0.8
+* Fix monospace TTF font loading
+* Add PDFPageFormat::toString
+
 # 1.0.7
 * Use lowercase page dimension constants
 
