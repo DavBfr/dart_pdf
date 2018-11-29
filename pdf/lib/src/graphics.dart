@@ -195,7 +195,7 @@ class PdfGraphics {
     buf.putString(' Td ${font.name} ');
     buf.putNum(size);
     buf.putString(' Tf ');
-    buf.putText(s);
+    buf.putStream(font.putText(s));
     buf.putString(' Tj ET\n');
   }
 

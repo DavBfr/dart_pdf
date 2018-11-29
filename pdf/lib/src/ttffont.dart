@@ -21,36 +21,21 @@ class PdfTtfFont extends PdfFont {
   PdfTtfFont(PdfDocument pdfDocument, ByteData bytes)
       : font = TtfParser(bytes),
         super._create(pdfDocument, subtype: '/TrueType') {
-    final PdfObjectStream file = PdfObjectStream(pdfDocument, isBinary: true);
-    final Uint8List data = bytes.buffer.asUint8List();
-    file.buf.putBytes(data);
-    file.params['/Length1'] = PdfStream.intNum(data.length);
-
-    _charMin = 32;
-    _charMax = 255;
-
-    final List<String> widths = <String>[];
-
-    for (int i = _charMin; i <= _charMax; i++) {
-      widths.add((glyphMetrics(i).advanceWidth * 1000.0).toInt().toString());
-    }
-
-    unicodeCMap = PdfObject(pdfDocument);
+    file = PdfObjectStream(pdfDocument, isBinary: true);
+    unicodeCMap = PdfUnicodeCmap(pdfDocument);
     descriptor = PdfFontDescriptor(this, file);
-    widthsObject = PdfArrayObject(pdfDocument, widths);
+    widthsObject = PdfArrayObject(pdfDocument, <String>[]);
   }
 
-  PdfObject unicodeCMap;
+  PdfUnicodeCmap unicodeCMap;
 
   PdfFontDescriptor descriptor;
+
+  PdfObjectStream file;
 
   PdfArrayObject widthsObject;
 
   final TtfParser font;
-
-  int _charMin;
-
-  int _charMax;
 
   @override
   String get fontName => font.fontName;
@@ -74,14 +59,80 @@ class PdfTtfFont extends PdfFont {
 
   @override
   void _prepare() {
+    int charMin;
+    int charMax;
+
     super._prepare();
 
+    final TtfWriter ttfWriter = TtfWriter(font);
+    final Uint8List data = ttfWriter.withChars(unicodeCMap.cmap);
+
+    file.buf.putBytes(data);
+    file.params['/Length1'] = PdfStream.intNum(data.length);
+
     params['/BaseFont'] = PdfStream.string('/' + fontName);
-    params['/FirstChar'] = PdfStream.intNum(_charMin);
-    params['/LastChar'] = PdfStream.intNum(_charMax);
-    params['/Widths'] = widthsObject.ref();
     params['/FontDescriptor'] = descriptor.ref();
-//    params['/Encoding'] = PdfStream.string('/Identity-H');
-//    params['/ToUnicode'] = unicodeCMap.ref();
+    if (font.unicode) {
+      if (params.containsKey('/Encoding')) {
+        params.remove('/Encoding');
+      }
+      params['/ToUnicode'] = unicodeCMap.ref();
+      charMin = 0;
+      charMax = unicodeCMap.cmap.length - 1;
+      for (int i = charMin; i <= charMax; i++) {
+        widthsObject.values.add(
+            (glyphMetrics(unicodeCMap.cmap[i]).advanceWidth * 1000.0)
+                .toInt()
+                .toString());
+      }
+    } else {
+      charMin = 32;
+      charMax = 255;
+      for (int i = charMin; i <= charMax; i++) {
+        widthsObject.values
+            .add((glyphMetrics(i).advanceWidth * 1000.0).toInt().toString());
+      }
+    }
+    params['/FirstChar'] = PdfStream.intNum(charMin);
+    params['/LastChar'] = PdfStream.intNum(charMax);
+    params['/Widths'] = widthsObject.ref();
+  }
+
+  @override
+  PdfStream putText(String text) {
+    if (!font.unicode) {
+      return super.putText(text);
+    }
+
+    final Runes runes = text.runes;
+    final List<int> bytes = List<int>();
+    for (int rune in runes) {
+      int char = unicodeCMap.cmap.indexOf(rune);
+      if (char == -1) {
+        char = unicodeCMap.cmap.length;
+        unicodeCMap.cmap.add(rune);
+      }
+
+      bytes.add(char);
+    }
+
+    return PdfStream()
+      ..putBytes(latin1.encode('('))
+      ..putTextBytes(bytes)
+      ..putBytes(latin1.encode(')'));
+  }
+
+  @override
+  PdfFontMetrics stringMetrics(String s) {
+    if (s.isEmpty || !font.unicode) {
+      return super.stringMetrics(s);
+    }
+
+    final Runes runes = s.runes;
+    final List<int> bytes = List<int>();
+    runes.forEach(bytes.add);
+
+    final Iterable<PdfFontMetrics> metrics = bytes.map(glyphMetrics);
+    return PdfFontMetrics.append(metrics);
   }
 }

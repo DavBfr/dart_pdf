@@ -15,7 +15,7 @@
  DART_SRC=$(shell find . -name '*.dart')
  CLNG_SRC=$(shell find printing/ios -name '*.java' -o -name '*.m' -o -name '*.h') $(shell find printing/android -name '*.java' -o -name '*.m' -o -name '*.h')
  SWFT_SRC=$(shell find . -name '*.swift')
- FONTS=pdf/open-sans.ttf pdf/roboto.ttf
+ FONTS=pdf/open-sans.ttf pdf/roboto.ttf pdf/noto-sans.ttf
 
 all: $(FONTS) format
 
@@ -24,6 +24,9 @@ pdf/open-sans.ttf:
 
 pdf/roboto.ttf:
 	curl -L "https://github.com/google/fonts/raw/master/apache/robotomono/RobotoMono-Regular.ttf" > $@
+
+pdf/noto-sans.ttf:
+	curl -L "https://raw.githubusercontent.com/google/fonts/master/ofl/notosans/NotoSans-Regular.ttf" > $@
 
 format: format-dart format-clang format-swift
 

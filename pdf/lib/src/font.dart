@@ -153,4 +153,11 @@ abstract class PdfFont extends PdfObject {
 
   @override
   String toString() => 'Font($fontName)';
+
+  PdfStream putText(String text) {
+    return PdfStream()
+      ..putBytes(latin1.encode('('))
+      ..putTextBytes(latin1.encode(text))
+      ..putBytes(latin1.encode(')'));
+  }
 }
