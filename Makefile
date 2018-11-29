@@ -17,10 +17,13 @@
  DART_SRC=$(shell find . -name '*.dart')
  CLNG_SRC=$(shell find . -name '*.java' -o -name '*.m' -o -name '*.h')
 
-all: pdf/open-sans.ttf format
+all: pdf/open-sans.ttf pdf/roboto.ttf format
 
 pdf/open-sans.ttf:
 	curl -L "https://github.com/google/fonts/raw/master/apache/opensans/OpenSans-Regular.ttf" > $@
+
+pdf/roboto.ttf:
+	curl -L "https://github.com/google/fonts/raw/master/apache/robotomono/RobotoMono-Regular.ttf" > $@
 
 format: format-dart format-clang
 

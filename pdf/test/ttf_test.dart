@@ -30,6 +30,20 @@ void main() {
     g.setColor(new PDFColor(0.3, 0.3, 0.3));
     g.drawString(ttf, FS, s, 50.0, 30.0);
 
+    var roboto = new PDFTTFFont(
+        pdf,
+        (new File("roboto.ttf").readAsBytesSync() as Uint8List)
+            .buffer
+            .asByteData());
+
+    r = roboto.stringBounds(s);
+    print(r);
+    g.setColor(new PDFColor(0.0, 1.0, 1.0));
+    g.drawRect(50.0 + r.x * FS, 130.0 + r.y * FS, r.w * FS, r.h * FS);
+    g.fillPath();
+    g.setColor(new PDFColor(0.3, 0.3, 0.3));
+    g.drawString(roboto, FS, s, 50.0, 130.0);
+
     var file = new File('file2.pdf');
     file.writeAsBytesSync(pdf.save());
   });

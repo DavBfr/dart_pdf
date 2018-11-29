@@ -58,7 +58,8 @@ class PDFTTFFont extends PDFFont {
       return super.glyphAdvance(charCode);
     }
 
-    return (font.advanceWidth[g]) ?? super.glyphAdvance(charCode);
+    return (g < font.advanceWidth.length ? font.advanceWidth[g] : null) ??
+        super.glyphAdvance(charCode);
   }
 
   @override
