@@ -18,23 +18,23 @@
 
 part of pdf;
 
-class PDFXref {
-  /// The id of a PDF Object
+class PdfXref {
+  /// The id of a Pdf Object
   int id;
 
-  /// The offset within the PDF file
+  /// The offset within the Pdf file
   int offset;
 
   /// The generation of the object, usually 0
   int generation = 0;
 
-  /// Creates a crossreference for a PDF Object
+  /// Creates a crossreference for a Pdf Object
   /// @param id The object's ID
   /// @param offset The object's position in the file
   /// @param generation The object's generation, usually 0
-  PDFXref(this.id, this.offset, {this.generation = 0});
+  PdfXref(this.id, this.offset, {this.generation = 0});
 
-  /// @return The xref in the format of the xref section in the PDF file
+  /// @return The xref in the format of the xref section in the Pdf file
   String ref() {
     String rs = offset.toString().padLeft(10, '0') +
         " " +

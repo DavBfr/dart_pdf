@@ -18,9 +18,9 @@
 
 part of pdf;
 
-class PDFObject {
+class PdfObject {
   /// This is the object parameters.
-  final params = new Map<String, PDFStream>();
+  final params = new Map<String, PdfStream>();
 
   /// This is the unique serial number for this object.
   final int objser;
@@ -28,29 +28,29 @@ class PDFObject {
   /// This is the generation number for this object.
   final int objgen = 0;
 
-  /// This allows any PDF object to refer to the document being constructed.
-  final PDFDocument pdfDocument;
+  /// This allows any Pdf object to refer to the document being constructed.
+  final PdfDocument pdfDocument;
 
   /// This is usually called by extensors to this class, and sets the
-  /// PDF Object Type
-  /// @param type the PDF Object Type
-  PDFObject(this.pdfDocument, [String type])
+  /// Pdf Object Type
+  /// @param type the Pdf Object Type
+  PdfObject(this.pdfDocument, [String type])
       : objser = pdfDocument._genSerial() {
     if (type != null) {
-      params["/Type"] = PDFStream.string(type);
+      params["/Type"] = PdfStream.string(type);
     }
 
     pdfDocument.objects.add(this);
   }
 
-  /// <p>Writes the object to the output stream.
-  /// This method must be overidden.</p>
+  /// Writes the object to the output stream.
+  /// This method must be overidden.
   ///
-  /// <p><b>Note:</b> It should not write any other objects, even if they are
-  /// it's Kids, as they will be written by the calling routine.</p>
+  /// Note: It should not write any other objects, even if they are
+  /// it's Kids, as they will be written by the calling routine.
   ///
   /// @param os OutputStream to send the object to
-  void write(PDFStream os) {
+  void write(PdfStream os) {
     prepare();
     writeStart(os);
     writeContent(os);
@@ -64,14 +64,14 @@ class PDFObject {
   /// The write method should call this before writing anything to the
   /// OutputStream. This will send the standard header for each object.
   ///
-  /// <p>Note: There are a few rare cases where this method is not called.
+  /// Note: There are a few rare cases where this method is not called.
   ///
   /// @param os OutputStream to write to
-  void writeStart(PDFStream os) {
+  void writeStart(PdfStream os) {
     os.putString("$objser $objgen obj\n");
   }
 
-  void writeContent(PDFStream os) {
+  void writeContent(PdfStream os) {
     if (params.length > 0) {
       os.putDictionary(params);
       os.putString("\n");
@@ -81,14 +81,14 @@ class PDFObject {
   /// The write method should call this after writing anything to the
   /// OutputStream. This will send the standard footer for each object.
   ///
-  /// <p>Note: There are a few rare cases where this method is not called.
+  /// Note: There are a few rare cases where this method is not called.
   ///
   /// @param os OutputStream to write to
-  void writeEnd(PDFStream os) {
+  void writeEnd(PdfStream os) {
     os.putString("endobj\n");
   }
 
-  /// Returns the unique serial number in PDF format
-  /// @return the serial number in PDF format
-  PDFStream ref() => PDFStream.string("$objser $objgen R");
+  /// Returns the unique serial number in Pdf format
+  /// @return the serial number in Pdf format
+  PdfStream ref() => PdfStream.string("$objser $objgen R");
 }

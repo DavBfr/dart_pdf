@@ -19,21 +19,21 @@ class MyAppState extends State<MyApp> {
   final shareWidget = new GlobalKey();
   final previewContainer = new GlobalKey();
 
-  PDFDocument _generateDocument() {
-    final pdf = new PDFDocument(deflate: zlib.encode);
-    final page = new PDFPage(pdf, pageFormat: PDFPageFormat.a4);
+  PdfDocument _generateDocument() {
+    final pdf = new PdfDocument(deflate: zlib.encode);
+    final page = new PdfPage(pdf, pageFormat: PdfPageFormat.a4);
     final g = page.getGraphics();
-    final font = new PDFFont(pdf);
+    final font = new PdfFont(pdf);
     final top = page.pageFormat.height;
 
-    g.setColor(new PDFColor(0.0, 1.0, 1.0));
-    g.drawRect(50.0 * PDFPageFormat.mm, top - 80.0 * PDFPageFormat.mm,
-        100.0 * PDFPageFormat.mm, 50.0 * PDFPageFormat.mm);
+    g.setColor(new PdfColor(0.0, 1.0, 1.0));
+    g.drawRect(50.0 * PdfPageFormat.mm, top - 80.0 * PdfPageFormat.mm,
+        100.0 * PdfPageFormat.mm, 50.0 * PdfPageFormat.mm);
     g.fillPath();
 
-    g.setColor(new PDFColor(0.3, 0.3, 0.3));
-    g.drawString(font, 12.0, "Hello World!", 10.0 * PDFPageFormat.mm,
-        top - 10.0 * PDFPageFormat.mm);
+    g.setColor(new PdfColor(0.3, 0.3, 0.3));
+    g.drawString(font, 12.0, "Hello World!", 10.0 * PdfPageFormat.mm,
+        top - 10.0 * PdfPageFormat.mm);
 
     return pdf;
   }
@@ -61,9 +61,9 @@ class MyAppState extends State<MyApp> {
   }
 
   Future<void> _printScreen() async {
-    const margin = 10.0 * PDFPageFormat.mm;
-    final pdf = new PDFDocument(deflate: zlib.encode);
-    final page = new PDFPage(pdf, pageFormat: PDFPageFormat.a4);
+    const margin = 10.0 * PdfPageFormat.mm;
+    final pdf = new PdfDocument(deflate: zlib.encode);
+    final page = new PdfPage(pdf, pageFormat: PdfPageFormat.a4);
     final g = page.getGraphics();
 
     RenderRepaintBoundary boundary =
@@ -84,7 +84,7 @@ class MyAppState extends State<MyApp> {
       ih = im.height.toDouble() * iw / im.width.toDouble();
     }
 
-    PDFImage image = PDFImage(pdf,
+    PdfImage image = PdfImage(pdf,
         image: bytes.buffer.asUint8List(), width: im.width, height: im.height);
     g.drawImage(image, margin + (w - iw) / 2.0,
         page.pageFormat.height - margin - ih - (h - ih) / 2.0, iw, ih);

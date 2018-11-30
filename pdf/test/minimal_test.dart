@@ -5,8 +5,8 @@ import "package:test/test.dart";
 
 void main() {
   test('Pdf1', () {
-    var pdf = new PDFDocument();
-    var page = new PDFPage(pdf, pageFormat: PDFPageFormat.a4);
+    var pdf = new PdfDocument();
+    var page = new PdfPage(pdf, pageFormat: PdfPageFormat.a4);
 
     var g = page.getGraphics();
     g.drawLine(30.0, 30.0, 200.0, 200.0);

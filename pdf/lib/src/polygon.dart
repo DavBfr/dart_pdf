@@ -18,13 +18,13 @@
 
 part of pdf;
 
-class Polygon {
-  List<PDFPoint> points;
+class PdfPolygon {
+  List<PdfPoint> points;
 
-  Polygon(this.points);
+  PdfPolygon(this.points);
 
-  PDFRect getBounds() {
+  PdfRect getBounds() {
     // TODO: Implement properly
-    return const PDFRect(0.0, 0.0, 0.0, 0.0);
+    return const PdfRect(0.0, 0.0, 0.0, 0.0);
   }
 }

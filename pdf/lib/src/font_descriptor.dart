@@ -18,31 +18,31 @@
 
 part of pdf;
 
-class PDFFontDescriptor extends PDFObject {
-  final PDFObjectStream file;
-  final PDFTTFFont ttfFont;
+class PdfFontDescriptor extends PdfObject {
+  final PdfObjectStream file;
+  final PdfTtfFont ttfFont;
 
-  PDFFontDescriptor(this.ttfFont, this.file)
+  PdfFontDescriptor(this.ttfFont, this.file)
       : super(ttfFont.pdfDocument, "/FontDescriptor");
 
   @override
   void prepare() {
     super.prepare();
 
-    params["/FontName"] = PDFStream.string(ttfFont.baseFont);
+    params["/FontName"] = PdfStream.string(ttfFont.baseFont);
     params["/FontFile2"] = file.ref();
-    params["/Flags"] = PDFStream.intNum(32);
-    params["/FontBBox"] = new PDFStream()
+    params["/Flags"] = PdfStream.intNum(32);
+    params["/FontBBox"] = new PdfStream()
       ..putStringArray([
         ttfFont.font.xMin,
         ttfFont.font.yMin,
         ttfFont.font.xMax,
         ttfFont.font.yMax
       ]);
-    params["/Ascent"] = PDFStream.intNum(ttfFont.font.ascent);
-    params["/Descent"] = PDFStream.intNum(ttfFont.font.descent);
-    params["/ItalicAngle"] = PDFStream.intNum(0);
-    params["/CapHeight"] = PDFStream.intNum(10);
-    params["/StemV"] = PDFStream.intNum(79);
+    params["/Ascent"] = PdfStream.intNum(ttfFont.font.ascent);
+    params["/Descent"] = PdfStream.intNum(ttfFont.font.descent);
+    params["/ItalicAngle"] = PdfStream.intNum(0);
+    params["/CapHeight"] = PdfStream.intNum(10);
+    params["/StemV"] = PdfStream.intNum(79);
   }
 }

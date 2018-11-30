@@ -18,7 +18,7 @@
 
 part of pdf;
 
-class PDFInfo extends PDFObject {
+class PdfInfo extends PdfObject {
   String author;
   String creator;
   String title;
@@ -26,10 +26,10 @@ class PDFInfo extends PDFObject {
   String keywords;
 
   /// @param title Title of this document
-  PDFInfo(PDFDocument pdfDocument,
+  PdfInfo(PdfDocument pdfDocument,
       {this.title, this.author, this.creator, this.subject, this.keywords})
       : super(pdfDocument, null) {
-    params["/Producer"] = PDFStream.text("dpdf - David PHAM-VAN");
+    params["/Producer"] = PdfStream.text("dpdf - David PHAM-VAN");
   }
 
   /// @param os OutputStream to send the object to
@@ -37,10 +37,10 @@ class PDFInfo extends PDFObject {
   void prepare() {
     super.prepare();
 
-    if (author != null) params["/Author"] = PDFStream.text(author);
-    if (creator != null) params["/Creator"] = PDFStream.text(creator);
-    if (title != null) params["/Title"] = PDFStream.text(title);
-    if (subject != null) params["/Subject"] = PDFStream.text(subject);
-    if (keywords != null) params["/Keywords"] = PDFStream.text(keywords);
+    if (author != null) params["/Author"] = PdfStream.text(author);
+    if (creator != null) params["/Creator"] = PdfStream.text(creator);
+    if (title != null) params["/Title"] = PdfStream.text(title);
+    if (subject != null) params["/Subject"] = PdfStream.text(subject);
+    if (keywords != null) params["/Keywords"] = PdfStream.text(keywords);
   }
 }

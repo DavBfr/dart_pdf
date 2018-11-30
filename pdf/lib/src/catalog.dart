@@ -18,23 +18,22 @@
 
 part of pdf;
 
-class PDFCatalog extends PDFObject {
+class PdfCatalog extends PdfObject {
   /// The pages of the document
-  final PDFPageList pdfPageList;
+  final PdfPageList pdfPageList;
 
   /// The outlines of the document
-  PDFOutline outlines;
+  PdfOutline outlines;
 
   /// The initial page mode
-  final PDFPageMode pageMode;
+  final PdfPageMode pageMode;
 
-  /// This constructs a PDF Catalog object
+  /// This constructs a Pdf Catalog object
   ///
-  /// @param pdfPageList The PDFPageList object that's the root
-  ///        of the documents page tree
+  /// @param pdfPageList The [PdfPageList] object that's the root of the documents page tree
   /// @param pagemode How the document should appear when opened.
-  /// Allowed values are USENONE, USEOUTLINES, USETHUMBS or FULLSCREEN.
-  PDFCatalog(PDFDocument pdfDocument, this.pdfPageList, this.pageMode)
+  /// Allowed values are usenone, useoutlines, usethumbs or fullscreen.
+  PdfCatalog(PdfDocument pdfDocument, this.pdfPageList, this.pageMode)
       : super(pdfDocument, "/Catalog");
 
   /// @param os OutputStream to send the object to
@@ -51,6 +50,6 @@ class PDFCatalog extends PDFObject {
 
     // the /PageMode setting
     params["/PageMode"] =
-        PDFStream.string(PDFDocument._PDF_PAGE_MODES[pageMode.index]);
+        PdfStream.string(PdfDocument._PdfPageModes[pageMode.index]);
   }
 }

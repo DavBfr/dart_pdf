@@ -18,9 +18,9 @@
 
 part of pdf;
 
-class PDFXObject extends PDFObjectStream {
-  PDFXObject(PDFDocument pdfDocument, String subtype, {bool isBinary = false})
+class PdfXObject extends PdfObjectStream {
+  PdfXObject(PdfDocument pdfDocument, String subtype, {bool isBinary = false})
       : super(pdfDocument, type: '/XObject', isBinary: isBinary) {
-    params['/Subtype'] = PDFStream.string(subtype);
+    params['/Subtype'] = PdfStream.string(subtype);
   }
 }

@@ -18,24 +18,23 @@
 
 part of pdf;
 
-class PDFPageList extends PDFObject {
+class PdfPageList extends PdfObject {
   /// This holds the pages
-  final List<PDFPage> pages = [];
+  final List<PdfPage> pages = [];
 
-  /// This constructs a PDF Pages object.
-  PDFPageList(PDFDocument pdfDocument) : super(pdfDocument, "/Pages");
+  /// This constructs a [PdfPageList] object.
+  PdfPageList(PdfDocument pdfDocument) : super(pdfDocument, "/Pages");
 
-  /// This returns a specific page. Used by the PDF class.
+  /// This returns a specific page. Used by the Pdf class.
   /// @param page page number to return
-  /// @return PDFPage at that position
-  PDFPage getPage(int page) => pages[page];
+  /// @return [PdfPage] at that position
+  PdfPage getPage(int page) => pages[page];
 
-  /// @param os OutputStream to send the object to
   @override
   void prepare() {
     super.prepare();
 
-    params["/Kids"] = new PDFStream()..putObjectArray(pages);
-    params["/Count"] = PDFStream.intNum(pages.length);
+    params["/Kids"] = new PdfStream()..putObjectArray(pages);
+    params["/Count"] = PdfStream.intNum(pages.length);
   }
 }

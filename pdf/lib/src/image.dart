@@ -18,7 +18,7 @@
 
 part of pdf;
 
-class PDFImage extends PDFXObject {
+class PdfImage extends PdfXObject {
   /// RGBA Image Data
   final Uint8List image;
 
@@ -36,15 +36,14 @@ class PDFImage extends PDFXObject {
   /// Process alphaChannel only
   final bool alphaChannel;
 
-  /// Creates a new <code>PDFImage</code> instance.
+  /// Creates a new [PdfImage] instance.
   ///
-  /// @param img an <code>Image</code> value
-  /// @param x an <code>int</code> value
-  /// @param y an <code>int</code> value
-  /// @param w an <code>int</code> value
-  /// @param h an <code>int</code> value
-  /// @param obs an <code>ImageObserver</code> value
-  PDFImage(PDFDocument pdfDocument,
+  /// @param imgage an [Uint8List] value
+  /// @param width
+  /// @param height
+  /// @param alpha if the image is transparent
+  /// @param alphaChannel if this is transparency mask
+  PdfImage(PdfDocument pdfDocument,
       {@required this.image,
       @required this.width,
       @required this.height,
@@ -55,25 +54,25 @@ class PDFImage extends PDFXObject {
         assert(height != null),
         super(pdfDocument, "/Image", isBinary: true) {
     _name = "/Image$objser";
-    params["/Width"] = PDFStream.string(width.toString());
-    params["/Height"] = PDFStream.string(height.toString());
-    params["/BitsPerComponent"] = PDFStream.intNum(8);
-    params['/Name'] = PDFStream.string(_name);
+    params["/Width"] = PdfStream.string(width.toString());
+    params["/Height"] = PdfStream.string(height.toString());
+    params["/BitsPerComponent"] = PdfStream.intNum(8);
+    params['/Name'] = PdfStream.string(_name);
 
     if (alphaChannel == false && alpha) {
-      var _sMask = new PDFImage(pdfDocument,
+      var _sMask = new PdfImage(pdfDocument,
           image: image,
           width: width,
           height: height,
           alpha: alpha,
           alphaChannel: true);
-      params["/SMask"] = PDFStream.string("${_sMask.objser} 0 R");
+      params["/SMask"] = PdfStream.string("${_sMask.objser} 0 R");
     }
 
     if (alphaChannel) {
-      params["/ColorSpace"] = PDFStream.string("/DeviceGray");
+      params["/ColorSpace"] = PdfStream.string("/DeviceGray");
     } else {
-      params["/ColorSpace"] = PDFStream.string("/DeviceRGB");
+      params["/ColorSpace"] = PdfStream.string("/DeviceRGB");
     }
   }
 
@@ -107,6 +106,6 @@ class PDFImage extends PDFXObject {
 
   /// Get the name
   ///
-  /// @return a <code>String</code> value
+  /// @return a String value
   String get name => _name;
 }

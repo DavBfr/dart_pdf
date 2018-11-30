@@ -18,20 +18,21 @@
 
 part of pdf;
 
-class PDFObjectStream extends PDFObject {
+class PdfObjectStream extends PdfObject {
   /// This holds the stream's content.
-  final PDFStream buf = new PDFStream();
+  final PdfStream buf = new PdfStream();
 
   /// defines if the stream needs to be converted to ascii85
   final bool isBinary;
 
   /// Constructs a stream. The supplied type is stored in the stream's header
-  /// and is used by other objects that extend the PDFStream class (like
-  /// PDFImage).
-  /// <p>By default, the stream will be compressed.
+  /// and is used by other objects that extend the [PdfStream] class (like
+  /// [PdfImage]).
+  /// By default, the stream will be compressed.
+  ///
   /// @param type type for the stream
-  /// @see PDFImage
-  PDFObjectStream(PDFDocument pdfDocument, {String type, this.isBinary = false})
+  /// @see [PdfImage]
+  PdfObjectStream(PdfDocument pdfDocument, {String type, this.isBinary = false})
       : super(pdfDocument, type);
 
   List<int> _data;
@@ -42,21 +43,21 @@ class PDFObjectStream extends PDFObject {
 
     if (pdfDocument.deflate != null) {
       _data = pdfDocument.deflate(buf.output());
-      params["/Filter"] = PDFStream.string("/FlateDecode");
+      params["/Filter"] = PdfStream.string("/FlateDecode");
     } else if (isBinary) {
       // This is a Ascii85 stream
       var e = new Ascii85Encoder();
       _data = e.convert(buf.output());
-      params["/Filter"] = PDFStream.string("/ASCII85Decode");
+      params["/Filter"] = PdfStream.string("/ASCII85Decode");
     } else {
       // This is a non-deflated stream
       _data = buf.output();
     }
-    params["/Length"] = PDFStream.intNum(_data.length);
+    params["/Length"] = PdfStream.intNum(_data.length);
   }
 
   @override
-  void writeContent(PDFStream os) {
+  void writeContent(PdfStream os) {
     super.writeContent(os);
 
     os.putString("stream\n");

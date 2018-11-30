@@ -18,13 +18,13 @@
 
 part of pdf;
 
-class PDFArrayObject extends PDFObject {
+class PdfArrayObject extends PdfObject {
   final List<String> values;
 
-  PDFArrayObject(PDFDocument pdfDocument, this.values) : super(pdfDocument);
+  PdfArrayObject(PdfDocument pdfDocument, this.values) : super(pdfDocument);
 
   @override
-  void writeContent(PDFStream os) {
+  void writeContent(PdfStream os) {
     super.writeContent(os);
 
     os.putStringArray(values);

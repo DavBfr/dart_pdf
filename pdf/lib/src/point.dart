@@ -18,10 +18,12 @@
 
 part of pdf;
 
-class PDFPoint {
-  final double w, h;
-  const PDFPoint(this.w, this.h);
+@immutable
+class PdfPoint {
+  final double x, y;
+
+  const PdfPoint(this.x, this.y);
 
   @override
-  String toString() => "PDFPoint($w, $h)";
+  String toString() => "PdfPoint($x, $y)";
 }

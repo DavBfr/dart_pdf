@@ -18,67 +18,63 @@
 
 part of pdf;
 
-class PDFOutline extends PDFObject {
+enum PdfOutlineMode {
+  /// When jumping to the destination, display the whole page
+  fitpage,
+
+  /// When jumping to the destination, display the specified region
+  fitrect
+}
+
+class PdfOutline extends PdfObject {
   /// This holds any outlines below us
-  List<PDFOutline> outlines = [];
+  List<PdfOutline> outlines = [];
 
   /// For subentries, this points to it's parent outline
-  PDFOutline parent;
+  PdfOutline parent;
 
   /// This is this outlines Title
   final String title;
 
   /// The destination page
-  PDFPage dest;
+  PdfPage dest;
 
   /// The region on the destination page
-  final double l, b, r, t;
-
-  /// When jumping to the destination, display the whole page
-  static const bool FITPAGE = false;
-
-  /// When jumping to the destination, display the specified region
-  static const bool FITRECT = true;
+  final PdfRect rect;
 
   /// How the destination is handled
-  bool destMode = FITPAGE;
+  PdfOutlineMode destMode = PdfOutlineMode.fitpage;
 
-  /// Constructs a PDF Outline object. When selected, the specified region
+  /// Constructs a Pdf Outline object. When selected, the specified region
   /// is displayed.
   ///
   /// @param title Title of the outline
   /// @param dest The destination page
-  /// @param l left coordinate
-  /// @param b bottom coordinate
-  /// @param r right coordinate
-  /// @param t top coordinate
-  PDFOutline(PDFDocument pdfDocument,
-      {this.title, this.dest, this.l, this.b, this.r, this.t})
+  /// @param rect coordinate
+  PdfOutline(PdfDocument pdfDocument, {this.title, this.dest, this.rect})
       : super(pdfDocument, "/Outlines");
 
   /// This method creates an outline, and attaches it to this one.
   /// When the outline is selected, the supplied region is displayed.
   ///
-  /// <p>Note: the coordiates are in Java space. They are converted to User
+  /// Note: the coordiates are in User space. They are converted to User
   /// space.
   ///
-  /// <p>This allows you to have an outline for say a Chapter,
+  /// This allows you to have an outline for say a Chapter,
   /// then under the chapter, one for each section. You are not really
   /// limited on how deep you go, but it's best not to go below say 6 levels,
   /// for the reader's sake.
   ///
   /// @param title Title of the outline
   /// @param dest The destination page
-  /// @param x coordinate of region in Java space
-  /// @param y coordinate of region in Java space
-  /// @param w width of region in Java space
-  /// @param h height of region in Java space
-  /// @return PDFOutline object created, for creating sub-outlines
-  PDFOutline add({String title, PDFPage dest, double x, y, w, h}) {
-    var xy1 = dest.cxy(x, y + h);
-    var xy2 = dest.cxy(x + w, y);
-    PDFOutline outline = new PDFOutline(pdfDocument,
-        title: title, dest: dest, l: xy1.w, b: xy1.h, r: xy2.w, t: xy2.h);
+  /// @param x coordinate of region in User space
+  /// @param y coordinate of region in User space
+  /// @param w width of region in User space
+  /// @param h height of region in User space
+  /// @return [PdfOutline] object created, for creating sub-outlines
+  PdfOutline add({String title, PdfPage dest, PdfRect rect}) {
+    PdfOutline outline =
+        new PdfOutline(pdfDocument, title: title, dest: dest, rect: rect);
     // Tell the outline of ourselves
     outline.parent = this;
     return outline;
@@ -91,23 +87,24 @@ class PDFOutline extends PDFObject {
 
     // These are for kids only
     if (parent != null) {
-      params["/Title"] = PDFStream.string(title);
-      var dests = new List<PDFStream>();
+      params["/Title"] = PdfStream.string(title);
+      var dests = new List<PdfStream>();
       dests.add(dest.ref());
 
-      if (destMode == FITPAGE) {
-        dests.add(PDFStream.string("/Fit"));
+      if (destMode == PdfOutlineMode.fitpage) {
+        dests.add(PdfStream.string("/Fit"));
       } else {
-        dests.add(PDFStream.string("/FitR $l $b $r $t"));
+        dests.add(
+            PdfStream.string("/FitR ${rect.l} ${rect.b} ${rect.r} ${rect.t}"));
       }
       params["/Parent"] = parent.ref();
-      params["/Dest"] = PDFStream.array(dests);
+      params["/Dest"] = PdfStream.array(dests);
 
       // were a decendent, so by default we are closed. Find out how many
       // entries are below us
       int c = descendants();
       if (c > 0) {
-        params["/Count"] = PDFStream.intNum(-c);
+        params["/Count"] = PdfStream.intNum(-c);
       }
 
       int index = parent.getIndex(this);
@@ -123,7 +120,7 @@ class PDFOutline extends PDFObject {
     } else {
       // the number of outlines in this document
       // were the top level node, so all are open by default
-      params["/Count"] = PDFStream.intNum(outlines.length);
+      params["/Count"] = PdfStream.intNum(outlines.length);
     }
 
     // These only valid if we have children
@@ -139,9 +136,9 @@ class PDFOutline extends PDFObject {
   /// This is called by children to find their position in this outlines
   /// tree.
   ///
-  /// @param outline PDFOutline to search for
+  /// @param outline [PdfOutline] to search for
   /// @return index within Vector
-  int getIndex(PDFOutline outline) => outlines.indexOf(outline);
+  int getIndex(PdfOutline outline) => outlines.indexOf(outline);
 
   /// Returns the last index in this outline
   /// @return last index in outline
@@ -150,7 +147,7 @@ class PDFOutline extends PDFObject {
   /// Returns the outline at a specified position.
   /// @param i index
   /// @return the node at index i
-  PDFOutline getNode(int i) => outlines[i];
+  PdfOutline getNode(int i) => outlines[i];
 
   /// Returns the total number of descendants below this one.
   /// @return the number of descendants below this one
@@ -158,7 +155,7 @@ class PDFOutline extends PDFObject {
     int c = outlines.length; // initially the number of kids
 
     // now call each one for their descendants
-    for (PDFOutline o in outlines) {
+    for (PdfOutline o in outlines) {
       c += o.descendants();
     }
 

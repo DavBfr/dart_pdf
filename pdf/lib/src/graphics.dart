@@ -18,21 +18,21 @@
 
 part of pdf;
 
-enum PDFLineCap { JOIN_MITER, JOIN_ROUND, JOIN_BEVEL }
+enum PdfLineCap { joinMiter, joinRound, joinBevel }
 
-class PDFGraphics {
+class PdfGraphics {
   /// Graphic context number
   var _context = 0;
 
-  final PDFPage page;
+  final PdfPage page;
 
-  final PDFStream buf;
+  final PdfStream buf;
 
-  PDFGraphics(this.page, this.buf);
+  PdfGraphics(this.page, this.buf);
 
-  PDFFont get defaultFont {
+  PdfFont get defaultFont {
     if (page.pdfDocument.fonts.length == 0) {
-      new PDFFont(page.pdfDocument);
+      new PdfFont(page.pdfDocument);
     }
 
     return page.pdfDocument.fonts.elementAt(0);
@@ -54,16 +54,11 @@ class PDFGraphics {
     buf.putString("W n\n");
   }
 
-  /// <p>This releases any resources used by this Graphics object. You must use
-  /// this method once finished with it. Leaving it open will leave the PDF
-  /// stream in an inconsistent state, and will produce errors.</p>
-  /// <p>
-  /// <p>If this was created with Graphics.create() then the parent instance
-  /// can be used again. If not, then this closes the graphics operations for
-  /// this page when used with PDFJob.</p>
-  /// <p>
-  /// <p>When using PDFPage, you can create another fresh Graphics instance,
-  /// which will draw over this one.</p>
+  /// This releases any resources used by this Graphics object. You must use
+  /// this method once finished with it.
+  ///
+  /// When using [PdfPage], you can create another fresh Graphics instance,
+  /// which will draw over this one.
   void restoreContext() {
     if (_context > 0) {
       // restore graphics context
@@ -78,21 +73,21 @@ class PDFGraphics {
     _context++;
   }
 
-  /// <p>Draws an image onto the page.</p>
-  /// <p>
-  /// <p>This method is implemented with ASCIIbase85 encoding and the
+  /// Draws an image onto the page.
+  ///
+  /// This method is implemented with [Ascii85Encoder] encoding and the
   /// zip stream deflater.  It results in a stream that is anywhere
   /// from 3 to 10 times as big as the image.  This obviously needs some
-  /// improvement, but it works well for small images</p>
+  /// improvement, but it works well for small images
   ///
-  /// @param img The java.awt.Image
+  /// @param img The Image
   /// @param x   coordinate on page
   /// @param y   coordinate on page
   /// @param w   Width on page
   /// @param h   height on page
   /// @param bgcolor Background colour
   /// @return true if drawn
-  void drawImage(PDFImage img, double x, double y, [double w, double h]) {
+  void drawImage(PdfImage img, double x, double y, [double w, double h]) {
     if (w == null) w = img.width.toDouble();
     if (h == null) h = img.height.toDouble() * w / img.width.toDouble();
 
@@ -104,7 +99,7 @@ class PDFGraphics {
   }
 
   /// Draws a line between two coordinates.
-  /// <p>
+  ///
   /// If the first coordinate is the same as the last one drawn
   /// (i.e. a previous drawLine, moveto, etc) it is ignored.
   ///
@@ -122,7 +117,7 @@ class PDFGraphics {
   /// @param xp Array of x coordinates
   /// @param yp Array of y coordinates
   /// @param np number of points in polygon
-  void drawPolygon(Polygon p) {
+  void drawPolygon(PdfPolygon p) {
     _polygon(p.points);
   }
 
@@ -144,7 +139,7 @@ class PDFGraphics {
   }
 
   /// We override Graphics.drawRect as it doesn't join the 4 lines.
-  /// Also, PDF provides us with a Rectangle operator, so we will use that.
+  /// Also, Pdf provides us with a Rectangle operator, so we will use that.
   ///
   /// @param x coordinate
   /// @param y coordinate
@@ -164,7 +159,7 @@ class PDFGraphics {
   /// @param x coordinate
   /// @param y coordinate
   /// @oaran s String to draw
-  void drawString(PDFFont font, size, String s, double x, double y) {
+  void drawString(PdfFont font, size, String s, double x, double y) {
     if (!page.fonts.containsKey(font.name)) {
       page.fonts[font.name] = font;
     }
@@ -177,7 +172,7 @@ class PDFGraphics {
   /// Sets the color for drawing
   ///
   /// @param c Color to use
-  void setColor(PDFColor color) {
+  void setColor(PdfColor color) {
     buf.putString(
         "${color.r} ${color.g} ${color.b} rg ${color.r} ${color.g} ${color.b} RG\n");
   }
@@ -234,18 +229,18 @@ class PDFGraphics {
   /// @see #drawPolygon
   /// @see #drawPolyline
   /// @see #fillPolygon
-  void _polygon(List<PDFPoint> p) {
+  void _polygon(List<PdfPoint> p) {
     // newPath() not needed here as moveto does it ;-)
-    moveTo(p[0].w, p[0].h);
+    moveTo(p[0].x, p[0].y);
 
-    for (int i = 1; i < p.length; i++) lineTo(p[i].w, p[i].h);
+    for (int i = 1; i < p.length; i++) lineTo(p[i].x, p[i].y);
   }
 
-  void setLineCap(PDFLineCap cap) {
+  void setLineCap(PdfLineCap cap) {
     buf.putString("${cap.index} J\n");
   }
 
-  void setLineJoin(PDFLineCap join) {
+  void setLineJoin(PdfLineCap join) {
     buf.putString("${join.index} j\n");
   }
 

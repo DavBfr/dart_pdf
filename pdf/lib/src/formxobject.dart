@@ -18,23 +18,23 @@
 
 part of pdf;
 
-class PDFFormXObject extends PDFXObject {
+class PdfFormXObject extends PdfXObject {
   /// The fonts associated with this page
-  final fonts = new Map<String, PDFFont>();
+  final fonts = new Map<String, PdfFont>();
 
   /// The xobjects or other images in the pdf
-  final xobjects = new Map<String, PDFXObject>();
+  final xobjects = new Map<String, PdfXObject>();
 
-  PDFFormXObject(PDFDocument pdfDocument) : super(pdfDocument, '/Form') {
-    params["/FormType"] = PDFStream.string("1");
-    params["/BBox"] = PDFStream.string("[0 0 1000 1000]");
+  PdfFormXObject(PdfDocument pdfDocument) : super(pdfDocument, '/Form') {
+    params["/FormType"] = PdfStream.string("1");
+    params["/BBox"] = PdfStream.string("[0 0 1000 1000]");
   }
 
   /// set matrix
   void setMatrix(Matrix4 t) {
     var s = t.storage;
     params["/Matrix"] =
-        PDFStream.string("[${s[0]} ${s[1]} ${s[4]} ${s[5]} ${s[12]} ${s[13]}]");
+        PdfStream.string("[${s[0]} ${s[1]} ${s[4]} ${s[5]} ${s[12]} ${s[13]}]");
   }
 
   @override
@@ -43,20 +43,20 @@ class PDFFormXObject extends PDFXObject {
 
     // Now the resources
     /// This holds any resources for this FormXObject
-    final resources = new Map<String, PDFStream>();
+    final resources = new Map<String, PdfStream>();
 
     // fonts
     if (fonts.length > 0) {
-      resources["/Font"] = new PDFStream()..putObjectDictionary(fonts);
+      resources["/Font"] = new PdfStream()..putObjectDictionary(fonts);
     }
 
     // Now the XObjects
     if (xobjects.length > 0) {
-      resources["/XObject"] = new PDFStream()..putObjectDictionary(xobjects);
+      resources["/XObject"] = new PdfStream()..putObjectDictionary(xobjects);
     }
 
     if (resources.length > 0) {
-      params["/Resources"] = PDFStream.dictionary(resources);
+      params["/Resources"] = PdfStream.dictionary(resources);
     }
   }
 }

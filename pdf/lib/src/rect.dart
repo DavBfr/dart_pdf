@@ -18,10 +18,22 @@
 
 part of pdf;
 
-class PDFRect {
+@immutable
+class PdfRect {
   final double x, y, w, h;
-  const PDFRect(this.x, this.y, this.w, this.h);
+
+  const PdfRect(this.x, this.y, this.w, this.h);
+
+  factory PdfRect.fromLTRB(
+      double left, double top, double right, double bottom) {
+    return PdfRect(left, top, right - left, bottom - top);
+  }
+
+  double get l => x;
+  double get b => y;
+  double get r => x + w;
+  double get t => y + h;
 
   @override
-  String toString() => "PDFRect($x, $y, $w, $h)";
+  String toString() => "PdfRect($x, $y, $w, $h)";
 }

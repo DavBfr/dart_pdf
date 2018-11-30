@@ -18,7 +18,7 @@
 
 part of pdf;
 
-class TTFParser {
+class TtfParser {
   static const _HEAD = "head";
   static const _NAME = "name";
   static const _HMTX = "hmtx";
@@ -34,9 +34,9 @@ class TTFParser {
   final advanceWidth = new List<double>();
   final charToGlyphIndexMap = new Map<int, int>();
   final glyphOffsets = new List<int>();
-  final glyphInfoMap = new Map<int, PDFRect>();
+  final glyphInfoMap = new Map<int, PdfRect>();
 
-  TTFParser(this.bytes) {
+  TtfParser(this.bytes) {
     final numTables = bytes.getUint16(4);
 
     for (var i = 0; i < numTables; i++) {
@@ -210,7 +210,7 @@ class TTFParser {
       final yMin = bytes.getInt16(baseOffset + offset + 4); // 4
       final xMax = bytes.getInt16(baseOffset + offset + 6); // 6
       final yMax = bytes.getInt16(baseOffset + offset + 8); // 8
-      glyphInfoMap[glyphIndex] = new PDFRect(
+      glyphInfoMap[glyphIndex] = new PdfRect(
           xMin.toDouble() / unitsPerEm,
           yMin.toDouble() / unitsPerEm,
           xMax.toDouble() / unitsPerEm,

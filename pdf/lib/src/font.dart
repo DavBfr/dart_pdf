@@ -18,21 +18,20 @@
 
 part of pdf;
 
-class PDFFont extends PDFObject {
-  /// The PDF type of the font, usually /Type1
+class PdfFont extends PdfObject {
+  /// Thedf type of the font, usually /Type1
   final String subtype;
 
   /// The font's real name
   String baseFont;
 
-  /// Constructs a PDFFont. This will attempt to map the font from a known
-  /// Java font name to that in PDF, defaulting to Helvetica if not possible.
+  /// Constructs a [PdfFont]. This will attempt to map the font from a known
+  /// font name to that in Pdf, defaulting to Helvetica if not possible.
   ///
   /// @param name The document name, ie /F1
-  /// @param type The pdf type, ie /Type1
-  /// @param font The font name, ie Helvetica
-  /// @param style The java.awt.Font style, ie: Font.PLAIN
-  PDFFont(PDFDocument pdfDocument,
+  /// @param subtype The pdf type, ie /Type1
+  /// @param baseFont The font name, ie /Helvetica
+  PdfFont(PdfDocument pdfDocument,
       {this.subtype = "/Type1", this.baseFont = "/Helvetica"})
       : super(pdfDocument, "/Font") {
     pdfDocument.fonts.add(this);
@@ -45,24 +44,24 @@ class PDFFont extends PDFObject {
   void prepare() {
     super.prepare();
 
-    params["/Subtype"] = PDFStream.string(subtype);
-    params["/Name"] = PDFStream.string(name);
-    params["/BaseFont"] = PDFStream.string(baseFont);
-    params["/Encoding"] = PDFStream.string("/WinAnsiEncoding");
+    params["/Subtype"] = PdfStream.string(subtype);
+    params["/Name"] = PdfStream.string(name);
+    params["/BaseFont"] = PdfStream.string(baseFont);
+    params["/Encoding"] = PdfStream.string("/WinAnsiEncoding");
   }
 
   double glyphAdvance(int charCode) {
     return 0.454;
   }
 
-  PDFRect glyphBounds(int charCode) {
-    return const PDFRect(0.0, 0.0, 0.4, 1.0);
+  PdfRect glyphBounds(int charCode) {
+    return const PdfRect(0.0, 0.0, 0.4, 1.0);
   }
 
-  PDFRect stringBounds(String s) {
+  PdfRect stringBounds(String s) {
     var chars = latin1.encode(s);
 
-    if (chars.length == 0) return const PDFRect(0.0, 0.0, 0.0, 0.0);
+    if (chars.length == 0) return const PdfRect(0.0, 0.0, 0.0, 0.0);
 
     var n = 0;
     var c = chars[n];
@@ -80,10 +79,10 @@ class PDFFont extends PDFObject {
       w += n == chars.length - 1 ? r.w : glyphAdvance(c);
     }
 
-    return new PDFRect(x, y, w, h);
+    return new PdfRect(x, y, w, h);
   }
 
-  PDFPoint stringSize(String s) {
+  PdfPoint stringSize(String s) {
     var chars = latin1.encode(s);
 
     var w = 0.0;
@@ -95,6 +94,6 @@ class PDFFont extends PDFObject {
       w += glyphAdvance(c);
     }
 
-    return new PDFPoint(w, h);
+    return new PdfPoint(w, h);
   }
 }

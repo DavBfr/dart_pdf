@@ -18,37 +18,37 @@
 
 part of pdf;
 
-class PDFOutput {
-  /// This is the actual PDFStream used to write to.
-  final PDFStream os;
+class PdfOutput {
+  /// This is the actual [PdfStream] used to write to.
+  final PdfStream os;
 
   /// This vector contains offsets of each object
-  List<PDFXref> offsets = [];
+  List<PdfXref> offsets = [];
 
   /// This is used to track the /Root object (catalog)
-  PDFObject rootID;
+  PdfObject rootID;
 
   /// This is used to track the /Info object (info)
-  PDFObject infoID;
+  PdfObject infoID;
 
-  /// This creates a PDF PDFStream
+  /// This creates a Pdf [PdfStream]
   ///
-  /// @param os The output stream to write the PDF file to.
-  PDFOutput(this.os) {
+  /// @param os The output stream to write the Pdf file to.
+  PdfOutput(this.os) {
     os.putString("%PDF-1.4\n");
     os.putBytes([0x25, 0xC2, 0xA5, 0xC2, 0xB1, 0xC3, 0xAB, 0x0A]);
   }
 
-  /// This method writes a PDFObject to the stream.
+  /// This method writes a [PdfObject] to the stream.
   ///
-  /// @param ob PDFObject Obeject to write
-  void write(PDFObject ob) {
+  /// @param ob [PdfObject] Obeject to write
+  void write(PdfObject ob) {
     // Check the object to see if it's one that is needed in the trailer
     // object
-    if (ob is PDFCatalog) rootID = ob;
-    if (ob is PDFInfo) infoID = ob;
+    if (ob is PdfCatalog) rootID = ob;
+    if (ob is PdfInfo) infoID = ob;
 
-    offsets.add(new PDFXref(ob.objser, os.offset));
+    offsets.add(new PdfXref(ob.objser, os.offset));
     ob.write(os);
   }
 
@@ -56,7 +56,7 @@ class PDFOutput {
   void close() {
     // we use baos to speed things up a little.
     // Also, offset is preserved, and marks the begining of this block.
-    // This is required by PDF at the end of the PDF file.
+    // This is required by Pdf at the end of the Pdf file.
 
     int xref = os.offset;
 
@@ -72,9 +72,9 @@ class PDFOutput {
     var block = []; // xrefs in this block
 
     // We need block 0 to exist
-    block.add(new PDFXref(0, 0, generation: 65535));
+    block.add(new PdfXref(0, 0, generation: 65535));
 
-    for (PDFXref x in offsets) {
+    for (PdfXref x in offsets) {
       if (firstid == -1) firstid = x.id;
 
       // check to see if block is in range (-1 means empty)
@@ -120,14 +120,14 @@ class PDFOutput {
     os.putString(">>\nstartxref\n$xref\n%%EOF\n");
   }
 
-  /// Writes a block of references to the PDF file
+  /// Writes a block of references to the Pdf file
   /// @param firstid ID of the first reference in this block
   /// @param block Vector containing the references in this block
   void writeblock(int firstid, var block) {
     os.putString("$firstid ${block.length}\n");
     //os.write("\n0000000000 65535 f\n");
 
-    for (PDFXref x in block) {
+    for (PdfXref x in block) {
       os.putString(x.ref());
       os.putString("\n");
     }

@@ -27,7 +27,7 @@ import 'package:pdf/pdf.dart';
 class Printing {
   static const MethodChannel _channel = const MethodChannel('printing');
 
-  static Future<Null> printPdf({PDFDocument document, List<int> bytes}) async {
+  static Future<Null> printPdf({PdfDocument document, List<int> bytes}) async {
     assert(document != null || bytes != null);
     assert(!(document == null && bytes == null));
 
@@ -41,7 +41,7 @@ class Printing {
   }
 
   static Future<Null> sharePdf(
-      {PDFDocument document, List<int> bytes, Rect bounds}) async {
+      {PdfDocument document, List<int> bytes, Rect bounds}) async {
     assert(document != null || bytes != null);
     assert(!(document == null && bytes == null));
 

@@ -16,7 +16,7 @@ To load an image it is possible to use
 var Image im;
 var bytes = await im.toByteData(format: ui.ImageByteFormat.rawRgba);
 
-PDFImage image = PDFImage(
+PdfImage image = PdfImage(
     pdf,
     image: bytes.buffer.asUint8List(), 
     width: im.width, 
@@ -28,7 +28,7 @@ To use a TrueType font from a flutter bundle:
 
 ```dart
 var font = await rootBundle.load("assets/open-sans.ttf");
-PDFTTFFont ttf = new PDFTTFFont(pdf, font);
-g.setColor(new PDFColor(0.3, 0.3, 0.3));
+PdfTtfFont ttf = new PdfTtfFont(pdf, font);
+g.setColor(new PdfColor(0.3, 0.3, 0.3));
 g.drawString(ttf, 20.0, "Dart is awesome", 50.0, 30.0);
 ```

@@ -18,65 +18,63 @@
 
 part of pdf;
 
-enum PDFPageMode {
+enum PdfPageMode {
   /// This page mode indicates that the document
   /// should be opened just with the page visible.  This is the default
-  NONE,
+  none,
 
   /// This page mode indicates that the Outlines
   /// should also be displayed when the document is opened.
-  OUTLINES,
+  outlines,
 
   /// This page mode indicates that the Thumbnails should be visible when the
   /// document first opens.
-  THUMBS,
+  thumbs,
 
   /// This page mode indicates that when the document is opened, it is displayed
   /// in full-screen-mode. There is no menu bar, window controls nor any other
   /// window present.
-  FULLSCREEN
+  fullscreen
 }
 
 typedef List<int> DeflateCallback(List<int> data);
 
-/// <p>This class is the base of the PDF generator. A PDFDocument class is
+/// This class is the base of the Pdf generator. A [PdfDocument] class is
 /// created for a document, and each page, object, annotation,
 /// etc is added to the document.
-/// Once complete, the document can be written to a Stream, and the PDF
+/// Once complete, the document can be written to a Stream, and the Pdf
 /// document's internal structures are kept in sync.
-class PDFDocument {
+class PdfDocument {
   /// This is used to allocate objects a unique serial number in the document.
   int _objser;
 
   /// This vector contains each indirect object within the document.
-  final Set<PDFObject> objects = new Set<PDFObject>();
+  final Set<PdfObject> objects = new Set<PdfObject>();
 
-  /// This is the Catalog object, which is required by each PDF Document
-  PDFCatalog catalog;
+  /// This is the Catalog object, which is required by each Pdf Document
+  PdfCatalog catalog;
 
   /// This is the info object. Although this is an optional object, we
   /// include it.
-  PDFInfo info;
+  PdfInfo info;
 
-  /// This is the Pages object, which is required by each PDF Document
-  PDFPageList pdfPageList;
+  /// This is the Pages object, which is required by each Pdf Document
+  PdfPageList pdfPageList;
 
   /// This is the Outline object, which is optional
-  PDFOutline _outline;
+  PdfOutline _outline;
 
-  /// This holds a PDFObject describing the default border for annotations.
+  /// This holds a [PdfObject] describing the default border for annotations.
   /// It's only used when the document is being written.
-  PDFObject defaultOutlineBorder;
+  PdfObject defaultOutlineBorder;
 
   /// Callback to compress the stream in the pdf file.
   /// Use `deflate: zlib.encode` if using dart:io
   /// No compression by default
   final DeflateCallback deflate;
 
-  /// <p>
-  /// These map the page modes just defined to the pagemodes setting of PDF.
-  /// </p>
-  static const _PDF_PAGE_MODES = const [
+  /// These map the page modes just defined to the pagemodes setting of Pdf.
+  static const _PdfPageModes = const [
     "/UseNone",
     "/UseOutlines",
     "/UseThumbs",
@@ -84,38 +82,38 @@ class PDFDocument {
   ];
 
   /// This holds the current fonts
-  final Set<PDFFont> fonts = new Set<PDFFont>();
+  final Set<PdfFont> fonts = new Set<PdfFont>();
 
   /// Creates a new serial number
   int _genSerial() => _objser++;
 
-  /// <p>This creates a PDF document</p>
+  /// This creates a Pdf document
   /// @param pagemode an int, determines how the document will present itself to
   /// the viewer when it first opens.
-  PDFDocument({PDFPageMode pageMode = PDFPageMode.NONE, this.deflate}) {
+  PdfDocument({PdfPageMode pageMode = PdfPageMode.none, this.deflate}) {
     _objser = 1;
 
     // Now create some standard objects
-    pdfPageList = new PDFPageList(this);
-    catalog = new PDFCatalog(this, pdfPageList, pageMode);
-    info = new PDFInfo(this);
+    pdfPageList = new PdfPageList(this);
+    catalog = new PdfCatalog(this, pdfPageList, pageMode);
+    info = new PdfInfo(this);
   }
 
-  /// <p>This returns a specific page. It's used mainly when using a
-  /// Serialized template file.</p>
+  /// This returns a specific page. It's used mainly when using a
+  /// Serialized template file.
   ///
   /// ?? How does a serialized template file work ???
   ///
   /// @param page page number to return
-  /// @return PDFPage at that position
-  PDFPage page(int page) {
+  /// @return [PdfPage] at that position
+  PdfPage page(int page) {
     return pdfPageList.getPage(page);
   }
 
   /// @return the root outline
-  PDFOutline get outline {
+  PdfOutline get outline {
     if (_outline == null) {
-      _outline = new PDFOutline(this);
+      _outline = new PdfOutline(this);
       catalog.outlines = _outline;
     }
     return _outline;
@@ -123,21 +121,21 @@ class PDFDocument {
 
   /// This writes the document to an OutputStream.
   ///
-  /// <p><b>Note:</b> You can call this as many times as you wish, as long as
+  /// Note: You can call this as many times as you wish, as long as
   /// the calls are not running at the same time.
   ///
-  /// <p>Also, objects can be added or amended between these calls.
+  /// Also, objects can be added or amended between these calls.
   ///
-  /// <p>Also, the OutputStream is not closed, but will be flushed on
+  /// Also, the OutputStream is not closed, but will be flushed on
   /// completion. It is up to the caller to close the stream.
   ///
   /// @param os OutputStream to write the document to
-  void write(PDFStream os) {
-    PDFOutput pos = new PDFOutput(os);
+  void write(PdfStream os) {
+    PdfOutput pos = new PdfOutput(os);
 
-    // Write each object to the PDFStream. We call via the output
+    // Write each object to the [PdfStream]. We call via the output
     // as that builds the xref table
-    for (PDFObject o in objects) {
+    for (PdfObject o in objects) {
       pos.write(o);
     }
 
@@ -146,7 +144,7 @@ class PDFDocument {
   }
 
   List<int> save() {
-    PDFStream os = new PDFStream();
+    PdfStream os = new PdfStream();
     write(os);
     return os.output();
   }

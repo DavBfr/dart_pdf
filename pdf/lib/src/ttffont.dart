@@ -18,25 +18,25 @@
 
 part of pdf;
 
-class PDFTTFFont extends PDFFont {
-  PDFObject unicodeCMap;
-  PDFFontDescriptor descriptor;
-  PDFArrayObject widthsObject;
+class PdfTtfFont extends PdfFont {
+  PdfObject unicodeCMap;
+  PdfFontDescriptor descriptor;
+  PdfArrayObject widthsObject;
   final widths = new List<String>();
-  final TTFParser font;
+  final TtfParser font;
   int _charMin;
   int _charMax;
 
-  /// Constructs a PDFTTFFont
-  PDFTTFFont(PDFDocument pdfDocument, ByteData bytes)
-      : font = new TTFParser(bytes),
+  /// Constructs a [PdfTtfFont]
+  PdfTtfFont(PdfDocument pdfDocument, ByteData bytes)
+      : font = new TtfParser(bytes),
         super(pdfDocument, subtype: "/TrueType") {
     baseFont = "/" + font.fontName.replaceAll(" ", "");
 
-    PDFObjectStream file = new PDFObjectStream(pdfDocument, isBinary: true);
+    PdfObjectStream file = new PdfObjectStream(pdfDocument, isBinary: true);
     final data = bytes.buffer.asUint8List();
     file.buf.putBytes(data);
-    file.params["/Length1"] = PDFStream.intNum(data.length);
+    file.params["/Length1"] = PdfStream.intNum(data.length);
 
     _charMin = 32;
     _charMax = 255;
@@ -45,9 +45,9 @@ class PDFTTFFont extends PDFFont {
       widths.add((glyphAdvance(i) * 1000.0).toString());
     }
 
-    unicodeCMap = new PDFObject(pdfDocument);
-    descriptor = new PDFFontDescriptor(this, file);
-    widthsObject = new PDFArrayObject(pdfDocument, widths);
+    unicodeCMap = new PdfObject(pdfDocument);
+    descriptor = new PdfFontDescriptor(this, file);
+    widthsObject = new PdfArrayObject(pdfDocument, widths);
   }
 
   @override
@@ -63,7 +63,7 @@ class PDFTTFFont extends PDFFont {
   }
 
   @override
-  PDFRect glyphBounds(int charCode) {
+  PdfRect glyphBounds(int charCode) {
     var g = font.charToGlyphIndexMap[charCode];
 
     if (g == null) {
@@ -77,11 +77,11 @@ class PDFTTFFont extends PDFFont {
   void prepare() {
     super.prepare();
 
-    params["/FirstChar"] = PDFStream.intNum(_charMin);
-    params["/LastChar"] = PDFStream.intNum(_charMax);
+    params["/FirstChar"] = PdfStream.intNum(_charMin);
+    params["/LastChar"] = PdfStream.intNum(_charMax);
     params["/Widths"] = widthsObject.ref();
     params["/FontDescriptor"] = descriptor.ref();
-//    params["/Encoding"] = PDFStream.string("/Identity-H");
+//    params["/Encoding"] = PdfStream.string("/Identity-H");
 //    params["/ToUnicode"] = unicodeCMap.ref();
   }
 }

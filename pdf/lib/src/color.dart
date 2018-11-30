@@ -18,26 +18,26 @@
 
 part of pdf;
 
-class PDFColor {
+class PdfColor {
   final double a;
   final double r;
   final double g;
   final double b;
 
-  static var black = new PDFColor(0.0, 0.0, 0.0);
+  static var black = new PdfColor(0.0, 0.0, 0.0);
 
-  PDFColor(this.r, this.g, this.b, [this.a = 1.0]);
+  const PdfColor(this.r, this.g, this.b, [this.a = 1.0]);
 
-  factory PDFColor.fromInt(int color) {
-    return new PDFColor(
+  factory PdfColor.fromInt(int color) {
+    return new PdfColor(
         (color >> 16 & 0xff) / 255.0,
         (color >> 8 & 0xff) / 255.0,
         (color & 0xff) / 255.0,
         (color >> 24 & 0xff) / 255.0);
   }
 
-  factory PDFColor.fromHex(String color) {
-    return new PDFColor(
+  factory PdfColor.fromHex(String color) {
+    return new PdfColor(
         (int.parse(color.substring(0, 1), radix: 16) >> 16 & 0xff) / 255.0,
         (int.parse(color.substring(2, 3), radix: 16) >> 8 & 0xff) / 255.0,
         (int.parse(color.substring(4, 5), radix: 16) & 0xff) / 255.0,

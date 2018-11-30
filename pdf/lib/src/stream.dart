@@ -18,10 +18,10 @@
 
 part of pdf;
 
-class PDFStream {
+class PdfStream {
   final _stream = List<int>();
 
-  void putStream(PDFStream s) {
+  void putStream(PdfStream s) {
     _stream.addAll(s._stream);
   }
 
@@ -35,7 +35,7 @@ class PDFStream {
     }
   }
 
-  static PDFStream string(String s) => new PDFStream()..putString(s);
+  static PdfStream string(String s) => new PdfStream()..putString(s);
 
   void putStringUtf16(String s) {
     for (int codeUnit in s.codeUnits) {
@@ -52,8 +52,8 @@ class PDFStream {
     putString(d.toString());
   }
 
-  static PDFStream num(double d) => new PDFStream()..putNum(d);
-  static PDFStream intNum(int i) => new PDFStream()..putString(i.toString());
+  static PdfStream num(double d) => new PdfStream()..putNum(d);
+  static PdfStream intNum(int i) => new PdfStream()..putString(i.toString());
 
   void putText(String s) {
     // Escape special characters
@@ -79,13 +79,13 @@ class PDFStream {
     putBytes(latin1.encode('(' + s + ')'));
   }
 
-  static PDFStream text(String s) => new PDFStream()..putText(s);
+  static PdfStream text(String s) => new PdfStream()..putText(s);
 
   void putBool(bool value) {
     putString(value ? "true" : "false");
   }
 
-  void putArray(List<PDFStream> values) {
+  void putArray(List<PdfStream> values) {
     putString("[");
     for (var val in values) {
       putStream(val);
@@ -94,7 +94,7 @@ class PDFStream {
     putString("]");
   }
 
-  void putObjectArray(List<PDFObject> values) {
+  void putObjectArray(List<PdfObject> values) {
     putString("[");
     for (var val in values) {
       putStream(val.ref());
@@ -107,10 +107,10 @@ class PDFStream {
     putString("[" + values.join(" ") + "]");
   }
 
-  static PDFStream array(List<PDFStream> values) =>
-      new PDFStream()..putArray(values);
+  static PdfStream array(List<PdfStream> values) =>
+      new PdfStream()..putArray(values);
 
-  void putDictionary(Map<String, PDFStream> values) {
+  void putDictionary(Map<String, PdfStream> values) {
     putString("<< ");
     values.forEach((k, v) {
       putString("$k ");
@@ -120,10 +120,10 @@ class PDFStream {
     putString(">>");
   }
 
-  static PDFStream dictionary(Map<String, PDFStream> values) =>
-      new PDFStream()..putDictionary(values);
+  static PdfStream dictionary(Map<String, PdfStream> values) =>
+      new PdfStream()..putDictionary(values);
 
-  void putObjectDictionary(Map<String, PDFObject> values) {
+  void putObjectDictionary(Map<String, PdfObject> values) {
     putString("<< ");
     values.forEach((k, v) {
       putString("$k ");

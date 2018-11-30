@@ -18,49 +18,30 @@
 
 part of pdf;
 
-class PDFPageFormat {
-  static const a4 = const PDFPageFormat(595.28, 841.89);
-  static const a3 = const PDFPageFormat(841.89, 1190.55);
-  static const a5 = const PDFPageFormat(420.94, 595.28);
-  static const letter = const PDFPageFormat(612.0, 792.0);
-  static const legal = const PDFPageFormat(612.0, 1008.0);
+class PdfPageFormat {
+  static const a4 = const PdfPageFormat(595.28, 841.89);
+  static const a3 = const PdfPageFormat(841.89, 1190.55);
+  static const a5 = const PdfPageFormat(420.94, 595.28);
+  static const letter = const PdfPageFormat(612.0, 792.0);
+  static const legal = const PdfPageFormat(612.0, 1008.0);
 
   static const point = 1.0;
   static const inch = 72.0;
   static const cm = inch / 2.54;
   static const mm = inch / 25.4;
 
-  @deprecated
-  static const A4 = a4;
-  @deprecated
-  static const A3 = a3;
-  @deprecated
-  static const A5 = a5;
-  @deprecated
-  static const LETTER = letter;
-  @deprecated
-  static const LEGAL = legal;
-  @deprecated
-  static const PT = point;
-  @deprecated
-  static const IN = inch;
-  @deprecated
-  static const CM = cm;
-  @deprecated
-  static const MM = mm;
-
   final double width;
   final double height;
 
-  const PDFPageFormat(this.width, this.height);
+  const PdfPageFormat(this.width, this.height);
 
-  PDFPoint get dimension => new PDFPoint(width, height);
+  PdfPoint get dimension => new PdfPoint(width, height);
 
-  PDFPageFormat get landscape =>
-      width >= height ? this : PDFPageFormat(height, width);
+  PdfPageFormat get landscape =>
+      width >= height ? this : PdfPageFormat(height, width);
 
-  PDFPageFormat get portrait =>
-      height >= width ? this : PDFPageFormat(height, width);
+  PdfPageFormat get portrait =>
+      height >= width ? this : PdfPageFormat(height, width);
 
   @override
   String toString() {
