@@ -15,7 +15,7 @@
  # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
  DART_SRC=$(shell find . -name '*.dart')
- CLNG_SRC=$(shell find . -name '*.java' -o -name '*.m' -o -name '*.h')
+ CLNG_SRC=$(shell find printing/ios -name '*.java' -o -name '*.m' -o -name '*.h') $(shell find printing/android -name '*.java' -o -name '*.m' -o -name '*.h')
 
 all: pdf/open-sans.ttf pdf/roboto.ttf format
 
