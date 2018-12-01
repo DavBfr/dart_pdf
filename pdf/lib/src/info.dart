@@ -34,8 +34,8 @@ class PdfInfo extends PdfObject {
 
   /// @param os OutputStream to send the object to
   @override
-  void prepare() {
-    super.prepare();
+  void _prepare() {
+    super._prepare();
 
     if (author != null) params["/Author"] = PdfStream.text(author);
     if (creator != null) params["/Creator"] = PdfStream.text(creator);

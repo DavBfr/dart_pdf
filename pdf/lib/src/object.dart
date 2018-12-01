@@ -50,16 +50,16 @@ class PdfObject {
   /// it's Kids, as they will be written by the calling routine.
   ///
   /// @param os OutputStream to send the object to
-  void write(PdfStream os) {
-    prepare();
-    writeStart(os);
-    writeContent(os);
-    writeEnd(os);
+  void _write(PdfStream os) {
+    _prepare();
+    _writeStart(os);
+    _writeContent(os);
+    _writeEnd(os);
   }
 
   /// Prepare the object to be written to the stream
   @mustCallSuper
-  void prepare() {}
+  void _prepare() {}
 
   /// The write method should call this before writing anything to the
   /// OutputStream. This will send the standard header for each object.
@@ -67,11 +67,11 @@ class PdfObject {
   /// Note: There are a few rare cases where this method is not called.
   ///
   /// @param os OutputStream to write to
-  void writeStart(PdfStream os) {
+  void _writeStart(PdfStream os) {
     os.putString("$objser $objgen obj\n");
   }
 
-  void writeContent(PdfStream os) {
+  void _writeContent(PdfStream os) {
     if (params.length > 0) {
       os.putDictionary(params);
       os.putString("\n");
@@ -84,7 +84,7 @@ class PdfObject {
   /// Note: There are a few rare cases where this method is not called.
   ///
   /// @param os OutputStream to write to
-  void writeEnd(PdfStream os) {
+  void _writeEnd(PdfStream os) {
     os.putString("endobj\n");
   }
 

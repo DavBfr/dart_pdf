@@ -93,8 +93,8 @@ class PdfAnnot extends PdfObject {
   ///
   /// @param os OutputStream to send the object to
   @override
-  void prepare() {
-    super.prepare();
+  void _prepare() {
+    super._prepare();
 
     params["/Subtype"] = PdfStream.string(subtype);
     params["/Rect"] = PdfStream.string(

@@ -61,8 +61,8 @@ class PdfBorder extends PdfObject {
 
   /// @param os OutputStream to send the object to
   @override
-  void writeContent(PdfStream os) {
-    super.writeContent(os);
+  void _writeContent(PdfStream os) {
+    super._writeContent(os);
 
     var data = List<PdfStream>();
     data.add(PdfStream.string("/S"));

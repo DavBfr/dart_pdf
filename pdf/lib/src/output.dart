@@ -49,7 +49,7 @@ class PdfOutput {
     if (ob is PdfInfo) infoID = ob;
 
     offsets.add(PdfXref(ob.objser, os.offset));
-    ob.write(os);
+    ob._write(os);
   }
 
   /// This closes the Stream, writing the xref table

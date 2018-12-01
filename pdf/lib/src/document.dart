@@ -130,7 +130,7 @@ class PdfDocument {
   /// completion. It is up to the caller to close the stream.
   ///
   /// @param os OutputStream to write the document to
-  void write(PdfStream os) {
+  void _write(PdfStream os) {
     PdfOutput pos = PdfOutput(os);
 
     // Write each object to the [PdfStream]. We call via the output
@@ -145,7 +145,7 @@ class PdfDocument {
 
   List<int> save() {
     PdfStream os = PdfStream();
-    write(os);
+    _write(os);
     return os.output();
   }
 }

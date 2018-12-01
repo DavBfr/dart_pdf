@@ -77,7 +77,7 @@ class PdfImage extends PdfXObject {
   }
 
   @override
-  void prepare() {
+  void _prepare() {
     // write the pixels to the stream
     // print("Processing image ${img.width}x${img.height} pixels");
 
@@ -101,7 +101,7 @@ class PdfImage extends PdfXObject {
 
     buf.putBytes(out);
 
-    super.prepare();
+    super._prepare();
   }
 
   /// Get the name

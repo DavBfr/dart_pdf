@@ -74,8 +74,8 @@ class PdfTtfFont extends PdfFont {
   }
 
   @override
-  void prepare() {
-    super.prepare();
+  void _prepare() {
+    super._prepare();
 
     params["/FirstChar"] = PdfStream.intNum(_charMin);
     params["/LastChar"] = PdfStream.intNum(_charMax);

@@ -38,8 +38,8 @@ class PdfFormXObject extends PdfXObject {
   }
 
   @override
-  void prepare() {
-    super.prepare();
+  void _prepare() {
+    super._prepare();
 
     // Now the resources
     /// This holds any resources for this FormXObject

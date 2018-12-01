@@ -31,8 +31,8 @@ class PdfPageList extends PdfObject {
   PdfPage getPage(int page) => pages[page];
 
   @override
-  void prepare() {
-    super.prepare();
+  void _prepare() {
+    super._prepare();
 
     params["/Kids"] = PdfStream()..putObjectArray(pages);
     params["/Count"] = PdfStream.intNum(pages.length);

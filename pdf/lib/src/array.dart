@@ -24,8 +24,8 @@ class PdfArrayObject extends PdfObject {
   PdfArrayObject(PdfDocument pdfDocument, this.values) : super(pdfDocument);
 
   @override
-  void writeContent(PdfStream os) {
-    super.writeContent(os);
+  void _writeContent(PdfStream os) {
+    super._writeContent(os);
 
     os.putStringArray(values);
   }

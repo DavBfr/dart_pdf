@@ -76,8 +76,8 @@ class PdfPage extends PdfObject {
 
   /// @param os OutputStream to send the object to
   @override
-  void prepare() {
-    super.prepare();
+  void _prepare() {
+    super._prepare();
 
     // the /Parent pages object
     params["/Parent"] = pdfDocument.pdfPageList.ref();

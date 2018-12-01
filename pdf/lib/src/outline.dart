@@ -82,8 +82,8 @@ class PdfOutline extends PdfObject {
 
   /// @param os OutputStream to send the object to
   @override
-  void prepare() {
-    super.prepare();
+  void _prepare() {
+    super._prepare();
 
     // These are for kids only
     if (parent != null) {

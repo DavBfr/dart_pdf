@@ -26,8 +26,8 @@ class PdfFontDescriptor extends PdfObject {
       : super(ttfFont.pdfDocument, "/FontDescriptor");
 
   @override
-  void prepare() {
-    super.prepare();
+  void _prepare() {
+    super._prepare();
 
     params["/FontName"] = PdfStream.string(ttfFont.baseFont);
     params["/FontFile2"] = file.ref();

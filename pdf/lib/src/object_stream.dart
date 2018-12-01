@@ -38,8 +38,8 @@ class PdfObjectStream extends PdfObject {
   List<int> _data;
 
   @override
-  void prepare() {
-    super.prepare();
+  void _prepare() {
+    super._prepare();
 
     if (pdfDocument.deflate != null) {
       _data = pdfDocument.deflate(buf.output());
@@ -57,8 +57,8 @@ class PdfObjectStream extends PdfObject {
   }
 
   @override
-  void writeContent(PdfStream os) {
-    super.writeContent(os);
+  void _writeContent(PdfStream os) {
+    super._writeContent(os);
 
     os.putString("stream\n");
     os.putBytes(_data);
