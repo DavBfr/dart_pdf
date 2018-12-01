@@ -16,8 +16,9 @@
 
  DART_SRC=$(shell find . -name '*.dart')
  CLNG_SRC=$(shell find printing/ios -name '*.java' -o -name '*.m' -o -name '*.h') $(shell find printing/android -name '*.java' -o -name '*.m' -o -name '*.h')
+ FONTS=pdf/open-sans.ttf pdf/roboto.ttf
 
-all: pdf/open-sans.ttf pdf/roboto.ttf format
+all: $(FONTS) format
 
 pdf/open-sans.ttf:
 	curl -L "https://github.com/google/fonts/raw/master/apache/opensans/OpenSans-Regular.ttf" > $@
@@ -33,7 +34,10 @@ format-dart: $(DART_SRC)
 format-clang: $(CLNG_SRC)
 	clang-format -style=Chromium -i $^
 
-test: pdf/open-sans.ttf
+pdf/.dart_tool:
+	cd pdf ; pub get
+
+test: pdf/.dart_tool $(FONTS)
 	cd pdf; for EXAMPLE in $(shell cd pdf; find example -name '*.dart'); do dart $$EXAMPLE; done
 	cd pdf; for TEST in $(shell cd pdf; find test -name '*.dart'); do dart $$TEST; done
 	# cd printing; flutter test
@@ -41,7 +45,7 @@ test: pdf/open-sans.ttf
 clean:
 	git clean -fdx
 
-publish-pdf: format clean pdf/open-sans.ttf
+publish-pdf: format clean
 	cd pdf; pub publish -f
 
 publish-printing: format clean
