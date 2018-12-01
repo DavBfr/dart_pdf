@@ -20,7 +20,7 @@ part of pdf;
 
 class PdfObject {
   /// This is the object parameters.
-  final params = new Map<String, PdfStream>();
+  final params = Map<String, PdfStream>();
 
   /// This is the unique serial number for this object.
   final int objser;

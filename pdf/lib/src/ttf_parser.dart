@@ -29,12 +29,12 @@ class TtfParser {
   static const _GLYF = "glyf";
 
   final ByteData bytes;
-  final _tableOffsets = new Map<String, int>();
+  final _tableOffsets = Map<String, int>();
   String _fontName;
-  final advanceWidth = new List<double>();
-  final charToGlyphIndexMap = new Map<int, int>();
-  final glyphOffsets = new List<int>();
-  final glyphInfoMap = new Map<int, PdfRect>();
+  final advanceWidth = List<double>();
+  final charToGlyphIndexMap = Map<int, int>();
+  final glyphOffsets = List<int>();
+  final glyphInfoMap = Map<int, PdfRect>();
 
   TtfParser(this.bytes) {
     final numTables = bytes.getUint16(4);
@@ -138,20 +138,20 @@ class TtfParser {
 
   void _parseCMapFormat4(int basePosition, int length) {
     final segCount = bytes.getUint16(basePosition + 2) ~/ 2;
-    final endCodes = new List<int>();
+    final endCodes = List<int>();
     for (var i = 0; i < segCount; i++) {
       endCodes.add(bytes.getUint16(basePosition + i * 2 + 10));
     }
-    final startCodes = new List<int>();
+    final startCodes = List<int>();
     for (var i = 0; i < segCount; i++) {
       startCodes.add(bytes.getUint16(basePosition + (segCount + i) * 2 + 12));
     }
-    final idDeltas = new List<int>();
+    final idDeltas = List<int>();
     for (var i = 0; i < segCount; i++) {
       idDeltas.add(bytes.getUint16(basePosition + (segCount * 2 + i) * 2 + 12));
     }
     final idRangeOffsetBasePos = basePosition + segCount * 6 + 12;
-    final idRangeOffsets = new List<int>();
+    final idRangeOffsets = List<int>();
     for (var i = 0; i < segCount; i++) {
       idRangeOffsets.add(bytes.getUint16(idRangeOffsetBasePos + i * 2));
     }
@@ -210,7 +210,7 @@ class TtfParser {
       final yMin = bytes.getInt16(baseOffset + offset + 4); // 4
       final xMax = bytes.getInt16(baseOffset + offset + 6); // 6
       final yMax = bytes.getInt16(baseOffset + offset + 8); // 8
-      glyphInfoMap[glyphIndex] = new PdfRect(
+      glyphInfoMap[glyphIndex] = PdfRect(
           xMin.toDouble() / unitsPerEm,
           yMin.toDouble() / unitsPerEm,
           xMax.toDouble() / unitsPerEm,

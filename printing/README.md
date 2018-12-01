@@ -28,7 +28,7 @@ To use a TrueType font from a flutter bundle:
 
 ```dart
 var font = await rootBundle.load("assets/open-sans.ttf");
-PdfTtfFont ttf = new PdfTtfFont(pdf, font);
-g.setColor(new PdfColor(0.3, 0.3, 0.3));
+PdfTtfFont ttf = PdfTtfFont(pdf, font);
+g.setColor(PdfColor(0.3, 0.3, 0.3));
 g.drawString(ttf, 20.0, "Dart is awesome", 50.0, 30.0);
 ```

@@ -22,18 +22,18 @@ class PdfTtfFont extends PdfFont {
   PdfObject unicodeCMap;
   PdfFontDescriptor descriptor;
   PdfArrayObject widthsObject;
-  final widths = new List<String>();
+  final widths = List<String>();
   final TtfParser font;
   int _charMin;
   int _charMax;
 
   /// Constructs a [PdfTtfFont]
   PdfTtfFont(PdfDocument pdfDocument, ByteData bytes)
-      : font = new TtfParser(bytes),
+      : font = TtfParser(bytes),
         super(pdfDocument, subtype: "/TrueType") {
     baseFont = "/" + font.fontName.replaceAll(" ", "");
 
-    PdfObjectStream file = new PdfObjectStream(pdfDocument, isBinary: true);
+    PdfObjectStream file = PdfObjectStream(pdfDocument, isBinary: true);
     final data = bytes.buffer.asUint8List();
     file.buf.putBytes(data);
     file.params["/Length1"] = PdfStream.intNum(data.length);
@@ -45,9 +45,9 @@ class PdfTtfFont extends PdfFont {
       widths.add((glyphAdvance(i) * 1000.0).toString());
     }
 
-    unicodeCMap = new PdfObject(pdfDocument);
-    descriptor = new PdfFontDescriptor(this, file);
-    widthsObject = new PdfArrayObject(pdfDocument, widths);
+    unicodeCMap = PdfObject(pdfDocument);
+    descriptor = PdfFontDescriptor(this, file);
+    widthsObject = PdfArrayObject(pdfDocument, widths);
   }
 
   @override

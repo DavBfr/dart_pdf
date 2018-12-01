@@ -50,11 +50,11 @@ class PDFAnnot extends PdfAnnot {
 
   factory PDFAnnot.annotation(
           PdfPage pdfPage, String s, double l, double b, double r, double t) =>
-      new PDFAnnot(pdfPage, type: "/Annot", s: s, l: l, b: b, r: r, t: t);
+      PDFAnnot(pdfPage, type: "/Annot", s: s, l: l, b: b, r: r, t: t);
 
   factory PDFAnnot.text(
           PdfPage pdfPage, double l, double b, double r, double t, String s) =>
-      new PDFAnnot(pdfPage, type: "/Text", l: l, b: b, r: r, t: t, s: s);
+      PDFAnnot(pdfPage, type: "/Text", l: l, b: b, r: r, t: t, s: s);
 
   factory PDFAnnot.link(PdfPage pdfPage, double l, double b, double r, double t,
           PdfObject dest,
@@ -62,7 +62,7 @@ class PDFAnnot extends PdfAnnot {
           double fb = FULL_PAGE,
           double fr = FULL_PAGE,
           double ft = FULL_PAGE]) =>
-      new PDFAnnot(pdfPage,
+      PDFAnnot(pdfPage,
           type: "/Link",
           l: l,
           b: b,
@@ -249,7 +249,7 @@ class PDFPage extends PdfPage {
   /// @return a Dimension object containing the width and height of the page.
   /// use pageFormat.dimension
   @deprecated
-  PdfPoint getDimension() => new PdfPoint(pageFormat.width, pageFormat.height);
+  PdfPoint getDimension() => PdfPoint(pageFormat.width, pageFormat.height);
 
   /// This method adds a text note to the document.
   /// @param note Text of the note
@@ -262,8 +262,8 @@ class PDFPage extends PdfPage {
   PdfAnnot addNote(String note, double x, y, w, h) {
     var xy1 = cxy(x, y + h);
     var xy2 = cxy(x + w, y);
-    PdfAnnot ob = new PdfAnnot.text(
-        this, PdfRect.fromLTRB(xy1.x, xy1.y, xy2.x, xy2.y), note);
+    PdfAnnot ob =
+        PdfAnnot.text(this, PdfRect.fromLTRB(xy1.x, xy1.y, xy2.x, xy2.y), note);
     return ob;
   }
 
@@ -289,7 +289,7 @@ class PDFPage extends PdfPage {
     var xy2 = cxy(x + w, y);
     var xy3 = cxy(vx, vy + vh);
     var xy4 = cxy(vx + vw, vy);
-    PdfAnnot ob = new PdfAnnot.link(
+    PdfAnnot ob = PdfAnnot.link(
         this,
         PdfRect.fromLTRB(xy1.x, xy1.y, xy2.x, xy2.y),
         dest,
@@ -310,7 +310,7 @@ class PDFPage extends PdfPage {
       {double x, double y, double w, double h}) {
     PdfPoint xy1 = cxy(x, y + h);
     PdfPoint xy2 = cxy(x + w, y);
-    PdfOutline outline = new PdfOutline(pdfDocument,
+    PdfOutline outline = PdfOutline(pdfDocument,
         title: title,
         dest: this,
         rect: PdfRect.fromLTRB(xy1.x, xy2.y, xy2.x, xy1.y));
@@ -340,7 +340,7 @@ class PDFPage extends PdfPage {
   /// @param y Coordinate in User space
   /// @return array containing the x & y Coordinate in User space
   @deprecated
-  PdfPoint cxy(double x, double y) => new PdfPoint(x, pageFormat.height - y);
+  PdfPoint cxy(double x, double y) => PdfPoint(x, pageFormat.height - y);
 }
 
 @deprecated

@@ -33,10 +33,10 @@ class PdfPage extends PdfObject {
   List<PdfAnnot> annotations = [];
 
   /// The fonts associated with this page
-  final fonts = new Map<String, PdfFont>();
+  final fonts = Map<String, PdfFont>();
 
   /// The xobjects or other images in the pdf
-  final xObjects = new Map<String, PdfXObject>();
+  final xObjects = Map<String, PdfXObject>();
 
   /// This constructs a Page object, which will hold any contents for this
   /// page.
@@ -58,8 +58,8 @@ class PdfPage extends PdfObject {
   ///
   /// @return a new [PdfGraphics] object to be used to draw this page.
   PdfGraphics getGraphics() {
-    var stream = new PdfObjectStream(pdfDocument);
-    var g = new PdfGraphics(this, stream.buf);
+    var stream = PdfObjectStream(pdfDocument);
+    var g = PdfGraphics(this, stream.buf);
     contents.add(stream);
     return g;
   }
@@ -83,7 +83,7 @@ class PdfPage extends PdfObject {
     params["/Parent"] = pdfDocument.pdfPageList.ref();
 
     // the /MediaBox for the page size
-    params["/MediaBox"] = new PdfStream()
+    params["/MediaBox"] = PdfStream()
       ..putStringArray([0, 0, pageFormat.width, pageFormat.height]);
 
     // Rotation (if not zero)
@@ -98,22 +98,22 @@ class PdfPage extends PdfObject {
       if (contents.length == 1) {
         params["/Contents"] = contents[0].ref();
       } else {
-        params["/Contents"] = new PdfStream()..putObjectArray(contents);
+        params["/Contents"] = PdfStream()..putObjectArray(contents);
       }
     }
 
     // Now the resources
     /// This holds any resources for this page
-    final resources = new Map<String, PdfStream>();
+    final resources = Map<String, PdfStream>();
 
     // fonts
     if (fonts.length > 0) {
-      resources["/Font"] = new PdfStream()..putObjectDictionary(fonts);
+      resources["/Font"] = PdfStream()..putObjectDictionary(fonts);
     }
 
     // Now the XObjects
     if (xObjects.length > 0) {
-      resources["/XObject"] = new PdfStream()..putObjectDictionary(xObjects);
+      resources["/XObject"] = PdfStream()..putObjectDictionary(xObjects);
     }
 
     params["/Resources"] = PdfStream.dictionary(resources);
@@ -125,7 +125,7 @@ class PdfPage extends PdfObject {
 
     // The /Annots object
     if (annotations.length > 0) {
-      params["/Annots"] = new PdfStream()..putObjectArray(annotations);
+      params["/Annots"] = PdfStream()..putObjectArray(annotations);
     }
   }
 }

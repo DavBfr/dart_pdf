@@ -20,10 +20,10 @@ part of pdf;
 
 class PdfFormXObject extends PdfXObject {
   /// The fonts associated with this page
-  final fonts = new Map<String, PdfFont>();
+  final fonts = Map<String, PdfFont>();
 
   /// The xobjects or other images in the pdf
-  final xobjects = new Map<String, PdfXObject>();
+  final xobjects = Map<String, PdfXObject>();
 
   PdfFormXObject(PdfDocument pdfDocument) : super(pdfDocument, '/Form') {
     params["/FormType"] = PdfStream.string("1");
@@ -43,16 +43,16 @@ class PdfFormXObject extends PdfXObject {
 
     // Now the resources
     /// This holds any resources for this FormXObject
-    final resources = new Map<String, PdfStream>();
+    final resources = Map<String, PdfStream>();
 
     // fonts
     if (fonts.length > 0) {
-      resources["/Font"] = new PdfStream()..putObjectDictionary(fonts);
+      resources["/Font"] = PdfStream()..putObjectDictionary(fonts);
     }
 
     // Now the XObjects
     if (xobjects.length > 0) {
-      resources["/XObject"] = new PdfStream()..putObjectDictionary(xobjects);
+      resources["/XObject"] = PdfStream()..putObjectDictionary(xobjects);
     }
 
     if (resources.length > 0) {

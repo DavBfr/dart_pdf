@@ -60,7 +60,7 @@ class PdfImage extends PdfXObject {
     params['/Name'] = PdfStream.string(_name);
 
     if (alphaChannel == false && alpha) {
-      var _sMask = new PdfImage(pdfDocument,
+      var _sMask = PdfImage(pdfDocument,
           image: image,
           width: width,
           height: height,
@@ -85,7 +85,7 @@ class PdfImage extends PdfXObject {
     int h = height;
     int s = w * h;
 
-    Uint8List out = new Uint8List(alphaChannel ? s : s * 3);
+    Uint8List out = Uint8List(alphaChannel ? s : s * 3);
 
     if (alphaChannel) {
       for (int i = 0; i < s; i++) {

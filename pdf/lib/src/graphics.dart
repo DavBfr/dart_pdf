@@ -32,7 +32,7 @@ class PdfGraphics {
 
   PdfFont get defaultFont {
     if (page.pdfDocument.fonts.length == 0) {
-      new PdfFont(page.pdfDocument);
+      PdfFont(page.pdfDocument);
     }
 
     return page.pdfDocument.fonts.elementAt(0);
@@ -200,9 +200,9 @@ class PdfGraphics {
   }
 
   void drawShape(String d) {
-    var sb = new StringBuffer();
+    var sb = StringBuffer();
 
-    RegExp exp = new RegExp(r"([MmZzLlHhVvCcSsQqTtAa])|(-[\.0-9]+)|([\.0-9]+)");
+    RegExp exp = RegExp(r"([MmZzLlHhVvCcSsQqTtAa])|(-[\.0-9]+)|([\.0-9]+)");
     var matches = exp.allMatches(d);
     var action;
     for (var m in matches) {

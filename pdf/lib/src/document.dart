@@ -49,7 +49,7 @@ class PdfDocument {
   int _objser;
 
   /// This vector contains each indirect object within the document.
-  final Set<PdfObject> objects = new Set<PdfObject>();
+  final Set<PdfObject> objects = Set<PdfObject>();
 
   /// This is the Catalog object, which is required by each Pdf Document
   PdfCatalog catalog;
@@ -82,7 +82,7 @@ class PdfDocument {
   ];
 
   /// This holds the current fonts
-  final Set<PdfFont> fonts = new Set<PdfFont>();
+  final Set<PdfFont> fonts = Set<PdfFont>();
 
   /// Creates a new serial number
   int _genSerial() => _objser++;
@@ -94,9 +94,9 @@ class PdfDocument {
     _objser = 1;
 
     // Now create some standard objects
-    pdfPageList = new PdfPageList(this);
-    catalog = new PdfCatalog(this, pdfPageList, pageMode);
-    info = new PdfInfo(this);
+    pdfPageList = PdfPageList(this);
+    catalog = PdfCatalog(this, pdfPageList, pageMode);
+    info = PdfInfo(this);
   }
 
   /// This returns a specific page. It's used mainly when using a
@@ -113,7 +113,7 @@ class PdfDocument {
   /// @return the root outline
   PdfOutline get outline {
     if (_outline == null) {
-      _outline = new PdfOutline(this);
+      _outline = PdfOutline(this);
       catalog.outlines = _outline;
     }
     return _outline;
@@ -131,7 +131,7 @@ class PdfDocument {
   ///
   /// @param os OutputStream to write the document to
   void write(PdfStream os) {
-    PdfOutput pos = new PdfOutput(os);
+    PdfOutput pos = PdfOutput(os);
 
     // Write each object to the [PdfStream]. We call via the output
     // as that builds the xref table
@@ -144,7 +144,7 @@ class PdfDocument {
   }
 
   List<int> save() {
-    PdfStream os = new PdfStream();
+    PdfStream os = PdfStream();
     write(os);
     return os.output();
   }

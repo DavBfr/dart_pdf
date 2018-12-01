@@ -64,7 +64,7 @@ class PdfBorder extends PdfObject {
   void writeContent(PdfStream os) {
     super.writeContent(os);
 
-    var data = new List<PdfStream>();
+    var data = List<PdfStream>();
     data.add(PdfStream.string("/S"));
     data.add(PdfStream.string(
         "/" + "SDBIU".substring(style.index, style.index + 1)));

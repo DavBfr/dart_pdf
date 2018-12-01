@@ -6,32 +6,32 @@ import 'package:flutter/rendering.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
-void main() => runApp(new MaterialApp(home: new MyApp()));
+void main() => runApp(MaterialApp(home: MyApp()));
 
 class MyApp extends StatefulWidget {
   @override
   MyAppState createState() {
-    return new MyAppState();
+    return MyAppState();
   }
 }
 
 class MyAppState extends State<MyApp> {
-  final shareWidget = new GlobalKey();
-  final previewContainer = new GlobalKey();
+  final shareWidget = GlobalKey();
+  final previewContainer = GlobalKey();
 
   PdfDocument _generateDocument() {
-    final pdf = new PdfDocument(deflate: zlib.encode);
-    final page = new PdfPage(pdf, pageFormat: PdfPageFormat.a4);
+    final pdf = PdfDocument(deflate: zlib.encode);
+    final page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
     final g = page.getGraphics();
-    final font = new PdfFont(pdf);
+    final font = PdfFont(pdf);
     final top = page.pageFormat.height;
 
-    g.setColor(new PdfColor(0.0, 1.0, 1.0));
+    g.setColor(PdfColor(0.0, 1.0, 1.0));
     g.drawRect(50.0 * PdfPageFormat.mm, top - 80.0 * PdfPageFormat.mm,
         100.0 * PdfPageFormat.mm, 50.0 * PdfPageFormat.mm);
     g.fillPath();
 
-    g.setColor(new PdfColor(0.3, 0.3, 0.3));
+    g.setColor(PdfColor(0.3, 0.3, 0.3));
     g.drawString(font, 12.0, "Hello World!", 10.0 * PdfPageFormat.mm,
         top - 10.0 * PdfPageFormat.mm);
 
@@ -55,15 +55,15 @@ class MyAppState extends State<MyApp> {
         referenceBox.localToGlobal(referenceBox.paintBounds.topLeft);
     final bottomRight =
         referenceBox.localToGlobal(referenceBox.paintBounds.bottomRight);
-    final bounds = new Rect.fromPoints(topLeft, bottomRight);
+    final bounds = Rect.fromPoints(topLeft, bottomRight);
 
     Printing.sharePdf(document: pdf, bounds: bounds);
   }
 
   Future<void> _printScreen() async {
     const margin = 10.0 * PdfPageFormat.mm;
-    final pdf = new PdfDocument(deflate: zlib.encode);
-    final page = new PdfPage(pdf, pageFormat: PdfPageFormat.a4);
+    final pdf = PdfDocument(deflate: zlib.encode);
+    final page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
     final g = page.getGraphics();
 
     RenderRepaintBoundary boundary =
@@ -94,25 +94,24 @@ class MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return new RepaintBoundary(
+    return RepaintBoundary(
         key: previewContainer,
-        child: new Scaffold(
-          appBar: new AppBar(
+        child: Scaffold(
+          appBar: AppBar(
             title: const Text('Pdf Printing Example'),
           ),
-          body: new Center(
-            child: new Column(
+          body: Center(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                new RaisedButton(
-                    child: new Text('Print Document'), onPressed: _printPdf),
-                new RaisedButton(
+                RaisedButton(
+                    child: Text('Print Document'), onPressed: _printPdf),
+                RaisedButton(
                     key: shareWidget,
-                    child: new Text('Share Document'),
+                    child: Text('Share Document'),
                     onPressed: _sharePdf),
-                new RaisedButton(
-                    child: new Text('Print Screenshot'),
-                    onPressed: _printScreen),
+                RaisedButton(
+                    child: Text('Print Screenshot'), onPressed: _printScreen),
               ],
             ),
           ),

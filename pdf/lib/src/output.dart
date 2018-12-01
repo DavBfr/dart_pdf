@@ -48,7 +48,7 @@ class PdfOutput {
     if (ob is PdfCatalog) rootID = ob;
     if (ob is PdfInfo) infoID = ob;
 
-    offsets.add(new PdfXref(ob.objser, os.offset));
+    offsets.add(PdfXref(ob.objser, os.offset));
     ob.write(os);
   }
 
@@ -72,7 +72,7 @@ class PdfOutput {
     var block = []; // xrefs in this block
 
     // We need block 0 to exist
-    block.add(new PdfXref(0, 0, generation: 65535));
+    block.add(PdfXref(0, 0, generation: 65535));
 
     for (PdfXref x in offsets) {
       if (firstid == -1) firstid = x.id;
@@ -107,7 +107,7 @@ class PdfOutput {
       os.putStream(rootID.ref());
       os.putString("\n");
     } else
-      throw new Exception("Root object is not present in document");
+      throw Exception("Root object is not present in document");
 
     // the /Info reference (OPTIONAL)
     if (infoID != null) {

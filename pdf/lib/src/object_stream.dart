@@ -20,7 +20,7 @@ part of pdf;
 
 class PdfObjectStream extends PdfObject {
   /// This holds the stream's content.
-  final PdfStream buf = new PdfStream();
+  final PdfStream buf = PdfStream();
 
   /// defines if the stream needs to be converted to ascii85
   final bool isBinary;
@@ -46,7 +46,7 @@ class PdfObjectStream extends PdfObject {
       params["/Filter"] = PdfStream.string("/FlateDecode");
     } else if (isBinary) {
       // This is a Ascii85 stream
-      var e = new Ascii85Encoder();
+      var e = Ascii85Encoder();
       _data = e.convert(buf.output());
       params["/Filter"] = PdfStream.string("/ASCII85Decode");
     } else {

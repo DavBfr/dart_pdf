@@ -14,27 +14,27 @@ The coordinate system is using the internal Pdf system:
 
 Example:
 ```dart
-final pdf = new PdfDocument();
-final page = new PdfPage(pdf, pageFormat: PdfPageFormat.letter);
+final pdf = PdfDocument();
+final page = PdfPage(pdf, pageFormat: PdfPageFormat.letter);
 final g = page.getGraphics();
-final font = new PdfFont(pdf);
+final font = PdfFont(pdf);
 
-g.setColor(new PdfColor(0.0, 1.0, 1.0));
+g.setColor(PdfColor(0.0, 1.0, 1.0));
 g.drawRect(50.0, 30.0, 100.0, 50.0);
 g.fillPath();
 
-g.setColor(new PdfColor(0.3, 0.3, 0.3));
+g.setColor(PdfColor(0.3, 0.3, 0.3));
 g.drawString(font, 12.0, "Hello World!", 5.0 * PdfPageFormat.mm, 300.0);
 
-var file = new File('file.pdf');
+var file = File('file.pdf');
 file.writeAsBytesSync(pdf.save());
 ```
 
 To load an image it is possible to use the dart library [image](https://pub.dartlang.org/packages/image):
 
 ```dart
-Image image = decodeImage(new Io.File('test.webp').readAsBytesSync());
-PdfImage image = new PdfImage(
+Image image = decodeImage(Io.File('test.webp').readAsBytesSync());
+PdfImage image = PdfImage(
   pdf,
 	image: img.data.buffer.asUint8List(),
 	width: img.width,
@@ -45,9 +45,9 @@ g.drawImage(image, 100.0, 100.0, 80.0);
 To use a TrueType font:
 
 ```dart
-PdfTtfFont ttf = new PdfTtfFont(
+PdfTtfFont ttf = PdfTtfFont(
   pdf,
-  (new File("open-sans.ttf").readAsBytesSync() as Uint8List).buffer.asByteData());
-g.setColor(new PdfColor(0.3, 0.3, 0.3));
+  (File("open-sans.ttf").readAsBytesSync() as Uint8List).buffer.asByteData());
+g.setColor(PdfColor(0.3, 0.3, 0.3));
 g.drawString(ttf, 20.0, "Dart is awesome", 50.0, 30.0);
 ```

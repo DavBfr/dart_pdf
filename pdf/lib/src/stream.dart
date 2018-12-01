@@ -35,7 +35,7 @@ class PdfStream {
     }
   }
 
-  static PdfStream string(String s) => new PdfStream()..putString(s);
+  static PdfStream string(String s) => PdfStream()..putString(s);
 
   void putStringUtf16(String s) {
     for (int codeUnit in s.codeUnits) {
@@ -52,8 +52,8 @@ class PdfStream {
     putString(d.toString());
   }
 
-  static PdfStream num(double d) => new PdfStream()..putNum(d);
-  static PdfStream intNum(int i) => new PdfStream()..putString(i.toString());
+  static PdfStream num(double d) => PdfStream()..putNum(d);
+  static PdfStream intNum(int i) => PdfStream()..putString(i.toString());
 
   void putText(String s) {
     // Escape special characters
@@ -79,7 +79,7 @@ class PdfStream {
     putBytes(latin1.encode('(' + s + ')'));
   }
 
-  static PdfStream text(String s) => new PdfStream()..putText(s);
+  static PdfStream text(String s) => PdfStream()..putText(s);
 
   void putBool(bool value) {
     putString(value ? "true" : "false");
@@ -108,7 +108,7 @@ class PdfStream {
   }
 
   static PdfStream array(List<PdfStream> values) =>
-      new PdfStream()..putArray(values);
+      PdfStream()..putArray(values);
 
   void putDictionary(Map<String, PdfStream> values) {
     putString("<< ");
@@ -121,7 +121,7 @@ class PdfStream {
   }
 
   static PdfStream dictionary(Map<String, PdfStream> values) =>
-      new PdfStream()..putDictionary(values);
+      PdfStream()..putDictionary(values);
 
   void putObjectDictionary(Map<String, PdfObject> values) {
     putString("<< ");

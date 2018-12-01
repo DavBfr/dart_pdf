@@ -32,7 +32,7 @@ class PdfFontDescriptor extends PdfObject {
     params["/FontName"] = PdfStream.string(ttfFont.baseFont);
     params["/FontFile2"] = file.ref();
     params["/Flags"] = PdfStream.intNum(32);
-    params["/FontBBox"] = new PdfStream()
+    params["/FontBBox"] = PdfStream()
       ..putStringArray([
         ttfFont.font.xMin,
         ttfFont.font.yMin,

@@ -74,7 +74,7 @@ class PdfOutline extends PdfObject {
   /// @return [PdfOutline] object created, for creating sub-outlines
   PdfOutline add({String title, PdfPage dest, PdfRect rect}) {
     PdfOutline outline =
-        new PdfOutline(pdfDocument, title: title, dest: dest, rect: rect);
+        PdfOutline(pdfDocument, title: title, dest: dest, rect: rect);
     // Tell the outline of ourselves
     outline.parent = this;
     return outline;
@@ -88,7 +88,7 @@ class PdfOutline extends PdfObject {
     // These are for kids only
     if (parent != null) {
       params["/Title"] = PdfStream.string(title);
-      var dests = new List<PdfStream>();
+      var dests = List<PdfStream>();
       dests.add(dest.ref());
 
       if (destMode == PdfOutlineMode.fitpage) {

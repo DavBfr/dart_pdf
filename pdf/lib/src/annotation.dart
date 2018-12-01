@@ -53,13 +53,13 @@ class PdfAnnot extends PdfObject {
   /// @param s Subtype for this annotation
   /// @param rect coordinates
   factory PdfAnnot.annotation(PdfPage pdfPage, String s, PdfRect rect) =>
-      new PdfAnnot(pdfPage, type: "/Annot", s: s, srcRect: rect);
+      PdfAnnot(pdfPage, type: "/Annot", s: s, srcRect: rect);
 
   /// Creates a text annotation
   /// @param rect coordinates
   /// @param s Text for this annotation
   factory PdfAnnot.text(PdfPage pdfPage, PdfRect rect, String s) =>
-      new PdfAnnot(pdfPage, type: "/Text", srcRect: rect, s: s);
+      PdfAnnot(pdfPage, type: "/Text", srcRect: rect, s: s);
 
   /// Creates a link annotation
   /// @param srcRect coordinates
@@ -68,7 +68,7 @@ class PdfAnnot extends PdfObject {
   /// (must be in User Coordinates)
   factory PdfAnnot.link(PdfPage pdfPage, PdfRect srcRect, PdfObject dest,
           [PdfRect destRect]) =>
-      new PdfAnnot(pdfPage,
+      PdfAnnot(pdfPage,
           type: "/Link", srcRect: srcRect, dest: dest, destRect: destRect);
 
   /// Sets the border for the annotation. By default, no border is defined.
@@ -86,7 +86,7 @@ class PdfAnnot extends PdfObject {
   /// is null, then the default of {3} is used.
   void setBorder(double width,
       {PdfBorderStyle style = PdfBorderStyle.solid, List<double> dash}) {
-    border = new PdfBorder(pdfDocument, width, style: style, dash: dash);
+    border = PdfBorder(pdfDocument, width, style: style, dash: dash);
   }
 
   /// Output the annotation
@@ -111,7 +111,7 @@ class PdfAnnot extends PdfObject {
     if (subtype == "/Text") {
       params["/Contents"] = PdfStream.string(s);
     } else if (subtype == "/Link") {
-      var dests = new List<PdfStream>();
+      var dests = List<PdfStream>();
       dests.add(dest.ref());
       if (destRect == null)
         dests.add(PdfStream.string("/Fit"));

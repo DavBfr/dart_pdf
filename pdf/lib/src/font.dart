@@ -79,7 +79,7 @@ class PdfFont extends PdfObject {
       w += n == chars.length - 1 ? r.w : glyphAdvance(c);
     }
 
-    return new PdfRect(x, y, w, h);
+    return PdfRect(x, y, w, h);
   }
 
   PdfPoint stringSize(String s) {
@@ -94,6 +94,6 @@ class PdfFont extends PdfObject {
       w += glyphAdvance(c);
     }
 
-    return new PdfPoint(w, h);
+    return PdfPoint(w, h);
   }
 }

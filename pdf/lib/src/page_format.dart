@@ -35,7 +35,7 @@ class PdfPageFormat {
 
   const PdfPageFormat(this.width, this.height);
 
-  PdfPoint get dimension => new PdfPoint(width, height);
+  PdfPoint get dimension => PdfPoint(width, height);
 
   PdfPageFormat get landscape =>
       width >= height ? this : PdfPageFormat(height, width);

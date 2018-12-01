@@ -34,7 +34,7 @@ class Printing {
     if (document != null) bytes = document.save();
 
     final Map<String, dynamic> params = <String, dynamic>{
-      'doc': new Uint8List.fromList(bytes),
+      'doc': Uint8List.fromList(bytes),
     };
 
     await _channel.invokeMethod('printPdf', params);
@@ -48,11 +48,11 @@ class Printing {
     if (document != null) bytes = document.save();
 
     if (bounds == null) {
-      bounds = new Rect.fromCircle(center: Offset.zero, radius: 10.0);
+      bounds = Rect.fromCircle(center: Offset.zero, radius: 10.0);
     }
 
     final Map<String, dynamic> params = <String, dynamic>{
-      'doc': new Uint8List.fromList(bytes),
+      'doc': Uint8List.fromList(bytes),
       'x': bounds.left,
       'y': bounds.top,
       'w': bounds.width,
