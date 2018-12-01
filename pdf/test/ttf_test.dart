@@ -22,7 +22,6 @@ void main() {
             .asByteData());
     var s = "Hello World!";
     var r = ttf.stringBounds(s);
-    print(r);
     const FS = 20.0;
     g.setColor(new PDFColor(0.0, 1.0, 1.0));
     g.drawRect(50.0 + r.x * FS, 30.0 + r.y * FS, r.w * FS, r.h * FS);
@@ -37,7 +36,6 @@ void main() {
             .asByteData());
 
     r = roboto.stringBounds(s);
-    print(r);
     g.setColor(new PDFColor(0.0, 1.0, 1.0));
     g.drawRect(50.0 + r.x * FS, 130.0 + r.y * FS, r.w * FS, r.h * FS);
     g.fillPath();

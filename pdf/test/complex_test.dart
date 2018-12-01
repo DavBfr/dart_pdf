@@ -9,7 +9,6 @@ import 'package:vector_math/vector_math_64.dart';
 void main() {
   test('Pdf', () {
     var img = new Uint32List(10 * 10);
-    print(img.length);
     img.fillRange(0, img.length - 1, 0x12345678);
 
     var pdf = new PDFDocument(deflate: zlib.encode);
