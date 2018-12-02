@@ -126,9 +126,9 @@ class PDFFontDescriptor extends PdfFontDescriptor {
 
 @deprecated
 class PDFFont extends PdfFont {
-  PDFFont(PdfDocument pdfDocument,
-      {String subtype = "/Type1", String baseFont = "/Helvetica"})
-      : super(pdfDocument, subtype: subtype, baseFont: baseFont);
+  factory PDFFont(PdfDocument pdfDocument, {String subtype, String baseFont}) {
+    return PdfFont.helvetica(pdfDocument);
+  }
 }
 
 @deprecated

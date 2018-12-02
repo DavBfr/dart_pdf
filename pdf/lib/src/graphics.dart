@@ -32,7 +32,7 @@ class PdfGraphics {
 
   PdfFont get defaultFont {
     if (page.pdfDocument.fonts.length == 0) {
-      PdfFont(page.pdfDocument);
+      PdfFont.helvetica(page.pdfDocument);
     }
 
     return page.pdfDocument.fonts.elementAt(0);

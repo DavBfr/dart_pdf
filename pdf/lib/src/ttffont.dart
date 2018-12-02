@@ -30,9 +30,7 @@ class PdfTtfFont extends PdfFont {
   /// Constructs a [PdfTtfFont]
   PdfTtfFont(PdfDocument pdfDocument, ByteData bytes)
       : font = TtfParser(bytes),
-        super(pdfDocument, subtype: "/TrueType") {
-    baseFont = "/" + font.fontName.replaceAll(" ", "");
-
+        super._create(pdfDocument, subtype: "/TrueType") {
     PdfObjectStream file = PdfObjectStream(pdfDocument, isBinary: true);
     final data = bytes.buffer.asUint8List();
     file.buf.putBytes(data);
@@ -49,6 +47,9 @@ class PdfTtfFont extends PdfFont {
     descriptor = PdfFontDescriptor(this, file);
     widthsObject = PdfArrayObject(pdfDocument, widths);
   }
+
+  @override
+  String get fontName => "/" + font.fontName.replaceAll(" ", "");
 
   @override
   double glyphAdvance(int charCode) {
@@ -77,6 +78,7 @@ class PdfTtfFont extends PdfFont {
   void _prepare() {
     super._prepare();
 
+    params["/BaseFont"] = PdfStream.string(fontName);
     params["/FirstChar"] = PdfStream.intNum(_charMin);
     params["/LastChar"] = PdfStream.intNum(_charMax);
     params["/Widths"] = widthsObject.ref();

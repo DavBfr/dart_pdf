@@ -51,5 +51,6 @@ part 'src/rect.dart';
 part 'src/stream.dart';
 part 'src/ttf_parser.dart';
 part 'src/ttffont.dart';
+part 'src/type1_font.dart';
 part 'src/xobject.dart';
 part 'src/xref.dart';

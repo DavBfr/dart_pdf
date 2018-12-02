@@ -6,7 +6,7 @@ void main() {
   final pdf = PdfDocument(deflate: zlib.encode);
   final page = PdfPage(pdf, pageFormat: PdfPageFormat.letter);
   final g = page.getGraphics();
-  final font = PdfFont(pdf);
+  final font = g.defaultFont;
   final top = page.pageFormat.height;
 
   g.setColor(PdfColor(0.0, 1.0, 1.0));
