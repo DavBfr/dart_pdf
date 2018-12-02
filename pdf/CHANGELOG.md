@@ -1,3 +1,10 @@
+# 1.1.0
+* Rename classes to satisfy Dart conventions
+* Remove useless new and const keywords
+* Mark some internal functions as protected
+* Fix annotations
+* Implement default fonts bounding box
+
 # 1.0.8
 * Fix monospace TTF font loading
 * Add PDFPageFormat::toString
