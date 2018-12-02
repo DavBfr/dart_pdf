@@ -40,9 +40,9 @@ class PDFAnnot extends PdfAnnot {
       double fb,
       double fr,
       double ft})
-      : super(pdfPage,
+      : super._create(pdfPage,
             type: type,
-            s: s,
+            content: s,
             srcRect: PdfRect.fromLTRB(l, t, r, b),
             subtype: subtype,
             dest: dest,
@@ -262,8 +262,8 @@ class PDFPage extends PdfPage {
   PdfAnnot addNote(String note, double x, y, w, h) {
     var xy1 = cxy(x, y + h);
     var xy2 = cxy(x + w, y);
-    PdfAnnot ob =
-        PdfAnnot.text(this, PdfRect.fromLTRB(xy1.x, xy1.y, xy2.x, xy2.y), note);
+    PdfAnnot ob = PdfAnnot.text(this,
+        rect: PdfRect.fromLTRB(xy1.x, xy1.y, xy2.x, xy2.y), content: note);
     return ob;
   }
 
@@ -289,11 +289,10 @@ class PDFPage extends PdfPage {
     var xy2 = cxy(x + w, y);
     var xy3 = cxy(vx, vy + vh);
     var xy4 = cxy(vx + vw, vy);
-    PdfAnnot ob = PdfAnnot.link(
-        this,
-        PdfRect.fromLTRB(xy1.x, xy1.y, xy2.x, xy2.y),
-        dest,
-        PdfRect.fromLTRB(xy3.x, xy3.y, xy4.x, xy4.y));
+    PdfAnnot ob = PdfAnnot.link(this,
+        srcRect: PdfRect.fromLTRB(xy1.x, xy1.y, xy2.x, xy2.y),
+        dest: dest,
+        destRect: PdfRect.fromLTRB(xy3.x, xy3.y, xy4.x, xy4.y));
     return ob;
   }
 

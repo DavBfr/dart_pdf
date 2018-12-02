@@ -26,7 +26,7 @@ class PdfAnnot extends PdfObject {
   final PdfRect srcRect;
 
   /// The text of a text annotation
-  final String s;
+  final String content;
 
   /// Link to the Destination page
   final PdfObject dest;
@@ -36,58 +36,46 @@ class PdfAnnot extends PdfObject {
   final PdfRect destRect;
 
   /// the border for this annotation
-  PdfBorder border;
+  final PdfBorder border;
 
-  PdfAnnot(PdfPage pdfPage,
+  PdfAnnot._create(PdfPage pdfPage,
       {String type,
-      this.s,
+      this.content,
       this.srcRect,
-      this.subtype,
+      @required this.subtype,
       this.dest,
-      this.destRect})
-      : super(pdfPage.pdfDocument, type) {
+      this.destRect,
+      this.border})
+      : super(pdfPage.pdfDocument, type ?? '/Annot') {
     pdfPage.annotations.add(this);
   }
-
-  /// This is used to create an annotation.
-  /// @param s Subtype for this annotation
-  /// @param rect coordinates
-  factory PdfAnnot.annotation(PdfPage pdfPage, String s, PdfRect rect) =>
-      PdfAnnot(pdfPage, type: "/Annot", s: s, srcRect: rect);
 
   /// Creates a text annotation
   /// @param rect coordinates
   /// @param s Text for this annotation
-  factory PdfAnnot.text(PdfPage pdfPage, PdfRect rect, String s) =>
-      PdfAnnot(pdfPage, type: "/Text", srcRect: rect, s: s);
+  factory PdfAnnot.text(PdfPage pdfPage,
+          {@required PdfRect rect,
+          @required String content,
+          PdfBorder border}) =>
+      PdfAnnot._create(pdfPage,
+          subtype: "/Text", srcRect: rect, content: content, border: border);
 
   /// Creates a link annotation
   /// @param srcRect coordinates
   /// @param dest Destination for this link. The page will fit the display.
   /// @param destRect Rectangle describing what part of the page to be displayed
   /// (must be in User Coordinates)
-  factory PdfAnnot.link(PdfPage pdfPage, PdfRect srcRect, PdfObject dest,
-          [PdfRect destRect]) =>
-      PdfAnnot(pdfPage,
-          type: "/Link", srcRect: srcRect, dest: dest, destRect: destRect);
-
-  /// Sets the border for the annotation. By default, no border is defined.
-  ///
-  /// If the style is dashed, then this method uses Pdf's default dash
-  /// scheme {3}
-  ///
-  /// Important: the annotation must have been added to the document before
-  /// this is used. If the annotation was created using the methods in
-  /// [PdfPage], then the annotation is already in the document.
-  ///
-  /// @param style Border style solid, dashed, beveled, inset or underlined.
-  /// @param width Width of the border
-  /// @param dash Array of lengths, used for drawing the dashes. If this
-  /// is null, then the default of {3} is used.
-  void setBorder(double width,
-      {PdfBorderStyle style = PdfBorderStyle.solid, List<double> dash}) {
-    border = PdfBorder(pdfDocument, width, style: style, dash: dash);
-  }
+  factory PdfAnnot.link(PdfPage pdfPage,
+          {@required PdfRect srcRect,
+          @required PdfPage dest,
+          PdfRect destRect,
+          PdfBorder border}) =>
+      PdfAnnot._create(pdfPage,
+          subtype: "/Link",
+          srcRect: srcRect,
+          dest: dest,
+          destRect: destRect,
+          border: border);
 
   /// Output the annotation
   ///
@@ -109,7 +97,7 @@ class PdfAnnot extends PdfObject {
 
     // Now the annotation subtypes
     if (subtype == "/Text") {
-      params["/Contents"] = PdfStream.string(s);
+      params["/Contents"] = PdfStream.text(content);
     } else if (subtype == "/Link") {
       var dests = List<PdfStream>();
       dests.add(dest.ref());
