@@ -74,7 +74,7 @@ class PdfDocument {
   final DeflateCallback deflate;
 
   /// These map the page modes just defined to the pagemodes setting of Pdf.
-  static const _PdfPageModes = const [
+  static const _PdfPageModes = [
     "/UseNone",
     "/UseOutlines",
     "/UseThumbs",

@@ -29,7 +29,7 @@ pdf/roboto.ttf:
 format: format-dart format-clang
 
 format-dart: $(DART_SRC)
-	dartfmt -w $^
+	dartfmt -w --fix $^
 
 format-clang: $(CLNG_SRC)
 	clang-format -style=Chromium -i $^

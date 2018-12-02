@@ -19,11 +19,11 @@
 part of pdf;
 
 class PdfPageFormat {
-  static const a4 = const PdfPageFormat(595.28, 841.89);
-  static const a3 = const PdfPageFormat(841.89, 1190.55);
-  static const a5 = const PdfPageFormat(420.94, 595.28);
-  static const letter = const PdfPageFormat(612.0, 792.0);
-  static const legal = const PdfPageFormat(612.0, 1008.0);
+  static const a4 = PdfPageFormat(595.28, 841.89);
+  static const a3 = PdfPageFormat(841.89, 1190.55);
+  static const a5 = PdfPageFormat(420.94, 595.28);
+  static const letter = PdfPageFormat(612.0, 792.0);
+  static const legal = PdfPageFormat(612.0, 1008.0);
 
   static const point = 1.0;
   static const inch = 72.0;

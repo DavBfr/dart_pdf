@@ -25,7 +25,7 @@ import 'package:flutter/widgets.dart';
 import 'package:pdf/pdf.dart';
 
 class Printing {
-  static const MethodChannel _channel = const MethodChannel('printing');
+  static const MethodChannel _channel = MethodChannel('printing');
 
   static Future<Null> printPdf({PdfDocument document, List<int> bytes}) async {
     assert(document != null || bytes != null);
