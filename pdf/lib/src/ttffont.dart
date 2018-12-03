@@ -26,6 +26,7 @@ class PdfTtfFont extends PdfFont {
   final TtfParser font;
   int _charMin;
   int _charMax;
+  bool get unicode => font.unicode;
 
   /// Constructs a [PdfTtfFont]
   PdfTtfFont(PdfDocument pdfDocument, ByteData bytes)
@@ -83,7 +84,7 @@ class PdfTtfFont extends PdfFont {
     params["/LastChar"] = PdfStream.intNum(_charMax);
     params["/Widths"] = widthsObject.ref();
     params["/FontDescriptor"] = descriptor.ref();
-//    params["/Encoding"] = PdfStream.string("/Identity-H");
+    params["/Encoding"] = PdfStream.string("/Identity-H");
 //    params["/ToUnicode"] = unicodeCMap.ref();
   }
 }

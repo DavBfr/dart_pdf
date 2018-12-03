@@ -37,10 +37,13 @@ class PdfInfo extends PdfObject {
   void _prepare() {
     super._prepare();
 
-    if (author != null) params["/Author"] = PdfStream.text(author);
-    if (creator != null) params["/Creator"] = PdfStream.text(creator);
-    if (title != null) params["/Title"] = PdfStream.text(title);
-    if (subject != null) params["/Subject"] = PdfStream.text(subject);
-    if (keywords != null) params["/Keywords"] = PdfStream.text(keywords);
+    if (author != null) params["/Author"] = PdfStream.textUtf16(author, true);
+    if (creator != null)
+      params["/Creator"] = PdfStream.textUtf16(creator, true);
+    if (title != null) params["/Title"] = PdfStream.textUtf16(title, true);
+    if (subject != null)
+      params["/Subject"] = PdfStream.textUtf16(subject, true);
+    if (keywords != null)
+      params["/Keywords"] = PdfStream.textUtf16(keywords, true);
   }
 }

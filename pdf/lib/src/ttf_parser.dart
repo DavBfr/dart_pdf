@@ -72,6 +72,8 @@ class TtfParser {
 
   get numGlyphs => bytes.getInt16(_tableOffsets[_MAXP] + 4);
 
+  bool get unicode => bytes.getUint32(0) == 0x10000;
+
   get fontName => _fontName;
 
   void _parseFontName() {

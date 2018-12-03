@@ -76,13 +76,40 @@ class PdfStream {
         .replaceAll('\f', '\\f')
         .replaceAll('\r', '\\r');
 
+    putBytes(latin1.encode('(' + s + ')'));
+  }
+
+  void putTextUtf16(String s, bool bom) {
+    // Escape special characters
+    //    \n Line feed (LF)
+    //    \r Carriage return (CR)
+    //    \t Horizontal tab (HT)
+    //    \b Backspace (BS)
+    //    \f Form feed (FF)
+    //    \( Left parenthesis
+    //    \) Right parenthesis
+    //    \\ Backslash
+    //    \ddd Character code ddd (octal)
+    s = s
+        .replaceAll('\\', '\\\\')
+        .replaceAll('(', '\\(')
+        .replaceAll(')', '\\)')
+        .replaceAll('\n', '\\n')
+        .replaceAll('\t', '\\t')
+        .replaceAll('\b', '\\b')
+        .replaceAll('\f', '\\f')
+        .replaceAll('\r', '\\r');
+
     putBytes(latin1.encode('('));
-    putBytes([0xfe, 0xff]);
+    if (bom) putBytes([0xfe, 0xff]);
     putBytes(encodeUtf16be(s));
     putBytes(latin1.encode(')'));
   }
 
   static PdfStream text(String s) => PdfStream()..putText(s);
+
+  static PdfStream textUtf16(String s, bool bom) =>
+      PdfStream()..putTextUtf16(s, bom);
 
   void putBool(bool value) {
     putString(value ? "true" : "false");

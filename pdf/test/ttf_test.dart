@@ -50,7 +50,6 @@ void main() {
 
     s = "你好世界";
     r = noto.stringBounds(s);
-    print(r);
     g.setColor(PdfColor(0.0, 1.0, 1.0));
     g.drawRect(50.0 + r.x * FS, 80.0 + r.y * FS, r.w * FS, r.h * FS);
     g.fillPath();
