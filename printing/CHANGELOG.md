@@ -1,6 +1,7 @@
 # 1.1.0
 * Rename classes to satisfy Dart conventions
 * Remove useless new and const keywords
+* Changed appcompat dependency to 26.1.0
 
 # 1.0.6
 * Add screenshot example
