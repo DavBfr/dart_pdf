@@ -166,7 +166,7 @@ class PdfGraphics {
 
     buf.putString("BT $x $y Td ${font.name} $size Tf ");
     if (font.unicode) {
-      buf.putTextUtf16(s, false);
+      buf.putTextUtf16(s);
     } else {
       buf.putText(s);
     }

@@ -55,61 +55,67 @@ class PdfStream {
   static PdfStream num(double d) => PdfStream()..putNum(d);
   static PdfStream intNum(int i) => PdfStream()..putString(i.toString());
 
-  void putText(String s) {
-    // Escape special characters
-    //    \n Line feed (LF)
-    //    \r Carriage return (CR)
-    //    \t Horizontal tab (HT)
-    //    \b Backspace (BS)
-    //    \f Form feed (FF)
-    //    \( Left parenthesis
-    //    \) Right parenthesis
-    //    \\ Backslash
-    //    \ddd Character code ddd (octal)
-    s = s
-        .replaceAll('\\', '\\\\')
-        .replaceAll('(', '\\(')
-        .replaceAll(')', '\\)')
-        .replaceAll('\n', '\\n')
-        .replaceAll('\t', '\\t')
-        .replaceAll('\b', '\\b')
-        .replaceAll('\f', '\\f')
-        .replaceAll('\r', '\\r');
-
-    putBytes(latin1.encode('(' + s + ')'));
+  /// Escape special characters
+  /// \ddd Character code ddd (octal)
+  void putTextBytes(List<int> s) {
+    for (var c in s) {
+      switch (c) {
+        case 0x0a: // \n Line feed (LF)
+          _stream.add(0x5c);
+          _stream.add(0x6e);
+          break;
+        case 0x0d: // \r Carriage return (CR)
+          _stream.add(0x5c);
+          _stream.add(0x72);
+          break;
+        case 0x09: // \t Horizontal tab (HT)
+          _stream.add(0x5c);
+          _stream.add(0x74);
+          break;
+        case 0x08: // \b Backspace (BS)
+          _stream.add(0x5c);
+          _stream.add(0x62);
+          break;
+        case 0x0c: // \f Form feed (FF)
+          _stream.add(0x5c);
+          _stream.add(0x66);
+          break;
+        case 0x28: // \( Left parenthesis
+          _stream.add(0x5c);
+          _stream.add(0x28);
+          break;
+        case 0x29: // \) Right parenthesis
+          _stream.add(0x5c);
+          _stream.add(0x29);
+          break;
+        case 0x5c: // \\ Backslash
+          _stream.add(0x5c);
+          _stream.add(0x5c);
+          break;
+        default:
+          _stream.add(c);
+      }
+    }
   }
 
-  void putTextUtf16(String s, bool bom) {
-    // Escape special characters
-    //    \n Line feed (LF)
-    //    \r Carriage return (CR)
-    //    \t Horizontal tab (HT)
-    //    \b Backspace (BS)
-    //    \f Form feed (FF)
-    //    \( Left parenthesis
-    //    \) Right parenthesis
-    //    \\ Backslash
-    //    \ddd Character code ddd (octal)
-    s = s
-        .replaceAll('\\', '\\\\')
-        .replaceAll('(', '\\(')
-        .replaceAll(')', '\\)')
-        .replaceAll('\n', '\\n')
-        .replaceAll('\t', '\\t')
-        .replaceAll('\b', '\\b')
-        .replaceAll('\f', '\\f')
-        .replaceAll('\r', '\\r');
-
+  void putText(String s) {
     putBytes(latin1.encode('('));
-    if (bom) putBytes([0xfe, 0xff]);
-    putBytes(encodeUtf16be(s));
+    putTextBytes(latin1.encode(s));
     putBytes(latin1.encode(')'));
   }
 
-  static PdfStream text(String s) => PdfStream()..putText(s);
+  void putTextUtf16(String s) {
+    putBytes(latin1.encode('('));
+    putTextBytes(encodeUtf16be(s));
+    putBytes(latin1.encode(')'));
+  }
 
-  static PdfStream textUtf16(String s, bool bom) =>
-      PdfStream()..putTextUtf16(s, bom);
+  void putLitteral(String s) {
+    putBytes(latin1.encode('('));
+    putBytes([0xfe, 0xff]);
+    putTextBytes(encodeUtf16be(s));
+    putBytes(latin1.encode(')'));
+  }
 
   void putBool(bool value) {
     putString(value ? "true" : "false");
