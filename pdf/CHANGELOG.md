@@ -4,6 +4,7 @@
 * Mark some internal functions as protected
 * Fix annotations
 * Implement default fonts bounding box
+* Add Bézier Curve primitive
 
 # 1.0.8
 * Fix monospace TTF font loading
