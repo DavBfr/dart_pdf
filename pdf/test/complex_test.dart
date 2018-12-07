@@ -20,12 +20,19 @@ void main() {
     var page = PdfPage(pdf, pageFormat: const PdfPageFormat(500.0, 300.0));
 
     var g = page.getGraphics();
+
     g.saveContext();
     var tm = Matrix4.identity();
-    tm.translate(100.0, 700.0);
+    tm.translate(50.0, 290.0);
+    tm.rotateZ(pi);
     g.setTransform(tm);
-//  g.drawShape("M37 0H9C6.24 0 4 2.24 4 5v38c0 2.76 2.24 5 5 5h28c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zM23 46c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm15-8H8V6h30v32z");
+    g.setColor(PdfColor(0.0, 0.0, 0.0));
+    g.drawShape(
+        "M37 0H9C6.24 0 4 2.24 4 5v38c0 2.76 2.24 5 5 5h28c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zM23 46c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm15-8H8V6h30v32z",
+        stroke: false);
+    g.fillPath();
     g.restoreContext();
+
     var font1 = g.defaultFont;
 
     var font2 = PdfTtfFont(

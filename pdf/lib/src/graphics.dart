@@ -206,26 +206,151 @@ class PdfGraphics {
     buf.putString("$x1 $y1 $x2 $y2 $x3 $y3 c\n");
   }
 
-  void drawShape(String d) {
-    var sb = StringBuffer();
-
-    RegExp exp = RegExp(r"([MmZzLlHhVvCcSsQqTtAa])|(-[\.0-9]+)|([\.0-9]+)");
-    var matches = exp.allMatches(d);
-    var action;
+  /// https://github.com/deeplook/svglib/blob/master/svglib/svglib.py#L911
+  void drawShape(String d, {stroke = true}) {
+    final sb = StringBuffer();
+    final exp = RegExp(r"([MmZzLlHhVvCcSsQqTtAaE])|(-[\.0-9]+)|([\.0-9]+)");
+    final matches = exp.allMatches(d + " E");
+    String action;
+    String lastAction;
+    List<double> points;
+    PdfPoint lastControl = PdfPoint(0.0, 0.0);
+    PdfPoint lastPoint = PdfPoint(0.0, 0.0);
     for (var m in matches) {
       var a = m.group(1);
       var b = m.group(0);
-      print("$a, $b");
-      if (a != null) {
-        if (action != null) {
-          sb.write("$action ");
-        }
-        action = a;
-      } else {
-        sb.write("$b ");
+
+      if (a == null) {
+        points.add(double.parse(b));
+        continue;
       }
+
+      if (action != null) {
+        switch (action) {
+          case 'm': // moveto relative
+            lastPoint =
+                PdfPoint(lastPoint.x + points[0], lastPoint.y + points[1]);
+            sb.write("${lastPoint.x} ${lastPoint.y} m ");
+            break;
+          case 'M': // moveto absolute
+            lastPoint = PdfPoint(points[0], points[1]);
+            sb.write("${lastPoint.x} ${lastPoint.y} m ");
+            break;
+          case 'l': // lineto relative
+            lastPoint =
+                PdfPoint(lastPoint.x + points[0], lastPoint.y + points[1]);
+            sb.write("${lastPoint.x} ${lastPoint.y} l ");
+            break;
+          case 'L': // lineto absolute
+            lastPoint = PdfPoint(points[0], points[1]);
+            sb.write("${lastPoint.x} ${lastPoint.y} l ");
+            break;
+          case 'H': // horizontal line absolute
+            lastPoint = PdfPoint(points[0], lastPoint.y);
+            sb.write("${lastPoint.x} ${lastPoint.y} l ");
+            break;
+          case 'V': // vertical line absolute
+            lastPoint = PdfPoint(lastPoint.x, points[0]);
+            sb.write("${lastPoint.x} ${lastPoint.y} l ");
+            break;
+          case 'h': // horizontal line relative
+            lastPoint = PdfPoint(lastPoint.x + points[0], lastPoint.y);
+            sb.write("${lastPoint.x} ${lastPoint.y} l ");
+            break;
+          case 'v': // vertical line relative
+            lastPoint = PdfPoint(lastPoint.x, lastPoint.y + points[0]);
+            sb.write("${lastPoint.x} ${lastPoint.y} l ");
+            break;
+          case 'C': // cubic bezier, absolute
+            var len = 0;
+            while ((len + 1) * 6 <= points.length) {
+              sb.write(
+                  points.sublist(len * 6, (len + 1) * 6).join(" ") + " c ");
+              len += 1;
+            }
+            lastPoint =
+                PdfPoint(points[points.length - 2], points[points.length - 1]);
+            lastControl =
+                PdfPoint(points[points.length - 4], points[points.length - 3]);
+            break;
+          case 'S': // smooth cubic bézier, absolute
+            while (points.length >= 4) {
+              PdfPoint c1;
+              if ('cCsS'.indexOf(lastAction) >= 0) {
+                c1 = PdfPoint(lastPoint.x + (lastPoint.x - lastControl.x),
+                    lastPoint.y + (lastPoint.y - lastControl.y));
+              } else {
+                c1 = lastPoint;
+              }
+              lastControl = PdfPoint(points[0], points[1]);
+              lastPoint = PdfPoint(points[2], points[3]);
+              sb.write(
+                  "${c1.x} ${c1.y} ${lastControl.x} ${lastControl.y} ${lastPoint.x} ${lastPoint.y} c ");
+              points = points.sublist(4);
+              lastAction = 'C';
+            }
+            break;
+          case 'c': // cubic bezier, relative
+            var len = 0;
+            while ((len + 1) * 6 <= points.length) {
+              points[len + 0] += lastPoint.x;
+              points[len + 1] += lastPoint.y;
+              points[len + 2] += lastPoint.x;
+              points[len + 3] += lastPoint.y;
+              points[len + 4] += lastPoint.x;
+              points[len + 5] += lastPoint.y;
+              sb.write(
+                  points.sublist(len * 6, (len + 1) * 6).join(" ") + " c ");
+              len += 1;
+            }
+            lastPoint =
+                PdfPoint(points[points.length - 2], points[points.length - 1]);
+            lastControl =
+                PdfPoint(points[points.length - 4], points[points.length - 3]);
+            break;
+          case 's': // smooth cubic bézier, relative
+            while (points.length >= 4) {
+              PdfPoint c1;
+              if ('cCsS'.indexOf(lastAction) >= 0) {
+                c1 = PdfPoint(lastPoint.x + (lastPoint.x - lastControl.x),
+                    lastPoint.y + (lastPoint.y - lastControl.y));
+              } else {
+                c1 = lastPoint;
+              }
+              lastControl =
+                  PdfPoint(points[0] + lastPoint.x, points[1] + lastPoint.y);
+              lastPoint =
+                  PdfPoint(points[2] + lastPoint.x, points[3] + lastPoint.y);
+              sb.write(
+                  "${c1.x} ${c1.y} ${lastControl.x} ${lastControl.y} ${lastPoint.x} ${lastPoint.y} c ");
+              points = points.sublist(4);
+              lastAction = 'c';
+            }
+            break;
+          // case 'Q': // quadratic bezier, absolute
+          //   break;
+          // case 'T': // quadratic bezier, absolute
+          //   break;
+          // case 'q': // quadratic bezier, relative
+          //   break;
+          // case 't': // quadratic bezier, relative
+          //   break;
+          // case 'A': // elliptical arc, absolute
+          //   break;
+          // case 'a': // elliptical arc, relative
+          //   break;
+          case 'Z': // close path
+          case 'z': // close path
+            if (stroke) sb.write("s ");
+            break;
+          default:
+            print("Unknown path action: $action");
+        }
+      }
+      lastAction = action;
+      action = a;
+      points = List<double>();
     }
-    print(sb);
     buf.putString(sb.toString());
   }
 

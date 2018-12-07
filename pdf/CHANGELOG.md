@@ -5,6 +5,7 @@
 * Fix annotations
 * Implement default fonts bounding box
 * Add Bézier Curve primitive
+* Implement drawShape
 
 # 1.0.8
 * Fix monospace TTF font loading
