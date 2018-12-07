@@ -159,7 +159,7 @@ class PdfGraphics {
   /// @param x coordinate
   /// @param y coordinate
   /// @oaran s String to draw
-  void drawString(PdfFont font, size, String s, double x, double y) {
+  void drawString(PdfFont font, double size, String s, double x, double y) {
     if (!page.fonts.containsKey(font.name)) {
       page.fonts[font.name] = font;
     }
@@ -180,7 +180,8 @@ class PdfGraphics {
   /// Set the transformation Matrix
   void setTransform(Matrix4 t) {
     var s = t.storage;
-    buf.putString("${s[0]} ${s[1]} ${s[4]} ${s[5]} ${s[12]} ${s[13]} cm\n");
+    buf.putNumList(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]);
+    buf.putString(" cm\n");
   }
 
   /// This adds a line segment to the current path

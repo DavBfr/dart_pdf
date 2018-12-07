@@ -19,6 +19,7 @@
 part of pdf;
 
 class PdfStream {
+  static const precision = 5;
   final _stream = List<int>();
 
   void putStream(PdfStream s) {
@@ -49,7 +50,11 @@ class PdfStream {
   }
 
   void putNum(double d) {
-    putString(d.toString());
+    putString(d.toStringAsFixed(precision));
+  }
+
+  void putNumList(List<double> d) {
+    putString(d.map((v) => v.toStringAsFixed(precision)).join(" "));
   }
 
   static PdfStream num(double d) => PdfStream()..putNum(d);
