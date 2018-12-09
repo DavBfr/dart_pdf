@@ -36,6 +36,8 @@ printing/example/android/app/build.gradle
 printing/example/android/app/src/main/AndroidManifest.xml
 printing/example/android/app/src/main/java/com/example/example/MainActivity.java
 printing/example/android/gradle
+printing/example/android/local.properties
+printing/example/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
 printing/example/ios/Podfile
 printing/example/ios/Flutter/AppFrameworkInfo.plist
 printing/example/ios/Flutter/Debug.xcconfig
@@ -50,5 +52,8 @@ printing/example/ios/Runner.xcodeproj/project.pbxproj
 printing/example/ios/Runner.xcodeproj/project.xcworkspace
 printing/example/ios/Runner.xcodeproj/xcshareddata
 printing/example/ios/Runner.xcworkspace
+printing/example/ios/Flutter/Generated.xcconfig
+printing/example/ios/Runner/GeneratedPluginRegistrant.h
+printing/example/ios/Runner/GeneratedPluginRegistrant.m
 printing/example/.gitignore
 printing/example/.metadata

@@ -344,12 +344,6 @@ class PDFPage extends PdfPage {
 
 @deprecated
 class PDFPoint extends PdfPoint {
-  @deprecated
-  double get w => x;
-
-  @deprecated
-  double get h => y;
-
   PDFPoint(double w, double h) : super(w, h);
 }
 

@@ -45,6 +45,6 @@ class PdfPageFormat {
 
   @override
   String toString() {
-    return "${width}x${height}";
+    return "${width}x$height";
   }
 }

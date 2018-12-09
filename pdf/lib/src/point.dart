@@ -22,6 +22,12 @@ part of pdf;
 class PdfPoint {
   final double x, y;
 
+  @deprecated
+  double get w => x;
+
+  @deprecated
+  double get h => y;
+
   const PdfPoint(this.x, this.y);
 
   @override
