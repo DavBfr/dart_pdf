@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
-library printing;
+library widget;
 
-import 'dart:async';
-import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
+import 'dart:math' as math;
 
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart';
+import 'package:vector_math/vector_math_64.dart';
 
-part 'src/asset_utils.dart';
-part 'src/printing.dart';
-part 'src/widgets.dart';
+part 'widgets/basic.dart';
+part 'widgets/clip.dart';
+part 'widgets/container.dart';
+part 'widgets/content.dart';
+part 'widgets/document.dart';
+part 'widgets/flex.dart';
+part 'widgets/geometry.dart';
+part 'widgets/grid_view.dart';
+part 'widgets/image.dart';
+part 'widgets/placeholders.dart';
+part 'widgets/table.dart';
+part 'widgets/text.dart';
+part 'widgets/theme.dart';
+part 'widgets/widget.dart';

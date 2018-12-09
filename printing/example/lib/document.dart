@@ -1,92 +1,193 @@
-import 'dart:io';
 import 'dart:async';
 
+import 'package:flutter/widgets.dart' as fw;
+
 import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart';
+import 'package:printing/printing.dart';
+
+const green = PdfColor.fromInt(0xff9ce5d0);
+const lightGreen = PdfColor.fromInt(0xffcdf1e7);
+
+class MyPage extends Page {
+  MyPage(
+      {PdfPageFormat pageFormat = PdfPageFormat.a4,
+      BuildCallback build,
+      EdgeInsets margin})
+      : super(pageFormat: pageFormat, margin: margin, build: build);
+
+  void paint(Widget child, Context context) {
+    context.canvas
+      ..setColor(lightGreen)
+      ..moveTo(0, pageFormat.height)
+      ..lineTo(0, pageFormat.height - 230)
+      ..lineTo(60, pageFormat.height)
+      ..fillPath()
+      ..setColor(green)
+      ..moveTo(0, pageFormat.height)
+      ..lineTo(0, pageFormat.height - 100)
+      ..lineTo(100, pageFormat.height)
+      ..fillPath()
+      ..setColor(lightGreen)
+      ..moveTo(30, pageFormat.height)
+      ..lineTo(110, pageFormat.height - 50)
+      ..lineTo(150, pageFormat.height)
+      ..fillPath()
+      ..moveTo(pageFormat.width, 0)
+      ..lineTo(pageFormat.width, 230)
+      ..lineTo(pageFormat.width - 60, 0)
+      ..fillPath()
+      ..setColor(green)
+      ..moveTo(pageFormat.width, 0)
+      ..lineTo(pageFormat.width, 100)
+      ..lineTo(pageFormat.width - 100, 0)
+      ..fillPath()
+      ..setColor(lightGreen)
+      ..moveTo(pageFormat.width - 30, 0)
+      ..lineTo(pageFormat.width - 110, 50)
+      ..lineTo(pageFormat.width - 150, 0)
+      ..fillPath();
+
+    super.paint(child, context);
+  }
+}
+
+class Block extends StatelessWidget {
+  Block({this.title});
+
+  final String title;
+
+  @override
+  Widget build(Context context) {
+    return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
+            Container(
+              width: 6,
+              height: 6,
+              margin: EdgeInsets.only(top: 2.5, left: 2, right: 5),
+              decoration: BoxDecoration(color: green, shape: BoxShape.circle),
+            ),
+            Text(title, style: Theme.of(context).defaultTextStyleBold),
+          ]),
+          Container(
+            decoration: BoxDecoration(
+                border: BoxBorder(left: true, color: green, width: 2)),
+            padding: EdgeInsets.only(left: 10, top: 5, bottom: 5),
+            margin: EdgeInsets.only(left: 5),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Lorem(length: 20),
+                ]),
+          ),
+        ]);
+  }
+}
+
+class Category extends StatelessWidget {
+  Category({this.title});
+
+  final String title;
+
+  @override
+  Widget build(Context context) {
+    return Container(
+        decoration: BoxDecoration(color: lightGreen, borderRadius: 6),
+        margin: EdgeInsets.only(bottom: 10, top: 20),
+        padding: EdgeInsets.fromLTRB(10, 7, 10, 4),
+        child: Text(title, textScaleFactor: 1.5));
+  }
+}
 
 Future<PdfDocument> generateDocument(PdfPageFormat format) async {
-  final pdf = PdfDocument(deflate: zlib.encode);
-  final page = PdfPage(pdf,
-      pageFormat: format.applyMargin(
-          left: 2.0 * PdfPageFormat.cm,
-          top: 2.0 * PdfPageFormat.cm,
-          right: 2.0 * PdfPageFormat.cm,
-          bottom: 2.0 * PdfPageFormat.cm));
-  final g = page.getGraphics();
-  final font = PdfFont.helvetica(pdf);
-  final top = page.pageFormat.height - page.pageFormat.marginTop;
+  final pdf = PdfDoc();
 
-  g.setColor(PdfColor.orange);
-  g.drawRect(
-      page.pageFormat.marginLeft,
-      page.pageFormat.marginBottom,
-      page.pageFormat.width -
-          page.pageFormat.marginRight -
-          page.pageFormat.marginLeft,
-      page.pageFormat.height -
-          page.pageFormat.marginTop -
-          page.pageFormat.marginBottom);
-  g.strokePath();
+  final profileImage = await pdfImageFromImageProvider(
+      pdf: pdf.document,
+      image: fw.NetworkImage(
+          "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=200"),
+      onError: (dynamic exception, StackTrace stackTrace) {
+        print("error");
+      });
 
-  g.setColor(PdfColor(0.0, 1.0, 1.0));
-  g.drawRRect(
-    50.0 * PdfPageFormat.mm,
-    top - 80.0 * PdfPageFormat.mm,
-    100.0 * PdfPageFormat.mm,
-    50.0 * PdfPageFormat.mm,
-    20.0,
-    20.0,
-  );
-  g.fillPath();
-
-  g.setColor(PdfColor(0.3, 0.3, 0.3));
-  g.drawString(
-      font,
-      12.0,
-      "Hello World!",
-      page.pageFormat.marginLeft + 10.0 * PdfPageFormat.mm,
-      top - 10.0 * PdfPageFormat.mm);
-
-  {
-    final page = PdfPage(pdf,
-        pageFormat: format.applyMargin(
-            left: 2.0 * PdfPageFormat.cm,
-            top: 2.0 * PdfPageFormat.cm,
-            right: 2.0 * PdfPageFormat.cm,
-            bottom: 2.0 * PdfPageFormat.cm));
-    final g = page.getGraphics();
-    final font = PdfFont.helvetica(pdf);
-    final top = page.pageFormat.height - page.pageFormat.marginTop;
-
-    g.setColor(PdfColor.orange);
-    g.drawRect(
-        page.pageFormat.marginLeft,
-        page.pageFormat.marginBottom,
-        page.pageFormat.width -
-            page.pageFormat.marginRight -
-            page.pageFormat.marginLeft,
-        page.pageFormat.height -
-            page.pageFormat.marginTop -
-            page.pageFormat.marginBottom);
-    g.strokePath();
-
-    g.setColor(PdfColor(0.0, 1.0, 1.0));
-    g.drawRRect(
-      50.0 * PdfPageFormat.mm,
-      top - 80.0 * PdfPageFormat.mm,
-      100.0 * PdfPageFormat.mm,
-      50.0 * PdfPageFormat.mm,
-      20.0,
-      20.0,
-    );
-    g.fillPath();
-
-    g.setColor(PdfColor(0.3, 0.3, 0.3));
-    g.drawString(
-        font,
-        12.0,
-        "Hello World!",
-        page.pageFormat.marginLeft + 10.0 * PdfPageFormat.mm,
-        top - 10.0 * PdfPageFormat.mm);
-  }
-  return pdf;
+  pdf.addPage(MyPage(
+    pageFormat: format.applyMargin(
+        left: 2.0 * PdfPageFormat.cm,
+        top: 4.0 * PdfPageFormat.cm,
+        right: 2.0 * PdfPageFormat.cm,
+        bottom: 2.0 * PdfPageFormat.cm),
+    build: (Context context) => Row(children: <Widget>[
+          Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                Container(
+                    padding: EdgeInsets.only(left: 30, bottom: 20),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text("Parnella Charlesbois",
+                              textScaleFactor: 2.0,
+                              style: Theme.of(context).defaultTextStyleBold),
+                          Padding(padding: EdgeInsets.only(top: 10)),
+                          Text("Electrotyper",
+                              textScaleFactor: 1.2,
+                              style: Theme.of(context)
+                                  .defaultTextStyleBold
+                                  .copyWith(color: green)),
+                          Padding(padding: EdgeInsets.only(top: 20)),
+                          Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text("568 Port Washington Road"),
+                                      Text("Nordegg, AB T0M 2H0"),
+                                      Text("Canada, ON"),
+                                    ]),
+                                Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text("+1 403-721-6898"),
+                                      Text("p.charlesbois@yahoo.com"),
+                                      Text("wholeprices.ca")
+                                    ]),
+                                Padding(padding: EdgeInsets.zero)
+                              ]),
+                        ])),
+                Category(title: "Work Experience"),
+                Block(title: "Tour bus driver"),
+                Block(title: "Logging equipment operator"),
+                Block(title: "Foot doctor"),
+                Category(title: "Education"),
+                Block(title: "Bachelor Of Commerce"),
+                Block(title: "Bachelor Interior Design"),
+              ])),
+          Container(
+            height: double.infinity,
+            width: 10,
+            decoration: BoxDecoration(
+                border: BoxBorder(left: true, color: green, width: 2)),
+          ),
+          Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                ClipOval(
+                    child: Container(
+                        width: 100,
+                        height: 100,
+                        color: lightGreen,
+                        child: profileImage == null
+                            ? Container()
+                            : Image(profileImage)))
+              ])
+        ]),
+  ));
+  return pdf.document;
 }

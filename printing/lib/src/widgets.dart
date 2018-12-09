@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-library printing;
+part of printing;
 
-import 'dart:async';
-import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
-
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart';
-
-part 'src/asset_utils.dart';
-part 'src/printing.dart';
-part 'src/widgets.dart';
+class PdfDoc extends Document {
+  PdfDoc({bool compress = true})
+      : super(deflate: compress ? zlib.encode : null);
+}

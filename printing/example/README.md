@@ -1,11 +1,17 @@
 # Pdf Printing Example
 
-Flutter example project
-
-## Getting Started
-
-1. to run the example, start a simulator and run:
-
-  ```shell
-  flutter run
-  ```
+```dart
+void printPdf() {
+  Printing.layoutPdf(onLayout: (PdfPageFormat format) {
+    final pdf = Document()
+      ..addPage(Page(
+          pageFormat: PdfPageFormat.a4,
+          build: (Context context) {
+            return Center(
+              child: Text("Hello World"),
+            ); // Center
+          }));
+    return pdf.save();
+  }); // Page
+}
+```

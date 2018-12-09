@@ -1,3 +1,6 @@
+# 1.3.0
+* Add a Flutter like widget system
+
 # 1.2.0
 * Fix compileSdkVersion to match appcompat
 * Change license to Apache 2.0
