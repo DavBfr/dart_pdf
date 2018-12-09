@@ -20,7 +20,7 @@ part of pdf;
 
 class PdfPage extends PdfObject {
   /// This is this page format, ie the size of the page, margins, and rotation
-  PdfPageFormat pageFormat;
+  final PdfPageFormat pageFormat;
 
   /// This holds the contents of the page.
   List<PdfObjectStream> contents = [];
@@ -45,10 +45,9 @@ class PdfPage extends PdfObject {
   ///
   /// @param pdfDocument Document
   /// @param pageFormat [PdfPageFormat] describing the page size
-  PdfPage(PdfDocument pdfDocument, {this.pageFormat})
+  PdfPage(PdfDocument pdfDocument, {this.pageFormat = PdfPageFormat.a4})
       : super(pdfDocument, "/Page") {
     pdfDocument.pdfPageList.pages.add(this);
-    if (pageFormat == null) pageFormat = PdfPageFormat.a4;
   }
 
   /// This returns a [PdfGraphics] object, which can then be used to render
