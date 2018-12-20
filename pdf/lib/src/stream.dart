@@ -77,7 +77,8 @@ class PdfStream {
         .replaceAll('\r', '\\r');
 
     putBytes(latin1.encode('('));
-    putBytes([0xfe, 0xff]);
+    // this line does nothing except add 2 unnecessary symbols ?
+    // putBytes([0xfe, 0xff]);
     putBytes(encodeUtf16be(s));
     putBytes(latin1.encode(')'));
   }
