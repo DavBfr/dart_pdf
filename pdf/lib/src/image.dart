@@ -76,11 +76,9 @@ class PdfImage extends PdfXObject {
     }
   }
 
+  /// write the pixels to the stream
   @override
   void _prepare() {
-    // write the pixels to the stream
-    // print("Processing image ${img.width}x${img.height} pixels");
-
     int w = width;
     int h = height;
     int s = w * h;

@@ -97,7 +97,7 @@ class PdfAnnot extends PdfObject {
 
     // Now the annotation subtypes
     if (subtype == "/Text") {
-      params["/Contents"] = PdfStream.text(content);
+      params["/Contents"] = PdfStream()..putLitteral(content);
     } else if (subtype == "/Link") {
       var dests = List<PdfStream>();
       dests.add(dest.ref());

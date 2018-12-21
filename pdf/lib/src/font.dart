@@ -37,6 +37,8 @@ class PdfFont extends PdfObject {
 
   String get fontName => null;
 
+  bool get unicode => false;
+
   /// @param os OutputStream to send the object to
   @override
   void _prepare() {

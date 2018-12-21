@@ -96,7 +96,6 @@ class PdfDocument {
     // Now create some standard objects
     pdfPageList = PdfPageList(this);
     catalog = PdfCatalog(this, pdfPageList, pageMode);
-    info = PdfInfo(this);
   }
 
   /// This returns a specific page. It's used mainly when using a

@@ -165,7 +165,11 @@ class PdfGraphics {
     }
 
     buf.putString("BT $x $y Td ${font.name} $size Tf ");
-    buf.putText(s);
+    if (font.unicode) {
+      buf.putTextUtf16(s);
+    } else {
+      buf.putText(s);
+    }
     buf.putString(" Tj ET\n");
   }
 
@@ -208,7 +212,6 @@ class PdfGraphics {
     for (var m in matches) {
       var a = m.group(1);
       var b = m.group(0);
-      print("$a, $b");
       if (a != null) {
         if (action != null) {
           sb.write("$action ");
@@ -218,7 +221,6 @@ class PdfGraphics {
         sb.write("$b ");
       }
     }
-    print(sb);
     buf.putString(sb.toString());
   }
 
