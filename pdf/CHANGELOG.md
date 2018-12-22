@@ -6,6 +6,7 @@
 * Implement default fonts bounding box
 * Add Bézier Curve primitive
 * Implement drawShape
+* Add support for Jpeg images
 
 # 1.0.8
 * Fix monospace TTF font loading

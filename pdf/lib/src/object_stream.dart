@@ -41,7 +41,10 @@ class PdfObjectStream extends PdfObject {
   void _prepare() {
     super._prepare();
 
-    if (pdfDocument.deflate != null) {
+    if (params.containsKey("/Filter")) {
+      // The data is already in the right format
+      _data = buf.output();
+    } else if (pdfDocument.deflate != null) {
       _data = pdfDocument.deflate(buf.output());
       params["/Filter"] = PdfStream.string("/FlateDecode");
     } else if (isBinary) {

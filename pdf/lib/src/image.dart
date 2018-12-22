@@ -36,6 +36,9 @@ class PdfImage extends PdfXObject {
   /// Process alphaChannel only
   final bool alphaChannel;
 
+  /// The image data is a jpeg image
+  final bool jpeg;
+
   /// Creates a new [PdfImage] instance.
   ///
   /// @param imgage an [Uint8List] value
@@ -48,7 +51,8 @@ class PdfImage extends PdfXObject {
       @required this.width,
       @required this.height,
       this.alpha = true,
-      this.alphaChannel = false})
+      this.alphaChannel = false,
+      this.jpeg = false})
       : assert(alphaChannel == false || alpha == true),
         assert(width != null),
         assert(height != null),
@@ -74,10 +78,21 @@ class PdfImage extends PdfXObject {
     } else {
       params["/ColorSpace"] = PdfStream.string("/DeviceRGB");
     }
+
+    if (jpeg) {
+      params["/Intent"] = PdfStream.string("/RelativeColorimetric");
+    }
   }
 
   @override
   void _prepare() {
+    if (jpeg) {
+      buf.putBytes(image);
+      params["/Filter"] = PdfStream.string("/DCTDecode");
+      super._prepare();
+      return;
+    }
+
     // write the pixels to the stream
     // print("Processing image ${img.width}x${img.height} pixels");
 
