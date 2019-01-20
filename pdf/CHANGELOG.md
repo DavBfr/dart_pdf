@@ -1,5 +1,6 @@
 # 1.1.1
 * Improve PdfPoint and PdfRect
+* Change PdfColor.fromInt to const constructor
 
 # 1.1.0
 * Rename classes to satisfy Dart conventions

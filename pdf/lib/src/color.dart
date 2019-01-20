@@ -48,10 +48,11 @@ class PdfColor {
 
   const PdfColor(this.r, this.g, this.b, [this.a = 1.0]);
 
-  factory PdfColor.fromInt(int color) {
-    return PdfColor((color >> 16 & 0xff) / 255.0, (color >> 8 & 0xff) / 255.0,
-        (color & 0xff) / 255.0, (color >> 24 & 0xff) / 255.0);
-  }
+  const PdfColor.fromInt(int color)
+      : r = (color >> 16 & 0xff) / 255.0,
+        g = (color >> 8 & 0xff) / 255.0,
+        b = (color & 0xff) / 255.0,
+        a = (color >> 24 & 0xff) / 255.0;
 
   factory PdfColor.fromHex(String color) {
     return PdfColor(
