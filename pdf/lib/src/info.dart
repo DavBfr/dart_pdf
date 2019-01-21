@@ -19,28 +19,43 @@
 part of pdf;
 
 class PdfInfo extends PdfObject {
-  String author;
-  String creator;
-  String title;
-  String subject;
-  String keywords;
+  static const String _libraryName = "https://github.com/DavBfr/dart_pdf";
+  final String author;
+  final String creator;
+  final String title;
+  final String subject;
+  final String keywords;
+  final String producer;
 
   /// @param title Title of this document
   PdfInfo(PdfDocument pdfDocument,
-      {this.title, this.author, this.creator, this.subject, this.keywords})
+      {this.title,
+      this.author,
+      this.creator,
+      this.subject,
+      this.keywords,
+      this.producer})
       : super(pdfDocument, null) {
-    params["/Producer"] = PdfStream.text("dpdf - David PHAM-VAN");
-  }
-
-  /// @param os OutputStream to send the object to
-  @override
-  void _prepare() {
-    super._prepare();
-
-    if (author != null) params["/Author"] = PdfStream.text(author);
-    if (creator != null) params["/Creator"] = PdfStream.text(creator);
-    if (title != null) params["/Title"] = PdfStream.text(title);
-    if (subject != null) params["/Subject"] = PdfStream.text(subject);
-    if (keywords != null) params["/Keywords"] = PdfStream.text(keywords);
+    if (author != null) {
+      params["/Author"] = PdfStream()..putLiteral(author);
+    }
+    if (creator != null) {
+      params["/Creator"] = PdfStream()..putLiteral(creator);
+    }
+    if (title != null) {
+      params["/Title"] = PdfStream()..putLiteral(title);
+    }
+    if (subject != null) {
+      params["/Subject"] = PdfStream()..putLiteral(subject);
+    }
+    if (keywords != null) {
+      params["/Keywords"] = PdfStream()..putLiteral(keywords);
+    }
+    if (producer != null) {
+      params["/Producer"] = PdfStream()
+        ..putLiteral("$producer ($_libraryName)");
+    } else {
+      params["/Producer"] = PdfStream()..putLiteral(_libraryName);
+    }
   }
 }

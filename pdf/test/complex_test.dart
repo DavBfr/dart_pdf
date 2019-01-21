@@ -12,11 +12,11 @@ void main() {
     img.fillRange(0, img.length - 1, 0x12345678);
 
     var pdf = PdfDocument(deflate: zlib.encode);
-    var i = pdf.info;
-    i.author = "David PHAM-VAN";
-    i.creator = i.author;
-    i.title = "My Title";
-    i.subject = "My Subject";
+    pdf.info = PdfInfo(pdf,
+        author: "David PHAM-VAN",
+        creator: "David PHAM-VAN",
+        title: "My Title",
+        subject: "My Subject");
     var page = PdfPage(pdf, pageFormat: const PdfPageFormat(500.0, 300.0));
 
     var g = page.getGraphics();
