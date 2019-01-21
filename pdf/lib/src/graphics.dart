@@ -95,7 +95,9 @@ class PdfGraphics {
     page.xObjects[img.name] = img;
 
     // q w 0 0 h x y cm % the coordinate matrix
-    buf.putString("q $w 0 0 $h $x $y cm ${img.name} Do Q\n");
+    buf.putString("q ");
+    buf.putNumList(<double>[w, 0.0, 0.0, h, x, y]);
+    buf.putString(" cm ${img.name} Do Q\n");
   }
 
   /// Draws a line between two coordinates.
@@ -128,14 +130,18 @@ class PdfGraphics {
     // Starting point
     moveTo(x, y - r2);
 
-    buf.putString(
-        "${x + m4 * r1} ${y - r2} ${x + r1} ${y - m4 * r2} ${x + r1} $y c\n");
-    buf.putString(
-        "${x + r1} ${y + m4 * r2} ${x + m4 * r1} ${y + r2} $x ${y + r2} c\n");
-    buf.putString(
-        "${x - m4 * r1} ${y + r2} ${x - r1} ${y + m4 * r2} ${x - r1} $y c\n");
-    buf.putString(
-        "${x - r1} ${y - m4 * r2} ${x - m4 * r1} ${y - r2} $x ${y - r2} c\n");
+    buf.putNumList(
+        <double>[x + m4 * r1, y - r2, x + r1, y - m4 * r2, x + r1, y]);
+    buf.putString(" c\n");
+    buf.putNumList(
+        <double>[x + r1, y + m4 * r2, x + m4 * r1, y + r2, x, y + r2]);
+    buf.putString(" c\n");
+    buf.putNumList(
+        <double>[x - m4 * r1, y + r2, x - r1, y + m4 * r2, x - r1, y]);
+    buf.putString(" c\n");
+    buf.putNumList(
+        <double>[x - r1, y - m4 * r2, x - m4 * r1, y - r2, x, y - r2]);
+    buf.putString(" c\n");
   }
 
   /// We override Graphics.drawRect as it doesn't join the 4 lines.
@@ -151,7 +157,8 @@ class PdfGraphics {
     double w,
     double h,
   ) {
-    buf.putString("$x $y $w $h re\n");
+    buf.putNumList(<double>[x, y, w, h]);
+    buf.putString(" re\n");
   }
 
   /// This draws a string.
@@ -164,7 +171,11 @@ class PdfGraphics {
       page.fonts[font.name] = font;
     }
 
-    buf.putString("BT $x $y Td ${font.name} $size Tf ");
+    buf.putString("BT ");
+    buf.putNumList(<double>[x, y]);
+    buf.putString(" Td ${font.name} ");
+    buf.putNum(size);
+    buf.putString(" Tf ");
     buf.putText(s);
     buf.putString(" Tj ET\n");
   }
@@ -173,8 +184,10 @@ class PdfGraphics {
   ///
   /// @param c Color to use
   void setColor(PdfColor color) {
-    buf.putString(
-        "${color.r} ${color.g} ${color.b} rg ${color.r} ${color.g} ${color.b} RG\n");
+    buf.putNumList(<double>[color.r, color.g, color.b]);
+    buf.putString(" rg ");
+    buf.putNumList(<double>[color.r, color.g, color.b]);
+    buf.putString(" RG\n");
   }
 
   /// Set the transformation Matrix
@@ -189,7 +202,8 @@ class PdfGraphics {
   /// @param x coordinate
   /// @param y coordinate
   void lineTo(double x, double y) {
-    buf.putString("$x $y l\n");
+    buf.putNumList(<double>[x, y]);
+    buf.putString(" l\n");
   }
 
   /// This moves the current drawing point.
@@ -197,18 +211,19 @@ class PdfGraphics {
   /// @param x coordinate
   /// @param y coordinate
   void moveTo(double x, double y) {
-    buf.putString("$x $y m\n");
+    buf.putNumList(<double>[x, y]);
+    buf.putString(" m\n");
   }
 
   /// Draw a bézier curve
   void curveTo(
       double x1, double y1, double x2, double y2, double x3, double y3) {
-    buf.putString("$x1 $y1 $x2 $y2 $x3 $y3 c\n");
+    buf.putNumList(<double>[x1, y1, x2, y2, x3, y3]);
+    buf.putString(" c\n");
   }
 
   /// https://github.com/deeplook/svglib/blob/master/svglib/svglib.py#L911
   void drawShape(String d, {stroke = true}) {
-    final sb = StringBuffer();
     final exp = RegExp(r"([MmZzLlHhVvCcSsQqTtAaE])|(-[\.0-9]+)|([\.0-9]+)");
     final matches = exp.allMatches(d + " E");
     String action;
@@ -230,42 +245,42 @@ class PdfGraphics {
           case 'm': // moveto relative
             lastPoint =
                 PdfPoint(lastPoint.x + points[0], lastPoint.y + points[1]);
-            sb.write("${lastPoint.x} ${lastPoint.y} m ");
+            moveTo(lastPoint.x, lastPoint.y);
             break;
           case 'M': // moveto absolute
             lastPoint = PdfPoint(points[0], points[1]);
-            sb.write("${lastPoint.x} ${lastPoint.y} m ");
+            moveTo(lastPoint.x, lastPoint.y);
             break;
           case 'l': // lineto relative
             lastPoint =
                 PdfPoint(lastPoint.x + points[0], lastPoint.y + points[1]);
-            sb.write("${lastPoint.x} ${lastPoint.y} l ");
+            lineTo(lastPoint.x, lastPoint.y);
             break;
           case 'L': // lineto absolute
             lastPoint = PdfPoint(points[0], points[1]);
-            sb.write("${lastPoint.x} ${lastPoint.y} l ");
+            lineTo(lastPoint.x, lastPoint.y);
             break;
           case 'H': // horizontal line absolute
             lastPoint = PdfPoint(points[0], lastPoint.y);
-            sb.write("${lastPoint.x} ${lastPoint.y} l ");
+            lineTo(lastPoint.x, lastPoint.y);
             break;
           case 'V': // vertical line absolute
             lastPoint = PdfPoint(lastPoint.x, points[0]);
-            sb.write("${lastPoint.x} ${lastPoint.y} l ");
+            lineTo(lastPoint.x, lastPoint.y);
             break;
           case 'h': // horizontal line relative
             lastPoint = PdfPoint(lastPoint.x + points[0], lastPoint.y);
-            sb.write("${lastPoint.x} ${lastPoint.y} l ");
+            lineTo(lastPoint.x, lastPoint.y);
             break;
           case 'v': // vertical line relative
             lastPoint = PdfPoint(lastPoint.x, lastPoint.y + points[0]);
-            sb.write("${lastPoint.x} ${lastPoint.y} l ");
+            lineTo(lastPoint.x, lastPoint.y);
             break;
           case 'C': // cubic bezier, absolute
             var len = 0;
             while ((len + 1) * 6 <= points.length) {
-              sb.write(
-                  points.sublist(len * 6, (len + 1) * 6).join(" ") + " c ");
+              curveTo(points[len + 0], points[len + 1], points[len + 2],
+                  points[len + 3], points[len + 4], points[len + 5]);
               len += 1;
             }
             lastPoint =
@@ -284,8 +299,8 @@ class PdfGraphics {
               }
               lastControl = PdfPoint(points[0], points[1]);
               lastPoint = PdfPoint(points[2], points[3]);
-              sb.write(
-                  "${c1.x} ${c1.y} ${lastControl.x} ${lastControl.y} ${lastPoint.x} ${lastPoint.y} c ");
+              curveTo(c1.x, c1.y, lastControl.x, lastControl.y, lastPoint.x,
+                  lastPoint.y);
               points = points.sublist(4);
               lastAction = 'C';
             }
@@ -299,8 +314,8 @@ class PdfGraphics {
               points[len + 3] += lastPoint.y;
               points[len + 4] += lastPoint.x;
               points[len + 5] += lastPoint.y;
-              sb.write(
-                  points.sublist(len * 6, (len + 1) * 6).join(" ") + " c ");
+              curveTo(points[len + 0], points[len + 1], points[len + 2],
+                  points[len + 3], points[len + 4], points[len + 5]);
               len += 1;
             }
             lastPoint =
@@ -321,8 +336,8 @@ class PdfGraphics {
                   PdfPoint(points[0] + lastPoint.x, points[1] + lastPoint.y);
               lastPoint =
                   PdfPoint(points[2] + lastPoint.x, points[3] + lastPoint.y);
-              sb.write(
-                  "${c1.x} ${c1.y} ${lastControl.x} ${lastControl.y} ${lastPoint.x} ${lastPoint.y} c ");
+              curveTo(c1.x, c1.y, lastControl.x, lastControl.y, lastPoint.x,
+                  lastPoint.y);
               points = points.sublist(4);
               lastAction = 'c';
             }
@@ -341,7 +356,7 @@ class PdfGraphics {
           //   break;
           case 'Z': // close path
           case 'z': // close path
-            if (stroke) sb.write("s ");
+            if (stroke) closePath();
             break;
           default:
             print("Unknown path action: $action");
@@ -351,7 +366,6 @@ class PdfGraphics {
       action = a;
       points = List<double>();
     }
-    buf.putString(sb.toString());
   }
 
   /// This is used to add a polygon to the current path.
@@ -377,10 +391,12 @@ class PdfGraphics {
   }
 
   void setLineWidth(double width) {
-    buf.putString("$width w\n");
+    buf.putNum(width);
+    buf.putString(" w\n");
   }
 
   void setMiterLimit(double limit) {
-    buf.putString("$limit M\n");
+    buf.putNum(limit);
+    buf.putString(" M\n");
   }
 }
