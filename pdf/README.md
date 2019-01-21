@@ -51,3 +51,12 @@ PdfTtfFont ttf = PdfTtfFont(
 g.setColor(PdfColor(0.3, 0.3, 0.3));
 g.drawString(ttf, 20.0, "Dart is awesome", 50.0, 30.0);
 ```
+
+To save the image on Flutter, use the [path_provider](https://pub.dartlang.org/packages/path_provider) library:
+
+```dart
+Directory tempDir = await getTemporaryDirectory();
+String tempPath = tempDir.path;
+var file = File("$tempPath/file.pdf");
+await file.writeAsBytes(pdf.save());
+```

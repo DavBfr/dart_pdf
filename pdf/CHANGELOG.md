@@ -9,6 +9,7 @@
 * Add support for Jpeg images
 * Fix numeric conversions in graphic operations
 * Add unicode support for annotations and info block
+* Add Flutter example
 
 # 1.0.8
 * Fix monospace TTF font loading
