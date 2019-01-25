@@ -3,6 +3,7 @@
 * Change PdfColor.fromInt to const constructor
 * Fix drawShape Bézier curves
 * Add arcs to SVG drawShape
+* Add default page margins
 
 # 1.1.0
 * Rename classes to satisfy Dart conventions
