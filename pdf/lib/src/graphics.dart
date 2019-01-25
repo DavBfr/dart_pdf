@@ -278,10 +278,10 @@ class PdfGraphics {
             break;
           case 'C': // cubic bezier, absolute
             var len = 0;
-            while ((len + 1) * 6 <= points.length) {
+            while (len < points.length) {
               curveTo(points[len + 0], points[len + 1], points[len + 2],
                   points[len + 3], points[len + 4], points[len + 5]);
-              len += 1;
+              len += 6;
             }
             lastPoint =
                 PdfPoint(points[points.length - 2], points[points.length - 1]);
@@ -307,7 +307,7 @@ class PdfGraphics {
             break;
           case 'c': // cubic bezier, relative
             var len = 0;
-            while ((len + 1) * 6 <= points.length) {
+            while (len < points.length) {
               points[len + 0] += lastPoint.x;
               points[len + 1] += lastPoint.y;
               points[len + 2] += lastPoint.x;
@@ -316,12 +316,10 @@ class PdfGraphics {
               points[len + 5] += lastPoint.y;
               curveTo(points[len + 0], points[len + 1], points[len + 2],
                   points[len + 3], points[len + 4], points[len + 5]);
-              len += 1;
+              lastPoint = PdfPoint(points[len + 4], points[len + 5]);
+              lastControl = PdfPoint(points[len + 2], points[len + 3]);
+              len += 6;
             }
-            lastPoint =
-                PdfPoint(points[points.length - 2], points[points.length - 1]);
-            lastControl =
-                PdfPoint(points[points.length - 4], points[points.length - 3]);
             break;
           case 's': // smooth cubic bézier, relative
             while (points.length >= 4) {
