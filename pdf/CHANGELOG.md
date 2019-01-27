@@ -2,6 +2,7 @@
 * Improve PdfPoint and PdfRect
 * Change PdfColor.fromInt to const constructor
 * Fix drawShape Bézier curves
+* Add arcs to SVG drawShape
 
 # 1.1.0
 * Rename classes to satisfy Dart conventions

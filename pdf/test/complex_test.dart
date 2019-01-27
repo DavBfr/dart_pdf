@@ -23,14 +23,24 @@ void main() {
 
     g.saveContext();
     var tm = Matrix4.identity();
-    tm.translate(50.0, 290.0);
-    tm.rotateZ(pi);
+    tm.translate(10.0, 290.0);
+    tm.scale(1.0, -1.0);
     g.setTransform(tm);
     g.setColor(PdfColor(0.0, 0.0, 0.0));
     g.drawShape(
         "M37 0H9C6.24 0 4 2.24 4 5v38c0 2.76 2.24 5 5 5h28c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zM23 46c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm15-8H8V6h30v32z",
         stroke: false);
     g.fillPath();
+    g.restoreContext();
+
+    g.saveContext();
+    tm = Matrix4.identity();
+    tm.translate(200.0, 290.0);
+    tm.scale(.1, -.1);
+    g.setTransform(tm);
+    g.setColor(PdfColor(0.0, 0.0, 0.0));
+    g.drawShape(
+        "M300,200 h-150 a150,150 0 1,0 150,-150 z M275,175 v-150 a150,150 0 0,0 -150,150 z");
     g.restoreContext();
 
     var font1 = g.defaultFont;
@@ -70,7 +80,7 @@ void main() {
       g.restoreContext();
     }
 
-    var file = File('file.pdf');
+    var file = File('complex.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

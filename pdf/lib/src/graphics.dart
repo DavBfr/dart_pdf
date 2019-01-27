@@ -215,11 +215,148 @@ class PdfGraphics {
     buf.putString(" m\n");
   }
 
-  /// Draw a bézier curve
+  /// Draw a cubic bézier curve from the current point to (x3,y3)
+  /// using (x1,y1) as the control point at the beginning of the curve
+  /// and (x2,y2) as the control point at the end of the curve.
+  ///
+  /// @param x1 first control point
+  /// @param y1 first control point
+  /// @param x2 second control point
+  /// @param y2 second control point
+  /// @param x3 end point
+  /// @param y3 end point
   void curveTo(
       double x1, double y1, double x2, double y2, double x3, double y3) {
     buf.putNumList(<double>[x1, y1, x2, y2, x3, y3]);
     buf.putString(" c\n");
+  }
+
+  double _vectorAngle(double ux, double uy, double vx, double vy) {
+    final d = math.sqrt(ux * ux + uy * uy) * math.sqrt(vx * vx + vy * vy);
+    if (d == 0.0) return 0.0;
+    var c = (ux * vx + uy * vy) / d;
+    if (c < -1.0) {
+      c = -1.0;
+    } else if (c > 1.0) c = 1.0;
+    final s = ux * vy - uy * vx;
+    c = math.acos(c);
+    return c.sign == s.sign ? c : -c;
+  }
+
+  void _endToCenterParameters(double x1, double y1, double x2, double y2,
+      bool large, bool sweep, double rx, double ry) {
+    // See http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes F.6.5
+
+    rx = rx.abs();
+    ry = ry.abs();
+
+    final x1d = 0.5 * (x1 - x2);
+    final y1d = 0.5 * (y1 - y2);
+
+    var r = x1d * x1d / (rx * rx) + y1d * y1d / (ry * ry);
+    if (r > 1.0) {
+      var rr = math.sqrt(r);
+      rx *= rr;
+      ry *= rr;
+      r = x1d * x1d / (rx * rx) + y1d * y1d / (ry * ry);
+    } else if (r != 0.0) r = 1.0 / r - 1.0;
+
+    if (-1e-10 < r && r < 0.0) r = 0.0;
+
+    r = math.sqrt(r);
+    if (large == sweep) r = -r;
+
+    final cxd = (r * rx * y1d) / ry;
+    final cyd = -(r * ry * x1d) / rx;
+
+    final cx = cxd + 0.5 * (x1 + x2);
+    final cy = cyd + 0.5 * (y1 + y2);
+
+    final theta = _vectorAngle(1.0, 0.0, (x1d - cxd) / rx, (y1d - cyd) / ry);
+    var dTheta = _vectorAngle((x1d - cxd) / rx, (y1d - cyd) / ry,
+            (-x1d - cxd) / rx, (-y1d - cyd) / ry) %
+        (math.pi * 2.0);
+    if (sweep == false && dTheta > 0.0)
+      dTheta -= math.pi * 2.0;
+    else if (sweep == true && dTheta < 0.0) dTheta += math.pi * 2.0;
+    _bezierArcFromCentre(cx, cy, rx, ry, -theta, -dTheta);
+  }
+
+  void _bezierArcFromCentre(double cx, double cy, double rx, double ry,
+      double startAngle, double extent) {
+    int fragmentsCount;
+    double fragmentsAngle;
+
+    if (extent.abs() <= math.pi / 2.0) {
+      fragmentsCount = 1;
+      fragmentsAngle = extent;
+    } else {
+      fragmentsCount = (extent.abs() / (math.pi / 2.0)).ceil().toInt();
+      fragmentsAngle = extent / fragmentsCount.toDouble();
+    }
+    if (fragmentsAngle == 0.0) {
+      return;
+    }
+
+    final halfFragment = fragmentsAngle * 0.5;
+    var kappa =
+        (4.0 / 3.0 * (1.0 - math.cos(halfFragment)) / math.sin(halfFragment))
+            .abs();
+
+    if (fragmentsAngle < 0.0) kappa = -kappa;
+
+    var theta = startAngle;
+    final startFragment = theta + fragmentsAngle;
+
+    var c1 = math.cos(theta);
+    var s1 = math.sin(theta);
+    for (var i = 0; i < fragmentsCount; i++) {
+      final c0 = c1;
+      final s0 = s1;
+      theta = startFragment + i * fragmentsAngle;
+      c1 = math.cos(theta);
+      s1 = math.sin(theta);
+      curveTo(
+          cx + rx * (c0 - kappa * s0),
+          cy - ry * (s0 + kappa * c0),
+          cx + rx * (c1 + kappa * s1),
+          cy - ry * (s1 - kappa * c1),
+          cx + rx * c1,
+          cy - ry * s1);
+    }
+  }
+
+  /// Draws an elliptical arc from (x1, y1) to (x2, y2).
+  /// The size and orientation of the ellipse are defined by two radii (rx, ry)
+  /// The center (cx, cy) of the ellipse is calculated automatically to satisfy
+  /// the constraints imposed by the other parameters. large and sweep flags
+  /// contribute to the automatic calculations and help determine how the arc is drawn.
+  void _bezierArc(
+      double x1, double y1, double rx, double ry, double x2, double y2,
+      {large = false, sweep = false, phi = 0.0}) {
+    if (x1 == x2 && y1 == y2) {
+      // From https://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes:
+      // If the endpoints (x1, y1) and (x2, y2) are identical, then this is
+      // equivalent to omitting the elliptical arc segment entirely.
+      return;
+    }
+
+    if (rx.abs() <= 1e-10 || ry.abs() <= 1e-10) {
+      lineTo(x2, y2);
+      return;
+    }
+
+    if (phi != 0.0) {
+      // Our box bézier arcs can't handle rotations directly
+      // move to a well known point, eliminate phi and transform the other point
+      final mat = Matrix4.identity();
+      mat.translate(-x1, -y1);
+      mat.rotateZ(-phi);
+      final tr = mat.transform3(Vector3(x2, y2, 0.0));
+      _endToCenterParameters(0.0, 0.0, tr[0], tr[1], large, sweep, rx, ry);
+    } else {
+      _endToCenterParameters(x1, y1, x2, y2, large, sweep, rx, ry);
+    }
   }
 
   /// https://github.com/deeplook/svglib/blob/master/svglib/svglib.py#L911
@@ -348,10 +485,32 @@ class PdfGraphics {
           //   break;
           // case 't': // quadratic bezier, relative
           //   break;
-          // case 'A': // elliptical arc, absolute
-          //   break;
-          // case 'a': // elliptical arc, relative
-          //   break;
+          case 'A': // elliptical arc, absolute
+            var len = 0;
+            while (len < points.length) {
+              _bezierArc(lastPoint.x, lastPoint.y, points[len + 0],
+                  points[len + 1], points[len + 5], points[len + 6],
+                  phi: points[len + 2] * math.pi / 180.0,
+                  large: points[len + 3] != 0.0,
+                  sweep: points[len + 4] != 0.0);
+              lastPoint = PdfPoint(points[len + 5], points[len + 6]);
+              len += 7;
+            }
+            break;
+          case 'a': // elliptical arc, relative
+            var len = 0;
+            while (len < points.length) {
+              points[len + 5] += lastPoint.x;
+              points[len + 6] += lastPoint.y;
+              _bezierArc(lastPoint.x, lastPoint.y, points[len + 0],
+                  points[len + 1], points[len + 5], points[len + 6],
+                  phi: points[len + 2] * math.pi / 180.0,
+                  large: points[len + 3] != 0.0,
+                  sweep: points[len + 4] != 0.0);
+              lastPoint = PdfPoint(points[len + 5], points[len + 6]);
+              len += 7;
+            }
+            break;
           case 'Z': // close path
           case 'z': // close path
             if (stroke) closePath();
