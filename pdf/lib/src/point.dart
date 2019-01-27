@@ -30,6 +30,8 @@ class PdfPoint {
 
   const PdfPoint(this.x, this.y);
 
+  static const zero = PdfPoint(0.0, 0.0);
+
   @override
   String toString() => "PdfPoint($x, $y)";
 }

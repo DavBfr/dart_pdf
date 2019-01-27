@@ -22,11 +22,17 @@ part of pdf;
 class PdfRect {
   final double x, y, w, h;
 
+  static const zero = PdfRect(0.0, 0.0, 0.0, 0.0);
+
   const PdfRect(this.x, this.y, this.w, this.h);
 
   factory PdfRect.fromLTRB(
       double left, double top, double right, double bottom) {
     return PdfRect(left, top, right - left, bottom - top);
+  }
+
+  factory PdfRect.fromPoints(PdfPoint offset, PdfPoint size) {
+    return PdfRect(offset.x, offset.y, size.x, size.y);
   }
 
   double get l => x;
@@ -36,4 +42,16 @@ class PdfRect {
 
   @override
   String toString() => "PdfRect($x, $y, $w, $h)";
+
+  PdfRect operator *(double factor) {
+    return PdfRect(x * factor, y * factor, w * factor, h * factor);
+  }
+
+  PdfPoint get offset => PdfPoint(x, y);
+  PdfPoint get size => PdfPoint(w, h);
+
+  PdfPoint get topLeft => PdfPoint(x, y);
+  PdfPoint get topRight => PdfPoint(r, y);
+  PdfPoint get bottomLeft => PdfPoint(x, t);
+  PdfPoint get bottomRight => PdfPoint(r, t);
 }

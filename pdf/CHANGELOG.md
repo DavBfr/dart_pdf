@@ -1,3 +1,6 @@
+# 1.1.1
+* Improve PdfPoint and PdfRect
+
 # 1.1.0
 * Rename classes to satisfy Dart conventions
 * Remove useless new and const keywords
