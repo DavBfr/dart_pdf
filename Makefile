@@ -78,7 +78,11 @@ test-readme: $(FONTS) get-readme
 	cd test; dart extract_readme.dart
 	cd test; dartanalyzer readme.dart	
 
-test: test-pdf test-printing node_modules
+test-web:
+	cd pdf/web_example; pub get
+	cd pdf/web_example; pub run webdev build
+
+test: test-pdf test-printing node_modules test-web
 	cat pdf/lcov.info printing/lcov.info | node_modules/.bin/lcov-summary
 
 clean:

@@ -6,6 +6,7 @@
 - Fix Theme.withFont factory
 - Implement InheritedWidget
 - Fix Web dependency
+- Add Web example
 
 ## 1.3.17
 

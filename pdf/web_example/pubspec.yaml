@@ -1,0 +1,19 @@
+name: web_example
+version: 1.0.0
+homepage: https://github.com/DavBfr/dart_pdf
+author: David PHAM-VAN <dev.nfet.net@gmail.com>
+
+environment:
+  sdk: '>=2.2.0 <3.0.0'
+
+dependencies:
+  pdf:
+
+dependency_overrides:
+  pdf:
+    path: ../
+
+dev_dependencies:
+  build_runner:
+  build_web_compilers:
+  webdev:
