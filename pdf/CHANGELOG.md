@@ -1,9 +1,13 @@
+# 1.2.0
+* Change license to Apache 2.0
+
 # 1.1.1
 * Improve PdfPoint and PdfRect
 * Change PdfColor.fromInt to const constructor
 * Fix drawShape Bézier curves
 * Add arcs to SVG drawShape
 * Add default page margins
+* Change license to Apache 2.0
 
 # 1.1.0
 * Rename classes to satisfy Dart conventions
