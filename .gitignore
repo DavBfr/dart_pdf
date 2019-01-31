@@ -57,5 +57,5 @@ printing/example/ios/Runner.xcworkspace
 printing/example/ios/Flutter/Generated.xcconfig
 printing/example/ios/Runner/GeneratedPluginRegistrant.h
 printing/example/ios/Runner/GeneratedPluginRegistrant.m
-printing/example/.gitignore
 printing/example/.metadata
+printing/example/ios/Podfile.lock
