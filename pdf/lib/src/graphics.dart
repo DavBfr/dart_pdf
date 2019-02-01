@@ -19,6 +19,9 @@ part of pdf;
 enum PdfLineCap { joinMiter, joinRound, joinBevel }
 
 class PdfGraphics {
+  /// Ellipse 4-spline magic number
+  static const _m4 = 0.551784;
+
   /// Graphic context number
   var _context = 0;
 
@@ -122,28 +125,14 @@ class PdfGraphics {
   }
 
   void drawEllipse(double x, double y, double r1, double r2) {
-    // The best 4-spline magic number
-    double m4 = 0.551784;
-
-    // Starting point
     moveTo(x, y - r2);
-
-    buf.putNumList(
-        <double>[x + m4 * r1, y - r2, x + r1, y - m4 * r2, x + r1, y]);
-    buf.putString(" c\n");
-    buf.putNumList(
-        <double>[x + r1, y + m4 * r2, x + m4 * r1, y + r2, x, y + r2]);
-    buf.putString(" c\n");
-    buf.putNumList(
-        <double>[x - m4 * r1, y + r2, x - r1, y + m4 * r2, x - r1, y]);
-    buf.putString(" c\n");
-    buf.putNumList(
-        <double>[x - r1, y - m4 * r2, x - m4 * r1, y - r2, x, y - r2]);
-    buf.putString(" c\n");
+    curveTo(x + _m4 * r1, y - r2, x + r1, y - _m4 * r2, x + r1, y);
+    curveTo(x + r1, y + _m4 * r2, x + _m4 * r1, y + r2, x, y + r2);
+    curveTo(x - _m4 * r1, y + r2, x - r1, y + _m4 * r2, x - r1, y);
+    curveTo(x - r1, y - _m4 * r2, x - _m4 * r1, y - r2, x, y - r2);
   }
 
-  /// We override Graphics.drawRect as it doesn't join the 4 lines.
-  /// Also, Pdf provides us with a Rectangle operator, so we will use that.
+  /// Draws a Rectangle
   ///
   /// @param x coordinate
   /// @param y coordinate
@@ -157,6 +146,27 @@ class PdfGraphics {
   ) {
     buf.putNumList(<double>[x, y, w, h]);
     buf.putString(" re\n");
+  }
+
+  /// Draws a Rounded Rectangle
+  ///
+  /// @param x coordinate
+  /// @param y coordinate
+  /// @param w width
+  /// @param h height
+  /// @param rh horizontal radius
+  /// @param rv vertical radius
+  void drawRRect(double x, double y, double w, double h, double rv, double rh) {
+    moveTo(x, y + rv);
+    curveTo(x, y - _m4 * rv + rv, x - _m4 * rh + rh, y, x + rh, y);
+    lineTo(x + w - rh, y);
+    curveTo(x + _m4 * rh + w - rh, y, x + w, y - _m4 * rv + rv, x + w, y + rv);
+    lineTo(x + w, y + h - rv);
+    curveTo(x + w, y + _m4 * rv + h - rv, x + _m4 * rh + w - rh, y + h,
+        x + w - rh, y + h);
+    lineTo(x + rh, y + h);
+    curveTo(x - _m4 * rh + rh, y + h, x, y + _m4 * rv + h - rv, x, y + h - rv);
+    lineTo(x, y + rv);
   }
 
   /// This draws a string.

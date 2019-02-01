@@ -2,6 +2,7 @@
 * Change license to Apache 2.0
 * Improve PdfRect
 * Add support for CMYK, HSL anf HSV colors
+* Implement rounded rect
 
 # 1.1.1
 * Improve PdfPoint and PdfRect
