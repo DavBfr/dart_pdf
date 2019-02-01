@@ -18,11 +18,11 @@ part of pdf;
 
 @immutable
 class PdfRect {
-  final double x, y, w, h;
+  final double x, y, width, height;
 
   static const zero = PdfRect(0.0, 0.0, 0.0, 0.0);
 
-  const PdfRect(this.x, this.y, this.w, this.h);
+  const PdfRect(this.x, this.y, this.width, this.height);
 
   factory PdfRect.fromLTRB(
       double left, double top, double right, double bottom) {
@@ -33,23 +33,36 @@ class PdfRect {
     return PdfRect(offset.x, offset.y, size.x, size.y);
   }
 
-  double get l => x;
-  double get b => y;
-  double get r => x + w;
-  double get t => y + h;
+  double get left => x;
+  double get bottom => y;
+  double get right => x + width;
+  double get top => y + height;
+
+  @deprecated
+  double get l => left;
+  @deprecated
+  double get b => bottom;
+  @deprecated
+  double get r => right;
+  @deprecated
+  double get t => top;
+  @deprecated
+  double get w => width;
+  @deprecated
+  double get h => height;
 
   @override
-  String toString() => "PdfRect($x, $y, $w, $h)";
+  String toString() => "PdfRect($x, $y, $width, $height)";
 
   PdfRect operator *(double factor) {
-    return PdfRect(x * factor, y * factor, w * factor, h * factor);
+    return PdfRect(x * factor, y * factor, width * factor, height * factor);
   }
 
   PdfPoint get offset => PdfPoint(x, y);
-  PdfPoint get size => PdfPoint(w, h);
+  PdfPoint get size => PdfPoint(width, height);
 
   PdfPoint get topLeft => PdfPoint(x, y);
-  PdfPoint get topRight => PdfPoint(r, y);
-  PdfPoint get bottomLeft => PdfPoint(x, t);
-  PdfPoint get bottomRight => PdfPoint(r, t);
+  PdfPoint get topRight => PdfPoint(right, y);
+  PdfPoint get bottomLeft => PdfPoint(x, top);
+  PdfPoint get bottomRight => PdfPoint(right, top);
 }

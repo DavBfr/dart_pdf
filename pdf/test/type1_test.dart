@@ -25,7 +25,7 @@ void printText(PdfGraphics g, String text, PdfFont font, double top) {
   const FS = 20.0;
   g.setColor(PdfColor(0.9, 0.9, 0.9));
   g.drawRect(50.0 + r.x * FS, g.page.pageFormat.height - top + r.y * FS,
-      r.w * FS, r.h * FS);
+      r.width * FS, r.height * FS);
   g.fillPath();
   g.setColor(PdfColor(0.3, 0.3, 0.3));
   g.drawString(font, FS, text, 50.0, g.page.pageFormat.height - top);

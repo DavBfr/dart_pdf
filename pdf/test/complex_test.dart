@@ -70,7 +70,7 @@ void main() {
     var r = font2.stringBounds(s);
     const FS = 20.0;
     g.setColor(PdfColor(0.0, 1.0, 1.0));
-    g.drawRect(50.0 + r.x * FS, 30.0 + r.y * FS, r.w * FS, r.h * FS);
+    g.drawRect(50.0 + r.x * FS, 30.0 + r.y * FS, r.width * FS, r.height * FS);
     g.fillPath();
     g.setColor(PdfColor(0.3, 0.3, 0.3));
     g.drawString(font2, FS, s, 50.0, 30.0);

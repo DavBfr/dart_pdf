@@ -84,7 +84,7 @@ class PdfAnnot extends PdfObject {
 
     params["/Subtype"] = PdfStream.string(subtype);
     params["/Rect"] = PdfStream.string(
-        "[${srcRect.l} ${srcRect.b} ${srcRect.r} ${srcRect.t}]");
+        "[${srcRect.left} ${srcRect.bottom} ${srcRect.right} ${srcRect.top}]");
 
     // handle the border
     if (border == null) {
@@ -103,7 +103,7 @@ class PdfAnnot extends PdfObject {
         dests.add(PdfStream.string("/Fit"));
       else {
         dests.add(PdfStream.string(
-            "/FitR ${destRect.l} ${destRect.b} ${destRect.r} ${destRect.t}"));
+            "/FitR ${destRect.left} ${destRect.bottom} ${destRect.right} ${destRect.top}"));
       }
       params["/Dest"] = PdfStream.array(dests);
     }

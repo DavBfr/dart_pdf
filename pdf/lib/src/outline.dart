@@ -92,8 +92,8 @@ class PdfOutline extends PdfObject {
       if (destMode == PdfOutlineMode.fitpage) {
         dests.add(PdfStream.string("/Fit"));
       } else {
-        dests.add(
-            PdfStream.string("/FitR ${rect.l} ${rect.b} ${rect.r} ${rect.t}"));
+        dests.add(PdfStream.string(
+            "/FitR ${rect.left} ${rect.bottom} ${rect.right} ${rect.top}"));
       }
       params["/Parent"] = parent.ref();
       params["/Dest"] = PdfStream.array(dests);

@@ -63,15 +63,15 @@ class PdfFont extends PdfObject {
     var r = glyphBounds(c);
     var x = r.x;
     var y = r.y;
-    var h = r.h;
-    var w = n == chars.length - 1 ? r.w : glyphAdvance(c);
+    var h = r.height;
+    var w = n == chars.length - 1 ? r.width : glyphAdvance(c);
 
     while (++n < chars.length) {
       c = chars[n];
       r = glyphBounds(c);
       if (r.y < y) y = r.y;
-      if (r.h > h) h = r.h;
-      w += n == chars.length - 1 ? r.w : glyphAdvance(c);
+      if (r.height > h) h = r.height;
+      w += n == chars.length - 1 ? r.width : glyphAdvance(c);
     }
 
     return PdfRect(x, y, w, h);
@@ -85,7 +85,7 @@ class PdfFont extends PdfObject {
 
     for (var c in chars) {
       var r = glyphBounds(c);
-      if (r.h > h) h = r.h;
+      if (r.height > h) h = r.height;
       w += glyphAdvance(c);
     }
 

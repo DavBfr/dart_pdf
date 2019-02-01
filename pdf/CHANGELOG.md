@@ -1,5 +1,6 @@
 # 1.2.0
 * Change license to Apache 2.0
+* Improve PdfRect
 
 # 1.1.1
 * Improve PdfPoint and PdfRect
