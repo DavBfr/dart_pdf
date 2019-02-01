@@ -182,10 +182,34 @@ class PdfGraphics {
   ///
   /// @param c Color to use
   void setColor(PdfColor color) {
-    buf.putNumList(<double>[color.r, color.g, color.b]);
-    buf.putString(" rg ");
-    buf.putNumList(<double>[color.r, color.g, color.b]);
-    buf.putString(" RG\n");
+    setFillColor(color);
+    setStrokeColor(color);
+  }
+
+  /// Sets the fill color for drawing
+  ///
+  /// @param c Color to use
+  void setFillColor(PdfColor color) {
+    if (color is PdfColorCmyk) {
+      buf.putNumList(<double>[color.c, color.m, color.y, color.k]);
+      buf.putString(" k\n");
+    } else {
+      buf.putNumList(<double>[color.r, color.g, color.b]);
+      buf.putString(" rg\n");
+    }
+  }
+
+  /// Sets the stroke color for drawing
+  ///
+  /// @param c Color to use
+  void setStrokeColor(PdfColor color) {
+    if (color is PdfColorCmyk) {
+      buf.putNumList(<double>[color.c, color.m, color.y, color.k]);
+      buf.putString(" K\n");
+    } else {
+      buf.putNumList(<double>[color.r, color.g, color.b]);
+      buf.putString(" RG\n");
+    }
   }
 
   /// Set the transformation Matrix
