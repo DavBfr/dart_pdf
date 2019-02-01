@@ -27,7 +27,7 @@ void main() {
     var img = Uint32List(10 * 10);
     img.fillRange(0, img.length - 1, 0x12345678);
 
-    var pdf = PdfDocument(deflate: zlib.encode);
+    var pdf = PdfDocument();
     pdf.info = PdfInfo(pdf,
         author: "David PHAM-VAN",
         creator: "David PHAM-VAN",
