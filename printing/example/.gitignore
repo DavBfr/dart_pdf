@@ -25,9 +25,8 @@
 .packages
 .pub-cache/
 .pub/
-build/
+/build/
 .metadata
-test
 
 # Android related
 **/android/**/gradle-wrapper.jar
@@ -63,7 +62,9 @@ test
 **/ios/Flutter/flutter_assets/
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
 **/ios/Podfile.lock
+**/ios/Podfile
 
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3

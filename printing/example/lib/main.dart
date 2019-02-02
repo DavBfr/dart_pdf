@@ -4,8 +4,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
+
+import 'package:printing_example/document.dart';
 
 void main() => runApp(MaterialApp(home: MyApp()));
 
@@ -20,34 +23,15 @@ class MyAppState extends State<MyApp> {
   final shareWidget = GlobalKey();
   final previewContainer = GlobalKey();
 
-  PdfDocument _generateDocument() {
-    final pdf = PdfDocument(deflate: zlib.encode);
-    final page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
-    final g = page.getGraphics();
-    final font = PdfFont.helvetica(pdf);
-    final top = page.pageFormat.height;
-
-    g.setColor(PdfColor(0.0, 1.0, 1.0));
-    g.drawRect(50.0 * PdfPageFormat.mm, top - 80.0 * PdfPageFormat.mm,
-        100.0 * PdfPageFormat.mm, 50.0 * PdfPageFormat.mm);
-    g.fillPath();
-
-    g.setColor(PdfColor(0.3, 0.3, 0.3));
-    g.drawString(font, 12.0, "Hello World!", 10.0 * PdfPageFormat.mm,
-        top - 10.0 * PdfPageFormat.mm);
-
-    return pdf;
-  }
-
-  void _printPdf() {
+  void _printPdf() async {
     print("Print ...");
-    final pdf = _generateDocument();
+    final pdf = await generateDocument();
     Printing.printPdf(document: pdf);
   }
 
-  void _sharePdf() {
+  void _sharePdf() async {
     print("Share ...");
-    final pdf = _generateDocument();
+    final pdf = await generateDocument();
 
     // Calculate the widget center for iPad sharing popup position
     final RenderBox referenceBox =

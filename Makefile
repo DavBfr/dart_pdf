@@ -38,7 +38,7 @@ pdf/.dart_tool:
 test: pdf/.dart_tool $(FONTS)
 	cd pdf; for EXAMPLE in $(shell cd pdf; find example -name '*.dart'); do dart $$EXAMPLE; done
 	cd pdf; for TEST in $(shell cd pdf; find test -name '*.dart'); do dart $$TEST; done
-	# cd printing; flutter test
+	cd printing/example; flutter test
 
 clean:
 	git clean -fdx -e .vscode
