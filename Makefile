@@ -41,7 +41,7 @@ test: pdf/.dart_tool $(FONTS)
 	# cd printing; flutter test
 
 clean:
-	git clean -fdx
+	git clean -fdx -e .vscode
 
 publish-pdf: format clean
 	cd pdf; pub publish -f
