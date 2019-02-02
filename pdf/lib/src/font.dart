@@ -17,7 +17,7 @@
 part of pdf;
 
 class PdfFont extends PdfObject {
-  /// Thedf type of the font, usually /Type1
+  /// The df type of the font, usually /Type1
   final String subtype;
 
   /// Constructs a [PdfFont]. This will attempt to map the font from a known

@@ -42,7 +42,7 @@ class PdfObject {
   }
 
   /// Writes the object to the output stream.
-  /// This method must be overidden.
+  /// This method must be overridden.
   ///
   /// Note: It should not write any other objects, even if they are
   /// it's Kids, as they will be written by the calling routine.

@@ -173,7 +173,7 @@ class PdfGraphics {
   ///
   /// @param x coordinate
   /// @param y coordinate
-  /// @oaran s String to draw
+  /// @param s String to draw
   void drawString(PdfFont font, double size, String s, double x, double y) {
     if (!page.fonts.containsKey(font.name)) {
       page.fonts[font.name] = font;
@@ -558,7 +558,7 @@ class PdfGraphics {
   }
 
   /// This is used to add a polygon to the current path.
-  /// Used by drawPolygon(), drawPolyline() and fillPolygon() etal
+  /// Used by drawPolygon()
   ///
   /// @param p Array of coordinates
   /// @see #drawPolygon

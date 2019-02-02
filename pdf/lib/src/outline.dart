@@ -55,7 +55,7 @@ class PdfOutline extends PdfObject {
   /// This method creates an outline, and attaches it to this one.
   /// When the outline is selected, the supplied region is displayed.
   ///
-  /// Note: the coordiates are in User space. They are converted to User
+  /// Note: the coordinates are in User space. They are converted to User
   /// space.
   ///
   /// This allows you to have an outline for say a Chapter,
@@ -98,7 +98,7 @@ class PdfOutline extends PdfObject {
       params["/Parent"] = parent.ref();
       params["/Dest"] = PdfStream.array(dests);
 
-      // were a decendent, so by default we are closed. Find out how many
+      // were a descendent, so by default we are closed. Find out how many
       // entries are below us
       int c = descendants();
       if (c > 0) {

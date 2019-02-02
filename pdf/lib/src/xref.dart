@@ -26,7 +26,7 @@ class PdfXref {
   /// The generation of the object, usually 0
   int generation = 0;
 
-  /// Creates a crossreference for a Pdf Object
+  /// Creates a cross-reference for a Pdf Object
   /// @param id The object's ID
   /// @param offset The object's position in the file
   /// @param generation The object's generation, usually 0

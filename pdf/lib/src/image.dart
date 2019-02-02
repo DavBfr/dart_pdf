@@ -39,7 +39,7 @@ class PdfImage extends PdfXObject {
 
   /// Creates a new [PdfImage] instance.
   ///
-  /// @param imgage an [Uint8List] value
+  /// @param image an [Uint8List] value
   /// @param width
   /// @param height
   /// @param alpha if the image is transparent

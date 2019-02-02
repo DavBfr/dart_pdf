@@ -39,7 +39,7 @@ class PdfOutput {
 
   /// This method writes a [PdfObject] to the stream.
   ///
-  /// @param ob [PdfObject] Obeject to write
+  /// @param ob [PdfObject] Object to write
   void write(PdfObject ob) {
     // Check the object to see if it's one that is needed in the trailer
     // object
@@ -52,10 +52,6 @@ class PdfOutput {
 
   /// This closes the Stream, writing the xref table
   void close() {
-    // we use baos to speed things up a little.
-    // Also, offset is preserved, and marks the begining of this block.
-    // This is required by Pdf at the end of the Pdf file.
-
     int xref = os.offset;
 
     os.putString("xref\n");
