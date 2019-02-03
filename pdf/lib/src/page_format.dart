@@ -69,6 +69,15 @@ class PdfPageFormat {
   PdfPageFormat get portrait =>
       height >= width ? this : copyWith(width: height, height: width);
 
+  PdfPageFormat applyMargin(
+          {double left, double top, double right, double bottom}) =>
+      copyWith(
+        marginLeft: math.max(marginLeft, left),
+        marginTop: math.max(marginTop, top),
+        marginRight: math.max(marginRight, right),
+        marginBottom: math.max(marginBottom, bottom),
+      );
+
   @override
   String toString() {
     return "${width}x$height";

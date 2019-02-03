@@ -25,13 +25,13 @@ class MyAppState extends State<MyApp> {
 
   void _printPdf() async {
     print("Print ...");
-    final pdf = await generateDocument();
+    final pdf = await generateDocument(PdfPageFormat.a4);
     Printing.printPdf(document: pdf);
   }
 
   void _sharePdf() async {
     print("Share ...");
-    final pdf = await generateDocument();
+    final pdf = await generateDocument(PdfPageFormat.a4);
 
     // Calculate the widget center for iPad sharing popup position
     final RenderBox referenceBox =
@@ -46,7 +46,6 @@ class MyAppState extends State<MyApp> {
   }
 
   Future<void> _printScreen() async {
-    const margin = 10.0 * PdfPageFormat.mm;
     final pdf = PdfDocument(deflate: zlib.encode);
     final page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
     final g = page.getGraphics();
@@ -58,8 +57,12 @@ class MyAppState extends State<MyApp> {
     print("Print Screen ${im.width}x${im.height} ...");
 
     // Center the image
-    final w = page.pageFormat.width - margin * 2.0;
-    final h = page.pageFormat.height - margin * 2.0;
+    final w = page.pageFormat.width -
+        page.pageFormat.marginLeft -
+        page.pageFormat.marginRight;
+    final h = page.pageFormat.height -
+        page.pageFormat.marginTop -
+        page.pageFormat.marginBottom;
     double iw, ih;
     if (im.width.toDouble() / im.height.toDouble() < 1.0) {
       ih = h;
@@ -71,8 +74,15 @@ class MyAppState extends State<MyApp> {
 
     PdfImage image = PdfImage(pdf,
         image: bytes.buffer.asUint8List(), width: im.width, height: im.height);
-    g.drawImage(image, margin + (w - iw) / 2.0,
-        page.pageFormat.height - margin - ih - (h - ih) / 2.0, iw, ih);
+    g.drawImage(
+        image,
+        page.pageFormat.marginLeft + (w - iw) / 2.0,
+        page.pageFormat.height -
+            page.pageFormat.marginTop -
+            ih -
+            (h - ih) / 2.0,
+        iw,
+        ih);
 
     Printing.printPdf(document: pdf);
   }
