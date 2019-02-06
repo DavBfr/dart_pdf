@@ -1,3 +1,6 @@
+# 1.3.3
+* Update Readme
+
 # 1.3.2
 * Fix iOS printing issues
 

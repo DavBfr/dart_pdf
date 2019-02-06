@@ -1,3 +1,6 @@
+# 1.3.2
+* Update Readme
+
 # 1.3.1
 * Fix pana linting notices
 

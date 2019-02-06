@@ -8,7 +8,9 @@ This library is divided in two parts:
 It can create a full multi-pages document with graphics,
 images and text using TrueType fonts. With the ease of use you already know.
 
-> Use `printing` package <https://pub.dartlang.org/packages/printing>
+![Example document](example.jpg)
+
+> Use the `printing` package <https://pub.dartlang.org/packages/printing>
 > for full flutter print and share operation.
 
 The coordinate system is using the internal Pdf unit:
