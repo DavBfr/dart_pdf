@@ -63,6 +63,7 @@
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
 **/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+**/ios/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
 **/ios/Podfile.lock
 **/ios/Podfile
 

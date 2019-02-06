@@ -1,3 +1,6 @@
+# 1.3.2
+* Fix iOS printing issues
+
 # 1.3.1
 * Fix pana linting notices
 

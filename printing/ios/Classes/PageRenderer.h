@@ -20,8 +20,7 @@
 
 - (instancetype)init:(FlutterMethodChannel*)channel;
 - (void)drawPageAtIndex:(NSInteger)pageIndex inRect:(CGRect)printableRect;
+- (void)setDocument:(NSData*)data;
 
 @property(nonatomic, readonly) NSInteger numberOfPages;
-@property(nonatomic, readonly) NSLock* lock;
-@property(nonatomic) CGPDFDocumentRef pdfDocument;
 @end

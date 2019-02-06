@@ -18,10 +18,9 @@
 
 @implementation PdfPrintPageRenderer {
   FlutterMethodChannel* channel;
+  CGPDFDocumentRef pdfDocument;
+  NSLock* lock;
 }
-
-@synthesize lock;
-@synthesize pdfDocument;
 
 - (instancetype)init:(FlutterMethodChannel*)channel {
   self = [super init];
@@ -29,6 +28,12 @@
   self->lock = [[NSLock alloc] init];
   self->pdfDocument = nil;
   return self;
+}
+
+- (void)dealloc {
+  if (self->pdfDocument != nil) {
+    CGPDFDocumentRelease(self->pdfDocument);
+  }
 }
 
 - (NSInteger)numberOfPages {
@@ -73,6 +78,26 @@
   CGContextScaleCTM(ctx, 1.0, -1.0);
   CGContextTranslateCTM(ctx, 0.0, -self.paperRect.size.height);
   CGContextDrawPDFPage(ctx, page);
+}
+
+void dataProviderReleaseDataCallback(void* info,
+                                     const void* data,
+                                     size_t size) {
+  free((void*)data);
+}
+
+- (void)setDocument:(NSData*)data {
+  void* buffer = malloc(data.length);
+  memcpy(buffer, data.bytes, data.length);
+  CGDataProviderRef dataProvider = CGDataProviderCreateWithData(
+      NULL, buffer, data.length, dataProviderReleaseDataCallback);
+  if (pdfDocument != nil) {
+    CGPDFDocumentRelease(pdfDocument);
+    pdfDocument = nil;
+  }
+  pdfDocument = CGPDFDocumentCreateWithProvider(dataProvider);
+  CGDataProviderRelease(dataProvider);
+  [lock unlock];
 }
 
 @end

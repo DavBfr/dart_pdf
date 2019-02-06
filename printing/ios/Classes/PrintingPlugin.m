@@ -33,7 +33,7 @@
 - (instancetype)init:(FlutterMethodChannel*)channel {
   self = [super init];
   self->channel = channel;
-  self->renderer = [[PdfPrintPageRenderer alloc] init:channel];
+  self->renderer = nil;
   return self;
 }
 
@@ -72,6 +72,7 @@
   printInfo.jobName = name;
   printInfo.outputType = UIPrintInfoOutputGeneral;
   controller.printInfo = printInfo;
+  renderer = [[PdfPrintPageRenderer alloc] init:channel];
   [controller setPrintPageRenderer:renderer];
   UIPrintInteractionCompletionHandler completionHandler =
       ^(UIPrintInteractionController* printController, BOOL completed,
@@ -80,25 +81,14 @@
           NSLog(@"FAILED! due to error in domain %@ with error code %u",
                 error.domain, (unsigned int)error.code);
         }
-        if (self->renderer.pdfDocument != nil) {
-          CGPDFDocumentRelease(self->renderer.pdfDocument);
-          self->renderer.pdfDocument = nil;
-        }
+        self->renderer = nil;
       };
 
   [controller presentAnimated:YES completionHandler:completionHandler];
 }
 
 - (void)writePdf:(nonnull FlutterStandardTypedData*)data {
-  CGDataProviderRef dataProvider = CGDataProviderCreateWithData(
-      NULL, data.data.bytes, data.data.length, NULL);
-  if (renderer.pdfDocument != nil) {
-    CGPDFDocumentRelease(renderer.pdfDocument);
-    renderer.pdfDocument = nil;
-  }
-  renderer.pdfDocument = CGPDFDocumentCreateWithProvider(dataProvider);
-  CGDataProviderRelease(dataProvider);
-  [renderer.lock unlock];
+  [renderer setDocument:data.data];
 }
 
 - (void)sharePdf:(nonnull FlutterStandardTypedData*)data
