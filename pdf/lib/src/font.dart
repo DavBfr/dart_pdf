@@ -56,7 +56,7 @@ class PdfFont extends PdfObject {
   PdfRect stringBounds(String s) {
     var chars = latin1.encode(s);
 
-    if (chars.length == 0) return const PdfRect(0.0, 0.0, 0.0, 0.0);
+    if (chars.isEmpty) return const PdfRect(0.0, 0.0, 0.0, 0.0);
 
     var n = 0;
     var c = chars[n];

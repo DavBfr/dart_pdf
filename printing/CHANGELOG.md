@@ -1,3 +1,6 @@
+# 1.3.1
+* Fix pana linting notices
+
 # 1.3.0
 * Add a Flutter like widget system
 

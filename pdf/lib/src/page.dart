@@ -91,7 +91,7 @@ class PdfPage extends PdfObject {
 //        }
 
     // the /Contents pages object
-    if (contents.length > 0) {
+    if (contents.isNotEmpty) {
       if (contents.length == 1) {
         params["/Contents"] = contents[0].ref();
       } else {
@@ -104,12 +104,12 @@ class PdfPage extends PdfObject {
     final resources = Map<String, PdfStream>();
 
     // fonts
-    if (fonts.length > 0) {
+    if (fonts.isNotEmpty) {
       resources["/Font"] = PdfStream()..putObjectDictionary(fonts);
     }
 
     // Now the XObjects
-    if (xObjects.length > 0) {
+    if (xObjects.isNotEmpty) {
       resources["/XObject"] = PdfStream()..putObjectDictionary(xObjects);
     }
 
@@ -121,7 +121,7 @@ class PdfPage extends PdfObject {
     }
 
     // The /Annots object
-    if (annotations.length > 0) {
+    if (annotations.isNotEmpty) {
       params["/Annots"] = PdfStream()..putObjectArray(annotations);
     }
   }

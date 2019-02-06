@@ -44,16 +44,16 @@ class PdfFormXObject extends PdfXObject {
     final resources = Map<String, PdfStream>();
 
     // fonts
-    if (fonts.length > 0) {
+    if (fonts.isNotEmpty) {
       resources["/Font"] = PdfStream()..putObjectDictionary(fonts);
     }
 
     // Now the XObjects
-    if (xobjects.length > 0) {
+    if (xobjects.isNotEmpty) {
       resources["/XObject"] = PdfStream()..putObjectDictionary(xobjects);
     }
 
-    if (resources.length > 0) {
+    if (resources.isNotEmpty) {
       params["/Resources"] = PdfStream.dictionary(resources);
     }
   }

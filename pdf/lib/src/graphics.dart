@@ -32,7 +32,7 @@ class PdfGraphics {
   PdfGraphics(this.page, this.buf);
 
   PdfFont get defaultFont {
-    if (page.pdfDocument.fonts.length == 0) {
+    if (page.pdfDocument.fonts.isEmpty) {
       PdfFont.helvetica(page.pdfDocument);
     }
 
@@ -460,7 +460,7 @@ class PdfGraphics {
           case 'S': // smooth cubic bézier, absolute
             while (points.length >= 4) {
               PdfPoint c1;
-              if ('cCsS'.indexOf(lastAction) >= 0) {
+              if ('cCsS'.contains(lastAction)) {
                 c1 = PdfPoint(lastPoint.x + (lastPoint.x - lastControl.x),
                     lastPoint.y + (lastPoint.y - lastControl.y));
               } else {
@@ -493,7 +493,7 @@ class PdfGraphics {
           case 's': // smooth cubic bézier, relative
             while (points.length >= 4) {
               PdfPoint c1;
-              if ('cCsS'.indexOf(lastAction) >= 0) {
+              if ('cCsS'.contains(lastAction)) {
                 c1 = PdfPoint(lastPoint.x + (lastPoint.x - lastControl.x),
                     lastPoint.y + (lastPoint.y - lastControl.y));
               } else {

@@ -42,7 +42,7 @@ class PdfCatalog extends PdfObject {
     params["/Pages"] = pdfPageList.ref();
 
     // the Outlines object
-    if (outlines != null && outlines.outlines.length > 0) {
+    if (outlines != null && outlines.outlines.isNotEmpty) {
       params["/Outlines"] = outlines.ref();
     }
 

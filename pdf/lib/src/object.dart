@@ -70,7 +70,7 @@ class PdfObject {
   }
 
   void _writeContent(PdfStream os) {
-    if (params.length > 0) {
+    if (params.isNotEmpty) {
       os.putDictionary(params);
       os.putString("\n");
     }

@@ -122,7 +122,7 @@ class PdfOutline extends PdfObject {
     }
 
     // These only valid if we have children
-    if (outlines.length > 0) {
+    if (outlines.isNotEmpty) {
       // the number of the first outline in list
       params["/First"] = outlines[0].ref();
 
