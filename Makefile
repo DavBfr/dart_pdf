@@ -14,6 +14,7 @@
 
  DART_SRC=$(shell find . -name '*.dart')
  CLNG_SRC=$(shell find printing/ios -name '*.java' -o -name '*.m' -o -name '*.h') $(shell find printing/android -name '*.java' -o -name '*.m' -o -name '*.h')
+ SWFT_SRC=$(shell find . -name '*.swift')
  FONTS=pdf/open-sans.ttf pdf/roboto.ttf
 
 all: $(FONTS) format
@@ -24,13 +25,16 @@ pdf/open-sans.ttf:
 pdf/roboto.ttf:
 	curl -L "https://github.com/google/fonts/raw/master/apache/robotomono/RobotoMono-Regular.ttf" > $@
 
-format: format-dart format-clang
+format: format-dart format-clang format-swift
 
 format-dart: $(DART_SRC)
 	dartfmt -w --fix $^
 
 format-clang: $(CLNG_SRC)
 	clang-format -style=Chromium -i $^
+
+format-swift: $(SWFT_SRC)
+	swiftformat --swiftversion 4.2 $^
 
 pdf/.dart_tool:
 	cd pdf ; pub get

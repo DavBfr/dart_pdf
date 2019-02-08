@@ -12,6 +12,10 @@ dependencies:
     sdk: flutter
   pdf: "^1.3.0"
 
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
 flutter:
   plugin:
     androidPackage: net.nfet.flutter.printing

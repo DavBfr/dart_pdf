@@ -16,8 +16,5 @@
 
 #import <Flutter/Flutter.h>
 
-@interface PrintingPlugin
-    : NSObject <FlutterPlugin, UIPrintInteractionControllerDelegate>
-
-- (instancetype)init:(FlutterMethodChannel*)channel;
+@interface PrintingPlugin : NSObject <FlutterPlugin>
 @end
