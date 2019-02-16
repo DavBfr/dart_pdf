@@ -18,6 +18,8 @@ part of pdf;
 
 @immutable
 class PdfPoint {
+  const PdfPoint(this.x, this.y);
+
   final double x, y;
 
   @deprecated
@@ -26,10 +28,8 @@ class PdfPoint {
   @deprecated
   double get h => y;
 
-  const PdfPoint(this.x, this.y);
-
-  static const zero = PdfPoint(0.0, 0.0);
+  static const PdfPoint zero = PdfPoint(0.0, 0.0);
 
   @override
-  String toString() => "PdfPoint($x, $y)";
+  String toString() => 'PdfPoint($x, $y)';
 }

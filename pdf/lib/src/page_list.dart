@@ -17,11 +17,11 @@
 part of pdf;
 
 class PdfPageList extends PdfObject {
-  /// This holds the pages
-  final List<PdfPage> pages = [];
-
   /// This constructs a [PdfPageList] object.
-  PdfPageList(PdfDocument pdfDocument) : super(pdfDocument, "/Pages");
+  PdfPageList(PdfDocument pdfDocument) : super(pdfDocument, '/Pages');
+
+  /// This holds the pages
+  final List<PdfPage> pages = <PdfPage>[];
 
   /// This returns a specific page. Used by the Pdf class.
   /// @param page page number to return
@@ -32,7 +32,7 @@ class PdfPageList extends PdfObject {
   void _prepare() {
     super._prepare();
 
-    params["/Kids"] = PdfStream()..putObjectArray(pages);
-    params["/Count"] = PdfStream.intNum(pages.length);
+    params['/Kids'] = PdfStream()..putObjectArray(pages);
+    params['/Count'] = PdfStream.intNum(pages.length);
   }
 }

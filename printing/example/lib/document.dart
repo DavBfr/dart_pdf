@@ -6,8 +6,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:printing/printing.dart';
 
-const green = PdfColor.fromInt(0xff9ce5d0);
-const lightGreen = PdfColor.fromInt(0xffcdf1e7);
+const PdfColor green = PdfColor.fromInt(0xff9ce5d0);
+const PdfColor lightGreen = PdfColor.fromInt(0xffcdf1e7);
 
 class MyPage extends Page {
   MyPage(
@@ -16,6 +16,7 @@ class MyPage extends Page {
       EdgeInsets margin})
       : super(pageFormat: pageFormat, margin: margin, build: build);
 
+  @override
   void paint(Widget child, Context context) {
     context.canvas
       ..setColor(lightGreen)
@@ -66,16 +67,17 @@ class Block extends StatelessWidget {
             Container(
               width: 6,
               height: 6,
-              margin: EdgeInsets.only(top: 2.5, left: 2, right: 5),
-              decoration: BoxDecoration(color: green, shape: BoxShape.circle),
+              margin: const EdgeInsets.only(top: 2.5, left: 2, right: 5),
+              decoration:
+                  const BoxDecoration(color: green, shape: BoxShape.circle),
             ),
             Text(title, style: Theme.of(context).defaultTextStyleBold),
           ]),
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
                 border: BoxBorder(left: true, color: green, width: 2)),
-            padding: EdgeInsets.only(left: 10, top: 5, bottom: 5),
-            margin: EdgeInsets.only(left: 5),
+            padding: const EdgeInsets.only(left: 10, top: 5, bottom: 5),
+            margin: const EdgeInsets.only(left: 5),
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -94,22 +96,22 @@ class Category extends StatelessWidget {
   @override
   Widget build(Context context) {
     return Container(
-        decoration: BoxDecoration(color: lightGreen, borderRadius: 6),
-        margin: EdgeInsets.only(bottom: 10, top: 20),
-        padding: EdgeInsets.fromLTRB(10, 7, 10, 4),
+        decoration: const BoxDecoration(color: lightGreen, borderRadius: 6),
+        margin: const EdgeInsets.only(bottom: 10, top: 20),
+        padding: const EdgeInsets.fromLTRB(10, 7, 10, 4),
         child: Text(title, textScaleFactor: 1.5));
   }
 }
 
 Future<PdfDocument> generateDocument(PdfPageFormat format) async {
-  final pdf = PdfDoc();
+  final PdfDoc pdf = PdfDoc();
 
-  final profileImage = await pdfImageFromImageProvider(
+  final PdfImage profileImage = await pdfImageFromImageProvider(
       pdf: pdf.document,
       image: fw.NetworkImage(
-          "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=200"),
+          'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=200'),
       onError: (dynamic exception, StackTrace stackTrace) {
-        print("error");
+        print('error');
       });
 
   pdf.addPage(MyPage(
@@ -124,20 +126,20 @@ Future<PdfDocument> generateDocument(PdfPageFormat format) async {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                 Container(
-                    padding: EdgeInsets.only(left: 30, bottom: 20),
+                    padding: const EdgeInsets.only(left: 30, bottom: 20),
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Text("Parnella Charlesbois",
+                          Text('Parnella Charlesbois',
                               textScaleFactor: 2.0,
                               style: Theme.of(context).defaultTextStyleBold),
-                          Padding(padding: EdgeInsets.only(top: 10)),
-                          Text("Electrotyper",
+                          Padding(padding: const EdgeInsets.only(top: 10)),
+                          Text('Electrotyper',
                               textScaleFactor: 1.2,
                               style: Theme.of(context)
                                   .defaultTextStyleBold
                                   .copyWith(color: green)),
-                          Padding(padding: EdgeInsets.only(top: 20)),
+                          Padding(padding: const EdgeInsets.only(top: 20)),
                           Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -146,33 +148,33 @@ Future<PdfDocument> generateDocument(PdfPageFormat format) async {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: <Widget>[
-                                      Text("568 Port Washington Road"),
-                                      Text("Nordegg, AB T0M 2H0"),
-                                      Text("Canada, ON"),
+                                      Text('568 Port Washington Road'),
+                                      Text('Nordegg, AB T0M 2H0'),
+                                      Text('Canada, ON'),
                                     ]),
                                 Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: <Widget>[
-                                      Text("+1 403-721-6898"),
-                                      Text("p.charlesbois@yahoo.com"),
-                                      Text("wholeprices.ca")
+                                      Text('+1 403-721-6898'),
+                                      Text('p.charlesbois@yahoo.com'),
+                                      Text('wholeprices.ca')
                                     ]),
                                 Padding(padding: EdgeInsets.zero)
                               ]),
                         ])),
-                Category(title: "Work Experience"),
-                Block(title: "Tour bus driver"),
-                Block(title: "Logging equipment operator"),
-                Block(title: "Foot doctor"),
-                Category(title: "Education"),
-                Block(title: "Bachelor Of Commerce"),
-                Block(title: "Bachelor Interior Design"),
+                Category(title: 'Work Experience'),
+                Block(title: 'Tour bus driver'),
+                Block(title: 'Logging equipment operator'),
+                Block(title: 'Foot doctor'),
+                Category(title: 'Education'),
+                Block(title: 'Bachelor Of Commerce'),
+                Block(title: 'Bachelor Interior Design'),
               ])),
           Container(
             height: double.infinity,
             width: 10,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
                 border: BoxBorder(left: true, color: green, width: 2)),
           ),
           Column(

@@ -25,8 +25,17 @@ enum PdfOutlineMode {
 }
 
 class PdfOutline extends PdfObject {
+  /// Constructs a Pdf Outline object. When selected, the specified region
+  /// is displayed.
+  ///
+  /// @param title Title of the outline
+  /// @param dest The destination page
+  /// @param rect coordinate
+  PdfOutline(PdfDocument pdfDocument, {this.title, this.dest, this.rect})
+      : super(pdfDocument, '/Outlines');
+
   /// This holds any outlines below us
-  List<PdfOutline> outlines = [];
+  List<PdfOutline> outlines = <PdfOutline>[];
 
   /// For subentries, this points to it's parent outline
   PdfOutline parent;
@@ -42,15 +51,6 @@ class PdfOutline extends PdfObject {
 
   /// How the destination is handled
   PdfOutlineMode destMode = PdfOutlineMode.fitpage;
-
-  /// Constructs a Pdf Outline object. When selected, the specified region
-  /// is displayed.
-  ///
-  /// @param title Title of the outline
-  /// @param dest The destination page
-  /// @param rect coordinate
-  PdfOutline(PdfDocument pdfDocument, {this.title, this.dest, this.rect})
-      : super(pdfDocument, "/Outlines");
 
   /// This method creates an outline, and attaches it to this one.
   /// When the outline is selected, the supplied region is displayed.
@@ -71,7 +71,7 @@ class PdfOutline extends PdfObject {
   /// @param h height of region in User space
   /// @return [PdfOutline] object created, for creating sub-outlines
   PdfOutline add({String title, PdfPage dest, PdfRect rect}) {
-    PdfOutline outline =
+    final PdfOutline outline =
         PdfOutline(pdfDocument, title: title, dest: dest, rect: rect);
     // Tell the outline of ourselves
     outline.parent = this;
@@ -85,49 +85,49 @@ class PdfOutline extends PdfObject {
 
     // These are for kids only
     if (parent != null) {
-      params["/Title"] = PdfStream.string(title);
-      var dests = List<PdfStream>();
+      params['/Title'] = PdfStream.string(title);
+      final List<PdfStream> dests = <PdfStream>[];
       dests.add(dest.ref());
 
       if (destMode == PdfOutlineMode.fitpage) {
-        dests.add(PdfStream.string("/Fit"));
+        dests.add(PdfStream.string('/Fit'));
       } else {
         dests.add(PdfStream.string(
-            "/FitR ${rect.left} ${rect.bottom} ${rect.right} ${rect.top}"));
+            '/FitR ${rect.left} ${rect.bottom} ${rect.right} ${rect.top}'));
       }
-      params["/Parent"] = parent.ref();
-      params["/Dest"] = PdfStream.array(dests);
+      params['/Parent'] = parent.ref();
+      params['/Dest'] = PdfStream.array(dests);
 
       // were a descendent, so by default we are closed. Find out how many
       // entries are below us
-      int c = descendants();
+      final int c = descendants();
       if (c > 0) {
-        params["/Count"] = PdfStream.intNum(-c);
+        params['/Count'] = PdfStream.intNum(-c);
       }
 
-      int index = parent.getIndex(this);
+      final int index = parent.getIndex(this);
       if (index > 0) {
         // Now if were not the first, then we have a /Prev node
-        params["/Prev"] = parent.getNode(index - 1).ref();
+        params['/Prev'] = parent.getNode(index - 1).ref();
       }
 
       if (index < parent.getLast()) {
         // We have a /Next node
-        params["/Next"] = parent.getNode(index + 1).ref();
+        params['/Next'] = parent.getNode(index + 1).ref();
       }
     } else {
       // the number of outlines in this document
       // were the top level node, so all are open by default
-      params["/Count"] = PdfStream.intNum(outlines.length);
+      params['/Count'] = PdfStream.intNum(outlines.length);
     }
 
     // These only valid if we have children
     if (outlines.isNotEmpty) {
       // the number of the first outline in list
-      params["/First"] = outlines[0].ref();
+      params['/First'] = outlines[0].ref();
 
       // the number of the last outline in list
-      params["/Last"] = outlines[outlines.length - 1].ref();
+      params['/Last'] = outlines[outlines.length - 1].ref();
     }
   }
 

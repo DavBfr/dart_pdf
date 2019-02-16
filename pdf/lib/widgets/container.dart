@@ -219,7 +219,9 @@ class Container extends StatelessWidget {
     if (alignment != null)
       current = Align(alignment: alignment, child: current);
 
-    if (padding != null) current = Padding(padding: padding, child: current);
+    if (padding != null) {
+      current = Padding(padding: padding, child: current);
+    }
 
     if (decoration != null)
       current = DecoratedBox(decoration: decoration, child: current);
@@ -234,7 +236,9 @@ class Container extends StatelessWidget {
     if (constraints != null)
       current = ConstrainedBox(constraints: constraints, child: current);
 
-    if (margin != null) current = Padding(padding: margin, child: current);
+    if (margin != null) {
+      current = Padding(padding: margin, child: current);
+    }
 
     if (transform != null)
       current = Transform(transform: transform, child: current);

@@ -93,11 +93,11 @@ class Flex extends MultiChildWidget {
       double inflexibleSpace = 0.0;
       double maxFlexFractionSoFar = 0.0;
 
-      for (var child in children) {
-        final int flex = child._flex;
+      for (Widget child in children) {
+        final int flex = child is Expanded ? child.flex : 0;
         totalFlex += flex;
         if (flex > 0) {
-          final double flexFraction = childSize(child, extent) / child._flex;
+          final double flexFraction = childSize(child, extent) / flex;
           maxFlexFractionSoFar = math.max(maxFlexFractionSoFar, flexFraction);
         } else {
           inflexibleSpace += childSize(child, extent);
@@ -115,8 +115,8 @@ class Flex extends MultiChildWidget {
       int totalFlex = 0;
       double inflexibleSpace = 0.0;
       double maxCrossSize = 0.0;
-      for (var child in children) {
-        final int flex = child._flex;
+      for (Widget child in children) {
+        final int flex = child is Expanded ? child.flex : 0;
         totalFlex += flex;
         double mainSize;
         double crossSize;
@@ -142,8 +142,8 @@ class Flex extends MultiChildWidget {
           math.max(0.0, (availableMainSpace - inflexibleSpace) / totalFlex);
 
       // Size remaining (flexible) items, find the maximum cross size.
-      for (var child in children) {
-        final int flex = child._flex;
+      for (Widget child in children) {
+        final int flex = child is Expanded ? child.flex : 0;
         if (flex > 0)
           maxCrossSize =
               math.max(maxCrossSize, childSize(child, spacePerFlex * flex));
@@ -203,10 +203,10 @@ class Flex extends MultiChildWidget {
 
   @override
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
+      {bool parentUsesSize = false}) {
     // Determine used flex factor, size inflexible items, calculate free space.
     int totalFlex = 0;
-    final totalChildren = children.length;
+    final int totalChildren = children.length;
     Widget lastFlexChild;
     assert(constraints != null);
     final double maxMainSize = direction == Axis.horizontal
@@ -218,22 +218,22 @@ class Flex extends MultiChildWidget {
     double allocatedSize =
         0.0; // Sum of the sizes of the non-flexible children.
 
-    for (var child in children) {
-      final int flex = child._flex;
+    for (Widget child in children) {
+      final int flex = child is Expanded ? child.flex : 0;
+      final FlexFit fit = child is Expanded ? child.fit : FlexFit.loose;
       if (flex > 0) {
         assert(() {
           final String dimension =
               direction == Axis.horizontal ? 'width' : 'height';
           if (!canFlex &&
-              (mainAxisSize == MainAxisSize.max ||
-                  child._fit == FlexFit.tight)) {
+              (mainAxisSize == MainAxisSize.max || fit == FlexFit.tight)) {
             throw Exception(
                 'Flex children have non-zero flex but incoming $dimension constraints are unbounded.');
           } else {
             return true;
           }
         }());
-        totalFlex += child._flex;
+        totalFlex += flex;
       } else {
         BoxConstraints innerConstraints;
         if (crossAxisAlignment == CrossAxisAlignment.stretch) {
@@ -275,8 +275,9 @@ class Flex extends MultiChildWidget {
       final double spacePerFlex =
           canFlex && totalFlex > 0 ? (freeSpace / totalFlex) : double.nan;
 
-      for (var child in children) {
-        final int flex = child._flex;
+      for (Widget child in children) {
+        final int flex = child is Expanded ? child.flex : 0;
+        final FlexFit fit = child is Expanded ? child.fit : FlexFit.loose;
         if (flex > 0) {
           final double maxChildExtent = canFlex
               ? (child == lastFlexChild
@@ -284,7 +285,7 @@ class Flex extends MultiChildWidget {
                   : spacePerFlex * flex)
               : double.infinity;
           double minChildExtent;
-          switch (child._fit) {
+          switch (fit) {
             case FlexFit.tight:
               assert(maxChildExtent < double.infinity);
               minChildExtent = maxChildExtent;
@@ -404,7 +405,7 @@ class Flex extends MultiChildWidget {
             direction == Axis.vertical);
     double childMainPosition =
         flipMainAxis ? actualSize - leadingSpace : leadingSpace;
-    for (var child in children) {
+    for (Widget child in children) {
       double childCrossPosition;
       switch (crossAxisAlignment) {
         case CrossAxisAlignment.start:
@@ -423,7 +424,9 @@ class Flex extends MultiChildWidget {
           break;
       }
 
-      if (flipMainAxis) childMainPosition -= _getMainSize(child);
+      if (flipMainAxis) {
+        childMainPosition -= _getMainSize(child);
+      }
       switch (direction) {
         case Axis.horizontal:
           child.box = PdfRect(box.x + childMainPosition,
@@ -446,12 +449,12 @@ class Flex extends MultiChildWidget {
   void paint(Context context) {
     super.paint(context);
 
-    final mat = Matrix4.identity();
+    final Matrix4 mat = Matrix4.identity();
     mat.translate(box.x, box.y);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
-    for (var child in children) {
+    for (Widget child in children) {
       child.paint(context);
     }
     context.canvas.restoreContext();
@@ -494,20 +497,22 @@ class Column extends Flex {
 
 class Expanded extends SingleChildWidget {
   Expanded({
-    int flex = 1,
+    this.flex = 1,
+    this.fit = FlexFit.tight,
     @required Widget child,
-  }) : super(child: child) {
-    this._flex = flex;
-    this._fit = FlexFit.tight;
-  }
+  }) : super(child: child);
+
+  final int flex;
+
+  final FlexFit fit;
 }
 
 class ListView extends Flex {
   ListView(
       {Axis direction = Axis.vertical,
-      EdgeInsets padding,
-      double spacing = 0.0,
-      List<Widget> children = const []})
+      // EdgeInsets padding,
+      // double spacing = 0.0,
+      List<Widget> children = const <Widget>[]})
       : super(
             direction: direction,
             mainAxisAlignment: MainAxisAlignment.start,

@@ -1,3 +1,6 @@
+# 1.3.3
+* Fix dart lint warnings
+
 # 1.3.2
 * Update Readme
 

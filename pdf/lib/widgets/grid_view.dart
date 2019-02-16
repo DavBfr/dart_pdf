@@ -24,7 +24,7 @@ class GridView extends MultiChildWidget {
       this.mainAxisSpacing = 0.0,
       this.crossAxisSpacing = 0.0,
       this.childAspectRatio = double.infinity,
-      List<Widget> children = const []})
+      List<Widget> children = const <Widget>[]})
       : assert(padding != null),
         super(children: children);
 
@@ -43,7 +43,7 @@ class GridView extends MultiChildWidget {
 
   @override
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
+      {bool parentUsesSize = false}) {
     double mainAxisExtent;
     double crossAxisExtent;
     switch (direction) {
@@ -69,10 +69,10 @@ class GridView extends MultiChildWidget {
     _totalCross = (_childCrossAxis + crossAxisSpacing) * crossAxisCount -
         crossAxisSpacing;
 
-    var startX = padding.left;
-    var startY = 0.0;
-    var mainAxis;
-    var crossAxis;
+    final double startX = padding.left;
+    const double startY = 0.0;
+    double mainAxis;
+    double crossAxis;
     BoxConstraints innerConstraints;
     switch (direction) {
       case Axis.vertical:
@@ -89,8 +89,8 @@ class GridView extends MultiChildWidget {
         break;
     }
 
-    var c = 0;
-    for (var child in children) {
+    int c = 0;
+    for (Widget child in children) {
       child.layout(context, innerConstraints);
 
       switch (direction) {
@@ -157,7 +157,7 @@ class GridView extends MultiChildWidget {
       ..lineTo(box.right - padding.right, box.bottom + padding.bottom)
       ..fillPath();
 
-    for (var c = 1; c < crossAxisCount; c++) {
+    for (int c = 1; c < crossAxisCount; c++) {
       switch (direction) {
         case Axis.vertical:
           context.canvas
@@ -176,7 +176,7 @@ class GridView extends MultiChildWidget {
       }
     }
 
-    for (var c = 1; c < _mainAxisCount; c++) {
+    for (int c = 1; c < _mainAxisCount; c++) {
       switch (direction) {
         case Axis.vertical:
           context.canvas
@@ -200,12 +200,12 @@ class GridView extends MultiChildWidget {
   void paint(Context context) {
     super.paint(context);
 
-    final mat = Matrix4.identity();
+    final Matrix4 mat = Matrix4.identity();
     mat.translate(box.x, box.y);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
-    for (var child in children) {
+    for (Widget child in children) {
       child.paint(context);
     }
     context.canvas.restoreContext();

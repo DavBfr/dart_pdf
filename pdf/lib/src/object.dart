@@ -17,8 +17,20 @@
 part of pdf;
 
 class PdfObject {
+  /// This is usually called by extensors to this class, and sets the
+  /// Pdf Object Type
+  /// @param type the Pdf Object Type
+  PdfObject(this.pdfDocument, [String type])
+      : objser = pdfDocument._genSerial() {
+    if (type != null) {
+      params['/Type'] = PdfStream.string(type);
+    }
+
+    pdfDocument.objects.add(this);
+  }
+
   /// This is the object parameters.
-  final params = Map<String, PdfStream>();
+  final Map<String, PdfStream> params = <String, PdfStream>{};
 
   /// This is the unique serial number for this object.
   final int objser;
@@ -28,18 +40,6 @@ class PdfObject {
 
   /// This allows any Pdf object to refer to the document being constructed.
   final PdfDocument pdfDocument;
-
-  /// This is usually called by extensors to this class, and sets the
-  /// Pdf Object Type
-  /// @param type the Pdf Object Type
-  PdfObject(this.pdfDocument, [String type])
-      : objser = pdfDocument._genSerial() {
-    if (type != null) {
-      params["/Type"] = PdfStream.string(type);
-    }
-
-    pdfDocument.objects.add(this);
-  }
 
   /// Writes the object to the output stream.
   /// This method must be overridden.
@@ -66,13 +66,13 @@ class PdfObject {
   ///
   /// @param os OutputStream to write to
   void _writeStart(PdfStream os) {
-    os.putString("$objser $objgen obj\n");
+    os.putString('$objser $objgen obj\n');
   }
 
   void _writeContent(PdfStream os) {
     if (params.isNotEmpty) {
       os.putDictionary(params);
-      os.putString("\n");
+      os.putString('\n');
     }
   }
 
@@ -83,10 +83,10 @@ class PdfObject {
   ///
   /// @param os OutputStream to write to
   void _writeEnd(PdfStream os) {
-    os.putString("endobj\n");
+    os.putString('endobj\n');
   }
 
   /// Returns the unique serial number in Pdf format
   /// @return the serial number in Pdf format
-  PdfStream ref() => PdfStream.string("$objser $objgen R");
+  PdfStream ref() => PdfStream.string('$objser $objgen R');
 }

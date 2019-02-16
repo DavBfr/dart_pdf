@@ -17,25 +17,6 @@
 part of pdf;
 
 class PdfPageFormat {
-  static const a3 = PdfPageFormat(29.7 * cm, 42 * cm, marginAll: 2.0 * cm);
-  static const a4 = PdfPageFormat(21.0 * cm, 29.7 * cm, marginAll: 2.0 * cm);
-  static const a5 = PdfPageFormat(14.8 * cm, 21.0 * cm, marginAll: 2.0 * cm);
-  static const letter = PdfPageFormat(8.5 * inch, 11.0 * inch, marginAll: inch);
-  static const legal = PdfPageFormat(8.5 * inch, 14.0 * inch, marginAll: inch);
-
-  static const point = 1.0;
-  static const inch = 72.0;
-  static const cm = inch / 2.54;
-  static const mm = inch / 25.4;
-
-  final double width;
-  final double height;
-
-  final double marginTop;
-  final double marginBottom;
-  final double marginLeft;
-  final double marginRight;
-
   const PdfPageFormat(this.width, this.height,
       {double marginTop = 0.0,
       double marginBottom = 0.0,
@@ -46,6 +27,30 @@ class PdfPageFormat {
         marginBottom = marginAll ?? marginBottom,
         marginLeft = marginAll ?? marginLeft,
         marginRight = marginAll ?? marginRight;
+
+  static const PdfPageFormat a3 =
+      PdfPageFormat(29.7 * cm, 42 * cm, marginAll: 2.0 * cm);
+  static const PdfPageFormat a4 =
+      PdfPageFormat(21.0 * cm, 29.7 * cm, marginAll: 2.0 * cm);
+  static const PdfPageFormat a5 =
+      PdfPageFormat(14.8 * cm, 21.0 * cm, marginAll: 2.0 * cm);
+  static const PdfPageFormat letter =
+      PdfPageFormat(8.5 * inch, 11.0 * inch, marginAll: inch);
+  static const PdfPageFormat legal =
+      PdfPageFormat(8.5 * inch, 14.0 * inch, marginAll: inch);
+
+  static const double point = 1.0;
+  static const double inch = 72.0;
+  static const double cm = inch / 2.54;
+  static const double mm = inch / 25.4;
+
+  final double width;
+  final double height;
+
+  final double marginTop;
+  final double marginBottom;
+  final double marginLeft;
+  final double marginRight;
 
   PdfPageFormat copyWith(
       {double width,
@@ -80,6 +85,6 @@ class PdfPageFormat {
 
   @override
   String toString() {
-    return "${width}x$height";
+    return '${width}x$height';
   }
 }

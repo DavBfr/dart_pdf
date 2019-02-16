@@ -18,14 +18,14 @@ part of printing;
 
 typedef LayoutCallback = FutureOr<List<int>> Function(PdfPageFormat format);
 
-class Printing {
+mixin Printing {
   static const MethodChannel _channel = MethodChannel('printing');
   static LayoutCallback _onLayout;
 
-  static Future<dynamic> _handleMethod(MethodCall call) async {
+  static Future<void> _handleMethod(MethodCall call) async {
     switch (call.method) {
-      case "onLayout":
-        final bytes = await _onLayout(PdfPageFormat(
+      case 'onLayout':
+        final List<int> bytes = await _onLayout(PdfPageFormat(
           call.arguments['width'],
           call.arguments['height'],
           marginLeft: call.arguments['marginLeft'],
@@ -36,21 +36,21 @@ class Printing {
         final Map<String, dynamic> params = <String, dynamic>{
           'doc': Uint8List.fromList(bytes),
         };
-        await _channel.invokeMethod('writePdf', params);
-        return Future.value("");
+        await _channel.invokeMethod<void>('writePdf', params);
+        return Future<void>.value();
     }
   }
 
-  static Future<Null> layoutPdf(
-      {@required LayoutCallback onLayout, String name = "Document"}) async {
+  static Future<void> layoutPdf(
+      {@required LayoutCallback onLayout, String name = 'Document'}) async {
     _onLayout = onLayout;
     _channel.setMethodCallHandler(_handleMethod);
     final Map<String, dynamic> params = <String, dynamic>{'name': name};
-    await _channel.invokeMethod('printPdf', params);
+    await _channel.invokeMethod<void>('printPdf', params);
   }
 
   @deprecated
-  static Future<Null> printPdf({PdfDocument document, List<int> bytes}) async {
+  static Future<void> printPdf({PdfDocument document, List<int> bytes}) async {
     assert(document != null || bytes != null);
     assert(!(document == null && bytes == null));
 
@@ -59,16 +59,16 @@ class Printing {
             document != null ? document.save() : bytes);
   }
 
-  static Future<Null> sharePdf(
+  static Future<void> sharePdf(
       {PdfDocument document, List<int> bytes, Rect bounds}) async {
     assert(document != null || bytes != null);
     assert(!(document == null && bytes == null));
 
-    if (document != null) bytes = document.save();
-
-    if (bounds == null) {
-      bounds = Rect.fromCircle(center: Offset.zero, radius: 10.0);
+    if (document != null) {
+      bytes = document.save();
     }
+
+    bounds ??= Rect.fromCircle(center: Offset.zero, radius: 10.0);
 
     final Map<String, dynamic> params = <String, dynamic>{
       'doc': Uint8List.fromList(bytes),
@@ -77,6 +77,6 @@ class Printing {
       'w': bounds.width,
       'h': bounds.height,
     };
-    await _channel.invokeMethod('sharePdf', params);
+    await _channel.invokeMethod<void>('sharePdf', params);
   }
 }

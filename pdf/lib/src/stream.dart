@@ -17,8 +17,8 @@
 part of pdf;
 
 class PdfStream {
-  static const precision = 5;
-  final _stream = List<int>();
+  static const int precision = 5;
+  final List<int> _stream = <int>[];
 
   void putStream(PdfStream s) {
     _stream.addAll(s._stream);
@@ -52,7 +52,11 @@ class PdfStream {
   }
 
   void putNumList(List<double> d) {
-    putString(d.map((v) => v.toStringAsFixed(precision)).join(" "));
+    putString(d.map((double v) => v.toStringAsFixed(precision)).join(' '));
+  }
+
+  void putIntList(List<int> d) {
+    putString(d.map((int v) => v.toString()).join(' '));
   }
 
   static PdfStream num(double d) => PdfStream()..putNum(d);
@@ -61,7 +65,7 @@ class PdfStream {
   /// Escape special characters
   /// \ddd Character code ddd (octal)
   void putTextBytes(List<int> s) {
-    for (var c in s) {
+    for (int c in s) {
       switch (c) {
         case 0x0a: // \n Line feed (LF)
           _stream.add(0x5c);
@@ -109,61 +113,73 @@ class PdfStream {
 
   void putLiteral(String s) {
     putBytes(latin1.encode('('));
-    putBytes([0xfe, 0xff]);
+    putBytes(<int>[0xfe, 0xff]);
     putTextBytes(encodeUtf16be(s));
     putBytes(latin1.encode(')'));
   }
 
   void putBool(bool value) {
-    putString(value ? "true" : "false");
+    putString(value ? 'true' : 'false');
   }
 
   void putArray(List<PdfStream> values) {
-    putString("[");
-    for (var val in values) {
+    putString('[');
+    for (PdfStream val in values) {
       putStream(val);
-      putString(" ");
+      putString(' ');
     }
-    putString("]");
+    putString(']');
   }
 
   void putObjectArray(List<PdfObject> values) {
-    putString("[");
-    for (var val in values) {
+    putString('[');
+    for (PdfObject val in values) {
       putStream(val.ref());
-      putString(" ");
+      putString(' ');
     }
-    putString("]");
+    putString(']');
   }
 
-  void putStringArray(List<dynamic> values) {
-    putString("[" + values.join(" ") + "]");
+  void putStringArray(List<String> values) {
+    putString('[' + values.join(' ') + ']');
+  }
+
+  void putNumArray(List<double> values) {
+    putString('[');
+    putNumList(values);
+    putString(']');
+  }
+
+  void putIntArray(List<int> values) {
+    putString('[');
+    putIntList(values);
+    putString(']');
   }
 
   static PdfStream array(List<PdfStream> values) =>
       PdfStream()..putArray(values);
 
   void putDictionary(Map<String, PdfStream> values) {
-    putString("<< ");
-    values.forEach((k, v) {
-      putString("$k ");
+    putString('<< ');
+    values.forEach((String k, PdfStream v) {
+      putString('$k ');
       putStream(v);
-      putString("\n");
+      putString('\n');
     });
-    putString(">>");
+    putString('>>');
   }
 
   static PdfStream dictionary(Map<String, PdfStream> values) =>
       PdfStream()..putDictionary(values);
 
   void putObjectDictionary(Map<String, PdfObject> values) {
-    putString("<< ");
-    values.forEach((k, v) {
-      putString("$k ");
+    putString('<< ');
+    values.forEach((String k, PdfObject v) {
+      putString('$k ');
       putStream(v.ref());
-      putString(" ");
+      putString(' ');
     });
-    putString(">>");
+    putString('>>');
   }
 
   int get offset => _stream.length;

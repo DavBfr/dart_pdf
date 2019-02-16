@@ -17,40 +17,36 @@
 part of widget;
 
 abstract class BasePage {
-  final PdfPageFormat pageFormat;
+  BasePage({@required this.pageFormat}) : assert(pageFormat != null);
 
-  BasePage({this.pageFormat}) : assert(pageFormat != null);
+  final PdfPageFormat pageFormat;
 
   @protected
   void generate(Document document);
 }
 
 class Document {
-  static var debug = false;
-
-  final PdfDocument document;
-
-  final Theme theme;
-
   Document(
       {PdfPageMode pageMode = PdfPageMode.none,
       DeflateCallback deflate,
       this.theme})
       : document = PdfDocument(pageMode: pageMode, deflate: deflate);
 
+  static bool debug = false;
+
+  final PdfDocument document;
+
+  final Theme theme;
+
   void addPage(BasePage page) {
     page.generate(this);
   }
 }
 
-typedef Widget BuildCallback(Context context);
-typedef List<Widget> BuildListCallback(Context context);
+typedef BuildCallback = Widget Function(Context context);
+typedef BuildListCallback = List<Widget> Function(Context context);
 
 class Page extends BasePage {
-  final EdgeInsets margin;
-  final BuildCallback _build;
-  final Theme theme;
-
   Page(
       {PdfPageFormat pageFormat = PdfPageFormat.a4,
       BuildCallback build,
@@ -61,6 +57,12 @@ class Page extends BasePage {
                 pageFormat.marginRight, pageFormat.marginBottom),
         _build = build,
         super(pageFormat: pageFormat);
+
+  final EdgeInsets margin;
+
+  final BuildCallback _build;
+
+  final Theme theme;
 
   void debugPaint(Context context) {
     context.canvas
@@ -78,18 +80,19 @@ class Page extends BasePage {
 
   @override
   void generate(Document document) {
-    final pdfPage = PdfPage(document.document, pageFormat: pageFormat);
-    final canvas = pdfPage.getGraphics();
-    final constraints = BoxConstraints(
+    final PdfPage pdfPage = PdfPage(document.document, pageFormat: pageFormat);
+    final PdfGraphics canvas = pdfPage.getGraphics();
+    final BoxConstraints constraints = BoxConstraints(
         maxWidth: pageFormat.width, maxHeight: pageFormat.height);
 
-    final calculatedTheme = theme ?? document.theme ?? Theme(document.document);
-    final inherited = Map<Type, Inherited>();
+    final Theme calculatedTheme =
+        theme ?? document.theme ?? Theme(document.document);
+    final Map<Type, Inherited> inherited = <Type, Inherited>{};
     inherited[calculatedTheme.runtimeType] = calculatedTheme;
-    final context =
+    final Context context =
         Context(page: pdfPage, canvas: canvas, inherited: inherited);
     if (_build != null) {
-      final child = _build(context);
+      final Widget child = _build(context);
       layout(child, context, constraints);
       paint(child, context);
     }
@@ -97,9 +100,9 @@ class Page extends BasePage {
 
   @protected
   void layout(Widget child, Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
+      {bool parentUsesSize = false}) {
     if (child != null) {
-      final childConstraints = BoxConstraints(
+      final BoxConstraints childConstraints = BoxConstraints(
           minWidth: constraints.minWidth,
           minHeight: constraints.minHeight,
           maxWidth: constraints.hasBoundedWidth
@@ -120,7 +123,9 @@ class Page extends BasePage {
   @protected
   void paint(Widget child, Context context) {
     assert(() {
-      if (Document.debug) debugPaint(context);
+      if (Document.debug) {
+        debugPaint(context);
+      }
       return true;
     }());
 
@@ -131,11 +136,6 @@ class Page extends BasePage {
 }
 
 class MultiPage extends Page {
-  final BuildListCallback _buildList;
-  final CrossAxisAlignment crossAxisAlignment;
-  final BuildCallback header;
-  final BuildCallback footer;
-
   MultiPage(
       {PdfPageFormat pageFormat = PdfPageFormat.a4,
       BuildListCallback build,
@@ -146,39 +146,53 @@ class MultiPage extends Page {
       : _buildList = build,
         super(pageFormat: pageFormat, margin: margin);
 
+  final BuildListCallback _buildList;
+
+  final CrossAxisAlignment crossAxisAlignment;
+
+  final BuildCallback header;
+
+  final BuildCallback footer;
+
   @override
   void generate(Document document) {
-    if (_buildList == null) return;
+    if (_buildList == null) {
+      return;
+    }
 
-    final constraints = BoxConstraints(
+    final BoxConstraints constraints = BoxConstraints(
         maxWidth: pageFormat.width, maxHeight: pageFormat.height);
-    final childConstraints =
+    final BoxConstraints childConstraints =
         BoxConstraints(maxWidth: constraints.maxWidth - margin.horizontal);
-    final calculatedTheme = theme ?? document.theme ?? Theme(document.document);
-    final inherited = Map<Type, Inherited>();
+    final Theme calculatedTheme =
+        theme ?? document.theme ?? Theme(document.document);
+    final Map<Type, Inherited> inherited = <Type, Inherited>{};
     inherited[calculatedTheme.runtimeType] = calculatedTheme;
     Context context;
     double offsetEnd;
     double offsetStart;
-    var index = 0;
-    final children = _buildList(Context(inherited: inherited));
+    int index = 0;
+    final List<Widget> children = _buildList(Context(inherited: inherited));
     WidgetContext widgetContext;
 
     while (index < children.length) {
-      final child = children[index];
+      final Widget child = children[index];
 
       if (context == null) {
-        final pdfPage = PdfPage(document.document, pageFormat: pageFormat);
-        final canvas = pdfPage.getGraphics();
+        final PdfPage pdfPage =
+            PdfPage(document.document, pageFormat: pageFormat);
+        final PdfGraphics canvas = pdfPage.getGraphics();
         context = Context(page: pdfPage, canvas: canvas, inherited: inherited);
         assert(() {
-          if (Document.debug) debugPaint(context);
+          if (Document.debug) {
+            debugPaint(context);
+          }
           return true;
         }());
         offsetStart = pageFormat.height - margin.top;
         offsetEnd = margin.bottom;
         if (header != null) {
-          final headerWidget = header(context);
+          final Widget headerWidget = header(context);
           if (headerWidget != null) {
             headerWidget.layout(context, childConstraints,
                 parentUsesSize: false);
@@ -193,7 +207,7 @@ class MultiPage extends Page {
         }
 
         if (footer != null) {
-          final footerWidget = footer(context);
+          final Widget footerWidget = footer(context);
           if (footerWidget != null) {
             footerWidget.layout(context, childConstraints,
                 parentUsesSize: false);
@@ -206,7 +220,7 @@ class MultiPage extends Page {
       }
 
       if (widgetContext != null && child is SpanningWidget) {
-        (child as SpanningWidget).restoreContext(widgetContext);
+        child.restoreContext(widgetContext);
         widgetContext = null;
       }
 
@@ -222,7 +236,7 @@ class MultiPage extends Page {
           throw Exception("Widget won't fit into the page");
         }
 
-        final span = child as SpanningWidget;
+        final SpanningWidget span = child;
 
         child.layout(context,
             childConstraints.copyWith(maxHeight: offsetStart - offsetEnd),

@@ -59,8 +59,8 @@ class TableBorder extends BoxBorder {
     super.paintBorders(context, box);
 
     if (verticalInside) {
-      var offset = box.x;
-      for (var width in widths.sublist(0, widths.length - 1)) {
+      double offset = box.x;
+      for (double width in widths.sublist(0, widths.length - 1)) {
         offset += width;
         context.canvas.moveTo(offset, box.y);
         context.canvas.lineTo(offset, box.top);
@@ -69,8 +69,8 @@ class TableBorder extends BoxBorder {
     }
 
     if (horizontalInside) {
-      var offset = box.top;
-      for (var height in heights.sublist(0, heights.length - 1)) {
+      double offset = box.top;
+      for (double height in heights.sublist(0, heights.length - 1)) {
         offset -= height;
         context.canvas.moveTo(box.x, offset);
         context.canvas.lineTo(box.right, offset);
@@ -81,8 +81,8 @@ class TableBorder extends BoxBorder {
 }
 
 class _TableContext extends WidgetContext {
-  var firstLine = 0;
-  var lastLine = 0;
+  int firstLine = 0;
+  int lastLine = 0;
 }
 
 /// A widget that uses the table layout algorithm for its children.
@@ -94,6 +94,33 @@ class Table extends Widget implements SpanningWidget {
       this.tableWidth = TableWidth.max})
       : assert(children != null),
         super();
+
+  factory Table.fromTextArray(
+      {@required Context context, @required List<List<String>> data}) {
+    final List<TableRow> rows = <TableRow>[];
+    for (List<String> row in data) {
+      final List<Widget> tableRow = <Widget>[];
+      if (row == data.first) {
+        for (String cell in row) {
+          tableRow.add(Container(
+              alignment: Alignment.center,
+              margin: const EdgeInsets.all(5),
+              child: Text(cell, style: Theme.of(context).tableHeader)));
+        }
+      } else {
+        for (String cell in row) {
+          tableRow.add(Container(
+              margin: const EdgeInsets.all(5),
+              child: Text(cell, style: Theme.of(context).tableCell)));
+        }
+      }
+      rows.add(TableRow(children: tableRow, repeat: row == data.first));
+    }
+    return Table(
+        border: const TableBorder(),
+        tableWidth: TableWidth.max,
+        children: rows);
+  }
 
   @override
   bool get canSpan => true;
@@ -107,10 +134,10 @@ class Table extends Widget implements SpanningWidget {
 
   final TableWidth tableWidth;
 
-  final _widths = List<double>();
-  final _heights = List<double>();
+  final List<double> _widths = <double>[];
+  final List<double> _heights = <double>[];
 
-  var _context = _TableContext();
+  _TableContext _context = _TableContext();
 
   @override
   WidgetContext saveContext() {
@@ -125,20 +152,21 @@ class Table extends Widget implements SpanningWidget {
 
   @override
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
+      {bool parentUsesSize = false}) {
     // Compute required width for all row/columns width flex
-    final flex = List<double>();
+    final List<double> flex = <double>[];
     _widths.clear();
     _heights.clear();
-    var index = 0;
+    int index = 0;
 
-    for (var row in children) {
-      var n = 0;
-      for (var child in row.children) {
-        child.layout(context, BoxConstraints());
-        final calculatedWidth =
+    for (TableRow row in children) {
+      int n = 0;
+      for (Widget child in row.children) {
+        child.layout(context, const BoxConstraints());
+        final double calculatedWidth =
             child.box.width == double.infinity ? 0.0 : child.box.width;
-        final childFlex = child._flex.toDouble();
+        final double childFlex =
+            child is Expanded ? child.flex.toDouble() : 0.0;
         if (flex.length < n + 1) {
           flex.add(childFlex);
           _widths.add(calculatedWidth);
@@ -152,15 +180,15 @@ class Table extends Widget implements SpanningWidget {
       }
     }
 
-    final maxWidth = _widths.reduce((a, b) => a + b);
+    final double maxWidth = _widths.reduce((double a, double b) => a + b);
 
     // Compute column widths using flex and estimated width
     if (constraints.hasBoundedWidth) {
-      final totalFlex = flex.reduce((a, b) => a + b);
-      var flexSpace = 0.0;
-      for (var n = 0; n < _widths.length; n++) {
+      final double totalFlex = flex.reduce((double a, double b) => a + b);
+      double flexSpace = 0.0;
+      for (int n = 0; n < _widths.length; n++) {
         if (flex[n] == 0.0) {
-          var newWidth = _widths[n] / maxWidth * constraints.maxWidth;
+          final double newWidth = _widths[n] / maxWidth * constraints.maxWidth;
           if ((tableWidth == TableWidth.max && totalFlex == 0.0) ||
               newWidth < _widths[n]) {
             _widths[n] = newWidth;
@@ -168,32 +196,35 @@ class Table extends Widget implements SpanningWidget {
           flexSpace += _widths[n];
         }
       }
-      final spacePerFlex = totalFlex > 0.0
+      final double spacePerFlex = totalFlex > 0.0
           ? ((constraints.maxWidth - flexSpace) / totalFlex)
           : double.nan;
 
-      for (var n = 0; n < _widths.length; n++) {
+      for (int n = 0; n < _widths.length; n++) {
         if (flex[n] > 0.0) {
-          var newWidth = spacePerFlex * flex[n];
+          final double newWidth = spacePerFlex * flex[n];
           _widths[n] = newWidth;
         }
       }
     }
 
-    final totalWidth = _widths.reduce((a, b) => a + b);
+    final double totalWidth = _widths.reduce((double a, double b) => a + b);
 
     // Compute final widths
-    var totalHeight = 0.0;
+    double totalHeight = 0.0;
     index = 0;
-    for (var row in children) {
-      if (index++ < _context.firstLine && !row.repeat) continue;
+    for (TableRow row in children) {
+      if (index++ < _context.firstLine && !row.repeat) {
+        continue;
+      }
 
-      var n = 0;
-      var x = 0.0;
+      int n = 0;
+      double x = 0.0;
 
-      var lineHeight = 0.0;
-      for (var child in row.children) {
-        final childConstraints = BoxConstraints.tightFor(width: _widths[n]);
+      double lineHeight = 0.0;
+      for (Widget child in row.children) {
+        final BoxConstraints childConstraints =
+            BoxConstraints.tightFor(width: _widths[n]);
         child.layout(context, childConstraints);
         child.box = PdfRect(x, totalHeight, child.box.width, child.box.height);
         x += _widths[n];
@@ -212,10 +243,12 @@ class Table extends Widget implements SpanningWidget {
 
     // Compute final y position
     index = 0;
-    for (var row in children) {
-      if (index++ < _context.firstLine && !row.repeat) continue;
+    for (TableRow row in children) {
+      if (index++ < _context.firstLine && !row.repeat) {
+        continue;
+      }
 
-      for (var child in row.children) {
+      for (Widget child in row.children) {
         child.box = PdfRect(
             child.box.x,
             totalHeight - child.box.y - child.box.height,
@@ -223,7 +256,9 @@ class Table extends Widget implements SpanningWidget {
             child.box.height);
       }
 
-      if (index >= _context.lastLine) break;
+      if (index >= _context.lastLine) {
+        break;
+      }
     }
 
     box = PdfRect(0.0, 0.0, totalWidth, totalHeight);
@@ -233,49 +268,28 @@ class Table extends Widget implements SpanningWidget {
   void paint(Context context) {
     super.paint(context);
 
-    final mat = Matrix4.identity();
+    final Matrix4 mat = Matrix4.identity();
     mat.translate(box.x, box.y);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
 
-    var index = 0;
-    for (var row in children) {
-      if (index++ < _context.firstLine && !row.repeat) continue;
-      for (var child in row.children) {
+    int index = 0;
+    for (TableRow row in children) {
+      if (index++ < _context.firstLine && !row.repeat) {
+        continue;
+      }
+      for (Widget child in row.children) {
         child.paint(context);
       }
-      if (index >= _context.lastLine) break;
+      if (index >= _context.lastLine) {
+        break;
+      }
     }
     context.canvas.restoreContext();
 
     if (border != null) {
       border.paintBorders(context, box, _widths, _heights);
     }
-  }
-
-  factory Table.fromTextArray(
-      {@required Context context, @required List<List<String>> data}) {
-    final rows = List<TableRow>();
-    for (var row in data) {
-      final tableRow = List<Widget>();
-      if (row == data.first) {
-        for (var cell in row) {
-          tableRow.add(Container(
-              alignment: Alignment.center,
-              margin: EdgeInsets.all(5),
-              child: Text(cell, style: Theme.of(context).tableHeader)));
-        }
-      } else {
-        for (var cell in row) {
-          tableRow.add(Container(
-              margin: EdgeInsets.all(5),
-              child: Text(cell, style: Theme.of(context).tableCell)));
-        }
-      }
-      rows.add(TableRow(children: tableRow, repeat: row == data.first));
-    }
-    return Table(
-        border: TableBorder(), tableWidth: TableWidth.max, children: rows);
   }
 }

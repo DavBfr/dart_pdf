@@ -45,7 +45,7 @@ class LimitedBox extends SingleChildWidget {
 
   @override
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
+      {bool parentUsesSize = false}) {
     PdfPoint size;
     if (child != null) {
       child.layout(context, _limitConstraints(constraints),
@@ -69,9 +69,9 @@ class Padding extends SingleChildWidget {
 
   @override
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
+      {bool parentUsesSize = false}) {
     if (child != null) {
-      final childConstraints = constraints.deflate(padding);
+      final BoxConstraints childConstraints = constraints.deflate(padding);
       child.layout(context, childConstraints, parentUsesSize: parentUsesSize);
       box = constraints.constrainRect(
           width: child.box.width + padding.horizontal,
@@ -100,12 +100,14 @@ class Padding extends SingleChildWidget {
   @override
   void paint(Context context) {
     assert(() {
-      if (Document.debug) debugPaint(context);
+      if (Document.debug) {
+        debugPaint(context);
+      }
       return true;
     }());
 
     if (child != null) {
-      final mat = Matrix4.identity();
+      final Matrix4 mat = Matrix4.identity();
       mat.translate(box.x + padding.left, box.y + padding.bottom);
       context.canvas
         ..saveContext()
@@ -163,29 +165,39 @@ class Transform extends SingleChildWidget {
   final Alignment alignment;
 
   Matrix4 get _effectiveTransform {
-    if (origin == null && alignment == null) return transform;
+    if (origin == null && alignment == null) {
+      return transform;
+    }
     final Matrix4 result = Matrix4.identity();
-    if (origin != null) result.translate(origin.x, origin.y);
+    if (origin != null) {
+      result.translate(origin.x, origin.y);
+    }
     PdfPoint translation;
     if (alignment != null) {
       translation = alignment.alongSize(box.size);
       result.translate(translation.x, translation.y);
     }
     result.multiply(transform);
-    if (alignment != null) result.translate(-translation.x, -translation.y);
-    if (origin != null) result.translate(-origin.x, -origin.y);
+    if (alignment != null) {
+      result.translate(-translation.x, -translation.y);
+    }
+    if (origin != null) {
+      result.translate(-origin.x, -origin.y);
+    }
     return result;
   }
 
   @override
   void paint(Context context) {
     assert(() {
-      if (Document.debug) debugPaint(context);
+      if (Document.debug) {
+        debugPaint(context);
+      }
       return true;
     }());
 
     if (child != null) {
-      final mat = _effectiveTransform;
+      final Matrix4 mat = _effectiveTransform;
       context.canvas
         ..saveContext()
         ..setTransform(mat);
@@ -219,7 +231,7 @@ class Align extends SingleChildWidget {
 
   @override
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
+      {bool parentUsesSize = false}) {
     final bool shrinkWrapWidth =
         widthFactor != null || constraints.maxWidth == double.infinity;
     final bool shrinkWrapHeight =
@@ -256,7 +268,7 @@ class ConstrainedBox extends SingleChildWidget {
 
   @override
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
+      {bool parentUsesSize = false}) {
     if (child != null) {
       child.layout(context, this.constraints.enforce(constraints),
           parentUsesSize: true);
@@ -292,7 +304,7 @@ class FittedBox extends SingleChildWidget {
 
   @override
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
+      {bool parentUsesSize = false}) {
     PdfPoint size;
     if (child != null) {
       child.layout(context, const BoxConstraints(), parentUsesSize: true);
@@ -316,7 +328,7 @@ class FittedBox extends SingleChildWidget {
       final PdfRect destinationRect =
           alignment.inscribe(sizes.destination, box);
 
-      final mat =
+      final Matrix4 mat =
           Matrix4.translationValues(destinationRect.x, destinationRect.y, 0.0)
             ..scale(scaleX, scaleY, 1.0)
             ..translate(-sourceRect.x, -sourceRect.y);
@@ -341,7 +353,9 @@ class AspectRatio extends SingleChildWidget {
   final double aspectRatio;
 
   PdfPoint _applyAspectRatio(BoxConstraints constraints) {
-    if (constraints.isTight) return constraints.smallest;
+    if (constraints.isTight) {
+      return constraints.smallest;
+    }
 
     double width = constraints.maxWidth;
     double height;
@@ -378,7 +392,7 @@ class AspectRatio extends SingleChildWidget {
 
   @override
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
+      {bool parentUsesSize = false}) {
     box = PdfRect.fromPoints(PdfPoint.zero, _applyAspectRatio(constraints));
     if (child != null)
       child.layout(context,
@@ -386,7 +400,7 @@ class AspectRatio extends SingleChildWidget {
   }
 }
 
-typedef CustomPainter(PdfGraphics canvas, PdfPoint size);
+typedef CustomPainter = Function(PdfGraphics canvas, PdfPoint size);
 
 class CustomPaint extends SingleChildWidget {
   CustomPaint(
@@ -402,7 +416,7 @@ class CustomPaint extends SingleChildWidget {
 
   @override
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
+      {bool parentUsesSize = false}) {
     if (child != null) {
       child.layout(context, constraints.tighten(width: size.x, height: size.y),
           parentUsesSize: parentUsesSize);
@@ -415,18 +429,26 @@ class CustomPaint extends SingleChildWidget {
   @override
   void paint(Context context) {
     assert(() {
-      if (Document.debug) debugPaint(context);
+      if (Document.debug) {
+        debugPaint(context);
+      }
       return true;
     }());
 
-    final mat = Matrix4.identity();
+    final Matrix4 mat = Matrix4.identity();
     mat.translate(box.x, box.y);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
-    if (painter != null) painter(context.canvas, box.size);
-    if (child != null) child.paint(context);
-    if (foregroundPainter != null) foregroundPainter(context.canvas, box.size);
+    if (painter != null) {
+      painter(context.canvas, box.size);
+    }
+    if (child != null) {
+      child.paint(context);
+    }
+    if (foregroundPainter != null) {
+      foregroundPainter(context.canvas, box.size);
+    }
     context.canvas.restoreContext();
   }
 }

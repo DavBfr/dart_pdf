@@ -19,7 +19,7 @@ part of widget;
 class ClipRect extends SingleChildWidget {
   ClipRect({Widget child}) : super(child: child);
 
-  @protected
+  @override
   void debugPaint(Context context) {
     context.canvas
       ..setStrokeColor(PdfColor.deepPurple)
@@ -30,12 +30,14 @@ class ClipRect extends SingleChildWidget {
   @override
   void paint(Context context) {
     assert(() {
-      if (Document.debug) debugPaint(context);
+      if (Document.debug) {
+        debugPaint(context);
+      }
       return true;
     }());
 
     if (child != null) {
-      final mat = Matrix4.identity();
+      final Matrix4 mat = Matrix4.identity();
       mat.translate(box.x, box.y);
       context.canvas
         ..saveContext()
@@ -58,7 +60,7 @@ class ClipRRect extends SingleChildWidget {
   final double horizontalRadius;
   final double verticalRadius;
 
-  @protected
+  @override
   void debugPaint(Context context) {
     context.canvas
       ..setStrokeColor(PdfColor.deepPurple)
@@ -70,12 +72,14 @@ class ClipRRect extends SingleChildWidget {
   @override
   void paint(Context context) {
     assert(() {
-      if (Document.debug) debugPaint(context);
+      if (Document.debug) {
+        debugPaint(context);
+      }
       return true;
     }());
 
     if (child != null) {
-      final mat = Matrix4.identity();
+      final Matrix4 mat = Matrix4.identity();
       mat.translate(box.x, box.y);
       context.canvas
         ..saveContext()
@@ -92,10 +96,10 @@ class ClipRRect extends SingleChildWidget {
 class ClipOval extends SingleChildWidget {
   ClipOval({Widget child}) : super(child: child);
 
-  @protected
+  @override
   void debugPaint(Context context) {
-    final rx = box.width / 2.0;
-    final ry = box.height / 2.0;
+    final double rx = box.width / 2.0;
+    final double ry = box.height / 2.0;
 
     context.canvas
       ..setStrokeColor(PdfColor.deepPurple)
@@ -106,15 +110,17 @@ class ClipOval extends SingleChildWidget {
   @override
   void paint(Context context) {
     assert(() {
-      if (Document.debug) debugPaint(context);
+      if (Document.debug) {
+        debugPaint(context);
+      }
       return true;
     }());
 
-    final rx = box.width / 2.0;
-    final ry = box.height / 2.0;
+    final double rx = box.width / 2.0;
+    final double ry = box.height / 2.0;
 
     if (child != null) {
-      final mat = Matrix4.identity();
+      final Matrix4 mat = Matrix4.identity();
       mat.translate(box.x, box.y);
       context.canvas
         ..saveContext()

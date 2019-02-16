@@ -18,13 +18,6 @@ part of pdf;
 
 @deprecated
 class PDFAnnot extends PdfAnnot {
-  static const SOLID = PdfBorderStyle.solid;
-  static const DASHED = PdfBorderStyle.dashed;
-  static const BEVELED = PdfBorderStyle.beveled;
-  static const INSET = PdfBorderStyle.inset;
-  static const UNDERLINED = PdfBorderStyle.underlined;
-  static const FULL_PAGE = -9999.0;
-
   PDFAnnot(PdfPage pdfPage,
       {String type,
       String s,
@@ -48,11 +41,11 @@ class PDFAnnot extends PdfAnnot {
 
   factory PDFAnnot.annotation(
           PdfPage pdfPage, String s, double l, double b, double r, double t) =>
-      PDFAnnot(pdfPage, type: "/Annot", s: s, l: l, b: b, r: r, t: t);
+      PDFAnnot(pdfPage, type: '/Annot', s: s, l: l, b: b, r: r, t: t);
 
   factory PDFAnnot.text(
           PdfPage pdfPage, double l, double b, double r, double t, String s) =>
-      PDFAnnot(pdfPage, type: "/Text", l: l, b: b, r: r, t: t, s: s);
+      PDFAnnot(pdfPage, type: '/Text', l: l, b: b, r: r, t: t, s: s);
 
   factory PDFAnnot.link(PdfPage pdfPage, double l, double b, double r, double t,
           PdfObject dest,
@@ -61,7 +54,7 @@ class PDFAnnot extends PdfAnnot {
           double fr = FULL_PAGE,
           double ft = FULL_PAGE]) =>
       PDFAnnot(pdfPage,
-          type: "/Link",
+          type: '/Link',
           l: l,
           b: b,
           r: r,
@@ -71,6 +64,13 @@ class PDFAnnot extends PdfAnnot {
           fb: fb,
           fr: fr,
           ft: ft);
+
+  static const PdfBorderStyle SOLID = PdfBorderStyle.solid;
+  static const PdfBorderStyle DASHED = PdfBorderStyle.dashed;
+  static const PdfBorderStyle BEVELED = PdfBorderStyle.beveled;
+  static const PdfBorderStyle INSET = PdfBorderStyle.inset;
+  static const PdfBorderStyle UNDERLINED = PdfBorderStyle.underlined;
+  static const double FULL_PAGE = -9999.0;
 }
 
 @deprecated
@@ -106,12 +106,12 @@ class PDFColor extends PdfColor {
   PDFColor(double r, double g, double b, [double a = 1.0]) : super(r, g, b, a);
 
   factory PDFColor.fromInt(int color) {
-    final c = PdfColor.fromInt(color);
+    final PdfColor c = PdfColor.fromInt(color);
     return PDFColor(c.r, c.g, c.b, c.a);
   }
 
   factory PDFColor.fromHex(String color) {
-    final c = PdfColor.fromHex(color);
+    final PdfColor c = PdfColor.fromHex(color);
     return PDFColor(c.r, c.g, c.b, c.a);
   }
 }
@@ -125,6 +125,7 @@ class PDFFontDescriptor extends PdfFontDescriptor {
 @deprecated
 class PDFFont extends PdfFont {
   factory PDFFont(PdfDocument pdfDocument, {String subtype, String baseFont}) {
+    subtype ??= baseFont;
     return PdfFont.helvetica(pdfDocument);
   }
 }
@@ -184,16 +185,16 @@ class PDFObject extends PdfObject {
 
 @deprecated
 class PDFOutline extends PdfOutline {
+  PDFOutline(PdfDocument pdfDocument,
+      {String title, PdfPage dest, double l, double b, double r, double t})
+      : super(pdfDocument,
+            title: title, dest: dest, rect: PdfRect.fromLTRB(l, t, r, b));
+
   @deprecated
   static const PdfOutlineMode FITPAGE = PdfOutlineMode.fitpage;
 
   @deprecated
   static const PdfOutlineMode FITRECT = PdfOutlineMode.fitrect;
-
-  PDFOutline(PdfDocument pdfDocument,
-      {String title, PdfPage dest, double l, double b, double r, double t})
-      : super(pdfDocument,
-            title: title, dest: dest, rect: PdfRect.fromLTRB(l, t, r, b));
 }
 
 @deprecated
@@ -203,26 +204,26 @@ class PDFOutput extends PdfOutput {
 
 @deprecated
 class PDFPageFormat extends PdfPageFormat {
-  static const a4 = PdfPageFormat.a4;
-  static const a3 = PdfPageFormat.a3;
-  static const a5 = PdfPageFormat.a5;
-  static const letter = PdfPageFormat.letter;
-  static const legal = PdfPageFormat.legal;
-  static const point = PdfPageFormat.point;
-  static const inch = PdfPageFormat.inch;
-  static const cm = PdfPageFormat.cm;
-  static const mm = PdfPageFormat.mm;
-  static const A4 = a4;
-  static const A3 = a3;
-  static const A5 = a5;
-  static const LETTER = letter;
-  static const LEGAL = legal;
-  static const PT = point;
-  static const IN = inch;
-  static const CM = cm;
-  static const MM = mm;
-
   const PDFPageFormat(double width, double height) : super(width, height);
+
+  static const PdfPageFormat a4 = PdfPageFormat.a4;
+  static const PdfPageFormat a3 = PdfPageFormat.a3;
+  static const PdfPageFormat a5 = PdfPageFormat.a5;
+  static const PdfPageFormat letter = PdfPageFormat.letter;
+  static const PdfPageFormat legal = PdfPageFormat.legal;
+  static const double point = PdfPageFormat.point;
+  static const double inch = PdfPageFormat.inch;
+  static const double cm = PdfPageFormat.cm;
+  static const double mm = PdfPageFormat.mm;
+  static const PdfPageFormat A4 = a4;
+  static const PdfPageFormat A3 = a3;
+  static const PdfPageFormat A5 = a5;
+  static const PdfPageFormat LETTER = letter;
+  static const PdfPageFormat LEGAL = legal;
+  static const double PT = point;
+  static const double IN = inch;
+  static const double CM = cm;
+  static const double MM = mm;
 }
 
 @deprecated
@@ -257,10 +258,10 @@ class PDFPage extends PdfPage {
   /// @param h Height of the note
   /// @return Returns the annotation, so other settings can be changed.
   @deprecated
-  PdfAnnot addNote(String note, double x, y, w, h) {
-    var xy1 = cxy(x, y + h);
-    var xy2 = cxy(x + w, y);
-    PdfAnnot ob = PdfAnnot.text(this,
+  PdfAnnot addNote(String note, double x, double y, double w, double h) {
+    final PdfPoint xy1 = cxy(x, y + h);
+    final PdfPoint xy2 = cxy(x + w, y);
+    final PdfAnnot ob = PdfAnnot.text(this,
         rect: PdfRect.fromLTRB(xy1.x, xy1.y, xy2.x, xy2.y), content: note);
     return ob;
   }
@@ -278,16 +279,16 @@ class PDFPage extends PdfPage {
   /// @param vh Height of the view area
   /// @return Returns the annotation, so other settings can be changed.
   @deprecated
-  PdfAnnot addLink(double x, y, w, h, PdfObject dest,
+  PdfAnnot addLink(double x, double y, double w, double h, PdfObject dest,
       [double vx = PDFAnnot.FULL_PAGE,
-      vy = PDFAnnot.FULL_PAGE,
-      vw = PDFAnnot.FULL_PAGE,
-      vh = PDFAnnot.FULL_PAGE]) {
-    var xy1 = cxy(x, y + h);
-    var xy2 = cxy(x + w, y);
-    var xy3 = cxy(vx, vy + vh);
-    var xy4 = cxy(vx + vw, vy);
-    PdfAnnot ob = PdfAnnot.link(this,
+      double vy = PDFAnnot.FULL_PAGE,
+      double vw = PDFAnnot.FULL_PAGE,
+      double vh = PDFAnnot.FULL_PAGE]) {
+    final PdfPoint xy1 = cxy(x, y + h);
+    final PdfPoint xy2 = cxy(x + w, y);
+    final PdfPoint xy3 = cxy(vx, vy + vh);
+    final PdfPoint xy4 = cxy(vx + vw, vy);
+    final PdfAnnot ob = PdfAnnot.link(this,
         srcRect: PdfRect.fromLTRB(xy1.x, xy1.y, xy2.x, xy2.y),
         dest: dest,
         destRect: PdfRect.fromLTRB(xy3.x, xy3.y, xy4.x, xy4.y));
@@ -305,9 +306,9 @@ class PDFPage extends PdfPage {
   @deprecated
   PdfOutline addOutline(String title,
       {double x, double y, double w, double h}) {
-    PdfPoint xy1 = cxy(x, y + h);
-    PdfPoint xy2 = cxy(x + w, y);
-    PdfOutline outline = PdfOutline(pdfDocument,
+    final PdfPoint xy1 = cxy(x, y + h);
+    final PdfPoint xy2 = cxy(x + w, y);
+    final PdfOutline outline = PdfOutline(pdfDocument,
         title: title,
         dest: this,
         rect: PdfRect.fromLTRB(xy1.x, xy2.y, xy2.x, xy1.y));
@@ -342,7 +343,7 @@ class PDFPage extends PdfPage {
 
 @deprecated
 class PDFPoint extends PdfPoint {
-  PDFPoint(double w, double h) : super(w, h);
+  const PDFPoint(double w, double h) : super(w, h);
 }
 
 @deprecated

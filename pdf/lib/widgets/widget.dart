@@ -18,14 +18,15 @@ part of widget;
 
 @immutable
 class Context {
+  const Context({this.page, this.canvas, this.inherited});
+
   final PdfPage page;
+
   final PdfGraphics canvas;
 
   final Map<Type, Inherited> inherited;
 
-  get pageNumber => page.pdfDocument.pdfPageList.pages.indexOf(page) + 1;
-
-  const Context({this.page, this.canvas, this.inherited});
+  int get pageNumber => page.pdfDocument.pdfPageList.pages.indexOf(page) + 1;
 
   Context copyWith(
       {PdfPage page, PdfGraphics canvas, Map<Type, Inherited> inherited}) {
@@ -36,7 +37,7 @@ class Context {
   }
 
   Context inheritFrom(Inherited object) {
-    final inherited = this.inherited;
+    final Map<Type, Inherited> inherited = this.inherited;
     inherited[object.runtimeType] = object;
     return copyWith(inherited: inherited);
   }
@@ -45,20 +46,20 @@ class Context {
 class Inherited {}
 
 abstract class Widget {
-  PdfRect box;
-  var _flex = 0;
-  FlexFit _fit = FlexFit.loose;
-
   Widget();
+
+  PdfRect box;
 
   @protected
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false});
+      {bool parentUsesSize = false});
 
   @protected
   void paint(Context context) {
     assert(() {
-      if (Document.debug) debugPaint(context);
+      if (Document.debug) {
+        debugPaint(context);
+      }
       return true;
     }());
   }
@@ -74,7 +75,7 @@ abstract class Widget {
 
 class WidgetContext {}
 
-abstract class SpanningWidget {
+abstract class SpanningWidget extends Widget {
   bool get canSpan => false;
 
   @protected
@@ -85,14 +86,14 @@ abstract class SpanningWidget {
 }
 
 abstract class StatelessWidget extends Widget {
-  Widget _child;
-
   StatelessWidget() : super();
+
+  Widget _child;
 
   @override
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
-    if (_child == null) _child = build(context);
+      {bool parentUsesSize = false}) {
+    _child ??= build(context);
 
     if (_child != null) {
       _child.layout(context, constraints, parentUsesSize: parentUsesSize);
@@ -107,7 +108,7 @@ abstract class StatelessWidget extends Widget {
     super.paint(context);
 
     if (_child != null) {
-      final mat = Matrix4.identity();
+      final Matrix4 mat = Matrix4.identity();
       mat.translate(box.x, box.y);
       context.canvas
         ..saveContext()
@@ -128,7 +129,7 @@ abstract class SingleChildWidget extends Widget {
 
   @override
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
+      {bool parentUsesSize = false}) {
     if (child != null) {
       child.layout(context, constraints, parentUsesSize: parentUsesSize);
       box = child.box;
@@ -142,7 +143,7 @@ abstract class SingleChildWidget extends Widget {
     super.paint(context);
 
     if (child != null) {
-      final mat = Matrix4.identity();
+      final Matrix4 mat = Matrix4.identity();
       mat.translate(box.x, box.y);
       context.canvas
         ..saveContext()

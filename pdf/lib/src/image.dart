@@ -17,6 +17,51 @@
 part of pdf;
 
 class PdfImage extends PdfXObject {
+  /// Creates a new [PdfImage] instance.
+  ///
+  /// @param image an [Uint8List] value
+  /// @param width
+  /// @param height
+  /// @param alpha if the image is transparent
+  /// @param alphaChannel if this is transparency mask
+  PdfImage(PdfDocument pdfDocument,
+      {@required this.image,
+      @required this.width,
+      @required this.height,
+      this.alpha = true,
+      this.alphaChannel = false,
+      this.jpeg = false})
+      : assert(alphaChannel == false || alpha == true),
+        assert(width != null),
+        assert(height != null),
+        super(pdfDocument, '/Image', isBinary: true) {
+    _name = '/Image$objser';
+    params['/Width'] = PdfStream.string(width.toString());
+    params['/Height'] = PdfStream.string(height.toString());
+    params['/BitsPerComponent'] = PdfStream.intNum(8);
+    params['/Name'] = PdfStream.string(_name);
+
+    if (alphaChannel == false && alpha) {
+      final PdfImage _sMask = PdfImage(pdfDocument,
+          image: image,
+          width: width,
+          height: height,
+          alpha: alpha,
+          alphaChannel: true);
+      params['/SMask'] = PdfStream.string('${_sMask.objser} 0 R');
+    }
+
+    if (alphaChannel) {
+      params['/ColorSpace'] = PdfStream.string('/DeviceGray');
+    } else {
+      params['/ColorSpace'] = PdfStream.string('/DeviceRGB');
+    }
+
+    if (jpeg) {
+      params['/Intent'] = PdfStream.string('/RelativeColorimetric');
+    }
+  }
+
   /// RGBA Image Data
   final Uint8List image;
 
@@ -37,66 +82,21 @@ class PdfImage extends PdfXObject {
   /// The image data is a jpeg image
   final bool jpeg;
 
-  /// Creates a new [PdfImage] instance.
-  ///
-  /// @param image an [Uint8List] value
-  /// @param width
-  /// @param height
-  /// @param alpha if the image is transparent
-  /// @param alphaChannel if this is transparency mask
-  PdfImage(PdfDocument pdfDocument,
-      {@required this.image,
-      @required this.width,
-      @required this.height,
-      this.alpha = true,
-      this.alphaChannel = false,
-      this.jpeg = false})
-      : assert(alphaChannel == false || alpha == true),
-        assert(width != null),
-        assert(height != null),
-        super(pdfDocument, "/Image", isBinary: true) {
-    _name = "/Image$objser";
-    params["/Width"] = PdfStream.string(width.toString());
-    params["/Height"] = PdfStream.string(height.toString());
-    params["/BitsPerComponent"] = PdfStream.intNum(8);
-    params['/Name'] = PdfStream.string(_name);
-
-    if (alphaChannel == false && alpha) {
-      var _sMask = PdfImage(pdfDocument,
-          image: image,
-          width: width,
-          height: height,
-          alpha: alpha,
-          alphaChannel: true);
-      params["/SMask"] = PdfStream.string("${_sMask.objser} 0 R");
-    }
-
-    if (alphaChannel) {
-      params["/ColorSpace"] = PdfStream.string("/DeviceGray");
-    } else {
-      params["/ColorSpace"] = PdfStream.string("/DeviceRGB");
-    }
-
-    if (jpeg) {
-      params["/Intent"] = PdfStream.string("/RelativeColorimetric");
-    }
-  }
-
   /// write the pixels to the stream
   @override
   void _prepare() {
     if (jpeg) {
       buf.putBytes(image);
-      params["/Filter"] = PdfStream.string("/DCTDecode");
+      params['/Filter'] = PdfStream.string('/DCTDecode');
       super._prepare();
       return;
     }
 
-    int w = width;
-    int h = height;
-    int s = w * h;
+    final int w = width;
+    final int h = height;
+    final int s = w * h;
 
-    Uint8List out = Uint8List(alphaChannel ? s : s * 3);
+    final Uint8List out = Uint8List(alphaChannel ? s : s * 3);
 
     if (alphaChannel) {
       for (int i = 0; i < s; i++) {

@@ -17,25 +17,6 @@
 part of pdf;
 
 class PdfPage extends PdfObject {
-  /// This is this page format, ie the size of the page, margins, and rotation
-  final PdfPageFormat pageFormat;
-
-  /// This holds the contents of the page.
-  List<PdfObjectStream> contents = [];
-
-  /// Object ID that contains a thumbnail sketch of the page.
-  /// -1 indicates no thumbnail.
-  PdfObject thumbnail;
-
-  /// This holds any Annotations contained within this page.
-  List<PdfAnnot> annotations = [];
-
-  /// The fonts associated with this page
-  final fonts = Map<String, PdfFont>();
-
-  /// The xobjects or other images in the pdf
-  final xObjects = Map<String, PdfXObject>();
-
   /// This constructs a Page object, which will hold any contents for this
   /// page.
   ///
@@ -44,9 +25,28 @@ class PdfPage extends PdfObject {
   /// @param pdfDocument Document
   /// @param pageFormat [PdfPageFormat] describing the page size
   PdfPage(PdfDocument pdfDocument, {this.pageFormat = PdfPageFormat.a4})
-      : super(pdfDocument, "/Page") {
+      : super(pdfDocument, '/Page') {
     pdfDocument.pdfPageList.pages.add(this);
   }
+
+  /// This is this page format, ie the size of the page, margins, and rotation
+  final PdfPageFormat pageFormat;
+
+  /// This holds the contents of the page.
+  List<PdfObjectStream> contents = <PdfObjectStream>[];
+
+  /// Object ID that contains a thumbnail sketch of the page.
+  /// -1 indicates no thumbnail.
+  PdfObject thumbnail;
+
+  /// This holds any Annotations contained within this page.
+  List<PdfAnnot> annotations = <PdfAnnot>[];
+
+  /// The fonts associated with this page
+  final Map<String, PdfFont> fonts = <String, PdfFont>{};
+
+  /// The xobjects or other images in the pdf
+  final Map<String, PdfXObject> xObjects = <String, PdfXObject>{};
 
   /// This returns a [PdfGraphics] object, which can then be used to render
   /// on to this page. If a previous [PdfGraphics] object was used, this object
@@ -55,8 +55,8 @@ class PdfPage extends PdfObject {
   ///
   /// @return a new [PdfGraphics] object to be used to draw this page.
   PdfGraphics getGraphics() {
-    var stream = PdfObjectStream(pdfDocument);
-    var g = PdfGraphics(this, stream.buf);
+    final PdfObjectStream stream = PdfObjectStream(pdfDocument);
+    final PdfGraphics g = PdfGraphics(this, stream.buf);
     contents.add(stream);
     return g;
   }
@@ -77,11 +77,11 @@ class PdfPage extends PdfObject {
     super._prepare();
 
     // the /Parent pages object
-    params["/Parent"] = pdfDocument.pdfPageList.ref();
+    params['/Parent'] = pdfDocument.pdfPageList.ref();
 
     // the /MediaBox for the page size
-    params["/MediaBox"] = PdfStream()
-      ..putStringArray([0, 0, pageFormat.width, pageFormat.height]);
+    params['/MediaBox'] = PdfStream()
+      ..putNumArray(<double>[0.0, 0.0, pageFormat.width, pageFormat.height]);
 
     // Rotation (if not zero)
 //        if(rotate!=0) {
@@ -93,36 +93,36 @@ class PdfPage extends PdfObject {
     // the /Contents pages object
     if (contents.isNotEmpty) {
       if (contents.length == 1) {
-        params["/Contents"] = contents[0].ref();
+        params['/Contents'] = contents[0].ref();
       } else {
-        params["/Contents"] = PdfStream()..putObjectArray(contents);
+        params['/Contents'] = PdfStream()..putObjectArray(contents);
       }
     }
 
     // Now the resources
     /// This holds any resources for this page
-    final resources = Map<String, PdfStream>();
+    final Map<String, PdfStream> resources = <String, PdfStream>{};
 
     // fonts
     if (fonts.isNotEmpty) {
-      resources["/Font"] = PdfStream()..putObjectDictionary(fonts);
+      resources['/Font'] = PdfStream()..putObjectDictionary(fonts);
     }
 
     // Now the XObjects
     if (xObjects.isNotEmpty) {
-      resources["/XObject"] = PdfStream()..putObjectDictionary(xObjects);
+      resources['/XObject'] = PdfStream()..putObjectDictionary(xObjects);
     }
 
-    params["/Resources"] = PdfStream.dictionary(resources);
+    params['/Resources'] = PdfStream.dictionary(resources);
 
     // The thumbnail
     if (thumbnail != null) {
-      params["/Thumb"] = thumbnail.ref();
+      params['/Thumb'] = thumbnail.ref();
     }
 
     // The /Annots object
     if (annotations.isNotEmpty) {
-      params["/Annots"] = PdfStream()..putObjectArray(annotations);
+      params['/Annots'] = PdfStream()..putObjectArray(annotations);
     }
   }
 }

@@ -18,10 +18,6 @@ part of pdf;
 
 @immutable
 class PdfRect {
-  final double x, y, width, height;
-
-  static const zero = PdfRect(0.0, 0.0, 0.0, 0.0);
-
   const PdfRect(this.x, this.y, this.width, this.height);
 
   factory PdfRect.fromLTRB(
@@ -32,6 +28,10 @@ class PdfRect {
   factory PdfRect.fromPoints(PdfPoint offset, PdfPoint size) {
     return PdfRect(offset.x, offset.y, size.x, size.y);
   }
+
+  final double x, y, width, height;
+
+  static const PdfRect zero = PdfRect(0.0, 0.0, 0.0, 0.0);
 
   double get left => x;
   double get bottom => y;
@@ -52,7 +52,7 @@ class PdfRect {
   double get h => height;
 
   @override
-  String toString() => "PdfRect($x, $y, $width, $height)";
+  String toString() => 'PdfRect($x, $y, $width, $height)';
 
   PdfRect operator *(double factor) {
     return PdfRect(x * factor, y * factor, width * factor, height * factor);

@@ -21,24 +21,25 @@ import 'package:test/test.dart';
 
 void printText(PdfGraphics g, String text, PdfFont font, double top) {
   text = text + font.fontName;
-  var r = font.stringBounds(text);
-  const FS = 20.0;
-  g.setColor(PdfColor(0.9, 0.9, 0.9));
+  final PdfRect r = font.stringBounds(text);
+  const double FS = 20.0;
+  g.setColor(const PdfColor(0.9, 0.9, 0.9));
   g.drawRect(50.0 + r.x * FS, g.page.pageFormat.height - top + r.y * FS,
       r.width * FS, r.height * FS);
   g.fillPath();
-  g.setColor(PdfColor(0.3, 0.3, 0.3));
+  g.setColor(const PdfColor(0.3, 0.3, 0.3));
   g.drawString(font, FS, text, 50.0, g.page.pageFormat.height - top);
 }
 
 void main() {
   test('Pdf', () {
-    var pdf = PdfDocument();
-    var page = PdfPage(pdf, pageFormat: const PdfPageFormat(500.0, 430.0));
+    final PdfDocument pdf = PdfDocument();
+    final PdfPage page =
+        PdfPage(pdf, pageFormat: const PdfPageFormat(500.0, 430.0));
 
-    var g = page.getGraphics();
-    var top = 0;
-    const s = "Hello ";
+    final PdfGraphics g = page.getGraphics();
+    int top = 0;
+    const String s = 'Hello ';
 
     printText(g, s, PdfFont.courier(pdf), 20.0 + 30.0 * top++);
     printText(g, s, PdfFont.courierBold(pdf), 20.0 + 30.0 * top++);
@@ -58,7 +59,7 @@ void main() {
     printText(g, s, PdfFont.symbol(pdf), 20.0 + 30.0 * top++);
     printText(g, s, PdfFont.zapfDingbats(pdf), 20.0 + 30.0 * top++);
 
-    var file = File('file3.pdf');
+    final File file = File('type1.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

@@ -17,12 +17,12 @@
 part of pdf;
 
 class PdfPolygon {
-  List<PdfPoint> points;
-
   PdfPolygon(this.points);
 
+  List<PdfPoint> points;
+
   PdfRect getBounds() {
-    // TODO: Implement properly
+    // TODO(me): Implement properly
     return const PdfRect(0.0, 0.0, 0.0, 0.0);
   }
 }

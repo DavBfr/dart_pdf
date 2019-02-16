@@ -17,21 +17,23 @@
 part of widget;
 
 class Image extends Widget {
-  final PdfImage image;
-  final double aspectRatio;
-  final BoxFit fit;
-
   Image(this.image, {this.fit = BoxFit.contain})
       : assert(image != null),
-        aspectRatio = (image.height.toDouble() / image.width.toDouble());
+        aspectRatio = image.height.toDouble() / image.width.toDouble();
+
+  final PdfImage image;
+
+  final double aspectRatio;
+
+  final BoxFit fit;
 
   @override
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
-    final w = constraints.hasBoundedWidth
+      {bool parentUsesSize = false}) {
+    final double w = constraints.hasBoundedWidth
         ? constraints.maxWidth
         : constraints.constrainWidth(image.width.toDouble());
-    final h = constraints.hasBoundedHeight
+    final double h = constraints.hasBoundedHeight
         ? constraints.maxHeight
         : constraints.constrainHeight(image.height.toDouble());
 
@@ -51,14 +53,6 @@ class Image extends Widget {
 }
 
 class Shape extends Widget {
-  final String shape;
-  final PdfColor strokeColor;
-  final PdfColor fillColor;
-  final double width;
-  final double height;
-  final double aspectRatio;
-  final BoxFit fit;
-
   Shape(
     this.shape, {
     this.strokeColor,
@@ -70,13 +64,27 @@ class Shape extends Widget {
         assert(height != null && height > 0.0),
         aspectRatio = height / width;
 
+  final String shape;
+
+  final PdfColor strokeColor;
+
+  final PdfColor fillColor;
+
+  final double width;
+
+  final double height;
+
+  final double aspectRatio;
+
+  final BoxFit fit;
+
   @override
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
-    final w = constraints.hasBoundedWidth
+      {bool parentUsesSize = false}) {
+    final double w = constraints.hasBoundedWidth
         ? constraints.maxWidth
         : constraints.constrainWidth(width);
-    final h = constraints.hasBoundedHeight
+    final double h = constraints.hasBoundedHeight
         ? constraints.maxHeight
         : constraints.constrainHeight(height);
 
@@ -89,7 +97,7 @@ class Shape extends Widget {
   void paint(Context context) {
     super.paint(context);
 
-    final mat = Matrix4.identity();
+    final Matrix4 mat = Matrix4.identity();
     mat.translate(box.x, box.y + box.height);
     mat.scale(box.width / width, -box.height / height);
     context.canvas

@@ -17,11 +17,12 @@
 part of pdf;
 
 class Ascii85Encoder extends Converter<List<int>, List<int>> {
+  @override
   List<int> convert(List<int> input) {
-    Uint8List buffer = Uint8List(_maxEncodedLen(input.length) + 2);
+    final Uint8List buffer = Uint8List(_maxEncodedLen(input.length) + 2);
 
-    var b = 0;
-    var s = 0;
+    int b = 0;
+    int s = 0;
 
     while (s < input.length) {
       buffer[b + 0] = 0;
@@ -68,7 +69,7 @@ class Ascii85Encoder extends Converter<List<int>, List<int>> {
       }
 
       // If input was short, discard the low destination bytes.
-      var m = 5;
+      int m = 5;
       if (input.length - s < 4) {
         m -= 4 - (input.length - s);
         break;

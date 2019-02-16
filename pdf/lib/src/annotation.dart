@@ -17,25 +17,6 @@
 part of pdf;
 
 class PdfAnnot extends PdfObject {
-  /// The subtype of the outline, ie text, note, etc
-  final String subtype;
-
-  /// The size of the annotation
-  final PdfRect srcRect;
-
-  /// The text of a text annotation
-  final String content;
-
-  /// Link to the Destination page
-  final PdfObject dest;
-
-  /// If destRect is null then this is the region of the destination page shown.
-  /// Otherwise they are ignored.
-  final PdfRect destRect;
-
-  /// the border for this annotation
-  final PdfBorder border;
-
   PdfAnnot._create(PdfPage pdfPage,
       {String type,
       this.content,
@@ -56,7 +37,7 @@ class PdfAnnot extends PdfObject {
           @required String content,
           PdfBorder border}) =>
       PdfAnnot._create(pdfPage,
-          subtype: "/Text", srcRect: rect, content: content, border: border);
+          subtype: '/Text', srcRect: rect, content: content, border: border);
 
   /// Creates a link annotation
   /// @param srcRect coordinates
@@ -69,11 +50,30 @@ class PdfAnnot extends PdfObject {
           PdfRect destRect,
           PdfBorder border}) =>
       PdfAnnot._create(pdfPage,
-          subtype: "/Link",
+          subtype: '/Link',
           srcRect: srcRect,
           dest: dest,
           destRect: destRect,
           border: border);
+
+  /// The subtype of the outline, ie text, note, etc
+  final String subtype;
+
+  /// The size of the annotation
+  final PdfRect srcRect;
+
+  /// The text of a text annotation
+  final String content;
+
+  /// Link to the Destination page
+  final PdfObject dest;
+
+  /// If destRect is null then this is the region of the destination page shown.
+  /// Otherwise they are ignored.
+  final PdfRect destRect;
+
+  /// the border for this annotation
+  final PdfBorder border;
 
   /// Output the annotation
   ///
@@ -82,30 +82,30 @@ class PdfAnnot extends PdfObject {
   void _prepare() {
     super._prepare();
 
-    params["/Subtype"] = PdfStream.string(subtype);
-    params["/Rect"] = PdfStream.string(
-        "[${srcRect.left} ${srcRect.bottom} ${srcRect.right} ${srcRect.top}]");
+    params['/Subtype'] = PdfStream.string(subtype);
+    params['/Rect'] = PdfStream.string(
+        '[${srcRect.left} ${srcRect.bottom} ${srcRect.right} ${srcRect.top}]');
 
     // handle the border
     if (border == null) {
-      params["/Border"] = PdfStream.string("[0 0 0]");
+      params['/Border'] = PdfStream.string('[0 0 0]');
     } else {
-      params["/BS"] = border.ref();
+      params['/BS'] = border.ref();
     }
 
     // Now the annotation subtypes
-    if (subtype == "/Text") {
-      params["/Contents"] = PdfStream()..putLiteral(content);
-    } else if (subtype == "/Link") {
-      var dests = List<PdfStream>();
+    if (subtype == '/Text') {
+      params['/Contents'] = PdfStream()..putLiteral(content);
+    } else if (subtype == '/Link') {
+      final List<PdfStream> dests = <PdfStream>[];
       dests.add(dest.ref());
       if (destRect == null)
-        dests.add(PdfStream.string("/Fit"));
+        dests.add(PdfStream.string('/Fit'));
       else {
         dests.add(PdfStream.string(
-            "/FitR ${destRect.left} ${destRect.bottom} ${destRect.right} ${destRect.top}"));
+            '/FitR ${destRect.left} ${destRect.bottom} ${destRect.right} ${destRect.top}'));
       }
-      params["/Dest"] = PdfStream.array(dests);
+      params['/Dest'] = PdfStream.array(dests);
     }
   }
 }

@@ -17,12 +17,12 @@
 part of widget;
 
 class Header extends StatelessWidget {
+  Header({this.level = 1, this.text, this.child})
+      : assert(level >= 0 && level <= 5);
+
   final String text;
   final Widget child;
   final int level;
-
-  Header({this.level = 1, this.text, this.child})
-      : assert(level >= 0 && level <= 5);
 
   @override
   Widget build(Context context) {
@@ -32,36 +32,36 @@ class Header extends StatelessWidget {
     double _textSize;
     switch (level) {
       case 0:
-        _margin = EdgeInsets.only(bottom: 5.0 * PdfPageFormat.mm);
-        _padding = EdgeInsets.only(bottom: 1.0 * PdfPageFormat.mm);
+        _margin = const EdgeInsets.only(bottom: 5.0 * PdfPageFormat.mm);
+        _padding = const EdgeInsets.only(bottom: 1.0 * PdfPageFormat.mm);
         _decoration =
-            BoxDecoration(border: BoxBorder(bottom: true, width: 1.0));
+            const BoxDecoration(border: BoxBorder(bottom: true, width: 1.0));
         _textSize = 2.0;
         break;
       case 1:
-        _margin = EdgeInsets.only(
+        _margin = const EdgeInsets.only(
             top: 3.0 * PdfPageFormat.mm, bottom: 5.0 * PdfPageFormat.mm);
         _decoration =
-            BoxDecoration(border: BoxBorder(bottom: true, width: 0.2));
+            const BoxDecoration(border: BoxBorder(bottom: true, width: 0.2));
         _textSize = 1.5;
         break;
       case 2:
-        _margin = EdgeInsets.only(
+        _margin = const EdgeInsets.only(
             top: 2.0 * PdfPageFormat.mm, bottom: 4.0 * PdfPageFormat.mm);
         _textSize = 1.4;
         break;
       case 3:
-        _margin = EdgeInsets.only(
+        _margin = const EdgeInsets.only(
             top: 2.0 * PdfPageFormat.mm, bottom: 4.0 * PdfPageFormat.mm);
         _textSize = 1.3;
         break;
       case 4:
-        _margin = EdgeInsets.only(
+        _margin = const EdgeInsets.only(
             top: 2.0 * PdfPageFormat.mm, bottom: 4.0 * PdfPageFormat.mm);
         _textSize = 1.2;
         break;
       case 5:
-        _margin = EdgeInsets.only(
+        _margin = const EdgeInsets.only(
             top: 2.0 * PdfPageFormat.mm, bottom: 4.0 * PdfPageFormat.mm);
         _textSize = 1.1;
         break;
@@ -77,14 +77,14 @@ class Header extends StatelessWidget {
 }
 
 class Paragraph extends StatelessWidget {
-  final String text;
-
   Paragraph({this.text});
+
+  final String text;
 
   @override
   Widget build(Context context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 5.0 * PdfPageFormat.mm),
+      margin: const EdgeInsets.only(bottom: 5.0 * PdfPageFormat.mm),
       child: Text(
         text,
         textAlign: TextAlign.justify,
@@ -95,26 +95,26 @@ class Paragraph extends StatelessWidget {
 }
 
 class Bullet extends StatelessWidget {
-  final String text;
-
   Bullet({this.text});
+
+  final String text;
 
   @override
   Widget build(Context context) {
     return Container(
-        margin: EdgeInsets.only(bottom: 2.0 * PdfPageFormat.mm),
+        margin: const EdgeInsets.only(bottom: 2.0 * PdfPageFormat.mm),
         child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Container(
                 width: 2.0 * PdfPageFormat.mm,
                 height: 2.0 * PdfPageFormat.mm,
-                margin: EdgeInsets.only(
+                margin: const EdgeInsets.only(
                   top: 0.5 * PdfPageFormat.mm,
                   left: 5.0 * PdfPageFormat.mm,
                   right: 2.0 * PdfPageFormat.mm,
                 ),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                     color: PdfColor.black, shape: BoxShape.circle),
               ),
               Expanded(child: Text(text, style: Theme.of(context).bulletStyle))

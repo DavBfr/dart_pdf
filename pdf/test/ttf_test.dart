@@ -22,38 +22,34 @@ import 'package:test/test.dart';
 
 void main() {
   test('Pdf', () {
-    var pdf = PdfDocument();
-    var page = PdfPage(pdf, pageFormat: const PdfPageFormat(500.0, 300.0));
+    final PdfDocument pdf = PdfDocument();
+    final PdfPage page =
+        PdfPage(pdf, pageFormat: const PdfPageFormat(500.0, 300.0));
 
-    var g = page.getGraphics();
-    var ttf = PdfTtfFont(
-        pdf,
-        (File("open-sans.ttf").readAsBytesSync() as Uint8List)
-            .buffer
-            .asByteData());
-    var s = "Hello World!";
-    var r = ttf.stringBounds(s);
-    const FS = 20.0;
-    g.setColor(PdfColor(0.0, 1.0, 1.0));
+    final PdfGraphics g = page.getGraphics();
+    final Uint8List ttfData = File('open-sans.ttf').readAsBytesSync();
+    final PdfTtfFont ttf = PdfTtfFont(pdf, ttfData.buffer.asByteData());
+    const String s = 'Hello World!';
+    PdfRect r = ttf.stringBounds(s);
+    const double FS = 20.0;
+    const PdfColor pdfColor = PdfColor(0.0, 1.0, 1.0);
+    g.setColor(pdfColor);
     g.drawRect(50.0 + r.x * FS, 30.0 + r.y * FS, r.width * FS, r.height * FS);
     g.fillPath();
-    g.setColor(PdfColor(0.3, 0.3, 0.3));
+    g.setColor(const PdfColor(0.3, 0.3, 0.3));
     g.drawString(ttf, FS, s, 50.0, 30.0);
 
-    var roboto = PdfTtfFont(
-        pdf,
-        (File("roboto.ttf").readAsBytesSync() as Uint8List)
-            .buffer
-            .asByteData());
+    final Uint8List robotoData = File('roboto.ttf').readAsBytesSync();
+    final PdfTtfFont roboto = PdfTtfFont(pdf, robotoData.buffer.asByteData());
 
     r = roboto.stringBounds(s);
-    g.setColor(PdfColor(0.0, 1.0, 1.0));
+    g.setColor(const PdfColor(0.0, 1.0, 1.0));
     g.drawRect(50.0 + r.x * FS, 130.0 + r.y * FS, r.width * FS, r.height * FS);
     g.fillPath();
-    g.setColor(PdfColor(0.3, 0.3, 0.3));
+    g.setColor(const PdfColor(0.3, 0.3, 0.3));
     g.drawString(roboto, FS, s, 50.0, 130.0);
 
-    var file = File('file2.pdf');
+    final File file = File('ttf.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

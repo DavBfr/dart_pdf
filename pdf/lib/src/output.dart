@@ -17,11 +17,19 @@
 part of pdf;
 
 class PdfOutput {
+  /// This creates a Pdf [PdfStream]
+  ///
+  /// @param os The output stream to write the Pdf file to.
+  PdfOutput(this.os) {
+    os.putString('%PDF-1.4\n');
+    os.putBytes(const <int>[0x25, 0xC2, 0xA5, 0xC2, 0xB1, 0xC3, 0xAB, 0x0A]);
+  }
+
   /// This is the actual [PdfStream] used to write to.
   final PdfStream os;
 
   /// This vector contains offsets of each object
-  List<PdfXref> offsets = [];
+  List<PdfXref> offsets = <PdfXref>[];
 
   /// This is used to track the /Root object (catalog)
   PdfObject rootID;
@@ -29,22 +37,18 @@ class PdfOutput {
   /// This is used to track the /Info object (info)
   PdfObject infoID;
 
-  /// This creates a Pdf [PdfStream]
-  ///
-  /// @param os The output stream to write the Pdf file to.
-  PdfOutput(this.os) {
-    os.putString("%PDF-1.4\n");
-    os.putBytes([0x25, 0xC2, 0xA5, 0xC2, 0xB1, 0xC3, 0xAB, 0x0A]);
-  }
-
   /// This method writes a [PdfObject] to the stream.
   ///
   /// @param ob [PdfObject] Object to write
   void write(PdfObject ob) {
     // Check the object to see if it's one that is needed in the trailer
     // object
-    if (ob is PdfCatalog) rootID = ob;
-    if (ob is PdfInfo) infoID = ob;
+    if (ob is PdfCatalog) {
+      rootID = ob;
+    }
+    if (ob is PdfInfo) {
+      infoID = ob;
+    }
 
     offsets.add(PdfXref(ob.objser, os.offset));
     ob._write(os);
@@ -52,9 +56,9 @@ class PdfOutput {
 
   /// This closes the Stream, writing the xref table
   void close() {
-    int xref = os.offset;
+    final int xref = os.offset;
 
-    os.putString("xref\n");
+    os.putString('xref\n');
 
     // Now a single subsection for object 0
     //os.write("0 1\n0000000000 65535 f \n");
@@ -63,19 +67,21 @@ class PdfOutput {
     // but just in case:
     int firstid = 0; // First id in block
     int lastid = -1; // The last id used
-    var block = []; // xrefs in this block
+    final List<PdfXref> block = <PdfXref>[]; // xrefs in this block
 
     // We need block 0 to exist
     block.add(PdfXref(0, 0, generation: 65535));
 
     for (PdfXref x in offsets) {
-      if (firstid == -1) firstid = x.id;
+      if (firstid == -1) {
+        firstid = x.id;
+      }
 
       // check to see if block is in range (-1 means empty)
       if (lastid > -1 && x.id != (lastid + 1)) {
         // no, so write this block, and reset
         writeblock(firstid, block);
-        block = [];
+        block.clear();
         firstid = -1;
       }
 
@@ -85,45 +91,46 @@ class PdfOutput {
     }
 
     // now write the last block
-    if (firstid > -1) writeblock(firstid, block);
+    if (firstid > -1) {
+      writeblock(firstid, block);
+    }
 
     // now the trailer object
-    os.putString("trailer\n<<\n");
+    os.putString('trailer\n<<\n');
 
     // the number of entries (REQUIRED)
-    os.putString("/Size ");
+    os.putString('/Size ');
     os.putString((offsets.length + 1).toString());
-    os.putString("\n");
+    os.putString('\n');
 
     // the /Root catalog indirect reference (REQUIRED)
     if (rootID != null) {
-      os.putString("/Root ");
+      os.putString('/Root ');
       os.putStream(rootID.ref());
-      os.putString("\n");
+      os.putString('\n');
     } else
-      throw Exception("Root object is not present in document");
+      throw Exception('Root object is not present in document');
 
     // the /Info reference (OPTIONAL)
     if (infoID != null) {
-      os.putString("/Info ");
+      os.putString('/Info ');
       os.putStream(infoID.ref());
-      os.putString("\n");
+      os.putString('\n');
     }
 
     // end the trailer object
-    os.putString(">>\nstartxref\n$xref\n%%EOF\n");
+    os.putString('>>\nstartxref\n$xref\n%%EOF\n');
   }
 
   /// Writes a block of references to the Pdf file
   /// @param firstid ID of the first reference in this block
   /// @param block Vector containing the references in this block
-  void writeblock(int firstid, var block) {
-    os.putString("$firstid ${block.length}\n");
-    //os.write("\n0000000000 65535 f\n");
+  void writeblock(int firstid, List<PdfXref> block) {
+    os.putString('$firstid ${block.length}\n');
 
     for (PdfXref x in block) {
       os.putString(x.ref());
-      os.putString("\n");
+      os.putString('\n');
     }
   }
 }

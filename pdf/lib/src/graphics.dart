@@ -19,17 +19,17 @@ part of pdf;
 enum PdfLineCap { joinMiter, joinRound, joinBevel }
 
 class PdfGraphics {
+  PdfGraphics(this.page, this.buf);
+
   /// Ellipse 4-spline magic number
-  static const _m4 = 0.551784;
+  static const double _m4 = 0.551784;
 
   /// Graphic context number
-  var _context = 0;
+  int _context = 0;
 
   final PdfPage page;
 
   final PdfStream buf;
-
-  PdfGraphics(this.page, this.buf);
 
   PdfFont get defaultFont {
     if (page.pdfDocument.fonts.isEmpty) {
@@ -40,19 +40,19 @@ class PdfGraphics {
   }
 
   void fillPath() {
-    buf.putString("f\n");
+    buf.putString('f\n');
   }
 
   void strokePath() {
-    buf.putString("S\n");
+    buf.putString('S\n');
   }
 
   void closePath() {
-    buf.putString("s\n");
+    buf.putString('s\n');
   }
 
   void clipPath() {
-    buf.putString("W n\n");
+    buf.putString('W n\n');
   }
 
   /// This releases any resources used by this Graphics object. You must use
@@ -63,14 +63,14 @@ class PdfGraphics {
   void restoreContext() {
     if (_context > 0) {
       // restore graphics context
-      buf.putString("Q\n");
+      buf.putString('Q\n');
       _context--;
     }
   }
 
   void saveContext() {
     // save graphics context
-    buf.putString("q\n");
+    buf.putString('q\n');
     _context++;
   }
 
@@ -89,16 +89,16 @@ class PdfGraphics {
   /// @param bgcolor Background colour
   /// @return true if drawn
   void drawImage(PdfImage img, double x, double y, [double w, double h]) {
-    if (w == null) w = img.width.toDouble();
-    if (h == null) h = img.height.toDouble() * w / img.width.toDouble();
+    w ??= img.width.toDouble();
+    h ??= img.height.toDouble() * w / img.width.toDouble();
 
     // The image needs to be registered in the page resources
     page.xObjects[img.name] = img;
 
     // q w 0 0 h x y cm % the coordinate matrix
-    buf.putString("q ");
+    buf.putString('q ');
     buf.putNumList(<double>[w, 0.0, 0.0, h, x, y]);
-    buf.putString(" cm ${img.name} Do Q\n");
+    buf.putString(' cm ${img.name} Do Q\n');
   }
 
   /// Draws a line between two coordinates.
@@ -145,7 +145,7 @@ class PdfGraphics {
     double h,
   ) {
     buf.putNumList(<double>[x, y, w, h]);
-    buf.putString(" re\n");
+    buf.putString(' re\n');
   }
 
   /// Draws a Rounded Rectangle
@@ -179,13 +179,13 @@ class PdfGraphics {
       page.fonts[font.name] = font;
     }
 
-    buf.putString("BT ");
+    buf.putString('BT ');
     buf.putNumList(<double>[x, y]);
-    buf.putString(" Td ${font.name} ");
+    buf.putString(' Td ${font.name} ');
     buf.putNum(size);
-    buf.putString(" Tf ");
+    buf.putString(' Tf ');
     buf.putText(s);
-    buf.putString(" Tj ET\n");
+    buf.putString(' Tj ET\n');
   }
 
   /// Sets the color for drawing
@@ -202,10 +202,10 @@ class PdfGraphics {
   void setFillColor(PdfColor color) {
     if (color is PdfColorCmyk) {
       buf.putNumList(<double>[color.c, color.m, color.y, color.k]);
-      buf.putString(" k\n");
+      buf.putString(' k\n');
     } else {
       buf.putNumList(<double>[color.r, color.g, color.b]);
-      buf.putString(" rg\n");
+      buf.putString(' rg\n');
     }
   }
 
@@ -215,18 +215,18 @@ class PdfGraphics {
   void setStrokeColor(PdfColor color) {
     if (color is PdfColorCmyk) {
       buf.putNumList(<double>[color.c, color.m, color.y, color.k]);
-      buf.putString(" K\n");
+      buf.putString(' K\n');
     } else {
       buf.putNumList(<double>[color.r, color.g, color.b]);
-      buf.putString(" RG\n");
+      buf.putString(' RG\n');
     }
   }
 
   /// Set the transformation Matrix
   void setTransform(Matrix4 t) {
-    var s = t.storage;
+    final Float64List s = t.storage;
     buf.putNumList(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]);
-    buf.putString(" cm\n");
+    buf.putString(' cm\n');
   }
 
   /// This adds a line segment to the current path
@@ -235,7 +235,7 @@ class PdfGraphics {
   /// @param y coordinate
   void lineTo(double x, double y) {
     buf.putNumList(<double>[x, y]);
-    buf.putString(" l\n");
+    buf.putString(' l\n');
   }
 
   /// This moves the current drawing point.
@@ -244,7 +244,7 @@ class PdfGraphics {
   /// @param y coordinate
   void moveTo(double x, double y) {
     buf.putNumList(<double>[x, y]);
-    buf.putString(" m\n");
+    buf.putString(' m\n');
   }
 
   /// Draw a cubic bézier curve from the current point to (x3,y3)
@@ -260,17 +260,22 @@ class PdfGraphics {
   void curveTo(
       double x1, double y1, double x2, double y2, double x3, double y3) {
     buf.putNumList(<double>[x1, y1, x2, y2, x3, y3]);
-    buf.putString(" c\n");
+    buf.putString(' c\n');
   }
 
   double _vectorAngle(double ux, double uy, double vx, double vy) {
-    final d = math.sqrt(ux * ux + uy * uy) * math.sqrt(vx * vx + vy * vy);
-    if (d == 0.0) return 0.0;
-    var c = (ux * vx + uy * vy) / d;
+    final double d =
+        math.sqrt(ux * ux + uy * uy) * math.sqrt(vx * vx + vy * vy);
+    if (d == 0.0) {
+      return 0.0;
+    }
+    double c = (ux * vx + uy * vy) / d;
     if (c < -1.0) {
       c = -1.0;
-    } else if (c > 1.0) c = 1.0;
-    final s = ux * vy - uy * vx;
+    } else if (c > 1.0) {
+      c = 1.0;
+    }
+    final double s = ux * vy - uy * vx;
     c = math.acos(c);
     return c.sign == s.sign ? c : -c;
   }
@@ -282,35 +287,44 @@ class PdfGraphics {
     rx = rx.abs();
     ry = ry.abs();
 
-    final x1d = 0.5 * (x1 - x2);
-    final y1d = 0.5 * (y1 - y2);
+    final double x1d = 0.5 * (x1 - x2);
+    final double y1d = 0.5 * (y1 - y2);
 
-    var r = x1d * x1d / (rx * rx) + y1d * y1d / (ry * ry);
+    double r = x1d * x1d / (rx * rx) + y1d * y1d / (ry * ry);
     if (r > 1.0) {
-      var rr = math.sqrt(r);
+      final double rr = math.sqrt(r);
       rx *= rr;
       ry *= rr;
       r = x1d * x1d / (rx * rx) + y1d * y1d / (ry * ry);
-    } else if (r != 0.0) r = 1.0 / r - 1.0;
+    } else if (r != 0.0) {
+      r = 1.0 / r - 1.0;
+    }
 
-    if (-1e-10 < r && r < 0.0) r = 0.0;
+    if (-1e-10 < r && r < 0.0) {
+      r = 0.0;
+    }
 
     r = math.sqrt(r);
-    if (large == sweep) r = -r;
+    if (large == sweep) {
+      r = -r;
+    }
 
-    final cxd = (r * rx * y1d) / ry;
-    final cyd = -(r * ry * x1d) / rx;
+    final double cxd = (r * rx * y1d) / ry;
+    final double cyd = -(r * ry * x1d) / rx;
 
-    final cx = cxd + 0.5 * (x1 + x2);
-    final cy = cyd + 0.5 * (y1 + y2);
+    final double cx = cxd + 0.5 * (x1 + x2);
+    final double cy = cyd + 0.5 * (y1 + y2);
 
-    final theta = _vectorAngle(1.0, 0.0, (x1d - cxd) / rx, (y1d - cyd) / ry);
-    var dTheta = _vectorAngle((x1d - cxd) / rx, (y1d - cyd) / ry,
+    final double theta =
+        _vectorAngle(1.0, 0.0, (x1d - cxd) / rx, (y1d - cyd) / ry);
+    double dTheta = _vectorAngle((x1d - cxd) / rx, (y1d - cyd) / ry,
             (-x1d - cxd) / rx, (-y1d - cyd) / ry) %
         (math.pi * 2.0);
     if (sweep == false && dTheta > 0.0)
       dTheta -= math.pi * 2.0;
-    else if (sweep == true && dTheta < 0.0) dTheta += math.pi * 2.0;
+    else if (sweep == true && dTheta < 0.0) {
+      dTheta += math.pi * 2.0;
+    }
     _bezierArcFromCentre(cx, cy, rx, ry, -theta, -dTheta);
   }
 
@@ -330,21 +344,23 @@ class PdfGraphics {
       return;
     }
 
-    final halfFragment = fragmentsAngle * 0.5;
-    var kappa =
+    final double halfFragment = fragmentsAngle * 0.5;
+    double kappa =
         (4.0 / 3.0 * (1.0 - math.cos(halfFragment)) / math.sin(halfFragment))
             .abs();
 
-    if (fragmentsAngle < 0.0) kappa = -kappa;
+    if (fragmentsAngle < 0.0) {
+      kappa = -kappa;
+    }
 
-    var theta = startAngle;
-    final startFragment = theta + fragmentsAngle;
+    double theta = startAngle;
+    final double startFragment = theta + fragmentsAngle;
 
-    var c1 = math.cos(theta);
-    var s1 = math.sin(theta);
-    for (var i = 0; i < fragmentsCount; i++) {
-      final c0 = c1;
-      final s0 = s1;
+    double c1 = math.cos(theta);
+    double s1 = math.sin(theta);
+    for (int i = 0; i < fragmentsCount; i++) {
+      final double c0 = c1;
+      final double s0 = s1;
       theta = startFragment + i * fragmentsAngle;
       c1 = math.cos(theta);
       s1 = math.sin(theta);
@@ -365,7 +381,7 @@ class PdfGraphics {
   /// contribute to the automatic calculations and help determine how the arc is drawn.
   void _bezierArc(
       double x1, double y1, double rx, double ry, double x2, double y2,
-      {large = false, sweep = false, phi = 0.0}) {
+      {bool large = false, bool sweep = false, double phi = 0.0}) {
     if (x1 == x2 && y1 == y2) {
       // From https://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes:
       // If the endpoints (x1, y1) and (x2, y2) are identical, then this is
@@ -381,10 +397,10 @@ class PdfGraphics {
     if (phi != 0.0) {
       // Our box bézier arcs can't handle rotations directly
       // move to a well known point, eliminate phi and transform the other point
-      final mat = Matrix4.identity();
+      final Matrix4 mat = Matrix4.identity();
       mat.translate(-x1, -y1);
       mat.rotateZ(-phi);
-      final tr = mat.transform3(Vector3(x2, y2, 0.0));
+      final Vector3 tr = mat.transform3(Vector3(x2, y2, 0.0));
       _endToCenterParameters(0.0, 0.0, tr[0], tr[1], large, sweep, rx, ry);
     } else {
       _endToCenterParameters(x1, y1, x2, y2, large, sweep, rx, ry);
@@ -392,17 +408,18 @@ class PdfGraphics {
   }
 
   /// https://github.com/deeplook/svglib/blob/master/svglib/svglib.py#L911
-  void drawShape(String d, {stroke = true}) {
-    final exp = RegExp(r"([MmZzLlHhVvCcSsQqTtAaE])|(-[\.0-9]+)|([\.0-9]+)");
-    final matches = exp.allMatches(d + " E");
+  void drawShape(String d, {bool stroke = true}) {
+    final RegExp exp =
+        RegExp(r'([MmZzLlHhVvCcSsQqTtAaE])|(-[\.0-9]+)|([\.0-9]+)');
+    final Iterable<Match> matches = exp.allMatches(d + ' E');
     String action;
     String lastAction;
     List<double> points;
-    PdfPoint lastControl = PdfPoint(0.0, 0.0);
-    PdfPoint lastPoint = PdfPoint(0.0, 0.0);
-    for (var m in matches) {
-      var a = m.group(1);
-      var b = m.group(0);
+    PdfPoint lastControl = const PdfPoint(0.0, 0.0);
+    PdfPoint lastPoint = const PdfPoint(0.0, 0.0);
+    for (Match m in matches) {
+      final String a = m.group(1);
+      final String b = m.group(0);
 
       if (a == null) {
         points.add(double.parse(b));
@@ -446,7 +463,7 @@ class PdfGraphics {
             lineTo(lastPoint.x, lastPoint.y);
             break;
           case 'C': // cubic bezier, absolute
-            var len = 0;
+            int len = 0;
             while (len < points.length) {
               curveTo(points[len + 0], points[len + 1], points[len + 2],
                   points[len + 3], points[len + 4], points[len + 5]);
@@ -475,7 +492,7 @@ class PdfGraphics {
             }
             break;
           case 'c': // cubic bezier, relative
-            var len = 0;
+            int len = 0;
             while (len < points.length) {
               points[len + 0] += lastPoint.x;
               points[len + 1] += lastPoint.y;
@@ -518,7 +535,7 @@ class PdfGraphics {
           // case 't': // quadratic bezier, relative
           //   break;
           case 'A': // elliptical arc, absolute
-            var len = 0;
+            int len = 0;
             while (len < points.length) {
               _bezierArc(lastPoint.x, lastPoint.y, points[len + 0],
                   points[len + 1], points[len + 5], points[len + 6],
@@ -530,7 +547,7 @@ class PdfGraphics {
             }
             break;
           case 'a': // elliptical arc, relative
-            var len = 0;
+            int len = 0;
             while (len < points.length) {
               points[len + 5] += lastPoint.x;
               points[len + 6] += lastPoint.y;
@@ -545,15 +562,17 @@ class PdfGraphics {
             break;
           case 'Z': // close path
           case 'z': // close path
-            if (stroke) closePath();
+            if (stroke) {
+              closePath();
+            }
             break;
           default:
-            print("Unknown path action: $action");
+            print('Unknown path action: $action');
         }
       }
       lastAction = action;
       action = a;
-      points = List<double>();
+      points = <double>[];
     }
   }
 
@@ -568,24 +587,26 @@ class PdfGraphics {
     // newPath() not needed here as moveto does it ;-)
     moveTo(p[0].x, p[0].y);
 
-    for (int i = 1; i < p.length; i++) lineTo(p[i].x, p[i].y);
+    for (int i = 1; i < p.length; i++) {
+      lineTo(p[i].x, p[i].y);
+    }
   }
 
   void setLineCap(PdfLineCap cap) {
-    buf.putString("${cap.index} J\n");
+    buf.putString('${cap.index} J\n');
   }
 
   void setLineJoin(PdfLineCap join) {
-    buf.putString("${join.index} j\n");
+    buf.putString('${join.index} j\n');
   }
 
   void setLineWidth(double width) {
     buf.putNum(width);
-    buf.putString(" w\n");
+    buf.putString(' w\n');
   }
 
   void setMiterLimit(double limit) {
     buf.putNum(limit);
-    buf.putString(" M\n");
+    buf.putString(' M\n');
   }
 }

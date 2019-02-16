@@ -17,27 +17,19 @@
 part of pdf;
 
 class PdfTtfFont extends PdfFont {
-  PdfObject unicodeCMap;
-  PdfFontDescriptor descriptor;
-  PdfArrayObject widthsObject;
-  final widths = List<String>();
-  final TtfParser font;
-  int _charMin;
-  int _charMax;
-
   /// Constructs a [PdfTtfFont]
   PdfTtfFont(PdfDocument pdfDocument, ByteData bytes)
       : font = TtfParser(bytes),
-        super._create(pdfDocument, subtype: "/TrueType") {
-    PdfObjectStream file = PdfObjectStream(pdfDocument, isBinary: true);
-    final data = bytes.buffer.asUint8List();
+        super._create(pdfDocument, subtype: '/TrueType') {
+    final PdfObjectStream file = PdfObjectStream(pdfDocument, isBinary: true);
+    final Uint8List data = bytes.buffer.asUint8List();
     file.buf.putBytes(data);
-    file.params["/Length1"] = PdfStream.intNum(data.length);
+    file.params['/Length1'] = PdfStream.intNum(data.length);
 
     _charMin = 32;
     _charMax = 255;
 
-    for (var i = _charMin; i <= _charMax; i++) {
+    for (int i = _charMin; i <= _charMax; i++) {
       widths.add((glyphAdvance(i) * 1000.0).toString());
     }
 
@@ -46,12 +38,26 @@ class PdfTtfFont extends PdfFont {
     widthsObject = PdfArrayObject(pdfDocument, widths);
   }
 
+  PdfObject unicodeCMap;
+
+  PdfFontDescriptor descriptor;
+
+  PdfArrayObject widthsObject;
+
+  final List<String> widths = <String>[];
+
+  final TtfParser font;
+
+  int _charMin;
+
+  int _charMax;
+
   @override
-  String get fontName => "/" + font.fontName.replaceAll(" ", "");
+  String get fontName => '/' + font.fontName.replaceAll(' ', '');
 
   @override
   double glyphAdvance(int charCode) {
-    var g = font.charToGlyphIndexMap[charCode];
+    final int g = font.charToGlyphIndexMap[charCode];
 
     if (g == null) {
       return super.glyphAdvance(charCode);
@@ -63,7 +69,7 @@ class PdfTtfFont extends PdfFont {
 
   @override
   PdfRect glyphBounds(int charCode) {
-    var g = font.charToGlyphIndexMap[charCode];
+    final int g = font.charToGlyphIndexMap[charCode];
 
     if (g == null) {
       return super.glyphBounds(charCode);
@@ -76,12 +82,12 @@ class PdfTtfFont extends PdfFont {
   void _prepare() {
     super._prepare();
 
-    params["/BaseFont"] = PdfStream.string(fontName);
-    params["/FirstChar"] = PdfStream.intNum(_charMin);
-    params["/LastChar"] = PdfStream.intNum(_charMax);
-    params["/Widths"] = widthsObject.ref();
-    params["/FontDescriptor"] = descriptor.ref();
-//    params["/Encoding"] = PdfStream.string("/Identity-H");
-//    params["/ToUnicode"] = unicodeCMap.ref();
+    params['/BaseFont'] = PdfStream.string(fontName);
+    params['/FirstChar'] = PdfStream.intNum(_charMin);
+    params['/LastChar'] = PdfStream.intNum(_charMax);
+    params['/Widths'] = widthsObject.ref();
+    params['/FontDescriptor'] = descriptor.ref();
+//    params['/Encoding'] = PdfStream.string('/Identity-H');
+//    params['/ToUnicode'] = unicodeCMap.ref();
   }
 }

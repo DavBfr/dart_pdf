@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -20,49 +21,50 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  final shareWidget = GlobalKey();
-  final previewContainer = GlobalKey();
+  final GlobalKey<State<StatefulWidget>> shareWidget = GlobalKey();
+  final GlobalKey<State<StatefulWidget>> previewContainer = GlobalKey();
 
-  void _printPdf() async {
-    print("Print ...");
+  Future<void> _printPdf() async {
+    print('Print ...');
     await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async =>
             (await generateDocument(format)).save());
   }
 
-  void _sharePdf() async {
-    print("Share ...");
-    final pdf = await generateDocument(PdfPageFormat.a4);
+  Future<void> _sharePdf() async {
+    print('Share ...');
+    final PdfDocument pdf = await generateDocument(PdfPageFormat.a4);
 
     // Calculate the widget center for iPad sharing popup position
     final RenderBox referenceBox =
         shareWidget.currentContext.findRenderObject();
-    final topLeft =
+    final Offset topLeft =
         referenceBox.localToGlobal(referenceBox.paintBounds.topLeft);
-    final bottomRight =
+    final Offset bottomRight =
         referenceBox.localToGlobal(referenceBox.paintBounds.bottomRight);
-    final bounds = Rect.fromPoints(topLeft, bottomRight);
+    final Rect bounds = Rect.fromPoints(topLeft, bottomRight);
 
     Printing.sharePdf(document: pdf, bounds: bounds);
   }
 
   Future<void> _printScreen() async {
-    RenderRepaintBoundary boundary =
+    final RenderRepaintBoundary boundary =
         previewContainer.currentContext.findRenderObject();
-    final im = await boundary.toImage();
-    final bytes = await im.toByteData(format: ImageByteFormat.rawRgba);
-    print("Print Screen ${im.width}x${im.height} ...");
+    final ui.Image im = await boundary.toImage();
+    final ByteData bytes =
+        await im.toByteData(format: ui.ImageByteFormat.rawRgba);
+    print('Print Screen ${im.width}x${im.height} ...');
 
     Printing.layoutPdf(onLayout: (PdfPageFormat format) {
-      final pdf = PdfDocument(deflate: zlib.encode);
-      final page = PdfPage(pdf, pageFormat: format);
-      final g = page.getGraphics();
+      final PdfDocument pdf = PdfDocument(deflate: zlib.encode);
+      final PdfPage page = PdfPage(pdf, pageFormat: format);
+      final PdfGraphics g = page.getGraphics();
 
       // Center the image
-      final w = page.pageFormat.width -
+      final double w = page.pageFormat.width -
           page.pageFormat.marginLeft -
           page.pageFormat.marginRight;
-      final h = page.pageFormat.height -
+      final double h = page.pageFormat.height -
           page.pageFormat.marginTop -
           page.pageFormat.marginBottom;
       double iw, ih;
@@ -74,7 +76,7 @@ class MyAppState extends State<MyApp> {
         ih = im.height.toDouble() * iw / im.width.toDouble();
       }
 
-      PdfImage image = PdfImage(pdf,
+      final PdfImage image = PdfImage(pdf,
           image: bytes.buffer.asUint8List(),
           width: im.width,
           height: im.height);
@@ -105,13 +107,14 @@ class MyAppState extends State<MyApp> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 RaisedButton(
-                    child: Text('Print Document'), onPressed: _printPdf),
+                    child: const Text('Print Document'), onPressed: _printPdf),
                 RaisedButton(
                     key: shareWidget,
-                    child: Text('Share Document'),
+                    child: const Text('Share Document'),
                     onPressed: _sharePdf),
                 RaisedButton(
-                    child: Text('Print Screenshot'), onPressed: _printScreen),
+                    child: const Text('Print Screenshot'),
+                    onPressed: _printScreen),
               ],
             ),
           ),

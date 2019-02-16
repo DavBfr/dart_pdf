@@ -18,6 +18,27 @@ part of widget;
 
 @immutable
 class BoxConstraints {
+  /// Creates box constraints with the given constraints.
+  const BoxConstraints(
+      {this.minWidth = 0.0,
+      this.maxWidth = double.infinity,
+      this.minHeight = 0.0,
+      this.maxHeight = double.infinity});
+
+  /// Creates box constraints that require the given width or height.
+  const BoxConstraints.tightFor({double width, double height})
+      : minWidth = width != null ? width : 0.0,
+        maxWidth = width != null ? width : double.infinity,
+        minHeight = height != null ? height : 0.0,
+        maxHeight = height != null ? height : double.infinity;
+
+  /// Creates box constraints that expand to fill another box constraints.
+  const BoxConstraints.expand({double width, double height})
+      : minWidth = width != null ? width : double.infinity,
+        maxWidth = width != null ? width : double.infinity,
+        minHeight = height != null ? height : double.infinity,
+        maxHeight = height != null ? height : double.infinity;
+
   /// The minimum width that satisfies the constraints.
   final double minWidth;
 
@@ -33,13 +54,6 @@ class BoxConstraints {
   ///
   /// Might be [double.infinity].
   final double maxHeight;
-
-  /// Creates box constraints with the given constraints.
-  const BoxConstraints(
-      {this.minWidth = 0.0,
-      this.maxWidth = double.infinity,
-      this.minHeight = 0.0,
-      this.maxHeight = double.infinity});
 
   bool get hasBoundedWidth => maxWidth < double.infinity;
 
@@ -65,13 +79,15 @@ class BoxConstraints {
   bool get isTight => hasTightWidth && hasTightHeight;
 
   PdfPoint constrain(PdfPoint size) {
-    final result = PdfPoint(constrainWidth(size.x), constrainHeight(size.y));
+    final PdfPoint result =
+        PdfPoint(constrainWidth(size.x), constrainHeight(size.y));
     return result;
   }
 
   PdfRect constrainRect(
       {double width = double.infinity, double height = double.infinity}) {
-    final result = PdfPoint(constrainWidth(width), constrainHeight(height));
+    final PdfPoint result =
+        PdfPoint(constrainWidth(width), constrainHeight(height));
     return PdfRect.fromPoints(PdfPoint.zero, result);
   }
 
@@ -86,8 +102,7 @@ class BoxConstraints {
   /// Returns a size that attempts to meet the conditions
   PdfPoint constrainSizeAndAttemptToPreserveAspectRatio(PdfPoint size) {
     if (isTight) {
-      PdfPoint result = smallest;
-
+      final PdfPoint result = smallest;
       return result;
     }
 
@@ -117,7 +132,8 @@ class BoxConstraints {
       width = height * aspectRatio;
     }
 
-    PdfPoint result = PdfPoint(constrainWidth(width), constrainHeight(height));
+    final PdfPoint result =
+        PdfPoint(constrainWidth(width), constrainHeight(height));
     return result;
   }
 
@@ -133,20 +149,6 @@ class BoxConstraints {
         maxHeight:
             height == null ? maxHeight : height.clamp(minHeight, maxHeight));
   }
-
-  /// Creates box constraints that require the given width or height.
-  const BoxConstraints.tightFor({double width, double height})
-      : minWidth = width != null ? width : 0.0,
-        maxWidth = width != null ? width : double.infinity,
-        minHeight = height != null ? height : 0.0,
-        maxHeight = height != null ? height : double.infinity;
-
-  /// Creates box constraints that expand to fill another box constraints.
-  const BoxConstraints.expand({double width, double height})
-      : minWidth = width != null ? width : double.infinity,
-        maxWidth = width != null ? width : double.infinity,
-        minHeight = height != null ? height : double.infinity,
-        maxHeight = height != null ? height : double.infinity;
 
   /// Returns new box constraints that are smaller by the given edge dimensions.
   BoxConstraints deflate(EdgeInsets edges) {
@@ -194,7 +196,7 @@ class BoxConstraints {
 
   @override
   String toString() {
-    return "BoxConstraint <$minWidth, $maxWidth> <$minHeight, $maxHeight>";
+    return 'BoxConstraint <$minWidth, $maxWidth> <$minHeight, $maxHeight>';
   }
 }
 
@@ -327,7 +329,7 @@ class Alignment {
   }
 
   @override
-  String toString() => "($x, $y)";
+  String toString() => '($x, $y)';
 }
 
 /// The pair of sizes returned by [applyBoxFit].
@@ -411,10 +413,10 @@ PdfPoint transformPoint(Matrix4 transform, PdfPoint point) {
 }
 
 PdfRect transformRect(Matrix4 transform, PdfRect rect) {
-  final point1 = transformPoint(transform, rect.topLeft);
-  final point2 = transformPoint(transform, rect.topRight);
-  final point3 = transformPoint(transform, rect.bottomLeft);
-  final point4 = transformPoint(transform, rect.bottomRight);
+  final PdfPoint point1 = transformPoint(transform, rect.topLeft);
+  final PdfPoint point2 = transformPoint(transform, rect.topRight);
+  final PdfPoint point3 = transformPoint(transform, rect.bottomLeft);
+  final PdfPoint point4 = transformPoint(transform, rect.bottomRight);
   return PdfRect.fromLTRB(
       math.min(point1.x, math.min(point2.x, math.min(point3.x, point4.x))),
       math.min(point1.y, math.min(point2.y, math.min(point3.y, point4.y))),

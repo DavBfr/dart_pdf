@@ -1,14 +1,14 @@
 /*
  * Copyright (C) 2017, David PHAM-VAN <dev.nfet.net@gmail.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -35,7 +35,7 @@ enum PdfPageMode {
   fullscreen
 }
 
-typedef List<int> DeflateCallback(List<int> data);
+typedef DeflateCallback = List<int> Function(List<int> data);
 
 /// This class is the base of the Pdf generator. A [PdfDocument] class is
 /// created for a document, and each page, object, annotation,
@@ -43,6 +43,17 @@ typedef List<int> DeflateCallback(List<int> data);
 /// Once complete, the document can be written to a Stream, and the Pdf
 /// document's internal structures are kept in sync.
 class PdfDocument {
+  /// This creates a Pdf document
+  /// @param pagemode an int, determines how the document will present itself to
+  /// the viewer when it first opens.
+  PdfDocument({PdfPageMode pageMode = PdfPageMode.none, this.deflate}) {
+    _objser = 1;
+
+    // Now create some standard objects
+    pdfPageList = PdfPageList(this);
+    catalog = PdfCatalog(this, pdfPageList, pageMode);
+  }
+
   /// This is used to allocate objects a unique serial number in the document.
   int _objser;
 
@@ -72,11 +83,11 @@ class PdfDocument {
   final DeflateCallback deflate;
 
   /// These map the page modes just defined to the pagemodes setting of Pdf.
-  static const _PdfPageModes = [
-    "/UseNone",
-    "/UseOutlines",
-    "/UseThumbs",
-    "/FullScreen"
+  static const List<String> _PdfPageModes = <String>[
+    '/UseNone',
+    '/UseOutlines',
+    '/UseThumbs',
+    '/FullScreen'
   ];
 
   /// This holds the current fonts
@@ -84,17 +95,6 @@ class PdfDocument {
 
   /// Creates a new serial number
   int _genSerial() => _objser++;
-
-  /// This creates a Pdf document
-  /// @param pagemode an int, determines how the document will present itself to
-  /// the viewer when it first opens.
-  PdfDocument({PdfPageMode pageMode = PdfPageMode.none, this.deflate}) {
-    _objser = 1;
-
-    // Now create some standard objects
-    pdfPageList = PdfPageList(this);
-    catalog = PdfCatalog(this, pdfPageList, pageMode);
-  }
 
   /// This returns a specific page. It's used mainly when using a
   /// Serialized template file.
@@ -128,20 +128,18 @@ class PdfDocument {
   ///
   /// @param os OutputStream to write the document to
   void _write(PdfStream os) {
-    PdfOutput pos = PdfOutput(os);
+    final PdfOutput pos = PdfOutput(os);
 
     // Write each object to the [PdfStream]. We call via the output
     // as that builds the xref table
-    for (PdfObject o in objects) {
-      pos.write(o);
-    }
+    objects.forEach(pos.write);
 
     // Finally close the output, which writes the xref table.
     pos.close();
   }
 
   List<int> save() {
-    PdfStream os = PdfStream();
+    final PdfStream os = PdfStream();
     _write(os);
     return os.output();
   }

@@ -17,33 +17,6 @@
 part of pdf;
 
 class PdfColor {
-  final double a;
-  final double r;
-  final double g;
-  final double b;
-
-  static const black = PdfColor(0.0, 0.0, 0.0);
-  static const white = PdfColor(1.0, 1.0, 1.0);
-  static const red = PdfColor(0.95686, 0.26274, 0.21176);
-  static const pink = PdfColor(0.91372, 0.11764, 0.38823);
-  static const purple = PdfColor(0.91372, 0.11764, 0.38823);
-  static const deepPurple = PdfColor(0.40392, 0.22745, 0.71765);
-  static const indigo = PdfColor(0.24705, 0.31765, 0.70980);
-  static const blue = PdfColor(0.12941, 0.58823, 0.95294);
-  static const lightBlue = PdfColor(0.01176, 0.66274, 0.95686);
-  static const cyan = PdfColor(0.0, 0.73725, 0.83137);
-  static const teal = PdfColor(0.0, 0.58823, 0.53333);
-  static const green = PdfColor(0.29803, 0.68627, 0.31372);
-  static const lightGreen = PdfColor(0.54509, 0.76470, 0.29020);
-  static const lime = PdfColor(0.80392, 0.86274, 0.22353);
-  static const yellow = PdfColor(1.0, 0.92157, 0.23137);
-  static const amber = PdfColor(1.0, 0.75686, 0.02745);
-  static const orange = PdfColor(1.0, 0.59608, 0.0);
-  static const deepOrange = PdfColor(1.0, 0.34118, 0.13333);
-  static const brown = PdfColor(0.47451, 0.33333, 0.28235);
-  static const grey = PdfColor(0.61961, 0.61961, 0.61961);
-  static const blueGrey = PdfColor(0.37647, 0.49020, 0.54510);
-
   const PdfColor(this.r, this.g, this.b, [this.a = 1.0]);
 
   const PdfColor.fromInt(int color)
@@ -59,6 +32,33 @@ class PdfColor {
         (int.parse(color.substring(4, 5), radix: 16) & 0xff) / 255.0,
         (int.parse(color.substring(6, 7), radix: 16) >> 24 & 0xff) / 255.0);
   }
+
+  final double a;
+  final double r;
+  final double g;
+  final double b;
+
+  static const PdfColor black = PdfColor(0.0, 0.0, 0.0);
+  static const PdfColor white = PdfColor(1.0, 1.0, 1.0);
+  static const PdfColor red = PdfColor(0.95686, 0.26274, 0.21176);
+  static const PdfColor pink = PdfColor(0.91372, 0.11764, 0.38823);
+  static const PdfColor purple = PdfColor(0.91372, 0.11764, 0.38823);
+  static const PdfColor deepPurple = PdfColor(0.40392, 0.22745, 0.71765);
+  static const PdfColor indigo = PdfColor(0.24705, 0.31765, 0.70980);
+  static const PdfColor blue = PdfColor(0.12941, 0.58823, 0.95294);
+  static const PdfColor lightBlue = PdfColor(0.01176, 0.66274, 0.95686);
+  static const PdfColor cyan = PdfColor(0.0, 0.73725, 0.83137);
+  static const PdfColor teal = PdfColor(0.0, 0.58823, 0.53333);
+  static const PdfColor green = PdfColor(0.29803, 0.68627, 0.31372);
+  static const PdfColor lightGreen = PdfColor(0.54509, 0.76470, 0.29020);
+  static const PdfColor lime = PdfColor(0.80392, 0.86274, 0.22353);
+  static const PdfColor yellow = PdfColor(1.0, 0.92157, 0.23137);
+  static const PdfColor amber = PdfColor(1.0, 0.75686, 0.02745);
+  static const PdfColor orange = PdfColor(1.0, 0.59608, 0.0);
+  static const PdfColor deepOrange = PdfColor(1.0, 0.34118, 0.13333);
+  static const PdfColor brown = PdfColor(0.47451, 0.33333, 0.28235);
+  static const PdfColor grey = PdfColor(0.61961, 0.61961, 0.61961);
+  static const PdfColor blueGrey = PdfColor(0.37647, 0.49020, 0.54510);
 
   int toInt() =>
       ((((a * 255.0).round() & 0xff) << 24) |
@@ -80,7 +80,9 @@ class PdfColor {
   }
 
   static double _linearizeColorComponent(double component) {
-    if (component <= 0.03928) return component / 12.92;
+    if (component <= 0.03928) {
+      return component / 12.92;
+    }
     return math.pow((component + 0.055) / 1.055, 2.4);
   }
 
@@ -91,21 +93,14 @@ class PdfColor {
     return 0.2126 * R + 0.7152 * G + 0.0722 * B;
   }
 
-  String toString() => "$runtimeType($r, $g, $b, $a)";
+  @override
+  String toString() => '$runtimeType($r, $g, $b, $a)';
 }
 
 class PdfColorCmyk extends PdfColor {
-  final double c;
-  final double m;
-  final double y;
-  final double k;
-
   const PdfColorCmyk(this.c, this.m, this.y, this.k, [double a = 1.0])
-      : super(
-          (1.0 - c) * (1.0 - k),
-          (1.0 - m) * (1.0 - k),
-          (1.0 - y) * (1.0 - k),
-        );
+      : super((1.0 - c) * (1.0 - k), (1.0 - m) * (1.0 - k),
+            (1.0 - y) * (1.0 - k), a);
 
   const PdfColorCmyk.fromRgb(double r, double g, double b, [double a = 1.0])
       : k = 1.0 - r > g ? r : g > b ? r > g ? r : g : b,
@@ -117,12 +112,18 @@ class PdfColorCmyk extends PdfColor {
             (1.0 - (1.0 - r > g ? r : g > b ? r > g ? r : g : b)),
         super(r, g, b, a);
 
+  final double c;
+  final double m;
+  final double y;
+  final double k;
+
   @override
   PdfColorCmyk toCmyk() {
     return this;
   }
 
-  String toString() => "$runtimeType($c, $m, $y, $k, $a)";
+  @override
+  String toString() => '$runtimeType($c, $m, $y, $k, $a)';
 }
 
 double _getHue(
@@ -144,14 +145,6 @@ double _getHue(
 }
 
 class PdfColorHsv extends PdfColor {
-  final double hue;
-  final double saturation;
-  final double value;
-
-  const PdfColorHsv._(this.hue, this.saturation, this.value, double red,
-      double green, double blue, double alpha)
-      : super(red, green, blue, alpha);
-
   factory PdfColorHsv(double hue, double saturation, double value,
       [double alpha = 1.0]) {
     final double chroma = saturation * value;
@@ -192,35 +185,36 @@ class PdfColorHsv extends PdfColor {
         blue + match, alpha);
   }
 
+  const PdfColorHsv._(this.hue, this.saturation, this.value, double red,
+      double green, double blue, double alpha)
+      : super(red, green, blue, alpha);
+
   factory PdfColorHsv.fromRgb(double red, double green, double blue,
       [double alpha]) {
     final double max = math.max(red, math.max(green, blue));
     final double min = math.min(red, math.min(green, blue));
     final double delta = max - min;
 
-    final hue = _getHue(red, green, blue, max, delta);
+    final double hue = _getHue(red, green, blue, max, delta);
     final double saturation = max == 0.0 ? 0.0 : delta / max;
 
     return PdfColorHsv._(hue, saturation, max, red, green, blue, alpha);
   }
+
+  final double hue;
+  final double saturation;
+  final double value;
 
   @override
   PdfColorHsv toHsv() {
     return this;
   }
 
-  String toString() => "$runtimeType($hue, $saturation, $value, $a)";
+  @override
+  String toString() => '$runtimeType($hue, $saturation, $value, $a)';
 }
 
 class PdfColorHsl extends PdfColor {
-  final double hue;
-  final double saturation;
-  final double lightness;
-
-  const PdfColorHsl._(this.hue, this.saturation, this.lightness, double alpha,
-      double red, double green, double blue)
-      : super(red, green, blue, alpha);
-
   factory PdfColorHsl(double hue, double saturation, double lightness,
       [double alpha]) {
     final double chroma = (1.0 - (2.0 * lightness - 1.0).abs()) * saturation;
@@ -260,6 +254,10 @@ class PdfColorHsl extends PdfColor {
         green + match, blue + match);
   }
 
+  const PdfColorHsl._(this.hue, this.saturation, this.lightness, double alpha,
+      double red, double green, double blue)
+      : super(red, green, blue, alpha);
+
   factory PdfColorHsl.fromRgb(double red, double green, double blue,
       [double alpha]) {
     final double max = math.max(red, math.max(green, blue));
@@ -274,6 +272,10 @@ class PdfColorHsl extends PdfColor {
         : (delta / (1.0 - (2.0 * lightness - 1.0).abs())).clamp(0.0, 1.0);
     return PdfColorHsl._(hue, saturation, lightness, alpha, red, green, blue);
   }
+
+  final double hue;
+  final double saturation;
+  final double lightness;
 
   @override
   PdfColorHsl toHsl() {

@@ -20,7 +20,7 @@ part of widget;
 class TextStyle {
   const TextStyle({
     this.color = PdfColor.black,
-    this.font,
+    @required this.font,
     this.fontSize = _defaultFontSize,
     this.letterSpacing = 1.0,
     this.wordSpacing = 1.0,
@@ -74,17 +74,29 @@ class TextStyle {
 enum TextAlign { left, right, center, justify }
 
 class _Word {
-  final String text;
-  PdfRect _box;
-
   _Word(this.text, this._box);
 
+  final String text;
+
+  PdfRect _box;
+
+  @override
   String toString() {
-    return "Word $text $_box";
+    return 'Word $text $_box';
   }
 }
 
 class Text extends Widget {
+  Text(
+    this.data, {
+    this.style,
+    this.textAlign = TextAlign.left,
+    bool softWrap = true,
+    this.textScaleFactor = 1.0,
+    int maxLines,
+  })  : maxLines = !softWrap ? 1 : maxLines,
+        assert(data != null);
+
   final String data;
 
   TextStyle style;
@@ -95,21 +107,11 @@ class Text extends Widget {
 
   final int maxLines;
 
-  Text(
-    this.data, {
-    this.style,
-    this.textAlign = TextAlign.left,
-    softWrap = true,
-    this.textScaleFactor = 1.0,
-    int maxLines,
-  })  : maxLines = !softWrap ? 1 : maxLines,
-        assert(data != null);
-
-  final _words = List<_Word>();
+  final List<_Word> _words = <_Word>[];
 
   double _realignLine(
       List<_Word> words, double totalWidth, double wordsWidth, bool last) {
-    var delta = 0.0;
+    double delta = 0.0;
     switch (textAlign) {
       case TextAlign.left:
         return wordsWidth;
@@ -120,17 +122,19 @@ class Text extends Widget {
         delta = (totalWidth - wordsWidth) / 2.0;
         break;
       case TextAlign.justify:
-        if (last) return wordsWidth;
+        if (last) {
+          return wordsWidth;
+        }
         delta = (totalWidth - wordsWidth) / (words.length - 1);
-        var x = 0.0;
-        for (var word in words) {
+        double x = 0.0;
+        for (_Word word in words) {
           word._box = PdfRect(
               word._box.x + x, word._box.y, word._box.width, word._box.height);
           x += delta;
         }
         return totalWidth;
     }
-    for (var word in words) {
+    for (_Word word in words) {
       word._box = PdfRect(
           word._box.x + delta, word._box.y, word._box.width, word._box.height);
     }
@@ -139,64 +143,69 @@ class Text extends Widget {
 
   @override
   void layout(Context context, BoxConstraints constraints,
-      {parentUsesSize = false}) {
+      {bool parentUsesSize = false}) {
     _words.clear();
 
-    if (style == null) {
-      style = Theme.of(context).defaultTextStyle;
-    }
+    style ??= Theme.of(context).defaultTextStyle;
 
-    final cw = constraints.hasBoundedWidth
+    final double cw = constraints.hasBoundedWidth
         ? constraints.maxWidth
         : constraints.constrainWidth();
-    final ch = constraints.hasBoundedHeight
+    final double ch = constraints.hasBoundedHeight
         ? constraints.maxHeight
         : constraints.constrainHeight();
 
-    var x = 0.0;
-    var y = 0.0;
-    var w = 0.0;
-    var h = 0.0;
-    var lh = 0.0;
+    double x = 0.0;
+    double y = 0.0;
+    double w = 0.0;
+    double h = 0.0;
+    double lh = 0.0;
 
-    final space =
-        style.font.stringBounds(" ") * (style.fontSize * textScaleFactor);
+    final PdfRect space =
+        style.font.stringBounds(' ') * (style.fontSize * textScaleFactor);
 
-    var lines = 1;
-    var wCount = 0;
-    var lineStart = 0;
+    int lines = 1;
+    int wCount = 0;
+    int lineStart = 0;
 
-    for (var word in data.split(" ")) {
-      final box =
+    for (String word in data.split(' ')) {
+      final PdfRect box =
           style.font.stringBounds(word) * (style.fontSize * textScaleFactor);
 
-      var ww = box.width;
-      var wh = box.height;
+      final double ww = box.width;
+      final double wh = box.height;
 
       if (x + ww > cw) {
-        if (wCount == 0) break;
+        if (wCount == 0) {
+          break;
+        }
         w = math.max(
             w,
             _realignLine(
                 _words.sublist(lineStart), cw, x - space.width, false));
         lineStart += wCount;
-        if (maxLines != null && ++lines > maxLines) break;
+        if (maxLines != null && ++lines > maxLines) {
+          break;
+        }
 
         x = 0.0;
         y += lh + style.lineSpacing;
         h += lh + style.lineSpacing;
         lh = 0.0;
-        if (y > ch) break;
+        if (y > ch) {
+          break;
+        }
         wCount = 0;
       }
 
-      var wx = x;
-      var wy = y;
+      final double wx = x;
+      final double wy = y;
 
       x += ww + space.width;
       lh = math.max(lh, wh);
 
-      final wd = _Word(word, PdfRect(box.x + wx, box.y + wy + wh, ww, wh));
+      final _Word wd =
+          _Word(word, PdfRect(box.x + wx, box.y + wy + wh, ww, wh));
       _words.add(wd);
       wCount++;
     }
@@ -207,7 +216,7 @@ class Text extends Widget {
         constraints.constrainHeight(h));
   }
 
-  @protected
+  @override
   void debugPaint(Context context) {
     context.canvas
       ..setStrokeColor(PdfColor.blue)
@@ -220,7 +229,7 @@ class Text extends Widget {
     super.paint(context);
     context.canvas.setFillColor(style.color);
 
-    for (var word in _words) {
+    for (_Word word in _words) {
       context.canvas.drawString(style.font, style.fontSize * textScaleFactor,
           word.text, box.x + word._box.x, box.y + box.height - word._box.y);
     }

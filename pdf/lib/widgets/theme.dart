@@ -17,9 +17,9 @@
 part of widget;
 
 class Theme extends Inherited {
-  final PdfDocument document;
-
   Theme(this.document);
+
+  final PdfDocument document;
 
   static Theme of(Context context) {
     return context.inherited[Theme];
@@ -28,55 +28,43 @@ class Theme extends Inherited {
   TextStyle _defaultTextStyle;
 
   TextStyle get defaultTextStyle {
-    if (_defaultTextStyle == null) {
-      _defaultTextStyle = TextStyle(font: PdfFont.helvetica(document));
-    }
+    _defaultTextStyle ??= TextStyle(font: PdfFont.helvetica(document));
     return _defaultTextStyle;
   }
 
   TextStyle _defaultTextStyleBold;
 
   TextStyle get defaultTextStyleBold {
-    if (_defaultTextStyleBold == null) {
-      _defaultTextStyleBold =
-          defaultTextStyle.copyWith(font: PdfFont.helveticaBold(document));
-    }
+    _defaultTextStyleBold ??=
+        defaultTextStyle.copyWith(font: PdfFont.helveticaBold(document));
     return _defaultTextStyleBold;
   }
 
   TextStyle _paragraphStyle;
 
   TextStyle get paragraphStyle {
-    if (_paragraphStyle == null) {
-      _paragraphStyle = defaultTextStyle.copyWith(lineSpacing: 5.0);
-    }
+    _paragraphStyle ??= defaultTextStyle.copyWith(lineSpacing: 5.0);
     return _paragraphStyle;
   }
 
   TextStyle _bulletStyle;
 
   TextStyle get bulletStyle {
-    if (_bulletStyle == null) {
-      _bulletStyle = defaultTextStyle.copyWith(lineSpacing: 5.0);
-    }
+    _bulletStyle ??= defaultTextStyle.copyWith(lineSpacing: 5.0);
     return _bulletStyle;
   }
 
   TextStyle _tableHeader;
 
   TextStyle get tableHeader {
-    if (_tableHeader == null) {
-      _tableHeader = defaultTextStyleBold;
-    }
+    _tableHeader ??= defaultTextStyleBold;
     return _tableHeader;
   }
 
   TextStyle _tableCell;
 
   TextStyle get tableCell {
-    if (_tableCell == null) {
-      _tableCell = defaultTextStyle;
-    }
+    _tableCell ??= defaultTextStyle;
     return _tableCell;
   }
 }

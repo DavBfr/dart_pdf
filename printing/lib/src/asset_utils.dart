@@ -18,7 +18,8 @@ part of printing;
 
 Future<PdfImage> pdfImageFromImage(
     {@required PdfDocument pdf, @required ui.Image image}) async {
-  var bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  final ByteData bytes =
+      await image.toByteData(format: ui.ImageByteFormat.rawRgba);
 
   return PdfImage(pdf,
       image: bytes.buffer.asUint8List(),
@@ -35,14 +36,19 @@ Future<PdfImage> pdfImageFromImageProvider(
   final ImageStream stream =
       image.resolve(configuration ?? ImageConfiguration.empty);
 
-  void listener(ImageInfo image, bool sync) async {
-    final result = await pdfImageFromImage(pdf: pdf, image: image.image);
-    if (!completer.isCompleted) completer.complete(result);
+  Future<void> listener(ImageInfo image, bool sync) async {
+    final PdfImage result =
+        await pdfImageFromImage(pdf: pdf, image: image.image);
+    if (!completer.isCompleted) {
+      completer.complete(result);
+    }
     stream.removeListener(listener);
   }
 
   void errorListener(dynamic exception, StackTrace stackTrace) {
-    if (!completer.isCompleted) completer.complete(null);
+    if (!completer.isCompleted) {
+      completer.complete(null);
+    }
     if (onError != null) {
       onError(exception, stackTrace);
     } else {

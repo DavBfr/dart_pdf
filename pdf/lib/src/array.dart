@@ -17,9 +17,9 @@
 part of pdf;
 
 class PdfArrayObject extends PdfObject {
-  final List<String> values;
-
   PdfArrayObject(PdfDocument pdfDocument, this.values) : super(pdfDocument);
+
+  final List<String> values;
 
   @override
   void _writeContent(PdfStream os) {

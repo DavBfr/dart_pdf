@@ -17,9 +17,6 @@
 part of pdf;
 
 class PdfFont extends PdfObject {
-  /// The df type of the font, usually /Type1
-  final String subtype;
-
   /// Constructs a [PdfFont]. This will attempt to map the font from a known
   /// font name to that in Pdf, defaulting to Helvetica if not possible.
   ///
@@ -27,94 +24,33 @@ class PdfFont extends PdfObject {
   /// @param subtype The pdf type, ie /Type1
   /// @param baseFont The font name, ie /Helvetica
   PdfFont._create(PdfDocument pdfDocument, {@required this.subtype})
-      : super(pdfDocument, "/Font") {
+      : super(pdfDocument, '/Font') {
     pdfDocument.fonts.add(this);
   }
 
-  String get name => "/F$objser";
-
-  String get fontName => null;
-
-  /// @param os OutputStream to send the object to
-  @override
-  void _prepare() {
-    super._prepare();
-
-    params["/Subtype"] = PdfStream.string(subtype);
-    params["/Name"] = PdfStream.string(name);
-    params["/Encoding"] = PdfStream.string("/WinAnsiEncoding");
-  }
-
-  double glyphAdvance(int charCode) {
-    return 0.454;
-  }
-
-  PdfRect glyphBounds(int charCode) {
-    return PdfRect(0.0, 0.0, glyphAdvance(charCode), 1.0);
-  }
-
-  PdfRect stringBounds(String s) {
-    var chars = latin1.encode(s);
-
-    if (chars.isEmpty) return const PdfRect(0.0, 0.0, 0.0, 0.0);
-
-    var n = 0;
-    var c = chars[n];
-    var r = glyphBounds(c);
-    var x = r.x;
-    var y = r.y;
-    var h = r.height;
-    var w = n == chars.length - 1 ? r.width : glyphAdvance(c);
-
-    while (++n < chars.length) {
-      c = chars[n];
-      r = glyphBounds(c);
-      if (r.y < y) y = r.y;
-      if (r.height > h) h = r.height;
-      w += n == chars.length - 1 ? r.width : glyphAdvance(c);
-    }
-
-    return PdfRect(x, y, w, h);
-  }
-
-  PdfPoint stringSize(String s) {
-    var chars = latin1.encode(s);
-
-    var w = 0.0;
-    var h = 0.0;
-
-    for (var c in chars) {
-      var r = glyphBounds(c);
-      if (r.height > h) h = r.height;
-      w += glyphAdvance(c);
-    }
-
-    return PdfPoint(w, h);
-  }
-
   factory PdfFont.courier(PdfDocument pdfDocument) {
-    return PdfType1Font._create(pdfDocument, "Courier", 0.910, -0.220,
+    return PdfType1Font._create(pdfDocument, 'Courier', 0.910, -0.220,
         List<double>.generate(256, (int index) => 0.600));
   }
 
   factory PdfFont.courierBold(PdfDocument pdfDocument) {
-    return PdfType1Font._create(pdfDocument, "Courier-Bold", 0.910, -0.220,
+    return PdfType1Font._create(pdfDocument, 'Courier-Bold', 0.910, -0.220,
         List<double>.generate(256, (int index) => 0.600));
   }
 
   factory PdfFont.courierBoldOblique(PdfDocument pdfDocument) {
-    return PdfType1Font._create(pdfDocument, "Courier-BoldOblique", 0.910,
+    return PdfType1Font._create(pdfDocument, 'Courier-BoldOblique', 0.910,
         -0.220, List<double>.generate(256, (int index) => 0.600));
   }
 
   factory PdfFont.courierOblique(PdfDocument pdfDocument) {
-    return PdfType1Font._create(pdfDocument, "Courier-Oblique", 0.910, -0.220,
+    return PdfType1Font._create(pdfDocument, 'Courier-Oblique', 0.910, -0.220,
         List<double>.generate(256, (int index) => 0.600));
   }
 
   factory PdfFont.helvetica(PdfDocument pdfDocument) {
     return PdfType1Font._create(
-        pdfDocument, "Helvetica", 0.931, -0.225, <double>[
+        pdfDocument, 'Helvetica', 0.931, -0.225, const <double>[
       0.500,
       0.500,
       0.500,
@@ -376,7 +312,7 @@ class PdfFont extends PdfObject {
 
   factory PdfFont.helveticaBold(PdfDocument pdfDocument) {
     return PdfType1Font._create(
-        pdfDocument, "Helvetica-Bold", 0.962, -0.228, <double>[
+        pdfDocument, 'Helvetica-Bold', 0.962, -0.228, const <double>[
       0.278,
       0.278,
       0.278,
@@ -638,7 +574,7 @@ class PdfFont extends PdfObject {
 
   factory PdfFont.helveticaBoldOblique(PdfDocument pdfDocument) {
     return PdfType1Font._create(
-        pdfDocument, "Helvetica-BoldOblique", 0.962, -0.228, <double>[
+        pdfDocument, 'Helvetica-BoldOblique', 0.962, -0.228, const <double>[
       0.278,
       0.278,
       0.278,
@@ -900,7 +836,7 @@ class PdfFont extends PdfObject {
 
   factory PdfFont.helveticaOblique(PdfDocument pdfDocument) {
     return PdfType1Font._create(
-        pdfDocument, "Helvetica-Oblique", 0.931, -0.225, <double>[
+        pdfDocument, 'Helvetica-Oblique', 0.931, -0.225, <double>[
       0.278,
       0.278,
       0.278,
@@ -1162,7 +1098,7 @@ class PdfFont extends PdfObject {
 
   factory PdfFont.times(PdfDocument pdfDocument) {
     return PdfType1Font._create(
-        pdfDocument, "Times-Roman", 0.898, -0.218, <double>[
+        pdfDocument, 'Times-Roman', 0.898, -0.218, <double>[
       0.250,
       0.250,
       0.250,
@@ -1424,7 +1360,7 @@ class PdfFont extends PdfObject {
 
   factory PdfFont.timesBold(PdfDocument pdfDocument) {
     return PdfType1Font._create(
-        pdfDocument, "Times-Bold", 0.935, -0.218, <double>[
+        pdfDocument, 'Times-Bold', 0.935, -0.218, <double>[
       0.250,
       0.250,
       0.250,
@@ -1686,7 +1622,7 @@ class PdfFont extends PdfObject {
 
   factory PdfFont.timesBoldItalic(PdfDocument pdfDocument) {
     return PdfType1Font._create(
-        pdfDocument, "Times-BoldItalic", 0.921, -0.218, <double>[
+        pdfDocument, 'Times-BoldItalic', 0.921, -0.218, <double>[
       0.250,
       0.250,
       0.250,
@@ -1948,7 +1884,7 @@ class PdfFont extends PdfObject {
 
   factory PdfFont.timesItalic(PdfDocument pdfDocument) {
     return PdfType1Font._create(
-        pdfDocument, "Times-Italic", 0.883, -0.217, <double>[
+        pdfDocument, 'Times-Italic', 0.883, -0.217, <double>[
       0.250,
       0.250,
       0.250,
@@ -2209,7 +2145,7 @@ class PdfFont extends PdfObject {
   }
 
   factory PdfFont.symbol(PdfDocument pdfDocument) {
-    return PdfType1Font._create(pdfDocument, "Symbol", 1.010, -0.293, <double>[
+    return PdfType1Font._create(pdfDocument, 'Symbol', 1.010, -0.293, <double>[
       0.587,
       0.587,
       0.587,
@@ -2471,7 +2407,7 @@ class PdfFont extends PdfObject {
 
   factory PdfFont.zapfDingbats(PdfDocument pdfDocument) {
     return PdfType1Font._create(
-        pdfDocument, "ZapfDingbats", 0.820, -0.143, <double>[
+        pdfDocument, 'ZapfDingbats', 0.820, -0.143, <double>[
       0.746,
       0.746,
       0.746,
@@ -2729,5 +2665,77 @@ class PdfFont extends PdfObject {
       0.918,
       0.746
     ]);
+  }
+
+  /// The df type of the font, usually /Type1
+  final String subtype;
+
+  String get name => '/F$objser';
+
+  String get fontName => null;
+
+  /// @param os OutputStream to send the object to
+  @override
+  void _prepare() {
+    super._prepare();
+
+    params['/Subtype'] = PdfStream.string(subtype);
+    params['/Name'] = PdfStream.string(name);
+    params['/Encoding'] = PdfStream.string('/WinAnsiEncoding');
+  }
+
+  double glyphAdvance(int charCode) {
+    return 0.454;
+  }
+
+  PdfRect glyphBounds(int charCode) {
+    return PdfRect(0.0, 0.0, glyphAdvance(charCode), 1.0);
+  }
+
+  PdfRect stringBounds(String s) {
+    final Uint8List chars = latin1.encode(s);
+
+    if (chars.isEmpty) {
+      return const PdfRect(0.0, 0.0, 0.0, 0.0);
+    }
+
+    int n = 0;
+    int c = chars[n];
+    PdfRect r = glyphBounds(c);
+    final double x = r.x;
+    double y = r.y;
+    double h = r.height;
+    double w = n == chars.length - 1 ? r.width : glyphAdvance(c);
+
+    while (++n < chars.length) {
+      c = chars[n];
+      r = glyphBounds(c);
+      if (r.y < y) {
+        y = r.y;
+      }
+      if (r.height > h) {
+        h = r.height;
+      }
+      w += n == chars.length - 1 ? r.width : glyphAdvance(c);
+    }
+
+    return PdfRect(x, y, w, h);
+  }
+
+  PdfPoint stringSize(String s) {
+    final Uint8List chars = latin1.encode(s);
+
+    double w = 0.0;
+    double h = 0.0;
+
+    for (int c in chars) {
+      final PdfRect r = glyphBounds(c);
+      if (r.height > h) {
+        h = r.height;
+      }
+      w += glyphAdvance(c);
+    }
+
+    return PdfPoint(w, h);
   }
 }

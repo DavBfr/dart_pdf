@@ -17,22 +17,22 @@
 part of pdf;
 
 class PdfFormXObject extends PdfXObject {
+  PdfFormXObject(PdfDocument pdfDocument) : super(pdfDocument, '/Form') {
+    params['/FormType'] = PdfStream.string('1');
+    params['/BBox'] = PdfStream.string('[0 0 1000 1000]');
+  }
+
   /// The fonts associated with this page
-  final fonts = Map<String, PdfFont>();
+  final Map<String, PdfFont> fonts = <String, PdfFont>{};
 
   /// The xobjects or other images in the pdf
-  final xobjects = Map<String, PdfXObject>();
-
-  PdfFormXObject(PdfDocument pdfDocument) : super(pdfDocument, '/Form') {
-    params["/FormType"] = PdfStream.string("1");
-    params["/BBox"] = PdfStream.string("[0 0 1000 1000]");
-  }
+  final Map<String, PdfXObject> xobjects = <String, PdfXObject>{};
 
   /// set matrix
   void setMatrix(Matrix4 t) {
-    var s = t.storage;
-    params["/Matrix"] =
-        PdfStream.string("[${s[0]} ${s[1]} ${s[4]} ${s[5]} ${s[12]} ${s[13]}]");
+    final Float64List s = t.storage;
+    params['/Matrix'] =
+        PdfStream.string('[${s[0]} ${s[1]} ${s[4]} ${s[5]} ${s[12]} ${s[13]}]');
   }
 
   @override
@@ -41,20 +41,20 @@ class PdfFormXObject extends PdfXObject {
 
     // Now the resources
     /// This holds any resources for this FormXObject
-    final resources = Map<String, PdfStream>();
+    final Map<String, PdfStream> resources = <String, PdfStream>{};
 
     // fonts
     if (fonts.isNotEmpty) {
-      resources["/Font"] = PdfStream()..putObjectDictionary(fonts);
+      resources['/Font'] = PdfStream()..putObjectDictionary(fonts);
     }
 
     // Now the XObjects
     if (xobjects.isNotEmpty) {
-      resources["/XObject"] = PdfStream()..putObjectDictionary(xobjects);
+      resources['/XObject'] = PdfStream()..putObjectDictionary(xobjects);
     }
 
     if (resources.isNotEmpty) {
-      params["/Resources"] = PdfStream.dictionary(resources);
+      params['/Resources'] = PdfStream.dictionary(resources);
     }
   }
 }
