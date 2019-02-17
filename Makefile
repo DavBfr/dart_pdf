@@ -49,4 +49,12 @@ publish-pdf: format clean
 publish-printing: format clean
 	cd printing; pub publish -f
 
-.PHONY: test format format-dart format-clang clean publish-pdf publish-printing
+.pana:
+	pub global activate pana
+	touch .pana
+
+analyze: .pana
+	pana --no-warning --source path pdf
+	pana --no-warning --source path printing
+
+.PHONY: test format format-dart format-clang clean publish-pdf publish-printing analyze
