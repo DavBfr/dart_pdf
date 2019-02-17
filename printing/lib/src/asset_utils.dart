@@ -16,6 +16,8 @@
 
 part of printing;
 
+/// Loads an image from a Flutter [ui.Image]
+/// into a [PdfImage] instance
 Future<PdfImage> pdfImageFromImage(
     {@required PdfDocument pdf, @required ui.Image image}) async {
   final ByteData bytes =
@@ -27,6 +29,8 @@ Future<PdfImage> pdfImageFromImage(
       height: image.height);
 }
 
+/// Loads an image from a Flutter [ImageProvider]
+/// into a [PdfImage] instance
 Future<PdfImage> pdfImageFromImageProvider(
     {@required PdfDocument pdf,
     @required ImageProvider image,

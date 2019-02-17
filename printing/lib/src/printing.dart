@@ -41,6 +41,9 @@ mixin Printing {
     }
   }
 
+  /// Prints a Pdf document to a local printer using the platform UI
+  /// the Pdf document is re-built in a [LayoutCallback] each time the
+  /// user changes a setting like the page format or orientation.
   static Future<void> layoutPdf(
       {@required LayoutCallback onLayout, String name = 'Document'}) async {
     _onLayout = onLayout;
@@ -49,6 +52,7 @@ mixin Printing {
     await _channel.invokeMethod<void>('printPdf', params);
   }
 
+  /// Prints a [PdfDocument] or a pdf stream to a local printer using the platform UI
   @deprecated
   static Future<void> printPdf({PdfDocument document, List<int> bytes}) async {
     assert(document != null || bytes != null);
@@ -59,6 +63,7 @@ mixin Printing {
             document != null ? document.save() : bytes);
   }
 
+  /// Displays a platform popup to share the Pdf document to another application
   static Future<void> sharePdf(
       {PdfDocument document, List<int> bytes, Rect bounds}) async {
     assert(document != null || bytes != null);
