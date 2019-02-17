@@ -54,7 +54,7 @@ publish-printing: format clean
 	touch .pana
 
 analyze: .pana
-	pana --no-warning --source path pdf
-	pana --no-warning --source path printing
+	@pana --no-warning --source path pdf 2> /dev/null | python pana_report.py
+	@pana --no-warning --source path printing 2> /dev/null | python pana_report.py
 
 .PHONY: test format format-dart format-clang clean publish-pdf publish-printing analyze
