@@ -16,6 +16,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
@@ -97,6 +98,10 @@ void main() {
                 children: List<Widget>.generate(
                     9, (int n) => FittedBox(child: Text('${n + 1}')))))));
 
+    final Uint8List robotoData = File('open-sans.ttf').readAsBytesSync();
+    final PdfTtfFont roboto =
+        PdfTtfFont(pdf.document, robotoData.buffer.asByteData());
+
     pdf.addPage(MultiPage(
         pageFormat: const PdfPageFormat(400.0, 200.0),
         margin: const EdgeInsets.all(10.0),
@@ -141,6 +146,22 @@ void main() {
                       ..drawRRect(0, 0, size.x, size.y, 10, 10)
                       ..fillPath();
                   }),
+              RichText(
+                text: TextSpan(
+                  text: 'Hello ',
+                  style: Theme.of(context).defaultTextStyle,
+                  children: <TextSpan>[
+                    TextSpan(
+                        text: 'bold',
+                        style: Theme.of(context)
+                            .defaultTextStyleBold
+                            .copyWith(fontSize: 20, color: PdfColor.blue)),
+                    const TextSpan(
+                      text: ' world!',
+                    ),
+                  ],
+                ),
+              )
             ]));
 
     final File file = File('widgets.pdf');

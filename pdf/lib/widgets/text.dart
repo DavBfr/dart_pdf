@@ -34,14 +34,18 @@ class TextStyle {
 
   final PdfFont font;
 
+  // font height, in pdf unit
   final double fontSize;
 
   static const double _defaultFontSize = 12.0 * PdfPageFormat.point;
 
+  // spacing between letters, 1.0 being natural spacing
   final double letterSpacing;
 
+  // spacing between lines, in pdf unit
   final double lineSpacing;
 
+  // spacing between words, 1.0 being natural spacing
   final double wordSpacing;
 
   final double height;
@@ -69,37 +73,96 @@ class TextStyle {
       background: background ?? this.background,
     );
   }
+
+  @override
+  String toString() =>
+      'TextStyle(color:$color font:$font letterSpacing:$letterSpacing wordSpacing:$wordSpacing lineSpacing:$lineSpacing height:$height background:$background)';
 }
 
 enum TextAlign { left, right, center, justify }
 
 class _Word {
-  _Word(this.text, this._box);
+  _Word(this.text, this.style, this.metrics);
 
   final String text;
 
-  PdfRect _box;
+  final TextStyle style;
+
+  final PdfFontMetrics metrics;
+
+  PdfPoint offset = PdfPoint.zero;
 
   @override
   String toString() {
-    return 'Word $text $_box';
+    return 'Word "$text" offset:$offset metrics:$metrics style:$style';
+  }
+
+  void debugPaint(Context context, double textScaleFactor, PdfRect globalBox) {
+    const double deb = 5.0;
+
+    context.canvas
+      ..drawRect(globalBox.x + offset.x + metrics.left,
+          globalBox.top + offset.y + metrics.top, metrics.width, metrics.height)
+      ..setStrokeColor(PdfColor.orange)
+      ..strokePath()
+      ..drawLine(
+          globalBox.x + offset.x - deb,
+          globalBox.top + offset.y,
+          globalBox.x + offset.x + metrics.right + deb,
+          globalBox.top + offset.y)
+      ..setStrokeColor(PdfColor.deepPurple)
+      ..strokePath();
   }
 }
 
-class Text extends Widget {
-  Text(
-    this.data, {
-    this.style,
-    this.textAlign = TextAlign.left,
-    bool softWrap = true,
-    this.textScaleFactor = 1.0,
-    int maxLines,
-  })  : maxLines = !softWrap ? 1 : maxLines,
-        assert(data != null);
+class TextSpan {
+  const TextSpan({this.style, this.text, this.children});
 
-  final String data;
+  final TextStyle style;
 
-  TextStyle style;
+  final String text;
+
+  final List<TextSpan> children;
+
+  String toPlainText() {
+    final StringBuffer buffer = StringBuffer();
+    visitTextSpan((TextSpan span) {
+      buffer.write(span.text);
+      return true;
+    });
+    return buffer.toString();
+  }
+
+  bool visitTextSpan(bool visitor(TextSpan span)) {
+    if (text != null) {
+      if (!visitor(this)) {
+        return false;
+      }
+    }
+    if (children != null) {
+      for (TextSpan child in children) {
+        if (!child.visitTextSpan(visitor)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+}
+
+class RichText extends Widget {
+  RichText(
+      {@required this.text,
+      this.textAlign = TextAlign.left,
+      bool softWrap = true,
+      this.textScaleFactor = 1.0,
+      int maxLines})
+      : maxLines = !softWrap ? 1 : maxLines,
+        assert(text != null);
+
+  static const bool debug = false;
+
+  final TextSpan text;
 
   final TextAlign textAlign;
 
@@ -109,12 +172,13 @@ class Text extends Widget {
 
   final List<_Word> _words = <_Word>[];
 
-  double _realignLine(
-      List<_Word> words, double totalWidth, double wordsWidth, bool last) {
+  double _realignLine(List<_Word> words, double totalWidth, double wordsWidth,
+      bool last, double baseline) {
     double delta = 0.0;
     switch (textAlign) {
       case TextAlign.left:
-        return wordsWidth;
+        totalWidth = wordsWidth;
+        break;
       case TextAlign.right:
         delta = totalWidth - wordsWidth;
         break;
@@ -123,20 +187,20 @@ class Text extends Widget {
         break;
       case TextAlign.justify:
         if (last) {
-          return wordsWidth;
+          totalWidth = wordsWidth;
+          break;
         }
         delta = (totalWidth - wordsWidth) / (words.length - 1);
         double x = 0.0;
         for (_Word word in words) {
-          word._box = PdfRect(
-              word._box.x + x, word._box.y, word._box.width, word._box.height);
+          word.offset = word.offset.translate(x, -baseline);
           x += delta;
         }
         return totalWidth;
     }
+
     for (_Word word in words) {
-      word._box = PdfRect(
-          word._box.x + delta, word._box.y, word._box.width, word._box.height);
+      word.offset = word.offset.translate(delta, -baseline);
     }
     return totalWidth;
   }
@@ -146,74 +210,89 @@ class Text extends Widget {
       {bool parentUsesSize = false}) {
     _words.clear();
 
-    style ??= Theme.of(context).defaultTextStyle;
+    final TextStyle defaultstyle = Theme.of(context).defaultTextStyle;
 
-    final double cw = constraints.hasBoundedWidth
+    final double constraintWidth = constraints.hasBoundedWidth
         ? constraints.maxWidth
         : constraints.constrainWidth();
-    final double ch = constraints.hasBoundedHeight
+    final double constraintHeight = constraints.hasBoundedHeight
         ? constraints.maxHeight
         : constraints.constrainHeight();
 
-    double x = 0.0;
-    double y = 0.0;
-    double w = 0.0;
-    double h = 0.0;
-    double lh = 0.0;
-
-    final PdfRect space =
-        style.font.stringBounds(' ') * (style.fontSize * textScaleFactor);
+    double offsetX = 0.0;
+    double offsetY = 0.0;
+    double width = 0.0;
+    double top;
+    double bottom;
 
     int lines = 1;
     int wCount = 0;
     int lineStart = 0;
 
-    for (String word in data.split(' ')) {
-      final PdfRect box =
-          style.font.stringBounds(word) * (style.fontSize * textScaleFactor);
-
-      final double ww = box.width;
-      final double wh = box.height;
-
-      if (x + ww > cw) {
-        if (wCount == 0) {
-          break;
-        }
-        w = math.max(
-            w,
-            _realignLine(
-                _words.sublist(lineStart), cw, x - space.width, false));
-        lineStart += wCount;
-        if (maxLines != null && ++lines > maxLines) {
-          break;
-        }
-
-        x = 0.0;
-        y += lh + style.lineSpacing;
-        h += lh + style.lineSpacing;
-        lh = 0.0;
-        if (y > ch) {
-          break;
-        }
-        wCount = 0;
+    text.visitTextSpan((TextSpan span) {
+      if (span.text == null) {
+        return true;
       }
 
-      final double wx = x;
-      final double wy = y;
+      final TextStyle style = span.style ?? defaultstyle;
 
-      x += ww + space.width;
-      lh = math.max(lh, wh);
+      final PdfFontMetrics space =
+          style.font.stringMetrics(' ') * (style.fontSize * textScaleFactor);
 
-      final _Word wd =
-          _Word(word, PdfRect(box.x + wx, box.y + wy + wh, ww, wh));
-      _words.add(wd);
-      wCount++;
-    }
-    w = math.max(
-        w, _realignLine(_words.sublist(lineStart), cw, x - space.width, true));
-    h += lh;
-    box = PdfRect(0.0, 0.0, constraints.constrainWidth(w),
-        constraints.constrainHeight(h));
+      for (String word in span.text.split(' ')) {
+        if (word.isEmpty) {
+          offsetX += space.width;
+          continue;
+        }
+
+        final PdfFontMetrics metrics =
+            style.font.stringMetrics(word) * (style.fontSize * textScaleFactor);
+
+        if (offsetX + metrics.width > constraintWidth) {
+          if (wCount == 0) {
+            break;
+          }
+          width = math.max(
+              width,
+              _realignLine(_words.sublist(lineStart), constraintWidth,
+                  offsetX - space.width, false, bottom));
+          lineStart += wCount;
+          if (maxLines != null && ++lines > maxLines) {
+            break;
+          }
+
+          offsetX = 0.0;
+          offsetY += bottom - top + style.lineSpacing;
+          top = null;
+          bottom = null;
+
+          if (offsetY > constraintHeight) {
+            return false;
+          }
+          wCount = 0;
+        }
+
+        top = math.min(top ?? metrics.top, metrics.top);
+        bottom = math.max(bottom ?? metrics.bottom, metrics.bottom);
+
+        final _Word wd = _Word(word, style, metrics);
+        wd.offset = PdfPoint(offsetX, -offsetY);
+
+        _words.add(wd);
+        wCount++;
+        offsetX += metrics.width + space.advanceWidth;
+      }
+
+      offsetX -= space.width;
+      return true;
+    });
+
+    width = math.max(
+        width,
+        _realignLine(
+            _words.sublist(lineStart), constraintWidth, offsetX, true, bottom));
+    box = PdfRect(0.0, 0.0, constraints.constrainWidth(width),
+        constraints.constrainHeight(offsetY + bottom - top));
   }
 
   @override
@@ -227,11 +306,48 @@ class Text extends Widget {
   @override
   void paint(Context context) {
     super.paint(context);
-    context.canvas.setFillColor(style.color);
+    TextStyle currentStyle;
+    PdfColor currentColor;
 
     for (_Word word in _words) {
-      context.canvas.drawString(style.font, style.fontSize * textScaleFactor,
-          word.text, box.x + word._box.x, box.y + box.height - word._box.y);
+      assert(() {
+        if (Document.debug && RichText.debug) {
+          word.debugPaint(context, textScaleFactor, box);
+        }
+        return true;
+      }());
+
+      if (word.style != currentStyle) {
+        currentStyle = word.style;
+        if (currentStyle.color != currentColor) {
+          currentColor = currentStyle.color;
+          context.canvas.setFillColor(currentColor);
+        }
+      }
+
+      context.canvas.drawString(
+          currentStyle.font,
+          currentStyle.fontSize * textScaleFactor,
+          word.text,
+          box.x + word.offset.x,
+          box.top + word.offset.y);
     }
   }
+}
+
+class Text extends RichText {
+  Text(
+    String text, {
+    TextStyle style,
+    TextAlign textAlign = TextAlign.left,
+    bool softWrap = true,
+    double textScaleFactor = 1.0,
+    int maxLines,
+  })  : assert(text != null),
+        super(
+            text: TextSpan(text: text, style: style),
+            textAlign: textAlign,
+            softWrap: softWrap,
+            textScaleFactor: textScaleFactor,
+            maxLines: maxLines);
 }
