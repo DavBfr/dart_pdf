@@ -1,5 +1,6 @@
 # 1.3.3
 * Fix dart lint warnings
+* Improve font bounds calculation
 
 # 1.3.2
 * Update Readme

@@ -28,18 +28,18 @@ class PdfFontDescriptor extends PdfObject {
   void _prepare() {
     super._prepare();
 
-    params['/FontName'] = PdfStream.string(ttfFont.fontName);
+    params['/FontName'] = PdfStream.string('/' + ttfFont.fontName);
     params['/FontFile2'] = file.ref();
     params['/Flags'] = PdfStream.intNum(32);
     params['/FontBBox'] = PdfStream()
       ..putIntArray(<int>[
-        ttfFont.font.xMin,
-        ttfFont.font.yMin,
-        ttfFont.font.xMax,
-        ttfFont.font.yMax
+        (ttfFont.font.xMin / ttfFont.font.unitsPerEm * 1000).toInt(),
+        (ttfFont.font.yMin / ttfFont.font.unitsPerEm * 1000).toInt(),
+        (ttfFont.font.xMax / ttfFont.font.unitsPerEm * 1000).toInt(),
+        (ttfFont.font.yMax / ttfFont.font.unitsPerEm * 1000).toInt()
       ]);
-    params['/Ascent'] = PdfStream.intNum(ttfFont.font.ascent);
-    params['/Descent'] = PdfStream.intNum(ttfFont.font.descent);
+    params['/Ascent'] = PdfStream.intNum((ttfFont.ascent * 1000).toInt());
+    params['/Descent'] = PdfStream.intNum((ttfFont.descent * 1000).toInt());
     params['/ItalicAngle'] = PdfStream.intNum(0);
     params['/CapHeight'] = PdfStream.intNum(10);
     params['/StemV'] = PdfStream.intNum(79);

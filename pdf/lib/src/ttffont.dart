@@ -29,8 +29,10 @@ class PdfTtfFont extends PdfFont {
     _charMin = 32;
     _charMax = 255;
 
+    final List<String> widths = <String>[];
+
     for (int i = _charMin; i <= _charMax; i++) {
-      widths.add((glyphAdvance(i) * 1000.0).toString());
+      widths.add((glyphMetrics(i).advanceWidth * 1000.0).toInt().toString());
     }
 
     unicodeCMap = PdfObject(pdfDocument);
@@ -44,8 +46,6 @@ class PdfTtfFont extends PdfFont {
 
   PdfArrayObject widthsObject;
 
-  final List<String> widths = <String>[];
-
   final TtfParser font;
 
   int _charMin;
@@ -53,36 +53,30 @@ class PdfTtfFont extends PdfFont {
   int _charMax;
 
   @override
-  String get fontName => '/' + font.fontName.replaceAll(' ', '');
+  String get fontName => font.fontName;
 
   @override
-  double glyphAdvance(int charCode) {
+  double get ascent => font.ascent.toDouble() / font.unitsPerEm;
+
+  @override
+  double get descent => font.descent.toDouble() / font.unitsPerEm;
+
+  @override
+  PdfFontMetrics glyphMetrics(int charCode) {
     final int g = font.charToGlyphIndexMap[charCode];
 
     if (g == null) {
-      return super.glyphAdvance(charCode);
+      return PdfFontMetrics.zero;
     }
 
-    return (g < font.advanceWidth.length ? font.advanceWidth[g] : null) ??
-        super.glyphAdvance(charCode);
-  }
-
-  @override
-  PdfRect glyphBounds(int charCode) {
-    final int g = font.charToGlyphIndexMap[charCode];
-
-    if (g == null) {
-      return super.glyphBounds(charCode);
-    }
-
-    return font.glyphInfoMap[g] ?? super.glyphBounds(charCode);
+    return font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
   }
 
   @override
   void _prepare() {
     super._prepare();
 
-    params['/BaseFont'] = PdfStream.string(fontName);
+    params['/BaseFont'] = PdfStream.string('/' + fontName);
     params['/FirstChar'] = PdfStream.intNum(_charMin);
     params['/LastChar'] = PdfStream.intNum(_charMax);
     params['/Widths'] = widthsObject.ref();

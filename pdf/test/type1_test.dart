@@ -19,16 +19,33 @@ import 'dart:io';
 import 'package:pdf/pdf.dart';
 import 'package:test/test.dart';
 
-void printText(PdfGraphics g, String text, PdfFont font, double top) {
+void printText(PdfGraphics canvas, String text, PdfFont font, double top) {
   text = text + font.fontName;
-  final PdfRect r = font.stringBounds(text);
-  const double FS = 20.0;
-  g.setColor(const PdfColor(0.9, 0.9, 0.9));
-  g.drawRect(50.0 + r.x * FS, g.page.pageFormat.height - top + r.y * FS,
-      r.width * FS, r.height * FS);
-  g.fillPath();
-  g.setColor(const PdfColor(0.3, 0.3, 0.3));
-  g.drawString(font, FS, text, 50.0, g.page.pageFormat.height - top);
+  const double fontSize = 20.0;
+  final PdfFontMetrics metrics = font.stringMetrics(text) * fontSize;
+
+  const double deb = 5.0;
+
+  const double x = 50.0;
+  final double y = canvas.page.pageFormat.height - top;
+
+  canvas
+    ..drawRect(x + metrics.left, y + metrics.top, metrics.width, metrics.height)
+    ..setColor(const PdfColor(0.9, 0.9, 0.9))
+    ..fillPath()
+    ..drawLine(x + metrics.left - deb, y, x + metrics.right + deb, y)
+    ..setColor(PdfColor.blue)
+    ..strokePath()
+    ..drawLine(x + metrics.left - deb, y + metrics.ascent,
+        x + metrics.right + deb, y + metrics.ascent)
+    ..setColor(PdfColor.green)
+    ..strokePath()
+    ..drawLine(x + metrics.left - deb, y + metrics.descent,
+        x + metrics.right + deb, y + metrics.descent)
+    ..setColor(PdfColor.purple)
+    ..strokePath()
+    ..setColor(const PdfColor(0.3, 0.3, 0.3))
+    ..drawString(font, fontSize, text, x, y);
 }
 
 void main() {

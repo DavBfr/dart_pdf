@@ -26,8 +26,10 @@ class PdfType1Font extends PdfFont {
   @override
   final String fontName;
 
+  @override
   final double ascent;
 
+  @override
   final double descent;
 
   final List<double> widths;
@@ -41,16 +43,13 @@ class PdfType1Font extends PdfFont {
   }
 
   @override
-  double glyphAdvance(int charCode) {
-    if (charCode > widths.length) {
-      return super.glyphAdvance(charCode);
-    }
-
-    return widths[charCode];
-  }
-
-  @override
-  PdfRect glyphBounds(int charCode) {
-    return PdfRect(0.0, descent, glyphAdvance(charCode), ascent);
+  PdfFontMetrics glyphMetrics(int charCode) {
+    return PdfFontMetrics(
+        left: 0.0,
+        top: descent,
+        right: charCode < widths.length
+            ? widths[charCode]
+            : PdfFont.defaultGlyphWidth,
+        bottom: ascent);
   }
 }

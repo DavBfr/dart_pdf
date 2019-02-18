@@ -128,6 +128,11 @@ class PDFFont extends PdfFont {
     subtype ??= baseFont;
     return PdfFont.helvetica(pdfDocument);
   }
+
+  @override
+  PdfFontMetrics glyphMetrics(int charCode) {
+    return PdfFontMetrics.zero;
+  }
 }
 
 @deprecated

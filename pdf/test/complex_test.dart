@@ -65,10 +65,11 @@ void main() {
     final Uint8List data = File('open-sans.ttf').readAsBytesSync();
     final PdfTtfFont font2 = PdfTtfFont(pdf, data.buffer.asByteData());
     const String s = 'Hello World!';
-    final PdfRect r = font2.stringBounds(s);
+    final PdfFontMetrics r = font2.stringMetrics(s);
     const double FS = 20.0;
     g.setColor(const PdfColor(0.0, 1.0, 1.0));
-    g.drawRect(50.0 + r.x * FS, 30.0 + r.y * FS, r.width * FS, r.height * FS);
+    g.drawRect(
+        50.0 + r.left * FS, 30.0 + r.top * FS, r.width * FS, r.height * FS);
     g.fillPath();
     g.setColor(const PdfColor(0.3, 0.3, 0.3));
     g.drawString(font2, FS, s, 50.0, 30.0);

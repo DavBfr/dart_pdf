@@ -27,7 +27,6 @@ class TtfParser {
     }
 
     _parseFontName();
-    _parseHmtx();
     _parseCMap();
     _parseIndexes();
     _parseGlyf();
@@ -45,10 +44,9 @@ class TtfParser {
   final ByteData bytes;
   final Map<String, int> _tableOffsets = <String, int>{};
   String _fontName;
-  final List<double> advanceWidth = <double>[];
   final Map<int, int> charToGlyphIndexMap = <int, int>{};
   final List<int> glyphOffsets = <int>[];
-  final Map<int, PdfRect> glyphInfoMap = <int, PdfRect>{};
+  final Map<int, PdfFontMetrics> glyphInfoMap = <int, PdfFontMetrics>{};
 
   int get unitsPerEm => bytes.getUint16(_tableOffsets[_HEAD] + 18);
 
@@ -72,6 +70,7 @@ class TtfParser {
 
   String get fontName => _fontName;
 
+  // https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6name.html
   void _parseFontName() {
     final int basePosition = _tableOffsets[_NAME];
     final int count = bytes.getUint16(basePosition + 2);
@@ -84,20 +83,25 @@ class TtfParser {
       final int offset = bytes.getUint16(pos + 10);
       pos += 12;
       if (platformID == 1 && nameID == 6) {
-        _fontName = utf8.decode(bytes.buffer
-            .asUint8List(basePosition + stringOffset + offset, length));
-        return;
+        try {
+          _fontName = utf8.decode(bytes.buffer
+              .asUint8List(basePosition + stringOffset + offset, length));
+          return;
+        } catch (a) {
+          print('Error: $platformID $nameID $a');
+        }
+      }
+      if (platformID == 3 && nameID == 6) {
+        try {
+          _fontName = decodeUtf16(bytes.buffer
+              .asUint8List(basePosition + stringOffset + offset, length));
+          return;
+        } catch (a) {
+          print('Error: $platformID $nameID $a');
+        }
       }
     }
     _fontName = hashCode.toString();
-  }
-
-  void _parseHmtx() {
-    final int offset = _tableOffsets[_HMTX];
-    final int unitsPerEm = this.unitsPerEm;
-    for (int i = 0; i < numOfLongHorMetrics; i++) {
-      advanceWidth.add(bytes.getInt16(offset + i * 4).toDouble() / unitsPerEm);
-    }
   }
 
   void _parseCMap() {
@@ -199,8 +203,10 @@ class TtfParser {
     }
   }
 
+  /// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
   void _parseGlyf() {
     final int baseOffset = _tableOffsets[_GLYF];
+    final int hmtxOffset = _tableOffsets[_HMTX];
     final int unitsPerEm = this.unitsPerEm;
     int glyphIndex = 0;
     for (int offset in glyphOffsets) {
@@ -208,11 +214,17 @@ class TtfParser {
       final int yMin = bytes.getInt16(baseOffset + offset + 4); // 4
       final int xMax = bytes.getInt16(baseOffset + offset + 6); // 6
       final int yMax = bytes.getInt16(baseOffset + offset + 8); // 8
-      glyphInfoMap[glyphIndex] = PdfRect(
-          xMin.toDouble() / unitsPerEm,
-          yMin.toDouble() / unitsPerEm,
-          xMax.toDouble() / unitsPerEm,
-          yMax.toDouble() / unitsPerEm);
+      final double advanceWidth = glyphIndex < numOfLongHorMetrics
+          ? bytes.getInt16(hmtxOffset + glyphIndex * 4).toDouble() / unitsPerEm
+          : null;
+      glyphInfoMap[glyphIndex] = PdfFontMetrics(
+          left: xMin.toDouble() / unitsPerEm,
+          top: yMin.toDouble() / unitsPerEm,
+          right: xMax.toDouble() / unitsPerEm,
+          bottom: yMax.toDouble() / unitsPerEm,
+          ascent: ascent.toDouble() / unitsPerEm,
+          descent: descent.toDouble() / unitsPerEm,
+          advanceWidth: advanceWidth);
       glyphIndex++;
     }
   }

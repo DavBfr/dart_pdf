@@ -32,4 +32,7 @@ class PdfPoint {
 
   @override
   String toString() => 'PdfPoint($x, $y)';
+
+  PdfPoint translate(double offsetX, double offsetY) =>
+      PdfPoint(x + offsetX, y + offsetY);
 }
