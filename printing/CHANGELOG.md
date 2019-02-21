@@ -1,6 +1,7 @@
 # 1.3.4
 * Fix dart lint warnings
 * Add documentation
+* Add a filename parameter for sharing
 
 # 1.3.3
 * Update Readme

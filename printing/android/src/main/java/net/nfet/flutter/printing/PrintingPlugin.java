@@ -152,7 +152,7 @@ public class PrintingPlugin extends PrintDocumentAdapter implements MethodCallHa
                 result.success(0);
                 break;
             case "sharePdf":
-                sharePdf((byte[]) call.argument("doc"));
+                sharePdf((byte[]) call.argument("doc"), (String) call.argument("name"));
                 result.success(0);
                 break;
             default:
@@ -161,11 +161,16 @@ public class PrintingPlugin extends PrintDocumentAdapter implements MethodCallHa
         }
     }
 
-    private void sharePdf(byte[] data) {
+    private void sharePdf(byte[] data, String name) {
         try {
             final File externalFilesDirectory =
-                    activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-            File shareFile = File.createTempFile("document", ".pdf", externalFilesDirectory);
+                    activity.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+            File shareFile;
+            if (name == null) {
+                shareFile = File.createTempFile("document-", ".pdf", externalFilesDirectory);
+            } else {
+                shareFile = new File(externalFilesDirectory, name);
+            }
 
             FileOutputStream stream = new FileOutputStream(shareFile);
             stream.write(data);

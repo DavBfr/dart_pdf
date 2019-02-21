@@ -44,7 +44,7 @@ class MyAppState extends State<MyApp> {
         referenceBox.localToGlobal(referenceBox.paintBounds.bottomRight);
     final Rect bounds = Rect.fromPoints(topLeft, bottomRight);
 
-    Printing.sharePdf(document: pdf, bounds: bounds);
+    Printing.sharePdf(document: pdf, filename: 'my-résumé.pdf', bounds: bounds);
   }
 
   Future<void> _printScreen() async {

@@ -50,7 +50,8 @@
                            [[call.arguments objectForKey:@"x"] floatValue],
                            [[call.arguments objectForKey:@"y"] floatValue],
                            [[call.arguments objectForKey:@"w"] floatValue],
-                           [[call.arguments objectForKey:@"h"] floatValue])];
+                           [[call.arguments objectForKey:@"h"] floatValue])
+               andName:[call.arguments objectForKey:@"name"]];
     result(@1);
   } else {
     result(FlutterMethodNotImplemented);
@@ -92,21 +93,27 @@
 }
 
 - (void)sharePdf:(nonnull FlutterStandardTypedData*)data
-    withSourceRect:(CGRect)rect {
+    withSourceRect:(CGRect)rect
+           andName:(NSString*)name {
   NSURL* tmpDirURL = [NSURL fileURLWithPath:NSTemporaryDirectory()
                                 isDirectory:YES];
 
   CFUUIDRef uuid = CFUUIDCreate(NULL);
-  assert(uuid != NULL);
+  assert(uuid != nil);
 
   CFStringRef uuidStr = CFUUIDCreateString(NULL, uuid);
-  assert(uuidStr != NULL);
+  assert(uuidStr != nil);
 
-  NSURL* fileURL = [[tmpDirURL
-      URLByAppendingPathComponent:[NSString
-                                      stringWithFormat:@"pdf-%@", uuidStr]]
-      URLByAppendingPathExtension:@"pdf"];
-  assert(fileURL != NULL);
+  NSURL* fileURL;
+  if ([name isEqual:[NSNull null]]) {
+    fileURL = [[tmpDirURL
+        URLByAppendingPathComponent:[NSString stringWithFormat:@"document-%@",
+                                                               uuidStr]]
+        URLByAppendingPathExtension:@"pdf"];
+  } else {
+    fileURL = [tmpDirURL URLByAppendingPathComponent:name];
+  }
+  assert(fileURL != nil);
 
   CFRelease(uuidStr);
   CFRelease(uuid);

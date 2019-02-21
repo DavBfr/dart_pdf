@@ -65,7 +65,10 @@ mixin Printing {
 
   /// Displays a platform popup to share the Pdf document to another application
   static Future<void> sharePdf(
-      {PdfDocument document, List<int> bytes, Rect bounds}) async {
+      {PdfDocument document,
+      List<int> bytes,
+      String filename,
+      Rect bounds}) async {
     assert(document != null || bytes != null);
     assert(!(document == null && bytes == null));
 
@@ -77,6 +80,7 @@ mixin Printing {
 
     final Map<String, dynamic> params = <String, dynamic>{
       'doc': Uint8List.fromList(bytes),
+      'name': filename,
       'x': bounds.left,
       'y': bounds.top,
       'w': bounds.width,
