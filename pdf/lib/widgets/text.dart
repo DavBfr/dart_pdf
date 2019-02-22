@@ -16,69 +16,6 @@
 
 part of widget;
 
-@immutable
-class TextStyle {
-  const TextStyle({
-    this.color = PdfColor.black,
-    @required this.font,
-    this.fontSize = _defaultFontSize,
-    this.letterSpacing = 1.0,
-    this.wordSpacing = 1.0,
-    this.lineSpacing = 0.0,
-    this.height = 1.0,
-    this.background,
-  })  : assert(font != null),
-        assert(color != null);
-
-  final PdfColor color;
-
-  final PdfFont font;
-
-  // font height, in pdf unit
-  final double fontSize;
-
-  static const double _defaultFontSize = 12.0 * PdfPageFormat.point;
-
-  // spacing between letters, 1.0 being natural spacing
-  final double letterSpacing;
-
-  // spacing between lines, in pdf unit
-  final double lineSpacing;
-
-  // spacing between words, 1.0 being natural spacing
-  final double wordSpacing;
-
-  final double height;
-
-  final PdfColor background;
-
-  TextStyle copyWith({
-    PdfColor color,
-    PdfFont font,
-    double fontSize,
-    double letterSpacing,
-    double wordSpacing,
-    double lineSpacing,
-    double height,
-    PdfColor background,
-  }) {
-    return TextStyle(
-      color: color ?? this.color,
-      font: font ?? this.font,
-      fontSize: fontSize ?? this.fontSize,
-      letterSpacing: letterSpacing ?? this.letterSpacing,
-      wordSpacing: wordSpacing ?? this.wordSpacing,
-      lineSpacing: lineSpacing ?? this.lineSpacing,
-      height: height ?? this.height,
-      background: background ?? this.background,
-    );
-  }
-
-  @override
-  String toString() =>
-      'TextStyle(color:$color font:$font letterSpacing:$letterSpacing wordSpacing:$wordSpacing lineSpacing:$lineSpacing height:$height background:$background)';
-}
-
 enum TextAlign { left, right, center, justify }
 
 class _Word {
@@ -235,9 +172,10 @@ class RichText extends Widget {
       }
 
       final TextStyle style = span.style ?? defaultstyle;
+      final PdfFont font = style.font.getFont(context);
 
       final PdfFontMetrics space =
-          style.font.stringMetrics(' ') * (style.fontSize * textScaleFactor);
+          font.stringMetrics(' ') * (style.fontSize * textScaleFactor);
 
       for (String word in span.text.split(' ')) {
         if (word.isEmpty) {
@@ -246,7 +184,7 @@ class RichText extends Widget {
         }
 
         final PdfFontMetrics metrics =
-            style.font.stringMetrics(word) * (style.fontSize * textScaleFactor);
+            font.stringMetrics(word) * (style.fontSize * textScaleFactor);
 
         if (offsetX + metrics.width > constraintWidth) {
           if (wCount == 0) {
@@ -326,7 +264,7 @@ class RichText extends Widget {
       }
 
       context.canvas.drawString(
-          currentStyle.font,
+          currentStyle.font.getFont(context),
           currentStyle.fontSize * textScaleFactor,
           word.text,
           box.x + word.offset.x,

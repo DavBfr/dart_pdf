@@ -16,7 +16,6 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
@@ -28,8 +27,7 @@ void main() {
 
     final Document pdf = Document();
 
-    final TextStyle symbol =
-        TextStyle(font: PdfFont.zapfDingbats(pdf.document));
+    final TextStyle symbol = TextStyle(font: Font.zapfDingbats());
 
     final List<int> imData = zlib.decode(base64.decode(
         'eJz7//8/w388uOTCT6a4Ez96Q47++I+OI479mEVALyNU7z9seuNP/mAm196Ekz8YR+0dWHtBmJC9S+7/Zog89iMIKLYaHQPVJGLTD7MXpDfq+I9goNhPdPPDjv3YlnH6Jye6+2H21l/6yeB/4HsSDr1bQXrRwq8HqHcGyF6QXp9933N0tn/7Y7vn+/9gLPaih0PDlV9MIAzVm6ez7dsfzW3f/oMwzAx0e7FhoJutdbcj9MKw9frnL2J2POfBpxeEg478YLba/X0Wsl6lBXf+s0bP/s8ePXeWePJCvPEJNYMRZIYWSO/cq/9Z/Nv+M4bO+M8YDjFDJGkhzvSE7A6jRTdnsQR2wfXCMLHuMC5byyidvGgWE5JeZDOIcYdR+TpmkBno+mFmAAC+DGhl'));
@@ -80,8 +78,9 @@ void main() {
                       border: BoxBorder(top: true, width: 1.0)),
                   child: Text("That's all Folks!",
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).defaultTextStyle.copyWith(
-                          font: PdfFont.timesBoldItalic(pdf.document)),
+                      style: Theme.of(context)
+                          .defaultTextStyle
+                          .copyWith(font: Font.timesBoldItalic()),
                       textScaleFactor: 3.0)),
             ])));
 
@@ -97,10 +96,6 @@ void main() {
                 padding: const EdgeInsets.all(10.0),
                 children: List<Widget>.generate(
                     9, (int n) => FittedBox(child: Text('${n + 1}')))))));
-
-    final Uint8List robotoData = File('open-sans.ttf').readAsBytesSync();
-    final PdfTtfFont roboto =
-        PdfTtfFont(pdf.document, robotoData.buffer.asByteData());
 
     pdf.addPage(MultiPage(
         pageFormat: const PdfPageFormat(400.0, 200.0),

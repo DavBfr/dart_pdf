@@ -17,6 +17,7 @@
 library widget;
 
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
@@ -28,6 +29,7 @@ part 'widgets/container.dart';
 part 'widgets/content.dart';
 part 'widgets/document.dart';
 part 'widgets/flex.dart';
+part 'widgets/font.dart';
 part 'widgets/geometry.dart';
 part 'widgets/grid_view.dart';
 part 'widgets/image.dart';

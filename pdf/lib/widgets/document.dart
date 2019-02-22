@@ -85,8 +85,7 @@ class Page extends BasePage {
     final BoxConstraints constraints = BoxConstraints(
         maxWidth: pageFormat.width, maxHeight: pageFormat.height);
 
-    final Theme calculatedTheme =
-        theme ?? document.theme ?? Theme(document.document);
+    final Theme calculatedTheme = theme ?? document.theme ?? Theme.base();
     final Map<Type, Inherited> inherited = <Type, Inherited>{};
     inherited[calculatedTheme.runtimeType] = calculatedTheme;
     final Context context =
@@ -142,9 +141,10 @@ class MultiPage extends Page {
       this.crossAxisAlignment = CrossAxisAlignment.start,
       this.header,
       this.footer,
+      Theme theme,
       EdgeInsets margin})
       : _buildList = build,
-        super(pageFormat: pageFormat, margin: margin);
+        super(pageFormat: pageFormat, margin: margin, theme: theme);
 
   final BuildListCallback _buildList;
 
@@ -164,8 +164,7 @@ class MultiPage extends Page {
         maxWidth: pageFormat.width, maxHeight: pageFormat.height);
     final BoxConstraints childConstraints =
         BoxConstraints(maxWidth: constraints.maxWidth - margin.horizontal);
-    final Theme calculatedTheme =
-        theme ?? document.theme ?? Theme(document.document);
+    final Theme calculatedTheme = theme ?? document.theme ?? Theme.base();
     final Map<Type, Inherited> inherited = <Type, Inherited>{};
     inherited[calculatedTheme.runtimeType] = calculatedTheme;
     Context context;

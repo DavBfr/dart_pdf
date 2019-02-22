@@ -69,3 +69,10 @@ Future<PdfImage> pdfImageFromImageProvider(
   stream.addListener(listener, onError: errorListener);
   return completer.future;
 }
+
+/// Loads a font from an asset bundle key. If used multiple times with the same font name,
+/// it will be included multiple times in the pdf file
+Future<TtfFont> fontFromAssetBundle(String key, AssetBundle bundle) async {
+  final ByteData data = await bundle.load(key);
+  return TtfFont(data);
+}

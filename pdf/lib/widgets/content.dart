@@ -17,53 +17,70 @@
 part of widget;
 
 class Header extends StatelessWidget {
-  Header({this.level = 1, this.text, this.child})
+  Header(
+      {this.level = 1,
+      this.text,
+      this.child,
+      this.decoration,
+      this.margin,
+      this.padding,
+      this.textStyle})
       : assert(level >= 0 && level <= 5);
 
   final String text;
+
   final Widget child;
+
   final int level;
+
+  final BoxDecoration decoration;
+
+  final EdgeInsets margin;
+
+  final EdgeInsets padding;
+
+  final TextStyle textStyle;
 
   @override
   Widget build(Context context) {
-    BoxDecoration _decoration;
-    EdgeInsets _margin;
-    EdgeInsets _padding;
-    double _textSize;
+    BoxDecoration _decoration = decoration;
+    EdgeInsets _margin = margin;
+    EdgeInsets _padding = padding;
+    TextStyle _textStyle = textStyle;
     switch (level) {
       case 0:
-        _margin = const EdgeInsets.only(bottom: 5.0 * PdfPageFormat.mm);
-        _padding = const EdgeInsets.only(bottom: 1.0 * PdfPageFormat.mm);
-        _decoration =
+        _margin ??= const EdgeInsets.only(bottom: 5.0 * PdfPageFormat.mm);
+        _padding ??= const EdgeInsets.only(bottom: 1.0 * PdfPageFormat.mm);
+        _decoration ??=
             const BoxDecoration(border: BoxBorder(bottom: true, width: 1.0));
-        _textSize = 2.0;
+        _textStyle ??= Theme.of(context).header0;
         break;
       case 1:
-        _margin = const EdgeInsets.only(
+        _margin ??= const EdgeInsets.only(
             top: 3.0 * PdfPageFormat.mm, bottom: 5.0 * PdfPageFormat.mm);
-        _decoration =
+        _decoration ??=
             const BoxDecoration(border: BoxBorder(bottom: true, width: 0.2));
-        _textSize = 1.5;
+        _textStyle ??= Theme.of(context).header1;
         break;
       case 2:
-        _margin = const EdgeInsets.only(
+        _margin ??= const EdgeInsets.only(
             top: 2.0 * PdfPageFormat.mm, bottom: 4.0 * PdfPageFormat.mm);
-        _textSize = 1.4;
+        _textStyle ??= Theme.of(context).header2;
         break;
       case 3:
-        _margin = const EdgeInsets.only(
+        _margin ??= const EdgeInsets.only(
             top: 2.0 * PdfPageFormat.mm, bottom: 4.0 * PdfPageFormat.mm);
-        _textSize = 1.3;
+        _textStyle ??= Theme.of(context).header3;
         break;
       case 4:
-        _margin = const EdgeInsets.only(
+        _margin ??= const EdgeInsets.only(
             top: 2.0 * PdfPageFormat.mm, bottom: 4.0 * PdfPageFormat.mm);
-        _textSize = 1.2;
+        _textStyle ??= Theme.of(context).header4;
         break;
       case 5:
-        _margin = const EdgeInsets.only(
+        _margin ??= const EdgeInsets.only(
             top: 2.0 * PdfPageFormat.mm, bottom: 4.0 * PdfPageFormat.mm);
-        _textSize = 1.1;
+        _textStyle ??= Theme.of(context).header5;
         break;
     }
     return Container(
@@ -71,53 +88,96 @@ class Header extends StatelessWidget {
       margin: _margin,
       padding: _padding,
       decoration: _decoration,
-      child: child ?? Text(text, textScaleFactor: _textSize),
+      child: child ?? Text(text, style: _textStyle),
     );
   }
 }
 
 class Paragraph extends StatelessWidget {
-  Paragraph({this.text});
+  Paragraph(
+      {this.text,
+      this.textAlign = TextAlign.justify,
+      this.style,
+      this.margin = const EdgeInsets.only(bottom: 5.0 * PdfPageFormat.mm),
+      this.padding});
 
   final String text;
+
+  final TextAlign textAlign;
+
+  final TextStyle style;
+
+  final EdgeInsets margin;
+
+  final EdgeInsets padding;
 
   @override
   Widget build(Context context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 5.0 * PdfPageFormat.mm),
+      margin: margin,
+      padding: padding,
       child: Text(
         text,
-        textAlign: TextAlign.justify,
-        style: Theme.of(context).paragraphStyle,
+        textAlign: textAlign,
+        style: style ?? Theme.of(context).paragraphStyle,
       ),
     );
   }
 }
 
 class Bullet extends StatelessWidget {
-  Bullet({this.text});
+  Bullet(
+      {this.text,
+      this.textAlign = TextAlign.left,
+      this.style,
+      this.margin = const EdgeInsets.only(bottom: 2.0 * PdfPageFormat.mm),
+      this.padding,
+      this.bulletSize = 2.0 * PdfPageFormat.mm,
+      this.bulletMargin = const EdgeInsets.only(
+        top: 1.5 * PdfPageFormat.mm,
+        left: 5.0 * PdfPageFormat.mm,
+        right: 2.0 * PdfPageFormat.mm,
+      ),
+      this.bulletShape = BoxShape.circle,
+      this.bulletColor = PdfColor.black});
 
   final String text;
+
+  final TextAlign textAlign;
+
+  final TextStyle style;
+
+  final EdgeInsets margin;
+
+  final EdgeInsets padding;
+
+  final EdgeInsets bulletMargin;
+
+  final double bulletSize;
+
+  final BoxShape bulletShape;
+
+  final PdfColor bulletColor;
 
   @override
   Widget build(Context context) {
     return Container(
-        margin: const EdgeInsets.only(bottom: 2.0 * PdfPageFormat.mm),
+        margin: margin,
+        padding: padding,
         child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Container(
-                width: 2.0 * PdfPageFormat.mm,
-                height: 2.0 * PdfPageFormat.mm,
-                margin: const EdgeInsets.only(
-                  top: 0.5 * PdfPageFormat.mm,
-                  left: 5.0 * PdfPageFormat.mm,
-                  right: 2.0 * PdfPageFormat.mm,
-                ),
-                decoration: const BoxDecoration(
-                    color: PdfColor.black, shape: BoxShape.circle),
+                width: bulletSize,
+                height: bulletSize,
+                margin: bulletMargin,
+                decoration:
+                    BoxDecoration(color: bulletColor, shape: bulletShape),
               ),
-              Expanded(child: Text(text, style: Theme.of(context).bulletStyle))
+              Expanded(
+                  child: Text(text,
+                      textAlign: textAlign,
+                      style: Theme.of(context).bulletStyle))
             ]));
   }
 }
