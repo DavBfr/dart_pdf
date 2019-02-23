@@ -2,6 +2,7 @@
 * Fix dart lint warnings
 * Improve font bounds calculation
 * Add RichText Widget
+* Fix MultiPage max height
 
 # 1.3.2
 * Update Readme

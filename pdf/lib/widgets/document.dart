@@ -226,13 +226,16 @@ class MultiPage extends Page {
       child.layout(context, childConstraints, parentUsesSize: false);
 
       if (offsetStart - child.box.height < offsetEnd) {
-        if (child.box.height < pageFormat.height - margin.vertical) {
+        if (child.box.height <= pageFormat.height - margin.vertical) {
           context = null;
           continue;
         }
 
         if (!(child is SpanningWidget)) {
-          throw Exception("Widget won't fit into the page");
+          throw Exception(
+              'Widget won\'t fit into the page as its height (${child.box.height}) '
+              'exceed a page height (${pageFormat.height - margin.vertical}). '
+              'You probably need a SpanningWidget or use a single page layout');
         }
 
         final SpanningWidget span = child;
