@@ -32,6 +32,13 @@ class BoxConstraints {
         minHeight = height != null ? height : 0.0,
         maxHeight = height != null ? height : double.infinity;
 
+  /// Creates box constraints that is respected only by the given size.
+  BoxConstraints.tight(PdfPoint size)
+      : minWidth = size.x,
+        maxWidth = size.x,
+        minHeight = size.y,
+        maxHeight = size.y;
+
   /// Creates box constraints that expand to fill another box constraints.
   const BoxConstraints.expand({double width, double height})
       : minWidth = width != null ? width : double.infinity,

@@ -133,31 +133,47 @@ void main() {
                 <String>['York Steak House', 'Outi Vuorinen', 'Finland'],
                 <String>['Weathervane', 'Else Jeremiassen', 'Iceland'],
               ]),
-              CustomPaint(
-                  size: const PdfPoint(50, 50),
-                  painter: (PdfGraphics canvas, PdfPoint size) {
-                    canvas
-                      ..setColor(PdfColor.indigo)
-                      ..drawRRect(0, 0, size.x, size.y, 10, 10)
-                      ..fillPath();
-                  }),
-              RichText(
-                text: TextSpan(
-                  text: 'Hello ',
-                  style: Theme.of(context).defaultTextStyle,
-                  children: <TextSpan>[
-                    TextSpan(
-                        text: 'bold',
-                        style: Theme.of(context)
-                            .defaultTextStyleBold
-                            .copyWith(fontSize: 20, color: PdfColor.blue)),
-                    const TextSpan(
-                      text: ' world!',
-                    ),
-                  ],
-                ),
-              )
             ]));
+
+    pdf.addPage(Page(
+        pageFormat: const PdfPageFormat(400.0, 200.0),
+        margin: const EdgeInsets.all(10.0),
+        build: (Context context) => Stack(overflow: Overflow.visible,
+                // fit: StackFit.expand,
+                // alignment: Alignment.bottomRight,
+                children: <Widget>[
+                  Positioned(
+                      right: 10,
+                      top: 10,
+                      child: CustomPaint(
+                          size: const PdfPoint(50, 50),
+                          painter: (PdfGraphics canvas, PdfPoint size) {
+                            canvas
+                              ..setColor(PdfColor.indigo)
+                              ..drawRRect(0, 0, size.x, size.y, 10, 10)
+                              ..fillPath();
+                          })),
+                  Positioned(
+                      left: 10,
+                      bottom: 10,
+                      child: RichText(
+                        text: TextSpan(
+                          text: 'Hello ',
+                          style: Theme.of(context).defaultTextStyle,
+                          children: <TextSpan>[
+                            TextSpan(
+                                text: 'bold',
+                                style: Theme.of(context)
+                                    .defaultTextStyleBold
+                                    .copyWith(
+                                        fontSize: 20, color: PdfColor.blue)),
+                            const TextSpan(
+                              text: ' world!',
+                            ),
+                          ],
+                        ),
+                      ))
+                ])));
 
     final File file = File('widgets.pdf');
     file.writeAsBytesSync(pdf.document.save());

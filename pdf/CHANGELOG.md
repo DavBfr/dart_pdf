@@ -3,6 +3,7 @@
 * Improve font bounds calculation
 * Add RichText Widget
 * Fix MultiPage max height
+* Add Stack Widget
 
 # 1.3.2
 * Update Readme
