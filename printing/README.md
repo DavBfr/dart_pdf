@@ -5,7 +5,7 @@ documents to android or ios compatible printers
 
 See the example on how to use the plugin.
 
-<img alt="Example document" src="example.png" width="300">
+<img alt="Example document" src="https://raw.githubusercontent.com/DavBfr/dart_pdf/master/printing/example.png" width="300">
 
 > This plugin uses the `pdf` package <https://pub.dartlang.org/packages/pdf>
 > for pdf creation. Please refer to <https://pub.dartlang.org/documentation/pdf/latest/>

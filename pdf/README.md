@@ -8,7 +8,7 @@ This library is divided in two parts:
 It can create a full multi-pages document with graphics,
 images and text using TrueType fonts. With the ease of use you already know.
 
-![Example document](example.jpg)
+<img alt="Example document" src="https://raw.githubusercontent.com/DavBfr/dart_pdf/master/pdf/example.jpg">
 
 > Use the `printing` package <https://pub.dartlang.org/packages/printing>
 > for full flutter print and share operation.
