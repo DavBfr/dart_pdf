@@ -44,7 +44,7 @@ void main() {
         alpha: false);
 
     final PdfGraphics g = page.getGraphics();
-    g.drawImage(image, 30.0, page.pageFormat.height - 507.0);
+    g.drawImage(image, 30, page.pageFormat.height - 507.0);
 
     final File file = File('jpeg.pdf');
     file.writeAsBytesSync(pdf.save());

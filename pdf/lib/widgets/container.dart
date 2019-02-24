@@ -211,8 +211,8 @@ class Container extends StatelessWidget {
 
     if (child == null && (constraints == null || !constraints.isTight)) {
       current = LimitedBox(
-          maxWidth: 0.0,
-          maxHeight: 0.0,
+          maxWidth: 0,
+          maxHeight: 0,
           child: ConstrainedBox(constraints: const BoxConstraints.expand()));
     }
 

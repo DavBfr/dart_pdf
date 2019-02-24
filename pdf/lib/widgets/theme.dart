@@ -104,8 +104,8 @@ class Theme extends Inherited {
     return Theme(
         defaultTextStyle: defaultTextStyle,
         defaultTextStyleBold: defaultTextStyleBold,
-        paragraphStyle: defaultTextStyle.copyWith(lineSpacing: 5.0),
-        bulletStyle: defaultTextStyle.copyWith(lineSpacing: 5.0),
+        paragraphStyle: defaultTextStyle.copyWith(lineSpacing: 5),
+        bulletStyle: defaultTextStyle.copyWith(lineSpacing: 5),
         header0: defaultTextStyleBold.copyWith(fontSize: fontSize * 2.0),
         header1: defaultTextStyleBold.copyWith(fontSize: fontSize * 1.5),
         header2: defaultTextStyleBold.copyWith(fontSize: fontSize * 1.4),

@@ -44,7 +44,7 @@ class PdfFontMetrics {
 
     double left;
     double top;
-    double right = 0.0;
+    double right = 0;
     double bottom;
     double ascent;
     double descent;
@@ -72,7 +72,7 @@ class PdfFontMetrics {
   }
 
   static const PdfFontMetrics zero =
-      PdfFontMetrics(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0);
+      PdfFontMetrics(left: 0, top: 0, right: 0, bottom: 0);
 
   final double left;
 
@@ -97,7 +97,7 @@ class PdfFontMetrics {
   double get maxWidth =>
       math.max(advanceWidth, right) + math.max(-leftBearing, 0.0);
 
-  double get effectiveLeft => math.min(leftBearing, 0.0);
+  double get effectiveLeft => math.min(leftBearing, 0);
 
   double get leftBearing => left;
 

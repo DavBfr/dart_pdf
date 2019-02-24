@@ -89,9 +89,9 @@ class Flex extends MultiChildWidget {
       // INTRINSIC MAIN SIZE
       // Intrinsic main size is the smallest size the flex container can take
       // while maintaining the min/max-content contributions of its flex items.
-      double totalFlex = 0.0;
-      double inflexibleSpace = 0.0;
-      double maxFlexFractionSoFar = 0.0;
+      double totalFlex = 0;
+      double inflexibleSpace = 0;
+      double maxFlexFractionSoFar = 0;
 
       for (Widget child in children) {
         final int flex = child is Expanded ? child.flex : 0;
@@ -113,8 +113,8 @@ class Flex extends MultiChildWidget {
       // Get inflexible space using the max intrinsic dimensions of fixed children in the main direction.
       final double availableMainSpace = extent;
       int totalFlex = 0;
-      double inflexibleSpace = 0.0;
-      double maxCrossSize = 0.0;
+      double inflexibleSpace = 0;
+      double maxCrossSize = 0;
       for (Widget child in children) {
         final int flex = child is Expanded ? child.flex : 0;
         totalFlex += flex;
@@ -139,7 +139,7 @@ class Flex extends MultiChildWidget {
       // Determine the spacePerFlex by allocating the remaining available space.
       // When you're over-constrained spacePerFlex can be negative.
       final double spacePerFlex =
-          math.max(0.0, (availableMainSpace - inflexibleSpace) / totalFlex);
+          math.max(0, (availableMainSpace - inflexibleSpace) / totalFlex);
 
       // Size remaining (flexible) items, find the maximum cross size.
       for (Widget child in children) {
@@ -214,9 +214,8 @@ class Flex extends MultiChildWidget {
         : constraints.maxHeight;
     final bool canFlex = maxMainSize < double.infinity;
 
-    double crossSize = 0.0;
-    double allocatedSize =
-        0.0; // Sum of the sizes of the non-flexible children.
+    double crossSize = 0;
+    double allocatedSize = 0; // Sum of the sizes of the non-flexible children.
 
     for (Widget child in children) {
       final int flex = child is Expanded ? child.flex : 0;
@@ -269,8 +268,8 @@ class Flex extends MultiChildWidget {
 
     // Distribute free space to flexible children, and determine baseline.
     final double freeSpace =
-        math.max(0.0, (canFlex ? maxMainSize : 0.0) - allocatedSize);
-    double allocatedFlexSpace = 0.0;
+        math.max(0, (canFlex ? maxMainSize : 0.0) - allocatedSize);
+    double allocatedFlexSpace = 0;
     if (totalFlex > 0) {
       final double spacePerFlex =
           canFlex && totalFlex > 0 ? (freeSpace / totalFlex) : double.nan;
@@ -362,7 +361,7 @@ class Flex extends MultiChildWidget {
     box = PdfRect.fromPoints(PdfPoint.zero, size);
     actualSizeDelta = actualSize - allocatedSize;
 
-    final double remainingSpace = math.max(0.0, actualSizeDelta);
+    final double remainingSpace = math.max(0, actualSizeDelta);
     double leadingSpace;
     double betweenSpace;
     final bool flipMainAxis = (verticalDirection == VerticalDirection.down &&

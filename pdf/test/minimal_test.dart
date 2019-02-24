@@ -25,8 +25,8 @@ void main() {
     final PdfPage page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
 
     final PdfGraphics g = page.getGraphics();
-    g.drawLine(30.0, page.pageFormat.height - 30.0, 200.0,
-        page.pageFormat.height - 200.0);
+    g.drawLine(
+        30, page.pageFormat.height - 30.0, 200, page.pageFormat.height - 200.0);
     g.strokePath();
 
     final File file = File('minimal.pdf');

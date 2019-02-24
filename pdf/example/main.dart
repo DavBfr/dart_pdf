@@ -41,7 +41,7 @@ void main() {
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text('Portable Document Format', textScaleFactor: 2.0),
+                      Text('Portable Document Format', textScaleFactor: 2),
                       PdfLogo()
                     ])),
             Paragraph(

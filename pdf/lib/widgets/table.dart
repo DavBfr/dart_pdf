@@ -186,7 +186,7 @@ class Table extends Widget implements SpanningWidget {
     // Compute column widths using flex and estimated width
     if (constraints.hasBoundedWidth) {
       final double totalFlex = flex.reduce((double a, double b) => a + b);
-      double flexSpace = 0.0;
+      double flexSpace = 0;
       for (int n = 0; n < _widths.length; n++) {
         if (flex[n] == 0.0) {
           final double newWidth = _widths[n] / maxWidth * constraints.maxWidth;
@@ -212,7 +212,7 @@ class Table extends Widget implements SpanningWidget {
     final double totalWidth = _widths.reduce((double a, double b) => a + b);
 
     // Compute final widths
-    double totalHeight = 0.0;
+    double totalHeight = 0;
     index = 0;
     for (TableRow row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
@@ -220,9 +220,9 @@ class Table extends Widget implements SpanningWidget {
       }
 
       int n = 0;
-      double x = 0.0;
+      double x = 0;
 
-      double lineHeight = 0.0;
+      double lineHeight = 0;
       for (Widget child in row.children) {
         final BoxConstraints childConstraints =
             BoxConstraints.tightFor(width: _widths[n]);
@@ -262,7 +262,7 @@ class Table extends Widget implements SpanningWidget {
       }
     }
 
-    box = PdfRect(0.0, 0.0, totalWidth, totalHeight);
+    box = PdfRect(0, 0, totalWidth, totalHeight);
   }
 
   @override

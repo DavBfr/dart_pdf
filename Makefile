@@ -43,6 +43,7 @@ test: pdf/.dart_tool $(FONTS)
 	cd pdf; pub get
 	cd pdf; for EXAMPLE in $(shell cd pdf; find example -name '*.dart'); do dart $$EXAMPLE; done
 	cd pdf; for TEST in $(shell cd pdf; find test -name '*.dart'); do dart $$TEST; done
+	cd printing/example; flutter packages get
 	cd printing/example; flutter test
 
 clean:
@@ -56,10 +57,20 @@ publish-printing: format clean
 
 .pana:
 	pub global activate pana
-	touch .pana
+	touch $@
 
 analyze: .pana
 	@pana --no-warning --source path pdf 2> /dev/null | python pana_report.py
 	@pana --no-warning --source path printing 2> /dev/null | python pana_report.py
+
+.dartfix:
+	pub global activate dartfix
+	touch $@
+
+fix: .dartfix
+	cd pdf; pub get
+	cd pdf; dartfix --overwrite .
+	cd printing; flutter packages get
+	cd printing; dartfix --overwrite .
 
 .PHONY: test format format-dart format-clang clean publish-pdf publish-printing analyze

@@ -31,7 +31,7 @@ class PdfRect {
 
   final double x, y, width, height;
 
-  static const PdfRect zero = PdfRect(0.0, 0.0, 0.0, 0.0);
+  static const PdfRect zero = PdfRect(0, 0, 0, 0);
 
   double get left => x;
   double get bottom => y;

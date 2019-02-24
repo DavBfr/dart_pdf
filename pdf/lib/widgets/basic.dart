@@ -141,7 +141,7 @@ class Transform extends SingleChildWidget {
   Transform.translate({
     @required PdfPoint offset,
     Widget child,
-  })  : transform = Matrix4.translationValues(offset.x, offset.y, 0.0),
+  })  : transform = Matrix4.translationValues(offset.x, offset.y, 0),
         origin = null,
         alignment = null,
         super(child: child);
@@ -152,7 +152,7 @@ class Transform extends SingleChildWidget {
     this.origin,
     this.alignment = Alignment.center,
     Widget child,
-  })  : transform = Matrix4.diagonal3Values(scale, scale, 1.0),
+  })  : transform = Matrix4.diagonal3Values(scale, scale, 1),
         super(child: child);
 
   /// The matrix to transform the child by during painting.
@@ -329,8 +329,8 @@ class FittedBox extends SingleChildWidget {
           alignment.inscribe(sizes.destination, box);
 
       final Matrix4 mat =
-          Matrix4.translationValues(destinationRect.x, destinationRect.y, 0.0)
-            ..scale(scaleX, scaleY, 1.0)
+          Matrix4.translationValues(destinationRect.x, destinationRect.y, 0)
+            ..scale(scaleX, scaleY, 1)
             ..translate(-sourceRect.x, -sourceRect.y);
 
       context.canvas

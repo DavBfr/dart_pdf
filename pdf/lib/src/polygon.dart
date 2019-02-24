@@ -23,6 +23,6 @@ class PdfPolygon {
 
   PdfRect getBounds() {
     // TODO(me): Implement properly
-    return const PdfRect(0.0, 0.0, 0.0, 0.0);
+    return const PdfRect(0, 0, 0, 0);
   }
 }

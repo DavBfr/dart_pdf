@@ -97,7 +97,7 @@ class PdfGraphics {
 
     // q w 0 0 h x y cm % the coordinate matrix
     buf.putString('q ');
-    buf.putNumList(<double>[w, 0.0, 0.0, h, x, y]);
+    buf.putNumList(<double>[w, 0, 0, h, x, y]);
     buf.putString(' cm ${img.name} Do Q\n');
   }
 
@@ -267,7 +267,7 @@ class PdfGraphics {
     final double d =
         math.sqrt(ux * ux + uy * uy) * math.sqrt(vx * vx + vy * vy);
     if (d == 0.0) {
-      return 0.0;
+      return 0;
     }
     double c = (ux * vx + uy * vy) / d;
     if (c < -1.0) {
@@ -315,8 +315,7 @@ class PdfGraphics {
     final double cx = cxd + 0.5 * (x1 + x2);
     final double cy = cyd + 0.5 * (y1 + y2);
 
-    final double theta =
-        _vectorAngle(1.0, 0.0, (x1d - cxd) / rx, (y1d - cyd) / ry);
+    final double theta = _vectorAngle(1, 0, (x1d - cxd) / rx, (y1d - cyd) / ry);
     double dTheta = _vectorAngle((x1d - cxd) / rx, (y1d - cyd) / ry,
             (-x1d - cxd) / rx, (-y1d - cyd) / ry) %
         (math.pi * 2.0);
@@ -400,8 +399,8 @@ class PdfGraphics {
       final Matrix4 mat = Matrix4.identity();
       mat.translate(-x1, -y1);
       mat.rotateZ(-phi);
-      final Vector3 tr = mat.transform3(Vector3(x2, y2, 0.0));
-      _endToCenterParameters(0.0, 0.0, tr[0], tr[1], large, sweep, rx, ry);
+      final Vector3 tr = mat.transform3(Vector3(x2, y2, 0));
+      _endToCenterParameters(0, 0, tr[0], tr[1], large, sweep, rx, ry);
     } else {
       _endToCenterParameters(x1, y1, x2, y2, large, sweep, rx, ry);
     }
@@ -415,8 +414,8 @@ class PdfGraphics {
     String action;
     String lastAction;
     List<double> points;
-    PdfPoint lastControl = const PdfPoint(0.0, 0.0);
-    PdfPoint lastPoint = const PdfPoint(0.0, 0.0);
+    PdfPoint lastControl = const PdfPoint(0, 0);
+    PdfPoint lastPoint = const PdfPoint(0, 0);
     for (Match m in matches) {
       final String a = m.group(1);
       final String b = m.group(0);

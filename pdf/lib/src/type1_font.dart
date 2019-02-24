@@ -45,7 +45,7 @@ class PdfType1Font extends PdfFont {
   @override
   PdfFontMetrics glyphMetrics(int charCode) {
     return PdfFontMetrics(
-        left: 0.0,
+        left: 0,
         top: descent,
         right: charCode < widths.length
             ? widths[charCode]

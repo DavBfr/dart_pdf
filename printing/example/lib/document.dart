@@ -131,7 +131,7 @@ Future<PdfDocument> generateDocument(PdfPageFormat format) async {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text('Parnella Charlesbois',
-                              textScaleFactor: 2.0,
+                              textScaleFactor: 2,
                               style: Theme.of(context).defaultTextStyleBold),
                           Padding(padding: const EdgeInsets.only(top: 10)),
                           Text('Electrotyper',

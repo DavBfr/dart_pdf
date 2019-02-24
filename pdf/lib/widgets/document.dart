@@ -67,10 +67,10 @@ class Page extends BasePage {
   void debugPaint(Context context) {
     context.canvas
       ..setFillColor(PdfColor.lightGreen)
-      ..moveTo(0.0, 0.0)
-      ..lineTo(pageFormat.width, 0.0)
+      ..moveTo(0, 0)
+      ..lineTo(pageFormat.width, 0)
       ..lineTo(pageFormat.width, pageFormat.height)
-      ..lineTo(0.0, pageFormat.height)
+      ..lineTo(0, pageFormat.height)
       ..moveTo(margin.left, margin.bottom)
       ..lineTo(margin.left, pageFormat.height - margin.top)
       ..lineTo(pageFormat.width - margin.right, pageFormat.height - margin.top)

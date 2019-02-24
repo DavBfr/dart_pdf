@@ -70,7 +70,7 @@ class GridView extends MultiChildWidget {
         crossAxisSpacing;
 
     final double startX = padding.left;
-    const double startY = 0.0;
+    const double startY = 0;
     double mainAxis;
     double crossAxis;
     BoxConstraints innerConstraints;
@@ -167,7 +167,7 @@ class GridView extends MultiChildWidget {
                     (_childCrossAxis + crossAxisSpacing) * c -
                     crossAxisSpacing,
                 box.bottom + padding.bottom,
-                math.max(crossAxisSpacing, 1.0),
+                math.max(crossAxisSpacing, 1),
                 box.height - padding.vertical)
             ..fillPath();
           break;
@@ -187,7 +187,7 @@ class GridView extends MultiChildWidget {
                     (_childMainAxis + mainAxisSpacing) * c -
                     mainAxisSpacing,
                 box.width - padding.horizontal,
-                math.max(mainAxisSpacing, 1.0))
+                math.max(mainAxisSpacing, 1))
             ..fillPath();
           break;
         case Axis.horizontal:

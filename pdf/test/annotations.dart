@@ -23,18 +23,17 @@ void main() {
   test('Pdf', () {
     final PdfDocument pdf = PdfDocument();
     final PdfPage page =
-        PdfPage(pdf, pageFormat: const PdfPageFormat(500.0, 300.0));
+        PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
     final PdfPage page1 =
-        PdfPage(pdf, pageFormat: const PdfPageFormat(500.0, 300.0));
+        PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
 
     final PdfGraphics g = page.getGraphics();
 
     PdfAnnot.text(page,
-        content: 'Hello', rect: const PdfRect(100.0, 100.0, 50.0, 50.0));
+        content: 'Hello', rect: const PdfRect(100, 100, 50, 50));
 
-    PdfAnnot.link(page,
-        dest: page1, srcRect: const PdfRect(100.0, 150.0, 50.0, 50.0));
-    g.drawRect(100.0, 150.0, 50.0, 50.0);
+    PdfAnnot.link(page, dest: page1, srcRect: const PdfRect(100, 150, 50, 50));
+    g.drawRect(100, 150, 50, 50);
     g.strokePath();
 
     final File file = File('annotations.pdf');

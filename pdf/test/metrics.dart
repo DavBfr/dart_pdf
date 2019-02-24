@@ -30,7 +30,7 @@ void printMetrics(
   final double fontSize = min(fontSizeW, fontSizeH);
   final PdfFontMetrics metrics = metricsUnscales * fontSize;
 
-  const double deb = 20.0;
+  const double deb = 20;
 
   final double x = (size.x - metrics.maxWidth) / 2.0;
   final double y = (size.y - metrics.maxHeight) / 2.0 - metrics.descent;
@@ -70,7 +70,7 @@ void main() {
         in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz&%!?0123456789'
             .codeUnits) {
       pdf.addPage(Page(
-          pageFormat: const PdfPageFormat(500.0, 500.0, marginAll: 20),
+          pageFormat: const PdfPageFormat(500, 500, marginAll: 20),
           build: (Context context) {
             return ConstrainedBox(
                 constraints: const BoxConstraints.expand(),

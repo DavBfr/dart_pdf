@@ -74,7 +74,7 @@ class BoxConstraints {
   PdfPoint get biggest => PdfPoint(constrainWidth(), constrainHeight());
 
   /// The smallest size that satisfies the constraints.
-  PdfPoint get smallest => PdfPoint(constrainWidth(0.0), constrainHeight(0.0));
+  PdfPoint get smallest => PdfPoint(constrainWidth(0), constrainHeight(0));
 
   /// Whether there is exactly one width value that satisfies the constraints.
   bool get hasTightWidth => minWidth >= maxWidth;
@@ -162,8 +162,8 @@ class BoxConstraints {
     assert(edges != null);
     final double horizontal = edges.horizontal;
     final double vertical = edges.vertical;
-    final double deflatedMinWidth = math.max(0.0, minWidth - horizontal);
-    final double deflatedMinHeight = math.max(0.0, minHeight - vertical);
+    final double deflatedMinWidth = math.max(0, minWidth - horizontal);
+    final double deflatedMinHeight = math.max(0, minHeight - vertical);
     return BoxConstraints(
         minWidth: deflatedMinWidth,
         maxWidth: math.max(deflatedMinWidth, maxWidth - horizontal),
@@ -174,10 +174,11 @@ class BoxConstraints {
   /// Returns new box constraints that remove the minimum width and height requirements.
   BoxConstraints loosen() {
     return BoxConstraints(
-        minWidth: 0.0,
-        maxWidth: maxWidth,
-        minHeight: 0.0,
-        maxHeight: maxHeight);
+      minWidth: 0,
+      maxWidth: maxWidth,
+      minHeight: 0,
+      maxHeight: maxHeight,
+    );
   }
 
   /// Returns new box constraints that respect the given constraints while being
@@ -279,31 +280,31 @@ class Alignment {
   final double y;
 
   /// The top left corner.
-  static const Alignment topLeft = Alignment(-1.0, 1.0);
+  static const Alignment topLeft = Alignment(-1, 1);
 
   /// The center point along the top edge.
-  static const Alignment topCenter = Alignment(0.0, 1.0);
+  static const Alignment topCenter = Alignment(0, 1);
 
   /// The top right corner.
-  static const Alignment topRight = Alignment(1.0, 1.0);
+  static const Alignment topRight = Alignment(1, 1);
 
   /// The center point along the left edge.
-  static const Alignment centerLeft = Alignment(-1.0, 0.0);
+  static const Alignment centerLeft = Alignment(-1, 0);
 
   /// The center point, both horizontally and vertically.
-  static const Alignment center = Alignment(0.0, 0.0);
+  static const Alignment center = Alignment(0, 0);
 
   /// The center point along the right edge.
-  static const Alignment centerRight = Alignment(1.0, 0.0);
+  static const Alignment centerRight = Alignment(1, 0);
 
   /// The bottom left corner.
-  static const Alignment bottomLeft = Alignment(-1.0, -1.0);
+  static const Alignment bottomLeft = Alignment(-1, -1);
 
   /// The center point along the bottom edge.
-  static const Alignment bottomCenter = Alignment(0.0, -1.0);
+  static const Alignment bottomCenter = Alignment(0, -1);
 
   /// The bottom right corner.
-  static const Alignment bottomRight = Alignment(1.0, -1.0);
+  static const Alignment bottomRight = Alignment(1, -1);
 
   /// Returns the offset that is this fraction within the given size.
   PdfPoint alongSize(PdfPoint other) {
@@ -414,7 +415,7 @@ FittedSizes applyBoxFit(BoxFit fit, PdfPoint inputSize, PdfPoint outputSize) {
 }
 
 PdfPoint transformPoint(Matrix4 transform, PdfPoint point) {
-  final Vector3 position3 = Vector3(point.x, point.y, 0.0);
+  final Vector3 position3 = Vector3(point.x, point.y, 0);
   final Vector3 transformed3 = transform.perspectiveTransform(position3);
   return PdfPoint(transformed3.x, transformed3.y);
 }

@@ -81,7 +81,7 @@ class PdfPage extends PdfObject {
 
     // the /MediaBox for the page size
     params['/MediaBox'] = PdfStream()
-      ..putNumArray(<double>[0.0, 0.0, pageFormat.width, pageFormat.height]);
+      ..putNumArray(<double>[0, 0, pageFormat.width, pageFormat.height]);
 
     // Rotation (if not zero)
 //        if(rotate!=0) {

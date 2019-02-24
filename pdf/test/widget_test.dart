@@ -35,8 +35,8 @@ void main() {
         PdfImage(pdf.document, image: imData, width: 16, height: 20);
 
     pdf.addPage(Page(
-        pageFormat: const PdfPageFormat(400.0, 400.0),
-        margin: const EdgeInsets.all(10.0),
+        pageFormat: const PdfPageFormat(400, 400),
+        margin: const EdgeInsets.all(10),
         build: (Context context) => Column(children: <Widget>[
               Container(
                   padding: const EdgeInsets.all(5),
@@ -48,11 +48,11 @@ void main() {
                           bottom: true,
                           left: true,
                           right: true,
-                          width: 2.0)),
+                          width: 2)),
                   child: Text('Hello World',
-                      textScaleFactor: 2.0, textAlign: TextAlign.center)),
+                      textScaleFactor: 2, textAlign: TextAlign.center)),
               Align(alignment: Alignment.topLeft, child: Text('Left align')),
-              Padding(padding: const EdgeInsets.all(5.0)),
+              Padding(padding: const EdgeInsets.all(5)),
               Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
@@ -75,31 +75,31 @@ void main() {
               Container(
                   padding: const EdgeInsets.only(top: 5),
                   decoration: const BoxDecoration(
-                      border: BoxBorder(top: true, width: 1.0)),
+                      border: BoxBorder(top: true, width: 1)),
                   child: Text("That's all Folks!",
                       textAlign: TextAlign.center,
                       style: Theme.of(context)
                           .defaultTextStyle
                           .copyWith(font: Font.timesBoldItalic()),
-                      textScaleFactor: 3.0)),
+                      textScaleFactor: 3)),
             ])));
 
     pdf.addPage(Page(
-        pageFormat: const PdfPageFormat(400.0, 400.0),
-        margin: const EdgeInsets.all(10.0),
+        pageFormat: const PdfPageFormat(400, 400),
+        margin: const EdgeInsets.all(10),
         build: (Context context) => Center(
             child: GridView(
                 crossAxisCount: 3,
                 direction: Axis.vertical,
-                crossAxisSpacing: 10.0,
-                mainAxisSpacing: 10.0,
-                padding: const EdgeInsets.all(10.0),
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                padding: const EdgeInsets.all(10),
                 children: List<Widget>.generate(
                     9, (int n) => FittedBox(child: Text('${n + 1}')))))));
 
     pdf.addPage(MultiPage(
-        pageFormat: const PdfPageFormat(400.0, 200.0),
-        margin: const EdgeInsets.all(10.0),
+        pageFormat: const PdfPageFormat(400, 200),
+        margin: const EdgeInsets.all(10),
         build: (Context context) => <Widget>[
               Table.fromTextArray(context: context, data: <List<String>>[
                 <String>['Company', 'Contact', 'Country'],
@@ -136,8 +136,8 @@ void main() {
             ]));
 
     pdf.addPage(Page(
-        pageFormat: const PdfPageFormat(400.0, 200.0),
-        margin: const EdgeInsets.all(10.0),
+        pageFormat: const PdfPageFormat(400, 200),
+        margin: const EdgeInsets.all(10),
         build: (Context context) => Stack(overflow: Overflow.visible,
                 // fit: StackFit.expand,
                 // alignment: Alignment.bottomRight,

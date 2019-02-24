@@ -35,8 +35,8 @@ class Placeholder extends Widget {
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
     box = PdfRect(
-        0.0,
-        0.0,
+        0,
+        0,
         constraints.constrainWidth(
             constraints.hasBoundedWidth ? constraints.maxWidth : fallbackWidth),
         constraints.constrainHeight(constraints.hasBoundedHeight
@@ -71,7 +71,7 @@ class PdfLogo extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    return Shape(pdf, width: 24.0, height: 27.0, fillColor: color, fit: fit);
+    return Shape(pdf, width: 24, height: 27, fillColor: color, fit: fit);
   }
 }
 

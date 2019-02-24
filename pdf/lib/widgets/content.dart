@@ -52,7 +52,7 @@ class Header extends StatelessWidget {
         _margin ??= const EdgeInsets.only(bottom: 5.0 * PdfPageFormat.mm);
         _padding ??= const EdgeInsets.only(bottom: 1.0 * PdfPageFormat.mm);
         _decoration ??=
-            const BoxDecoration(border: BoxBorder(bottom: true, width: 1.0));
+            const BoxDecoration(border: BoxBorder(bottom: true, width: 1));
         _textStyle ??= Theme.of(context).header0;
         break;
       case 1:

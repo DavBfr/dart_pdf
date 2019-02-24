@@ -1,5 +1,6 @@
 # 1.3.5
 * Restore compatibility with Flutter 1.0.0
+* Update code to Dart 2.1.0
 
 # 1.3.4
 * Fix iOS build with Swift

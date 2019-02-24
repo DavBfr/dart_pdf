@@ -75,7 +75,7 @@ mixin Printing {
       bytes = document.save();
     }
 
-    bounds ??= Rect.fromCircle(center: Offset.zero, radius: 10.0);
+    bounds ??= Rect.fromCircle(center: Offset.zero, radius: 10);
 
     final Map<String, dynamic> params = <String, dynamic>{
       'doc': Uint8List.fromList(bytes),

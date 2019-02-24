@@ -31,3 +31,4 @@ printing/ios/Runner
 
 .pana
 pedantic_analyis_options_*.yaml
+.dartfix

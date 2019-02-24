@@ -21,12 +21,12 @@ import 'package:test/test.dart';
 
 void printText(PdfGraphics canvas, String text, PdfFont font, double top) {
   text = text + font.fontName;
-  const double fontSize = 20.0;
+  const double fontSize = 20;
   final PdfFontMetrics metrics = font.stringMetrics(text) * fontSize;
 
-  const double deb = 5.0;
+  const double deb = 5;
 
-  const double x = 50.0;
+  const double x = 50;
   final double y = canvas.page.pageFormat.height - top;
 
   canvas
@@ -52,7 +52,7 @@ void main() {
   test('Pdf', () {
     final PdfDocument pdf = PdfDocument();
     final PdfPage page =
-        PdfPage(pdf, pageFormat: const PdfPageFormat(500.0, 430.0));
+        PdfPage(pdf, pageFormat: const PdfPageFormat(500, 430));
 
     final PdfGraphics g = page.getGraphics();
     int top = 0;

@@ -35,7 +35,7 @@ class _Word {
   }
 
   void debugPaint(Context context, double textScaleFactor, PdfRect globalBox) {
-    const double deb = 5.0;
+    const double deb = 5;
 
     context.canvas
       ..drawRect(globalBox.x + offset.x + metrics.left,
@@ -111,7 +111,7 @@ class RichText extends Widget {
 
   double _realignLine(List<_Word> words, double totalWidth, double wordsWidth,
       bool last, double baseline) {
-    double delta = 0.0;
+    double delta = 0;
     switch (textAlign) {
       case TextAlign.left:
         totalWidth = wordsWidth;
@@ -128,7 +128,7 @@ class RichText extends Widget {
           break;
         }
         delta = (totalWidth - wordsWidth) / (words.length - 1);
-        double x = 0.0;
+        double x = 0;
         for (_Word word in words) {
           word.offset = word.offset.translate(x, -baseline);
           x += delta;
@@ -156,9 +156,9 @@ class RichText extends Widget {
         ? constraints.maxHeight
         : constraints.constrainHeight();
 
-    double offsetX = 0.0;
-    double offsetY = 0.0;
-    double width = 0.0;
+    double offsetX = 0;
+    double offsetY = 0;
+    double width = 0;
     double top;
     double bottom;
 
@@ -230,7 +230,7 @@ class RichText extends Widget {
     bottom ??= 0.0;
     top ??= 0.0;
 
-    box = PdfRect(0.0, 0.0, constraints.constrainWidth(width),
+    box = PdfRect(0, 0, constraints.constrainWidth(width),
         constraints.constrainHeight(offsetY + bottom - top));
   }
 
