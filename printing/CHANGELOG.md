@@ -1,10 +1,8 @@
-# 1.3.4
+# 1.3.3
 * Fix dart lint warnings
 * Add documentation
 * Add a filename parameter for sharing
 * Convert Objective-C code to Swift
-
-# 1.3.3
 * Update Readme
 
 # 1.3.2

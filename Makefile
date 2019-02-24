@@ -40,6 +40,7 @@ pdf/.dart_tool:
 	cd pdf ; pub get
 
 test: pdf/.dart_tool $(FONTS)
+	cd pdf; pub get
 	cd pdf; for EXAMPLE in $(shell cd pdf; find example -name '*.dart'); do dart $$EXAMPLE; done
 	cd pdf; for TEST in $(shell cd pdf; find test -name '*.dart'); do dart $$TEST; done
 	cd printing/example; flutter test
