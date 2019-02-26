@@ -108,7 +108,7 @@ Future<PdfDocument> generateDocument(PdfPageFormat format) async {
 
   final PdfImage profileImage = await pdfImageFromImageProvider(
       pdf: pdf.document,
-      image: fw.NetworkImage(
+      image: const fw.NetworkImage(
           'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=200'),
       onError: (dynamic exception, StackTrace stackTrace) {
         print('error');
