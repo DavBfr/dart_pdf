@@ -36,8 +36,7 @@ mixin Printing {
         final Map<String, dynamic> params = <String, dynamic>{
           'doc': Uint8List.fromList(bytes),
         };
-        await _channel.invokeMethod<void>('writePdf', params);
-        return Future<void>.value();
+        return await _channel.invokeMethod('writePdf', params);
     }
   }
 
@@ -49,7 +48,7 @@ mixin Printing {
     _onLayout = onLayout;
     _channel.setMethodCallHandler(_handleMethod);
     final Map<String, dynamic> params = <String, dynamic>{'name': name};
-    await _channel.invokeMethod<void>('printPdf', params);
+    return await _channel.invokeMethod('printPdf', params);
   }
 
   /// Prints a [PdfDocument] or a pdf stream to a local printer using the platform UI
@@ -86,6 +85,6 @@ mixin Printing {
       'w': bounds.width,
       'h': bounds.height,
     };
-    await _channel.invokeMethod<void>('sharePdf', params);
+    return await _channel.invokeMethod('sharePdf', params);
   }
 }
