@@ -1,3 +1,7 @@
+# 1.3.4
+* Fix iOS build with Swift
+* Add installation instructions in the Readme
+
 # 1.3.3
 * Fix dart lint warnings
 * Add documentation

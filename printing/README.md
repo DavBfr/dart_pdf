@@ -34,3 +34,29 @@ PdfTtfFont ttf = PdfTtfFont(pdf, font);
 g.setColor(PdfColor(0.3, 0.3, 0.3));
 g.drawString(ttf, 20.0, "Dart is awesome", 50.0, 30.0);
 ```
+
+## Installing
+
+1. Add this to your package's `pubspec.yaml` file:
+
+   ```yaml
+   dependencies:
+     printing: any       # <-- Add this line
+   ```
+
+2. Enable Swift on the iOS project, in `ios/Podfile`:
+
+   ```Ruby
+   target 'Runner' do
+      use_frameworks!    # <-- Add this line
+   ```
+
+3. Set minimum Android version in `android/app/build.gradle`:
+
+   ```java
+   defaultConfig {
+       ...
+       minSdkVersion 19  // <-- Change this line to 19 or more
+       ...
+   }
+   ```
