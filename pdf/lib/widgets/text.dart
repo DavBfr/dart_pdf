@@ -186,10 +186,7 @@ class RichText extends Widget {
         final PdfFontMetrics metrics =
             font.stringMetrics(word) * (style.fontSize * textScaleFactor);
 
-        if (offsetX + metrics.width > constraintWidth) {
-          if (wCount == 0) {
-            break;
-          }
+        if (offsetX + metrics.width > constraintWidth && wCount > 0) {
           width = math.max(
               width,
               _realignLine(_words.sublist(lineStart), constraintWidth,
@@ -229,6 +226,10 @@ class RichText extends Widget {
         width,
         _realignLine(
             _words.sublist(lineStart), constraintWidth, offsetX, true, bottom));
+
+    bottom ??= 0.0;
+    top ??= 0.0;
+
     box = PdfRect(0.0, 0.0, constraints.constrainWidth(width),
         constraints.constrainHeight(offsetY + bottom - top));
   }

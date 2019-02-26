@@ -165,8 +165,9 @@ class Table extends Widget implements SpanningWidget {
         child.layout(context, const BoxConstraints());
         final double calculatedWidth =
             child.box.width == double.infinity ? 0.0 : child.box.width;
-        final double childFlex =
-            child is Expanded ? child.flex.toDouble() : 0.0;
+        final double childFlex = child is Expanded
+            ? child.flex.toDouble()
+            : (child.box.width == double.infinity ? 1.0 : 0.0);
         if (flex.length < n + 1) {
           flex.add(childFlex);
           _widths.add(calculatedWidth);
@@ -280,7 +281,13 @@ class Table extends Widget implements SpanningWidget {
         continue;
       }
       for (Widget child in row.children) {
+        context.canvas
+          ..saveContext()
+          ..drawRect(
+              child.box.x, child.box.y, child.box.width, child.box.height)
+          ..clipPath();
         child.paint(context);
+        context.canvas.restoreContext();
       }
       if (index >= _context.lastLine) {
         break;

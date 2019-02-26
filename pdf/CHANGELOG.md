@@ -1,3 +1,6 @@
+# 1.3.3
+* Fix a bug with the RichText Widget
+
 # 1.3.2
 * Fix dart lint warnings
 * Improve font bounds calculation
