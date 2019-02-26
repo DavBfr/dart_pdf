@@ -19,5 +19,7 @@ part of printing;
 class PdfDoc extends Document {
   /// Wrapper for a [Document] with zlib compression enabled by default
   PdfDoc({bool compress = true})
-      : super(deflate: compress ? zlib.encode : null);
+      : super(deflate: compress ? zlib.encode : null) {
+    Document.debug = debugPaintSizeEnabled;
+  }
 }
