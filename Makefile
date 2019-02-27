@@ -50,18 +50,26 @@ clean:
 	git clean -fdx -e .vscode
 
 publish-pdf: format clean
+	find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
 	cd pdf; pub publish -f
+	find pdf -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 publish-printing: format clean
+	find printing -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
 	cd printing; pub publish -f
+	find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 .pana:
 	pub global activate pana
 	touch $@
 
 analyze: .pana
+	@find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
+	@find printing -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
 	@pana --no-warning --source path pdf 2> /dev/null | python pana_report.py
 	@pana --no-warning --source path printing 2> /dev/null | python pana_report.py
+	@find pdf -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
+	@find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 .dartfix:
 	pub global activate dartfix
