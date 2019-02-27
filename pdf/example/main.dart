@@ -147,5 +147,5 @@ void main() {
           ]));
 
   final File file = File('example.pdf');
-  file.writeAsBytesSync(pdf.document.save());
+  file.writeAsBytesSync(pdf.save());
 }

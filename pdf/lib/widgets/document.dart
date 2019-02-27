@@ -41,6 +41,8 @@ class Document {
   void addPage(BasePage page) {
     page.generate(this);
   }
+
+  List<int> save() => document.save();
 }
 
 typedef BuildCallback = Widget Function(Context context);

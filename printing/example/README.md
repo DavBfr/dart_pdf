@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
               )),
             );
           }));
-    return pdf.document.save();
+    return pdf.save();
   }
 }
 ```

@@ -176,6 +176,6 @@ void main() {
                 ])));
 
     final File file = File('widgets.pdf');
-    file.writeAsBytesSync(pdf.document.save());
+    file.writeAsBytesSync(pdf.save());
   });
 }

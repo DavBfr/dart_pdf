@@ -1,6 +1,7 @@
 # 1.3.3
 * Fix a bug with the RichText Widget
 * Update code to Dart 2.1.0
+* Add Document.save() method
 
 # 1.3.2
 * Fix dart lint warnings

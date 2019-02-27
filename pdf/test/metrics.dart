@@ -85,6 +85,6 @@ void main() {
     }
 
     final File file = File('metrics.pdf');
-    file.writeAsBytesSync(pdf.document.save());
+    file.writeAsBytesSync(pdf.save());
   });
 }
