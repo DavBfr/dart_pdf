@@ -1,3 +1,6 @@
+# 1.3.4
+* Add available dimensions for PdfPageFormat
+
 # 1.3.3
 * Fix a bug with the RichText Widget
 * Update code to Dart 2.1.0
