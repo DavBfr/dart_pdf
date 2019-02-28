@@ -266,6 +266,9 @@ class EdgeInsets {
       bottom + other.bottom,
     );
   }
+
+  @override
+  String toString() => 'EdgeInsets $left, $top, $right, $bottom';
 }
 
 class Alignment {
