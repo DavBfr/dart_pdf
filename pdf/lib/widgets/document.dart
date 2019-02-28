@@ -104,8 +104,11 @@ class Page extends BasePage {
     final Theme calculatedTheme = theme ?? document.theme ?? Theme.base();
     final Map<Type, Inherited> inherited = <Type, Inherited>{};
     inherited[calculatedTheme.runtimeType] = calculatedTheme;
-    final Context context =
-        Context(page: pdfPage, canvas: canvas, inherited: inherited);
+    final Context context = Context(
+        document: document.document,
+        page: pdfPage,
+        canvas: canvas,
+        inherited: inherited);
     if (_build != null) {
       final Widget child = _build(context);
       layout(child, context, constraints);
@@ -187,7 +190,9 @@ class MultiPage extends Page {
     double offsetEnd;
     double offsetStart;
     int index = 0;
-    final List<Widget> children = _buildList(Context(inherited: inherited));
+    final Context baseContext =
+        Context(document: document.document, inherited: inherited);
+    final List<Widget> children = _buildList(baseContext);
     WidgetContext widgetContext;
 
     while (index < children.length) {
@@ -197,7 +202,7 @@ class MultiPage extends Page {
         final PdfPage pdfPage =
             PdfPage(document.document, pageFormat: pageFormat);
         final PdfGraphics canvas = pdfPage.getGraphics();
-        context = Context(page: pdfPage, canvas: canvas, inherited: inherited);
+        context = baseContext.copyWith(page: pdfPage, canvas: canvas);
         assert(() {
           if (Document.debug) {
             debugPaint(context);

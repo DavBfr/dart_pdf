@@ -125,7 +125,7 @@ class Font {
 
   PdfFont getFont(Context context) {
     if (_pdfFont == null) {
-      final PdfDocument pdfDocument = context.page.pdfDocument;
+      final PdfDocument pdfDocument = context.document;
       _pdfFont = buildFont(pdfDocument);
     }
 

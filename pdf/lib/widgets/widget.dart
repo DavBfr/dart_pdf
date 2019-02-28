@@ -18,7 +18,13 @@ part of widget;
 
 @immutable
 class Context {
-  const Context({this.page, this.canvas, this.inherited});
+  const Context({
+    @required this.document,
+    this.page,
+    this.canvas,
+    @required this.inherited,
+  })  : assert(document != null),
+        assert(inherited != null);
 
   final PdfPage page;
 
@@ -26,11 +32,19 @@ class Context {
 
   final Map<Type, Inherited> inherited;
 
-  int get pageNumber => page.pdfDocument.pdfPageList.pages.indexOf(page) + 1;
+  final PdfDocument document;
+
+  int get pageNumber => document.pdfPageList.pages.indexOf(page) + 1;
+
+  int get pagesCount => document.pdfPageList.pages.length;
 
   Context copyWith(
-      {PdfPage page, PdfGraphics canvas, Map<Type, Inherited> inherited}) {
+      {PdfPage page,
+      PdfGraphics canvas,
+      Matrix4 ctm,
+      Map<Type, Inherited> inherited}) {
     return Context(
+        document: document,
         page: page ?? this.page,
         canvas: canvas ?? this.canvas,
         inherited: inherited ?? this.inherited);
@@ -48,12 +62,17 @@ class Inherited {}
 abstract class Widget {
   Widget();
 
+  /// The bounding box of this widget, calculated at layout time
   PdfRect box;
 
+  /// First widget pass to calculate the children layout and
+  /// bounding [box]
   @protected
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false});
 
+  /// Draw itself and its children, according to the calculated
+  /// [box.offset]
   @protected
   void paint(Context context) {
     assert(() {
