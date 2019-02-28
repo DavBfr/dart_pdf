@@ -18,8 +18,27 @@ part of printing;
 
 class PdfDoc extends Document {
   /// Wrapper for a [Document] with zlib compression enabled by default
-  PdfDoc({bool compress = true})
-      : super(deflate: compress ? zlib.encode : null) {
+  PdfDoc(
+      {bool compress = true,
+      PdfPageMode pageMode = PdfPageMode.none,
+      Theme theme,
+      String title,
+      String author,
+      String creator,
+      String subject,
+      String keywords,
+      String producer})
+      : super(
+          deflate: compress ? zlib.encode : null,
+          pageMode: pageMode,
+          theme: theme,
+          title: title,
+          author: author,
+          creator: creator,
+          subject: subject,
+          keywords: keywords,
+          producer: producer,
+        ) {
     Document.debug = debugPaintSizeEnabled;
   }
 }

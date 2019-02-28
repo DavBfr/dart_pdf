@@ -29,8 +29,22 @@ class Document {
   Document(
       {PdfPageMode pageMode = PdfPageMode.none,
       DeflateCallback deflate,
-      this.theme})
-      : document = PdfDocument(pageMode: pageMode, deflate: deflate);
+      this.theme,
+      String title,
+      String author,
+      String creator,
+      String subject,
+      String keywords,
+      String producer})
+      : document = PdfDocument(pageMode: pageMode, deflate: deflate) {
+    document.info = PdfInfo(document,
+        title: title,
+        author: author,
+        creator: creator,
+        subject: subject,
+        keywords: keywords,
+        producer: producer);
+  }
 
   static bool debug = false;
 

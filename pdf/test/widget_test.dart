@@ -25,7 +25,7 @@ void main() {
   test('Pdf', () {
     Document.debug = true;
 
-    final Document pdf = Document();
+    final Document pdf = Document(title: 'Widgets Test');
 
     final TextStyle symbol = TextStyle(font: Font.zapfDingbats());
 
