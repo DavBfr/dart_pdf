@@ -39,6 +39,8 @@ class PdfPageFormat {
   static const PdfPageFormat legal =
       PdfPageFormat(8.5 * inch, 14.0 * inch, marginAll: inch);
 
+  static const PdfPageFormat standard = a4;
+
   static const double point = 1.0;
   static const double inch = 72.0;
   static const double cm = inch / 2.54;

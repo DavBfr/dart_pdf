@@ -64,7 +64,7 @@ typedef BuildListCallback = List<Widget> Function(Context context);
 
 class Page extends BasePage {
   Page(
-      {PdfPageFormat pageFormat = PdfPageFormat.a4,
+      {PdfPageFormat pageFormat = PdfPageFormat.standard,
       BuildCallback build,
       this.theme,
       EdgeInsets margin})

@@ -24,7 +24,7 @@ class PdfPage extends PdfObject {
   ///
   /// @param pdfDocument Document
   /// @param pageFormat [PdfPageFormat] describing the page size
-  PdfPage(PdfDocument pdfDocument, {this.pageFormat = PdfPageFormat.a4})
+  PdfPage(PdfDocument pdfDocument, {this.pageFormat = PdfPageFormat.standard})
       : super(pdfDocument, '/Page') {
     pdfDocument.pdfPageList.pages.add(this);
   }
