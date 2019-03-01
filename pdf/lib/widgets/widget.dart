@@ -92,18 +92,6 @@ abstract class Widget {
   }
 }
 
-class WidgetContext {}
-
-abstract class SpanningWidget extends Widget {
-  bool get canSpan => false;
-
-  @protected
-  WidgetContext saveContext();
-
-  @protected
-  void restoreContext(WidgetContext context);
-}
-
 abstract class StatelessWidget extends Widget {
   StatelessWidget() : super();
 
