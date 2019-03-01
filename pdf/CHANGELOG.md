@@ -3,6 +3,7 @@
 * Add Document properties
 * Add Page.orientation to force landscape or portrait
 * Improve MultiPage Widget
+* Convert GridView to a SpanningWidget
 
 # 1.3.3
 * Fix a bug with the RichText Widget

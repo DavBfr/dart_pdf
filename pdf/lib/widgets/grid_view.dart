@@ -16,7 +16,19 @@
 
 part of widget;
 
-class GridView extends MultiChildWidget {
+class _GridViewContext extends WidgetContext {
+  int firstChild = 0;
+  int lastChild = 0;
+
+  double childCrossAxis;
+  double childMainAxis;
+
+  @override
+  String toString() =>
+      'GridViewContext first:$firstChild last:$lastChild size:${childCrossAxis}x$childMainAxis';
+}
+
+class GridView extends MultiChildWidget implements SpanningWidget {
   GridView(
       {this.direction = Axis.vertical,
       this.padding = EdgeInsets.zero,
@@ -35,15 +47,22 @@ class GridView extends MultiChildWidget {
   final double crossAxisSpacing;
   final double childAspectRatio;
 
-  double _childCrossAxis;
-  double _childMainAxis;
-  double _totalMain;
-  double _totalCross;
+  final _GridViewContext _context = _GridViewContext();
+
   int _mainAxisCount;
 
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
+    assert(() {
+      if (constraints.maxHeight.isInfinite && childAspectRatio.isInfinite) {
+        print(
+            'Unable to calculate the GridView dimensions. Please set one the height constraints or childAspectRatio.');
+        return false;
+      }
+      return true;
+    }());
+
     double mainAxisExtent;
     double crossAxisExtent;
     switch (direction) {
@@ -57,17 +76,39 @@ class GridView extends MultiChildWidget {
         break;
     }
 
-    _mainAxisCount = (children.length / crossAxisCount).ceil();
-    _childCrossAxis = crossAxisExtent / crossAxisCount -
-        (crossAxisSpacing * (crossAxisCount - 1) / crossAxisCount);
-    _childMainAxis = math.min(
-        _childCrossAxis * childAspectRatio,
-        mainAxisExtent / _mainAxisCount -
-            (mainAxisSpacing * (_mainAxisCount - 1) / _mainAxisCount));
-    _totalMain =
-        (_childMainAxis + mainAxisSpacing) * _mainAxisCount - mainAxisSpacing;
-    _totalCross = (_childCrossAxis + crossAxisSpacing) * crossAxisCount -
-        crossAxisSpacing;
+    if (constraints.maxHeight.isInfinite || _mainAxisCount == null) {
+      _mainAxisCount =
+          ((children.length - _context.firstChild) / crossAxisCount).ceil();
+
+      _context.childCrossAxis = crossAxisExtent / crossAxisCount -
+          (crossAxisSpacing * (crossAxisCount - 1) / crossAxisCount);
+
+      _context.childMainAxis = math.min(
+          _context.childCrossAxis * childAspectRatio,
+          mainAxisExtent / _mainAxisCount -
+              (mainAxisSpacing * (_mainAxisCount - 1) / _mainAxisCount));
+
+      if (_context.childCrossAxis.isInfinite) {
+        throw Exception(
+            'Unable to calculate child height as the height constraint is infinite.');
+      }
+    } else {
+      _mainAxisCount = ((mainAxisExtent + mainAxisSpacing) /
+              (mainAxisSpacing + _context.childMainAxis))
+          .floor();
+
+      if (_mainAxisCount < 0) {
+        // Not enough space to put one line, try to ask for more space.
+        _mainAxisCount = 0;
+      }
+    }
+
+    final double totalMain =
+        (_context.childMainAxis + mainAxisSpacing) * _mainAxisCount -
+            mainAxisSpacing;
+    final double totalCross =
+        (_context.childCrossAxis + crossAxisSpacing) * crossAxisCount -
+            crossAxisSpacing;
 
     final double startX = padding.left;
     const double startY = 0;
@@ -77,30 +118,35 @@ class GridView extends MultiChildWidget {
     switch (direction) {
       case Axis.vertical:
         innerConstraints = BoxConstraints.tightFor(
-            width: _childCrossAxis, height: _childMainAxis);
+            width: _context.childCrossAxis, height: _context.childMainAxis);
         crossAxis = startX;
         mainAxis = startY;
         break;
       case Axis.horizontal:
         innerConstraints = BoxConstraints.tightFor(
-            width: _childMainAxis, height: _childCrossAxis);
+            width: _context.childMainAxis, height: _context.childCrossAxis);
         mainAxis = startX;
         crossAxis = startY;
         break;
     }
 
     int c = 0;
-    for (Widget child in children) {
+    _context.lastChild = _context.firstChild;
+
+    for (Widget child in children.sublist(
+        _context.firstChild,
+        math.min(children.length,
+            _context.firstChild + crossAxisCount * _mainAxisCount))) {
       child.layout(context, innerConstraints);
 
       switch (direction) {
         case Axis.vertical:
           child.box = PdfRect.fromPoints(
               PdfPoint(
-                  (_childCrossAxis - child.box.width) / 2.0 + crossAxis,
-                  _totalMain +
+                  (_context.childCrossAxis - child.box.width) / 2.0 + crossAxis,
+                  totalMain +
                       padding.bottom -
-                      (_childMainAxis - child.box.height) / 2.0 -
+                      (_context.childMainAxis - child.box.height) / 2.0 -
                       mainAxis -
                       child.box.height),
               child.box.size);
@@ -108,10 +154,10 @@ class GridView extends MultiChildWidget {
         case Axis.horizontal:
           child.box = PdfRect.fromPoints(
               PdfPoint(
-                  (_childMainAxis - child.box.width) / 2.0 + mainAxis,
-                  _totalCross +
+                  (_context.childMainAxis - child.box.width) / 2.0 + mainAxis,
+                  totalCross +
                       padding.bottom -
-                      (_childCrossAxis - child.box.height) / 2.0 -
+                      (_context.childCrossAxis - child.box.height) / 2.0 -
                       crossAxis -
                       child.box.height),
               child.box.size);
@@ -119,24 +165,38 @@ class GridView extends MultiChildWidget {
       }
 
       if (++c >= crossAxisCount) {
-        mainAxis += _childMainAxis + mainAxisSpacing;
-        crossAxis = startX;
+        mainAxis += _context.childMainAxis + mainAxisSpacing;
+        switch (direction) {
+          case Axis.vertical:
+            crossAxis = startX;
+            break;
+          case Axis.horizontal:
+            crossAxis = startY;
+            break;
+        }
         c = 0;
+
+        if (mainAxis > mainAxisExtent) {
+          _context.lastChild++;
+
+          break;
+        }
       } else {
-        crossAxis += _childCrossAxis + crossAxisSpacing;
+        crossAxis += _context.childCrossAxis + crossAxisSpacing;
       }
+      _context.lastChild++;
     }
 
     switch (direction) {
       case Axis.vertical:
         box = constraints.constrainRect(
-            width: _totalCross + padding.horizontal,
-            height: _totalMain + padding.vertical);
+            width: totalCross + padding.horizontal,
+            height: totalMain + padding.vertical);
         break;
       case Axis.horizontal:
         box = constraints.constrainRect(
-            width: _totalMain + padding.horizontal,
-            height: _totalCross + padding.vertical);
+            width: totalMain + padding.horizontal,
+            height: totalCross + padding.vertical);
         break;
     }
   }
@@ -164,7 +224,7 @@ class GridView extends MultiChildWidget {
             ..drawRect(
                 box.left +
                     padding.left +
-                    (_childCrossAxis + crossAxisSpacing) * c -
+                    (_context.childCrossAxis + crossAxisSpacing) * c -
                     crossAxisSpacing,
                 box.bottom + padding.bottom,
                 math.max(crossAxisSpacing, 1),
@@ -172,6 +232,16 @@ class GridView extends MultiChildWidget {
             ..fillPath();
           break;
         case Axis.horizontal:
+          context.canvas
+            ..drawRect(
+                box.left + padding.left,
+                box.bottom +
+                    padding.bottom +
+                    (_context.childCrossAxis + crossAxisSpacing) * c -
+                    crossAxisSpacing,
+                box.width - padding.horizontal,
+                math.max(crossAxisSpacing, 1))
+            ..fillPath();
           break;
       }
     }
@@ -184,13 +254,23 @@ class GridView extends MultiChildWidget {
                 box.left + padding.left,
                 box.bottom +
                     padding.bottom +
-                    (_childMainAxis + mainAxisSpacing) * c -
+                    (_context.childMainAxis + mainAxisSpacing) * c -
                     mainAxisSpacing,
                 box.width - padding.horizontal,
                 math.max(mainAxisSpacing, 1))
             ..fillPath();
           break;
         case Axis.horizontal:
+          context.canvas
+            ..drawRect(
+                box.left +
+                    padding.left +
+                    (_context.childMainAxis + mainAxisSpacing) * c -
+                    mainAxisSpacing,
+                box.bottom + padding.bottom,
+                math.max(mainAxisSpacing, 1),
+                box.height - padding.vertical)
+            ..fillPath();
           break;
       }
     }
@@ -205,9 +285,26 @@ class GridView extends MultiChildWidget {
     context.canvas
       ..saveContext()
       ..setTransform(mat);
-    for (Widget child in children) {
+
+    for (Widget child
+        in children.sublist(_context.firstChild, _context.lastChild)) {
       child.paint(context);
     }
     context.canvas.restoreContext();
+  }
+
+  @override
+  bool get canSpan => true;
+
+  @override
+  void restoreContext(WidgetContext context) {
+    if (context is _GridViewContext) {
+      _context.firstChild = context.lastChild;
+    }
+  }
+
+  @override
+  WidgetContext saveContext() {
+    return _context;
   }
 }
