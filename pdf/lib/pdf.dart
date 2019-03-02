@@ -41,6 +41,7 @@ part 'src/formxobject.dart';
 part 'src/graphics.dart';
 part 'src/image.dart';
 part 'src/info.dart';
+part 'src/names.dart';
 part 'src/object.dart';
 part 'src/object_stream.dart';
 part 'src/outline.dart';

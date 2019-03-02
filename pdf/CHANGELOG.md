@@ -5,6 +5,7 @@
 * Improve MultiPage Widget
 * Convert GridView to a SpanningWidget
 * Add all Material Colors
+* Add Hyperlink widgets
 
 # 1.3.3
 * Fix a bug with the RichText Widget

@@ -51,7 +51,10 @@ void main() {
                           width: 2)),
                   child: Text('Hello World',
                       textScaleFactor: 2, textAlign: TextAlign.center)),
-              Align(alignment: Alignment.topLeft, child: Text('Left align')),
+              Align(
+                  alignment: Alignment.topLeft,
+                  child:
+                      Link(destination: 'anchor', child: Text('Left align'))),
               Padding(padding: const EdgeInsets.all(5)),
               Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -133,6 +136,7 @@ void main() {
                 <String>['York Steak House', 'Outi Vuorinen', 'Finland'],
                 <String>['Weathervane', 'Else Jeremiassen', 'Iceland'],
               ]),
+              Anchor(name: 'anchor', child: Text('Anchor')),
             ]));
 
     pdf.addPage(Page(
@@ -172,7 +176,13 @@ void main() {
                             ),
                           ],
                         ),
-                      ))
+                      )),
+                  Positioned(
+                      right: 10,
+                      bottom: 10,
+                      child: UrlLink(
+                          child: Text('dart_pdf'),
+                          destination: 'https://github.com/DavBfr/dart_pdf/'))
                 ])));
 
     final File file = File('widgets.pdf');

@@ -36,6 +36,12 @@ void main() {
     g.drawRect(100, 150, 50, 50);
     g.strokePath();
 
+    PdfAnnot.urlLink(page,
+        rect: const PdfRect(100, 250, 50, 50),
+        dest: 'https://github.com/DavBfr/dart_pdf/');
+    g.drawRect(100, 250, 50, 50);
+    g.strokePath();
+
     final File file = File('annotations.pdf');
     file.writeAsBytesSync(pdf.save());
   });

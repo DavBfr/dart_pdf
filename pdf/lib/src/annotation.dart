@@ -24,7 +24,9 @@ class PdfAnnot extends PdfObject {
       @required this.subtype,
       this.dest,
       this.destRect,
-      this.border})
+      this.border,
+      this.url,
+      this.name})
       : super(pdfPage.pdfDocument, type ?? '/Annot') {
     pdfPage.annotations.add(this);
   }
@@ -56,6 +58,18 @@ class PdfAnnot extends PdfObject {
           destRect: destRect,
           border: border);
 
+  /// Creates an external link annotation
+  factory PdfAnnot.urlLink(PdfPage pdfPage,
+          {@required PdfRect rect, @required String dest, PdfBorder border}) =>
+      PdfAnnot._create(pdfPage,
+          subtype: '/Link', srcRect: rect, url: dest, border: border);
+
+  /// Creates a link annotation to a named destination
+  factory PdfAnnot.namedLink(PdfPage pdfPage,
+          {@required PdfRect rect, @required String dest, PdfBorder border}) =>
+      PdfAnnot._create(pdfPage,
+          subtype: '/Link', srcRect: rect, name: dest, border: border);
+
   /// The subtype of the outline, ie text, note, etc
   final String subtype;
 
@@ -75,6 +89,12 @@ class PdfAnnot extends PdfObject {
   /// the border for this annotation
   final PdfBorder border;
 
+  /// The external url for a link
+  final String url;
+
+  /// The internal name for a link
+  final String name;
+
   /// Output the annotation
   ///
   /// @param os OutputStream to send the object to
@@ -83,8 +103,9 @@ class PdfAnnot extends PdfObject {
     super._prepare();
 
     params['/Subtype'] = PdfStream.string(subtype);
-    params['/Rect'] = PdfStream.string(
-        '[${srcRect.left} ${srcRect.bottom} ${srcRect.right} ${srcRect.top}]');
+    params['/Rect'] = PdfStream()
+      ..putNumArray(
+          <double>[srcRect.left, srcRect.bottom, srcRect.right, srcRect.top]);
 
     // handle the border
     if (border == null) {
@@ -97,15 +118,35 @@ class PdfAnnot extends PdfObject {
     if (subtype == '/Text') {
       params['/Contents'] = PdfStream()..putLiteral(content);
     } else if (subtype == '/Link') {
-      final List<PdfStream> dests = <PdfStream>[];
-      dests.add(dest.ref());
-      if (destRect == null)
-        dests.add(PdfStream.string('/Fit'));
-      else {
-        dests.add(PdfStream.string(
-            '/FitR ${destRect.left} ${destRect.bottom} ${destRect.right} ${destRect.top}'));
+      if (url != null) {
+        params['/A'] = PdfStream()
+          ..putDictionary(<String, PdfStream>{
+            '/S': PdfStream()..putString('/URI'),
+            '/URI': PdfStream()..putText(url),
+          });
+      } else if (name != null) {
+        params['/A'] = PdfStream()
+          ..putDictionary(<String, PdfStream>{
+            '/S': PdfStream()..putString('/GoTo'),
+            '/D': PdfStream()..putText(name),
+          });
+      } else {
+        final List<PdfStream> dests = <PdfStream>[];
+        dests.add(dest.ref());
+        if (destRect == null)
+          dests.add(PdfStream.string('/Fit'));
+        else {
+          dests.add(PdfStream.string('/FitR '));
+          dests.add(PdfStream()
+            ..putNumList(<double>[
+              destRect.left,
+              destRect.bottom,
+              destRect.right,
+              destRect.top
+            ]));
+        }
+        params['/Dest'] = PdfStream.array(dests);
       }
-      params['/Dest'] = PdfStream.array(dests);
     }
   }
 }

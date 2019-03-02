@@ -22,7 +22,8 @@ class PdfCatalog extends PdfObject {
   /// @param pdfPageList The [PdfPageList] object that's the root of the documents page tree
   /// @param pagemode How the document should appear when opened.
   /// Allowed values are usenone, useoutlines, usethumbs or fullscreen.
-  PdfCatalog(PdfDocument pdfDocument, this.pdfPageList, this.pageMode)
+  PdfCatalog(
+      PdfDocument pdfDocument, this.pdfPageList, this.pageMode, this.names)
       : super(pdfDocument, '/Catalog');
 
   /// The pages of the document
@@ -33,6 +34,9 @@ class PdfCatalog extends PdfObject {
 
   /// The initial page mode
   final PdfPageMode pageMode;
+
+  /// The initial page mode
+  final PdfNames names;
 
   /// @param os OutputStream to send the object to
   @override
@@ -45,6 +49,9 @@ class PdfCatalog extends PdfObject {
     if (outlines != null && outlines.outlines.isNotEmpty) {
       params['/Outlines'] = outlines.ref();
     }
+
+    // the Names object
+    params['/Names'] = names.ref();
 
     // the /PageMode setting
     params['/PageMode'] =

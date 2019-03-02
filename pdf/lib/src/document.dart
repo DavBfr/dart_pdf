@@ -51,7 +51,8 @@ class PdfDocument {
 
     // Now create some standard objects
     pdfPageList = PdfPageList(this);
-    catalog = PdfCatalog(this, pdfPageList, pageMode);
+    pdfNames = PdfNames(this);
+    catalog = PdfCatalog(this, pdfPageList, pageMode, pdfNames);
   }
 
   /// This is used to allocate objects a unique serial number in the document.
@@ -69,6 +70,9 @@ class PdfDocument {
 
   /// This is the Pages object, which is required by each Pdf Document
   PdfPageList pdfPageList;
+
+  /// The name dictionary
+  PdfNames pdfNames;
 
   /// This is the Outline object, which is optional
   PdfOutline _outline;

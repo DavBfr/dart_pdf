@@ -89,9 +89,9 @@ class PDFBorder extends PdfBorder {
 
 @deprecated
 class PDFCatalog extends PdfCatalog {
-  PDFCatalog(
-      PdfDocument pdfDocument, PdfPageList pdfPageList, PdfPageMode pageMode)
-      : super(pdfDocument, pdfPageList, pageMode);
+  PDFCatalog(PdfDocument pdfDocument, PdfPageList pdfPageList,
+      PdfPageMode pageMode, PdfNames names)
+      : super(pdfDocument, pdfPageList, pageMode, names);
 }
 
 @deprecated
