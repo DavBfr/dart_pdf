@@ -18,14 +18,25 @@ part of pdf;
 
 enum PdfLineCap { joinMiter, joinRound, joinBevel }
 
+@immutable
+class _PdfGraphicsContext {
+  const _PdfGraphicsContext({@required this.ctm}) : assert(ctm != null);
+  final Matrix4 ctm;
+
+  _PdfGraphicsContext copy() => _PdfGraphicsContext(ctm: ctm.clone());
+}
+
 class PdfGraphics {
-  PdfGraphics(this.page, this.buf);
+  PdfGraphics(this.page, this.buf) {
+    _context = _PdfGraphicsContext(ctm: Matrix4.identity());
+  }
 
   /// Ellipse 4-spline magic number
   static const double _m4 = 0.551784;
 
-  /// Graphic context number
-  int _context = 0;
+  /// Graphic context
+  _PdfGraphicsContext _context;
+  final Queue<_PdfGraphicsContext> _contextQueue = Queue<_PdfGraphicsContext>();
 
   final PdfPage page;
 
@@ -61,17 +72,17 @@ class PdfGraphics {
   /// When using [PdfPage], you can create another fresh Graphics instance,
   /// which will draw over this one.
   void restoreContext() {
-    if (_context > 0) {
+    if (_contextQueue.isNotEmpty) {
       // restore graphics context
       buf.putString('Q\n');
-      _context--;
+      _context = _contextQueue.removeLast();
     }
   }
 
   void saveContext() {
     // save graphics context
     buf.putString('q\n');
-    _context++;
+    _contextQueue.addLast(_context.copy());
   }
 
   /// Draws an image onto the page.
@@ -227,6 +238,12 @@ class PdfGraphics {
     final Float64List s = t.storage;
     buf.putNumList(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]);
     buf.putString(' cm\n');
+    _context.ctm.multiply(t);
+  }
+
+  /// Get the transformation Matrix
+  Matrix4 getTransform() {
+    return _context.ctm.clone();
   }
 
   /// This adds a line segment to the current path

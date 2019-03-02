@@ -16,6 +16,7 @@
 
 library pdf;
 
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
