@@ -260,6 +260,7 @@ class Flex extends MultiChildWidget {
           }
         }
         child.layout(context, innerConstraints, parentUsesSize: true);
+        assert(child.box != null);
         allocatedSize += _getMainSize(child);
         crossSize = math.max(crossSize, _getCrossSize(child));
       }
@@ -329,6 +330,7 @@ class Flex extends MultiChildWidget {
             }
           }
           child.layout(context, innerConstraints, parentUsesSize: true);
+          assert(child.box != null);
           final double childSize = _getMainSize(child);
           assert(childSize <= maxChildExtent);
           allocatedSize += childSize;

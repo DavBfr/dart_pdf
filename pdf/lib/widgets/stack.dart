@@ -100,6 +100,7 @@ class Stack extends MultiChildWidget {
         hasNonPositionedChildren = true;
 
         child.layout(context, nonPositionedConstraints, parentUsesSize: true);
+        assert(child.box != null);
 
         final PdfRect childSize = child.box;
         width = math.max(width, childSize.width);
@@ -137,6 +138,7 @@ class Stack extends MultiChildWidget {
               childConstraints.tighten(height: positioned.height);
 
         positioned.layout(context, childConstraints, parentUsesSize: true);
+        assert(positioned.box != null);
 
         double x;
         if (positioned.left != null) {

@@ -143,6 +143,7 @@ class MultiPage extends Page {
           final Widget headerWidget = header(context);
           if (headerWidget != null) {
             headerWidget.layout(context, constraints, parentUsesSize: false);
+            assert(headerWidget.box != null);
             _paintChild(context, headerWidget, _margin.left,
                 offsetStart - headerWidget.box.height, pageFormat.height);
             offsetStart -= headerWidget.box.height;
@@ -153,6 +154,7 @@ class MultiPage extends Page {
           final Widget footerWidget = footer(context);
           if (footerWidget != null) {
             footerWidget.layout(context, constraints, parentUsesSize: false);
+            assert(footerWidget.box != null);
             _paintChild(context, footerWidget, _margin.left, _margin.bottom,
                 pageFormat.height);
             offsetEnd += footerWidget.box.height;
@@ -167,6 +169,7 @@ class MultiPage extends Page {
       }
 
       child.layout(context, constraints, parentUsesSize: false);
+      assert(child.box != null);
 
       // What to do if the widget is too big for the page?
       if (offsetStart - child.box.height < offsetEnd) {
@@ -191,6 +194,7 @@ class MultiPage extends Page {
         child.layout(
             context, constraints.copyWith(maxHeight: offsetStart - offsetEnd),
             parentUsesSize: false);
+        assert(child.box != null);
         _paintChild(context, child, _margin.left,
             offsetStart - child.box.height, pageFormat.height);
 

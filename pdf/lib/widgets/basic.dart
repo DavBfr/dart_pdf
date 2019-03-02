@@ -50,6 +50,7 @@ class LimitedBox extends SingleChildWidget {
     if (child != null) {
       child.layout(context, _limitConstraints(constraints),
           parentUsesSize: true);
+      assert(child.box != null);
       size = constraints.constrain(child.box.size);
     } else {
       size = _limitConstraints(constraints).constrain(PdfPoint.zero);
@@ -73,6 +74,7 @@ class Padding extends SingleChildWidget {
     if (child != null) {
       final BoxConstraints childConstraints = constraints.deflate(padding);
       child.layout(context, childConstraints, parentUsesSize: parentUsesSize);
+      assert(child.box != null);
       box = constraints.constrainRect(
           width: child.box.width + padding.horizontal,
           height: child.box.height + padding.vertical);
@@ -239,6 +241,7 @@ class Align extends SingleChildWidget {
 
     if (child != null) {
       child.layout(context, constraints.loosen(), parentUsesSize: true);
+      assert(child.box != null);
 
       box = constraints.constrainRect(
           width: shrinkWrapWidth
@@ -272,6 +275,7 @@ class ConstrainedBox extends SingleChildWidget {
     if (child != null) {
       child.layout(context, this.constraints.enforce(constraints),
           parentUsesSize: true);
+      assert(child.box != null);
       box = child.box;
     } else {
       box = PdfRect.fromPoints(PdfPoint.zero,
@@ -308,6 +312,7 @@ class FittedBox extends SingleChildWidget {
     PdfPoint size;
     if (child != null) {
       child.layout(context, const BoxConstraints(), parentUsesSize: true);
+      assert(child.box != null);
       size = constraints
           .constrainSizeAndAttemptToPreserveAspectRatio(child.box.size);
     } else {
@@ -397,6 +402,7 @@ class AspectRatio extends SingleChildWidget {
     if (child != null)
       child.layout(context,
           BoxConstraints.tightFor(width: box.width, height: box.height));
+    assert(child.box != null);
   }
 }
 
@@ -420,6 +426,7 @@ class CustomPaint extends SingleChildWidget {
     if (child != null) {
       child.layout(context, constraints.tighten(width: size.x, height: size.y),
           parentUsesSize: parentUsesSize);
+      assert(child.box != null);
       box = child.box;
     } else {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.constrain(size));

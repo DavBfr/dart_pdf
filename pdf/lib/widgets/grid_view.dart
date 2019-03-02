@@ -138,6 +138,7 @@ class GridView extends MultiChildWidget implements SpanningWidget {
         math.min(children.length,
             _context.firstChild + crossAxisCount * _mainAxisCount))) {
       child.layout(context, innerConstraints);
+      assert(child.box != null);
 
       switch (direction) {
         case Axis.vertical:

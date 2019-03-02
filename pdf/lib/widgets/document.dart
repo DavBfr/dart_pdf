@@ -152,6 +152,7 @@ class Page {
     if (child != null) {
       final EdgeInsets _margin = margin;
       child.layout(context, constraints, parentUsesSize: parentUsesSize);
+      assert(child.box != null);
       child.box = PdfRect(
           _margin.left,
           pageFormat.height - child.box.height - _margin.top,

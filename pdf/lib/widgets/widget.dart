@@ -104,6 +104,7 @@ abstract class StatelessWidget extends Widget {
 
     if (_child != null) {
       _child.layout(context, constraints, parentUsesSize: parentUsesSize);
+      assert(_child.box != null);
       box = _child.box;
     } else {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
@@ -139,6 +140,7 @@ abstract class SingleChildWidget extends Widget {
       {bool parentUsesSize = false}) {
     if (child != null) {
       child.layout(context, constraints, parentUsesSize: parentUsesSize);
+      assert(child.box != null);
       box = child.box;
     } else {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
