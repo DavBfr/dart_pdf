@@ -26,6 +26,9 @@ class PdfColor {
         a = (color >> 24 & 0xff) / 255.0;
 
   factory PdfColor.fromHex(String color) {
+    if (color.startsWith('#')) {
+      color = color.substring(1);
+    }
     return PdfColor(
         (int.parse(color.substring(0, 1), radix: 16) >> 16 & 0xff) / 255.0,
         (int.parse(color.substring(2, 3), radix: 16) >> 8 & 0xff) / 255.0,
@@ -38,27 +41,48 @@ class PdfColor {
   final double g;
   final double b;
 
-  static const PdfColor black = PdfColor(0.0, 0.0, 0.0);
-  static const PdfColor white = PdfColor(1.0, 1.0, 1.0);
-  static const PdfColor red = PdfColor(0.95686, 0.26274, 0.21176);
-  static const PdfColor pink = PdfColor(0.91372, 0.11764, 0.38823);
-  static const PdfColor purple = PdfColor(0.91372, 0.11764, 0.38823);
-  static const PdfColor deepPurple = PdfColor(0.40392, 0.22745, 0.71765);
-  static const PdfColor indigo = PdfColor(0.24705, 0.31765, 0.70980);
-  static const PdfColor blue = PdfColor(0.12941, 0.58823, 0.95294);
-  static const PdfColor lightBlue = PdfColor(0.01176, 0.66274, 0.95686);
-  static const PdfColor cyan = PdfColor(0, 0.73725, 0.83137);
-  static const PdfColor teal = PdfColor(0, 0.58823, 0.53333);
-  static const PdfColor green = PdfColor(0.29803, 0.68627, 0.31372);
-  static const PdfColor lightGreen = PdfColor(0.54509, 0.76470, 0.29020);
-  static const PdfColor lime = PdfColor(0.80392, 0.86274, 0.22353);
-  static const PdfColor yellow = PdfColor(1, 0.92157, 0.23137);
-  static const PdfColor amber = PdfColor(1, 0.75686, 0.02745);
-  static const PdfColor orange = PdfColor(1, 0.59608, 0);
-  static const PdfColor deepOrange = PdfColor(1, 0.34118, 0.13333);
-  static const PdfColor brown = PdfColor(0.47451, 0.33333, 0.28235);
-  static const PdfColor grey = PdfColor(0.61961, 0.61961, 0.61961);
-  static const PdfColor blueGrey = PdfColor(0.37647, 0.49020, 0.54510);
+  @deprecated
+  static const PdfColor black = PdfColors.black;
+  @deprecated
+  static const PdfColor white = PdfColors.white;
+  @deprecated
+  static const PdfColor red = PdfColors.red;
+  @deprecated
+  static const PdfColor pink = PdfColors.pink;
+  @deprecated
+  static const PdfColor purple = PdfColors.purple;
+  @deprecated
+  static const PdfColor deepPurple = PdfColors.deepPurple;
+  @deprecated
+  static const PdfColor indigo = PdfColors.indigo;
+  @deprecated
+  static const PdfColor blue = PdfColors.blue;
+  @deprecated
+  static const PdfColor lightBlue = PdfColors.lightBlue;
+  @deprecated
+  static const PdfColor cyan = PdfColors.cyan;
+  @deprecated
+  static const PdfColor teal = PdfColors.teal;
+  @deprecated
+  static const PdfColor green = PdfColors.green;
+  @deprecated
+  static const PdfColor lightGreen = PdfColors.lightGreen;
+  @deprecated
+  static const PdfColor lime = PdfColors.lime;
+  @deprecated
+  static const PdfColor yellow = PdfColors.yellow;
+  @deprecated
+  static const PdfColor amber = PdfColors.amber;
+  @deprecated
+  static const PdfColor orange = PdfColors.orange;
+  @deprecated
+  static const PdfColor deepOrange = PdfColors.deepOrange;
+  @deprecated
+  static const PdfColor brown = PdfColors.brown;
+  @deprecated
+  static const PdfColor grey = PdfColors.grey;
+  @deprecated
+  static const PdfColor blueGrey = PdfColors.blueGrey;
 
   int toInt() =>
       ((((a * 255.0).round() & 0xff) << 24) |
@@ -66,6 +90,8 @@ class PdfColor {
           (((g * 255.0).round() & 0xff) << 8) |
           (((b * 255.0).round() & 0xff) << 0)) &
       0xFFFFFFFF;
+
+  String toHex() => '#' + toInt().toRadixString(16);
 
   PdfColorCmyk toCmyk() {
     return PdfColorCmyk.fromRgb(r, g, b, a);

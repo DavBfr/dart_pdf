@@ -40,7 +40,7 @@ class TableBorder extends BoxBorder {
       bool bottom = true,
       this.horizontalInside = true,
       this.verticalInside = true,
-      PdfColor color = PdfColor.black,
+      PdfColor color = PdfColors.black,
       double width = 1.0})
       : super(
             left: left,

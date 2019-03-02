@@ -207,7 +207,7 @@ class GridView extends MultiChildWidget implements SpanningWidget {
     super.debugPaint(context);
 
     context.canvas
-      ..setFillColor(PdfColor.lime)
+      ..setFillColor(PdfColors.lime)
       ..moveTo(box.left, box.bottom)
       ..lineTo(box.right, box.bottom)
       ..lineTo(box.right, box.top)

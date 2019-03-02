@@ -61,7 +61,7 @@ class Placeholder extends Widget {
 }
 
 class PdfLogo extends StatelessWidget {
-  PdfLogo({this.color = PdfColor.red, this.fit = BoxFit.contain});
+  PdfLogo({this.color = PdfColors.red, this.fit = BoxFit.contain});
 
   final PdfColor color;
   final BoxFit fit;

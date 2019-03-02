@@ -42,7 +42,7 @@ void main() {
                   padding: const EdgeInsets.all(5),
                   margin: const EdgeInsets.only(bottom: 10),
                   decoration: const BoxDecoration(
-                      color: PdfColor.amber,
+                      color: PdfColors.amber,
                       border: BoxBorder(
                           top: true,
                           bottom: true,
@@ -149,7 +149,7 @@ void main() {
                           size: const PdfPoint(50, 50),
                           painter: (PdfGraphics canvas, PdfPoint size) {
                             canvas
-                              ..setColor(PdfColor.indigo)
+                              ..setColor(PdfColors.indigo)
                               ..drawRRect(0, 0, size.x, size.y, 10, 10)
                               ..fillPath();
                           })),
@@ -166,7 +166,7 @@ void main() {
                                 style: Theme.of(context)
                                     .defaultTextStyleBold
                                     .copyWith(
-                                        fontSize: 20, color: PdfColor.blue)),
+                                        fontSize: 20, color: PdfColors.blue)),
                             const TextSpan(
                               text: ' world!',
                             ),

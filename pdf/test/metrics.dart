@@ -38,22 +38,22 @@ void printMetrics(
   canvas
     ..setLineWidth(0.5)
     ..drawRect(x, y + metrics.descent, metrics.advanceWidth, metrics.maxHeight)
-    ..setStrokeColor(PdfColor.green)
+    ..setStrokeColor(PdfColors.green)
     ..strokePath()
     ..drawRect(x + metrics.left, y + metrics.top, metrics.width, metrics.height)
-    ..setStrokeColor(PdfColor.amber)
+    ..setStrokeColor(PdfColors.amber)
     ..strokePath()
     ..drawLine(x + metrics.effectiveLeft - deb, y,
         x + metrics.maxWidth + metrics.effectiveLeft + deb, y)
-    ..setColor(PdfColor.blue)
+    ..setColor(PdfColors.blue)
     ..strokePath()
     ..drawEllipse(x, y, 5, 5)
-    ..setFillColor(PdfColor.black)
+    ..setFillColor(PdfColors.black)
     ..fillPath()
     ..drawEllipse(x + metrics.advanceWidth, y, 5, 5)
-    ..setFillColor(PdfColor.red)
+    ..setFillColor(PdfColors.red)
     ..fillPath()
-    ..setFillColor(PdfColor.grey)
+    ..setFillColor(PdfColors.grey)
     ..drawString(font, fontSize, text, x, y);
 }
 

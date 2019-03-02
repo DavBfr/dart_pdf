@@ -139,7 +139,7 @@ class Bullet extends StatelessWidget {
         right: 2.0 * PdfPageFormat.mm,
       ),
       this.bulletShape = BoxShape.circle,
-      this.bulletColor = PdfColor.black});
+      this.bulletColor = PdfColors.black});
 
   final String text;
 

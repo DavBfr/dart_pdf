@@ -87,7 +87,7 @@ class Padding extends SingleChildWidget {
   @override
   void debugPaint(Context context) {
     context.canvas
-      ..setFillColor(PdfColor.lime)
+      ..setFillColor(PdfColors.lime)
       ..moveTo(box.x, box.y)
       ..lineTo(box.right, box.y)
       ..lineTo(box.right, box.top)

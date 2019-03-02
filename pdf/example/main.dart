@@ -20,11 +20,11 @@ void main() {
             padding: const EdgeInsets.only(bottom: 3.0 * PdfPageFormat.mm),
             decoration: const BoxDecoration(
                 border:
-                    BoxBorder(bottom: true, width: 0.5, color: PdfColor.grey)),
+                    BoxBorder(bottom: true, width: 0.5, color: PdfColors.grey)),
             child: Text('Portable Document Format',
                 style: Theme.of(context)
                     .defaultTextStyle
-                    .copyWith(color: PdfColor.grey)));
+                    .copyWith(color: PdfColors.grey)));
       },
       footer: (Context context) {
         return Container(
@@ -33,7 +33,7 @@ void main() {
             child: Text('Page ${context.pageNumber}',
                 style: Theme.of(context)
                     .defaultTextStyle
-                    .copyWith(color: PdfColor.grey)));
+                    .copyWith(color: PdfColors.grey)));
       },
       build: (Context context) => <Widget>[
             Header(

@@ -19,7 +19,7 @@ part of widget;
 @immutable
 class TextStyle {
   const TextStyle({
-    this.color = PdfColor.black,
+    this.color = PdfColors.black,
     @required this.font,
     this.fontSize = _defaultFontSize,
     this.letterSpacing = 1.0,

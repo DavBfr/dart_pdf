@@ -105,7 +105,7 @@ class Page {
   void debugPaint(Context context) {
     final EdgeInsets _margin = margin;
     context.canvas
-      ..setFillColor(PdfColor.lightGreen)
+      ..setFillColor(PdfColors.lightGreen)
       ..moveTo(0, 0)
       ..lineTo(pageFormat.width, 0)
       ..lineTo(pageFormat.width, pageFormat.height)

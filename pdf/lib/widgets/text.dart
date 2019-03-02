@@ -40,14 +40,14 @@ class _Word {
     context.canvas
       ..drawRect(globalBox.x + offset.x + metrics.left,
           globalBox.top + offset.y + metrics.top, metrics.width, metrics.height)
-      ..setStrokeColor(PdfColor.orange)
+      ..setStrokeColor(PdfColors.orange)
       ..strokePath()
       ..drawLine(
           globalBox.x + offset.x - deb,
           globalBox.top + offset.y,
           globalBox.x + offset.x + metrics.right + deb,
           globalBox.top + offset.y)
-      ..setStrokeColor(PdfColor.deepPurple)
+      ..setStrokeColor(PdfColors.deepPurple)
       ..strokePath();
   }
 }
@@ -237,7 +237,7 @@ class RichText extends Widget {
   @override
   void debugPaint(Context context) {
     context.canvas
-      ..setStrokeColor(PdfColor.blue)
+      ..setStrokeColor(PdfColors.blue)
       ..drawRect(box.x, box.y, box.width, box.height)
       ..strokePath();
   }

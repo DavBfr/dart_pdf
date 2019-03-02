@@ -31,6 +31,7 @@ part 'src/ascii85.dart';
 part 'src/border.dart';
 part 'src/catalog.dart';
 part 'src/color.dart';
+part 'src/colors.dart';
 part 'src/compatibility.dart';
 part 'src/document.dart';
 part 'src/font.dart';
