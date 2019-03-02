@@ -51,7 +51,7 @@ class Color extends StatelessWidget {
 }
 
 void main() {
-  test('Pdf', () {
+  test('Pdf Colors', () {
     final Document pdf = Document(title: 'Material Colors');
 
     pdf.addPage(MultiPage(

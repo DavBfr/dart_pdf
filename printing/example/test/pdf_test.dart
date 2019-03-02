@@ -7,7 +7,7 @@ import 'package:pdf/pdf.dart';
 import 'package:printing_example/document.dart';
 
 void main() {
-  testWidgets('Generate the Pdf document', (WidgetTester tester) async {
+  testWidgets('Pdf Generate the document', (WidgetTester tester) async {
     final PdfDocument pdf = await generateDocument(PdfPageFormat.a4);
     final File file = File('document.pdf');
     file.writeAsBytesSync(pdf.save());

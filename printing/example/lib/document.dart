@@ -111,7 +111,7 @@ Future<PdfDocument> generateDocument(PdfPageFormat format) async {
       image: const fw.NetworkImage(
           'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=200'),
       onError: (dynamic exception, StackTrace stackTrace) {
-        print('error');
+        print('Unable to download image');
       });
 
   pdf.addPage(MyPage(

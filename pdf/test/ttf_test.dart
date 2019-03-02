@@ -58,7 +58,7 @@ void printTextTtf(PdfGraphics canvas, String text, File ttfFont, double top) {
 }
 
 void main() {
-  test('Pdf', () {
+  test('Pdf TrueType', () {
     final PdfDocument pdf = PdfDocument();
     final PdfPage page =
         PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));

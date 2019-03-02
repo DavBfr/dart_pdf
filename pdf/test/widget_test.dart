@@ -22,7 +22,7 @@ import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Pdf', () {
+  test('Pdf Widgets', () {
     Document.debug = true;
 
     final Document pdf = Document(title: 'Widgets Test');

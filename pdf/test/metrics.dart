@@ -58,7 +58,7 @@ void printMetrics(
 }
 
 void main() {
-  test('Pdf', () {
+  test('Pdf Font Metrics', () {
     final Document pdf = Document();
 
     final File ttfFont = File('open-sans.ttf');

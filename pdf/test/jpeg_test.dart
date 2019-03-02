@@ -32,7 +32,7 @@ Future<Uint8List> download(String url) async {
 }
 
 void main() {
-  test('Pdf1', () async {
+  test('Pdf Jpeg', () async {
     final PdfDocument pdf = PdfDocument();
     final PdfPage page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
 

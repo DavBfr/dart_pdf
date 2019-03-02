@@ -20,7 +20,7 @@ import 'package:pdf/pdf.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Pdf1', () {
+  test('Pdf Minimal', () {
     final PdfDocument pdf = PdfDocument();
     final PdfPage page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
 

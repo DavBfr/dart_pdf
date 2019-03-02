@@ -23,7 +23,7 @@ import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 void main() {
-  test('Pdf', () {
+  test('Pdf Complex', () {
     final Uint32List img = Uint32List(10 * 10);
     img.fillRange(0, img.length - 1, 0x12345678);
 

@@ -49,7 +49,7 @@ void printText(PdfGraphics canvas, String text, PdfFont font, double top) {
 }
 
 void main() {
-  test('Pdf', () {
+  test('Pdf Type1 Embedded Fonts', () {
     final PdfDocument pdf = PdfDocument();
     final PdfPage page =
         PdfPage(pdf, pageFormat: const PdfPageFormat(500, 430));

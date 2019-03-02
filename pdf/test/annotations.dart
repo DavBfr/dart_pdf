@@ -20,7 +20,7 @@ import 'package:pdf/pdf.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Pdf', () {
+  test('Pdf Annotations', () {
     final PdfDocument pdf = PdfDocument();
     final PdfPage page =
         PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
