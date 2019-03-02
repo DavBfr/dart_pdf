@@ -29,12 +29,7 @@ class ClipRect extends SingleChildWidget {
 
   @override
   void paint(Context context) {
-    assert(() {
-      if (Document.debug) {
-        debugPaint(context);
-      }
-      return true;
-    }());
+    super.paint(context);
 
     if (child != null) {
       final Matrix4 mat = Matrix4.identity();
@@ -71,12 +66,7 @@ class ClipRRect extends SingleChildWidget {
 
   @override
   void paint(Context context) {
-    assert(() {
-      if (Document.debug) {
-        debugPaint(context);
-      }
-      return true;
-    }());
+    super.paint(context);
 
     if (child != null) {
       final Matrix4 mat = Matrix4.identity();
@@ -109,12 +99,7 @@ class ClipOval extends SingleChildWidget {
 
   @override
   void paint(Context context) {
-    assert(() {
-      if (Document.debug) {
-        debugPaint(context);
-      }
-      return true;
-    }());
+    super.paint(context);
 
     final double rx = box.width / 2.0;
     final double ry = box.height / 2.0;

@@ -57,6 +57,12 @@ class LimitedBox extends SingleChildWidget {
     }
     box = PdfRect.fromPoints(PdfPoint.zero, size);
   }
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+    paintChild(context);
+  }
 }
 
 class Padding extends SingleChildWidget {
@@ -101,12 +107,7 @@ class Padding extends SingleChildWidget {
 
   @override
   void paint(Context context) {
-    assert(() {
-      if (Document.debug) {
-        debugPaint(context);
-      }
-      return true;
-    }());
+    super.paint(context);
 
     if (child != null) {
       final Matrix4 mat = Matrix4.identity();
@@ -191,12 +192,7 @@ class Transform extends SingleChildWidget {
 
   @override
   void paint(Context context) {
-    assert(() {
-      if (Document.debug) {
-        debugPaint(context);
-      }
-      return true;
-    }());
+    super.paint(context);
 
     if (child != null) {
       final Matrix4 mat = _effectiveTransform;
@@ -258,6 +254,12 @@ class Align extends SingleChildWidget {
           height: shrinkWrapHeight ? 0.0 : double.infinity);
     }
   }
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+    paintChild(context);
+  }
 }
 
 /// A widget that imposes additional constraints on its child.
@@ -281,6 +283,12 @@ class ConstrainedBox extends SingleChildWidget {
       box = PdfRect.fromPoints(PdfPoint.zero,
           this.constraints.enforce(constraints).constrain(PdfPoint.zero));
     }
+  }
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+    paintChild(context);
   }
 }
 
@@ -323,6 +331,8 @@ class FittedBox extends SingleChildWidget {
 
   @override
   void paint(Context context) {
+    super.paint(context);
+
     if (child != null) {
       final PdfPoint childSize = child.box.size;
       final FittedSizes sizes = applyBoxFit(fit, childSize, box.size);
@@ -404,6 +414,12 @@ class AspectRatio extends SingleChildWidget {
           BoxConstraints.tightFor(width: box.width, height: box.height));
     assert(child.box != null);
   }
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+    paintChild(context);
+  }
 }
 
 typedef CustomPainter = Function(PdfGraphics canvas, PdfPoint size);
@@ -435,12 +451,7 @@ class CustomPaint extends SingleChildWidget {
 
   @override
   void paint(Context context) {
-    assert(() {
-      if (Document.debug) {
-        debugPaint(context);
-      }
-      return true;
-    }());
+    super.paint(context);
 
     final Matrix4 mat = Matrix4.identity();
     mat.translate(box.x, box.y);

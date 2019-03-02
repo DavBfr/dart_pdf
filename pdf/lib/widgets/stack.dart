@@ -44,6 +44,12 @@ class Positioned extends SingleChildWidget {
   double get width => box?.width;
 
   double get height => box?.height;
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+    paintChild(context);
+  }
 }
 
 /// A widget that positions its children relative to the edges of its box.

@@ -506,6 +506,12 @@ class Expanded extends SingleChildWidget {
   final int flex;
 
   final FlexFit fit;
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+    paintChild(context);
+  }
 }
 
 class ListView extends Flex {

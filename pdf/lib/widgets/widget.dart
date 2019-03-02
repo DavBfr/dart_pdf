@@ -74,6 +74,7 @@ abstract class Widget {
   /// Draw itself and its children, according to the calculated
   /// [box.offset]
   @protected
+  @mustCallSuper
   void paint(Context context) {
     assert(() {
       if (Document.debug) {
@@ -147,10 +148,8 @@ abstract class SingleChildWidget extends Widget {
     }
   }
 
-  @override
-  void paint(Context context) {
-    super.paint(context);
-
+  @protected
+  void paintChild(Context context) {
     if (child != null) {
       final Matrix4 mat = Matrix4.identity();
       mat.translate(box.x, box.y);
