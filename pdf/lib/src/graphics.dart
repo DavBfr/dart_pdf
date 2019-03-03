@@ -212,10 +212,11 @@ class PdfGraphics {
   /// @param c Color to use
   void setFillColor(PdfColor color) {
     if (color is PdfColorCmyk) {
-      buf.putNumList(<double>[color.c, color.m, color.y, color.k]);
+      buf.putNumList(
+          <double>[color.cyan, color.magenta, color.yellow, color.black]);
       buf.putString(' k\n');
     } else {
-      buf.putNumList(<double>[color.r, color.g, color.b]);
+      buf.putNumList(<double>[color.red, color.green, color.blue]);
       buf.putString(' rg\n');
     }
   }
@@ -225,10 +226,11 @@ class PdfGraphics {
   /// @param c Color to use
   void setStrokeColor(PdfColor color) {
     if (color is PdfColorCmyk) {
-      buf.putNumList(<double>[color.c, color.m, color.y, color.k]);
+      buf.putNumList(
+          <double>[color.cyan, color.magenta, color.yellow, color.black]);
       buf.putString(' K\n');
     } else {
-      buf.putNumList(<double>[color.r, color.g, color.b]);
+      buf.putNumList(<double>[color.red, color.green, color.blue]);
       buf.putString(' RG\n');
     }
   }

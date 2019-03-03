@@ -44,6 +44,13 @@ class Color extends StatelessWidget {
             Text(varient ?? '', style: style),
             Padding(padding: const EdgeInsets.all(2 * PdfPageFormat.mm)),
             Text(color.toHex(), style: hexStyle),
+            Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: color.monochromatic
+                    .map<Widget>((PdfColor color) =>
+                        Container(width: 30, height: 30, color: color))
+                    .toList())
           ],
           // )
         ));

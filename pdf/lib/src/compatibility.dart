@@ -107,13 +107,59 @@ class PDFColor extends PdfColor {
 
   factory PDFColor.fromInt(int color) {
     final PdfColor c = PdfColor.fromInt(color);
-    return PDFColor(c.r, c.g, c.b, c.a);
+    return PDFColor(c.red, c.green, c.blue, c.alpha);
   }
 
   factory PDFColor.fromHex(String color) {
     final PdfColor c = PdfColor.fromHex(color);
-    return PDFColor(c.r, c.g, c.b, c.a);
+    return PDFColor(c.red, c.green, c.blue, c.alpha);
   }
+
+  @deprecated
+  static const PdfColor black = PdfColors.black;
+  @deprecated
+  static const PdfColor white = PdfColors.white;
+  @deprecated
+  static const PdfColor pink = PdfColors.pink;
+  @deprecated
+  static const PdfColor purple = PdfColors.purple;
+  @deprecated
+  static const PdfColor deepPurple = PdfColors.deepPurple;
+  @deprecated
+  static const PdfColor indigo = PdfColors.indigo;
+  @deprecated
+  static const PdfColor lightBlue = PdfColors.lightBlue;
+  @deprecated
+  static const PdfColor cyan = PdfColors.cyan;
+  @deprecated
+  static const PdfColor teal = PdfColors.teal;
+  @deprecated
+  static const PdfColor lightGreen = PdfColors.lightGreen;
+  @deprecated
+  static const PdfColor lime = PdfColors.lime;
+  @deprecated
+  static const PdfColor yellow = PdfColors.yellow;
+  @deprecated
+  static const PdfColor amber = PdfColors.amber;
+  @deprecated
+  static const PdfColor orange = PdfColors.orange;
+  @deprecated
+  static const PdfColor deepOrange = PdfColors.deepOrange;
+  @deprecated
+  static const PdfColor brown = PdfColors.brown;
+  @deprecated
+  static const PdfColor grey = PdfColors.grey;
+  @deprecated
+  static const PdfColor blueGrey = PdfColors.blueGrey;
+
+  @deprecated
+  double get r => red;
+
+  @deprecated
+  double get g => green;
+
+  @deprecated
+  double get b => blue;
 }
 
 @deprecated

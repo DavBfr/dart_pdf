@@ -1,3 +1,7 @@
+# 1.3.5
+* Add some color functions
+* Remove color constants from PdfColor, use PdfColors
+
 # 1.3.4
 * Add available dimensions for PdfPageFormat
 * Add Document properties
