@@ -182,7 +182,24 @@ void main() {
                       bottom: 10,
                       child: UrlLink(
                           child: Text('dart_pdf'),
-                          destination: 'https://github.com/DavBfr/dart_pdf/'))
+                          destination: 'https://github.com/DavBfr/dart_pdf/')),
+                  Positioned(
+                      left: 10,
+                      top: 10,
+                      child: Container(
+                          width: 100,
+                          height: 100,
+                          child: Stack(
+                              alignment: Alignment.center,
+                              fit: StackFit.expand,
+                              children: <Widget>[
+                                Center(
+                                    child: Text('30%', textScaleFactor: 1.5)),
+                                CircularProgressIndicator(
+                                    value: .3,
+                                    backgroundColor: PdfColors.grey300,
+                                    strokeWidth: 15),
+                              ])))
                 ])));
 
     final File file = File('widgets.pdf');

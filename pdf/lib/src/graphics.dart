@@ -397,7 +397,7 @@ class PdfGraphics {
   /// The center (cx, cy) of the ellipse is calculated automatically to satisfy
   /// the constraints imposed by the other parameters. large and sweep flags
   /// contribute to the automatic calculations and help determine how the arc is drawn.
-  void _bezierArc(
+  void bezierArc(
       double x1, double y1, double rx, double ry, double x2, double y2,
       {bool large = false, bool sweep = false, double phi = 0.0}) {
     if (x1 == x2 && y1 == y2) {
@@ -555,7 +555,7 @@ class PdfGraphics {
           case 'A': // elliptical arc, absolute
             int len = 0;
             while (len < points.length) {
-              _bezierArc(lastPoint.x, lastPoint.y, points[len + 0],
+              bezierArc(lastPoint.x, lastPoint.y, points[len + 0],
                   points[len + 1], points[len + 5], points[len + 6],
                   phi: points[len + 2] * math.pi / 180.0,
                   large: points[len + 3] != 0.0,
@@ -569,7 +569,7 @@ class PdfGraphics {
             while (len < points.length) {
               points[len + 5] += lastPoint.x;
               points[len + 6] += lastPoint.y;
-              _bezierArc(lastPoint.x, lastPoint.y, points[len + 0],
+              bezierArc(lastPoint.x, lastPoint.y, points[len + 0],
                   points[len + 1], points[len + 5], points[len + 6],
                   phi: points[len + 2] * math.pi / 180.0,
                   large: points[len + 3] != 0.0,

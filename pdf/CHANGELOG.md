@@ -3,6 +3,7 @@
 * Remove color constants from PdfColor, use PdfColors
 * Add TTF Font SubSetting
 * Add Unicode support for TTF Fonts
+* Add Circular Progress Indicator
 
 # 1.3.4
 * Add available dimensions for PdfPageFormat
