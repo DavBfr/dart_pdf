@@ -70,6 +70,7 @@ void main() {
     printTextTtf(g, s, File('open-sans.ttf'), 30.0 + 30.0 * top++);
     printTextTtf(g, s, File('roboto.ttf'), 30.0 + 30.0 * top++);
     printTextTtf(g, s, File('noto-sans.ttf'), 30.0 + 30.0 * top++);
+    printTextTtf(g, '你好 檯號 ', File('genyomintw.ttf'), 30.0 + 30.0 * top++);
 
     final File file = File('ttf.pdf');
     file.writeAsBytesSync(pdf.save());

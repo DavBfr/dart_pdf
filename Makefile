@@ -15,7 +15,7 @@
  DART_SRC=$(shell find . -name '*.dart')
  CLNG_SRC=$(shell find printing/ios -name '*.java' -o -name '*.m' -o -name '*.h') $(shell find printing/android -name '*.java' -o -name '*.m' -o -name '*.h')
  SWFT_SRC=$(shell find . -name '*.swift')
- FONTS=pdf/open-sans.ttf pdf/roboto.ttf pdf/noto-sans.ttf
+ FONTS=pdf/open-sans.ttf pdf/roboto.ttf pdf/noto-sans.ttf pdf/genyomintw.ttf
 
 all: $(FONTS) format
 
@@ -27,6 +27,9 @@ pdf/roboto.ttf:
 
 pdf/noto-sans.ttf:
 	curl -L "https://raw.githubusercontent.com/google/fonts/master/ofl/notosans/NotoSans-Regular.ttf" > $@
+
+pdf/genyomintw.ttf:
+	curl -L "https://github.com/ButTaiwan/genyo-font/raw/master/TW/GenYoMinTW-Heavy.ttf" > $@
 
 format: format-dart format-clang format-swift
 

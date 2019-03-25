@@ -56,6 +56,7 @@ class Font {
   factory Font.timesItalic() => Font.type1(Type1Fonts.timesItalic);
   factory Font.symbol() => Font.type1(Type1Fonts.symbol);
   factory Font.zapfDingbats() => Font.type1(Type1Fonts.zapfDingbats);
+  factory Font.ttf(ByteData data) => TtfFont(data);
 
   final Type1Fonts font;
 

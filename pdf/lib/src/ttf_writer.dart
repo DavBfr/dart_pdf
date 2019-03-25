@@ -67,8 +67,8 @@ class TtfWriter {
         continue;
       }
 
-      final TtfGlyphInfo glyph = ttf.readGlyph(
-          chars[index] == 0 ? 0 : ttf.charToGlyphIndexMap[chars[index]]);
+      final TtfGlyphInfo glyph =
+          ttf.readGlyph(ttf.charToGlyphIndexMap[chars[index]] ?? 0);
       for (int g in glyph.compounds) {
         compounds[g] = null;
       }
