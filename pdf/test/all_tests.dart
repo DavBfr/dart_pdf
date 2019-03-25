@@ -32,6 +32,7 @@ import 'widget_table_test.dart' as widget_table;
 import 'widget_test.dart' as widget;
 import 'widget_text_test.dart' as widget_text;
 import 'widget_theme_test.dart' as widget_theme;
+import 'widget_wrap_test.dart' as widget_wrap;
 
 void main() {
   annotations.main();
@@ -49,5 +50,6 @@ void main() {
   widget_table.main();
   widget_text.main();
   widget_theme.main();
+  widget_wrap.main();
   widget.main();
 }

@@ -46,6 +46,14 @@ class BoxConstraints {
         minHeight = height != null ? height : double.infinity,
         maxHeight = height != null ? height : double.infinity;
 
+  const BoxConstraints.tightForFinite({
+    double width = double.infinity,
+    double height = double.infinity,
+  })  : minWidth = width != double.infinity ? width : 0.0,
+        maxWidth = width != double.infinity ? width : double.infinity,
+        minHeight = height != double.infinity ? height : 0.0,
+        maxHeight = height != double.infinity ? height : double.infinity;
+
   /// The minimum width that satisfies the constraints.
   final double minWidth;
 
