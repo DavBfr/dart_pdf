@@ -75,4 +75,22 @@ void main() {
     final File file = File('ttf.pdf');
     file.writeAsBytesSync(pdf.save());
   });
+
+  test('Font SubSetting', () {
+    final Uint8List fontData = File('open-sans.ttf').readAsBytesSync();
+    final TtfParser font = TtfParser(fontData.buffer.asByteData());
+    final TtfWriter ttfWriter = TtfWriter(font);
+    final Uint8List data = ttfWriter.withChars('hçHée'.runes.toList());
+    final File output = File('${font.fontName}.ttf');
+    output.writeAsBytesSync(data);
+  });
+
+  test('Font SubSetting CN', () {
+    final Uint8List fontData = File('genyomintw.ttf').readAsBytesSync();
+    final TtfParser font = TtfParser(fontData.buffer.asByteData());
+    final TtfWriter ttfWriter = TtfWriter(font);
+    final Uint8List data = ttfWriter.withChars('hçHée 你好 檯號 ☃'.runes.toList());
+    final File output = File('${font.fontName}.ttf');
+    output.writeAsBytesSync(data);
+  });
 }

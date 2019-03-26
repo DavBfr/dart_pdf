@@ -77,13 +77,16 @@ class TtfWriter {
 
     // Add compound glyphs
     for (int compound in compounds.keys) {
-      final int index = chars.indexOf(compound);
-      if (index >= 0) {
-        compounds[compound] = index;
+      final TtfGlyphInfo index = glyphsInfo.firstWhere(
+          (TtfGlyphInfo glyph) => glyph.index == compound,
+          orElse: () => null);
+      if (index != null) {
+        compounds[compound] = glyphsInfo.indexOf(index);
+        assert(compounds[compound] >= 0, 'Unable to find the glyph');
       } else {
         compounds[compound] = glyphsInfo.length;
         final TtfGlyphInfo glyph = ttf.readGlyph(compound);
-        assert(glyph.compounds.isEmpty); // This is a simple glyph
+        assert(glyph.compounds.isEmpty, 'This is not a simple glyph');
         glyphsInfo.add(glyph);
       }
     }
