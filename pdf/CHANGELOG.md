@@ -1,5 +1,6 @@
 # 1.3.7
 * Add Pdf Creation date
+* Support 64k glyphs per TTF font
 
 # 1.3.6
 * Fix TTF Font SubSetting

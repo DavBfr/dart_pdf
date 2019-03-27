@@ -34,14 +34,14 @@ class PdfUnicodeCmap extends PdfObjectStream {
         '/CMapName/Adobe-Identity-UCS def\n'
         '/CMapType 2 def\n'
         '1 begincodespacerange\n'
-        '<00> <FF>\n'
+        '<0000> <FFFF>\n'
         'endcodespacerange\n'
         '${cmap.length} beginbfchar\n');
 
     for (int key = 0; key < cmap.length; key++) {
       final int value = cmap[key];
       buf.putString('<' +
-          key.toRadixString(16).toUpperCase().padLeft(2, '0') +
+          key.toRadixString(16).toUpperCase().padLeft(4, '0') +
           '> <' +
           value.toRadixString(16).toUpperCase().padLeft(4, '0') +
           '>\n');
