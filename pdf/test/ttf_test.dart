@@ -68,6 +68,7 @@ void main() {
     const String s = 'Hello Lukáča ';
 
     printTextTtf(g, s, File('open-sans.ttf'), 30.0 + 30.0 * top++);
+    printTextTtf(g, s, File('open-sans-bold.ttf'), 30.0 + 30.0 * top++);
     printTextTtf(g, s, File('roboto.ttf'), 30.0 + 30.0 * top++);
     printTextTtf(g, s, File('noto-sans.ttf'), 30.0 + 30.0 * top++);
     printTextTtf(g, '你好 檯號 ', File('genyomintw.ttf'), 30.0 + 30.0 * top++);

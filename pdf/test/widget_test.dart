@@ -16,6 +16,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
@@ -25,7 +26,16 @@ void main() {
   test('Pdf Widgets', () {
     Document.debug = true;
 
-    final Document pdf = Document(title: 'Widgets Test');
+    final Uint8List defaultFont = File('open-sans.ttf').readAsBytesSync();
+    final Uint8List defaultFontBold =
+        File('open-sans-bold.ttf').readAsBytesSync();
+
+    final Document pdf = Document(
+        title: 'Widgets Test',
+        theme: Theme.withFont(
+          Font.ttf(defaultFont.buffer.asByteData()),
+          Font.ttf(defaultFontBold.buffer.asByteData()),
+        ));
 
     final TextStyle symbol = TextStyle(font: Font.zapfDingbats());
 
