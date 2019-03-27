@@ -144,6 +144,17 @@ class PdfStream {
     putString('[' + values.join(' ') + ']');
   }
 
+  void putDate(DateTime date) {
+    final DateTime utcDate = date.toUtc();
+    final String year = utcDate.year.toString().padLeft(4, '0');
+    final String month = utcDate.month.toString().padLeft(2, '0');
+    final String day = utcDate.day.toString().padLeft(2, '0');
+    final String hour = utcDate.hour.toString().padLeft(2, '0');
+    final String minute = utcDate.minute.toString().padLeft(2, '0');
+    final String second = utcDate.second.toString().padLeft(2, '0');
+    putText("D:${year}${month}${day}${hour}${minute}${second}Z");
+  }
+
   void putNumArray(List<double> values) {
     putString('[');
     putNumList(values);

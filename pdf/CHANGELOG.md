@@ -1,3 +1,6 @@
+# 1.3.7
+* Add Pdf Creation date
+
 # 1.3.6
 * Fix TTF Font SubSetting
 

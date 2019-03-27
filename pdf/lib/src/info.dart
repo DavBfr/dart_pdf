@@ -47,6 +47,8 @@ class PdfInfo extends PdfObject {
     } else {
       params['/Producer'] = PdfStream()..putLiteral(_libraryName);
     }
+
+    params['/CreationDate'] = PdfStream()..putDate(DateTime.now());
   }
 
   static const String _libraryName = 'https://github.com/DavBfr/dart_pdf';
