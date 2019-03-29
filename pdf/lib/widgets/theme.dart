@@ -119,6 +119,35 @@ class Theme extends Inherited {
   factory Theme.base() =>
       Theme.withFont(Font.helvetica(), Font.helveticaBold());
 
+  Theme copyWith({
+    TextStyle defaultTextStyle,
+    TextStyle defaultTextStyleBold,
+    TextStyle paragraphStyle,
+    TextStyle header0,
+    TextStyle header1,
+    TextStyle header2,
+    TextStyle header3,
+    TextStyle header4,
+    TextStyle header5,
+    TextStyle bulletStyle,
+    TextStyle tableHeader,
+    TextStyle tableCell,
+  }) =>
+      Theme(
+          defaultTextStyle: defaultTextStyle ?? this.defaultTextStyle,
+          defaultTextStyleBold:
+              defaultTextStyleBold ?? this.defaultTextStyleBold,
+          paragraphStyle: paragraphStyle ?? this.paragraphStyle,
+          bulletStyle: bulletStyle ?? this.bulletStyle,
+          header0: header0 ?? this.header0,
+          header1: header1 ?? this.header1,
+          header2: header2 ?? this.header2,
+          header3: header3 ?? this.header3,
+          header4: header4 ?? this.header4,
+          header5: header5 ?? this.header5,
+          tableHeader: tableHeader ?? this.tableHeader,
+          tableCell: tableCell ?? this.tableCell);
+
   static Theme of(Context context) {
     return context.inherited[Theme];
   }
