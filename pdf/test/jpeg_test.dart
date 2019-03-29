@@ -36,12 +36,10 @@ void main() {
     final PdfDocument pdf = PdfDocument();
     final PdfPage page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
 
-    final PdfImage image = PdfImage(pdf,
-        image: await download('https://www.nfet.net/nfet.jpg'),
-        width: 472,
-        height: 477,
-        jpeg: true,
-        alpha: false);
+    final PdfImage image = PdfImage.jpeg(
+      pdf,
+      image: await download('https://www.nfet.net/nfet.jpg'),
+    );
 
     final PdfGraphics g = page.getGraphics();
     g.drawImage(image, 30, page.pageFormat.height - 507.0);

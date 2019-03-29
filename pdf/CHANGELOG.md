@@ -1,3 +1,6 @@
+# 1.3.8
+* Add jpeg image loading function
+
 # 1.3.7
 * Add Pdf Creation date
 * Support 64k glyphs per TTF font

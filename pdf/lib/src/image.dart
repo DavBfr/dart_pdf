@@ -62,6 +62,51 @@ class PdfImage extends PdfXObject {
     }
   }
 
+  factory PdfImage.jpeg(PdfDocument pdfDocument, {@required Uint8List image}) {
+    assert(image != null);
+
+    int width;
+    int height;
+    int offset = 0;
+    while (offset < image.length) {
+      while (image[offset] == 0xff) {
+        offset++;
+      }
+
+      final int mrkr = image[offset];
+      offset++;
+
+      if (mrkr == 0xd8) {
+        continue; // SOI
+      }
+
+      if (mrkr == 0xd9) {
+        break; // EOI
+      }
+
+      if (0xd0 <= mrkr && mrkr <= 0xd7) {
+        continue;
+      }
+
+      if (mrkr == 0x01) {
+        continue; // TEM
+      }
+
+      final int len = (image[offset] << 8) | image[offset + 1];
+      offset += 2;
+
+      if (mrkr == 0xc0) {
+        height = (image[offset + 1] << 8) | image[offset + 2];
+        width = (image[offset + 3] << 8) | image[offset + 4];
+        break;
+      }
+      offset += len - 2;
+    }
+
+    return PdfImage(pdfDocument,
+        image: image, width: width, height: height, jpeg: true, alpha: false);
+  }
+
   /// RGBA Image Data
   final Uint8List image;
 
