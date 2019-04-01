@@ -28,13 +28,20 @@ class Document {
       String keywords,
       String producer})
       : document = PdfDocument(pageMode: pageMode, deflate: deflate) {
-    document.info = PdfInfo(document,
-        title: title,
-        author: author,
-        creator: creator,
-        subject: subject,
-        keywords: keywords,
-        producer: producer);
+    if (title != null ||
+        author != null ||
+        creator != null ||
+        subject != null ||
+        keywords != null ||
+        producer != null) {
+      document.info = PdfInfo(document,
+          title: title,
+          author: author,
+          creator: creator,
+          subject: subject,
+          keywords: keywords,
+          producer: producer);
+    }
   }
 
   static bool debug = false;
