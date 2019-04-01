@@ -19,7 +19,7 @@ part of widget;
 enum TextAlign { left, right, center, justify }
 
 class _Word {
-  _Word(this.text, this.style, this.metrics);
+  _Word(this.text, this.style, this.metrics, this.annotation);
 
   final String text;
 
@@ -28,6 +28,8 @@ class _Word {
   final PdfFontMetrics metrics;
 
   PdfPoint offset = PdfPoint.zero;
+
+  final AnnotationBuilder annotation;
 
   @override
   String toString() {
@@ -53,13 +55,15 @@ class _Word {
 }
 
 class TextSpan {
-  const TextSpan({this.style, this.text, this.children});
+  const TextSpan({this.style, this.text, this.children, this.annotation});
 
   final TextStyle style;
 
   final String text;
 
   final List<TextSpan> children;
+
+  final AnnotationBuilder annotation;
 
   String toPlainText() {
     final StringBuffer buffer = StringBuffer();
@@ -210,7 +214,7 @@ class RichText extends Widget {
         top = math.min(top ?? metrics.top, metrics.top);
         bottom = math.max(bottom ?? metrics.bottom, metrics.bottom);
 
-        final _Word wd = _Word(word, style, metrics);
+        final _Word wd = _Word(word, style, metrics, span.annotation);
         wd.offset = PdfPoint(offsetX, -offsetY);
 
         _words.add(wd);
@@ -262,6 +266,15 @@ class RichText extends Widget {
           currentColor = currentStyle.color;
           context.canvas.setFillColor(currentColor);
         }
+      }
+
+      if (word.annotation != null) {
+        final PdfRect wordBox = PdfRect(
+            box.x + word.offset.x + word.metrics.left,
+            box.top + word.offset.y + word.metrics.top,
+            word.metrics.width,
+            word.metrics.height);
+        word.annotation.build(context, wordBox);
       }
 
       context.canvas.drawString(

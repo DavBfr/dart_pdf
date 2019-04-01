@@ -42,8 +42,51 @@ class Anchor extends SingleChildWidget {
   }
 }
 
-class _Annotation extends SingleChildWidget {
-  _Annotation({Widget child}) : super(child: child);
+abstract class AnnotationBuilder {
+  PdfRect localToGlobal(Context context, PdfRect box) {
+    final Matrix4 mat = context.canvas.getTransform();
+    final Vector3 lt = mat.transform3(Vector3(box.left, box.bottom, 0));
+    final Vector3 rb = mat.transform3(Vector3(box.right, box.top, 0));
+    return PdfRect.fromLTRB(lt.x, lt.y, rb.x, rb.y);
+  }
+
+  void build(Context context, PdfRect box);
+}
+
+class AnnotationLink extends AnnotationBuilder {
+  AnnotationLink(this.destination) : assert(destination != null);
+
+  final String destination;
+
+  @override
+  void build(Context context, PdfRect box) {
+    PdfAnnot.namedLink(
+      context.page,
+      rect: localToGlobal(context, box),
+      dest: destination,
+    );
+  }
+}
+
+class AnnotationUrl extends AnnotationBuilder {
+  AnnotationUrl(this.destination) : assert(destination != null);
+
+  final String destination;
+
+  @override
+  void build(Context context, PdfRect box) {
+    PdfAnnot.urlLink(
+      context.page,
+      rect: localToGlobal(context, box),
+      dest: destination,
+    );
+  }
+}
+
+class Annotation extends SingleChildWidget {
+  Annotation({Widget child, this.builder}) : super(child: child);
+
+  final AnnotationBuilder builder;
 
   @override
   void debugPaint(Context context) {
@@ -57,54 +100,18 @@ class _Annotation extends SingleChildWidget {
   void paint(Context context) {
     super.paint(context);
     paintChild(context);
+    builder?.build(context, box);
   }
 }
 
-class Link extends _Annotation {
-  Link({@required Widget child, this.destination})
+class Link extends Annotation {
+  Link({@required Widget child, String destination})
       : assert(child != null),
-        super(child: child);
-
-  final String destination;
-
-  @override
-  void paint(Context context) {
-    super.paint(context);
-
-    if (destination != null) {
-      final Matrix4 mat = context.canvas.getTransform();
-      final Vector3 lt = mat.transform3(Vector3(box.left, box.bottom, 0));
-      final Vector3 rb = mat.transform3(Vector3(box.right, box.top, 0));
-      final PdfRect ibox = PdfRect.fromLTRB(lt.x, lt.y, rb.x, rb.y);
-      PdfAnnot.namedLink(
-        context.page,
-        rect: ibox,
-        dest: destination,
-      );
-    }
-  }
+        super(child: child, builder: AnnotationLink(destination));
 }
 
-class UrlLink extends _Annotation {
-  UrlLink({@required Widget child, @required this.destination})
+class UrlLink extends Annotation {
+  UrlLink({@required Widget child, String destination})
       : assert(child != null),
-        assert(destination != null),
-        super(child: child);
-
-  final String destination;
-
-  @override
-  void paint(Context context) {
-    super.paint(context);
-
-    final Matrix4 mat = context.canvas.getTransform();
-    final Vector3 lt = mat.transform3(Vector3(box.left, box.bottom, 0));
-    final Vector3 rb = mat.transform3(Vector3(box.right, box.top, 0));
-    final PdfRect ibox = PdfRect.fromLTRB(lt.x, lt.y, rb.x, rb.y);
-    PdfAnnot.urlLink(
-      context.page,
-      rect: ibox,
-      dest: destination,
-    );
-  }
+        super(child: child, builder: AnnotationUrl(destination));
 }

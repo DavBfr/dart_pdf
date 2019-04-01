@@ -1,6 +1,7 @@
 # 1.3.8
 * Add jpeg image loading function
 * Add Theme::copyFrom() method
+* Allow Annotations in TextSpan
 
 # 1.3.7
 * Add Pdf Creation date
