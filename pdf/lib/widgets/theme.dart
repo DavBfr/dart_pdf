@@ -74,6 +74,23 @@ class TextStyle {
     );
   }
 
+  TextStyle merge(TextStyle other) {
+    if (other == null) {
+      return this;
+    }
+
+    return copyWith(
+      color: other.color,
+      font: other.font,
+      fontSize: other.fontSize,
+      letterSpacing: other.letterSpacing,
+      wordSpacing: other.wordSpacing,
+      lineSpacing: other.lineSpacing,
+      height: other.height,
+      background: other.background,
+    );
+  }
+
   @override
   String toString() =>
       'TextStyle(color:$color font:$font letterSpacing:$letterSpacing wordSpacing:$wordSpacing lineSpacing:$lineSpacing height:$height background:$background)';
