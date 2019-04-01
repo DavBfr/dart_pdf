@@ -2,6 +2,7 @@
 * Add jpeg image loading function
 * Add Theme::copyFrom() method
 * Allow Annotations in TextSpan
+* Add SizedBox Widget
 
 # 1.3.7
 * Add Pdf Creation date

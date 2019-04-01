@@ -470,3 +470,39 @@ class CustomPaint extends SingleChildWidget {
     context.canvas.restoreContext();
   }
 }
+
+/// A box with a specified size.
+class SizedBox extends StatelessWidget {
+  /// Creates a fixed size box.
+  SizedBox({this.width, this.height, this.child});
+
+  /// Creates a box that will become as large as its parent allows.
+  SizedBox.expand({this.child})
+      : width = double.infinity,
+        height = double.infinity;
+
+  /// Creates a box that will become as small as its parent allows.
+  SizedBox.shrink({this.child})
+      : width = 0.0,
+        height = 0.0;
+
+  /// Creates a box with the specified size.
+  SizedBox.fromSize({this.child, PdfPoint size})
+      : width = size?.x,
+        height = size?.y;
+
+  /// If non-null, requires the child to have exactly this width.
+  final double width;
+
+  /// If non-null, requires the child to have exactly this height.
+  final double height;
+
+  final Widget child;
+
+  @override
+  Widget build(Context context) {
+    return ConstrainedBox(
+        child: child,
+        constraints: BoxConstraints.tightFor(width: width, height: height));
+  }
+}
