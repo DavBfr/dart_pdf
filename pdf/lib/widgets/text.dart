@@ -183,7 +183,7 @@ class RichText extends Widget {
 
       for (String word in span.text.split(' ')) {
         if (word.isEmpty) {
-          offsetX += space.width;
+          offsetX += space.advanceWidth * style.wordSpacing;
           continue;
         }
 
@@ -193,8 +193,12 @@ class RichText extends Widget {
         if (offsetX + metrics.width > constraintWidth && wCount > 0) {
           width = math.max(
               width,
-              _realignLine(_words.sublist(lineStart), constraintWidth,
-                  offsetX - space.width, false, bottom));
+              _realignLine(
+                  _words.sublist(lineStart),
+                  constraintWidth,
+                  offsetX - space.advanceWidth * style.wordSpacing,
+                  false,
+                  bottom));
           lineStart += wCount;
           if (maxLines != null && ++lines > maxLines) {
             break;
@@ -219,10 +223,11 @@ class RichText extends Widget {
 
         _words.add(wd);
         wCount++;
-        offsetX += metrics.width + space.advanceWidth;
+        offsetX +=
+            metrics.advanceWidth + space.advanceWidth * style.wordSpacing;
       }
 
-      offsetX -= space.width;
+      offsetX -= space.advanceWidth * style.wordSpacing;
       return true;
     });
 

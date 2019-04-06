@@ -3,6 +3,7 @@
 * Add Theme::copyFrom() method
 * Allow Annotations in TextSpan
 * Add SizedBox Widget
+* Fix RichText Widget word spacing
 
 # 1.3.7
 * Add Pdf Creation date
