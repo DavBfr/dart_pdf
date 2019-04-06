@@ -33,8 +33,8 @@ void main() {
     final Document pdf = Document(
         title: 'Widgets Test',
         theme: Theme.withFont(
-          Font.ttf(defaultFont.buffer.asByteData()),
-          Font.ttf(defaultFontBold.buffer.asByteData()),
+          base: Font.ttf(defaultFont.buffer.asByteData()),
+          bold: Font.ttf(defaultFontBold.buffer.asByteData()),
         ));
 
     final TextStyle symbol = TextStyle(font: Font.zapfDingbats());
@@ -175,12 +175,12 @@ void main() {
                           text: 'Hello ',
                           style: Theme.of(context).defaultTextStyle,
                           children: <TextSpan>[
-                            TextSpan(
+                            const TextSpan(
                                 text: 'bold',
-                                style: Theme.of(context)
-                                    .defaultTextStyleBold
-                                    .copyWith(
-                                        fontSize: 20, color: PdfColors.blue)),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                    color: PdfColors.blue)),
                             const TextSpan(
                               text: ' world!',
                             ),

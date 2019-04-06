@@ -4,6 +4,7 @@
 * Allow Annotations in TextSpan
 * Add SizedBox Widget
 * Fix RichText Widget word spacing
+* Improve Theme and TextStyle
 
 # 1.3.7
 * Add Pdf Creation date

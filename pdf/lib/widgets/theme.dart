@@ -16,26 +16,74 @@
 
 part of widget;
 
+enum FontWeight { normal, bold }
+
+enum FontStyle { normal, italic }
+
 @immutable
 class TextStyle {
   const TextStyle({
-    this.color = PdfColors.black,
-    @required this.font,
-    this.fontSize = _defaultFontSize,
-    this.letterSpacing = 1.0,
-    this.wordSpacing = 1.0,
-    this.lineSpacing = 0.0,
-    this.height = 1.0,
+    this.inherit = true,
+    this.color,
+    this.font,
+    this.fontBold,
+    this.fontItalic,
+    this.fontBoldItalic,
+    this.fontSize,
+    this.fontWeight,
+    this.fontStyle,
+    this.letterSpacing,
+    this.wordSpacing,
+    this.lineSpacing,
+    this.height,
     this.background,
-  })  : assert(font != null),
-        assert(color != null);
+  })  : assert(inherit || color != null),
+        assert(inherit || font != null),
+        assert(inherit || fontSize != null),
+        assert(inherit || fontWeight != null),
+        assert(inherit || fontStyle != null),
+        assert(inherit || letterSpacing != null),
+        assert(inherit || wordSpacing != null),
+        assert(inherit || lineSpacing != null),
+        assert(inherit || height != null);
+
+  factory TextStyle.defaultStyle() {
+    return TextStyle(
+      color: PdfColors.black,
+      font: Font.helvetica(),
+      fontBold: Font.helveticaBold(),
+      fontItalic: Font.helveticaOblique(),
+      fontBoldItalic: Font.helveticaBoldOblique(),
+      fontSize: _defaultFontSize,
+      fontWeight: FontWeight.normal,
+      fontStyle: FontStyle.normal,
+      letterSpacing: 1.0,
+      wordSpacing: 1.0,
+      lineSpacing: 0.0,
+      height: 1.0,
+    );
+  }
+
+  final bool inherit;
 
   final PdfColor color;
 
   final Font font;
 
+  final Font fontBold;
+
+  final Font fontItalic;
+
+  final Font fontBoldItalic;
+
   // font height, in pdf unit
   final double fontSize;
+
+  /// The typeface thickness to use when painting the text (e.g., bold).
+  final FontWeight fontWeight;
+
+  /// The typeface variant to use when drawing the letters (e.g., italics).
+  final FontStyle fontStyle;
 
   static const double _defaultFontSize = 12.0 * PdfPageFormat.point;
 
@@ -55,7 +103,12 @@ class TextStyle {
   TextStyle copyWith({
     PdfColor color,
     Font font,
+    Font fontBold,
+    Font fontItalic,
+    Font fontBoldItalic,
     double fontSize,
+    FontWeight fontWeight,
+    FontStyle fontStyle,
     double letterSpacing,
     double wordSpacing,
     double lineSpacing,
@@ -63,9 +116,15 @@ class TextStyle {
     PdfColor background,
   }) {
     return TextStyle(
+      inherit: inherit,
       color: color ?? this.color,
       font: font ?? this.font,
+      fontBold: fontBold ?? this.fontBold,
+      fontItalic: fontItalic ?? this.fontItalic,
+      fontBoldItalic: fontBoldItalic ?? this.fontBoldItalic,
       fontSize: fontSize ?? this.fontSize,
+      fontWeight: fontWeight ?? this.fontWeight,
+      fontStyle: fontStyle ?? this.fontStyle,
       letterSpacing: letterSpacing ?? this.letterSpacing,
       wordSpacing: wordSpacing ?? this.wordSpacing,
       lineSpacing: lineSpacing ?? this.lineSpacing,
@@ -74,15 +133,79 @@ class TextStyle {
     );
   }
 
+  /// Creates a copy of this text style replacing or altering the specified
+  /// properties.
+  TextStyle apply({
+    PdfColor color,
+    Font font,
+    Font fontBold,
+    Font fontItalic,
+    Font fontBoldItalic,
+    double fontSizeFactor = 1.0,
+    double fontSizeDelta = 0.0,
+    double letterSpacingFactor = 1.0,
+    double letterSpacingDelta = 0.0,
+    double wordSpacingFactor = 1.0,
+    double wordSpacingDelta = 0.0,
+    double heightFactor = 1.0,
+    double heightDelta = 0.0,
+  }) {
+    assert(fontSizeFactor != null);
+    assert(fontSizeDelta != null);
+    assert(fontSize != null || (fontSizeFactor == 1.0 && fontSizeDelta == 0.0));
+    assert(letterSpacingFactor != null);
+    assert(letterSpacingDelta != null);
+    assert(letterSpacing != null ||
+        (letterSpacingFactor == 1.0 && letterSpacingDelta == 0.0));
+    assert(wordSpacingFactor != null);
+    assert(wordSpacingDelta != null);
+    assert(wordSpacing != null ||
+        (wordSpacingFactor == 1.0 && wordSpacingDelta == 0.0));
+    assert(heightFactor != null);
+    assert(heightDelta != null);
+    assert(heightFactor != null || (heightFactor == 1.0 && heightDelta == 0.0));
+
+    return TextStyle(
+      inherit: inherit,
+      color: color ?? this.color,
+      font: font ?? this.font,
+      fontBold: fontBold ?? this.fontBold,
+      fontItalic: fontItalic ?? this.fontItalic,
+      fontBoldItalic: fontBoldItalic ?? this.fontBoldItalic,
+      fontSize:
+          fontSize == null ? null : fontSize * fontSizeFactor + fontSizeDelta,
+      fontWeight: fontWeight,
+      fontStyle: fontStyle,
+      letterSpacing: letterSpacing == null
+          ? null
+          : letterSpacing * letterSpacingFactor + letterSpacingDelta,
+      wordSpacing: wordSpacing == null
+          ? null
+          : wordSpacing * wordSpacingFactor + wordSpacingDelta,
+      height: height == null ? null : height * heightFactor + heightDelta,
+      background: background,
+    );
+  }
+
+  /// Returns a new text style that is a combination of this style and the given
+  /// [other] style.
   TextStyle merge(TextStyle other) {
     if (other == null) {
       return this;
     }
 
+    if (!other.inherit) {
+      return other;
+    }
+
     return copyWith(
       color: other.color,
       font: other.font,
+      fontItalic: other.fontItalic,
+      fontBoldItalic: other.fontBoldItalic,
       fontSize: other.fontSize,
+      fontWeight: other.fontWeight,
+      fontStyle: other.fontStyle,
       letterSpacing: other.letterSpacing,
       wordSpacing: other.wordSpacing,
       lineSpacing: other.lineSpacing,
@@ -91,16 +214,31 @@ class TextStyle {
     );
   }
 
+  Font get paintFont {
+    if (fontWeight == FontWeight.normal) {
+      if (fontStyle == FontStyle.normal) {
+        return font;
+      } else {
+        return fontItalic ?? font;
+      }
+    } else {
+      if (fontStyle == FontStyle.normal) {
+        return fontBold ?? font;
+      } else {
+        return fontBoldItalic ?? fontBold ?? fontItalic ?? font;
+      }
+    }
+  }
+
   @override
   String toString() =>
-      'TextStyle(color:$color font:$font letterSpacing:$letterSpacing wordSpacing:$wordSpacing lineSpacing:$lineSpacing height:$height background:$background)';
+      'TextStyle(color:$color font:$paintFont size:$fontSize weight:$fontWeight style:$fontStyle letterSpacing:$letterSpacing wordSpacing:$wordSpacing lineSpacing:$lineSpacing height:$height background:$background)';
 }
 
 @immutable
 class Theme extends Inherited {
-  Theme({
+  const Theme({
     @required this.defaultTextStyle,
-    @required this.defaultTextStyleBold,
     @required this.paragraphStyle,
     @required this.header0,
     @required this.header1,
@@ -113,32 +251,33 @@ class Theme extends Inherited {
     @required this.tableCell,
   });
 
-  factory Theme.withFont(Font baseFont, Font baseFontBold) {
-    final TextStyle defaultTextStyle = TextStyle(font: baseFont);
-    final TextStyle defaultTextStyleBold = TextStyle(font: baseFontBold);
-    final double fontSize = defaultTextStyle.fontSize;
+  factory Theme.withFont({Font base, Font bold, Font italic, Font boldItalic}) {
+    final TextStyle defaultStyle = TextStyle.defaultStyle().copyWith(
+        font: base,
+        fontBold: bold,
+        fontItalic: italic,
+        fontBoldItalic: boldItalic);
+    final double fontSize = defaultStyle.fontSize;
 
     return Theme(
-        defaultTextStyle: defaultTextStyle,
-        defaultTextStyleBold: defaultTextStyleBold,
-        paragraphStyle: defaultTextStyle.copyWith(lineSpacing: 5),
-        bulletStyle: defaultTextStyle.copyWith(lineSpacing: 5),
-        header0: defaultTextStyleBold.copyWith(fontSize: fontSize * 2.0),
-        header1: defaultTextStyleBold.copyWith(fontSize: fontSize * 1.5),
-        header2: defaultTextStyleBold.copyWith(fontSize: fontSize * 1.4),
-        header3: defaultTextStyleBold.copyWith(fontSize: fontSize * 1.3),
-        header4: defaultTextStyleBold.copyWith(fontSize: fontSize * 1.2),
-        header5: defaultTextStyleBold.copyWith(fontSize: fontSize * 1.1),
-        tableHeader: defaultTextStyleBold,
-        tableCell: defaultTextStyle);
+        defaultTextStyle: defaultStyle,
+        paragraphStyle: defaultStyle.copyWith(lineSpacing: 5),
+        bulletStyle: defaultStyle.copyWith(lineSpacing: 5),
+        header0: defaultStyle.copyWith(fontSize: fontSize * 2.0),
+        header1: defaultStyle.copyWith(fontSize: fontSize * 1.5),
+        header2: defaultStyle.copyWith(fontSize: fontSize * 1.4),
+        header3: defaultStyle.copyWith(fontSize: fontSize * 1.3),
+        header4: defaultStyle.copyWith(fontSize: fontSize * 1.2),
+        header5: defaultStyle.copyWith(fontSize: fontSize * 1.1),
+        tableHeader: defaultStyle.copyWith(
+            fontSize: fontSize * 0.8, fontWeight: FontWeight.bold),
+        tableCell: defaultStyle.copyWith(fontSize: fontSize * 0.8));
   }
 
-  factory Theme.base() =>
-      Theme.withFont(Font.helvetica(), Font.helveticaBold());
+  factory Theme.base() => Theme.withFont();
 
   Theme copyWith({
     TextStyle defaultTextStyle,
-    TextStyle defaultTextStyleBold,
     TextStyle paragraphStyle,
     TextStyle header0,
     TextStyle header1,
@@ -152,8 +291,6 @@ class Theme extends Inherited {
   }) =>
       Theme(
           defaultTextStyle: defaultTextStyle ?? this.defaultTextStyle,
-          defaultTextStyleBold:
-              defaultTextStyleBold ?? this.defaultTextStyleBold,
           paragraphStyle: paragraphStyle ?? this.paragraphStyle,
           bulletStyle: bulletStyle ?? this.bulletStyle,
           header0: header0 ?? this.header0,
@@ -170,8 +307,6 @@ class Theme extends Inherited {
   }
 
   final TextStyle defaultTextStyle;
-
-  final TextStyle defaultTextStyleBold;
 
   final TextStyle paragraphStyle;
 

@@ -57,7 +57,9 @@ class Context {
   }
 }
 
-class Inherited {}
+class Inherited {
+  const Inherited();
+}
 
 abstract class Widget {
   Widget();

@@ -71,7 +71,10 @@ class Block extends StatelessWidget {
               decoration:
                   const BoxDecoration(color: green, shape: BoxShape.circle),
             ),
-            Text(title, style: Theme.of(context).defaultTextStyleBold),
+            Text(title,
+                style: Theme.of(context)
+                    .defaultTextStyle
+                    .copyWith(fontWeight: FontWeight.bold)),
           ]),
           Container(
             decoration: const BoxDecoration(
@@ -132,13 +135,17 @@ Future<PdfDocument> generateDocument(PdfPageFormat format) async {
                         children: <Widget>[
                           Text('Parnella Charlesbois',
                               textScaleFactor: 2,
-                              style: Theme.of(context).defaultTextStyleBold),
+                              style: Theme.of(context)
+                                  .defaultTextStyle
+                                  .copyWith(fontWeight: FontWeight.bold)),
                           Padding(padding: const EdgeInsets.only(top: 10)),
                           Text('Electrotyper',
                               textScaleFactor: 1.2,
                               style: Theme.of(context)
-                                  .defaultTextStyleBold
-                                  .copyWith(color: green)),
+                                  .defaultTextStyle
+                                  .copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: green)),
                           Padding(padding: const EdgeInsets.only(top: 20)),
                           Row(
                               crossAxisAlignment: CrossAxisAlignment.start,

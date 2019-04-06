@@ -67,22 +67,25 @@ class TextSpan {
 
   String toPlainText() {
     final StringBuffer buffer = StringBuffer();
-    visitTextSpan((TextSpan span) {
+    visitTextSpan((TextSpan span, TextStyle style) {
       buffer.write(span.text);
       return true;
-    });
+    }, null);
     return buffer.toString();
   }
 
-  bool visitTextSpan(bool visitor(TextSpan span)) {
+  bool visitTextSpan(bool visitor(TextSpan span, TextStyle parentStyle),
+      TextStyle parentStyle) {
+    final TextStyle _style = parentStyle?.merge(style);
+
     if (text != null) {
-      if (!visitor(this)) {
+      if (!visitor(this, _style)) {
         return false;
       }
     }
     if (children != null) {
       for (TextSpan child in children) {
-        if (!child.visitTextSpan(visitor)) {
+        if (!child.visitTextSpan(visitor, _style)) {
           return false;
         }
       }
@@ -170,18 +173,17 @@ class RichText extends Widget {
     int wCount = 0;
     int lineStart = 0;
 
-    text.visitTextSpan((TextSpan span) {
+    text.visitTextSpan((TextSpan span, TextStyle style) {
       if (span.text == null) {
         return true;
       }
 
-      final TextStyle style = span.style ?? defaultstyle;
-      final PdfFont font = style.font.getFont(context);
+      final PdfFont font = style.paintFont.getFont(context);
 
       final PdfFontMetrics space =
           font.stringMetrics(' ') * (style.fontSize * textScaleFactor);
 
-      for (String word in span.text.split(' ')) {
+      for (String word in span.text.split(RegExp(r'\s'))) {
         if (word.isEmpty) {
           offsetX += space.advanceWidth * style.wordSpacing;
           continue;
@@ -229,7 +231,7 @@ class RichText extends Widget {
 
       offsetX -= space.advanceWidth * style.wordSpacing;
       return true;
-    });
+    }, defaultstyle);
 
     width = math.max(
         width,
@@ -283,7 +285,7 @@ class RichText extends Widget {
       }
 
       context.canvas.drawString(
-          currentStyle.font.getFont(context),
+          currentStyle.paintFont.getFont(context),
           currentStyle.fontSize * textScaleFactor,
           word.text,
           box.x + word.offset.x,
