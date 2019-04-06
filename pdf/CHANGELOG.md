@@ -5,6 +5,7 @@
 * Add SizedBox Widget
 * Fix RichText Widget word spacing
 * Improve Theme and TextStyle
+* Implement properly RichText.softWrap
 
 # 1.3.7
 * Add Pdf Creation date

@@ -98,11 +98,10 @@ class RichText extends Widget {
   RichText(
       {@required this.text,
       this.textAlign = TextAlign.left,
-      bool softWrap = true,
+      this.softWrap = true,
       this.textScaleFactor = 1.0,
-      int maxLines})
-      : maxLines = !softWrap ? 1 : maxLines,
-        assert(text != null);
+      this.maxLines})
+      : assert(text != null);
 
   static const bool debug = false;
 
@@ -111,6 +110,8 @@ class RichText extends Widget {
   final TextAlign textAlign;
 
   final double textScaleFactor;
+
+  final bool softWrap;
 
   final int maxLines;
 
@@ -183,16 +184,57 @@ class RichText extends Widget {
       final PdfFontMetrics space =
           font.stringMetrics(' ') * (style.fontSize * textScaleFactor);
 
-      for (String word in span.text.split(RegExp(r'\s'))) {
-        if (word.isEmpty) {
-          offsetX += space.advanceWidth * style.wordSpacing;
-          continue;
+      final List<String> spanLines = span.text.split('\n');
+      for (int line = 0; line < spanLines.length; line++) {
+        for (String word in spanLines[line].split(RegExp(r'\s'))) {
+          if (word.isEmpty) {
+            offsetX += space.advanceWidth * style.wordSpacing;
+            continue;
+          }
+
+          final PdfFontMetrics metrics =
+              font.stringMetrics(word) * (style.fontSize * textScaleFactor);
+
+          if (offsetX + metrics.width > constraintWidth && wCount > 0) {
+            width = math.max(
+                width,
+                _realignLine(
+                    _words.sublist(lineStart),
+                    constraintWidth,
+                    offsetX - space.advanceWidth * style.wordSpacing,
+                    false,
+                    bottom));
+
+            lineStart += wCount;
+
+            if (maxLines != null && ++lines > maxLines) {
+              break;
+            }
+
+            offsetX = 0.0;
+            offsetY += bottom - top + style.lineSpacing;
+            top = null;
+            bottom = null;
+
+            if (offsetY > constraintHeight) {
+              return false;
+            }
+            wCount = 0;
+          }
+
+          top = math.min(top ?? metrics.top, metrics.top);
+          bottom = math.max(bottom ?? metrics.bottom, metrics.bottom);
+
+          final _Word wd = _Word(word, style, metrics, span.annotation);
+          wd.offset = PdfPoint(offsetX, -offsetY);
+
+          _words.add(wd);
+          wCount++;
+          offsetX +=
+              metrics.advanceWidth + space.advanceWidth * style.wordSpacing;
         }
 
-        final PdfFontMetrics metrics =
-            font.stringMetrics(word) * (style.fontSize * textScaleFactor);
-
-        if (offsetX + metrics.width > constraintWidth && wCount > 0) {
+        if (softWrap && line < spanLines.length - 1) {
           width = math.max(
               width,
               _realignLine(
@@ -201,13 +243,19 @@ class RichText extends Widget {
                   offsetX - space.advanceWidth * style.wordSpacing,
                   false,
                   bottom));
+
           lineStart += wCount;
+
           if (maxLines != null && ++lines > maxLines) {
             break;
           }
 
           offsetX = 0.0;
-          offsetY += bottom - top + style.lineSpacing;
+          if (wCount > 0) {
+            offsetY += bottom - top + style.lineSpacing;
+          } else {
+            offsetY += space.ascent + space.descent + style.lineSpacing;
+          }
           top = null;
           bottom = null;
 
@@ -216,17 +264,6 @@ class RichText extends Widget {
           }
           wCount = 0;
         }
-
-        top = math.min(top ?? metrics.top, metrics.top);
-        bottom = math.max(bottom ?? metrics.bottom, metrics.bottom);
-
-        final _Word wd = _Word(word, style, metrics, span.annotation);
-        wd.offset = PdfPoint(offsetX, -offsetY);
-
-        _words.add(wd);
-        wCount++;
-        offsetX +=
-            metrics.advanceWidth + space.advanceWidth * style.wordSpacing;
       }
 
       offsetX -= space.advanceWidth * style.wordSpacing;
