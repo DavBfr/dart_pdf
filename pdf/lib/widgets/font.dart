@@ -60,26 +60,27 @@ class Font {
 
   final Type1Fonts font;
 
+  static const Map<Type1Fonts, String> _type1Map = <Type1Fonts, String>{
+    Type1Fonts.courier: 'Courier',
+    Type1Fonts.courierBold: 'Courier-Bold',
+    Type1Fonts.courierBoldOblique: 'Courier-BoldOblique',
+    Type1Fonts.courierOblique: 'Courier-Oblique',
+    Type1Fonts.helvetica: 'Helvetica',
+    Type1Fonts.helveticaBold: 'Helvetica-Bold',
+    Type1Fonts.helveticaBoldOblique: 'Helvetica-BoldOblique',
+    Type1Fonts.helveticaOblique: 'Helvetica-Oblique',
+    Type1Fonts.times: 'Times-Roman',
+    Type1Fonts.timesBold: 'Times-Bold',
+    Type1Fonts.timesBoldItalic: 'Times-BoldItalic',
+    Type1Fonts.timesItalic: 'Times-Italic',
+    Type1Fonts.symbol: 'Symbol',
+    Type1Fonts.zapfDingbats: 'ZapfDingbats'
+  };
+
+  String get fontName => _type1Map[font];
+
   @protected
   PdfFont buildFont(PdfDocument pdfDocument) {
-    const Map<Type1Fonts, String> type1Map = <Type1Fonts, String>{
-      Type1Fonts.courier: 'Courier',
-      Type1Fonts.courierBold: 'Courier-Bold',
-      Type1Fonts.courierBoldOblique: 'Courier-BoldOblique',
-      Type1Fonts.courierOblique: 'Courier-Oblique',
-      Type1Fonts.helvetica: 'Helvetica',
-      Type1Fonts.helveticaBold: 'Helvetica-Bold',
-      Type1Fonts.helveticaBoldOblique: 'Helvetica-BoldOblique',
-      Type1Fonts.helveticaOblique: 'Helvetica-Oblique',
-      Type1Fonts.times: 'Times-Roman',
-      Type1Fonts.timesBold: 'Times-Bold',
-      Type1Fonts.timesBoldItalic: 'Times-BoldItalic',
-      Type1Fonts.timesItalic: 'Times-Italic',
-      Type1Fonts.symbol: 'Symbol',
-      Type1Fonts.zapfDingbats: 'ZapfDingbats'
-    };
-
-    final String fontName = type1Map[font];
     final PdfFont existing = pdfDocument.fonts.firstWhere(
       (PdfFont font) => font.subtype == '/Type1' && font.fontName == fontName,
       orElse: () => null,
@@ -132,14 +133,24 @@ class Font {
 
     return _pdfFont;
   }
+
+  @override
+  String toString() => '<Type1 Font "$fontName">';
 }
 
 class TtfFont extends Font {
   TtfFont(this.data);
 
   final ByteData data;
+
   @override
   PdfFont buildFont(PdfDocument pdfDocument) {
     return PdfTtfFont(pdfDocument, data);
+  }
+
+  @override
+  String toString() {
+    final TtfParser font = TtfParser(data);
+    return '<TrueType Font "${font.fontName}">';
   }
 }
