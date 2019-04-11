@@ -35,15 +35,15 @@ public class SwiftPrintingPlugin: NSObject, FlutterPlugin, UIPrintInteractionCon
 
     public func handle(_ call: FlutterMethodCall, result: FlutterResult) {
         let args = call.arguments! as! [String: Any]
-        if "printPdf" == call.method {
+        if call.method == "printPdf" {
             printPdf(args["name"] as? String ?? "")
             result(NSNumber(value: 1))
-        } else if "writePdf" == call.method {
+        } else if call.method == "writePdf" {
             if let object = args["doc"] as? FlutterStandardTypedData {
                 writePdf(object)
             }
             result(NSNumber(value: 1))
-        } else if "sharePdf" == call.method {
+        } else if call.method == "sharePdf" {
             if let object = args["doc"] as? FlutterStandardTypedData {
                 sharePdf(
                     object,
