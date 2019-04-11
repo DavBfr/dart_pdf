@@ -36,8 +36,19 @@ class NewPage extends Widget {
   }
 }
 
+class _MultiPageInstance {
+  const _MultiPageInstance(
+      {@required this.context,
+      @required this.constraints,
+      @required this.offsetStart});
+
+  final Context context;
+  final BoxConstraints constraints;
+  final double offsetStart;
+}
+
 class MultiPage extends Page {
-  const MultiPage(
+  MultiPage(
       {PdfPageFormat pageFormat = PdfPageFormat.a4,
       BuildListCallback build,
       this.crossAxisAlignment = CrossAxisAlignment.start,
@@ -60,6 +71,8 @@ class MultiPage extends Page {
   final BuildCallback header;
 
   final BuildCallback footer;
+
+  final List<_MultiPageInstance> _pages = <_MultiPageInstance>[];
 
   void _paintChild(
       Context context, Widget child, double x, double y, double pageHeight) {
@@ -139,13 +152,17 @@ class MultiPage extends Page {
         offsetEnd =
             _mustRotate ? pageHeightMargin - _margin.left : _margin.bottom;
 
+        _pages.add(_MultiPageInstance(
+          context: context,
+          constraints: constraints,
+          offsetStart: offsetStart,
+        ));
+
         if (header != null) {
           final Widget headerWidget = header(context);
           if (headerWidget != null) {
             headerWidget.layout(context, constraints, parentUsesSize: false);
             assert(headerWidget.box != null);
-            _paintChild(context, headerWidget, _margin.left,
-                offsetStart - headerWidget.box.height, pageFormat.height);
             offsetStart -= headerWidget.box.height;
           }
         }
@@ -155,8 +172,6 @@ class MultiPage extends Page {
           if (footerWidget != null) {
             footerWidget.layout(context, constraints, parentUsesSize: false);
             assert(footerWidget.box != null);
-            _paintChild(context, footerWidget, _margin.left, _margin.bottom,
-                pageFormat.height);
             offsetEnd += footerWidget.box.height;
           }
         }
@@ -216,6 +231,35 @@ class MultiPage extends Page {
       offsetStart -= child.box.height;
       sameCount = 0;
       index++;
+    }
+  }
+
+  @override
+  void postProcess(Document document) {
+    final EdgeInsets _margin = margin;
+
+    for (_MultiPageInstance page in _pages) {
+      if (header != null) {
+        final Widget headerWidget = header(page.context);
+        if (headerWidget != null) {
+          headerWidget.layout(page.context, page.constraints,
+              parentUsesSize: false);
+          assert(headerWidget.box != null);
+          _paintChild(page.context, headerWidget, _margin.left,
+              page.offsetStart - headerWidget.box.height, pageFormat.height);
+        }
+      }
+
+      if (footer != null) {
+        final Widget footerWidget = footer(page.context);
+        if (footerWidget != null) {
+          footerWidget.layout(page.context, page.constraints,
+              parentUsesSize: false);
+          assert(footerWidget.box != null);
+          _paintChild(page.context, footerWidget, _margin.left, _margin.bottom,
+              pageFormat.height);
+        }
+      }
     }
   }
 }

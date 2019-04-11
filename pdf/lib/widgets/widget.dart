@@ -36,6 +36,9 @@ class Context {
 
   int get pageNumber => document.pdfPageList.pages.indexOf(page) + 1;
 
+  /// Number of pages in the document.
+  /// This value is not available in a MultiPage body and will be equal to pageNumber.
+  /// But can be used in Header and Footer.
   int get pagesCount => document.pdfPageList.pages.length;
 
   Context copyWith(

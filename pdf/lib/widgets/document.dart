@@ -50,11 +50,19 @@ class Document {
 
   final Theme theme;
 
+  final List<Page> _pages = <Page>[];
+
   void addPage(Page page) {
     page.generate(this);
+    _pages.add(page);
   }
 
-  List<int> save() => document.save();
+  List<int> save() {
+    for (Page page in _pages) {
+      page.postProcess(this);
+    }
+    return document.save();
+  }
 }
 
 typedef BuildCallback = Widget Function(Context context);
@@ -63,7 +71,7 @@ typedef BuildListCallback = List<Widget> Function(Context context);
 enum PageOrientation { natural, landscape, portrait }
 
 class Page {
-  const Page(
+  Page(
       {this.pageFormat = PdfPageFormat.standard,
       BuildCallback build,
       this.theme,
@@ -88,6 +96,8 @@ class Page {
           pageFormat.height > pageFormat.width) ||
       (orientation == PageOrientation.portrait &&
           pageFormat.width > pageFormat.height);
+
+  PdfPage _pdfPage;
 
   EdgeInsets get margin {
     if (_margin != null) {
@@ -127,8 +137,12 @@ class Page {
 
   @protected
   void generate(Document document) {
-    final PdfPage pdfPage = PdfPage(document.document, pageFormat: pageFormat);
-    final PdfGraphics canvas = pdfPage.getGraphics();
+    _pdfPage = PdfPage(document.document, pageFormat: pageFormat);
+  }
+
+  @protected
+  void postProcess(Document document) {
+    final PdfGraphics canvas = _pdfPage.getGraphics();
     final EdgeInsets _margin = margin;
     final BoxConstraints constraints = mustRotate
         ? BoxConstraints(
@@ -143,7 +157,7 @@ class Page {
     inherited[calculatedTheme.runtimeType] = calculatedTheme;
     final Context context = Context(
         document: document.document,
-        page: pdfPage,
+        page: _pdfPage,
         canvas: canvas,
         inherited: inherited);
     if (_build != null) {

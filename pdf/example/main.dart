@@ -30,7 +30,7 @@ void main() {
         return Container(
             alignment: Alignment.centerRight,
             margin: const EdgeInsets.only(top: 1.0 * PdfPageFormat.cm),
-            child: Text('Page ${context.pageNumber}',
+            child: Text('Page ${context.pageNumber} of ${context.pagesCount}',
                 style: Theme.of(context)
                     .defaultTextStyle
                     .copyWith(color: PdfColors.grey)));
