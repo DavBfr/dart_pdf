@@ -16,22 +16,24 @@
 
 package net.nfet.flutter.printing;
 
-import static java.lang.StrictMath.max;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.print.PageRange;
+import android.print.PdfConvert;
 import android.print.PrintAttributes;
 import android.print.PrintDocumentAdapter;
 import android.print.PrintDocumentInfo;
 import android.print.PrintManager;
 import android.print.pdf.PrintedPdfDocument;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import androidx.core.content.FileProvider;
 
 import java.io.File;
@@ -155,6 +157,28 @@ public class PrintingPlugin extends PrintDocumentAdapter implements MethodCallHa
                 sharePdf((byte[]) call.argument("doc"), (String) call.argument("name"));
                 result.success(0);
                 break;
+            case "convertHtml":
+                double width = (double) call.argument("width");
+                double height = (double) call.argument("height");
+                double marginLeft = (double) call.argument("marginLeft");
+                double marginTop = (double) call.argument("marginTop");
+                double marginRight = (double) call.argument("marginRight");
+                double marginBottom = (double) call.argument("marginBottom");
+
+                PrintAttributes.Margins margins =
+                        new PrintAttributes.Margins(Double.valueOf(marginLeft * 1000.0).intValue(),
+                                Double.valueOf(marginTop * 1000.0 / 72.0).intValue(),
+                                Double.valueOf(marginRight * 1000.0 / 72.0).intValue(),
+                                Double.valueOf(marginBottom * 1000.0 / 72.0).intValue());
+
+                PrintAttributes.MediaSize size = new PrintAttributes.MediaSize("flutter_printing",
+                        "Provided size", Double.valueOf(width * 1000.0 / 72.0).intValue(),
+                        Double.valueOf(height * 1000.0 / 72.0).intValue());
+
+                convertHtml((String) call.argument("html"), size, margins,
+                        (String) call.argument("baseUrl"));
+                result.success(0);
+                break;
             default:
                 result.notImplemented();
                 break;
@@ -191,5 +215,50 @@ public class PrintingPlugin extends PrintDocumentAdapter implements MethodCallHa
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void convertHtml(String data, final PrintAttributes.MediaSize size,
+            final PrintAttributes.Margins margins, String baseUrl) {
+        final WebView webView = new WebView(activity.getApplicationContext());
+
+        webView.loadDataWithBaseURL(baseUrl, data, "text/HTML", "UTF-8", null);
+
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    PrintAttributes attributes =
+                            new PrintAttributes.Builder()
+                                    .setMediaSize(size)
+                                    .setResolution(
+                                            new PrintAttributes.Resolution("pdf", "pdf", 600, 600))
+                                    .setMinMargins(margins)
+                                    .build();
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        final PrintDocumentAdapter adapter =
+                                webView.createPrintDocumentAdapter("printing");
+
+                        PdfConvert.print(activity, adapter, attributes, new PdfConvert.Result() {
+                            @Override
+                            public void onSuccess(File file) {
+                                try {
+                                    byte[] fileContent = PdfConvert.readFile(file);
+                                    channel.invokeMethod("onHtmlRendered", fileContent);
+                                } catch (IOException e) {
+                                    onError(e.getMessage());
+                                }
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                channel.invokeMethod("onHtmlError", message);
+                            }
+                        });
+                    }
+                }
+            }
+        });
     }
 }

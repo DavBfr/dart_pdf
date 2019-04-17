@@ -21,6 +21,7 @@ typedef LayoutCallback = FutureOr<List<int>> Function(PdfPageFormat format);
 mixin Printing {
   static const MethodChannel _channel = MethodChannel('printing');
   static LayoutCallback _onLayout;
+  static Completer<List<int>> _onHtmlRendered;
 
   static Future<void> _handleMethod(MethodCall call) async {
     switch (call.method) {
@@ -37,6 +38,12 @@ mixin Printing {
           'doc': Uint8List.fromList(bytes),
         };
         return await _channel.invokeMethod('writePdf', params);
+      case 'onHtmlRendered':
+        _onHtmlRendered.complete(call.arguments);
+        break;
+      case 'onHtmlError':
+        _onHtmlRendered.completeError(call.arguments);
+        break;
     }
   }
 
@@ -88,5 +95,26 @@ mixin Printing {
       'h': bounds.height,
     };
     return await _channel.invokeMethod('sharePdf', params);
+  }
+
+  static Future<List<int>> convertHtml(
+      {@required String html,
+      String baseUrl,
+      PdfPageFormat format = PdfPageFormat.a4}) async {
+    final Map<String, dynamic> params = <String, dynamic>{
+      'html': html,
+      'baseUrl': baseUrl,
+      'width': format.width,
+      'height': format.height,
+      'marginLeft': format.marginLeft,
+      'marginTop': format.marginTop,
+      'marginRight': format.marginRight,
+      'marginBottom': format.marginBottom,
+    };
+
+    _channel.setMethodCallHandler(_handleMethod);
+    _onHtmlRendered = Completer<List<int>>();
+    await _channel.invokeMethod<void>('convertHtml', params);
+    return _onHtmlRendered.future;
   }
 }

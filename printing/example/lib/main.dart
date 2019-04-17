@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:pdf/pdf.dart';
@@ -94,6 +95,14 @@ class MyAppState extends State<MyApp> {
     });
   }
 
+  Future<void> _printHtml() async {
+    print('Print html ...');
+    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async {
+      final String html = await rootBundle.loadString('assets/example.html');
+      return await Printing.convertHtml(format: format, html: html);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
@@ -117,6 +126,8 @@ class MyAppState extends State<MyApp> {
                     onPressed: _printScreen),
                 RaisedButton(
                     child: const Text('Save to file'), onPressed: _saveAsFile),
+                RaisedButton(
+                    child: const Text('Print Html'), onPressed: _printHtml),
               ],
             ),
           ),

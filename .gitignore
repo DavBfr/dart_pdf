@@ -28,6 +28,7 @@ printing/android/local.properties
 printing/*.log
 printing/ios/Flutter
 printing/ios/Runner
+printing/android/.gradle
 
 .pana
 pedantic_analyis_options_*.yaml

@@ -1,3 +1,7 @@
+## 2.1.0
+
+* Add html to pdf platform conversion
+
 ## 2.0.4
 
 * Update Readme
