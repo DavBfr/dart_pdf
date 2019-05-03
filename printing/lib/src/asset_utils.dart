@@ -57,7 +57,7 @@ Future<PdfImage> pdfImageFromImageProvider(
       onError(exception, stackTrace);
     } else {
       FlutterError.reportError(FlutterErrorDetails(
-        context: 'image failed to load',
+        context: DiagnosticsNode.message('image failed to load'),
         library: 'printing',
         exception: exception,
         stack: stackTrace,
