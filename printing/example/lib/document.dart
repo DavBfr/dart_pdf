@@ -106,7 +106,7 @@ class Category extends StatelessWidget {
   }
 }
 
-Future<PdfDocument> generateDocument(PdfPageFormat format) async {
+Future<Document> generateDocument(PdfPageFormat format) async {
   final PdfDoc pdf = PdfDoc(title: 'My Résumé', author: 'David PHAM-VAN');
 
   final PdfImage profileImage = await pdfImageFromImageProvider(
@@ -198,5 +198,5 @@ Future<PdfDocument> generateDocument(PdfPageFormat format) async {
               ])
         ]),
   ));
-  return pdf.document;
+  return pdf;
 }

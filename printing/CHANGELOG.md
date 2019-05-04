@@ -1,3 +1,6 @@
+# 2.0.2
+* Fix example application
+
 # 2.0.1
 * Fix Replace FlutterErrorDetails to be compatible with Dart 2.3.0
 

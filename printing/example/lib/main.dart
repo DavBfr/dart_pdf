@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pdf;
 import 'package:printing/printing.dart';
 
 import 'package:printing_example/document.dart';
@@ -33,7 +34,7 @@ class MyAppState extends State<MyApp> {
 
   Future<void> _sharePdf() async {
     print('Share ...');
-    final PdfDocument pdf = await generateDocument(PdfPageFormat.a4);
+    final pdf.Document document = await generateDocument(PdfPageFormat.a4);
 
     // Calculate the widget center for iPad sharing popup position
     final RenderBox referenceBox =
@@ -44,7 +45,8 @@ class MyAppState extends State<MyApp> {
         referenceBox.localToGlobal(referenceBox.paintBounds.bottomRight);
     final Rect bounds = Rect.fromPoints(topLeft, bottomRight);
 
-    Printing.sharePdf(document: pdf, filename: 'my-résumé.pdf', bounds: bounds);
+    await Printing.sharePdf(
+        bytes: document.save(), filename: 'my-résumé.pdf', bounds: bounds);
   }
 
   Future<void> _printScreen() async {
