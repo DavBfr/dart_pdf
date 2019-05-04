@@ -1,3 +1,6 @@
+# 2.0.1
+* Fix Replace FlutterErrorDetails to be compatible with Dart 2.3.0
+
 # 2.0.0
 * Breaking change: Switch libraries to AndroidX
 * Add Page information to PdfDoc object

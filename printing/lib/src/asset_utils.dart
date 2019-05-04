@@ -56,13 +56,8 @@ Future<PdfImage> pdfImageFromImageProvider(
     if (onError != null) {
       onError(exception, stackTrace);
     } else {
-      FlutterError.reportError(FlutterErrorDetails(
-        context: DiagnosticsNode.message('image failed to load'),
-        library: 'printing',
-        exception: exception,
-        stack: stackTrace,
-        silent: true,
-      ));
+      // https://groups.google.com/forum/#!topic/flutter-announce/hp1RNIgej38
+      AssertionError('image failed to load');
     }
   }
 
