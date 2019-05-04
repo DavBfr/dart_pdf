@@ -16,16 +16,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Printing Demo'),
+          title: const Text('Printing Demo'),
         ),
-        body: Center(
-          child: FlatButton(
-            child: Text("Print Document"),
-            onPressed: () {
-              Printing.layoutPdf(onLayout: buildPdf);
-            },
-          ),
+        floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.print),
+          tooltip: 'Print Document',
+          onPressed: () {
+            Printing.layoutPdf(onLayout: buildPdf);
+          },
         ),
+        body: Center(child: const Text('Click on the print button below')),
       ),
     );
   }
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
               constraints: const Pdf.BoxConstraints.expand(),
               child: Pdf.FittedBox(
                   child: Pdf.Text(
-                "Hello World",
+                'Hello World',
               )),
             );
           }));
