@@ -5,12 +5,14 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pdf;
 import 'package:printing/printing.dart';
 
-import 'package:printing_example/document.dart';
+import 'document.dart';
+import 'viewer.dart';
 
 void main() => runApp(MaterialApp(home: MyApp()));
 
@@ -30,6 +32,19 @@ class MyAppState extends State<MyApp> {
     await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async =>
             (await generateDocument(format)).save());
+  }
+
+  Future<void> _saveAsFile() async {
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    String appDocPath = appDocDir.path;
+    File file = File(appDocPath + '/' + 'document.pdf');
+    print('Save as file ${file.path} ...');
+    await file.writeAsBytes((await generateDocument(PdfPageFormat.a4)).save());
+    Navigator.push<dynamic>(
+      context,
+      MaterialPageRoute<dynamic>(
+          builder: (BuildContext context) => PdfViewer(file: file)),
+    );
   }
 
   Future<void> _sharePdf() async {
@@ -117,6 +132,8 @@ class MyAppState extends State<MyApp> {
                 RaisedButton(
                     child: const Text('Print Screenshot'),
                     onPressed: _printScreen),
+                RaisedButton(
+                    child: const Text('Save to file'), onPressed: _saveAsFile),
               ],
             ),
           ),
