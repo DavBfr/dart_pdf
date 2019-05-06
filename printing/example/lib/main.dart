@@ -73,41 +73,24 @@ class MyAppState extends State<MyApp> {
     print('Print Screen ${im.width}x${im.height} ...');
 
     Printing.layoutPdf(onLayout: (PdfPageFormat format) {
-      final PdfDocument pdf = PdfDocument(deflate: zlib.encode);
-      final PdfPage page = PdfPage(pdf, pageFormat: format);
-      final PdfGraphics g = page.getGraphics();
+      final pdf.Document document = PdfDoc();
 
-      // Center the image
-      final double w = page.pageFormat.width -
-          page.pageFormat.marginLeft -
-          page.pageFormat.marginRight;
-      final double h = page.pageFormat.height -
-          page.pageFormat.marginTop -
-          page.pageFormat.marginBottom;
-      double iw, ih;
-      if (im.width.toDouble() / im.height.toDouble() < 1.0) {
-        ih = h;
-        iw = im.width.toDouble() * ih / im.height.toDouble();
-      } else {
-        iw = w;
-        ih = im.height.toDouble() * iw / im.width.toDouble();
-      }
-
-      final PdfImage image = PdfImage(pdf,
+      final image = PdfImage(document.document,
           image: bytes.buffer.asUint8List(),
           width: im.width,
           height: im.height);
-      g.drawImage(
-          image,
-          page.pageFormat.marginLeft + (w - iw) / 2.0,
-          page.pageFormat.height -
-              page.pageFormat.marginTop -
-              ih -
-              (h - ih) / 2.0,
-          iw,
-          ih);
 
-      return pdf.save();
+      document.addPage(pdf.Page(
+          pageFormat: format,
+          build: (pdf.Context context) {
+            return pdf.Center(
+              child: pdf.Expanded(
+                child: pdf.Image(image),
+              ),
+            ); // Center
+          })); // Page
+
+      return document.save();
     });
   }
 
