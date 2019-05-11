@@ -175,6 +175,7 @@ class Transform extends SingleChildWidget {
     if (origin != null) {
       result.translate(origin.x, origin.y);
     }
+    result.translate(box.x, box.y);
     PdfPoint translation;
     if (alignment != null) {
       translation = alignment.alongSize(box.size);

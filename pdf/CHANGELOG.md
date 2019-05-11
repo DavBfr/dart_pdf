@@ -1,3 +1,6 @@
+# 1.3.9
+* Fix Transform Widget alignment
+
 # 1.3.8
 * Add jpeg image loading function
 * Add Theme::copyFrom() method
