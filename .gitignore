@@ -32,3 +32,8 @@ printing/ios/Runner
 .pana
 pedantic_analyis_options_*.yaml
 .dartfix
+node_modules
+pdf/lcov.info
+pdf/coverage.json
+.coverage
+package-lock.json

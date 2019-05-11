@@ -16,6 +16,7 @@
  CLNG_SRC=$(shell find printing/ios -name '*.java' -o -name '*.m' -o -name '*.h') $(shell find printing/android -name '*.java' -o -name '*.m' -o -name '*.h')
  SWFT_SRC=$(shell find . -name '*.swift')
  FONTS=pdf/open-sans.ttf pdf/open-sans-bold.ttf pdf/roboto.ttf pdf/noto-sans.ttf pdf/genyomintw.ttf
+ COV_PORT=9292
 
 all: $(FONTS) format
 
@@ -45,12 +46,22 @@ format-clang: $(CLNG_SRC)
 format-swift: $(SWFT_SRC)
 	swiftformat --swiftversion 4.2 $^
 
-test: $(FONTS)
+.coverage:
+	pub global activate coverage
+	touch $@
+
+node_modules:
+	npm install lcov-summary
+
+test: $(FONTS) .coverage node_modules
 	cd pdf; pub get
-	cd pdf; pub run test
+	cd pdf; pub global run coverage:collect_coverage --port=$(COV_PORT) -o coverage.json --resume-isolates --wait-paused &\
+	dart --enable-asserts --disable-service-auth-codes --enable-vm-service=$(COV_PORT) --pause-isolates-on-exit test/all_tests.dart
+	cd pdf; pub global run coverage:format_coverage --packages=.packages -i coverage.json --report-on lib --lcov --out lcov.info
 	cd pdf; for EXAMPLE in $(shell cd pdf; find example -name '*.dart'); do dart $$EXAMPLE; done
 	cd printing/example; flutter packages get
 	cd printing/example; flutter test
+	node_modules/.bin/lcov-summary pdf/lcov.info
 
 clean:
 	git clean -fdx -e .vscode
@@ -72,8 +83,8 @@ publish-printing: format clean
 analyze: .pana
 	@find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
 	@find printing -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	@pana --no-warning --source path pdf 2> /dev/null | python pana_report.py
-	@pana --no-warning --source path printing 2> /dev/null | python pana_report.py
+	@pub global run pana --no-warning --source path pdf 2> /dev/null | python pana_report.py
+	@pub global run pana --no-warning --source path printing 2> /dev/null | python pana_report.py
 	@find pdf -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 	@find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
@@ -83,8 +94,8 @@ analyze: .pana
 
 fix: .dartfix
 	cd pdf; pub get
-	cd pdf; dartfix --overwrite .
+	cd pdf; pub global run dartfix:fix --overwrite .
 	cd printing; flutter packages get
-	cd printing; dartfix --overwrite .
+	cd printing; pub global run dartfix:fix --overwrite .
 
 .PHONY: test format format-dart format-clang clean publish-pdf publish-printing analyze
