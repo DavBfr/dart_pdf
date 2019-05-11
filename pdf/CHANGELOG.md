@@ -1,5 +1,6 @@
 # 1.3.9
 * Fix Transform Widget alignment
+* Fix CustomPaint Widget size
 
 # 1.3.8
 * Add jpeg image loading function

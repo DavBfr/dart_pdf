@@ -441,8 +441,7 @@ class CustomPaint extends SingleChildWidget {
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
     if (child != null) {
-      child.layout(context, constraints.tighten(width: size.x, height: size.y),
-          parentUsesSize: parentUsesSize);
+      child.layout(context, constraints, parentUsesSize: parentUsesSize);
       assert(child.box != null);
       box = child.box;
     } else {
