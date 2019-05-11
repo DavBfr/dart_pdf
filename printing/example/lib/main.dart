@@ -35,9 +35,9 @@ class MyAppState extends State<MyApp> {
   }
 
   Future<void> _saveAsFile() async {
-    Directory appDocDir = await getApplicationDocumentsDirectory();
-    String appDocPath = appDocDir.path;
-    File file = File(appDocPath + '/' + 'document.pdf');
+    final Directory appDocDir = await getApplicationDocumentsDirectory();
+    final String appDocPath = appDocDir.path;
+    final File file = File(appDocPath + '/' + 'document.pdf');
     print('Save as file ${file.path} ...');
     await file.writeAsBytes((await generateDocument(PdfPageFormat.a4)).save());
     Navigator.push<dynamic>(
@@ -75,7 +75,7 @@ class MyAppState extends State<MyApp> {
     Printing.layoutPdf(onLayout: (PdfPageFormat format) {
       final pdf.Document document = PdfDoc();
 
-      final image = PdfImage(document.document,
+      final PdfImage image = PdfImage(document.document,
           image: bytes.buffer.asUint8List(),
           width: im.width,
           height: im.height);
