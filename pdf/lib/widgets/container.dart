@@ -86,6 +86,44 @@ class BoxBorder {
   }
 }
 
+@immutable
+class DecorationImage {
+  const DecorationImage(
+      {@required this.image,
+      this.fit = BoxFit.cover,
+      this.alignment = Alignment.center})
+      : assert(image != null),
+        assert(fit != null),
+        assert(alignment != null);
+
+  final PdfImage image;
+  final BoxFit fit;
+  final Alignment alignment;
+
+  void paintImage(Context context, PdfRect box) {
+    final PdfPoint imageSize =
+        PdfPoint(image.width.toDouble(), image.height.toDouble());
+    final FittedSizes sizes = applyBoxFit(fit, imageSize, box.size);
+    final double scaleX = sizes.destination.x / sizes.source.x;
+    final double scaleY = sizes.destination.y / sizes.source.y;
+    final PdfRect sourceRect = alignment.inscribe(
+        sizes.source, PdfRect.fromPoints(PdfPoint.zero, imageSize));
+    final PdfRect destinationRect = alignment.inscribe(sizes.destination, box);
+    final Matrix4 mat =
+        Matrix4.translationValues(destinationRect.x, destinationRect.y, 0)
+          ..scale(scaleX, scaleY, 1)
+          ..translate(-sourceRect.x, -sourceRect.y);
+
+    context.canvas
+      ..saveContext()
+      ..drawRect(box.x, box.y, box.width, box.height)
+      ..clipPath()
+      ..setTransform(mat)
+      ..drawImage(image, 0, 0, imageSize.x, imageSize.y)
+      ..restoreContext();
+  }
+}
+
 enum BoxShape { circle, rectangle }
 
 @immutable
@@ -94,6 +132,7 @@ class BoxDecoration {
       {this.color,
       this.border,
       this.borderRadius,
+      this.image,
       this.shape = BoxShape.rectangle});
 
   /// The color to fill in the background of the box.
@@ -101,6 +140,7 @@ class BoxDecoration {
   final BoxBorder border;
   final double borderRadius;
   final BoxShape shape;
+  final DecorationImage image;
 
   void paintBackground(Context context, PdfRect box) {
     assert(box.x != null);
@@ -150,11 +190,13 @@ class DecoratedBox extends SingleChildWidget {
     super.paint(context);
     if (position == DecorationPosition.background) {
       decoration.paintBackground(context, box);
+      decoration.image?.paintImage(context, box);
       decoration.border?.paintBorders(context, box);
     }
     paintChild(context);
     if (position == DecorationPosition.foreground) {
       decoration.paintBackground(context, box);
+      decoration.image?.paintImage(context, box);
       decoration.border?.paintBorders(context, box);
     }
   }

@@ -1,6 +1,7 @@
 # 1.3.9
 * Fix Transform Widget alignment
 * Fix CustomPaint Widget size
+* Add DecorationImage to BoxDecoration
 
 # 1.3.8
 * Add jpeg image loading function
