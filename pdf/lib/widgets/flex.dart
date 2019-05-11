@@ -144,9 +144,10 @@ class Flex extends MultiChildWidget {
       // Size remaining (flexible) items, find the maximum cross size.
       for (Widget child in children) {
         final int flex = child is Expanded ? child.flex : 0;
-        if (flex > 0)
+        if (flex > 0) {
           maxCrossSize =
               math.max(maxCrossSize, childSize(child, spacePerFlex * flex));
+        }
       }
 
       return maxCrossSize;

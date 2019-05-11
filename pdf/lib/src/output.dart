@@ -108,8 +108,9 @@ class PdfOutput {
       os.putString('/Root ');
       os.putStream(rootID.ref());
       os.putString('\n');
-    } else
+    } else {
       throw Exception('Root object is not present in document');
+    }
 
     // the /Info reference (OPTIONAL)
     if (infoID != null) {

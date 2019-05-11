@@ -410,9 +410,10 @@ class AspectRatio extends SingleChildWidget {
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
     box = PdfRect.fromPoints(PdfPoint.zero, _applyAspectRatio(constraints));
-    if (child != null)
+    if (child != null) {
       child.layout(context,
           BoxConstraints.tightFor(width: box.width, height: box.height));
+    }
     assert(child.box != null);
   }
 

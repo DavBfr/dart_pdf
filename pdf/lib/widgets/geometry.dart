@@ -359,8 +359,9 @@ FittedSizes applyBoxFit(BoxFit fit, PdfPoint inputSize, PdfPoint outputSize) {
   if (inputSize.y <= 0.0 ||
       inputSize.x <= 0.0 ||
       outputSize.y <= 0.0 ||
-      outputSize.x <= 0.0)
+      outputSize.x <= 0.0) {
     return const FittedSizes(PdfPoint.zero, PdfPoint.zero);
+  }
 
   PdfPoint sourceSize, destinationSize;
   switch (fit) {
@@ -370,12 +371,13 @@ FittedSizes applyBoxFit(BoxFit fit, PdfPoint inputSize, PdfPoint outputSize) {
       break;
     case BoxFit.contain:
       sourceSize = inputSize;
-      if (outputSize.x / outputSize.y > sourceSize.x / sourceSize.y)
+      if (outputSize.x / outputSize.y > sourceSize.x / sourceSize.y) {
         destinationSize =
             PdfPoint(sourceSize.x * outputSize.y / sourceSize.y, outputSize.y);
-      else
+      } else {
         destinationSize =
             PdfPoint(outputSize.x, sourceSize.y * outputSize.x / sourceSize.x);
+      }
       break;
     case BoxFit.cover:
       if (outputSize.x / outputSize.y > inputSize.x / inputSize.y) {
@@ -408,10 +410,12 @@ FittedSizes applyBoxFit(BoxFit fit, PdfPoint inputSize, PdfPoint outputSize) {
       sourceSize = inputSize;
       destinationSize = inputSize;
       final double aspectRatio = inputSize.x / inputSize.y;
-      if (destinationSize.y > outputSize.y)
+      if (destinationSize.y > outputSize.y) {
         destinationSize = PdfPoint(outputSize.y * aspectRatio, outputSize.y);
-      if (destinationSize.x > outputSize.x)
+      }
+      if (destinationSize.x > outputSize.x) {
         destinationSize = PdfPoint(outputSize.x, outputSize.x / aspectRatio);
+      }
       break;
   }
   return FittedSizes(sourceSize, destinationSize);

@@ -130,18 +130,20 @@ class Stack extends MultiChildWidget {
         final Positioned positioned = child;
         BoxConstraints childConstraints = const BoxConstraints();
 
-        if (positioned.left != null && positioned.right != null)
+        if (positioned.left != null && positioned.right != null) {
           childConstraints = childConstraints.tighten(
               width: box.width - positioned.right - positioned.left);
-        else if (positioned.width != null)
+        } else if (positioned.width != null) {
           childConstraints = childConstraints.tighten(width: positioned.width);
+        }
 
-        if (positioned.top != null && positioned.bottom != null)
+        if (positioned.top != null && positioned.bottom != null) {
           childConstraints = childConstraints.tighten(
               height: box.height - positioned.bottom - positioned.top);
-        else if (positioned.height != null)
+        } else if (positioned.height != null) {
           childConstraints =
               childConstraints.tighten(height: positioned.height);
+        }
 
         positioned.layout(context, childConstraints, parentUsesSize: true);
         assert(positioned.box != null);

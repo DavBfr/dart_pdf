@@ -77,8 +77,9 @@ class BoxBorder {
           context.canvas.lineTo(box.x, box.top);
         } else if (right && top) {
           context.canvas.closePath();
-        } else
+        } else {
           context.canvas.lineTo(box.x, box.top);
+        }
       }
 
       context.canvas.strokePath();
@@ -151,12 +152,12 @@ class BoxDecoration {
     if (color != null) {
       switch (shape) {
         case BoxShape.rectangle:
-          if (borderRadius == null)
+          if (borderRadius == null) {
             context.canvas.drawRect(box.x, box.y, box.width, box.height);
-          else
+          } else {
             context.canvas.drawRRect(box.x, box.y, box.width, box.height,
                 borderRadius, borderRadius);
-
+          }
           break;
         case BoxShape.circle:
           context.canvas.drawEllipse(box.x + box.width / 2.0,
@@ -259,15 +260,17 @@ class Container extends StatelessWidget {
           child: ConstrainedBox(constraints: const BoxConstraints.expand()));
     }
 
-    if (alignment != null)
+    if (alignment != null) {
       current = Align(alignment: alignment, child: current);
+    }
 
     if (padding != null) {
       current = Padding(padding: padding, child: current);
     }
 
-    if (decoration != null)
+    if (decoration != null) {
       current = DecoratedBox(decoration: decoration, child: current);
+    }
 
     if (foregroundDecoration != null) {
       current = DecoratedBox(
@@ -276,15 +279,17 @@ class Container extends StatelessWidget {
           child: current);
     }
 
-    if (constraints != null)
+    if (constraints != null) {
       current = ConstrainedBox(constraints: constraints, child: current);
+    }
 
     if (margin != null) {
       current = Padding(padding: margin, child: current);
     }
 
-    if (transform != null)
+    if (transform != null) {
       current = Transform(transform: transform, child: current);
+    }
 
     return current;
   }

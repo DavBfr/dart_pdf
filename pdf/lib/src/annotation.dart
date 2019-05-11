@@ -133,9 +133,9 @@ class PdfAnnot extends PdfObject {
       } else {
         final List<PdfStream> dests = <PdfStream>[];
         dests.add(dest.ref());
-        if (destRect == null)
+        if (destRect == null) {
           dests.add(PdfStream.string('/Fit'));
-        else {
+        } else {
           dests.add(PdfStream.string('/FitR '));
           dests.add(PdfStream()
             ..putNumList(<double>[
