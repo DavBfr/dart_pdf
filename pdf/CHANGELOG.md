@@ -2,6 +2,7 @@
 * Fix Transform Widget alignment
 * Fix CustomPaint Widget size
 * Add DecorationImage to BoxDecoration
+* Add default values to ClipRRect
 
 # 1.3.8
 * Add jpeg image loading function
