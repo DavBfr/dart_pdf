@@ -37,3 +37,4 @@ pdf/lcov.info
 pdf/coverage.json
 .coverage
 package-lock.json
+printing/lcov.info

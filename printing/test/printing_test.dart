@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pdf;
 
-import 'package:printing_example/document.dart';
+import '../example/lib/document.dart';
 
 void main() {
   testWidgets('Pdf Generate the document', (WidgetTester tester) async {
