@@ -1,0 +1,1 @@
+../example/lib/document.dart
