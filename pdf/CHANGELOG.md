@@ -1,3 +1,6 @@
+# 1.3.10
+* Deprecate the document argument in Printing.sharePdf()
+
 # 1.3.9
 * Fix Transform Widget alignment
 * Fix CustomPaint Widget size

@@ -1,6 +1,7 @@
 # 2.0.3
 * Add file save and view to example application
 * Convert print screen example to Widgets
+* Deprecate the document argument in Printing.sharePdf()
 
 # 2.0.2
 * Fix example application

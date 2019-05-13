@@ -52,8 +52,10 @@ mixin Printing {
   }
 
   /// Prints a [PdfDocument] or a pdf stream to a local printer using the platform UI
-  @deprecated
-  static Future<void> printPdf({PdfDocument document, List<int> bytes}) async {
+  @Deprecated('use Printing.layoutPdf(onLayout: (_) => document.save());')
+  static Future<void> printPdf(
+      {@Deprecated('use bytes with document.save()') PdfDocument document,
+      List<int> bytes}) async {
     assert(document != null || bytes != null);
     assert(!(document == null && bytes == null));
 
@@ -64,7 +66,7 @@ mixin Printing {
 
   /// Displays a platform popup to share the Pdf document to another application
   static Future<void> sharePdf(
-      {PdfDocument document,
+      {@Deprecated('use bytes with document.save()') PdfDocument document,
       List<int> bytes,
       String filename,
       Rect bounds}) async {
