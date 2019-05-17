@@ -198,7 +198,7 @@ class PdfColorHsv extends PdfColor {
         super(red, green, blue, alpha);
 
   factory PdfColorHsv.fromRgb(double red, double green, double blue,
-      [double alpha]) {
+      [double alpha = 1.0]) {
     final double max = math.max(red, math.max(green, blue));
     final double min = math.min(red, math.min(green, blue));
     final double delta = max - min;
@@ -280,7 +280,7 @@ class PdfColorHsv extends PdfColor {
 
 class PdfColorHsl extends PdfColor {
   factory PdfColorHsl(double hue, double saturation, double lightness,
-      [double alpha]) {
+      [double alpha = 1.0]) {
     final double chroma = (1.0 - (2.0 * lightness - 1.0).abs()) * saturation;
     final double secondary =
         chroma * (1.0 - (((hue / 60.0) % 2.0) - 1.0).abs());
@@ -323,7 +323,7 @@ class PdfColorHsl extends PdfColor {
       : super(red, green, blue, alpha);
 
   factory PdfColorHsl.fromRgb(double red, double green, double blue,
-      [double alpha]) {
+      [double alpha = 1.0]) {
     final double max = math.max(red, math.max(green, blue));
     final double min = math.min(red, math.min(green, blue));
     final double delta = max - min;
