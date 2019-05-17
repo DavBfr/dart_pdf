@@ -94,7 +94,7 @@ class Flex extends MultiChildWidget {
       double maxFlexFractionSoFar = 0;
 
       for (Widget child in children) {
-        final int flex = child is Expanded ? child.flex : 0;
+        final int flex = child is Flexible ? child.flex : 0;
         totalFlex += flex;
         if (flex > 0) {
           final double flexFraction = childSize(child, extent) / flex;
@@ -116,7 +116,7 @@ class Flex extends MultiChildWidget {
       double inflexibleSpace = 0;
       double maxCrossSize = 0;
       for (Widget child in children) {
-        final int flex = child is Expanded ? child.flex : 0;
+        final int flex = child is Flexible ? child.flex : 0;
         totalFlex += flex;
         double mainSize;
         double crossSize;
@@ -143,7 +143,7 @@ class Flex extends MultiChildWidget {
 
       // Size remaining (flexible) items, find the maximum cross size.
       for (Widget child in children) {
-        final int flex = child is Expanded ? child.flex : 0;
+        final int flex = child is Flexible ? child.flex : 0;
         if (flex > 0) {
           maxCrossSize =
               math.max(maxCrossSize, childSize(child, spacePerFlex * flex));
@@ -219,8 +219,8 @@ class Flex extends MultiChildWidget {
     double allocatedSize = 0; // Sum of the sizes of the non-flexible children.
 
     for (Widget child in children) {
-      final int flex = child is Expanded ? child.flex : 0;
-      final FlexFit fit = child is Expanded ? child.fit : FlexFit.loose;
+      final int flex = child is Flexible ? child.flex : 0;
+      final FlexFit fit = child is Flexible ? child.fit : FlexFit.loose;
       if (flex > 0) {
         assert(() {
           final String dimension =
@@ -277,8 +277,8 @@ class Flex extends MultiChildWidget {
           canFlex && totalFlex > 0 ? (freeSpace / totalFlex) : double.nan;
 
       for (Widget child in children) {
-        final int flex = child is Expanded ? child.flex : 0;
-        final FlexFit fit = child is Expanded ? child.fit : FlexFit.loose;
+        final int flex = child is Flexible ? child.flex : 0;
+        final FlexFit fit = child is Flexible ? child.fit : FlexFit.loose;
         if (flex > 0) {
           final double maxChildExtent = canFlex
               ? (child == lastFlexChild
@@ -497,21 +497,52 @@ class Column extends Flex {
         );
 }
 
-class Expanded extends SingleChildWidget {
-  Expanded({
+/// A widget that controls how a child of a [Row], [Column], or [Flex] flexes.
+class Flexible extends SingleChildWidget {
+  Flexible({
     this.flex = 1,
-    this.fit = FlexFit.tight,
+    this.fit = FlexFit.loose,
     @required Widget child,
   }) : super(child: child);
 
+  /// The flex factor to use for this child
   final int flex;
 
+  /// How a flexible child is inscribed into the available space.
   final FlexFit fit;
 
   @override
   void paint(Context context) {
     super.paint(context);
     paintChild(context);
+  }
+}
+
+class Expanded extends Flexible {
+  Expanded({
+    int flex = 1,
+    FlexFit fit = FlexFit.tight,
+    @required Widget child,
+  }) : super(child: child, flex: flex, fit: fit);
+}
+
+/// Spacer creates an adjustable, empty spacer that can be used to tune the
+/// spacing between widgets in a [Flex] container, like [Row] or [Column].
+class Spacer extends StatelessWidget {
+  Spacer({this.flex = 1})
+      : assert(flex != null),
+        assert(flex > 0),
+        super();
+
+  /// The flex factor to use in determining how much space to take up.
+  final int flex;
+
+  @override
+  Widget build(Context context) {
+    return Expanded(
+      flex: flex,
+      child: SizedBox.shrink(),
+    );
   }
 }
 

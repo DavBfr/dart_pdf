@@ -2,6 +2,7 @@
 * Deprecate the document argument in Printing.sharePdf()
 * Add default value to alpha in PdfColor variants
 * Fix Table Widget
+* Add Flexible and Spacer Widgets
 
 # 1.3.9
 * Fix Transform Widget alignment
