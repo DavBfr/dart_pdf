@@ -28,6 +28,7 @@ import 'type1_test.dart' as type1;
 import 'widget_basic_test.dart' as widget_basic;
 import 'widget_clip_test.dart' as widget_clip;
 import 'widget_container_test.dart' as widget_container;
+import 'widget_table_test.dart' as widget_table;
 import 'widget_test.dart' as widget;
 
 void main() {
@@ -42,6 +43,7 @@ void main() {
   widget_basic.main();
   widget_clip.main();
   widget_container.main();
+  widget_table.main();
   widget.main();
   example.main();
 }

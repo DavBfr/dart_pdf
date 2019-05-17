@@ -182,6 +182,11 @@ class Table extends Widget implements SpanningWidget {
       }
     }
 
+    if (_widths.isEmpty) {
+      box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
+      return;
+    }
+
     final double maxWidth = _widths.reduce((double a, double b) => a + b);
 
     // Compute column widths using flex and estimated width
@@ -276,6 +281,10 @@ class Table extends Widget implements SpanningWidget {
     context.canvas
       ..saveContext()
       ..setTransform(mat);
+
+    if (_context.lastLine == 0) {
+      return;
+    }
 
     int index = 0;
     for (TableRow row in children) {
