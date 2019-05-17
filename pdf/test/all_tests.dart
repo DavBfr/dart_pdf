@@ -30,6 +30,7 @@ import 'widget_clip_test.dart' as widget_clip;
 import 'widget_container_test.dart' as widget_container;
 import 'widget_table_test.dart' as widget_table;
 import 'widget_test.dart' as widget;
+import 'widget_text_test.dart' as widget_text;
 
 void main() {
   annotations.main();
@@ -44,6 +45,7 @@ void main() {
   widget_clip.main();
   widget_container.main();
   widget_table.main();
+  widget_text.main();
   widget.main();
   example.main();
 }

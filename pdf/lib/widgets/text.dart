@@ -103,7 +103,7 @@ class RichText extends Widget {
       this.maxLines})
       : assert(text != null);
 
-  static const bool debug = false;
+  static bool debug = false;
 
   final TextSpan text;
 
