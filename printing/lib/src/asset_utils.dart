@@ -57,7 +57,7 @@ Future<PdfImage> pdfImageFromImageProvider(
       onError(exception, stackTrace);
     } else {
       // https://groups.google.com/forum/#!topic/flutter-announce/hp1RNIgej38
-      AssertionError('image failed to load');
+      assert(false, 'image failed to load');
     }
   }
 
