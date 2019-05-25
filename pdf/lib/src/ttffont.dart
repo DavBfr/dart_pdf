@@ -164,7 +164,7 @@ class PdfTtfFont extends PdfFont {
     }
 
     final Runes runes = s.runes;
-    final List<int> bytes = List<int>();
+    final List<int> bytes = <int>[];
     runes.forEach(bytes.add);
 
     final Iterable<PdfFontMetrics> metrics = bytes.map(glyphMetrics);
