@@ -137,9 +137,18 @@ abstract class PdfFont extends PdfObject {
       return PdfFontMetrics.zero;
     }
 
-    final Uint8List chars = latin1.encode(s);
-    final Iterable<PdfFontMetrics> metrics = chars.map(glyphMetrics);
-    return PdfFontMetrics.append(metrics);
+    try {
+      final Uint8List chars = latin1.encode(s);
+      final Iterable<PdfFontMetrics> metrics = chars.map(glyphMetrics);
+      return PdfFontMetrics.append(metrics);
+    } catch (e) {
+      assert(false, '''\n---------------------------------------------
+Can not decode the string to Latin1.
+This font does not support Unicode characters.
+If you want to use strings other than Latin strings, use a TrueType (TTF) font instead.
+---------------------------------------------''');
+      rethrow;
+    }
   }
 
   // Use stringMetrics instead
@@ -155,9 +164,18 @@ abstract class PdfFont extends PdfObject {
   String toString() => 'Font($fontName)';
 
   PdfStream putText(String text) {
-    return PdfStream()
-      ..putBytes(latin1.encode('('))
-      ..putTextBytes(latin1.encode(text))
-      ..putBytes(latin1.encode(')'));
+    try {
+      return PdfStream()
+        ..putBytes(latin1.encode('('))
+        ..putTextBytes(latin1.encode(text))
+        ..putBytes(latin1.encode(')'));
+    } catch (e) {
+      assert(false, '''\n---------------------------------------------
+Can not decode the string to Latin1.
+This font does not support Unicode characters.
+If you want to use strings other than Latin strings, use a TrueType (TTF) font instead.
+---------------------------------------------''');
+      rethrow;
+    }
   }
 }
