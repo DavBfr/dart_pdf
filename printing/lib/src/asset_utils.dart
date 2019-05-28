@@ -40,16 +40,15 @@ Future<PdfImage> pdfImageFromImageProvider(
   final ImageStream stream =
       image.resolve(configuration ?? ImageConfiguration.empty);
 
-  Future<void> listener(ImageInfo image, bool sync) async {
+  ImageStreamListener listener;
+  listener = ImageStreamListener((ImageInfo image, bool sync) async {
     final PdfImage result =
         await pdfImageFromImage(pdf: pdf, image: image.image);
     if (!completer.isCompleted) {
       completer.complete(result);
     }
     stream.removeListener(listener);
-  }
-
-  void errorListener(dynamic exception, StackTrace stackTrace) {
+  }, onError: (dynamic exception, StackTrace stackTrace) {
     if (!completer.isCompleted) {
       completer.complete(null);
     }
@@ -59,9 +58,9 @@ Future<PdfImage> pdfImageFromImageProvider(
       // https://groups.google.com/forum/#!topic/flutter-announce/hp1RNIgej38
       assert(false, 'image failed to load');
     }
-  }
+  });
 
-  stream.addListener(listener, onError: errorListener);
+  stream.addListener(listener);
   return completer.future;
 }
 
