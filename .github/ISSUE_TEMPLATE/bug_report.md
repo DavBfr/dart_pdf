@@ -22,6 +22,12 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
+**Flutter Doctor**
+Paste the output of running `flutter doctor -v` here.
+
+```
+```
+
 **Desktop (please complete the following information):**
  - [ ] iOS
  - [ ] Android
