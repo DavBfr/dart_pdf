@@ -7,32 +7,71 @@ See the example on how to use the plugin.
 
 <img alt="Example document" src="https://raw.githubusercontent.com/DavBfr/dart_pdf/master/printing/example.png" width="300">
 
-> This plugin uses the `pdf` package <https://pub.dartlang.org/packages/pdf>
-> for pdf creation. Please refer to <https://pub.dartlang.org/documentation/pdf/latest/>
-> for documentation.
+This plugin uses the `pdf` package <https://pub.dartlang.org/packages/pdf>
+for pdf creation. Please refer to <https://pub.dartlang.org/documentation/pdf/latest/>
+for documentation.
 
-To load an image it is possible to use
-[Image.toByteData](https://docs.flutter.io/flutter/dart-ui/Image/toByteData.html):
+Example:
 
 ```dart
-var Image im;
-var bytes = await im.toByteData(format: ui.ImageByteFormat.rawRgba);
+final pdf = PdfDoc();
 
-PdfImage image = PdfImage(
-    pdf,
-    image: bytes.buffer.asUint8List(), 
-    width: im.width, 
-    height: im.height);
-g.drawImage(image, 100.0, 100.0, 80.0);
+pdf.addPage(Page(
+      pageFormat: PdfPageFormat.a4,
+      build: (Context context) {
+        return Center(
+          child: Text("Hello World"),
+        ); // Center
+      })); // Page
+```
+
+To load an image from an ImageProvider:
+
+```dart
+const imageProvider = const AssetImage('assets/image.png');
+final PdfImage image = await pdfImageFromImageProvider(pdf: pdf.document, image: imageProvider);
+
+pdf.addPage(Page(
+    build: (Context context) {
+      return Center(
+        child: Image(image),
+      ); // Center
+    })); // Page
 ```
 
 To use a TrueType font from a flutter bundle:
 
 ```dart
-var font = await rootBundle.load("assets/open-sans.ttf");
-PdfTtfFont ttf = PdfTtfFont(pdf, font);
-g.setColor(PdfColor(0.3, 0.3, 0.3));
-g.drawString(ttf, 20.0, "Dart is awesome", 50.0, 30.0);
+final font = await rootBundle.load("assets/open-sans.ttf");
+final ttf = Font.ttf(font);
+
+pdf.addPage(Page(
+    build: (Context context) {
+      return Center(
+        child: Text('Dart is awesome', style: TextStyle(font: ttf, fontSize: 40)),
+      ); // Center
+    })); // Page
+```
+
+To save the pdf file using the [path_provider](https://pub.dartlang.org/packages/path_provider) library:
+
+```dart
+final output = await getTemporaryDirectory();
+final file = File("${output.path}/example.pdf");
+await file.writeAsBytes(pdf.save());
+```
+
+You can also print the document using the iOS or Android print service:
+
+```dart
+await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save());
+```
+
+Or share the document to other applications:
+
+```dart
+await Printing.sharePdf(bytes: pdf.save(), filename: 'my-document.pdf');
 ```
 
 ## Installing

@@ -1,3 +1,6 @@
+# 2.0.4
+* Update Readme
+
 # 2.0.3
 * Add file save and view to example application
 * Convert print screen example to Widgets

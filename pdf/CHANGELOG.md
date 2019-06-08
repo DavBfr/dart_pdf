@@ -1,3 +1,6 @@
+# 1.3.11
+* Update Readme
+
 # 1.3.10
 * Deprecate the document argument in Printing.sharePdf()
 * Add default value to alpha in PdfColor variants

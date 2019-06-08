@@ -1,0 +1,20 @@
+name: readme_to_dart
+author: David PHAM-VAN <dev.nfet.net@gmail.com>
+description: Readme Markdown to dart source converter.
+homepage: https://github.com/DavBfr/dart_pdf/tree/master/test
+repository: https://github.com/DavBfr/dart_pdf
+issue_tracker: https://github.com/DavBfr/dart_pdf/issues
+version: 1.0.0
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:  
+  pdf:
+  printing:
+  markdown:
+  meta: 
+  string_scanner: 
+  path: 
+  image:
+  path_provider:
