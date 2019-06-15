@@ -149,6 +149,16 @@ class TtfFont extends Font {
   }
 
   @override
+  String get fontName {
+    if (_pdfFont != null) {
+      return _pdfFont.fontName;
+    }
+
+    final TtfParser font = TtfParser(data);
+    return font.fontName;
+  }
+
+  @override
   String toString() {
     final TtfParser font = TtfParser(data);
     return '<TrueType Font "${font.fontName}">';
