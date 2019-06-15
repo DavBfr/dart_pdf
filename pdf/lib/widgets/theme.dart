@@ -25,10 +25,11 @@ class TextStyle {
   const TextStyle({
     this.inherit = true,
     this.color,
-    this.font,
-    this.fontBold,
-    this.fontItalic,
-    this.fontBoldItalic,
+    Font font,
+    Font fontNormal,
+    Font fontBold,
+    Font fontItalic,
+    Font fontBoldItalic,
     this.fontSize,
     this.fontWeight,
     this.fontStyle,
@@ -45,12 +46,28 @@ class TextStyle {
         assert(inherit || letterSpacing != null),
         assert(inherit || wordSpacing != null),
         assert(inherit || lineSpacing != null),
-        assert(inherit || height != null);
+        assert(inherit || height != null),
+        fontNormal = fontNormal ??
+            (fontStyle != FontStyle.italic && fontWeight != FontWeight.bold
+                ? font
+                : null),
+        fontBold = fontBold ??
+            (fontStyle != FontStyle.italic && fontWeight == FontWeight.bold
+                ? font
+                : null),
+        fontItalic = fontItalic ??
+            (fontStyle == FontStyle.italic && fontWeight != FontWeight.bold
+                ? font
+                : null),
+        fontBoldItalic = fontBoldItalic ??
+            (fontStyle == FontStyle.italic && fontWeight == FontWeight.bold
+                ? font
+                : null);
 
   factory TextStyle.defaultStyle() {
     return TextStyle(
       color: PdfColors.black,
-      font: Font.helvetica(),
+      fontNormal: Font.helvetica(),
       fontBold: Font.helveticaBold(),
       fontItalic: Font.helveticaOblique(),
       fontBoldItalic: Font.helveticaBoldOblique(),
@@ -68,7 +85,7 @@ class TextStyle {
 
   final PdfColor color;
 
-  final Font font;
+  final Font fontNormal;
 
   final Font fontBold;
 
@@ -103,6 +120,7 @@ class TextStyle {
   TextStyle copyWith({
     PdfColor color,
     Font font,
+    Font fontNormal,
     Font fontBold,
     Font fontItalic,
     Font fontBoldItalic,
@@ -119,6 +137,7 @@ class TextStyle {
       inherit: inherit,
       color: color ?? this.color,
       font: font ?? this.font,
+      fontNormal: fontNormal ?? this.fontNormal,
       fontBold: fontBold ?? this.fontBold,
       fontItalic: fontItalic ?? this.fontItalic,
       fontBoldItalic: fontBoldItalic ?? this.fontBoldItalic,
@@ -138,6 +157,7 @@ class TextStyle {
   TextStyle apply({
     PdfColor color,
     Font font,
+    Font fontNormal,
     Font fontBold,
     Font fontItalic,
     Font fontBoldItalic,
@@ -169,6 +189,7 @@ class TextStyle {
       inherit: inherit,
       color: color ?? this.color,
       font: font ?? this.font,
+      fontNormal: fontNormal ?? this.fontNormal,
       fontBold: fontBold ?? this.fontBold,
       fontItalic: fontItalic ?? this.fontItalic,
       fontBoldItalic: fontBoldItalic ?? this.fontBoldItalic,
@@ -201,6 +222,8 @@ class TextStyle {
     return copyWith(
       color: other.color,
       font: other.font,
+      fontNormal: other.fontNormal,
+      fontBold: other.fontBold,
       fontItalic: other.fontItalic,
       fontBoldItalic: other.fontBoldItalic,
       fontSize: other.fontSize,
@@ -214,25 +237,32 @@ class TextStyle {
     );
   }
 
-  Font get paintFont {
-    if (fontWeight == FontWeight.normal) {
-      if (fontStyle == FontStyle.normal) {
-        return font;
+  @Deprecated('use font instead')
+  Font get paintFont => font;
+
+  Font get font {
+    if (fontWeight != FontWeight.bold) {
+      if (fontStyle != FontStyle.italic) {
+        // normal
+        return fontNormal ?? fontBold ?? fontItalic ?? fontBoldItalic;
       } else {
-        return fontItalic ?? font;
+        // italic
+        return fontItalic ?? fontNormal ?? fontBold ?? fontBoldItalic;
       }
     } else {
-      if (fontStyle == FontStyle.normal) {
-        return fontBold ?? font;
+      if (fontStyle != FontStyle.italic) {
+        // bold
+        return fontBold ?? fontNormal ?? fontItalic ?? fontBoldItalic;
       } else {
-        return fontBoldItalic ?? fontBold ?? fontItalic ?? font;
+        // bold + italic
+        return fontBoldItalic ?? fontBold ?? fontItalic ?? fontNormal;
       }
     }
   }
 
   @override
   String toString() =>
-      'TextStyle(color:$color font:$paintFont size:$fontSize weight:$fontWeight style:$fontStyle letterSpacing:$letterSpacing wordSpacing:$wordSpacing lineSpacing:$lineSpacing height:$height background:$background)';
+      'TextStyle(color:$color font:$font size:$fontSize weight:$fontWeight style:$fontStyle letterSpacing:$letterSpacing wordSpacing:$wordSpacing lineSpacing:$lineSpacing height:$height background:$background)';
 }
 
 @immutable

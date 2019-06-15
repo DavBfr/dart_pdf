@@ -179,7 +179,7 @@ class RichText extends Widget {
         return true;
       }
 
-      final PdfFont font = style.paintFont.getFont(context);
+      final PdfFont font = style.font.getFont(context);
 
       final PdfFontMetrics space =
           font.stringMetrics(' ') * (style.fontSize * textScaleFactor);
@@ -322,7 +322,7 @@ class RichText extends Widget {
       }
 
       context.canvas.drawString(
-          currentStyle.paintFont.getFont(context),
+          currentStyle.font.getFont(context),
           currentStyle.fontSize * textScaleFactor,
           word.text,
           box.x + word.offset.x,

@@ -175,7 +175,7 @@ void main() {
                           text: 'Hello ',
                           style: Theme.of(context).defaultTextStyle,
                           children: <TextSpan>[
-                            const TextSpan(
+                            TextSpan(
                                 text: 'bold',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,

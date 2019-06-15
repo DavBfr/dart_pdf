@@ -1,3 +1,6 @@
+# 1.3.12
+* Fix TextStyle constructor
+
 # 1.3.11
 * Update Readme
 
