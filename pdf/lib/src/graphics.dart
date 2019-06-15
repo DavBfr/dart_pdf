@@ -338,9 +338,9 @@ class PdfGraphics {
     double dTheta = _vectorAngle((x1d - cxd) / rx, (y1d - cyd) / ry,
             (-x1d - cxd) / rx, (-y1d - cyd) / ry) %
         (math.pi * 2.0);
-    if (sweep == false && dTheta > 0.0)
+    if (sweep == false && dTheta > 0.0) {
       dTheta -= math.pi * 2.0;
-    else if (sweep == true && dTheta < 0.0) {
+    } else if (sweep == true && dTheta < 0.0) {
       dTheta += math.pi * 2.0;
     }
     _bezierArcFromCentre(cx, cy, rx, ry, -theta, -dTheta);
