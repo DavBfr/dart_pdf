@@ -14,10 +14,12 @@ Use the `printing` package <https://pub.dartlang.org/packages/printing>
 for full flutter print and share operation.
 
 The coordinate system is using the internal Pdf unit:
- * 1.0 is defined as 1 / 72.0 inch
- * you can use the constants for centimeters, milimeters and inch defined in PdfPageFormat
+
+* 1.0 is defined as 1 / 72.0 inch
+* you can use the constants for centimeters, millimeters and inch defined in PdfPageFormat
 
 Example:
+
 ```dart
 final pdf = Document();
 
@@ -36,9 +38,9 @@ To load an image it is possible to use the dart library [image](https://pub.dart
 final img = decodeImage(File('test.webp').readAsBytesSync());
 final image = PdfImage(
   pdf.document,
-	image: img.data.buffer.asUint8List(),
-	width: img.width,
-	height: img.height,
+  image: img.data.buffer.asUint8List(),
+  width: img.width,
+  height: img.height,
 );
 
 pdf.addPage(Page(
