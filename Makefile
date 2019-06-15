@@ -53,16 +53,30 @@ format-swift: $(SWFT_SRC)
 node_modules:
 	npm install lcov-summary
 
-test-pdf: $(FONTS) .coverage
+get-pdf:
 	cd pdf; pub get
+
+get-printing:
+	cd printing; flutter packages get
+	cd printing/example; flutter packages get
+
+get-readme:
+	cd test; flutter packages get
+
+get: get-pdf get-printing get-readme
+
+test-pdf: $(FONTS) get-pdf .coverage
 	cd pdf; pub global run coverage:collect_coverage --port=$(COV_PORT) -o coverage.json --resume-isolates --wait-paused &\
 	dart --enable-asserts --disable-service-auth-codes --enable-vm-service=$(COV_PORT) --pause-isolates-on-exit test/all_tests.dart
 	cd pdf; pub global run coverage:format_coverage --packages=.packages -i coverage.json --report-on lib --lcov --out lcov.info
 	cd pdf; for EXAMPLE in $(shell cd pdf; find example -name '*.dart'); do dart $$EXAMPLE; done
 
-test-printing: $(FONTS) .coverage
-	cd printing; flutter packages get
+test-printing: $(FONTS) get-printing .coverage
 	cd printing; flutter test --coverage --coverage-path lcov.info
+
+test-readme: $(FONTS) get-readme
+	cd test; dart extract_readme.dart
+	cd test; dartanalyzer readme.dart	
 
 test: test-pdf test-printing node_modules
 	cat pdf/lcov.info printing/lcov.info | node_modules/.bin/lcov-summary
@@ -100,10 +114,8 @@ analyze: analyze-pdf analyze-printing
 	pub global activate dartfix
 	touch $@
 
-fix: .dartfix
-	cd pdf; pub get
+fix: get .dartfix
 	cd pdf; pub global run dartfix:fix --overwrite .
-	cd printing; flutter packages get
 	cd printing; pub global run dartfix:fix --overwrite .
 
 .PHONY: test format format-dart format-clang clean publish-pdf publish-printing analyze

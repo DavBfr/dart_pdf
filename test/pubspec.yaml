@@ -8,13 +8,16 @@ version: 1.0.0
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
+  flutter: "^1.2.0"
 
 dependencies:  
-  pdf:
-  printing:
+  flutter:
+    sdk: flutter
   markdown:
   meta: 
   string_scanner: 
+  pdf:
+  printing:
   path: 
   image:
   path_provider:

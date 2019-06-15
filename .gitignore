@@ -38,3 +38,7 @@ pdf/coverage.json
 .coverage
 package-lock.json
 printing/lcov.info
+
+test/readme.dart
+test/android
+test/ios
