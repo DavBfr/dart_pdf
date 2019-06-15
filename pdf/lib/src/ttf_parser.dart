@@ -16,19 +16,28 @@
 
 part of pdf;
 
+@immutable
 class TtfGlyphInfo {
-  TtfGlyphInfo(this.index, this.data, this.compounds);
+  const TtfGlyphInfo(this.index, this.data, this.compounds);
 
   final int index;
   final Uint8List data;
   final List<int> compounds;
+
+  TtfGlyphInfo copy() {
+    return TtfGlyphInfo(
+      index,
+      Uint8List.fromList(data),
+      List<int>.from(compounds),
+    );
+  }
 
   @override
   String toString() => 'Glyph $index $compounds';
 }
 
 class TtfParser {
-  TtfParser(this.bytes) {
+  TtfParser(ByteData bytes) : bytes = UnmodifiableByteDataView(bytes) {
     final int numTables = bytes.getUint16(4);
 
     for (int i = 0; i < numTables; i++) {
@@ -54,7 +63,7 @@ class TtfParser {
   static const String loca_table = 'loca';
   static const String glyf_table = 'glyf';
 
-  final ByteData bytes;
+  final UnmodifiableByteDataView bytes;
   final Map<String, int> tableOffsets = <String, int>{};
   final Map<String, int> tableSize = <String, int>{};
   String _fontName;
@@ -284,7 +293,7 @@ class TtfParser {
       return TtfGlyphInfo(
         glyph,
         Uint8List.view(bytes.buffer, start, offset - start),
-        <int>[],
+        const <int>[],
       );
     }
 
@@ -322,7 +331,7 @@ class TtfParser {
     return TtfGlyphInfo(
       glyph,
       Uint8List.view(bytes.buffer, start, offset - start),
-      <int>[],
+      const <int>[],
     );
   }
 

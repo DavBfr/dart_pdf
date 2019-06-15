@@ -62,13 +62,14 @@ class TtfWriter {
 
     for (int index = 0; index < chars.length; index++) {
       if (chars[index] == 32) {
-        final TtfGlyphInfo glyph = TtfGlyphInfo(32, Uint8List(0), <int>[]);
+        final TtfGlyphInfo glyph =
+            TtfGlyphInfo(32, Uint8List(0), const <int>[]);
         glyphsInfo.add(glyph);
         continue;
       }
 
       final TtfGlyphInfo glyph =
-          ttf.readGlyph(ttf.charToGlyphIndexMap[chars[index]] ?? 0);
+          ttf.readGlyph(ttf.charToGlyphIndexMap[chars[index]] ?? 0).copy();
       for (int g in glyph.compounds) {
         compounds[g] = null;
       }
@@ -92,7 +93,7 @@ class TtfWriter {
     }
 
     // Add one last empty glyph
-    final TtfGlyphInfo glyph = TtfGlyphInfo(32, Uint8List(0), <int>[]);
+    final TtfGlyphInfo glyph = TtfGlyphInfo(32, Uint8List(0), const <int>[]);
     glyphsInfo.add(glyph);
 
     // update compound indices

@@ -131,6 +131,9 @@ class Font {
       _pdfFont = buildFont(pdfDocument);
     }
 
+    assert(_pdfFont.pdfDocument == context.document,
+        'Do not reuse a Font object across multiple documents');
+
     return _pdfFont;
   }
 

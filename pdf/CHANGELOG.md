@@ -1,3 +1,6 @@
+# 1.3.13
+* Do not modify the TTF font streams
+
 # 1.3.12
 * Fix TextStyle constructor
 
