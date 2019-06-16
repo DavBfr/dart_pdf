@@ -74,6 +74,16 @@ Or share the document to other applications:
 await Printing.sharePdf(bytes: pdf.save(), filename: 'my-document.pdf');
 ```
 
+To print an HTML document, simply do:
+
+```dart
+await Printing.layoutPdf(
+    onLayout: (PdfPageFormat format) async => await Printing.convertHtml(
+          format: format,
+          html: '<html><body><p>Hello!</p></body></html>',
+        ));
+```
+
 ## Installing
 
 1. Add this to your package's `pubspec.yaml` file:

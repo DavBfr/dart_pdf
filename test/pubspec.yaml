@@ -21,3 +21,9 @@ dependencies:
   path: 
   image:
   path_provider:
+
+dependency_overrides:
+  pdf:
+    path: ../pdf
+  printing:
+    path: ../printing
