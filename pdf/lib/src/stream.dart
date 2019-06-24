@@ -184,13 +184,8 @@ class PdfStream {
       PdfStream()..putDictionary(values);
 
   void putObjectDictionary(Map<String, PdfObject> values) {
-    putString('<< ');
-    values.forEach((String k, PdfObject v) {
-      putString('$k ');
-      putStream(v.ref());
-      putString(' ');
-    });
-    putString('>>');
+    putDictionary(values.map((String string, PdfObject object) =>
+        MapEntry<String, PdfStream>(string, object.ref())));
   }
 
   int get offset => _stream.length;
