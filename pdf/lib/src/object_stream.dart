@@ -54,6 +54,9 @@ class PdfObjectStream extends PdfObject {
       // This is a non-deflated stream
       _data = buf.output();
     }
+    if (pdfDocument.encryption != null) {
+      _data = pdfDocument.encryption.encrypt(_data, this);
+    }
     params['/Length'] = PdfStream.intNum(_data.length);
   }
 

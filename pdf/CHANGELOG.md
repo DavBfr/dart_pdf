@@ -1,6 +1,7 @@
 ## 1.3.14
 
 * Add Document ID
+* Add encryption support
 
 ## 1.3.13
 

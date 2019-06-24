@@ -86,6 +86,9 @@ class PdfDocument {
   /// No compression by default
   final DeflateCallback deflate;
 
+  /// Object used to encrypt the document
+  PdfEncryption encryption;
+
   /// These map the page modes just defined to the pagemodes setting of Pdf.
   static const List<String> _PdfPageModes = <String>[
     '/UseNone',

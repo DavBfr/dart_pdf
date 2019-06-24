@@ -37,6 +37,9 @@ class PdfOutput {
   /// This is used to track the /Info object (info)
   PdfObject infoID;
 
+  /// This is used to track the /Encrypt object (encryption)
+  PdfEncryption encryptID;
+
   /// This method writes a [PdfObject] to the stream.
   ///
   /// @param ob [PdfObject] Object to write
@@ -48,6 +51,9 @@ class PdfOutput {
     }
     if (ob is PdfInfo) {
       infoID = ob;
+    }
+    if (ob is PdfEncryption) {
+      encryptID = ob;
     }
 
     offsets.add(PdfXref(ob.objser, os.offset));
@@ -115,6 +121,11 @@ class PdfOutput {
     // the /Info reference (OPTIONAL)
     if (infoID != null) {
       params['/Info'] = infoID.ref();
+    }
+
+    // the /Encrypt reference (OPTIONAL)
+    if (encryptID != null) {
+      params['/Encrypt'] = encryptID.ref();
     }
 
     // end the trailer object
