@@ -122,6 +122,22 @@ class PdfStream {
     putString(value ? 'true' : 'false');
   }
 
+  /// Returns the ASCII/Unicode code unit corresponding to the hexadecimal digit
+  /// [digit].
+  int _codeUnitForDigit(int digit) =>
+      digit < 10 ? digit + 0x30 : digit + 0x61 - 10;
+
+  void putBinary(List<int> s) {
+    _stream.add(0x3c);
+    for (int byte in s) {
+      _stream.add(_codeUnitForDigit((byte & 0xF0) >> 4));
+      _stream.add(_codeUnitForDigit(byte & 0x0F));
+    }
+    _stream.add(0x3e);
+  }
+
+  static PdfStream binary(List<int> s) => PdfStream()..putBinary(s);
+
   void putArray(List<PdfStream> values) {
     putString('[');
     for (PdfStream val in values) {

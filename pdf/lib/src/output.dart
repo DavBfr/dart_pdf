@@ -106,6 +106,8 @@ class PdfOutput {
     // the /Root catalog indirect reference (REQUIRED)
     if (rootID != null) {
       params['/Root'] = rootID.ref();
+      final PdfStream id = PdfStream.binary(rootID.pdfDocument.documentID);
+      params['/ID'] = PdfStream.array(<PdfStream>[id, id]);
     } else {
       throw Exception('Root object is not present in document');
     }

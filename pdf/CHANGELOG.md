@@ -1,3 +1,7 @@
+## 1.3.14
+
+* Add Document ID
+
 ## 1.3.13
 
 * Do not modify the TTF font streams

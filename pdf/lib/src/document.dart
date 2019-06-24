@@ -97,6 +97,20 @@ class PdfDocument {
   /// This holds the current fonts
   final Set<PdfFont> fonts = Set<PdfFont>();
 
+  /// Generates the document ID
+  List<int> _documentID;
+  List<int> get documentID {
+    if (_documentID == null) {
+      final math.Random rnd = math.Random();
+      _documentID = sha256
+          .convert(DateTime.now().toIso8601String().codeUnits +
+              List<int>.generate(32, (_) => rnd.nextInt(256)))
+          .bytes;
+    }
+
+    return _documentID;
+  }
+
   /// Creates a new serial number
   int _genSerial() => _objser++;
 
