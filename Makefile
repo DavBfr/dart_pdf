@@ -82,7 +82,7 @@ test: test-pdf test-printing node_modules
 	cat pdf/lcov.info printing/lcov.info | node_modules/.bin/lcov-summary
 
 clean:
-	git clean -fdx -e .vscode
+	git clean -fdx -e .vscode -e ref
 
 publish-pdf: format clean
 	find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
@@ -118,4 +118,10 @@ fix: get .dartfix
 	cd pdf; pub global run dartfix:fix --overwrite .
 	cd printing; pub global run dartfix:fix --overwrite .
 
-.PHONY: test format format-dart format-clang clean publish-pdf publish-printing analyze
+ref:
+	mkdir -p ref
+	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/pdf/pdfs/PDF32000_2008.pdf'
+	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/pdf/adobe_supplement_iso32000.pdf'
+	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_reference_1-7.pdf'
+
+.PHONY: test format format-dart format-clang clean publish-pdf publish-printing analyze ref
