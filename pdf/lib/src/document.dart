@@ -89,6 +89,9 @@ class PdfDocument {
   /// Object used to encrypt the document
   PdfEncryption encryption;
 
+  /// The PDF specification version
+  final String version = '1.7';
+
   /// These map the page modes just defined to the pagemodes setting of Pdf.
   static const List<String> _PdfPageModes = <String>[
     '/UseNone',

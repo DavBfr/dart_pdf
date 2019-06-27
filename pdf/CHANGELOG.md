@@ -2,6 +2,7 @@
 
 * Add Document ID
 * Add encryption support
+* Increase PDF version to 1.7
 
 ## 1.3.13
 

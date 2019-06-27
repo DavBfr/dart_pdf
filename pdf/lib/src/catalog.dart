@@ -43,6 +43,9 @@ class PdfCatalog extends PdfObject {
   void _prepare() {
     super._prepare();
 
+    /// the PDF specification version, overrides the header version starting from 1.4
+    params['/Version'] = PdfStream.string('/${pdfDocument.version}');
+
     params['/Pages'] = pdfPageList.ref();
 
     // the Outlines object
