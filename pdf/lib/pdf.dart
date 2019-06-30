@@ -54,6 +54,7 @@ part 'src/page.dart';
 part 'src/point.dart';
 part 'src/polygon.dart';
 part 'src/rect.dart';
+part 'src/signature.dart';
 part 'src/stream.dart';
 part 'src/ttf_parser.dart';
 part 'src/ttf_writer.dart';

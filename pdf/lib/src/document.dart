@@ -89,6 +89,9 @@ class PdfDocument {
   /// Object used to encrypt the document
   PdfEncryption encryption;
 
+  /// Object used to sign the document
+  PdfSignature sign;
+
   /// The PDF specification version
   final String version = '1.7';
 

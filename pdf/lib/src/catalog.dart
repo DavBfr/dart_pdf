@@ -59,5 +59,10 @@ class PdfCatalog extends PdfObject {
     // the /PageMode setting
     params['/PageMode'] =
         PdfStream.string(PdfDocument._PdfPageModes[pageMode.index]);
+
+    if (pdfDocument.sign != null) {
+      params['/Perms'] = PdfStream.dictionary(
+          <String, PdfStream>{'/DocMDP': pdfDocument.sign.ref()});
+    }
   }
 }

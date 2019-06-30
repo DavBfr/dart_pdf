@@ -3,6 +3,7 @@
 * Add Document ID
 * Add encryption support
 * Increase PDF version to 1.7
+* Add document signature support
 
 ## 1.3.13
 

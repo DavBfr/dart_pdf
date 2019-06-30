@@ -40,6 +40,9 @@ class PdfOutput {
   /// This is used to track the /Encrypt object (encryption)
   PdfEncryption encryptID;
 
+  /// This is used to track the /Sign object (signature)
+  PdfSignature signatureID;
+
   /// This method writes a [PdfObject] to the stream.
   ///
   /// @param ob [PdfObject] Object to write
@@ -54,6 +57,10 @@ class PdfOutput {
     }
     if (ob is PdfEncryption) {
       encryptID = ob;
+    }
+    if (ob is PdfSignature) {
+      assert(signatureID == null, 'Only one document signature is allowed');
+      signatureID = ob;
     }
 
     offsets.add(PdfXref(ob.objser, os.offset));
@@ -131,6 +138,10 @@ class PdfOutput {
     // end the trailer object
     os.putDictionary(params);
     os.putString('\nstartxref\n$xref\n%%EOF\n');
+
+    if (signatureID != null) {
+      signatureID._writeSignature(os);
+    }
   }
 
   /// Writes a block of references to the Pdf file
