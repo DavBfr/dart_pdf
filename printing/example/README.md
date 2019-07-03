@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
   }
 
   List<int> buildPdf(PdfPageFormat format) {
-    final PdfDoc doc = PdfDoc();
+    final Document doc = Document();
 
     doc.addPage(
       pdf.Page(

@@ -20,6 +20,7 @@ class Document {
   Document(
       {PdfPageMode pageMode = PdfPageMode.none,
       DeflateCallback deflate,
+      bool compress = true,
       this.theme,
       String title,
       String author,
@@ -27,7 +28,11 @@ class Document {
       String subject,
       String keywords,
       String producer})
-      : document = PdfDocument(pageMode: pageMode, deflate: deflate) {
+      : document = PdfDocument(
+          pageMode: pageMode,
+          deflate: deflate,
+          compress: compress,
+        ) {
     if (title != null ||
         author != null ||
         creator != null ||

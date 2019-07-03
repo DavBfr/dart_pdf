@@ -16,6 +16,7 @@
 
 part of printing;
 
+@deprecated
 class PdfDoc extends Document {
   /// Wrapper for a [Document] with zlib compression enabled by default
   PdfDoc(
@@ -29,7 +30,7 @@ class PdfDoc extends Document {
       String keywords,
       String producer})
       : super(
-          deflate: compress ? zlib.encode : null,
+          compress: compress,
           pageMode: pageMode,
           theme: theme,
           title: title,

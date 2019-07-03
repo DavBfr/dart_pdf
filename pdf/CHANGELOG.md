@@ -4,6 +4,7 @@
 * Add encryption support
 * Increase PDF version to 1.7
 * Add document signature support
+* Default compress output if available
 
 ## 1.3.13
 

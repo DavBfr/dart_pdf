@@ -74,7 +74,7 @@ class MyAppState extends State<MyApp> {
     print('Print Screen ${im.width}x${im.height} ...');
 
     Printing.layoutPdf(onLayout: (PdfPageFormat format) {
-      final pdf.Document document = PdfDoc();
+      final pdf.Document document = pdf.Document();
 
       final PdfImage image = PdfImage(document.document,
           image: bytes.buffer.asUint8List(),

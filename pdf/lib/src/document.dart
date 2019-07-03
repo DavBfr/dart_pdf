@@ -46,7 +46,11 @@ class PdfDocument {
   /// This creates a Pdf document
   /// @param pagemode an int, determines how the document will present itself to
   /// the viewer when it first opens.
-  PdfDocument({PdfPageMode pageMode = PdfPageMode.none, this.deflate}) {
+  PdfDocument({
+    PdfPageMode pageMode = PdfPageMode.none,
+    DeflateCallback deflate,
+    bool compress = true,
+  }) : deflate = compress ? (deflate ?? defaultDeflate) : null {
     _objser = 1;
 
     // Now create some standard objects

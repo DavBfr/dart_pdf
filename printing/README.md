@@ -14,7 +14,7 @@ for documentation.
 Example:
 
 ```dart
-final pdf = PdfDoc();
+final pdf = Document();
 
 pdf.addPage(Page(
       pageFormat: PdfPageFormat.a4,
