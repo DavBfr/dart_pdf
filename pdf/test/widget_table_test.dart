@@ -74,10 +74,10 @@ void main() {
   test('Table Widget filled', () {
     pdf.addPage(Page(
       build: (Context context) => Table(
-            children: buildTable(context: context, count: 20),
-            border: const TableBorder(),
-            tableWidth: TableWidth.max,
-          ),
+        children: buildTable(context: context, count: 20),
+        border: const TableBorder(),
+        tableWidth: TableWidth.max,
+      ),
     ));
   });
 

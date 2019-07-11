@@ -124,79 +124,71 @@ Future<Document> generateDocument(PdfPageFormat format) async {
         right: 2.0 * PdfPageFormat.cm,
         bottom: 2.0 * PdfPageFormat.cm),
     build: (Context context) => Row(children: <Widget>[
-          Expanded(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                Container(
-                    padding: const EdgeInsets.only(left: 30, bottom: 20),
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text('Parnella Charlesbois',
-                              textScaleFactor: 2,
-                              style: Theme.of(context)
-                                  .defaultTextStyle
-                                  .copyWith(fontWeight: FontWeight.bold)),
-                          Padding(padding: const EdgeInsets.only(top: 10)),
-                          Text('Electrotyper',
-                              textScaleFactor: 1.2,
-                              style: Theme.of(context)
-                                  .defaultTextStyle
-                                  .copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: green)),
-                          Padding(padding: const EdgeInsets.only(top: 20)),
-                          Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text('568 Port Washington Road'),
-                                      Text('Nordegg, AB T0M 2H0'),
-                                      Text('Canada, ON'),
-                                    ]),
-                                Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text('+1 403-721-6898'),
-                                      Text('p.charlesbois@yahoo.com'),
-                                      Text('wholeprices.ca')
-                                    ]),
-                                Padding(padding: EdgeInsets.zero)
-                              ]),
-                        ])),
-                Category(title: 'Work Experience'),
-                Block(title: 'Tour bus driver'),
-                Block(title: 'Logging equipment operator'),
-                Block(title: 'Foot doctor'),
-                Category(title: 'Education'),
-                Block(title: 'Bachelor Of Commerce'),
-                Block(title: 'Bachelor Interior Design'),
-              ])),
-          Container(
-            height: double.infinity,
-            width: 10,
-            decoration: const BoxDecoration(
-                border: BoxBorder(left: true, color: green, width: 2)),
-          ),
-          Column(
+      Expanded(
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                ClipOval(
-                    child: Container(
-                        width: 100,
-                        height: 100,
-                        color: lightGreen,
-                        child: profileImage == null
-                            ? Container()
-                            : Image(profileImage)))
-              ])
-        ]),
+            Container(
+                padding: const EdgeInsets.only(left: 30, bottom: 20),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text('Parnella Charlesbois',
+                          textScaleFactor: 2,
+                          style: Theme.of(context)
+                              .defaultTextStyle
+                              .copyWith(fontWeight: FontWeight.bold)),
+                      Padding(padding: const EdgeInsets.only(top: 10)),
+                      Text('Electrotyper',
+                          textScaleFactor: 1.2,
+                          style: Theme.of(context).defaultTextStyle.copyWith(
+                              fontWeight: FontWeight.bold, color: green)),
+                      Padding(padding: const EdgeInsets.only(top: 20)),
+                      Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Text('568 Port Washington Road'),
+                                  Text('Nordegg, AB T0M 2H0'),
+                                  Text('Canada, ON'),
+                                ]),
+                            Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Text('+1 403-721-6898'),
+                                  Text('p.charlesbois@yahoo.com'),
+                                  Text('wholeprices.ca')
+                                ]),
+                            Padding(padding: EdgeInsets.zero)
+                          ]),
+                    ])),
+            Category(title: 'Work Experience'),
+            Block(title: 'Tour bus driver'),
+            Block(title: 'Logging equipment operator'),
+            Block(title: 'Foot doctor'),
+            Category(title: 'Education'),
+            Block(title: 'Bachelor Of Commerce'),
+            Block(title: 'Bachelor Interior Design'),
+          ])),
+      Container(
+        height: double.infinity,
+        width: 10,
+        decoration: const BoxDecoration(
+            border: BoxBorder(left: true, color: green, width: 2)),
+      ),
+      Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
+        ClipOval(
+            child: Container(
+                width: 100,
+                height: 100,
+                color: lightGreen,
+                child:
+                    profileImage == null ? Container() : Image(profileImage)))
+      ])
+    ]),
   ));
   return pdf;
 }

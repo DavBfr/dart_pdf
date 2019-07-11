@@ -60,13 +60,13 @@ void main() {
 
     pdf.addPage(Page(
       build: (Context context) => ListView(
-            children: <Widget>[
-              Text(
-                style.font.fontName,
-                style: style,
-              ),
-            ],
+        children: <Widget>[
+          Text(
+            style.font.fontName,
+            style: style,
           ),
+        ],
+      ),
     ));
   });
 

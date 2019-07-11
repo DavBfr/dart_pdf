@@ -49,24 +49,24 @@ void main() {
   test('Container Widgets Flat', () {
     pdf.addPage(Page(
       build: (Context context) => Container(
-            alignment: Alignment.center,
-            margin: const EdgeInsets.all(30),
-            padding: const EdgeInsets.all(20),
-            decoration: const BoxDecoration(
-                color: PdfColors.blue,
-                borderRadius: 20,
-                border: BoxBorder(
-                  color: PdfColors.blue800,
-                  top: true,
-                  left: true,
-                  right: true,
-                  bottom: true,
-                  width: 2,
-                )),
-            width: 200,
-            height: 400,
-            // child: Placeholder(),
-          ),
+        alignment: Alignment.center,
+        margin: const EdgeInsets.all(30),
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+            color: PdfColors.blue,
+            borderRadius: 20,
+            border: BoxBorder(
+              color: PdfColors.blue800,
+              top: true,
+              left: true,
+              right: true,
+              bottom: true,
+              width: 2,
+            )),
+        width: 200,
+        height: 400,
+        // child: Placeholder(),
+      ),
     ));
   });
 
@@ -77,16 +77,16 @@ void main() {
 
     pdf.addPage(Page(
       build: (Context context) => Container(
-            alignment: Alignment.center,
-            margin: const EdgeInsets.all(30),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              image: DecorationImage(image: image, fit: BoxFit.cover),
-            ),
-            width: 200,
-            height: 400,
-            // child: Placeholder(),
-          ),
+        alignment: Alignment.center,
+        margin: const EdgeInsets.all(30),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          image: DecorationImage(image: image, fit: BoxFit.cover),
+        ),
+        width: 200,
+        height: 400,
+        // child: Placeholder(),
+      ),
     ));
   });
 

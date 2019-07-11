@@ -31,41 +31,41 @@ void main() {
   test('Clip Widgets ClipRect', () {
     pdf.addPage(Page(
       build: (Context context) => ClipRect(
-            child: Transform.rotate(
-              angle: 0.1,
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: PdfColors.blue,
-                ),
-              ),
+        child: Transform.rotate(
+          angle: 0.1,
+          child: Container(
+            decoration: const BoxDecoration(
+              color: PdfColors.blue,
             ),
           ),
+        ),
+      ),
     ));
   });
 
   test('Clip Widgets ClipRRect', () {
     pdf.addPage(Page(
       build: (Context context) => ClipRRect(
-            horizontalRadius: 30,
-            verticalRadius: 30,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: PdfColors.blue,
-              ),
-            ),
+        horizontalRadius: 30,
+        verticalRadius: 30,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: PdfColors.blue,
           ),
+        ),
+      ),
     ));
   });
 
   test('Clip Widgets ClipOval', () {
     pdf.addPage(Page(
       build: (Context context) => ClipOval(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: PdfColors.blue,
-              ),
-            ),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: PdfColors.blue,
           ),
+        ),
+      ),
     ));
   });
 
