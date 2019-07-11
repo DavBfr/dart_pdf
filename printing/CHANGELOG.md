@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.2
+
+- Update Flutter and Dart dependency
+
 ## 2.1.0
 
 - Add html to pdf platform conversion
