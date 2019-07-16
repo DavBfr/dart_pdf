@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.3
+
+- Update Pdf dependency
+
 ## 2.1.2
 
 - Update Flutter and Dart dependency
