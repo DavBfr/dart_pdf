@@ -53,10 +53,9 @@ class TableBorder extends BoxBorder {
   final bool horizontalInside;
   final bool verticalInside;
 
-  @override
-  void paintBorders(Context context, PdfRect box,
+  void paint(Context context, PdfRect box,
       [List<double> widths, List<double> heights]) {
-    super.paintBorders(context, box);
+    super.paintRect(context, box);
 
     if (verticalInside) {
       double offset = box.x;
@@ -307,7 +306,7 @@ class Table extends Widget implements SpanningWidget {
     context.canvas.restoreContext();
 
     if (border != null) {
-      border.paintBorders(context, box, _widths, _heights);
+      border.paint(context, box, _widths, _heights);
     }
   }
 }

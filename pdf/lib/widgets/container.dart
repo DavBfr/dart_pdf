@@ -42,7 +42,7 @@ class BoxBorder {
   /// The width of the
   final double width;
 
-  void paintBorders(Context context, PdfRect box) {
+  void paintRect(Context context, PdfRect box) {
     assert(box.x != null);
     assert(box.y != null);
     assert(box.width != null);
@@ -85,6 +85,34 @@ class BoxBorder {
       context.canvas.strokePath();
     }
   }
+
+  void paintEllipse(Context context, PdfRect box) {
+    assert(box.x != null);
+    assert(box.y != null);
+    assert(box.width != null);
+    assert(box.height != null);
+
+    context.canvas
+      ..setStrokeColor(color)
+      ..setLineWidth(width)
+      ..drawEllipse(box.x + box.width / 2.0, box.y + box.height / 2.0,
+          box.width / 2.0, box.height / 2.0)
+      ..strokePath();
+  }
+
+  void paintRRect(Context context, PdfRect box, double borderRadius) {
+    assert(box.x != null);
+    assert(box.y != null);
+    assert(box.width != null);
+    assert(box.height != null);
+
+    context.canvas
+      ..setStrokeColor(color)
+      ..setLineWidth(width)
+      ..drawRRect(
+          box.x, box.y, box.width, box.height, borderRadius, borderRadius)
+      ..strokePath();
+  }
 }
 
 @immutable
@@ -101,7 +129,7 @@ class DecorationImage {
   final BoxFit fit;
   final Alignment alignment;
 
-  void paintImage(Context context, PdfRect box) {
+  void paint(Context context, PdfRect box) {
     final PdfPoint imageSize =
         PdfPoint(image.width.toDouble(), image.height.toDouble());
     final FittedSizes sizes = applyBoxFit(fit, imageSize, box.size);
@@ -134,7 +162,8 @@ class BoxDecoration {
       this.border,
       this.borderRadius,
       this.image,
-      this.shape = BoxShape.rectangle});
+      this.shape = BoxShape.rectangle})
+      : assert(shape != null);
 
   /// The color to fill in the background of the box.
   final PdfColor color;
@@ -143,7 +172,7 @@ class BoxDecoration {
   final BoxShape shape;
   final DecorationImage image;
 
-  void paintBackground(Context context, PdfRect box) {
+  void paint(Context context, PdfRect box) {
     assert(box.x != null);
     assert(box.y != null);
     assert(box.width != null);
@@ -168,6 +197,44 @@ class BoxDecoration {
         ..setFillColor(color)
         ..fillPath();
     }
+
+    if (image != null) {
+      context.canvas.saveContext();
+      switch (shape) {
+        case BoxShape.circle:
+          context.canvas
+            ..drawEllipse(box.x + box.width / 2.0, box.y + box.height / 2.0,
+                box.width / 2.0, box.height / 2.0)
+            ..clipPath();
+
+          break;
+        case BoxShape.rectangle:
+          if (borderRadius != null) {
+            context.canvas
+              ..drawRRect(box.x, box.y, box.width, box.height, borderRadius,
+                  borderRadius)
+              ..clipPath();
+          }
+          break;
+      }
+      image.paint(context, box);
+      context.canvas.restoreContext();
+    }
+
+    if (border != null) {
+      switch (shape) {
+        case BoxShape.circle:
+          border.paintEllipse(context, box);
+          break;
+        case BoxShape.rectangle:
+          if (borderRadius != null) {
+            border.paintRRect(context, box, borderRadius);
+          } else {
+            border.paintRect(context, box);
+          }
+          break;
+      }
+    }
   }
 }
 
@@ -190,15 +257,11 @@ class DecoratedBox extends SingleChildWidget {
   void paint(Context context) {
     super.paint(context);
     if (position == DecorationPosition.background) {
-      decoration.paintBackground(context, box);
-      decoration.image?.paintImage(context, box);
-      decoration.border?.paintBorders(context, box);
+      decoration.paint(context, box);
     }
     paintChild(context);
     if (position == DecorationPosition.foreground) {
-      decoration.paintBackground(context, box);
-      decoration.image?.paintImage(context, box);
-      decoration.border?.paintBorders(context, box);
+      decoration.paint(context, box);
     }
   }
 }

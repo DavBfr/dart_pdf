@@ -1,3 +1,9 @@
+# Changelog
+
+## 1.3.15
+
+* Fix Image shape inside BoxDecoration
+
 ## 1.3.14
 
 * Add Document ID

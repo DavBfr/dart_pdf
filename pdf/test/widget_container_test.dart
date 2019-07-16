@@ -90,6 +90,80 @@ void main() {
     ));
   });
 
+  test('Container Widgets BoxShape Image', () {
+    final Uint32List img = generateBitmap(100, 100);
+    final PdfImage image = PdfImage(pdf.document,
+        image: img.buffer.asUint8List(), width: 100, height: 100);
+
+    pdf.addPage(Page(
+      build: (Context context) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Container(
+              height: 200.0,
+              width: 200.0,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                image: DecorationImage(image: image, fit: BoxFit.cover),
+              ),
+            ),
+            Container(
+              height: 200.0,
+              width: 200.0,
+              decoration: BoxDecoration(
+                shape: BoxShape.rectangle,
+                borderRadius: 40,
+                image: DecorationImage(image: image, fit: BoxFit.cover),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+  });
+
+  test('Container Widgets BoxShape Border', () {
+    pdf.addPage(Page(
+      build: (Context context) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Container(
+              height: 200.0,
+              width: 200.0,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                border: BoxBorder(
+                    bottom: true,
+                    top: true,
+                    left: true,
+                    right: true,
+                    color: PdfColors.blue,
+                    width: 3),
+              ),
+            ),
+            Container(
+              height: 200.0,
+              width: 200.0,
+              decoration: const BoxDecoration(
+                shape: BoxShape.rectangle,
+                borderRadius: 40,
+                border: BoxBorder(
+                    bottom: true,
+                    top: true,
+                    left: true,
+                    right: true,
+                    color: PdfColors.blue,
+                    width: 3),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+  });
+
   tearDownAll(() {
     final File file = File('widgets-container.pdf');
     file.writeAsBytesSync(pdf.save());
