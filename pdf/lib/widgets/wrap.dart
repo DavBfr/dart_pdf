@@ -37,8 +37,16 @@ class _RunMetrics {
   final int childCount;
 }
 
+class _WrapContext extends WidgetContext {
+  int firstChild = 0;
+  int lastChild = 0;
+
+  @override
+  String toString() => 'WrapContext first:$firstChild last:$lastChild';
+}
+
 /// A widget that displays its children in multiple horizontal or vertical runs.
-class Wrap extends MultiChildWidget {
+class Wrap extends MultiChildWidget implements SpanningWidget {
   /// Creates a wrap layout.
 
   Wrap({
@@ -83,7 +91,10 @@ class Wrap extends MultiChildWidget {
 
   bool get textDirection => false;
 
-  bool _hasVisualOverflow = false;
+  @override
+  bool get canSpan => _context.lastChild < children.length;
+
+  final _WrapContext _context = _WrapContext();
 
   bool get _debugHasNecessaryDirections {
     assert(direction != null);
@@ -192,9 +203,8 @@ class Wrap extends MultiChildWidget {
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
     assert(_debugHasNecessaryDirections);
-    _hasVisualOverflow = false;
 
-    if (children.isEmpty) {
+    if (children.isEmpty || _context.firstChild >= children.length) {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
       return;
     }
@@ -234,7 +244,7 @@ class Wrap extends MultiChildWidget {
     double runCrossAxisExtent = 0.0;
     int childCount = 0;
 
-    for (Widget child in children) {
+    for (Widget child in children.sublist(_context.firstChild)) {
       child.layout(context, childConstraints, parentUsesSize: true);
 
       final double childMainAxisExtent = _getMainAxisExtent(child);
@@ -297,9 +307,6 @@ class Wrap extends MultiChildWidget {
         break;
     }
 
-    _hasVisualOverflow = containerMainAxisExtent < mainAxisExtent ||
-        containerCrossAxisExtent < crossAxisExtent;
-
     final double crossAxisFreeSpace =
         math.max(0.0, containerCrossAxisExtent - crossAxisExtent);
     double runLeadingSpace = 0.0;
@@ -333,7 +340,7 @@ class Wrap extends MultiChildWidget {
         ? containerCrossAxisExtent - runLeadingSpace
         : runLeadingSpace;
 
-    int currentWidget = 0;
+    _context.lastChild = _context.firstChild;
     for (int i = 0; i < runCount; ++i) {
       final _RunMetrics metrics = runMetrics[i];
       final double runMainAxisExtent = metrics.mainAxisExtent;
@@ -377,6 +384,12 @@ class Wrap extends MultiChildWidget {
         crossAxisOffset -= runCrossAxisExtent;
       }
 
+      if (crossAxisOffset < -.01 ||
+          crossAxisOffset + runCrossAxisExtent > containerCrossAxisExtent) {
+        break;
+      }
+
+      int currentWidget = _context.lastChild;
       for (Widget child in children.sublist(currentWidget)) {
         final int runIndex = childRunMetrics[child];
         if (runIndex != i) {
@@ -407,6 +420,8 @@ class Wrap extends MultiChildWidget {
       } else {
         crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
       }
+
+      _context.lastChild = currentWidget;
     }
   }
 
@@ -416,19 +431,26 @@ class Wrap extends MultiChildWidget {
 
     context.canvas.saveContext();
 
-    if (_hasVisualOverflow) {
-      context.canvas
-        ..drawRect(box.left, box.bottom, box.width, box.height)
-        ..clipPath();
-    }
-
     final Matrix4 mat = Matrix4.identity();
     mat.translate(box.x, box.y);
     context.canvas.setTransform(mat);
-    for (Widget child in children) {
+    for (Widget child
+        in children.sublist(_context.firstChild, _context.lastChild)) {
       child.paint(context);
     }
 
     context.canvas.restoreContext();
+  }
+
+  @override
+  void restoreContext(WidgetContext context) {
+    if (context is _WrapContext) {
+      _context.firstChild = context.lastChild;
+    }
+  }
+
+  @override
+  WidgetContext saveContext() {
+    return _context;
   }
 }

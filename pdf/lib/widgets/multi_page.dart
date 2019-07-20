@@ -55,9 +55,11 @@ class MultiPage extends Page {
       this.header,
       this.footer,
       Theme theme,
+      this.maxPages = 20,
       PageOrientation orientation = PageOrientation.natural,
       EdgeInsets margin})
       : _buildList = build,
+        assert(maxPages != null && maxPages > 0),
         super(
             pageFormat: pageFormat,
             margin: margin,
@@ -73,6 +75,8 @@ class MultiPage extends Page {
   final BuildCallback footer;
 
   final List<_MultiPageInstance> _pages = <_MultiPageInstance>[];
+
+  final int maxPages;
 
   void _paintChild(
       Context context, Widget child, double x, double y, double pageHeight) {
@@ -126,9 +130,9 @@ class MultiPage extends Page {
 
       assert(() {
         // Detect too big widgets
-        if (sameCount++ > 20) {
+        if (sameCount++ > maxPages) {
           throw Exception(
-              'This widget created more than 20 pages. This may be an issue in the widget or the document.');
+              'This widget created more than $maxPages pages. This may be an issue in the widget or the document.');
         }
         return true;
       }());
@@ -188,7 +192,7 @@ class MultiPage extends Page {
 
       // What to do if the widget is too big for the page?
       if (offsetStart - child.box.height < offsetEnd) {
-        // If it is not a multi=page widget and its height
+        // If it is not a multi-page widget and its height
         // is smaller than a full new page, we schedule a new page creation
         if (child.box.height <= pageHeight - pageHeightMargin &&
             !(child is SpanningWidget)) {

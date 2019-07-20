@@ -254,6 +254,36 @@ void main() {
     );
   });
 
+  test('Wrap Widget Multipage', () {
+    final math.Random rnd = math.Random(42);
+    pdf.addPage(
+      MultiPage(
+        pageFormat: const PdfPageFormat(200, 200),
+        margin: const EdgeInsets.all(10),
+        build: (Context context) => <Widget>[
+          Wrap(
+            direction: Axis.vertical,
+            verticalDirection: VerticalDirection.up,
+            alignment: WrapAlignment.center,
+            runAlignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 10,
+            runSpacing: 10,
+            children: List<Widget>.generate(
+                17,
+                (int n) => Container(
+                      width: rnd.nextDouble() * 100,
+                      height: rnd.nextDouble() * 100,
+                      alignment: Alignment.center,
+                      color: PdfColors.blue800,
+                      child: Text('$n'),
+                    )),
+          )
+        ],
+      ),
+    );
+  });
+
   test('Wrap Widget Empty', () {
     pdf.addPage(Page(build: (Context context) => Wrap()));
   });
