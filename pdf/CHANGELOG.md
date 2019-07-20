@@ -3,6 +3,7 @@
 ## 1.3.16
 
 * Add better debugPaint on Align Widget
+* Fix Transform placement when Alignment and Origin are Null
 
 ## 1.3.15
 

@@ -168,9 +168,6 @@ class Transform extends SingleChildWidget {
   final Alignment alignment;
 
   Matrix4 get _effectiveTransform {
-    if (origin == null && alignment == null) {
-      return transform;
-    }
     final Matrix4 result = Matrix4.identity();
     if (origin != null) {
       result.translate(origin.x, origin.y);
