@@ -191,6 +191,16 @@ void main() {
             )));
   });
 
+  test('Basic Widgets Transform rotateBox', () {
+    pdf.addPage(Page(
+        build: (Context context) => Center(
+              child: Transform.rotateBox(
+                angle: 3.1416 / 2,
+                child: Text('Hello'),
+              ),
+            )));
+  });
+
   tearDownAll(() {
     final File file = File('widgets-basic.pdf');
     file.writeAsBytesSync(pdf.save());

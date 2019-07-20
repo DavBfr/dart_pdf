@@ -4,6 +4,7 @@
 
 * Add better debugPaint on Align Widget
 * Fix Transform placement when Alignment and Origin are Null
+* Add Transform.rotateBox constructor
 
 ## 1.3.15
 

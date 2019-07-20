@@ -128,6 +128,7 @@ class Transform extends SingleChildWidget {
     this.alignment,
     Widget child,
   })  : assert(transform != null),
+        _relayout = false,
         super(child: child);
 
   /// Creates a widget that transforms its child using a rotation around the
@@ -138,6 +139,18 @@ class Transform extends SingleChildWidget {
     this.alignment = Alignment.center,
     Widget child,
   })  : transform = Matrix4.rotationZ(angle),
+        _relayout = false,
+        super(child: child);
+
+  /// Creates a widget that transforms its child using a rotation around the
+  /// center and relayout the bounding box.
+  Transform.rotateBox({
+    @required double angle,
+    Widget child,
+  })  : transform = Matrix4.rotationZ(angle),
+        _relayout = true,
+        alignment = null,
+        origin = null,
         super(child: child);
 
   /// Creates a widget that transforms its child using a translation.
@@ -147,6 +160,7 @@ class Transform extends SingleChildWidget {
   })  : transform = Matrix4.translationValues(offset.x, offset.y, 0),
         origin = null,
         alignment = null,
+        _relayout = false,
         super(child: child);
 
   /// Creates a widget that scales its child uniformly.
@@ -156,6 +170,7 @@ class Transform extends SingleChildWidget {
     this.alignment = Alignment.center,
     Widget child,
   })  : transform = Matrix4.diagonal3Values(scale, scale, 1),
+        _relayout = false,
         super(child: child);
 
   /// The matrix to transform the child by during painting.
@@ -166,6 +181,8 @@ class Transform extends SingleChildWidget {
 
   /// The alignment of the origin, relative to the size of the box.
   final Alignment alignment;
+
+  final bool _relayout;
 
   Matrix4 get _effectiveTransform {
     final Matrix4 result = Matrix4.identity();
@@ -186,6 +203,50 @@ class Transform extends SingleChildWidget {
       result.translate(-origin.x, -origin.y);
     }
     return result;
+  }
+
+  @override
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    if (!_relayout) {
+      return super.layout(context, constraints, parentUsesSize: parentUsesSize);
+    }
+
+    if (child != null) {
+      child.layout(context, constraints, parentUsesSize: parentUsesSize);
+      assert(child.box != null);
+      box = child.box;
+
+      final Matrix4 mat = transform;
+      final List<double> values = mat.applyToVector3Array(<double>[
+        child.box.left,
+        child.box.top,
+        0,
+        child.box.right,
+        child.box.top,
+        0,
+        child.box.right,
+        child.box.bottom,
+        0,
+        child.box.left,
+        child.box.bottom,
+        0,
+      ]);
+
+      box = PdfRect.fromLTRB(
+        math.min(
+            math.min(math.min(values[0], values[3]), values[6]), values[9]),
+        math.min(
+            math.min(math.min(values[1], values[4]), values[7]), values[10]),
+        math.max(
+            math.max(math.max(values[0], values[3]), values[6]), values[9]),
+        math.max(
+            math.max(math.max(values[1], values[4]), values[7]), values[10]),
+      );
+      transform.leftTranslate(-box.x, -box.y);
+    } else {
+      box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
+    }
   }
 
   @override
