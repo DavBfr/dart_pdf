@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.16
+
+* Add better debugPaint on Align Widget
+
 ## 1.3.15
 
 * Fix Image shape inside BoxDecoration

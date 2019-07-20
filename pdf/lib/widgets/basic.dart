@@ -257,6 +257,82 @@ class Align extends SingleChildWidget {
   }
 
   @override
+  void debugPaint(Context context) {
+    context.canvas
+      ..setStrokeColor(PdfColors.green)
+      ..drawRect(box.x, box.y, box.width, box.height);
+
+    if (child == null) {
+      context.canvas.strokePath();
+      return;
+    }
+
+    if (child.box.bottom > box.bottom) {
+      final double headSize =
+          math.min((child.box.bottom - box.bottom) * 0.2, 10);
+      context.canvas
+        ..moveTo(
+          box.left + child.box.horizondalCenter,
+          box.bottom,
+        )
+        ..lineTo(box.left + child.box.horizondalCenter,
+            box.bottom + child.box.bottom)
+        ..lineTo(box.left + child.box.horizondalCenter - headSize,
+            box.bottom + child.box.bottom - headSize)
+        ..moveTo(box.left + child.box.horizondalCenter,
+            box.bottom + child.box.bottom)
+        ..lineTo(box.left + child.box.horizondalCenter + headSize,
+            box.bottom + child.box.bottom - headSize);
+    }
+
+    if (box.bottom + child.box.top < box.top) {
+      final double headSize =
+          math.min((box.top - child.box.top - box.bottom) * 0.2, 10);
+      context.canvas
+        ..moveTo(box.left + child.box.horizondalCenter, box.top)
+        ..lineTo(
+            box.left + child.box.horizondalCenter, box.bottom + child.box.top)
+        ..lineTo(box.left + child.box.horizondalCenter - headSize,
+            box.bottom + child.box.top + headSize)
+        ..moveTo(
+            box.left + child.box.horizondalCenter, box.bottom + child.box.top)
+        ..lineTo(box.left + child.box.horizondalCenter + headSize,
+            box.bottom + child.box.top + headSize);
+    }
+
+    if (child.box.left > box.left) {
+      final double headSize = math.min((child.box.left - box.left) * 0.2, 10);
+      context.canvas
+        ..moveTo(box.left, box.bottom + child.box.verticalCenter)
+        ..lineTo(
+            box.left + child.box.left, box.bottom + child.box.verticalCenter)
+        ..lineTo(box.left + child.box.left - headSize,
+            box.bottom + child.box.verticalCenter - headSize)
+        ..moveTo(
+            box.left + child.box.left, box.bottom + child.box.verticalCenter)
+        ..lineTo(box.left + child.box.left - headSize,
+            box.bottom + child.box.verticalCenter + headSize);
+    }
+
+    if (box.left + child.box.right < box.right) {
+      final double headSize =
+          math.min((box.right - child.box.right - box.left) * 0.2, 10);
+      context.canvas
+        ..moveTo(box.right, box.bottom + child.box.verticalCenter)
+        ..lineTo(
+            box.left + child.box.right, box.bottom + child.box.verticalCenter)
+        ..lineTo(box.left + child.box.right + headSize,
+            box.bottom + child.box.verticalCenter - headSize)
+        ..moveTo(
+            box.left + child.box.right, box.bottom + child.box.verticalCenter)
+        ..lineTo(box.left + child.box.right + headSize,
+            box.bottom + child.box.verticalCenter + headSize);
+    }
+
+    context.canvas.strokePath();
+  }
+
+  @override
   void paint(Context context) {
     super.paint(context);
     paintChild(context);

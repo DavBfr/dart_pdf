@@ -28,10 +28,18 @@ void main() {
     pdf = Document();
   });
 
-  test('Basic Widgets Align', () {
+  test('Basic Widgets Align 1', () {
     pdf.addPage(Page(
         build: (Context context) => Align(
               alignment: Alignment.bottomRight,
+              child: SizedBox(width: 100, height: 100, child: PdfLogo()),
+            )));
+  });
+
+  test('Basic Widgets Align 2', () {
+    pdf.addPage(Page(
+        build: (Context context) => Align(
+              alignment: const Alignment(0.8, 0.2),
               child: SizedBox(width: 100, height: 100, child: PdfLogo()),
             )));
   });

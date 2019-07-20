@@ -38,6 +38,9 @@ class PdfRect {
   double get right => x + width;
   double get top => y + height;
 
+  double get horizondalCenter => x + width / 2;
+  double get verticalCenter => y + height / 2;
+
   @deprecated
   double get l => left;
   @deprecated
