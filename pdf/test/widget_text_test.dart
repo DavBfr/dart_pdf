@@ -169,17 +169,24 @@ void main() {
                     font: ttf,
                     fontSize: 20,
                   ),
-                  children: <TextSpan>[
+                  children: <InlineSpan>[
                     TextSpan(
                         text: 'bold',
                         style: TextStyle(
-                            font: ttfBold,
-                            fontSize: 40,
-                            color: PdfColors.blue)),
+                            font: ttfBold, fontSize: 40, color: PdfColors.blue),
+                        children: <InlineSpan>[
+                          const TextSpan(text: '*', baseline: 20),
+                          WidgetSpan(child: PdfLogo(), baseline: -10),
+                        ]),
                     TextSpan(
                       text: ' world!\n',
                       children: spans,
                     ),
+                    WidgetSpan(
+                        child: PdfLogo(),
+                        annotation: AnnotationUrl(
+                          'https://github.com/DavBfr/dart_pdf',
+                        )),
                   ],
                 ),
               ),

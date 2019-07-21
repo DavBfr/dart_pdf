@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.18
+
+- Implement InlineSpan and WidgetSpan
+
 ## 1.3.17
 
 - Fix MultiPage with multiple save() calls
