@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.4
+
+- Update example to show saved documents on iOS Files app
+
 ## 2.1.3
 
 - Update Pdf dependency
