@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.17
+
+* Fix MultiPage with multiple save() calls
+
 ## 1.3.16
 
 * Add better debugPaint on Align Widget

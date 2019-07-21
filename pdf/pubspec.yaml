@@ -4,7 +4,7 @@ description: A pdf producer for Dart. It can create pdf files for both web or fl
 homepage: https://github.com/DavBfr/dart_pdf/tree/master/pdf
 repository: https://github.com/DavBfr/dart_pdf
 issue_tracker: https://github.com/DavBfr/dart_pdf/issues
-version: 1.3.16
+version: 1.3.17
 
 environment:
   sdk: ">=2.1.0 <3.0.0"

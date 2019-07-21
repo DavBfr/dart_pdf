@@ -39,7 +39,7 @@ class PdfObjectStream extends PdfObject {
   void _prepare() {
     super._prepare();
 
-    if (params.containsKey('/Filter')) {
+    if (params.containsKey('/Filter') && _data == null) {
       // The data is already in the right format
       _data = buf.output();
     } else if (pdfDocument.deflate != null) {
