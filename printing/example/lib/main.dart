@@ -107,6 +107,11 @@ class MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    bool canDebug = false;
+    assert(() {
+      canDebug = true;
+      return true;
+    }());
     return RepaintBoundary(
         key: previewContainer,
         child: Scaffold(
@@ -130,6 +135,22 @@ class MyAppState extends State<MyApp> {
                     child: const Text('Save to file'), onPressed: _saveAsFile),
                 RaisedButton(
                     child: const Text('Print Html'), onPressed: _printHtml),
+                canDebug
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          const Text('Debug'),
+                          Switch.adaptive(
+                            onChanged: (bool value) {
+                              setState(() {
+                                pdf.Document.debug = value;
+                              });
+                            },
+                            value: pdf.Document.debug,
+                          ),
+                        ],
+                      )
+                    : const SizedBox(),
               ],
             ),
           ),

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.6
+
+- Add qrcode to example
+
 ## 2.1.5
 
 - Add printing completion

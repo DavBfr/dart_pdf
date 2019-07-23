@@ -75,7 +75,7 @@ test-pdf: $(FONTS) get-pdf .coverage
 	cd pdf; for EXAMPLE in $(shell cd pdf; find example -name '*.dart'); do dart $$EXAMPLE; done
 
 test-printing: $(FONTS) get-printing .coverage
-	cd printing; flutter test --coverage --coverage-path lcov.info
+	cd printing/example; flutter test --coverage --coverage-path ../lcov.info
 
 test-readme: $(FONTS) get-readme
 	cd test; dart extract_readme.dart

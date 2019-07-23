@@ -1,110 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart' as fw;
-
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:printing/printing.dart';
 
-const PdfColor green = PdfColor.fromInt(0xff9ce5d0);
-const PdfColor lightGreen = PdfColor.fromInt(0xffcdf1e7);
-
-class MyPage extends Page {
-  MyPage(
-      {PdfPageFormat pageFormat = PdfPageFormat.a4,
-      BuildCallback build,
-      EdgeInsets margin})
-      : super(pageFormat: pageFormat, margin: margin, build: build);
-
-  @override
-  void paint(Widget child, Context context) {
-    context.canvas
-      ..setColor(lightGreen)
-      ..moveTo(0, pageFormat.height)
-      ..lineTo(0, pageFormat.height - 230)
-      ..lineTo(60, pageFormat.height)
-      ..fillPath()
-      ..setColor(green)
-      ..moveTo(0, pageFormat.height)
-      ..lineTo(0, pageFormat.height - 100)
-      ..lineTo(100, pageFormat.height)
-      ..fillPath()
-      ..setColor(lightGreen)
-      ..moveTo(30, pageFormat.height)
-      ..lineTo(110, pageFormat.height - 50)
-      ..lineTo(150, pageFormat.height)
-      ..fillPath()
-      ..moveTo(pageFormat.width, 0)
-      ..lineTo(pageFormat.width, 230)
-      ..lineTo(pageFormat.width - 60, 0)
-      ..fillPath()
-      ..setColor(green)
-      ..moveTo(pageFormat.width, 0)
-      ..lineTo(pageFormat.width, 100)
-      ..lineTo(pageFormat.width - 100, 0)
-      ..fillPath()
-      ..setColor(lightGreen)
-      ..moveTo(pageFormat.width - 30, 0)
-      ..lineTo(pageFormat.width - 110, 50)
-      ..lineTo(pageFormat.width - 150, 0)
-      ..fillPath();
-
-    super.paint(child, context);
-  }
-}
-
-class Block extends StatelessWidget {
-  Block({this.title});
-
-  final String title;
-
-  @override
-  Widget build(Context context) {
-    return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
-            Container(
-              width: 6,
-              height: 6,
-              margin: const EdgeInsets.only(top: 2.5, left: 2, right: 5),
-              decoration:
-                  const BoxDecoration(color: green, shape: BoxShape.circle),
-            ),
-            Text(title,
-                style: Theme.of(context)
-                    .defaultTextStyle
-                    .copyWith(fontWeight: FontWeight.bold)),
-          ]),
-          Container(
-            decoration: const BoxDecoration(
-                border: BoxBorder(left: true, color: green, width: 2)),
-            padding: const EdgeInsets.only(left: 10, top: 5, bottom: 5),
-            margin: const EdgeInsets.only(left: 5),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Lorem(length: 20),
-                ]),
-          ),
-        ]);
-  }
-}
-
-class Category extends StatelessWidget {
-  Category({this.title});
-
-  final String title;
-
-  @override
-  Widget build(Context context) {
-    return Container(
-        decoration: const BoxDecoration(color: lightGreen, borderRadius: 6),
-        margin: const EdgeInsets.only(bottom: 10, top: 20),
-        padding: const EdgeInsets.fromLTRB(10, 7, 10, 4),
-        child: Text(title, textScaleFactor: 1.5));
-  }
-}
+import 'example_widgets.dart';
 
 Future<Document> generateDocument(PdfPageFormat format) async {
   final Document pdf = Document(title: 'My Résumé', author: 'David PHAM-VAN');
@@ -159,8 +60,10 @@ Future<Document> generateDocument(PdfPageFormat format) async {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   Text('+1 403-721-6898'),
-                                  Text('p.charlesbois@yahoo.com'),
-                                  Text('wholeprices.ca')
+                                  UrlText('p.charlesbois@yahoo.com',
+                                      'mailto:p.charlesbois@yahoo.com'),
+                                  UrlText('wholeprices.ca',
+                                      'https://wholeprices.ca'),
                                 ]),
                             Padding(padding: EdgeInsets.zero)
                           ]),
@@ -175,19 +78,29 @@ Future<Document> generateDocument(PdfPageFormat format) async {
           ])),
       Container(
         height: double.infinity,
-        width: 10,
-        decoration: const BoxDecoration(
-            border: BoxBorder(left: true, color: green, width: 2)),
+        width: 2,
+        margin: const EdgeInsets.symmetric(horizontal: 5),
+        color: green,
       ),
-      Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
-        ClipOval(
-            child: Container(
-                width: 100,
-                height: 100,
-                color: lightGreen,
-                child:
-                    profileImage == null ? Container() : Image(profileImage)))
-      ])
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          ClipOval(
+              child: Container(
+                  width: 100,
+                  height: 100,
+                  color: lightGreen,
+                  child: profileImage == null
+                      ? Container()
+                      : Image(profileImage))),
+          Column(children: <Widget>[
+            Percent(size: 60, value: .7, title: Text('Word')),
+            Percent(size: 60, value: .4, title: Text('Excel')),
+          ]),
+          QrCodeWidget(data: 'Parnella Charlesbois', size: 60),
+        ],
+      )
     ]),
   ));
   return pdf;
