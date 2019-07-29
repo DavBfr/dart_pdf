@@ -284,6 +284,7 @@ class Theme extends Inherited {
   factory Theme.withFont({Font base, Font bold, Font italic, Font boldItalic}) {
     final TextStyle defaultStyle = TextStyle.defaultStyle().copyWith(
         font: base,
+        fontNormal: base,
         fontBold: bold,
         fontItalic: italic,
         fontBoldItalic: boldItalic);

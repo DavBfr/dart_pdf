@@ -3,6 +3,7 @@
 ## 1.3.18
 
 - Implement InlineSpan and WidgetSpan
+- Fix Theme.withFont factory
 
 ## 1.3.17
 
