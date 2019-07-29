@@ -158,13 +158,11 @@ class Page {
             maxHeight: pageFormat.height - _margin.vertical);
 
     final Theme calculatedTheme = theme ?? document.theme ?? Theme.base();
-    final Map<Type, Inherited> inherited = <Type, Inherited>{};
-    inherited[calculatedTheme.runtimeType] = calculatedTheme;
     final Context context = Context(
-        document: document.document,
-        page: _pdfPage,
-        canvas: canvas,
-        inherited: inherited);
+      document: document.document,
+      page: _pdfPage,
+      canvas: canvas,
+    ).inheritFrom(calculatedTheme);
     if (_build != null) {
       final Widget child = _build(context);
       layout(child, context, constraints);

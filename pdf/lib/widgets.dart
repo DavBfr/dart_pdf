@@ -16,6 +16,7 @@
 
 library widget;
 
+import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:typed_data';
 

@@ -113,15 +113,13 @@ class MultiPage extends Page {
             ? (pageFormat.height - _margin.vertical)
             : (pageFormat.width - _margin.horizontal));
     final Theme calculatedTheme = theme ?? document.theme ?? Theme.base();
-    final Map<Type, Inherited> inherited = <Type, Inherited>{};
-    inherited[calculatedTheme.runtimeType] = calculatedTheme;
     Context context;
     double offsetEnd;
     double offsetStart;
     int index = 0;
     int sameCount = 0;
     final Context baseContext =
-        Context(document: document.document, inherited: inherited);
+        Context(document: document.document).inheritFrom(calculatedTheme);
     final List<Widget> children = _buildList(baseContext);
     WidgetContext widgetContext;
 

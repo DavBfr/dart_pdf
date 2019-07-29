@@ -70,6 +70,53 @@ void main() {
     ));
   });
 
+  test('Theme Page 1', () {
+    final Theme theme = Theme.withFont(base: roboto);
+
+    pdf.addPage(Page(
+      theme: theme,
+      build: (Context context) => Center(
+        child: Text('Hello'),
+      ),
+    ));
+  });
+
+  test('Theme Page 2', () {
+    final Theme theme = Theme.base().copyWith(
+      tableHeader: TextStyle(font: openSansBold),
+      tableCell: TextStyle(font: roboto),
+    );
+
+    pdf.addPage(Page(
+      theme: theme,
+      build: (Context context) => Center(
+        child: Table.fromTextArray(context: context, data: [
+          ['Header', '123'],
+          ['Cell', '456']
+        ]),
+      ),
+    ));
+  });
+
+  test('Theme Page 3', () {
+    pdf.addPage(Page(
+      build: (Context context) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Text('Hello default'),
+            InheritedWidget(
+              inherited: Theme.withFont(
+                base: roboto,
+              ),
+              build: (Context context) => Text('Hello themed'),
+            ),
+          ],
+        ),
+      ),
+    ));
+  });
+
   tearDownAll(() {
     final File file = File('widgets-theme.pdf');
     file.writeAsBytesSync(pdf.save());
