@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import 'package:archive/archive.dart';
+
 import 'package:pdf/pdf.dart';
 
-DeflateCallback defaultDeflate;
+DeflateCallback defaultDeflate = ZLibEncoder().encode;
