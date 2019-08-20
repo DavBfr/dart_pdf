@@ -5,6 +5,7 @@
 - Implement InlineSpan and WidgetSpan
 - Fix Theme.withFont factory
 - Implement InheritedWidget
+- Fix Web dependency
 
 ## 1.3.17
 
