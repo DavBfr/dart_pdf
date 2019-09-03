@@ -15,7 +15,7 @@
  DART_SRC=$(shell find . -name '*.dart')
  CLNG_SRC=$(shell find printing/ios -name '*.java' -o -name '*.m' -o -name '*.h') $(shell find printing/android -name '*.java' -o -name '*.m' -o -name '*.h')
  SWFT_SRC=$(shell find . -name '*.swift')
- FONTS=pdf/open-sans.ttf pdf/open-sans-bold.ttf pdf/roboto.ttf pdf/noto-sans.ttf pdf/genyomintw.ttf
+ FONTS=pdf/open-sans.ttf pdf/open-sans-bold.ttf pdf/roboto.ttf pdf/noto-sans.ttf pdf/genyomintw.ttf pdf/hacen-tunisia.ttf
  COV_PORT=9292
 
 all: $(FONTS) format
@@ -34,6 +34,9 @@ pdf/noto-sans.ttf:
 
 pdf/genyomintw.ttf:
 	curl -L "https://github.com/ButTaiwan/genyo-font/raw/master/TW/GenYoMinTW-Heavy.ttf" > $@
+
+pdf/hacen-tunisia.ttf:
+	curl -L "https://arbfonts.com/font_files/hacen/Hacen Tunisia.ttf" > $@
 
 format: format-dart format-clang format-swift
 
