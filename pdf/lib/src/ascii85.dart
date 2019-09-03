@@ -19,70 +19,70 @@ part of pdf;
 class Ascii85Encoder extends Converter<List<int>, List<int>> {
   @override
   List<int> convert(List<int> input) {
-    final Uint8List buffer = Uint8List(_maxEncodedLen(input.length) + 2);
+    final Uint8List output = Uint8List(_maxEncodedLen(input.length) + 2);
 
-    int b = 0;
-    int s = 0;
+    int outputOffset = 0;
+    int inputOffset = 0;
 
-    while (s < input.length) {
-      buffer[b + 0] = 0;
-      buffer[b + 1] = 0;
-      buffer[b + 2] = 0;
-      buffer[b + 3] = 0;
-      buffer[b + 4] = 0;
+    while (inputOffset < input.length) {
+      output[outputOffset + 0] = 0;
+      output[outputOffset + 1] = 0;
+      output[outputOffset + 2] = 0;
+      output[outputOffset + 3] = 0;
+      output[outputOffset + 4] = 0;
 
       // Unpack 4 bytes into int to repack into base 85 5-byte.
-      int v = 0;
+      int value = 0;
 
-      switch (input.length - s) {
+      switch (input.length - inputOffset) {
         case 3:
-          v |= input[s + 0] << 24;
-          v |= input[s + 1] << 16;
-          v |= input[s + 2] << 8;
+          value |= input[inputOffset + 0] << 24;
+          value |= input[inputOffset + 1] << 16;
+          value |= input[inputOffset + 2] << 8;
           break;
         case 2:
-          v |= input[s + 0] << 24;
-          v |= input[s + 1] << 16;
+          value |= input[inputOffset + 0] << 24;
+          value |= input[inputOffset + 1] << 16;
           break;
         case 1:
-          v |= input[s + 0] << 24;
+          value |= input[inputOffset + 0] << 24;
           break;
         default:
-          v |= input[s + 0] << 24;
-          v |= input[s + 1] << 16;
-          v |= input[s + 2] << 8;
-          v |= input[s + 3];
+          value |= input[inputOffset + 0] << 24;
+          value |= input[inputOffset + 1] << 16;
+          value |= input[inputOffset + 2] << 8;
+          value |= input[inputOffset + 3];
       }
 
       // Special case: zero (!!!!!) shortens to z.
-      if (v == 0 && input.length - s >= 4) {
-        buffer[b] = 122;
-        b++;
-        s += 4;
+      if (value == 0 && input.length - inputOffset >= 4) {
+        output[outputOffset] = 122;
+        outputOffset++;
+        inputOffset += 4;
         continue;
       }
 
       // Otherwise, 5 base 85 digits starting at !.
       for (int i = 4; i >= 0; i--) {
-        buffer[b + i] = 33 + v % 85;
-        v ~/= 85;
+        output[outputOffset + i] = 33 + value % 85;
+        value ~/= 85;
       }
 
-      if (input.length - s < 4) {
+      if (input.length - inputOffset < 4) {
         // If input was short, discard the low destination bytes.
-        b += input.length - s + 1;
+        outputOffset += input.length - inputOffset + 1;
         break;
       }
 
-      s += 4;
-      b += 5;
+      inputOffset += 4;
+      outputOffset += 5;
     }
 
-    buffer[b] = 0x7e;
-    buffer[b + 1] = 0x3e;
+    output[outputOffset] = 0x7e;
+    output[outputOffset + 1] = 0x3e;
 
-    return buffer.sublist(0, b + 2);
+    return output.sublist(0, outputOffset + 2);
   }
 
-  int _maxEncodedLen(int n) => (n + 3) ~/ 4 * 5;
+  int _maxEncodedLen(int length) => (length + 3) ~/ 4 * 5;
 }
