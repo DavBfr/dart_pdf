@@ -20,6 +20,7 @@ import '../example/main.dart' as example;
 import 'annotations_test.dart' as annotations;
 import 'colors_test.dart' as colors;
 import 'complex_test.dart' as complex;
+import 'isolate_test.dart' as isolate;
 import 'jpeg_test.dart' as jpeg;
 import 'metrics_test.dart' as metrics;
 import 'minimal_test.dart' as minimal;
@@ -40,6 +41,7 @@ void main() {
   colors.main();
   complex.main();
   example.main();
+  isolate.main();
   jpeg.main();
   metrics.main();
   minimal.main();
