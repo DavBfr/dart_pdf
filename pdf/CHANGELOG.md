@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.19
+
+- Fix Ascii85 encoding
+
 ## 1.3.18
 
 - Implement InlineSpan and WidgetSpan

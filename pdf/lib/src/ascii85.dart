@@ -68,16 +68,14 @@ class Ascii85Encoder extends Converter<List<int>, List<int>> {
         v ~/= 85;
       }
 
-      // If input was short, discard the low destination bytes.
-      int m = 5;
       if (input.length - s < 4) {
-        m -= 4 - (input.length - s);
+        // If input was short, discard the low destination bytes.
+        b += input.length - s + 1;
         break;
-      } else {
-        s += 4;
       }
 
-      b += m;
+      s += 4;
+      b += 5;
     }
 
     buffer[b] = 0x7e;
