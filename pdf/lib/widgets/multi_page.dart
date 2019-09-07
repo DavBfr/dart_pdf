@@ -40,27 +40,31 @@ class _MultiPageInstance {
   const _MultiPageInstance(
       {@required this.context,
       @required this.constraints,
+      @required this.fullConstraints,
       @required this.offsetStart});
 
   final Context context;
   final BoxConstraints constraints;
+  final BoxConstraints fullConstraints;
   final double offsetStart;
 }
 
 class MultiPage extends Page {
   MultiPage(
-      {PdfPageFormat pageFormat = PdfPageFormat.a4,
+      {PageTheme pageTheme,
+      PdfPageFormat pageFormat,
       BuildListCallback build,
       this.crossAxisAlignment = CrossAxisAlignment.start,
       this.header,
       this.footer,
       Theme theme,
       this.maxPages = 20,
-      PageOrientation orientation = PageOrientation.natural,
+      PageOrientation orientation,
       EdgeInsets margin})
       : _buildList = build,
         assert(maxPages != null && maxPages > 0),
         super(
+            pageTheme: pageTheme,
             pageFormat: pageFormat,
             margin: margin,
             theme: theme,
@@ -88,6 +92,7 @@ class MultiPage extends Page {
           ..rotateZ(-math.pi / 2)
           ..translate(x - pageHeight + _margin.top - _margin.left,
               y + _margin.left - _margin.bottom));
+
       child.paint(context);
       context.canvas.restoreContext();
     } else {
@@ -112,6 +117,13 @@ class MultiPage extends Page {
         maxWidth: _mustRotate
             ? (pageFormat.height - _margin.vertical)
             : (pageFormat.width - _margin.horizontal));
+    final BoxConstraints fullConstraints = mustRotate
+        ? BoxConstraints(
+            maxWidth: pageFormat.height - _margin.vertical,
+            maxHeight: pageFormat.width - _margin.horizontal)
+        : BoxConstraints(
+            maxWidth: pageFormat.width - _margin.horizontal,
+            maxHeight: pageFormat.height - _margin.vertical);
     final Theme calculatedTheme = theme ?? document.theme ?? Theme.base();
     Context context;
     double offsetEnd;
@@ -149,6 +161,16 @@ class MultiPage extends Page {
           return true;
         }());
 
+        if (pageTheme.buildBackground != null) {
+          final Widget child = pageTheme.buildBackground(context);
+          if (child != null) {
+            child.layout(context, fullConstraints, parentUsesSize: false);
+            assert(child.box != null);
+            _paintChild(context, child, _margin.left, _margin.bottom,
+                pageFormat.height);
+          }
+        }
+
         offsetStart = pageHeight -
             (_mustRotate ? pageHeightMargin - margin.bottom : _margin.top);
         offsetEnd =
@@ -157,6 +179,7 @@ class MultiPage extends Page {
         _pages.add(_MultiPageInstance(
           context: context,
           constraints: constraints,
+          fullConstraints: fullConstraints,
           offsetStart: offsetStart,
         ));
 
@@ -259,6 +282,17 @@ class MultiPage extends Page {
               parentUsesSize: false);
           assert(footerWidget.box != null);
           _paintChild(page.context, footerWidget, _margin.left, _margin.bottom,
+              pageFormat.height);
+        }
+      }
+
+      if (pageTheme.buildForeground != null) {
+        final Widget child = pageTheme.buildForeground(page.context);
+        if (child != null) {
+          child.layout(page.context, page.fullConstraints,
+              parentUsesSize: false);
+          assert(child.box != null);
+          _paintChild(page.context, child, _margin.left, _margin.bottom,
               pageFormat.height);
         }
       }

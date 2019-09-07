@@ -4,6 +4,7 @@
 
 - Fix Transform.rotateBox
 - Add Watermark widget
+- Add PageTheme
 
 ## 1.3.19
 

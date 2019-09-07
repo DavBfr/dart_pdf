@@ -23,51 +23,43 @@ enum PageOrientation { natural, landscape, portrait }
 
 class Page {
   Page(
-      {this.pageFormat = PdfPageFormat.standard,
+      {PageTheme pageTheme,
+      PdfPageFormat pageFormat,
       BuildCallback build,
-      this.theme,
-      this.orientation = PageOrientation.natural,
+      Theme theme,
+      PageOrientation orientation,
       EdgeInsets margin})
-      : assert(pageFormat != null),
-        _margin = margin,
+      : assert(
+            pageTheme == null ||
+                (pageFormat == null &&
+                    theme == null &&
+                    orientation == null &&
+                    margin == null),
+            'Don\'t set both pageTheme and other settings'),
+        pageTheme = pageTheme ??
+            PageTheme(
+              pageFormat: pageFormat,
+              orientation: orientation,
+              margin: margin,
+              theme: theme,
+            ),
         _build = build;
 
-  final PdfPageFormat pageFormat;
+  final PageTheme pageTheme;
 
-  final PageOrientation orientation;
+  PdfPageFormat get pageFormat => pageTheme.pageFormat;
 
-  final EdgeInsets _margin;
+  PageOrientation get orientation => pageTheme.orientation;
 
   final BuildCallback _build;
 
-  final Theme theme;
+  Theme get theme => pageTheme.theme;
 
-  bool get mustRotate =>
-      (orientation == PageOrientation.landscape &&
-          pageFormat.height > pageFormat.width) ||
-      (orientation == PageOrientation.portrait &&
-          pageFormat.width > pageFormat.height);
+  bool get mustRotate => pageTheme.mustRotate;
 
   PdfPage _pdfPage;
 
-  EdgeInsets get margin {
-    if (_margin != null) {
-      if (mustRotate) {
-        return EdgeInsets.fromLTRB(
-            _margin.bottom, _margin.left, _margin.top, _margin.right);
-      } else {
-        return _margin;
-      }
-    }
-
-    if (mustRotate) {
-      return EdgeInsets.fromLTRB(pageFormat.marginBottom, pageFormat.marginLeft,
-          pageFormat.marginTop, pageFormat.marginRight);
-    } else {
-      return EdgeInsets.fromLTRB(pageFormat.marginLeft, pageFormat.marginTop,
-          pageFormat.marginRight, pageFormat.marginBottom);
-    }
-  }
+  EdgeInsets get margin => pageTheme.margin;
 
   @protected
   void debugPaint(Context context) {
@@ -109,10 +101,26 @@ class Page {
       page: _pdfPage,
       canvas: canvas,
     ).inheritFrom(calculatedTheme);
+    if (pageTheme.buildBackground != null) {
+      final Widget child = pageTheme.buildBackground(context);
+      if (child != null) {
+        layout(child, context, constraints);
+        paint(child, context);
+      }
+    }
     if (_build != null) {
       final Widget child = _build(context);
-      layout(child, context, constraints);
-      paint(child, context);
+      if (child != null) {
+        layout(child, context, constraints);
+        paint(child, context);
+      }
+    }
+    if (pageTheme.buildForeground != null) {
+      final Widget child = pageTheme.buildForeground(context);
+      if (child != null) {
+        layout(child, context, constraints);
+        paint(child, context);
+      }
     }
   }
 
