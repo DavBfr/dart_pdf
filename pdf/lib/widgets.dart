@@ -36,6 +36,7 @@ part 'widgets/geometry.dart';
 part 'widgets/grid_view.dart';
 part 'widgets/image.dart';
 part 'widgets/multi_page.dart';
+part 'widgets/page.dart';
 part 'widgets/placeholders.dart';
 part 'widgets/progress.dart';
 part 'widgets/stack.dart';
