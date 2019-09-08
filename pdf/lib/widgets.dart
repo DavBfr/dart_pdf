@@ -43,6 +43,7 @@ part 'widgets/progress.dart';
 part 'widgets/stack.dart';
 part 'widgets/table.dart';
 part 'widgets/text.dart';
+part 'widgets/text_style.dart';
 part 'widgets/theme.dart';
 part 'widgets/widget.dart';
 part 'widgets/wrap.dart';
