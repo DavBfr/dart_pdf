@@ -11,6 +11,8 @@ This plugin uses the `pdf` package <https://pub.dartlang.org/packages/pdf>
 for pdf creation. Please refer to <https://pub.dartlang.org/documentation/pdf/latest/>
 for documentation.
 
+[![Buy Me A Coffee](https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/custom_images/orange_img.png "Buy Me A Coffee")](https://www.buymeacoffee.com/JORBmbw9h "Buy Me A Coffee")
+
 Example:
 
 ```dart
