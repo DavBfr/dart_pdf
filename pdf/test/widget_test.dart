@@ -80,11 +80,13 @@ void main() {
                   padding: const EdgeInsets.only(left: 30, top: 20),
                   child: Lorem(textAlign: TextAlign.justify)),
               Expanded(
-                  child: Transform.scale(
-                      child: Transform.rotate(
-                          child: FittedBox(child: Text('Expanded')),
-                          angle: 0.2),
-                      scale: 0.9)),
+                child: FittedBox(
+                  child: Transform.rotateBox(
+                    angle: 0.2,
+                    child: Text('Expanded'),
+                  ),
+                ),
+              ),
               Container(
                   padding: const EdgeInsets.only(top: 5),
                   decoration: const BoxDecoration(

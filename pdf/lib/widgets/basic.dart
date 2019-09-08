@@ -126,9 +126,9 @@ class Transform extends SingleChildWidget {
     @required this.transform,
     this.origin,
     this.alignment,
+    this.adjustLayout = false,
     Widget child,
   })  : assert(transform != null),
-        _relayout = false,
         super(child: child);
 
   /// Creates a widget that transforms its child using a rotation around the
@@ -139,7 +139,7 @@ class Transform extends SingleChildWidget {
     this.alignment = Alignment.center,
     Widget child,
   })  : transform = Matrix4.rotationZ(angle),
-        _relayout = false,
+        adjustLayout = false,
         super(child: child);
 
   /// Creates a widget that transforms its child using a rotation around the
@@ -148,7 +148,7 @@ class Transform extends SingleChildWidget {
     @required double angle,
     Widget child,
   })  : transform = Matrix4.rotationZ(angle),
-        _relayout = true,
+        adjustLayout = true,
         alignment = null,
         origin = null,
         super(child: child);
@@ -160,7 +160,7 @@ class Transform extends SingleChildWidget {
   })  : transform = Matrix4.translationValues(offset.x, offset.y, 0),
         origin = null,
         alignment = null,
-        _relayout = false,
+        adjustLayout = false,
         super(child: child);
 
   /// Creates a widget that scales its child uniformly.
@@ -170,7 +170,7 @@ class Transform extends SingleChildWidget {
     this.alignment = Alignment.center,
     Widget child,
   })  : transform = Matrix4.diagonal3Values(scale, scale, 1),
-        _relayout = false,
+        adjustLayout = false,
         super(child: child);
 
   /// The matrix to transform the child by during painting.
@@ -182,7 +182,7 @@ class Transform extends SingleChildWidget {
   /// The alignment of the origin, relative to the size of the box.
   final Alignment alignment;
 
-  final bool _relayout;
+  final bool adjustLayout;
 
   Matrix4 get _effectiveTransform {
     final Matrix4 result = Matrix4.identity();
@@ -208,14 +208,13 @@ class Transform extends SingleChildWidget {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    if (!_relayout) {
+    if (!adjustLayout) {
       return super.layout(context, constraints, parentUsesSize: parentUsesSize);
     }
 
     if (child != null) {
       child.layout(context, constraints, parentUsesSize: parentUsesSize);
       assert(child.box != null);
-      box = child.box;
 
       final Matrix4 mat = transform;
       final List<double> values = mat.applyToVector3Array(<double>[
@@ -233,17 +232,23 @@ class Transform extends SingleChildWidget {
         0,
       ]);
 
+      final double dx = -math.min(
+          math.min(math.min(values[0], values[3]), values[6]), values[9]);
+      final double dy = -math.min(
+          math.min(math.min(values[1], values[4]), values[7]), values[10]);
+
       box = PdfRect.fromLTRB(
-        math.min(
-            math.min(math.min(values[0], values[3]), values[6]), values[9]),
-        math.min(
-            math.min(math.min(values[1], values[4]), values[7]), values[10]),
-        math.max(
-            math.max(math.max(values[0], values[3]), values[6]), values[9]),
-        math.max(
-            math.max(math.max(values[1], values[4]), values[7]), values[10]),
+        0,
+        0,
+        math.max(math.max(math.max(values[0], values[3]), values[6]),
+                values[9]) +
+            dx,
+        math.max(math.max(math.max(values[1], values[4]), values[7]),
+                values[10]) +
+            dy,
       );
-      transform.leftTranslate(-box.x, -box.y);
+
+      transform.leftTranslate(dx, dy);
     } else {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
     }

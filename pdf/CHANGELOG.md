@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.20
+
+- Fix Transform.rotateBox
+
 ## 1.3.19
 
 - Fix Ascii85 encoding
