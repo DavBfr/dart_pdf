@@ -3,6 +3,7 @@
 ## 1.3.20
 
 - Fix Transform.rotateBox
+- Add Watermark widget
 
 ## 1.3.19
 

@@ -181,3 +181,48 @@ class Bullet extends StatelessWidget {
             ]));
   }
 }
+
+class Watermark extends StatelessWidget {
+  Watermark({
+    @required this.child,
+    this.fit = BoxFit.contain,
+    this.angle = 0,
+  })  : assert(fit != null),
+        assert(child != null),
+        assert(angle != null);
+
+  Watermark.text(
+    String text, {
+    TextStyle style,
+    this.fit = BoxFit.contain,
+    this.angle = math.pi / 4,
+  })  : assert(fit != null),
+        assert(angle != null),
+        child = Text(
+          text,
+          style: style ??
+              TextStyle(
+                color: PdfColors.grey200,
+                fontWeight: FontWeight.bold,
+              ),
+        );
+
+  final Widget child;
+
+  final double angle;
+
+  final BoxFit fit;
+
+  @override
+  Widget build(Context context) {
+    return SizedBox.expand(
+      child: FittedBox(
+        fit: fit,
+        child: Transform.rotateBox(
+          angle: angle,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
