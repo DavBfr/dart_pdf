@@ -80,6 +80,7 @@ void main() {
 
     print('Wait PDF to be generated');
     await completer.future;
+    receivePort.close();
     print('Done');
   });
 }
