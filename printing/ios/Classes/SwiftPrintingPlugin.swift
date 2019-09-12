@@ -166,7 +166,7 @@ public class SwiftPrintingPlugin: NSObject, FlutterPlugin, UIPrintInteractionCon
 
                 // create pdf context and draw each page
                 let pdfData = NSMutableData()
-                UIGraphicsBeginPDFContextToData(pdfData, .zero, nil)
+                UIGraphicsBeginPDFContextToData(pdfData, rect, nil)
 
                 for i in 0 ..< renderer.numberOfPages {
                     UIGraphicsBeginPDFPage()

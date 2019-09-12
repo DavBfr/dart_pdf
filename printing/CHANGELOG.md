@@ -3,6 +3,7 @@
 ## 2.1.4
 
 - Update example to show saved documents on iOS Files app
+- Fix Html to Pdf paper size on iOS
 
 ## 2.1.3
 
