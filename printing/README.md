@@ -7,8 +7,8 @@ See the example on how to use the plugin.
 
 <img alt="Example document" src="https://raw.githubusercontent.com/DavBfr/dart_pdf/master/printing/example.png" width="300">
 
-This plugin uses the `pdf` package <https://pub.dartlang.org/packages/pdf>
-for pdf creation. Please refer to <https://pub.dartlang.org/documentation/pdf/latest/>
+This plugin uses the `pdf` package <https://pub.dev/packages/pdf>
+for pdf creation. Please refer to <https://pub.dev/documentation/pdf/latest/>
 for documentation.
 
 [![Buy Me A Coffee](https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/custom_images/orange_img.png "Buy Me A Coffee")](https://www.buymeacoffee.com/JORBmbw9h "Buy Me A Coffee")
@@ -55,7 +55,7 @@ pdf.addPage(Page(
     })); // Page
 ```
 
-To save the pdf file using the [path_provider](https://pub.dartlang.org/packages/path_provider) library:
+To save the pdf file using the [path_provider](https://pub.dev/packages/path_provider) library:
 
 ```dart
 final output = await getTemporaryDirectory();

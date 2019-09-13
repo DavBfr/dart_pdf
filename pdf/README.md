@@ -10,7 +10,7 @@ images and text using TrueType fonts. With the ease of use you already know.
 
 <img alt="Example document" src="https://raw.githubusercontent.com/DavBfr/dart_pdf/master/pdf/example.jpg">
 
-Use the `printing` package <https://pub.dartlang.org/packages/printing>
+Use the `printing` package <https://pub.dev/packages/printing>
 for full flutter print and share operation.
 
 The coordinate system is using the internal Pdf unit:
@@ -34,7 +34,7 @@ pdf.addPage(Page(
       })); // Page
 ```
 
-To load an image it is possible to use the dart library [image](https://pub.dartlang.org/packages/image):
+To load an image it is possible to use the dart library [image](https://pub.dev/packages/image):
 
 ```dart
 final img = decodeImage(File('test.webp').readAsBytesSync());
@@ -71,7 +71,7 @@ pdf.addPage(Page(
 To save the pdf file:
 
 ```dart
-// On Flutter, use the [path_provider](https://pub.dartlang.org/packages/path_provider) library:
+// On Flutter, use the [path_provider](https://pub.dev/packages/path_provider) library:
 //   final output = await getTemporaryDirectory();
 //   final file = File("${output.path}/example.pdf");
 final file = File("example.pdf");
