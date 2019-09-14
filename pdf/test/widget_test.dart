@@ -23,27 +23,32 @@ import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Pdf Widgets', () {
+  Document pdf;
+  TextStyle symbol;
+  PdfImage im;
+
+  setUpAll(() {
     Document.debug = true;
 
     final Uint8List defaultFont = File('open-sans.ttf').readAsBytesSync();
     final Uint8List defaultFontBold =
         File('open-sans-bold.ttf').readAsBytesSync();
 
-    final Document pdf = Document(
+    pdf = Document(
         title: 'Widgets Test',
         theme: Theme.withFont(
           base: Font.ttf(defaultFont.buffer.asByteData()),
           bold: Font.ttf(defaultFontBold.buffer.asByteData()),
         ));
 
-    final TextStyle symbol = TextStyle(font: Font.zapfDingbats());
+    symbol = TextStyle(font: Font.zapfDingbats());
 
     final List<int> imData = zlib.decode(base64.decode(
         'eJz7//8/w388uOTCT6a4Ez96Q47++I+OI479mEVALyNU7z9seuNP/mAm196Ekz8YR+0dWHtBmJC9S+7/Zog89iMIKLYaHQPVJGLTD7MXpDfq+I9goNhPdPPDjv3YlnH6Jye6+2H21l/6yeB/4HsSDr1bQXrRwq8HqHcGyF6QXp9933N0tn/7Y7vn+/9gLPaih0PDlV9MIAzVm6ez7dsfzW3f/oMwzAx0e7FhoJutdbcj9MKw9frnL2J2POfBpxeEg478YLba/X0Wsl6lBXf+s0bP/s8ePXeWePJCvPEJNYMRZIYWSO/cq/9Z/Nv+M4bO+M8YDjFDJGkhzvSE7A6jRTdnsQR2wfXCMLHuMC5byyidvGgWE5JeZDOIcYdR+TpmkBno+mFmAAC+DGhl'));
-    final PdfImage im =
-        PdfImage(pdf.document, image: imData, width: 16, height: 20);
+    im = PdfImage(pdf.document, image: imData, width: 16, height: 20);
+  });
 
+  test('Pdf Widgets page 1', () {
     pdf.addPage(Page(
         pageFormat: const PdfPageFormat(400, 400),
         margin: const EdgeInsets.all(10),
@@ -63,8 +68,14 @@ void main() {
                       textScaleFactor: 2, textAlign: TextAlign.center)),
               Align(
                   alignment: Alignment.topLeft,
-                  child:
-                      Link(destination: 'anchor', child: Text('Left align'))),
+                  child: Link(
+                      destination: 'anchor',
+                      child: Text(
+                        'Internal link',
+                        style: TextStyle(
+                          color: PdfColors.blue,
+                        ),
+                      ))),
               Padding(padding: const EdgeInsets.all(5)),
               Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -98,7 +109,9 @@ void main() {
                           .copyWith(font: Font.timesBoldItalic()),
                       textScaleFactor: 3)),
             ])));
+  });
 
+  test('Pdf Widgets page 2', () {
     pdf.addPage(Page(
         pageFormat: const PdfPageFormat(400, 400),
         margin: const EdgeInsets.all(10),
@@ -111,7 +124,9 @@ void main() {
                 padding: const EdgeInsets.all(10),
                 children: List<Widget>.generate(
                     9, (int n) => FittedBox(child: Text('${n + 1}')))))));
+  });
 
+  test('Pdf Widgets page 3', () {
     pdf.addPage(MultiPage(
         pageFormat: const PdfPageFormat(400, 200),
         margin: const EdgeInsets.all(10),
@@ -150,7 +165,9 @@ void main() {
               ]),
               Anchor(name: 'anchor', child: Text('Anchor')),
             ]));
+  });
 
+  test('Pdf Widgets page 4', () {
     pdf.addPage(Page(
         pageFormat: const PdfPageFormat(400, 200),
         margin: const EdgeInsets.all(10),
@@ -193,7 +210,13 @@ void main() {
                       right: 10,
                       bottom: 10,
                       child: UrlLink(
-                          child: Text('dart_pdf'),
+                          child: Text(
+                            'https://github.com/DavBfr/dart_pdf/',
+                            style: TextStyle(
+                              color: PdfColors.grey,
+                              fontSize: 8,
+                            ),
+                          ),
                           destination: 'https://github.com/DavBfr/dart_pdf/')),
                   Positioned(
                       left: 10,
@@ -213,7 +236,9 @@ void main() {
                                     strokeWidth: 15),
                               ])))
                 ])));
+  });
 
+  tearDownAll(() {
     final File file = File('widgets.pdf');
     file.writeAsBytesSync(pdf.save());
   });
