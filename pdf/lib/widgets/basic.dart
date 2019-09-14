@@ -323,6 +323,7 @@ class Align extends SingleChildWidget {
   void debugPaint(Context context) {
     context.canvas
       ..setStrokeColor(PdfColors.green)
+      ..setLineWidth(1)
       ..drawRect(box.x, box.y, box.width, box.height);
 
     if (child == null) {

@@ -23,6 +23,7 @@ class ClipRect extends SingleChildWidget {
   void debugPaint(Context context) {
     context.canvas
       ..setStrokeColor(PdfColors.deepPurple)
+      ..setLineWidth(1)
       ..drawRect(box.x, box.y, box.width, box.height)
       ..strokePath();
   }
@@ -61,6 +62,7 @@ class ClipRRect extends SingleChildWidget {
   void debugPaint(Context context) {
     context.canvas
       ..setStrokeColor(PdfColors.deepPurple)
+      ..setLineWidth(1)
       ..drawRRect(
           box.x, box.y, box.width, box.height, horizontalRadius, verticalRadius)
       ..strokePath();
@@ -95,6 +97,7 @@ class ClipOval extends SingleChildWidget {
 
     context.canvas
       ..setStrokeColor(PdfColors.deepPurple)
+      ..setLineWidth(1)
       ..drawEllipse(box.x + rx, box.y + ry, rx, ry)
       ..strokePath();
   }
