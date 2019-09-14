@@ -272,8 +272,13 @@ class RichText extends Widget {
 
   final List<_Span> _spans = <_Span>[];
 
-  double _realignLine(List<_Span> spans, double totalWidth, double wordsWidth,
-      bool last, double baseline) {
+  double _realignLine(
+    List<_Span> spans,
+    double totalWidth,
+    double wordsWidth,
+    bool last,
+    double baseline,
+  ) {
     double delta = 0;
     switch (textAlign) {
       case TextAlign.left:
@@ -355,11 +360,12 @@ class RichText extends Widget {
               width = math.max(
                   width,
                   _realignLine(
-                      _spans.sublist(lineStart),
-                      constraintWidth,
-                      offsetX - space.advanceWidth * style.wordSpacing,
-                      false,
-                      bottom));
+                    _spans.sublist(lineStart),
+                    constraintWidth,
+                    offsetX - space.advanceWidth * style.wordSpacing,
+                    false,
+                    bottom,
+                  ));
 
               lineStart += wCount;
 
@@ -379,12 +385,21 @@ class RichText extends Widget {
             }
 
             final double baseline = span.baseline * textScaleFactor;
-            top =
-                math.min(top ?? metrics.top + baseline, metrics.top + baseline);
+            top = math.min(
+              top ?? metrics.top + baseline,
+              metrics.top + baseline,
+            );
             bottom = math.max(
-                bottom ?? metrics.bottom + baseline, metrics.bottom + baseline);
+              bottom ?? metrics.bottom + baseline,
+              metrics.bottom + baseline,
+            );
 
-            final _Word wd = _Word(word, style, metrics, span.annotation);
+            final _Word wd = _Word(
+              word,
+              style,
+              metrics,
+              span.annotation,
+            );
             wd.offset = PdfPoint(offsetX, -offsetY + baseline);
 
             _spans.add(wd);
@@ -397,11 +412,12 @@ class RichText extends Widget {
             width = math.max(
                 width,
                 _realignLine(
-                    _spans.sublist(lineStart),
-                    constraintWidth,
-                    offsetX - space.advanceWidth * style.wordSpacing,
-                    false,
-                    bottom));
+                  _spans.sublist(lineStart),
+                  constraintWidth,
+                  offsetX - space.advanceWidth * style.wordSpacing,
+                  false,
+                  bottom,
+                ));
 
             lineStart += wCount;
 
@@ -433,13 +449,22 @@ class RichText extends Widget {
               double.infinity,
               style.fontSize * textScaleFactor,
             )));
-        final _WidgetSpan ws = _WidgetSpan(span.child, style, span.annotation);
+        final _WidgetSpan ws = _WidgetSpan(
+          span.child,
+          style,
+          span.annotation,
+        );
 
         if (offsetX + ws.width > constraintWidth && wCount > 0) {
           width = math.max(
               width,
-              _realignLine(_spans.sublist(lineStart), constraintWidth, offsetX,
-                  false, bottom));
+              _realignLine(
+                _spans.sublist(lineStart),
+                constraintWidth,
+                offsetX,
+                false,
+                bottom,
+              ));
 
           lineStart += wCount;
 
@@ -460,7 +485,10 @@ class RichText extends Widget {
 
         final double baseline = span.baseline * textScaleFactor;
         top = math.min(top ?? baseline, baseline);
-        bottom = math.max(bottom ?? ws.height + baseline, ws.height + baseline);
+        bottom = math.max(
+          bottom ?? ws.height + baseline,
+          ws.height + baseline,
+        );
 
         ws.offset = PdfPoint(offsetX, -offsetY + baseline);
         _spans.add(ws);
@@ -474,7 +502,12 @@ class RichText extends Widget {
     width = math.max(
         width,
         _realignLine(
-            _spans.sublist(lineStart), constraintWidth, offsetX, true, bottom));
+          _spans.sublist(lineStart),
+          constraintWidth,
+          offsetX,
+          true,
+          bottom,
+        ));
 
     bottom ??= 0.0;
     top ??= 0.0;
