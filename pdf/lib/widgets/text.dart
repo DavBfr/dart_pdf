@@ -282,7 +282,6 @@ class RichText extends Widget {
     double delta = 0;
     switch (textAlign) {
       case TextAlign.left:
-        totalWidth = wordsWidth;
         break;
       case TextAlign.right:
         delta = totalWidth - wordsWidth;
@@ -503,7 +502,7 @@ class RichText extends Widget {
         width,
         _realignLine(
           _spans.sublist(lineStart),
-          constraintWidth,
+          lines > 1 ? constraintWidth : offsetX,
           offsetX,
           true,
           bottom,
