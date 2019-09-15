@@ -74,6 +74,7 @@ void main() {
                         'Internal link',
                         style: TextStyle(
                           color: PdfColors.blue,
+                          decoration: TextDecoration.underline,
                         ),
                       ))),
               Padding(padding: const EdgeInsets.all(5)),
@@ -215,6 +216,7 @@ void main() {
                             style: TextStyle(
                               color: PdfColors.grey,
                               fontSize: 8,
+                              decoration: TextDecoration.underline,
                             ),
                           ),
                           destination: 'https://github.com/DavBfr/dart_pdf/')),

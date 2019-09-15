@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.21
+
+- Add TextDecoration
+
 ## 1.3.20
 
 - Fix Transform.rotateBox

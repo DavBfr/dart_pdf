@@ -26,6 +26,18 @@ Document pdf;
 Font ttf;
 Font ttfBold;
 
+Iterable<TextDecoration> permute(
+    List<TextDecoration> prefix, List<TextDecoration> remaining) sync* {
+  yield TextDecoration.combine(prefix);
+  if (remaining.isNotEmpty) {
+    for (TextDecoration decoration in remaining) {
+      final List<TextDecoration> next = List<TextDecoration>.from(remaining);
+      next.remove(decoration);
+      yield* permute(prefix + <TextDecoration>[decoration], next);
+    }
+  }
+}
+
 void main() {
   setUpAll(() {
     Document.debug = true;
@@ -135,10 +147,46 @@ void main() {
                 para,
                 style: TextStyle(
                   font: ttf,
-                  background: PdfColors.purple50,
+                  background: BoxDecoration(color: PdfColors.purple50),
                 ),
               ),
             ]));
+  });
+
+  test('Text Widgets decoration', () {
+    final List<Widget> widgets = <Widget>[];
+    final List<TextDecoration> decorations = <TextDecoration>[
+      TextDecoration.underline,
+      TextDecoration.lineThrough,
+      TextDecoration.overline
+    ];
+
+    final Set<TextDecoration> decorationSet = Set<TextDecoration>.from(
+      permute(
+        <TextDecoration>[],
+        decorations,
+      ),
+    );
+
+    for (TextDecorationStyle decorationStyle in TextDecorationStyle.values) {
+      for (TextDecoration decoration in decorationSet) {
+        widgets.add(
+          Text(
+            decoration.toString().replaceAll('.', ' '),
+            style: TextStyle(
+                font: ttf,
+                decoration: decoration,
+                decorationColor: PdfColors.red,
+                decorationStyle: decorationStyle),
+          ),
+        );
+        widgets.add(
+          SizedBox(height: 5),
+        );
+      }
+    }
+
+    pdf.addPage(MultiPage(build: (Context context) => widgets));
   });
 
   test('Text Widgets RichText', () {
@@ -168,6 +216,7 @@ void main() {
                   style: TextStyle(
                     font: ttf,
                     fontSize: 20,
+                    decoration: TextDecoration.underline,
                   ),
                   children: <InlineSpan>[
                     TextSpan(
