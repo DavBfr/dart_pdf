@@ -60,10 +60,13 @@ get-printing:
 	cd printing; flutter packages get
 	cd printing/example; flutter packages get
 
+get-web:
+	cd pdf/web_example; pub get
+
 get-readme:
 	cd test; flutter packages get
 
-get: get-pdf get-printing get-readme
+get: $(FONTS) get-pdf get-printing get-web get-readme
 
 test-pdf: $(FONTS) get-pdf .coverage
 	cd pdf; pub global run coverage:collect_coverage --port=$(COV_PORT) -o coverage.json --resume-isolates --wait-paused &\
