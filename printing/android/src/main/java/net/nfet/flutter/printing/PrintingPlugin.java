@@ -30,6 +30,8 @@ import android.print.PdfConvert;
 import android.print.PrintAttributes;
 import android.print.PrintDocumentAdapter;
 import android.print.PrintDocumentInfo;
+import android.print.PrintJob;
+import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.print.pdf.PrintedPdfDocument;
 import android.webkit.WebView;
@@ -56,6 +58,7 @@ public class PrintingPlugin extends PrintDocumentAdapter implements MethodCallHa
     private final Activity activity;
     private final MethodChannel channel;
     private PrintedPdfDocument mPdfDocument;
+    private PrintJob printJob;
     private byte[] documentData;
     private String jobName;
     private LayoutResultCallback callback;
@@ -126,7 +129,33 @@ public class PrintingPlugin extends PrintDocumentAdapter implements MethodCallHa
 
     @Override
     public void onFinish() {
-        // noinspection ResultOfMethodCallIgnored
+        try {
+            while (true) {
+                int state = printJob.getInfo().getState();
+
+                if (state == PrintJobInfo.STATE_COMPLETED) {
+                    HashMap<String, Object> args = new HashMap<>();
+                    args.put("completed", true);
+                    channel.invokeMethod("onCompleted", args);
+                    break;
+                } else if (state == PrintJobInfo.STATE_CANCELED) {
+                    HashMap<String, Object> args = new HashMap<>();
+                    args.put("completed", false);
+                    channel.invokeMethod("onCompleted", args);
+                    break;
+                }
+
+                Thread.sleep(200);
+            }
+        } catch (Exception e) {
+            HashMap<String, Object> args = new HashMap<>();
+            args.put("completed", printJob.isCompleted());
+            args.put("error", e.getMessage());
+            channel.invokeMethod("onCompleted", args);
+        }
+
+        printJob = null;
+        mPdfDocument = null;
     }
 
     @Override
@@ -136,7 +165,7 @@ public class PrintingPlugin extends PrintDocumentAdapter implements MethodCallHa
                 jobName =
                         call.argument("name") == null ? "Document" : (String) call.argument("name");
                 assert jobName != null;
-                printManager.print(jobName, this, null);
+                printJob = printManager.print(jobName, this, null);
                 result.success(0);
                 break;
             case "writePdf":

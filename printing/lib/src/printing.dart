@@ -22,6 +22,7 @@ mixin Printing {
   static const MethodChannel _channel = MethodChannel('printing');
   static LayoutCallback _onLayout;
   static Completer<List<int>> _onHtmlRendered;
+  static Completer<bool> _onCompleted;
 
   static Future<void> _handleMethod(MethodCall call) async {
     switch (call.method) {
@@ -38,6 +39,15 @@ mixin Printing {
           'doc': Uint8List.fromList(bytes),
         };
         return await _channel.invokeMethod('writePdf', params);
+      case 'onCompleted':
+        final bool completed = call.arguments['completed'];
+        final String error = call.arguments['error'];
+        if (completed == false && error != null) {
+          _onCompleted.completeError(error);
+        } else {
+          _onCompleted.complete(completed);
+        }
+        break;
       case 'onHtmlRendered':
         _onHtmlRendered.complete(call.arguments);
         break;
@@ -50,12 +60,20 @@ mixin Printing {
   /// Prints a Pdf document to a local printer using the platform UI
   /// the Pdf document is re-built in a [LayoutCallback] each time the
   /// user changes a setting like the page format or orientation.
-  static Future<void> layoutPdf(
-      {@required LayoutCallback onLayout, String name = 'Document'}) async {
+  ///
+  /// returns a future with a `bool` set to true if the document is printed
+  /// and false if it is canceled.
+  /// throws an exception in case of error
+  static Future<bool> layoutPdf({
+    @required LayoutCallback onLayout,
+    String name = 'Document',
+  }) async {
+    _onCompleted = Completer<bool>();
     _onLayout = onLayout;
     _channel.setMethodCallHandler(_handleMethod);
     final Map<String, dynamic> params = <String, dynamic>{'name': name};
-    return await _channel.invokeMethod('printPdf', params);
+    await _channel.invokeMethod<int>('printPdf', params);
+    return _onCompleted.future;
   }
 
   /// Prints a [PdfDocument] or a pdf stream to a local printer using the platform UI

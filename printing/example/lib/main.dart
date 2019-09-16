@@ -30,9 +30,11 @@ class MyAppState extends State<MyApp> {
 
   Future<void> _printPdf() async {
     print('Print ...');
-    await Printing.layoutPdf(
+    final bool result = await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async =>
             (await generateDocument(format)).save());
+
+    print('Document printed: $result');
   }
 
   Future<void> _saveAsFile() async {

@@ -87,13 +87,24 @@ public class SwiftPrintingPlugin: NSObject, FlutterPlugin, UIPrintInteractionCon
         if !completed, error != nil {
             print("Unable to print: \(error?.localizedDescription ?? "unknown error")")
         }
+
+        let data: NSDictionary = [
+            "completed": completed,
+            "error": error?.localizedDescription as Any,
+        ]
+        channel?.invokeMethod("onCompleted", arguments: data)
+
         renderer = nil
     }
 
     func printPdf(_ name: String) {
         let printing = UIPrintInteractionController.isPrintingAvailable
         if !printing {
-            print("printing not available")
+            let data: NSDictionary = [
+                "completed": false,
+                "error": "Printing not available",
+            ]
+            channel?.invokeMethod("onCompleted", arguments: data)
             return
         }
 
