@@ -72,7 +72,7 @@ void main() {
                       destination: 'anchor',
                       child: Text(
                         'Internal link',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: PdfColors.blue,
                           decoration: TextDecoration.underline,
                         ),
