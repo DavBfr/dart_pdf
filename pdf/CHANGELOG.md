@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.22
+
+- Fix Text alignment
+
 ## 1.3.21
 
 - Add TextDecoration

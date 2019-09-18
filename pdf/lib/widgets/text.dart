@@ -530,7 +530,8 @@ class RichText extends Widget {
               spanStart += spanCount;
               decorationStart = _decorations.length;
 
-              if (maxLines != null && ++lines > maxLines) {
+              lines++;
+              if (maxLines != null && lines > maxLines) {
                 break;
               }
 
@@ -603,7 +604,8 @@ class RichText extends Widget {
               );
             }
 
-            if (maxLines != null && ++lines > maxLines) {
+            lines++;
+            if (maxLines != null && lines > maxLines) {
               break;
             }
 
@@ -651,7 +653,8 @@ class RichText extends Widget {
           spanStart += spanCount;
           decorationStart = _decorations.length;
 
-          if (maxLines != null && ++lines > maxLines) {
+          lines++;
+          if (maxLines != null && lines > maxLines) {
             return false;
           }
 
