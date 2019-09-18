@@ -24,7 +24,7 @@ import 'package:pdf/widgets.dart';
 
 Document pdf;
 
-Uint32List generateBitmap(int w, int h) {
+PdfImage generateBitmap(PdfDocument pdf, int w, int h) {
   final Uint32List bm = Uint32List(w * h);
   final double dw = w.toDouble();
   final double dh = h.toDouble();
@@ -37,7 +37,12 @@ Uint32List generateBitmap(int w, int h) {
     }
   }
 
-  return bm;
+  return PdfImage(
+    pdf,
+    image: bm.buffer.asUint8List(),
+    width: w,
+    height: h,
+  );
 }
 
 void main() {
@@ -71,56 +76,43 @@ void main() {
   });
 
   test('Container Widgets Image', () {
-    final Uint32List img = generateBitmap(100, 100);
-    final PdfImage image = PdfImage(pdf.document,
-        image: img.buffer.asUint8List(), width: 100, height: 100);
+    final PdfImage image = generateBitmap(pdf.document, 100, 200);
 
-    pdf.addPage(Page(
-      build: (Context context) => Container(
-        alignment: Alignment.center,
-        margin: const EdgeInsets.all(30),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          image: DecorationImage(image: image, fit: BoxFit.cover),
-        ),
-        width: 200,
-        height: 400,
-        // child: Placeholder(),
-      ),
-    ));
-  });
-
-  test('Container Widgets BoxShape Image', () {
-    final Uint32List img = generateBitmap(100, 100);
-    final PdfImage image = PdfImage(pdf.document,
-        image: img.buffer.asUint8List(), width: 100, height: 100);
-
-    pdf.addPage(Page(
-      build: (Context context) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Container(
-              height: 200.0,
-              width: 200.0,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(image: image, fit: BoxFit.cover),
+    final List<Widget> widgets = <Widget>[];
+    for (BoxShape shape in BoxShape.values) {
+      for (BoxFit fit in BoxFit.values) {
+        widgets.add(
+          Container(
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: shape,
+              borderRadius: 10,
+              image: DecorationImage(image: image, fit: fit),
+            ),
+            width: 100,
+            height: 100,
+            child: Container(
+              width: 70,
+              color: PdfColors.yellow,
+              child: Text(
+                '$fit\n$shape',
+                textAlign: TextAlign.center,
+                textScaleFactor: 0.6,
               ),
             ),
-            Container(
-              height: 200.0,
-              width: 200.0,
-              decoration: BoxDecoration(
-                shape: BoxShape.rectangle,
-                borderRadius: 40,
-                image: DecorationImage(image: image, fit: BoxFit.cover),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ));
+          ),
+        );
+      }
+    }
+
+    pdf.addPage(MultiPage(
+        build: (Context context) => <Widget>[
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: widgets,
+              )
+            ]));
   });
 
   test('Container Widgets BoxShape Border', () {
