@@ -24,6 +24,7 @@ mixin Printing {
   static Completer<List<int>> _onHtmlRendered;
   static Completer<bool> _onCompleted;
 
+  /// Callbacks from platform plugins
   static Future<void> _handleMethod(MethodCall call) async {
     switch (call.method) {
       case 'onLayout':
@@ -78,9 +79,10 @@ mixin Printing {
 
   /// Prints a [PdfDocument] or a pdf stream to a local printer using the platform UI
   @Deprecated('use Printing.layoutPdf(onLayout: (_) => document.save());')
-  static Future<void> printPdf(
-      {@Deprecated('use bytes with document.save()') PdfDocument document,
-      List<int> bytes}) async {
+  static Future<void> printPdf({
+    @Deprecated('use bytes with document.save()') PdfDocument document,
+    List<int> bytes,
+  }) async {
     assert(document != null || bytes != null);
     assert(!(document == null && bytes == null));
 
@@ -90,11 +92,12 @@ mixin Printing {
   }
 
   /// Displays a platform popup to share the Pdf document to another application
-  static Future<void> sharePdf(
-      {@Deprecated('use bytes with document.save()') PdfDocument document,
-      List<int> bytes,
-      String filename,
-      Rect bounds}) async {
+  static Future<void> sharePdf({
+    @Deprecated('use bytes with document.save()') PdfDocument document,
+    List<int> bytes,
+    String filename,
+    Rect bounds,
+  }) async {
     assert(document != null || bytes != null);
     assert(!(document == null && bytes == null));
 
@@ -115,6 +118,7 @@ mixin Printing {
     return await _channel.invokeMethod('sharePdf', params);
   }
 
+  /// Convert an html document to a pdf data
   static Future<List<int>> convertHtml(
       {@required String html,
       String baseUrl,
