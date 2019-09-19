@@ -45,6 +45,11 @@ public class SwiftPrintingPlugin: NSObject, FlutterPlugin, UIPrintInteractionCon
                 writePdf(object)
             }
             result(NSNumber(value: 1))
+        } else if call.method == "cancelJob" {
+            renderer?.cancelJob()
+            let controller = UIPrintInteractionController.shared
+            controller.dismiss(animated: true)
+            result(NSNumber(value: 1))
         } else if call.method == "sharePdf" {
             if let object = args["doc"] as? FlutterStandardTypedData {
                 sharePdf(

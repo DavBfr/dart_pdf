@@ -40,6 +40,11 @@ class PdfPrintPageRenderer: UIPrintPageRenderer {
         ctx?.drawPDFPage(page!)
     }
 
+    func cancelJob() {
+        pdfDocument = nil
+        lock?.unlock()
+    }
+
     func setDocument(_ data: Data?) {
         let bytesPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: data?.count ?? 0)
         data?.copyBytes(to: bytesPointer, count: data?.count ?? 0)

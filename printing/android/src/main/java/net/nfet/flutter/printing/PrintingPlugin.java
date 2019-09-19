@@ -149,7 +149,7 @@ public class PrintingPlugin extends PrintDocumentAdapter implements MethodCallHa
             }
         } catch (Exception e) {
             HashMap<String, Object> args = new HashMap<>();
-            args.put("completed", printJob.isCompleted());
+            args.put("completed", printJob != null && printJob.isCompleted());
             args.put("error", e.getMessage());
             channel.invokeMethod("onCompleted", args);
         }
@@ -180,6 +180,11 @@ public class PrintingPlugin extends PrintDocumentAdapter implements MethodCallHa
                 // Content layout reflow is complete
                 callback.onLayoutFinished(info, true);
 
+                result.success(0);
+                break;
+            case "cancelJob":
+                if (callback != null) callback.onLayoutCancelled();
+                if (printJob != null) printJob.cancel();
                 result.success(0);
                 break;
             case "sharePdf":

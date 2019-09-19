@@ -3,6 +3,7 @@
 ## 2.1.6
 
 - Add qrcode to example
+- Cancel print job in case of layout error
 
 ## 2.1.5
 

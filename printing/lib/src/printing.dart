@@ -28,18 +28,28 @@ mixin Printing {
   static Future<void> _handleMethod(MethodCall call) async {
     switch (call.method) {
       case 'onLayout':
-        final List<int> bytes = await _onLayout(PdfPageFormat(
-          call.arguments['width'],
-          call.arguments['height'],
-          marginLeft: call.arguments['marginLeft'],
-          marginTop: call.arguments['marginTop'],
-          marginRight: call.arguments['marginRight'],
-          marginBottom: call.arguments['marginBottom'],
-        ));
-        final Map<String, dynamic> params = <String, dynamic>{
-          'doc': Uint8List.fromList(bytes),
-        };
-        return await _channel.invokeMethod('writePdf', params);
+        try {
+          final List<int> bytes = await _onLayout(PdfPageFormat(
+            call.arguments['width'],
+            call.arguments['height'],
+            marginLeft: call.arguments['marginLeft'],
+            marginTop: call.arguments['marginTop'],
+            marginRight: call.arguments['marginRight'],
+            marginBottom: call.arguments['marginBottom'],
+          ));
+          if (bytes == null) {
+            await _channel.invokeMethod<void>('cancelJob', <String, dynamic>{});
+            break;
+          }
+          final Map<String, dynamic> params = <String, dynamic>{
+            'doc': Uint8List.fromList(bytes),
+          };
+          await _channel.invokeMethod<void>('writePdf', params);
+        } catch (e) {
+          print('Unable to print: $e');
+          await _channel.invokeMethod<void>('cancelJob', <String, dynamic>{});
+        }
+        break;
       case 'onCompleted':
         final bool completed = call.arguments['completed'];
         final String error = call.arguments['error'];
