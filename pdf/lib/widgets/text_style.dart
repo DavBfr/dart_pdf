@@ -111,7 +111,10 @@ class TextStyle {
     this.decorationStyle,
     this.decorationThickness,
   })  : assert(inherit || color != null),
-        assert(inherit || font != null),
+        assert(inherit || fontNormal != null),
+        assert(inherit || fontBold != null),
+        assert(inherit || fontItalic != null),
+        assert(inherit || fontBoldItalic != null),
         assert(inherit || fontSize != null),
         assert(inherit || fontWeight != null),
         assert(inherit || fontStyle != null),
@@ -120,7 +123,6 @@ class TextStyle {
         assert(inherit || lineSpacing != null),
         assert(inherit || height != null),
         assert(inherit || decoration != null),
-        assert(inherit || decorationColor != null),
         assert(inherit || decorationStyle != null),
         assert(inherit || decorationThickness != null),
         fontNormal = fontNormal ??
@@ -142,6 +144,7 @@ class TextStyle {
 
   factory TextStyle.defaultStyle() {
     return TextStyle(
+      inherit: false,
       color: PdfColors.black,
       fontNormal: Font.helvetica(),
       fontBold: Font.helveticaBold(),

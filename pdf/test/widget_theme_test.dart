@@ -117,6 +117,19 @@ void main() {
     ));
   });
 
+  test('Theme Page 4', () {
+    pdf.addPage(Page(
+        pageFormat: PdfPageFormat.a4,
+        orientation: PageOrientation.portrait,
+        margin: EdgeInsets.all(8.0),
+        theme: Theme(
+          defaultTextStyle: TextStyle(font: Font.courier(), fontSize: 10.0),
+        ),
+        build: (Context context) {
+          return Center(child: Text('Text'));
+        }));
+  });
+
   tearDownAll(() {
     final File file = File('widgets-theme.pdf');
     file.writeAsBytesSync(pdf.save());

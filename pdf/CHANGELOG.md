@@ -3,6 +3,7 @@
 ## 1.3.22
 
 - Fix Text alignment
+- Fix Theme creation
 
 ## 1.3.21
 
