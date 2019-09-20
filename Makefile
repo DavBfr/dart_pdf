@@ -117,6 +117,16 @@ analyze-printing: .pana
 
 analyze: analyze-pdf analyze-printing
 
+analyze-ci-pdf: .pana
+	@find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
+	@pub global run pana --no-warning --source path pdf
+	@find pdf -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
+
+analyze-ci-printing: .pana
+	@find printing -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
+	@pub global run pana --no-warning --source path printing
+	@find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
+
 .dartfix:
 	pub global activate dartfix
 	touch $@
