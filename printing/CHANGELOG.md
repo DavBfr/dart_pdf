@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.7
+
+- Add iOS Direct Print
+
 ## 2.1.6
 
 - Add qrcode to example

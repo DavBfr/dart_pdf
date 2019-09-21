@@ -26,7 +26,10 @@ class MyApp extends StatefulWidget {
 
 class MyAppState extends State<MyApp> {
   final GlobalKey<State<StatefulWidget>> shareWidget = GlobalKey();
+  final GlobalKey<State<StatefulWidget>> pickWidget = GlobalKey();
   final GlobalKey<State<StatefulWidget>> previewContainer = GlobalKey();
+
+  Printer selectedPrinter;
 
   Future<void> _printPdf() async {
     print('Print ...');
@@ -48,6 +51,36 @@ class MyAppState extends State<MyApp> {
       MaterialPageRoute<dynamic>(
           builder: (BuildContext context) => PdfViewer(file: file)),
     );
+  }
+
+  Future<void> _pickPrinter() async {
+    print('Pick printer ...');
+
+    // Calculate the widget center for iPad sharing popup position
+    final RenderBox referenceBox = pickWidget.currentContext.findRenderObject();
+    final Offset topLeft =
+        referenceBox.localToGlobal(referenceBox.paintBounds.topLeft);
+    final Offset bottomRight =
+        referenceBox.localToGlobal(referenceBox.paintBounds.bottomRight);
+    final Rect bounds = Rect.fromPoints(topLeft, bottomRight);
+
+    final Printer printer = await Printing.pickPrinter(bounds: bounds);
+
+    setState(() {
+      selectedPrinter = printer;
+    });
+
+    print('Selected printer: $selectedPrinter');
+  }
+
+  Future<void> _directPrintPdf() async {
+    print('Direct print ...');
+    final bool result = await Printing.directPrintPdf(
+        printer: selectedPrinter,
+        onLayout: (PdfPageFormat format) async =>
+            (await generateDocument(PdfPageFormat.letter)).save());
+
+    print('Document printed: $result');
   }
 
   Future<void> _sharePdf() async {
@@ -124,6 +157,22 @@ class MyAppState extends State<MyApp> {
               children: <Widget>[
                 RaisedButton(
                     child: const Text('Print Document'), onPressed: _printPdf),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    RaisedButton(
+                        key: pickWidget,
+                        child: const Text('Pick Printer'),
+                        onPressed: _pickPrinter),
+                    const SizedBox(width: 10),
+                    RaisedButton(
+                        child: Text(selectedPrinter == null
+                            ? 'Direct Print'
+                            : 'Print to $selectedPrinter'),
+                        onPressed:
+                            selectedPrinter != null ? _directPrintPdf : null),
+                  ],
+                ),
                 RaisedButton(
                     key: shareWidget,
                     child: const Text('Share Document'),

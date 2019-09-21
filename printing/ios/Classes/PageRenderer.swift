@@ -37,7 +37,9 @@ class PdfPrintPageRenderer: UIPrintPageRenderer {
         let page = pdfDocument?.page(at: pageIndex + 1)
         ctx?.scaleBy(x: 1.0, y: -1.0)
         ctx?.translateBy(x: 0.0, y: -paperRect.size.height)
-        ctx?.drawPDFPage(page!)
+        if page != nil {
+            ctx?.drawPDFPage(page!)
+        }
     }
 
     func cancelJob() {
@@ -78,5 +80,23 @@ class PdfPrintPageRenderer: UIPrintPageRenderer {
         let pages = pdfDocument?.numberOfPages ?? 0
 
         return pages
+    }
+
+    var pageArgs: [String: NSNumber] {
+        let width = NSNumber(value: Double(paperRect.size.width))
+        let height = NSNumber(value: Double(paperRect.size.height))
+        let marginLeft = NSNumber(value: Double(printableRect.origin.x))
+        let marginTop = NSNumber(value: Double(printableRect.origin.y))
+        let marginRight = NSNumber(value: Double(paperRect.size.width - (printableRect.origin.x + printableRect.size.width)))
+        let marginBottom = NSNumber(value: Double(paperRect.size.height - (printableRect.origin.y + printableRect.size.height)))
+
+        return [
+            "width": width,
+            "height": height,
+            "marginLeft": marginLeft,
+            "marginTop": marginTop,
+            "marginRight": marginRight,
+            "marginBottom": marginBottom,
+        ]
     }
 }

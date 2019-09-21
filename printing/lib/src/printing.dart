@@ -18,6 +18,24 @@ part of printing;
 
 typedef LayoutCallback = FutureOr<List<int>> Function(PdfPageFormat format);
 
+@immutable
+class Printer {
+  const Printer({
+    @required this.url,
+    this.name,
+    this.model,
+    this.location,
+  }) : assert(url != null);
+
+  final String url;
+  final String name;
+  final String model;
+  final String location;
+
+  @override
+  String toString() => name ?? url;
+}
+
 mixin Printing {
   static const MethodChannel _channel = MethodChannel('printing');
   static LayoutCallback _onLayout;
@@ -84,6 +102,61 @@ mixin Printing {
     _channel.setMethodCallHandler(_handleMethod);
     final Map<String, dynamic> params = <String, dynamic>{'name': name};
     await _channel.invokeMethod<int>('printPdf', params);
+    return _onCompleted.future;
+  }
+
+  /// Opens the native printer picker interface, and returns the URL of the selected printer.
+  static Future<Printer> pickPrinter({Rect bounds}) async {
+    if (!Platform.isIOS) {
+      return null;
+    }
+    _channel.setMethodCallHandler(_handleMethod);
+    bounds ??= Rect.fromCircle(center: Offset.zero, radius: 10);
+    final Map<String, dynamic> params = <String, dynamic>{
+      'x': bounds.left,
+      'y': bounds.top,
+      'w': bounds.width,
+      'h': bounds.height,
+    };
+    final Map<dynamic, dynamic> printer = await _channel
+        .invokeMethod<Map<dynamic, dynamic>>('pickPrinter', params);
+    print(printer);
+    if (printer == null) {
+      return null;
+    }
+    return Printer(
+      url: printer['url'],
+      name: printer['name'],
+      model: printer['model'],
+      location: printer['location'],
+    );
+  }
+
+  /// Prints a Pdf document to a specific local printer with no UI
+  ///
+  /// returns a future with a `bool` set to true if the document is printed
+  /// and false if it is canceled.
+  /// throws an exception in case of error
+  static Future<bool> directPrintPdf({
+    @required Printer printer,
+    @required LayoutCallback onLayout,
+    String name = 'Document',
+  }) async {
+    if (!Platform.isIOS || printer == null) {
+      return false;
+    }
+    _onCompleted = Completer<bool>();
+    _channel.setMethodCallHandler(_handleMethod);
+    final List<int> bytes = await onLayout(PdfPageFormat.standard);
+    if (bytes == null) {
+      return false;
+    }
+    final Map<String, dynamic> params = <String, dynamic>{
+      'name': name,
+      'printer': printer.url,
+      'doc': Uint8List.fromList(bytes),
+    };
+    await _channel.invokeMethod<int>('directPrintPdf', params);
     return _onCompleted.future;
   }
 
