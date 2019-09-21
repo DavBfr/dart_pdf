@@ -25,5 +25,9 @@ dependency_overrides:
 
 flutter:
   plugin:
-    androidPackage: net.nfet.flutter.printing
-    pluginClass: PrintingPlugin
+    platforms:
+      android:
+        package: net.nfet.flutter.printing
+        pluginClass: PrintingPlugin
+      ios:
+        pluginClass: PrintingPlugin
