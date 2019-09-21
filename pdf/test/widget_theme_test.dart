@@ -121,7 +121,7 @@ void main() {
     pdf.addPage(Page(
         pageFormat: PdfPageFormat.a4,
         orientation: PageOrientation.portrait,
-        margin: EdgeInsets.all(8.0),
+        margin: const EdgeInsets.all(8.0),
         theme: Theme(
           defaultTextStyle: TextStyle(font: Font.courier(), fontSize: 10.0),
         ),
