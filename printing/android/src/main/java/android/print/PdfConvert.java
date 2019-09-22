@@ -16,9 +16,10 @@
 
 package android.print;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,17 +28,16 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class PdfConvert {
-    public static void print(final Activity activity, final PrintDocumentAdapter adapter,
+    public static void print(final Context context, final PrintDocumentAdapter adapter,
             final PrintAttributes attributes, final Result result) {
         adapter.onLayout(null, attributes, null, new PrintDocumentAdapter.LayoutResultCallback() {
             @Override
             public void onLayoutFinished(PrintDocumentInfo info, boolean changed) {
-                File outputDir = activity.getCacheDir();
-                File outputFile = null;
+                File outputDir = context.getCacheDir();
+                File outputFile;
                 try {
                     outputFile = File.createTempFile("printing", "pdf", outputDir);
                 } catch (IOException e) {
-                    outputFile.delete();
                     result.onError(e.getMessage());
                     return;
                 }
@@ -54,16 +54,22 @@ public class PdfConvert {
                                     super.onWriteFinished(pages);
 
                                     if (pages.length == 0) {
-                                        finalOutputFile.delete();
+                                        if (!finalOutputFile.delete()) {
+                                            Log.e("PDF", "Unable to delete temporary file");
+                                        }
                                         result.onError("No page created");
                                     }
 
                                     result.onSuccess(finalOutputFile);
-                                    finalOutputFile.delete();
+                                    if (!finalOutputFile.delete()) {
+                                        Log.e("PDF", "Unable to delete temporary file");
+                                    }
                                 }
                             });
                 } catch (FileNotFoundException e) {
-                    outputFile.delete();
+                    if (!outputFile.delete()) {
+                        Log.e("PDF", "Unable to delete temporary file");
+                    }
                     result.onError(e.getMessage());
                 }
             }
@@ -72,16 +78,9 @@ public class PdfConvert {
 
     public static byte[] readFile(File file) throws IOException {
         byte[] buffer = new byte[(int) file.length()];
-        InputStream ios = null;
-        try {
-            ios = new FileInputStream(file);
+        try (InputStream ios = new FileInputStream(file)) {
             if (ios.read(buffer) == -1) {
                 throw new IOException("EOF reached while trying to read the whole file");
-            }
-        } finally {
-            try {
-                if (ios != null) ios.close();
-            } catch (IOException e) {
             }
         }
         return buffer;

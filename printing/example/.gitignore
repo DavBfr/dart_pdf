@@ -68,6 +68,9 @@
 **/ios/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
 **/ios/Podfile.lock
 **/ios/Podfile
+**/ios/Flutter/Flutter.podspec
+lib/generated_plugin_registrant.dart
+**/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
 
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3

@@ -31,6 +31,30 @@ class MyAppState extends State<MyApp> {
   final GlobalKey<State<StatefulWidget>> previewContainer = GlobalKey();
 
   Printer selectedPrinter;
+  PrintingInfo printingInfo;
+
+  @override
+  void initState() {
+    Printing.info().then((PrintingInfo info) {
+      setState(() {
+        printingInfo = info;
+      });
+    });
+    super.initState();
+  }
+
+  void _showPrintedToast(bool printed) {
+    final ScaffoldState scaffold = Scaffold.of(shareWidget.currentContext);
+    if (printed) {
+      scaffold.showSnackBar(const SnackBar(
+        content: Text('Document printed successfully'),
+      ));
+    } else {
+      scaffold.showSnackBar(const SnackBar(
+        content: Text('Document not printed'),
+      ));
+    }
+  }
 
   Future<void> _printPdf() async {
     print('Print ...');
@@ -38,7 +62,7 @@ class MyAppState extends State<MyApp> {
         onLayout: (PdfPageFormat format) async =>
             (await generateDocument(format)).save());
 
-    print('Document printed: $result');
+    _showPrintedToast(result);
   }
 
   Future<void> _saveAsFile() async {
@@ -84,7 +108,7 @@ class MyAppState extends State<MyApp> {
         onLayout: (PdfPageFormat format) async =>
             (await generateDocument(PdfPageFormat.letter)).save());
 
-    print('Document printed: $result');
+    _showPrintedToast(result);
   }
 
   Future<void> _sharePdf() async {
@@ -112,7 +136,8 @@ class MyAppState extends State<MyApp> {
         await im.toByteData(format: ui.ImageByteFormat.rawRgba);
     print('Print Screen ${im.width}x${im.height} ...');
 
-    Printing.layoutPdf(onLayout: (PdfPageFormat format) {
+    final bool result =
+        await Printing.layoutPdf(onLayout: (PdfPageFormat format) {
       final pdf.Document document = pdf.Document();
 
       final PdfImage image = PdfImage(document.document,
@@ -132,24 +157,32 @@ class MyAppState extends State<MyApp> {
 
       return document.save();
     });
+
+    _showPrintedToast(result);
   }
 
   Future<void> _printHtml() async {
     print('Print html ...');
-    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async {
+    final bool result =
+        await Printing.layoutPdf(onLayout: (PdfPageFormat format) async {
       final String html = await rootBundle.loadString('assets/example.html');
       return await Printing.convertHtml(format: format, html: html);
     });
+
+    _showPrintedToast(result);
   }
 
   Future<void> _printMarkdown() async {
     print('Print Markdown ...');
-    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async {
+    final bool result =
+        await Printing.layoutPdf(onLayout: (PdfPageFormat format) async {
       final String md = await rootBundle.loadString('assets/example.md');
       final String html = markdown.markdownToHtml(md,
           extensionSet: markdown.ExtensionSet.gitHubWeb);
       return await Printing.convertHtml(format: format, html: html);
     });
+
+    _showPrintedToast(result);
   }
 
   @override
@@ -170,37 +203,52 @@ class MyAppState extends State<MyApp> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 RaisedButton(
-                    child: const Text('Print Document'), onPressed: _printPdf),
+                  child: const Text('Print Document'),
+                  onPressed: printingInfo?.canPrint ?? false ? _printPdf : null,
+                ),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     RaisedButton(
-                        key: pickWidget,
-                        child: const Text('Pick Printer'),
-                        onPressed: _pickPrinter),
+                      key: pickWidget,
+                      child: const Text('Pick Printer'),
+                      onPressed: printingInfo?.directPrint ?? false
+                          ? _pickPrinter
+                          : null,
+                    ),
                     const SizedBox(width: 10),
                     RaisedButton(
-                        child: Text(selectedPrinter == null
-                            ? 'Direct Print'
-                            : 'Print to $selectedPrinter'),
-                        onPressed:
-                            selectedPrinter != null ? _directPrintPdf : null),
+                      child: Text(selectedPrinter == null
+                          ? 'Direct Print'
+                          : 'Print to $selectedPrinter'),
+                      onPressed:
+                          selectedPrinter != null ? _directPrintPdf : null,
+                    ),
                   ],
                 ),
                 RaisedButton(
-                    key: shareWidget,
-                    child: const Text('Share Document'),
-                    onPressed: _sharePdf),
+                  key: shareWidget,
+                  child: const Text('Share Document'),
+                  onPressed: printingInfo?.canShare ?? false ? _sharePdf : null,
+                ),
                 RaisedButton(
-                    child: const Text('Print Screenshot'),
-                    onPressed: _printScreen),
+                  child: const Text('Print Screenshot'),
+                  onPressed:
+                      printingInfo?.canPrint ?? false ? _printScreen : null,
+                ),
                 RaisedButton(
                     child: const Text('Save to file'), onPressed: _saveAsFile),
                 RaisedButton(
-                    child: const Text('Print Html'), onPressed: _printHtml),
+                  child: const Text('Print Html'),
+                  onPressed:
+                      printingInfo?.canConvertHtml ?? false ? _printHtml : null,
+                ),
                 RaisedButton(
-                    child: const Text('Print Markdown'),
-                    onPressed: _printMarkdown),
+                  child: const Text('Print Markdown'),
+                  onPressed: printingInfo?.canConvertHtml ?? false
+                      ? _printMarkdown
+                      : null,
+                ),
                 if (canDebug)
                   Row(
                     mainAxisSize: MainAxisSize.min,

@@ -18,72 +18,63 @@ part of printing;
 
 typedef LayoutCallback = FutureOr<List<int>> Function(PdfPageFormat format);
 
-@immutable
-class Printer {
-  const Printer({
-    @required this.url,
-    this.name,
-    this.model,
-    this.location,
-  }) : assert(url != null);
-
-  final String url;
-  final String name;
-  final String model;
-  final String location;
-
-  @override
-  String toString() => name ?? url;
-}
-
 mixin Printing {
   static const MethodChannel _channel = MethodChannel('net.nfet.printing');
-  static LayoutCallback _onLayout;
-  static Completer<List<int>> _onHtmlRendered;
-  static Completer<bool> _onCompleted;
+  static final Map<int, _PrintJob> _printJobs = <int, _PrintJob>{};
+  static int _jobIndex = 0;
 
   /// Callbacks from platform plugins
-  static Future<void> _handleMethod(MethodCall call) async {
+  static Future<dynamic> _handleMethod(MethodCall call) async {
     switch (call.method) {
       case 'onLayout':
+        final _PrintJob job = _printJobs[call.arguments['job']];
         try {
-          final List<int> bytes = await _onLayout(PdfPageFormat(
+          final PdfPageFormat format = PdfPageFormat(
             call.arguments['width'],
             call.arguments['height'],
             marginLeft: call.arguments['marginLeft'],
             marginTop: call.arguments['marginTop'],
             marginRight: call.arguments['marginRight'],
             marginBottom: call.arguments['marginBottom'],
-          ));
+          );
+
+          final List<int> bytes = await job.onLayout(format);
+
           if (bytes == null) {
-            await _channel.invokeMethod<void>('cancelJob', <String, dynamic>{});
-            break;
+            return false;
           }
-          final Map<String, dynamic> params = <String, dynamic>{
-            'doc': Uint8List.fromList(bytes),
-          };
-          await _channel.invokeMethod<void>('writePdf', params);
+
+          return Uint8List.fromList(bytes);
         } catch (e) {
           print('Unable to print: $e');
-          await _channel.invokeMethod<void>('cancelJob', <String, dynamic>{});
+          return false;
         }
         break;
       case 'onCompleted':
         final bool completed = call.arguments['completed'];
         final String error = call.arguments['error'];
+        final _PrintJob job = _printJobs[call.arguments['job']];
         if (completed == false && error != null) {
-          _onCompleted.completeError(error);
+          job.onCompleted.completeError(error);
         } else {
-          _onCompleted.complete(completed);
+          job.onCompleted.complete(completed);
         }
         break;
       case 'onHtmlRendered':
-        _onHtmlRendered.complete(call.arguments);
+        final _PrintJob job = _printJobs[call.arguments['job']];
+        job.onHtmlRendered.complete(call.arguments['doc']);
         break;
       case 'onHtmlError':
-        _onHtmlRendered.completeError(call.arguments);
+        final _PrintJob job = _printJobs[call.arguments['job']];
+        job.onHtmlRendered.completeError(call.arguments['error']);
         break;
     }
+  }
+
+  static _PrintJob _newPrintJob(_PrintJob job) {
+    job.index = _jobIndex++;
+    _printJobs[job.index] = job;
+    return job;
   }
 
   /// Prints a Pdf document to a local printer using the platform UI
@@ -98,24 +89,33 @@ mixin Printing {
     String name = 'Document',
     PdfPageFormat format = PdfPageFormat.standard,
   }) async {
-    _onCompleted = Completer<bool>();
-    _onLayout = onLayout;
     _channel.setMethodCallHandler(_handleMethod);
-    final Map<String, dynamic> params = <String, dynamic>{'name': name};
-    try {
-      final Map<dynamic, dynamic> info = await printingInfo();
-      if (int.parse(info['iosVersion'].toString().split('.').first) >= 13) {
-        final List<int> bytes = await onLayout(format);
-        if (bytes == null) {
-          return false;
-        }
-        params['doc'] = Uint8List.fromList(bytes);
-      }
-    } catch (e) {
-      e.toString();
-    }
+
+    final _PrintJob job = _newPrintJob(_PrintJob(
+      onCompleted: Completer<bool>(),
+      onLayout: onLayout,
+    ));
+
+    final Map<String, dynamic> params = <String, dynamic>{
+      'name': name,
+      'job': job.index,
+      'width': format.width,
+      'height': format.height,
+      'marginLeft': format.marginLeft,
+      'marginTop': format.marginTop,
+      'marginRight': format.marginRight,
+      'marginBottom': format.marginBottom,
+    };
+
     await _channel.invokeMethod<int>('printPdf', params);
-    return _onCompleted.future;
+    bool result = false;
+    try {
+      result = await job.onCompleted.future;
+    } catch (e) {
+      print('Document not printed: $e');
+    }
+    _printJobs.remove(job.index);
+    return result;
   }
 
   static Future<Map<dynamic, dynamic>> printingInfo() async {
@@ -159,19 +159,31 @@ mixin Printing {
     String name = 'Document',
     PdfPageFormat format = PdfPageFormat.standard,
   }) async {
-    _onCompleted = Completer<bool>();
+    if (printer == null) {
+      return false;
+    }
+
     _channel.setMethodCallHandler(_handleMethod);
+
+    final _PrintJob job = _newPrintJob(_PrintJob(
+      onCompleted: Completer<bool>(),
+    ));
+
     final List<int> bytes = await onLayout(format);
     if (bytes == null) {
       return false;
     }
+
     final Map<String, dynamic> params = <String, dynamic>{
       'name': name,
       'printer': printer.url,
       'doc': Uint8List.fromList(bytes),
+      'job': job.index,
     };
     await _channel.invokeMethod<int>('directPrintPdf', params);
-    return _onCompleted.future;
+    final bool result = await job.onCompleted.future;
+    _printJobs.remove(job.index);
+    return result;
   }
 
   /// Prints a [PdfDocument] or a pdf stream to a local printer using the platform UI
@@ -192,11 +204,12 @@ mixin Printing {
   static Future<void> sharePdf({
     @Deprecated('use bytes with document.save()') PdfDocument document,
     List<int> bytes,
-    String filename,
+    String filename = 'document.pdf',
     Rect bounds,
   }) async {
     assert(document != null || bytes != null);
     assert(!(document == null && bytes == null));
+    assert(filename != null);
 
     if (document != null) {
       bytes = document.save();
@@ -220,6 +233,12 @@ mixin Printing {
       {@required String html,
       String baseUrl,
       PdfPageFormat format = PdfPageFormat.a4}) async {
+    _channel.setMethodCallHandler(_handleMethod);
+
+    final _PrintJob job = _newPrintJob(_PrintJob(
+      onHtmlRendered: Completer<List<int>>(),
+    ));
+
     final Map<String, dynamic> params = <String, dynamic>{
       'html': html,
       'baseUrl': baseUrl,
@@ -229,11 +248,29 @@ mixin Printing {
       'marginTop': format.marginTop,
       'marginRight': format.marginRight,
       'marginBottom': format.marginBottom,
+      'job': job.index,
     };
 
-    _channel.setMethodCallHandler(_handleMethod);
-    _onHtmlRendered = Completer<List<int>>();
     await _channel.invokeMethod<void>('convertHtml', params);
-    return _onHtmlRendered.future;
+    final List<int> result = await job.onHtmlRendered.future;
+    _printJobs.remove(job.index);
+    return result;
+  }
+
+  static Future<PrintingInfo> info() async {
+    _channel.setMethodCallHandler(_handleMethod);
+    Map<dynamic, dynamic> result;
+
+    try {
+      result = await _channel.invokeMethod(
+        'printingInfo',
+        <String, dynamic>{},
+      );
+    } catch (e) {
+      print('Error getting printing info: $e');
+      return PrintingInfo.unavailable;
+    }
+
+    return PrintingInfo.fromMap(result);
   }
 }

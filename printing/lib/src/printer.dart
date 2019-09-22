@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-library printing;
+part of printing;
 
-import 'dart:async';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
+@immutable
+class Printer {
+  const Printer({
+    @required this.url,
+    this.name,
+    this.model,
+    this.location,
+  }) : assert(url != null);
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart';
+  final String url;
+  final String name;
+  final String model;
+  final String location;
 
-part 'src/asset_utils.dart';
-part 'src/print_job.dart';
-part 'src/printer.dart';
-part 'src/printing.dart';
-part 'src/printing_info.dart';
-part 'src/widgets.dart';
+  @override
+  String toString() => name ?? url;
+}

@@ -3,6 +3,8 @@
 ## 2.2.0
 
 - Simplify iOS code
+- Improve native code
+- Add Printing.info()
 
 ## 2.1.9
 

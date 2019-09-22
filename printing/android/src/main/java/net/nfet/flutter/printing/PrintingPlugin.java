@@ -17,32 +17,10 @@
 package net.nfet.flutter.printing;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.CancellationSignal;
-import android.os.Environment;
-import android.os.ParcelFileDescriptor;
-import android.print.PageRange;
-import android.print.PdfConvert;
 import android.print.PrintAttributes;
-import android.print.PrintDocumentAdapter;
-import android.print.PrintDocumentInfo;
-import android.print.PrintJob;
-import android.print.PrintJobInfo;
-import android.print.PrintManager;
-import android.print.pdf.PrintedPdfDocument;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
-import androidx.core.content.FileProvider;
+import androidx.annotation.NonNull;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashMap;
 
 import io.flutter.plugin.common.MethodCall;
@@ -54,17 +32,11 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 /**
  * PrintingPlugin
  */
-public class PrintingPlugin extends PrintDocumentAdapter implements MethodCallHandler {
-    private static PrintManager printManager;
+public class PrintingPlugin implements MethodCallHandler {
     private final Activity activity;
     private final MethodChannel channel;
-    private PrintedPdfDocument mPdfDocument;
-    private PrintJob printJob;
-    private byte[] documentData;
-    private String jobName;
-    private LayoutResultCallback callback;
 
-    private PrintingPlugin(Activity activity, MethodChannel channel) {
+    private PrintingPlugin(@NonNull Activity activity, @NonNull MethodChannel channel) {
         this.activity = activity;
         this.channel = channel;
     }
@@ -73,147 +45,66 @@ public class PrintingPlugin extends PrintDocumentAdapter implements MethodCallHa
      * Plugin registration.
      */
     public static void registerWith(Registrar registrar) {
-        try {
-            final Activity activity = registrar.activity();
-
-            if (activity == null) {
-                return;
-            }
-
-            final MethodChannel channel =
-                    new MethodChannel(registrar.messenger(), "net.nfet.printing");
-            final PrintingPlugin plugin = new PrintingPlugin(activity, channel);
-            channel.setMethodCallHandler(plugin);
-
-            if (printManager == null) {
-                printManager = (PrintManager) activity.getSystemService(Context.PRINT_SERVICE);
-            }
-        } catch (Exception e) {
-            Log.e("PrintingPlugin", "Registration failed", e);
+        Activity activity = registrar.activity();
+        if (activity == null) {
+            return; // We can't print without an activity
         }
+
+        final MethodChannel channel = new MethodChannel(registrar.messenger(), "net.nfet.printing");
+        channel.setMethodCallHandler(new PrintingPlugin(activity, channel));
     }
 
     @Override
-    public void onWrite(PageRange[] pageRanges, ParcelFileDescriptor parcelFileDescriptor,
-            CancellationSignal cancellationSignal, WriteResultCallback writeResultCallback) {
-        OutputStream output = null;
-        try {
-            output = new FileOutputStream(parcelFileDescriptor.getFileDescriptor());
-            output.write(documentData, 0, documentData.length);
-            writeResultCallback.onWriteFinished(new PageRange[] {PageRange.ALL_PAGES});
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (output != null) {
-                    output.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    public void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
-            CancellationSignal cancellationSignal, LayoutResultCallback callback, Bundle extras) {
-        // Create a new PdfDocument with the requested page attributes
-        mPdfDocument = new PrintedPdfDocument(activity, newAttributes);
-
-        // Respond to cancellation request
-        if (cancellationSignal.isCanceled()) {
-            callback.onLayoutCancelled();
-            return;
-        }
-
-        this.callback = callback;
-
-        HashMap<String, Double> args = new HashMap<>();
-
-        PrintAttributes.MediaSize size = newAttributes.getMediaSize();
-        args.put("width", size.getWidthMils() * 72.0 / 1000.0);
-        args.put("height", size.getHeightMils() * 72.0 / 1000.0);
-
-        PrintAttributes.Margins margins = newAttributes.getMinMargins();
-        args.put("marginLeft", margins.getLeftMils() * 72.0 / 1000.0);
-        args.put("marginTop", margins.getTopMils() * 72.0 / 1000.0);
-        args.put("marginRight", margins.getRightMils() * 72.0 / 1000.0);
-        args.put("marginBottom", margins.getBottomMils() * 72.0 / 1000.0);
-
-        channel.invokeMethod("onLayout", args);
-    }
-
-    @Override
-    public void onFinish() {
-        try {
-            while (true) {
-                int state = printJob.getInfo().getState();
-
-                if (state == PrintJobInfo.STATE_COMPLETED) {
-                    HashMap<String, Object> args = new HashMap<>();
-                    args.put("completed", true);
-                    channel.invokeMethod("onCompleted", args);
-                    break;
-                } else if (state == PrintJobInfo.STATE_CANCELED) {
-                    HashMap<String, Object> args = new HashMap<>();
-                    args.put("completed", false);
-                    channel.invokeMethod("onCompleted", args);
-                    break;
-                }
-
-                Thread.sleep(200);
-            }
-        } catch (Exception e) {
-            HashMap<String, Object> args = new HashMap<>();
-            args.put("completed", printJob != null && printJob.isCompleted());
-            args.put("error", e.getMessage());
-            channel.invokeMethod("onCompleted", args);
-        }
-
-        printJob = null;
-        mPdfDocument = null;
-    }
-
-    @Override
-    public void onMethodCall(MethodCall call, Result result) {
+    public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         switch (call.method) {
-            case "printPdf":
-                jobName =
-                        call.argument("name") == null ? "Document" : (String) call.argument("name");
-                assert jobName != null;
-                printJob = printManager.print(jobName, this, null);
-                result.success(0);
-                break;
-            case "writePdf":
-                documentData = (byte[]) call.argument("doc");
+            case "printPdf": {
+                final String name = call.argument("name");
+                final Double width = call.argument("width");
+                final Double height = call.argument("height");
+                final Double marginLeft = call.argument("marginLeft");
+                final Double marginTop = call.argument("marginTop");
+                final Double marginRight = call.argument("marginRight");
+                final Double marginBottom = call.argument("marginBottom");
 
-                // Return print information to print framework
-                PrintDocumentInfo info =
-                        new PrintDocumentInfo.Builder(jobName + ".pdf")
-                                .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
-                                .build();
+                final PrintingJob printJob =
+                        new PrintingJob(activity, this, (int) call.argument("job"));
+                assert name != null;
+                printJob.printPdf(
+                        name, width, height, marginLeft, marginTop, marginRight, marginBottom);
 
-                // Content layout reflow is complete
-                callback.onLayoutFinished(info, true);
+                result.success(1);
+                break;
+            }
+            case "cancelJob": {
+                final PrintingJob printJob =
+                        new PrintingJob(activity, this, (int) call.argument("job"));
+                printJob.cancelJob();
+                result.success(1);
+                break;
+            }
+            case "sharePdf": {
+                final byte[] document = call.argument("doc");
+                final String name = call.argument("name");
+                PrintingJob.sharePdf(activity, document, name);
+                result.success(1);
+                break;
+            }
+            case "convertHtml": {
+                Double width = call.argument("width");
+                Double height = call.argument("height");
+                Double marginLeft = call.argument("marginLeft");
+                Double marginTop = call.argument("marginTop");
+                Double marginRight = call.argument("marginRight");
+                Double marginBottom = call.argument("marginBottom");
+                final PrintingJob printJob =
+                        new PrintingJob(activity, this, (int) call.argument("job"));
 
-                result.success(0);
-                break;
-            case "cancelJob":
-                if (callback != null) callback.onLayoutCancelled();
-                if (printJob != null) printJob.cancel();
-                result.success(0);
-                break;
-            case "sharePdf":
-                sharePdf((byte[]) call.argument("doc"), (String) call.argument("name"));
-                result.success(0);
-                break;
-            case "convertHtml":
-                double width = (double) call.argument("width");
-                double height = (double) call.argument("height");
-                double marginLeft = (double) call.argument("marginLeft");
-                double marginTop = (double) call.argument("marginTop");
-                double marginRight = (double) call.argument("marginRight");
-                double marginBottom = (double) call.argument("marginBottom");
+                assert width != null;
+                assert height != null;
+                assert marginLeft != null;
+                assert marginTop != null;
+                assert marginRight != null;
+                assert marginBottom != null;
 
                 PrintAttributes.Margins margins =
                         new PrintAttributes.Margins(Double.valueOf(marginLeft * 1000.0).intValue(),
@@ -225,90 +116,82 @@ public class PrintingPlugin extends PrintDocumentAdapter implements MethodCallHa
                         "Provided size", Double.valueOf(width * 1000.0 / 72.0).intValue(),
                         Double.valueOf(height * 1000.0 / 72.0).intValue());
 
-                convertHtml((String) call.argument("html"), size, margins,
+                printJob.convertHtml((String) call.argument("html"), size, margins,
                         (String) call.argument("baseUrl"));
-                result.success(0);
+                result.success(1);
                 break;
+            }
+            case "printingInfo": {
+                result.success(PrintingJob.printingInfo());
+                break;
+            }
             default:
                 result.notImplemented();
                 break;
         }
     }
 
-    private void sharePdf(byte[] data, String name) {
-        try {
-            final File externalFilesDirectory =
-                    activity.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-            File shareFile;
-            if (name == null) {
-                shareFile = File.createTempFile("document-", ".pdf", externalFilesDirectory);
-            } else {
-                shareFile = new File(externalFilesDirectory, name);
-            }
+    /// Request the Pdf document from flutter
+    void onLayout(final PrintingJob printJob, Double width, double height, double marginLeft,
+            double marginTop, double marginRight, double marginBottom) {
+        HashMap<String, Object> args = new HashMap<>();
+        args.put("width", width);
+        args.put("height", height);
 
-            FileOutputStream stream = new FileOutputStream(shareFile);
-            stream.write(data);
-            stream.close();
+        args.put("marginLeft", marginLeft);
+        args.put("marginTop", marginTop);
+        args.put("marginRight", marginRight);
+        args.put("marginBottom", marginBottom);
+        args.put("job", printJob.index);
 
-            Uri apkURI = FileProvider.getUriForFile(activity,
-                    activity.getApplicationContext().getPackageName() + ".flutter.printing",
-                    shareFile);
-
-            Intent shareIntent = new Intent();
-            shareIntent.setAction(Intent.ACTION_SEND);
-            shareIntent.setType("application/pdf");
-            shareIntent.putExtra(Intent.EXTRA_STREAM, apkURI);
-            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            Intent chooserIntent = Intent.createChooser(shareIntent, null);
-            activity.startActivity(chooserIntent);
-            shareFile.deleteOnExit();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void convertHtml(String data, final PrintAttributes.MediaSize size,
-            final PrintAttributes.Margins margins, String baseUrl) {
-        final WebView webView = new WebView(activity.getApplicationContext());
-
-        webView.loadDataWithBaseURL(baseUrl, data, "text/HTML", "UTF-8", null);
-
-        webView.setWebViewClient(new WebViewClient() {
+        channel.invokeMethod("onLayout", args, new Result() {
             @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    PrintAttributes attributes =
-                            new PrintAttributes.Builder()
-                                    .setMediaSize(size)
-                                    .setResolution(
-                                            new PrintAttributes.Resolution("pdf", "pdf", 600, 600))
-                                    .setMinMargins(margins)
-                                    .build();
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        final PrintDocumentAdapter adapter =
-                                webView.createPrintDocumentAdapter("printing");
-
-                        PdfConvert.print(activity, adapter, attributes, new PdfConvert.Result() {
-                            @Override
-                            public void onSuccess(File file) {
-                                try {
-                                    byte[] fileContent = PdfConvert.readFile(file);
-                                    channel.invokeMethod("onHtmlRendered", fileContent);
-                                } catch (IOException e) {
-                                    onError(e.getMessage());
-                                }
-                            }
-
-                            @Override
-                            public void onError(String message) {
-                                channel.invokeMethod("onHtmlError", message);
-                            }
-                        });
-                    }
+            public void success(Object result) {
+                if (result instanceof byte[]) {
+                    printJob.setDocument((byte[]) result);
+                } else {
+                    printJob.cancelJob();
                 }
             }
+
+            @Override
+            public void error(String errorCode, String errorMessage, Object errorDetails) {
+                printJob.cancelJob();
+            }
+
+            @Override
+            public void notImplemented() {
+                printJob.cancelJob();
+            }
         });
+    }
+
+    /// send completion status to flutter
+    void onCompleted(PrintingJob printJob, boolean completed, String error) {
+        HashMap<String, Object> args = new HashMap<>();
+        args.put("completed", completed);
+
+        args.put("error", error);
+        args.put("job", printJob.index);
+
+        channel.invokeMethod("onCompleted", args);
+    }
+
+    /// send html to pdf data result to flutter
+    void onHtmlRendered(PrintingJob printJob, byte[] pdfData) {
+        HashMap<String, Object> args = new HashMap<>();
+        args.put("doc", pdfData);
+        args.put("job", printJob.index);
+
+        channel.invokeMethod("onHtmlRendered", args);
+    }
+
+    /// send html to pdf conversion error to flutter
+    void onHtmlError(PrintingJob printJob, String error) {
+        HashMap<String, Object> args = new HashMap<>();
+        args.put("error", error);
+        args.put("job", printJob.index);
+
+        channel.invokeMethod("onHtmlError", args);
     }
 }

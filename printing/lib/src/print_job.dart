@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-library printing;
+part of printing;
 
-import 'dart:async';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
+class _PrintJob {
+  _PrintJob({
+    this.onLayout,
+    this.onHtmlRendered,
+    this.onCompleted,
+  });
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart';
+  final LayoutCallback onLayout;
+  final Completer<List<int>> onHtmlRendered;
+  final Completer<bool> onCompleted;
 
-part 'src/asset_utils.dart';
-part 'src/print_job.dart';
-part 'src/printer.dart';
-part 'src/printing.dart';
-part 'src/printing_info.dart';
-part 'src/widgets.dart';
+  int index;
+}
