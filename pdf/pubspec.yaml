@@ -15,7 +15,6 @@ dependencies:
   utf: "^0.9.0"
   crypto: "^2.0.6"
   archive: "^2.0.10"
-  
 
 dev_dependencies:
   test: any

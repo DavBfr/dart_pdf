@@ -107,9 +107,6 @@ mixin Printing {
 
   /// Opens the native printer picker interface, and returns the URL of the selected printer.
   static Future<Printer> pickPrinter({Rect bounds}) async {
-    if (!Platform.isIOS) {
-      return null;
-    }
     _channel.setMethodCallHandler(_handleMethod);
     bounds ??= Rect.fromCircle(center: Offset.zero, radius: 10);
     final Map<String, dynamic> params = <String, dynamic>{
@@ -142,9 +139,6 @@ mixin Printing {
     @required LayoutCallback onLayout,
     String name = 'Document',
   }) async {
-    if (!Platform.isIOS || printer == null) {
-      return false;
-    }
     _onCompleted = Completer<bool>();
     _channel.setMethodCallHandler(_handleMethod);
     final List<int> bytes = await onLayout(PdfPageFormat.standard);

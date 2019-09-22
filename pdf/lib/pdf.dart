@@ -26,9 +26,9 @@ import 'package:meta/meta.dart';
 import 'package:utf/utf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'src/io.dart'
-    if (dart.library.io) 'src/io_vm.dart'
-    if (dart.library.js) 'src/io_archive.dart';
+import 'io/interface.dart'
+    if (dart.library.io) 'io/vm.dart'
+    if (dart.library.js) 'io/js.dart';
 
 part 'src/annotation.dart';
 part 'src/array.dart';
