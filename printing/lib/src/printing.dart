@@ -96,13 +96,33 @@ mixin Printing {
   static Future<bool> layoutPdf({
     @required LayoutCallback onLayout,
     String name = 'Document',
+    PdfPageFormat format = PdfPageFormat.standard,
   }) async {
     _onCompleted = Completer<bool>();
     _onLayout = onLayout;
     _channel.setMethodCallHandler(_handleMethod);
     final Map<String, dynamic> params = <String, dynamic>{'name': name};
+    try {
+      final Map<dynamic, dynamic> info = await printingInfo();
+      if (int.parse(info['iosVersion'].toString().split('.').first) >= 13) {
+        final List<int> bytes = await onLayout(format);
+        if (bytes == null) {
+          return false;
+        }
+        params['doc'] = Uint8List.fromList(bytes);
+      }
+    } catch (e) {
+      e.toString();
+    }
     await _channel.invokeMethod<int>('printPdf', params);
     return _onCompleted.future;
+  }
+
+  static Future<Map<dynamic, dynamic>> printingInfo() async {
+    return await _channel.invokeMethod<Map<dynamic, dynamic>>(
+      'printingInfo',
+      <String, dynamic>{},
+    );
   }
 
   /// Opens the native printer picker interface, and returns the URL of the selected printer.
@@ -117,7 +137,6 @@ mixin Printing {
     };
     final Map<dynamic, dynamic> printer = await _channel
         .invokeMethod<Map<dynamic, dynamic>>('pickPrinter', params);
-    print(printer);
     if (printer == null) {
       return null;
     }
@@ -138,10 +157,11 @@ mixin Printing {
     @required Printer printer,
     @required LayoutCallback onLayout,
     String name = 'Document',
+    PdfPageFormat format = PdfPageFormat.standard,
   }) async {
     _onCompleted = Completer<bool>();
     _channel.setMethodCallHandler(_handleMethod);
-    final List<int> bytes = await onLayout(PdfPageFormat.standard);
+    final List<int> bytes = await onLayout(format);
     if (bytes == null) {
       return false;
     }

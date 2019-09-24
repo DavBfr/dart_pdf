@@ -39,7 +39,8 @@ public class SwiftPrintingPlugin: NSObject, FlutterPlugin, UIPrintInteractionCon
         let args = call.arguments! as! [String: Any]
         if call.method == "printPdf" {
             let name = args["name"] as? String ?? ""
-            printPdf(name)
+            let object = args["doc"] as? FlutterStandardTypedData
+            printPdf(name, data: object?.data)
             result(NSNumber(value: 1))
         } else if call.method == "directPrintPdf" {
             let name = args["name"] as? String ?? ""
@@ -49,7 +50,7 @@ public class SwiftPrintingPlugin: NSObject, FlutterPlugin, UIPrintInteractionCon
             result(NSNumber(value: 1))
         } else if call.method == "writePdf" {
             if let object = args["doc"] as? FlutterStandardTypedData {
-                writePdf(object)
+                writePdf(object.data)
             }
             result(NSNumber(value: 1))
         } else if call.method == "cancelJob" {
@@ -97,6 +98,11 @@ public class SwiftPrintingPlugin: NSObject, FlutterPlugin, UIPrintInteractionCon
                 width: CGFloat((args["w"] as? NSNumber)?.floatValue ?? 0.0),
                 height: CGFloat((args["h"] as? NSNumber)?.floatValue ?? 0.0)
             ))
+        } else if call.method == "printingInfo" {
+            let data: NSDictionary = [
+                "iosVersion": UIDevice.current.systemVersion,
+            ]
+            result(data)
         } else {
             result(FlutterMethodNotImplemented)
         }
@@ -150,7 +156,7 @@ public class SwiftPrintingPlugin: NSObject, FlutterPlugin, UIPrintInteractionCon
         controller.print(to: printer, completionHandler: completionHandler)
     }
 
-    func printPdf(_ name: String) {
+    func printPdf(_ name: String, data: Data?) {
         let printing = UIPrintInteractionController.isPrintingAvailable
         if !printing {
             let data: NSDictionary = [
@@ -168,13 +174,13 @@ public class SwiftPrintingPlugin: NSObject, FlutterPlugin, UIPrintInteractionCon
         printInfo.jobName = name
         printInfo.outputType = .general
         controller.printInfo = printInfo
-        renderer = PdfPrintPageRenderer(channel)
+        renderer = PdfPrintPageRenderer(channel, data: data)
         controller.printPageRenderer = renderer
         controller.present(animated: true, completionHandler: completionHandler)
     }
 
-    func writePdf(_ data: FlutterStandardTypedData) {
-        renderer?.setDocument(data.data)
+    func writePdf(_ data: Data) {
+        renderer?.setDocument(data)
     }
 
     func sharePdf(_ data: FlutterStandardTypedData, withSourceRect rect: CGRect, andName name: String?) {

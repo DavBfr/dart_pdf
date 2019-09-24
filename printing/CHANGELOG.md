@@ -3,6 +3,7 @@
 ## 2.1.7
 
 - Add iOS Direct Print
+- Fix iOS 13 bug
 
 ## 2.1.6
 

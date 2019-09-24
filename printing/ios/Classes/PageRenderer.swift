@@ -24,12 +24,17 @@ class PdfPrintPageRenderer: UIPrintPageRenderer {
     private var channel: FlutterMethodChannel?
     private var pdfDocument: CGPDFDocument?
     private var lock: NSLock?
+    private var mustLayout: Bool = true
 
-    init(_ channel: FlutterMethodChannel?) {
+    init(_ channel: FlutterMethodChannel?, data: Data?) {
         super.init()
         self.channel = channel
-        lock = NSLock()
         pdfDocument = nil
+        if data != nil {
+            setDocument(data)
+            mustLayout = false
+        }
+        lock = NSLock()
     }
 
     override func drawPage(at pageIndex: Int, in _: CGRect) {
@@ -72,10 +77,12 @@ class PdfPrintPageRenderer: UIPrintPageRenderer {
             "marginBottom": marginBottom,
         ]
 
-        lock?.lock()
-        channel?.invokeMethod("onLayout", arguments: arg)
-        lock?.lock()
-        lock?.unlock()
+        if mustLayout {
+            lock?.lock()
+            channel?.invokeMethod("onLayout", arguments: arg)
+            lock?.lock()
+            lock?.unlock()
+        }
 
         let pages = pdfDocument?.numberOfPages ?? 0
 
