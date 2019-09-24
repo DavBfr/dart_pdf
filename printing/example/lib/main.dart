@@ -64,13 +64,16 @@ class MyAppState extends State<MyApp> {
         referenceBox.localToGlobal(referenceBox.paintBounds.bottomRight);
     final Rect bounds = Rect.fromPoints(topLeft, bottomRight);
 
-    final Printer printer = await Printing.pickPrinter(bounds: bounds);
+    try {
+      final Printer printer = await Printing.pickPrinter(bounds: bounds);
+      print('Selected printer: $selectedPrinter');
 
-    setState(() {
-      selectedPrinter = printer;
-    });
-
-    print('Selected printer: $selectedPrinter');
+      setState(() {
+        selectedPrinter = printer;
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<void> _directPrintPdf() async {
