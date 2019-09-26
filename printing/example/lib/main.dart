@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:markdown/markdown.dart' as markdown;
 import 'package:path_provider/path_provider.dart';
 
 import 'package:pdf/pdf.dart';
@@ -141,6 +142,16 @@ class MyAppState extends State<MyApp> {
     });
   }
 
+  Future<void> _printMarkdown() async {
+    print('Print Markdown ...');
+    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async {
+      final String md = await rootBundle.loadString('assets/example.md');
+      final String html = markdown.markdownToHtml(md,
+          extensionSet: markdown.ExtensionSet.gitHubWeb);
+      return await Printing.convertHtml(format: format, html: html);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     bool canDebug = false;
@@ -187,6 +198,9 @@ class MyAppState extends State<MyApp> {
                     child: const Text('Save to file'), onPressed: _saveAsFile),
                 RaisedButton(
                     child: const Text('Print Html'), onPressed: _printHtml),
+                RaisedButton(
+                    child: const Text('Print Markdown'),
+                    onPressed: _printMarkdown),
                 canDebug
                     ? Row(
                         mainAxisSize: MainAxisSize.min,

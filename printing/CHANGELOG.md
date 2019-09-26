@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.9
+
+- Add Markdown example
+
 ## 2.1.8
 
 - Revert "Update plugin platforms" (Flutter 1.9.1)

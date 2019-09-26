@@ -14,6 +14,7 @@ dependencies:
   flutter_full_pdf_viewer:
   cupertino_icons:
   qr:
+  markdown:
 
 dev_dependencies:
   flutter_test:
