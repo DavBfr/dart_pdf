@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.8
+
+- Revert "Update plugin platforms" (Flutter 1.9.1)
+
 ## 2.1.7
 
 - Add iOS Direct Print
