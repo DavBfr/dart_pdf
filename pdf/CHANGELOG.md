@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.23
+
+- Implement ListView.builder and ListView.separated
+
 ## 1.3.22
 
 - Fix Text alignment

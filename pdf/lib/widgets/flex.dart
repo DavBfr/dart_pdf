@@ -546,17 +546,99 @@ class Spacer extends StatelessWidget {
   }
 }
 
-class ListView extends Flex {
-  ListView(
-      {Axis direction = Axis.vertical,
-      // EdgeInsets padding,
-      // double spacing = 0.0,
-      List<Widget> children = const <Widget>[]})
-      : super(
-            direction: direction,
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            verticalDirection: VerticalDirection.down,
-            children: children);
+typedef IndexedWidgetBuilder = Widget Function(Context context, int index);
+
+class ListView extends StatelessWidget {
+  ListView({
+    this.direction = Axis.vertical,
+    this.reverse = false,
+    this.spacing = 0,
+    this.padding,
+    this.children = const <Widget>[],
+  })  : itemBuilder = null,
+        separatorBuilder = null,
+        itemCount = children.length,
+        super();
+
+  ListView.builder({
+    this.direction = Axis.vertical,
+    this.reverse = false,
+    this.spacing = 0,
+    this.padding,
+    @required this.itemBuilder,
+    @required this.itemCount,
+  })  : children = null,
+        separatorBuilder = null,
+        super();
+
+  ListView.separated({
+    this.direction = Axis.vertical,
+    this.reverse = false,
+    this.padding,
+    @required this.itemBuilder,
+    @required this.separatorBuilder,
+    @required this.itemCount,
+  })  : children = null,
+        spacing = null,
+        super();
+
+  final Axis direction;
+  final EdgeInsets padding;
+  final double spacing;
+  final bool reverse;
+  final IndexedWidgetBuilder itemBuilder;
+  final IndexedWidgetBuilder separatorBuilder;
+  final List<Widget> children;
+  final int itemCount;
+
+  Widget _getItem(Context context, int index) {
+    return children == null ? itemBuilder(context, index) : children[index];
+  }
+
+  Widget _getSeparator(Context context, int index) {
+    return spacing == null
+        ? separatorBuilder(context, index)
+        : direction == Axis.vertical
+            ? SizedBox(height: spacing)
+            : SizedBox(width: spacing);
+  }
+
+  @override
+  Widget build(Context context) {
+    final List<Widget> _children = <Widget>[];
+
+    if (reverse) {
+      for (int index = itemCount - 1; index >= 0; index--) {
+        _children.add(_getItem(context, index));
+        if (spacing != 0 && index > 0) {
+          _children.add(_getSeparator(context, index));
+        }
+      }
+    } else {
+      for (int index = 0; index < itemCount; index++) {
+        _children.add(_getItem(context, index));
+        if (spacing != 0 && index < itemCount - 1) {
+          _children.add(_getSeparator(context, index));
+        }
+      }
+    }
+
+    final Widget widget = Flex(
+      direction: direction,
+      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      verticalDirection: VerticalDirection.down,
+      children: _children,
+    );
+
+    if (padding != null) {
+      return Padding(
+        padding: padding,
+        child: widget,
+      );
+    }
+
+    return widget;
+  }
 }
