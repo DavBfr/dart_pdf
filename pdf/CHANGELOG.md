@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.24
+
+- Format Java code
+
 ## 1.3.23
 
 - Implement ListView.builder and ListView.separated
