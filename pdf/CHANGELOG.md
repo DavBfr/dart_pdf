@@ -2,6 +2,7 @@
 
 ## 1.3.24
 
+- Fix warning in example
 - Format Java code
 
 ## 1.3.23

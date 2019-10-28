@@ -132,7 +132,7 @@ class _QrCodeWidget extends Widget {
     } catch (ex) {
       if (onError != null) {
         _hasError = true;
-        this.onError(ex);
+        onError(ex);
       }
     }
   }
