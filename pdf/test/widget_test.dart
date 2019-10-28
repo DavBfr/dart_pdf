@@ -213,7 +213,7 @@ void main() {
                       child: UrlLink(
                           child: Text(
                             'https://github.com/DavBfr/dart_pdf/',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: PdfColors.grey,
                               fontSize: 8,
                               decoration: TextDecoration.underline,

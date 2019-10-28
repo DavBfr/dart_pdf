@@ -147,7 +147,7 @@ void main() {
                 para,
                 style: TextStyle(
                   font: ttf,
-                  background: BoxDecoration(color: PdfColors.purple50),
+                  background: const BoxDecoration(color: PdfColors.purple50),
                 ),
               ),
             ]));

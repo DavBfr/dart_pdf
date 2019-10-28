@@ -2,6 +2,7 @@
 
 ## 1.3.24
 
+- Fix warning in tests
 - Fix warning in example
 - Format Java code
 
