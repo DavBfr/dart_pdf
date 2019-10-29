@@ -30,3 +30,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+  fonts:
+    - family: arabic
+      fonts:
+        - asset: assets/hacen-tunisia.ttf
