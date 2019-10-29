@@ -269,6 +269,33 @@ void main() {
     ));
   });
 
+  test('Text Widgets Arabic', () {
+    final Uint8List fontData = File('hacen-tunisia.ttf').readAsBytesSync();
+    final Font ttf = Font.ttf(fontData.buffer.asByteData());
+
+    pdf.addPage(Page(
+      build: (Context context) => RichText(
+        textDirection: TextDirection.rtl,
+        text: TextSpan(
+          text: 'قهوة\n',
+          style: TextStyle(
+            font: ttf,
+            fontSize: 30,
+          ),
+          children: const <TextSpan>[
+            TextSpan(
+              text:
+                  'القهوة مشروب يعد من بذور الب المحمصة، وينمو في أكثر من 70 لداً. خصوصاً في المناطق الاستوائية في أمريكا الشمالية والجنوبية وجنوب شرق آسيا وشبه القارة الهندية وأفريقيا. ويقال أن البن الأخضر هو ثاني أكثر السلع تداولاً في العالم بعد النفط الخام.',
+              style: TextStyle(
+                fontSize: 20,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+  });
+
   tearDownAll(() {
     final File file = File('widgets-text.pdf');
     file.writeAsBytesSync(pdf.save());
