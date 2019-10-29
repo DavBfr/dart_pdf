@@ -218,10 +218,6 @@ class PdfArabic {
   }
 
   static int getCorrectForm(int currentChar, int beforeChar, int nextChar) {
-    if (!_isArabicLetter(currentChar)) {
-      return -1;
-    }
-
     if (_isInArabicSubstitutionA(currentChar) == false) {
       return _noChangeInForm;
     }
@@ -254,12 +250,15 @@ class PdfArabic {
     bool first = true;
     for (String word in words) {
       final List<int> newWord = <int>[];
+      bool isArabic = false;
 
       for (int j = 0; j < word.length; j += 1) {
         final int currentLetter = word.codeUnitAt(j);
         final int prevLetter = j > 0 ? word.codeUnitAt(j - 1) : 0;
         final int nextLetter = j < word.length - 1 ? word.codeUnitAt(j + 1) : 0;
         if (_isArabicLetter(currentLetter)) {
+          isArabic = true;
+
           final int position =
               getCorrectForm(currentLetter, prevLetter, nextLetter);
           if (position != -1) {
@@ -268,7 +267,10 @@ class PdfArabic {
             newWord.add(currentLetter);
           }
         } else {
-          newWord.add(currentLetter);
+          if (isArabic && currentLetter > 32)
+            newWord.insert(0, currentLetter);
+          else
+            newWord.add(currentLetter);
         }
       }
 
