@@ -374,18 +374,17 @@ class TtfParser {
   }
 
   void _parseGsub() {
-    print(fontName);
-    print(tableOffsets);
-
-    final int basePosition = tableOffsets[gsub_table];
-    print('GSUB Version: ${bytes.getUint32(basePosition).toRadixString(16)}');
-    final int scriptListOffset =
-        bytes.getUint16(basePosition + 4) + basePosition;
-    final int featureListOffset =
-        bytes.getUint16(basePosition + 6) + basePosition;
-    final int lookupListOffset =
-        bytes.getUint16(basePosition + 8) + basePosition;
-    print(
-        'GSUB Offsets: $scriptListOffset $featureListOffset $lookupListOffset');
+    // print(fontName);
+    // print(tableOffsets);
+    //
+    // final int basePosition = tableOffsets[gsub_table];
+    // print('GSUB Version: ${bytes.getUint32(basePosition).toRadixString(16)}');
+    // final int scriptListOffset =
+    // bytes.getUint16(basePosition + 4) + basePosition;
+    // final int featureListOffset =
+    // bytes.getUint16(basePosition + 6) + basePosition;
+    // final int lookupListOffset =
+    // bytes.getUint16(basePosition + 8) + basePosition;
+    // print('GSUB Offsets: $scriptListOffset $featureListOffset $lookupListOffset');
   }
 }
