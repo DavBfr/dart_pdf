@@ -8,6 +8,7 @@ environment:
 
 dependencies:
   pdf:
+  intl:
 
 dependency_overrides:
   pdf:

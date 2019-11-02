@@ -8,17 +8,87 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pdf Web Example</title>
   <link rel="stylesheet" href="styles.css">
-  <script defer src="main.dart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.3.200/pdf.min.js"></script>
+  <script src="main.dart.js"></script>
+  <script>
+    async function displayPdf(pdf) {
+      let doc = await pdfjsLib.getDocument(pdf).promise;
+      document.getElementById('page_count').innerText = doc.numPages;
+      let metadata = await doc.getMetadata();
+      let title = metadata.info.Title || 'Untitled';
+      document.getElementById('title').innerText = title;
+      document.title = title;
+
+      let author = metadata.info.Author || '';
+      let producer = metadata.info.Producer || '';
+      document.getElementById('author').innerText = author + ' | ' + producer;
+
+      let currentPage = 1;
+
+      document.getElementById('prev').addEventListener('click', () => {
+        if (currentPage <= 1) {
+          return;
+        }
+        currentPage--;
+        renderPage(doc, currentPage);
+      });
+
+      document.getElementById('next').addEventListener('click', () => {
+        if (currentPage >= doc.numPages) {
+          return;
+        }
+        currentPage++;
+        renderPage(doc, currentPage);
+      });
+
+      renderPage(doc, currentPage);
+    }
+
+    async function renderPage(doc, pageNum) {
+      document.getElementById('page_num').innerText = pageNum;
+
+      let page = await doc.getPage(pageNum);
+      let viewport = page.getViewport({ scale: 1 });
+      let canvas = document.getElementById('container');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      let renderContext = {
+        canvasContext: canvas.getContext('2d'),
+        viewport: viewport
+      };
+
+      await page.render(renderContext).promise;
+
+      document.getElementById('toolbar-loading').style.display = 'none';
+      document.getElementById('toolbar-content').style.display = '';
+      document.getElementById('container').style.display = '';
+      document.getElementById('author').style.display = '';
+    }
+
+    function ready() {
+      // Dart is fully loaded
+      let pdf = buildPdf();
+      displayPdf(pdf);
+    };
+  </script>
 </head>
 
 <body>
-  <div>
-    <button id="generate">Generate</button>
+  <div class="toolbar">
+    <div id="toolbar-loading">Loading ...</div>
+    <div id="toolbar-content" style="display:none;">
+      <button id="prev">Previous</button>
+      <button id="next">Next</button>
+      &nbsp; &nbsp;
+      <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
+      <span id="title"></span>
+    </div>
   </div>
 
-  <div id="container">
-    <object id="doc" type="application/pdf"></object>
-  </div>
+
+  <canvas id="container" style="display:none;"></canvas>
+  <div id="author" style="display:none;"></div>
 </body>
 
 </html>

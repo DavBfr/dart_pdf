@@ -10,18 +10,44 @@ body {
 }
 
 #container {
-  left: 10px;
-  right: 10px;
-  width: auto;
-  bottom: 10px;
-  top: 49px;
-  display: block;
-  position: absolute;
-  border: 1px dotted red;
+  border: 1px solid rgb(37, 37, 37);
+  box-shadow: 3px 3px 5px rgb(129, 129, 129);
+  margin: 20px;
 }
 
-#doc {
-  width: 100%;
-  height: 100%;
-  display: block;
+.toolbar {
+  background-color: rgb(82, 82, 82);
+  padding: 10px;
+  color: #fff;
+}
+
+button {
+  height: 50px;
+  width: 100px;
+  background-color: #5cb8ff;
+  border: 1px solid #4f90ff;
+  display: inline-block;
+  cursor: pointer;
+  color: #ffffff;
+  font-size: 17px;
+}
+
+button:hover {
+  background-color: #2688ff;
+}
+
+button:active {
+  background-color: #1a64be;
+}
+
+#title {
+  margin-left: 2rem;
+  font-size: 1.8em;
+}
+
+#author {
+  margin-left: 20px;
+  margin-bottom: 20px;
+  color: rgb(65, 72, 77);
+  font-size: 0.7em;
 }
