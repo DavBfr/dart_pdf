@@ -149,6 +149,15 @@ class PdfArabic {
 
   static const List<int> _alfletter = <int>[1570, 1571, 1573, 1575];
 
+  static const Map<int, int> _arabicDiacritics = <int, int>{
+    1611: 1611, // Shadda + Fathatan
+    1612: 64606, // Shadda + Dammatan
+    1613: 64607, // Shadda + Kasratan
+    1614: 64608, // Shadda + Fatha
+    1615: 64609, // Shadda + Damma
+    1616: 64610 // Shadda + Kasra
+  };
+
   static const int _noChangeInForm = -1;
   static const int _isolatedForm = 0;
   static const int _finalForm = 1;
@@ -188,27 +197,92 @@ class PdfArabic {
         _arabicSubstitionA[letter].length == 4;
   }
 
-  static List<int> _resolveLigatures(List<int> letters) {
+  static bool isArabicDiacritic(int letter) {
+    return _arabicDiacritics.containsKey(letter);
+  }
+
+  // static List<int> _resolveLigaturesr(List<int> letters) {
+  //   final List<int> result = <int>[];
+  //   int effectedLetters = 0;
+  //   int insert = 0;
+  //   dynamic tmpLigatures = _ligatures;
+
+  //   // print(letters);
+
+  //   for (int i = letters.length - 1; i >= 0; i--) {
+  //     // print('loop: $i');
+  //     if (tmpLigatures.containsKey(letters[i])) {
+  //       effectedLetters++;
+  //       tmpLigatures = tmpLigatures[letters[i]];
+  //       // print('tmpLigatures ${letters[i]} => $tmpLigatures');
+
+  //       if (tmpLigatures is int) {
+  //         // print('add $tmpLigatures');
+  //         result.insert(insert, tmpLigatures);
+  //         tmpLigatures = _ligatures;
+  //         effectedLetters = 0;
+  //       }
+  //       // print('$i == ${letters.length} - 1');
+  //       if (i - (effectedLetters - 1) == 0) {
+  //         tmpLigatures = _ligatures;
+  //         // print('add ${letters[i]} => $i $effectedLetters');
+  //         result.insert(insert, letters[i - (effectedLetters - 1)]);
+  //         i += (effectedLetters - 1);
+  //         effectedLetters = 0;
+  //       }
+  //     } else {
+  //       tmpLigatures = _ligatures;
+  //       final int letter = letters[i - effectedLetters];
+  //       // print('${letters[i]} add ${letter} ($effectedLetters)');
+  //       result.insert(insert, letter);
+  //       if (isArabicDiacritic(letter)) {
+  //         insert++;
+  //       }
+  //       i += effectedLetters;
+  //       effectedLetters = 0;
+  //     }
+  //   }
+
+  //   return result;
+  // }
+
+  static List<int> _resolveLigatures(List<int> lettersq) {
     final List<int> result = <int>[];
     int effectedLetters = 0;
+    dynamic tmpLigatures = _ligatures;
+    int insert = 0;
+    final List<int> letters = lettersq.reversed.toList();
+
+    // print(letters);
 
     for (int i = 0; i < letters.length; i += 1) {
-      if (_ligatures.containsKey(letters[i])) {
+      if (tmpLigatures.containsKey(letters[i])) {
         effectedLetters++;
-        final dynamic tmpLigature = _ligatures[letters[i]];
+        tmpLigatures = tmpLigatures[letters[i]];
+        // print('${letters[i]} => $tmpLigatures');
 
-        if (tmpLigature is int) {
-          result.add(tmpLigature);
-
+        if (tmpLigatures is int) {
+          // print('add $tmpLigatures');
+          result.insert(insert, tmpLigatures);
+          tmpLigatures = _ligatures;
           effectedLetters = 0;
         }
-        if (i == letters.length - 1) {
-          result.add(letters[i - (effectedLetters - 1)]);
+        // print('$i == ${letters.length} - 1');
+        if (i - (effectedLetters - 1) == letters.length - 1) {
+          tmpLigatures = _ligatures;
+          // print('add ${letters[i]} => $i $effectedLetters');
+          result.insert(insert, letters[i - (effectedLetters - 1)]);
           i = i - (effectedLetters - 1);
           effectedLetters = 0;
         }
       } else {
-        result.add(letters[i - effectedLetters]);
+        tmpLigatures = _ligatures;
+        final int letter = letters[i - effectedLetters];
+        // print('${letters[i]} add ${letter} $effectedLetters');
+        result.insert(insert, letter);
+        if (isArabicDiacritic(letter)) {
+          insert++;
+        }
         i = i - effectedLetters;
         effectedLetters = 0;
       }
