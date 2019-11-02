@@ -26,5 +26,6 @@ class PdfArrayObject extends PdfObject {
     super._writeContent(os);
 
     os.putStringArray(values);
+    os.putBytes(<int>[0x0a]);
   }
 }
