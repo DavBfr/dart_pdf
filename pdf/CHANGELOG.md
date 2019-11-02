@@ -2,6 +2,7 @@
 
 ## 1.3.24
 
+- Add more color functions
 - Fix Pdf format
 - Fix warning in tests
 - Fix warning in example

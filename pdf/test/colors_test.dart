@@ -15,6 +15,7 @@
  */
 
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
@@ -57,10 +58,125 @@ class Color extends StatelessWidget {
   }
 }
 
-void main() {
-  test('Pdf Colors', () {
-    final Document pdf = Document(title: 'Material Colors');
+enum ColorSpace { rgb, ryb, cmy }
 
+class ColorWheel extends Widget {
+  ColorWheel({
+    this.colorSpace = ColorSpace.rgb,
+    this.divisions = 12,
+    this.rings = 5,
+    this.brightness = .5,
+  }) : assert(brightness >= 0 && brightness <= 1);
+
+  final int divisions;
+  final int rings;
+  final double brightness;
+  final ColorSpace colorSpace;
+
+  @override
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
+  }
+
+  void drawFilledArc(Context context, double centerX, double centerY,
+      double angleStart, double angleEnd, double radius1, double radius2) {
+    assert(radius1 > radius2);
+
+    final PdfPoint startTop = PdfPoint(
+      box.x + centerX + math.cos(angleStart) * radius1,
+      box.y + centerY + math.sin(angleStart) * radius1,
+    );
+    final PdfPoint endTop = PdfPoint(
+      box.x + centerX + math.cos(angleEnd) * radius1,
+      box.y + centerY + math.sin(angleEnd) * radius1,
+    );
+    final PdfPoint startBottom = PdfPoint(
+      box.x + centerX + math.cos(angleStart) * radius2,
+      box.y + centerY + math.sin(angleStart) * radius2,
+    );
+    final PdfPoint endBottom = PdfPoint(
+      box.x + centerX + math.cos(angleEnd) * radius2,
+      box.y + centerY + math.sin(angleEnd) * radius2,
+    );
+
+    context.canvas
+      ..moveTo(startTop.x, startTop.y)
+      ..bezierArc(startTop.x, startTop.y, radius1, radius1, endTop.x, endTop.y,
+          large: false, sweep: true)
+      ..lineTo(endBottom.x, endBottom.y)
+      ..bezierArc(endBottom.x, endBottom.y, radius2, radius2, startBottom.x,
+          startBottom.y, large: false)
+      ..lineTo(startTop.x, startTop.y)
+      ..fillPath()
+      ..moveTo(startTop.x, startTop.y)
+      ..bezierArc(startTop.x, startTop.y, radius1, radius1, endTop.x, endTop.y,
+          large: false, sweep: true)
+      ..lineTo(endBottom.x, endBottom.y)
+      ..bezierArc(endBottom.x, endBottom.y, radius2, radius2, startBottom.x,
+          startBottom.y,
+          large: false)
+      ..lineTo(startTop.x, startTop.y)
+      ..strokePath();
+  }
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+
+    final double centerX = box.width / 2;
+    final double centerY = box.height / 2;
+    final double step = math.pi * 2 / divisions;
+    final double angleStart = math.pi / 2 - step;
+
+    final double ringStep = math.min(centerX, centerY) / rings;
+
+    context.canvas.setStrokeColor(PdfColors.black);
+
+    for (int ring = 0; ring <= rings; ring++) {
+      final double radius1 = ringStep * ring;
+      final double radius2 = ringStep * (ring - 1);
+      for (double angle = 0; angle < math.pi * 2; angle += step) {
+        final PdfColor ic =
+            PdfColorHsl(angle / math.pi * 180, ring / rings, brightness);
+
+        switch (colorSpace) {
+          case ColorSpace.rgb:
+            context.canvas.setFillColor(ic);
+            break;
+          case ColorSpace.ryb:
+            context.canvas
+                .setFillColor(PdfColor.fromRYB(ic.red, ic.green, ic.blue));
+            break;
+          case ColorSpace.cmy:
+            context.canvas
+                .setFillColor(PdfColorCmyk(ic.red, ic.green, ic.blue, 0));
+            break;
+        }
+
+        drawFilledArc(
+          context,
+          centerX,
+          centerY,
+          angleStart + angle,
+          angleStart + angle + step,
+          radius1,
+          radius2,
+        );
+      }
+    }
+  }
+}
+
+Document pdf;
+
+void main() {
+  setUpAll(() {
+    Document.debug = true;
+    pdf = Document();
+  });
+
+  test('Pdf Colors', () {
     pdf.addPage(MultiPage(
         pageFormat: PdfPageFormat.standard,
         build: (Context context) => <Widget>[
@@ -546,7 +662,52 @@ void main() {
                     Color(PdfColors.black, 'Black'),
                   ]),
             ]));
+  });
 
+  test('Pdf Colors Wheel', () {
+    const Map<ColorSpace, String> wheels = <ColorSpace, String>{
+      ColorSpace.rgb: 'Red Green Blue',
+      ColorSpace.ryb: 'Red Yellow Blue',
+      ColorSpace.cmy: 'Cyan Magenta Yellow',
+    };
+
+    wheels.forEach((ColorSpace colorSpace, String name) {
+      pdf.addPage(Page(
+          build: (Context context) => Column(
+                children: <Widget>[
+                  Header(text: name),
+                  SizedBox(
+                    height: context.page.pageFormat.availableWidth,
+                    child: ColorWheel(
+                      colorSpace: colorSpace,
+                    ),
+                  ),
+                ],
+              )));
+    });
+  });
+
+  test('Pdf Colors Generator', () {
+    const double widthCount = 26;
+    const PdfPageFormat format = PdfPageFormat(400, 400);
+    final double w = (format.width - 1) / widthCount;
+    final int count = widthCount * (format.height - 1) ~/ w;
+
+    pdf.addPage(MultiPage(
+        pageFormat: format,
+        build: (Context context) => <Widget>[
+              Wrap(
+                  children: List<Widget>.generate(count, (int i) {
+                return Container(
+                  width: w,
+                  height: w,
+                  color: PdfColors.getColor(i),
+                );
+              })),
+            ]));
+  });
+
+  tearDownAll(() {
     final File file = File('colors.pdf');
     file.writeAsBytesSync(pdf.save());
   });

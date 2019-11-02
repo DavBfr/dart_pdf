@@ -392,4 +392,13 @@ class PdfColors {
     orangeAccent,
     deepOrangeAccent,
   ];
+
+  static PdfColor getColor(int index) {
+    final double hue = index * 137.508;
+    final PdfColor color = PdfColorHsv(hue % 360, 1, 1);
+    if ((index / 3) % 2 == 0) {
+      return PdfColor.fromRYB(color.red, color.green, color.blue);
+    }
+    return color;
+  }
 }

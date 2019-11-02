@@ -40,6 +40,65 @@ class PdfColor {
         (int.parse(color.substring(6, 7), radix: 16) >> 24 & 0xff) / 255.0);
   }
 
+  factory PdfColor.fromRYB(double red, double yellow, double blue,
+      [double alpha = 1.0]) {
+    assert(red >= 0 && red <= 1);
+    assert(yellow >= 0 && yellow <= 1);
+    assert(blue >= 0 && blue <= 1);
+    assert(alpha >= 0 && alpha <= 1);
+
+    const List<List<double>> magic = <List<double>>[
+      <double>[1, 1, 1],
+      <double>[1, 1, 0],
+      <double>[1, 0, 0],
+      <double>[1, 0.5, 0],
+      <double>[0.163, 0.373, 0.6],
+      <double>[0.0, 0.66, 0.2],
+      <double>[0.5, 0.0, 0.5],
+      <double>[0.2, 0.094, 0.0]
+    ];
+
+    double cubicInt(double t, double A, double B) {
+      final double weight = t * t * (3 - 2 * t);
+      return A + weight * (B - A);
+    }
+
+    double getRed(double iR, double iY, double iB) {
+      final double x0 = cubicInt(iB, magic[0][0], magic[4][0]);
+      final double x1 = cubicInt(iB, magic[1][0], magic[5][0]);
+      final double x2 = cubicInt(iB, magic[2][0], magic[6][0]);
+      final double x3 = cubicInt(iB, magic[3][0], magic[7][0]);
+      final double y0 = cubicInt(iY, x0, x1);
+      final double y1 = cubicInt(iY, x2, x3);
+      return cubicInt(iR, y0, y1);
+    }
+
+    double getGreen(double iR, double iY, double iB) {
+      final double x0 = cubicInt(iB, magic[0][1], magic[4][1]);
+      final double x1 = cubicInt(iB, magic[1][1], magic[5][1]);
+      final double x2 = cubicInt(iB, magic[2][1], magic[6][1]);
+      final double x3 = cubicInt(iB, magic[3][1], magic[7][1]);
+      final double y0 = cubicInt(iY, x0, x1);
+      final double y1 = cubicInt(iY, x2, x3);
+      return cubicInt(iR, y0, y1);
+    }
+
+    double getBlue(double iR, double iY, double iB) {
+      final double x0 = cubicInt(iB, magic[0][2], magic[4][2]);
+      final double x1 = cubicInt(iB, magic[1][2], magic[5][2]);
+      final double x2 = cubicInt(iB, magic[2][2], magic[6][2]);
+      final double x3 = cubicInt(iB, magic[3][2], magic[7][2]);
+      final double y0 = cubicInt(iY, x0, x1);
+      final double y1 = cubicInt(iY, x2, x3);
+      return cubicInt(iR, y0, y1);
+    }
+
+    final double redValue = getRed(red, yellow, blue);
+    final double greenValue = getGreen(red, yellow, blue);
+    final double blueValue = getBlue(red, yellow, blue);
+    return PdfColor(redValue, greenValue, blueValue, alpha);
+  }
+
   final double alpha;
   final double red;
   final double green;
