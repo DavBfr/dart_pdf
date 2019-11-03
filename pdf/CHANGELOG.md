@@ -9,6 +9,7 @@
 - Fix warning in example
 - Format Java code
 - Add optional clipping on Page
+- Add Footer Widget
 
 ## 1.3.23
 

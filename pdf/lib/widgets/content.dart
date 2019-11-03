@@ -226,3 +226,43 @@ class Watermark extends StatelessWidget {
     );
   }
 }
+
+class Footer extends StatelessWidget {
+  Footer({
+    this.leading,
+    this.title,
+    this.trailing,
+    this.margin,
+    this.padding,
+    this.decoration,
+  });
+
+  final Widget leading;
+
+  final Widget title;
+
+  final Widget trailing;
+
+  final EdgeInsets margin;
+
+  final EdgeInsets padding;
+
+  final BoxDecoration decoration;
+
+  @override
+  Widget build(Context context) {
+    return Container(
+        margin: margin,
+        padding: padding,
+        decoration: decoration,
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            leading ?? SizedBox(),
+            title ?? SizedBox(),
+            trailing ?? SizedBox(),
+          ],
+        ));
+  }
+}
