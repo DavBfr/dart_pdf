@@ -170,14 +170,14 @@ class Page {
 
     if (mustRotate) {
       final EdgeInsets _margin = margin;
-      final Matrix4 mat = Matrix4.identity();
-      mat
-        ..rotateZ(-math.pi / 2)
-        ..translate(-pageFormat.height - _margin.left + _margin.top,
-            child.box.height - child.box.width + _margin.left - _margin.bottom);
       context.canvas
         ..saveContext()
-        ..setTransform(mat);
+        ..setTransform(Matrix4.identity()
+          ..rotateZ(-math.pi / 2)
+          ..translate(
+            -pageFormat.height - _margin.left + _margin.top,
+            -pageFormat.height + pageFormat.width + _margin.top - _margin.right,
+          ));
       child.paint(context);
       context.canvas.restoreContext();
     } else {

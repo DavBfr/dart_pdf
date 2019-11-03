@@ -10,6 +10,7 @@
 - Format Java code
 - Add optional clipping on Page
 - Add Footer Widget
+- Fix Page orientation
 
 ## 1.3.23
 

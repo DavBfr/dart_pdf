@@ -24,6 +24,7 @@ import 'isolate_test.dart' as isolate;
 import 'jpeg_test.dart' as jpeg;
 import 'metrics_test.dart' as metrics;
 import 'minimal_test.dart' as minimal;
+import 'orientation_test.dart' as orientation;
 import 'ttf_test.dart' as ttf;
 import 'type1_test.dart' as type1;
 import 'widget_basic_test.dart' as widget_basic;
@@ -47,6 +48,7 @@ void main() {
   jpeg.main();
   metrics.main();
   minimal.main();
+  orientation.main();
   ttf.main();
   type1.main();
   widget_basic.main();
