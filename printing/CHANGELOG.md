@@ -3,6 +3,7 @@
 ## 2.1.9
 
 - Add Markdown example
+- Update printing example
 
 ## 2.1.8
 
