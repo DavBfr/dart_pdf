@@ -28,13 +28,15 @@ class Page {
       BuildCallback build,
       Theme theme,
       PageOrientation orientation,
-      EdgeInsets margin})
+      EdgeInsets margin,
+      bool clip = false})
       : assert(
             pageTheme == null ||
                 (pageFormat == null &&
                     theme == null &&
                     orientation == null &&
-                    margin == null),
+                    margin == null &&
+                    clip == false),
             'Don\'t set both pageTheme and other settings'),
         pageTheme = pageTheme ??
             PageTheme(
@@ -42,6 +44,7 @@ class Page {
               orientation: orientation,
               margin: margin,
               theme: theme,
+              clip: clip,
             ),
         _build = build;
 
@@ -152,6 +155,19 @@ class Page {
       return;
     }
 
+    if (pageTheme.clip) {
+      final EdgeInsets _margin = margin;
+      context.canvas
+        ..saveContext()
+        ..drawRect(
+          _margin.left,
+          _margin.bottom,
+          pageFormat.width - _margin.horizontal,
+          pageFormat.height - _margin.vertical,
+        )
+        ..clipPath();
+    }
+
     if (mustRotate) {
       final EdgeInsets _margin = margin;
       final Matrix4 mat = Matrix4.identity();
@@ -166,6 +182,10 @@ class Page {
       context.canvas.restoreContext();
     } else {
       child.paint(context);
+    }
+
+    if (pageTheme.clip) {
+      context.canvas.restoreContext();
     }
   }
 }

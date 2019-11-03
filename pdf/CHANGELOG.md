@@ -8,6 +8,7 @@
 - Fix warning in tests
 - Fix warning in example
 - Format Java code
+- Add optional clipping on Page
 
 ## 1.3.23
 

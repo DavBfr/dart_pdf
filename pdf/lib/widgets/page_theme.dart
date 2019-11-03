@@ -18,14 +18,15 @@ part of widget;
 
 @immutable
 class PageTheme {
-  const PageTheme(
-      {PdfPageFormat pageFormat,
-      this.buildBackground,
-      this.buildForeground,
-      this.theme,
-      PageOrientation orientation,
-      EdgeInsets margin})
-      : pageFormat = pageFormat ?? PdfPageFormat.standard,
+  const PageTheme({
+    PdfPageFormat pageFormat,
+    this.buildBackground,
+    this.buildForeground,
+    this.theme,
+    PageOrientation orientation,
+    EdgeInsets margin,
+    this.clip = false,
+  })  : pageFormat = pageFormat ?? PdfPageFormat.standard,
         orientation = orientation ?? PageOrientation.natural,
         _margin = margin;
 
@@ -40,6 +41,8 @@ class PageTheme {
   final BuildCallback buildForeground;
 
   final Theme theme;
+
+  final bool clip;
 
   bool get mustRotate =>
       (orientation == PageOrientation.landscape &&
