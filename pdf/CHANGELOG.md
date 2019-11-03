@@ -11,6 +11,7 @@
 - Add optional clipping on Page
 - Add Footer Widget
 - Fix Page orientation
+- Add Ascii85 test
 
 ## 1.3.23
 
