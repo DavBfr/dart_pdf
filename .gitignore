@@ -43,5 +43,7 @@ printing/lcov.info
 test/readme.dart
 test/android
 test/ios
+test/diff
 
 ref
+!test/golden/*.pdf

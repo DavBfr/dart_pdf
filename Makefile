@@ -73,6 +73,7 @@ test-pdf: $(FONTS) get-pdf .coverage
 	dart --enable-asserts --disable-service-auth-codes --enable-vm-service=$(COV_PORT) --pause-isolates-on-exit test/all_tests.dart
 	cd pdf; pub global run coverage:format_coverage --packages=.packages -i coverage.json --report-on lib --lcov --out lcov.info
 	cd pdf; for EXAMPLE in $(shell cd pdf; find example -name '*.dart'); do dart $$EXAMPLE; done
+	test/compare-pdf.sh pdf test/golden
 
 test-printing: $(FONTS) get-printing .coverage
 	cd printing/example; flutter test --coverage --coverage-path ../lcov.info
@@ -107,12 +108,12 @@ publish-printing: format clean
 
 analyze-pdf: .pana
 	@find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	@pub global run pana --no-warning --source path pdf 2> /dev/null | python pana_report.py
+	@pub global run pana --no-warning --source path pdf 2> /dev/null | python test/pana_report.py
 	@find pdf -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 analyze-printing: .pana
 	@find printing -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	@pub global run pana --no-warning --source path printing 2> /dev/null | python pana_report.py
+	@pub global run pana --no-warning --source path printing 2> /dev/null | python test/pana_report.py
 	@find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 analyze: analyze-pdf analyze-printing

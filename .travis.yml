@@ -4,6 +4,8 @@ addons:
   apt:
     packages:
       - lib32stdc++6
+      - poppler-utils
+      - imagemagick
 install:
   - git clone https://github.com/flutter/flutter.git -b stable --depth 1 $HOME/flutter
   - export PATH=$HOME/flutter/bin:$PATH
