@@ -201,22 +201,23 @@ class MyAppState extends State<MyApp> {
                 RaisedButton(
                     child: const Text('Print Markdown'),
                     onPressed: _printMarkdown),
-                canDebug
-                    ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          const Text('Debug'),
-                          Switch.adaptive(
-                            onChanged: (bool value) {
-                              setState(() {
-                                pdf.Document.debug = value;
-                              });
-                            },
-                            value: pdf.Document.debug,
-                          ),
-                        ],
-                      )
-                    : const SizedBox(),
+                if (canDebug)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      const Text('Debug'),
+                      Switch.adaptive(
+                        onChanged: (bool value) {
+                          setState(() {
+                            pdf.Document.debug = value;
+                          });
+                        },
+                        value: pdf.Document.debug,
+                      ),
+                    ],
+                  )
+                else
+                  const SizedBox(),
               ],
             ),
           ),

@@ -63,7 +63,7 @@ class PdfDocument {
   int _objser;
 
   /// This vector contains each indirect object within the document.
-  final Set<PdfObject> objects = Set<PdfObject>();
+  final Set<PdfObject> objects = <PdfObject>{};
 
   /// This is the Catalog object, which is required by each Pdf Document
   PdfCatalog catalog;
@@ -108,7 +108,7 @@ class PdfDocument {
   ];
 
   /// This holds the current fonts
-  final Set<PdfFont> fonts = Set<PdfFont>();
+  final Set<PdfFont> fonts = <PdfFont>{};
 
   /// Generates the document ID
   List<int> _documentID;

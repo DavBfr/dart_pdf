@@ -39,9 +39,9 @@ class PdfNames extends PdfObject {
           ..putArray(<PdfStream>[
             page.ref(),
             PdfStream.string('/XYZ'),
-            posX == null ? PdfStream.string('null') : PdfStream.num(posX),
-            posY == null ? PdfStream.string('null') : PdfStream.num(posY),
-            posZ == null ? PdfStream.string('null') : PdfStream.num(posZ),
+            if (posX == null) PdfStream.string('null') else PdfStream.num(posX),
+            if (posY == null) PdfStream.string('null') else PdfStream.num(posY),
+            if (posZ == null) PdfStream.string('null') else PdfStream.num(posZ),
           ]),
       }));
   }

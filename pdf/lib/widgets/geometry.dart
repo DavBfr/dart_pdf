@@ -27,10 +27,10 @@ class BoxConstraints {
 
   /// Creates box constraints that require the given width or height.
   const BoxConstraints.tightFor({double width, double height})
-      : minWidth = width != null ? width : 0.0,
-        maxWidth = width != null ? width : double.infinity,
-        minHeight = height != null ? height : 0.0,
-        maxHeight = height != null ? height : double.infinity;
+      : minWidth = width ?? 0.0,
+        maxWidth = width ?? double.infinity,
+        minHeight = height ?? 0.0,
+        maxHeight = height ?? double.infinity;
 
   /// Creates box constraints that is respected only by the given size.
   BoxConstraints.tight(PdfPoint size)
@@ -41,10 +41,10 @@ class BoxConstraints {
 
   /// Creates box constraints that expand to fill another box constraints.
   const BoxConstraints.expand({double width, double height})
-      : minWidth = width != null ? width : double.infinity,
-        maxWidth = width != null ? width : double.infinity,
-        minHeight = height != null ? height : double.infinity,
-        maxHeight = height != null ? height : double.infinity;
+      : minWidth = width ?? double.infinity,
+        maxWidth = width ?? double.infinity,
+        minHeight = height ?? double.infinity,
+        maxHeight = height ?? double.infinity;
 
   const BoxConstraints.tightForFinite({
     double width = double.infinity,
