@@ -30,7 +30,7 @@ public class SwiftPrintingPlugin: NSObject, FlutterPlugin, UIPrintInteractionCon
     }
 
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(name: "printing", binaryMessenger: registrar.messenger())
+        let channel = FlutterMethodChannel(name: "net.nfet.printing", binaryMessenger: registrar.messenger())
         let instance = SwiftPrintingPlugin(channel)
         registrar.addMethodCallDelegate(instance, channel: channel)
     }

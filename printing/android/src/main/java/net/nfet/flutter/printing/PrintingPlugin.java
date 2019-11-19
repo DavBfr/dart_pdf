@@ -73,7 +73,7 @@ public class PrintingPlugin extends PrintDocumentAdapter implements MethodCallHa
      * Plugin registration.
      */
     public static void registerWith(Registrar registrar) {
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), "printing");
+        final MethodChannel channel = new MethodChannel(registrar.messenger(), "net.nfet.printing");
         channel.setMethodCallHandler(new PrintingPlugin(registrar.activity(), channel));
         printManager = (PrintManager) registrar.activity().getSystemService(Context.PRINT_SERVICE);
     }

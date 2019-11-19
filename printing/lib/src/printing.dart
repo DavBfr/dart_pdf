@@ -37,7 +37,7 @@ class Printer {
 }
 
 mixin Printing {
-  static const MethodChannel _channel = MethodChannel('printing');
+  static const MethodChannel _channel = MethodChannel('net.nfet.printing');
   static LayoutCallback _onLayout;
   static Completer<List<int>> _onHtmlRendered;
   static Completer<bool> _onCompleted;

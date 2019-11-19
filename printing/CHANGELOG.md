@@ -4,6 +4,7 @@
 
 - Add Markdown example
 - Update printing example
+- Change the channel name
 
 ## 2.1.8
 
