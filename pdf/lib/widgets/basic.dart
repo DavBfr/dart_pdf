@@ -647,3 +647,22 @@ class SizedBox extends StatelessWidget {
         constraints: BoxConstraints.tightFor(width: width, height: height));
   }
 }
+
+typedef WidgetBuilder = Widget Function(Context context);
+
+/// A platonic widget that calls a closure to obtain its child widget.
+class Builder extends StatelessWidget {
+  /// Creates a widget that delegates its build to a callback.
+  ///
+  /// The [builder] argument must not be null.
+  Builder({
+    @required this.builder,
+  })  : assert(builder != null),
+        super();
+
+  /// Called to obtain the child widget.
+  final WidgetBuilder builder;
+
+  @override
+  Widget build(Context context) => builder(context);
+}

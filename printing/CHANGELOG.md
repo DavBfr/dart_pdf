@@ -5,6 +5,7 @@
 - Add Markdown example
 - Update printing example
 - Change the channel name
+- Add Builder widget
 
 ## 2.1.8
 
