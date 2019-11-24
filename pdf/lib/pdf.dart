@@ -41,6 +41,7 @@ part 'src/compatibility.dart';
 part 'src/document.dart';
 part 'src/encryption.dart';
 part 'src/font_descriptor.dart';
+part 'src/exif.dart';
 part 'src/font_metrics.dart';
 part 'src/font.dart';
 part 'src/formxobject.dart';
