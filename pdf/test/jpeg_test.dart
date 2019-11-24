@@ -15,11 +15,63 @@
  */
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
+
+Document pdf;
+
+void main() {
+  setUpAll(() {
+    Document.debug = true;
+    pdf = Document();
+  });
+
+  test('Pdf Jpeg Download', () async {
+    final PdfImage image = PdfImage.jpeg(
+      pdf.document,
+      image: await download('https://www.nfet.net/nfet.jpg'),
+    );
+
+    pdf.addPage(Page(
+      build: (Context context) => Center(child: Image(image)),
+    ));
+  });
+
+  test('Pdf Jpeg Orientation', () {
+    pdf.addPage(
+      Page(
+        build: (Context context) => Wrap(
+          spacing: 20,
+          runSpacing: 20,
+          children: List<Widget>.generate(
+            PdfImageOrientation.values.length,
+            (int index) => SizedBox(
+              width: 230,
+              height: 230,
+              child: Image(
+                PdfImage.jpeg(
+                  pdf.document,
+                  image: base64.decode(jpegImage),
+                  orientation: PdfImageOrientation.values[index],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  });
+
+  tearDownAll(() {
+    final File file = File('jpeg.pdf');
+    file.writeAsBytesSync(pdf.save());
+  });
+}
 
 Future<Uint8List> download(String url) async {
   final HttpClient client = HttpClient();
@@ -31,20 +83,5 @@ Future<Uint8List> download(String url) async {
   return Uint8List.fromList(data);
 }
 
-void main() {
-  test('Pdf Jpeg', () async {
-    final PdfDocument pdf = PdfDocument();
-    final PdfPage page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
-
-    final PdfImage image = PdfImage.jpeg(
-      pdf,
-      image: await download('https://www.nfet.net/nfet.jpg'),
-    );
-
-    final PdfGraphics g = page.getGraphics();
-    g.drawImage(image, 30, page.pageFormat.height - 507.0);
-
-    final File file = File('jpeg.pdf');
-    file.writeAsBytesSync(pdf.save());
-  });
-}
+const String jpegImage =
+    '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAEMuMjoyKkM6NjpLR0NPZKZsZFxcZMySmnmm8dT++u3U6eX//////////+Xp////////////////////////////2wBDAUdLS2RXZMRsbMT//+n/////////////////////////////////////////////////////////////////////wAARCAAUAAgDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAP/xAAbEAACAwEBAQAAAAAAAAAAAAABAgARIQMEQf/EABQBAQAAAAAAAAAAAAAAAAAAAAD/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCvm5joGZi1hj9iPIgIZ7Nhzl5EC3FAikC9N7ERA//Z';

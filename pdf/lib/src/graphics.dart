@@ -108,7 +108,33 @@ class PdfGraphics {
 
     // q w 0 0 h x y cm % the coordinate matrix
     buf.putString('q ');
-    buf.putNumList(<double>[w, 0, 0, h, x, y]);
+    switch (img.orientation) {
+      case PdfImageOrientation.topLeft:
+        buf.putNumList(<double>[w, 0, 0, h, x, y]);
+        break;
+      case PdfImageOrientation.topRight:
+        buf.putNumList(<double>[-w, 0, 0, h, w - x, y]);
+        break;
+      case PdfImageOrientation.bottomRight:
+        buf.putNumList(<double>[-w, 0, 0, -h, w - x, h - y]);
+        break;
+      case PdfImageOrientation.bottomLeft:
+        buf.putNumList(<double>[w, 0, 0, -h, x, h - y]);
+        break;
+      case PdfImageOrientation.leftTop:
+        buf.putNumList(<double>[0, -h, -w, 0, w - x, h - y]);
+        break;
+      case PdfImageOrientation.rightTop:
+        buf.putNumList(<double>[0, h, -w, 0, w - x, y]);
+        break;
+      case PdfImageOrientation.rightBottom:
+        buf.putNumList(<double>[0, h, w, 0, x, y]);
+        break;
+      case PdfImageOrientation.leftBottom:
+        buf.putNumList(<double>[0, -h, w, 0, x, h - y]);
+        break;
+    }
+
     buf.putString(' cm ${img.name} Do Q\n');
   }
 

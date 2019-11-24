@@ -200,7 +200,13 @@ class PDFImage extends PdfImage {
     @required int height,
     bool alpha = true,
   }) : super._(pdfDocument,
-            image: image, width: width, height: height, alpha: alpha);
+            image: image,
+            width: width,
+            height: height,
+            alpha: alpha,
+            alphaChannel: false,
+            jpeg: false,
+            orientation: PdfImageOrientation.topLeft);
 }
 
 @deprecated

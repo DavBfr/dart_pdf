@@ -16,6 +16,19 @@
 
 part of pdf;
 
+/// Represents the position of the first pixel in the data stream
+/// This corresponds to the exif orientations
+enum PdfImageOrientation {
+  topLeft,
+  topRight,
+  bottomRight,
+  bottomLeft,
+  leftTop,
+  rightTop,
+  rightBottom,
+  leftBottom,
+}
+
 class PdfImage extends PdfXObject {
   /// Creates a new [PdfImage] instance.
   ///
@@ -29,6 +42,7 @@ class PdfImage extends PdfXObject {
     @required int width,
     @required int height,
     bool alpha = true,
+    PdfImageOrientation orientation = PdfImageOrientation.topLeft,
   }) =>
       PdfImage._(
         pdfDocument,
@@ -36,18 +50,27 @@ class PdfImage extends PdfXObject {
         width: width,
         height: height,
         alpha: alpha,
+        alphaChannel: false,
+        jpeg: false,
+        orientation: orientation,
       );
 
-  PdfImage._(PdfDocument pdfDocument,
-      {@required this.image,
-      @required this.width,
-      @required this.height,
-      this.alpha = true,
-      this.alphaChannel = false,
-      this.jpeg = false})
-      : assert(alphaChannel == false || alpha == true),
+  PdfImage._(
+    PdfDocument pdfDocument, {
+    @required this.image,
+    @required int width,
+    @required int height,
+    @required this.alpha,
+    @required this.alphaChannel,
+    @required this.jpeg,
+    @required this.orientation,
+  })  : assert(alphaChannel == false || alpha == true),
         assert(width != null),
         assert(height != null),
+        assert(jpeg != null),
+        assert(orientation != null),
+        _width = width,
+        _height = height,
         super(pdfDocument, '/Image', isBinary: true) {
     _name = '/Image$objser';
     params['/Width'] = PdfStream.string(width.toString());
@@ -56,12 +79,16 @@ class PdfImage extends PdfXObject {
     params['/Name'] = PdfStream.string(_name);
 
     if (alphaChannel == false && alpha) {
-      final PdfImage _sMask = PdfImage._(pdfDocument,
-          image: image,
-          width: width,
-          height: height,
-          alpha: alpha,
-          alphaChannel: true);
+      final PdfImage _sMask = PdfImage._(
+        pdfDocument,
+        image: image,
+        width: width,
+        height: height,
+        alpha: alpha,
+        alphaChannel: true,
+        jpeg: jpeg,
+        orientation: orientation,
+      );
       params['/SMask'] = PdfStream.string('${_sMask.objser} 0 R');
     }
 
@@ -76,7 +103,11 @@ class PdfImage extends PdfXObject {
     }
   }
 
-  factory PdfImage.jpeg(PdfDocument pdfDocument, {@required Uint8List image}) {
+  factory PdfImage.jpeg(
+    PdfDocument pdfDocument, {
+    @required Uint8List image,
+    PdfImageOrientation orientation,
+  }) {
     assert(image != null);
 
     int width;
@@ -117,18 +148,30 @@ class PdfImage extends PdfXObject {
       offset += len - 2;
     }
 
-    return PdfImage._(pdfDocument,
-        image: image, width: width, height: height, jpeg: true, alpha: false);
+    orientation ??= PdfImageOrientation.leftTop;
+
+    return PdfImage._(
+      pdfDocument,
+      image: image,
+      width: width,
+      height: height,
+      jpeg: true,
+      alpha: false,
+      alphaChannel: false,
+      orientation: orientation,
+    );
   }
 
   /// RGBA Image Data
   final Uint8List image;
 
   /// Image width
-  final int width;
+  final int _width;
+  int get width => orientation.index >= 4 ? _height : _width;
 
   /// Image height
-  final int height;
+  final int _height;
+  int get height => orientation.index < 4 ? _height : _width;
 
   /// Image has alpha channel
   final bool alpha;
@@ -141,6 +184,9 @@ class PdfImage extends PdfXObject {
   /// The image data is a jpeg image
   final bool jpeg;
 
+  /// The internal orientation of the image
+  final PdfImageOrientation orientation;
+
   /// write the pixels to the stream
   @override
   void _prepare() {
@@ -151,8 +197,8 @@ class PdfImage extends PdfXObject {
       return;
     }
 
-    final int w = width;
-    final int h = height;
+    final int w = _width;
+    final int h = _height;
     final int s = w * h;
 
     final Uint8List out = Uint8List(alphaChannel ? s : s * 3);
