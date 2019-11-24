@@ -122,14 +122,12 @@ abstract class PdfFont extends PdfObject {
     params['/Encoding'] = PdfStream.string('/WinAnsiEncoding');
   }
 
-  // Use glyphMetrics instead
-  @deprecated
+  @Deprecated('Use `glyphMetrics` instead')
   double glyphAdvance(int charCode) => glyphMetrics(charCode).advanceWidth;
 
   PdfFontMetrics glyphMetrics(int charCode);
 
-  // Use glyphMetrics instead
-  @deprecated
+  @Deprecated('Use `glyphMetrics` instead')
   PdfRect glyphBounds(int charCode) => glyphMetrics(charCode).toPdfRect();
 
   PdfFontMetrics stringMetrics(String s) {
@@ -152,8 +150,7 @@ See https://github.com/DavBfr/dart_pdf/issues/76
     }
   }
 
-  // Use stringMetrics instead
-  @deprecated
+  @Deprecated('Use `stringMetrics` instead')
   PdfRect stringBounds(String s) => stringMetrics(s).toPdfRect();
 
   PdfPoint stringSize(String s) {

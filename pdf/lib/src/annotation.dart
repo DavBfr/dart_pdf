@@ -27,48 +27,78 @@ class PdfAnnot extends PdfObject {
       this.border,
       this.url,
       this.name})
-      : super(pdfPage.pdfDocument, type ?? '/Annot') {
+      : assert(subtype != null),
+        super(pdfPage.pdfDocument, type ?? '/Annot') {
     pdfPage.annotations.add(this);
   }
 
   /// Creates a text annotation
   /// @param rect coordinates
   /// @param s Text for this annotation
-  factory PdfAnnot.text(PdfPage pdfPage,
-          {@required PdfRect rect,
-          @required String content,
-          PdfBorder border}) =>
-      PdfAnnot._create(pdfPage,
-          subtype: '/Text', srcRect: rect, content: content, border: border);
+  factory PdfAnnot.text(
+    PdfPage pdfPage, {
+    @required PdfRect rect,
+    @required String content,
+    PdfBorder border,
+  }) =>
+      PdfAnnot._create(
+        pdfPage,
+        subtype: '/Text',
+        srcRect: rect,
+        content: content,
+        border: border,
+      );
 
   /// Creates a link annotation
   /// @param srcRect coordinates
   /// @param dest Destination for this link. The page will fit the display.
   /// @param destRect Rectangle describing what part of the page to be displayed
   /// (must be in User Coordinates)
-  factory PdfAnnot.link(PdfPage pdfPage,
-          {@required PdfRect srcRect,
-          @required PdfPage dest,
-          PdfRect destRect,
-          PdfBorder border}) =>
-      PdfAnnot._create(pdfPage,
-          subtype: '/Link',
-          srcRect: srcRect,
-          dest: dest,
-          destRect: destRect,
-          border: border);
+  factory PdfAnnot.link(
+    PdfPage pdfPage, {
+    @required PdfRect srcRect,
+    @required PdfPage dest,
+    PdfRect destRect,
+    PdfBorder border,
+  }) =>
+      PdfAnnot._create(
+        pdfPage,
+        subtype: '/Link',
+        srcRect: srcRect,
+        dest: dest,
+        destRect: destRect,
+        border: border,
+      );
 
   /// Creates an external link annotation
-  factory PdfAnnot.urlLink(PdfPage pdfPage,
-          {@required PdfRect rect, @required String dest, PdfBorder border}) =>
-      PdfAnnot._create(pdfPage,
-          subtype: '/Link', srcRect: rect, url: dest, border: border);
+  factory PdfAnnot.urlLink(
+    PdfPage pdfPage, {
+    @required PdfRect rect,
+    @required String dest,
+    PdfBorder border,
+  }) =>
+      PdfAnnot._create(
+        pdfPage,
+        subtype: '/Link',
+        srcRect: rect,
+        url: dest,
+        border: border,
+      );
 
   /// Creates a link annotation to a named destination
-  factory PdfAnnot.namedLink(PdfPage pdfPage,
-          {@required PdfRect rect, @required String dest, PdfBorder border}) =>
-      PdfAnnot._create(pdfPage,
-          subtype: '/Link', srcRect: rect, name: dest, border: border);
+  factory PdfAnnot.namedLink(
+    PdfPage pdfPage, {
+    @required PdfRect rect,
+    @required String dest,
+    PdfBorder border,
+  }) =>
+      PdfAnnot._create(
+        pdfPage,
+        subtype: '/Link',
+        srcRect: rect,
+        name: dest,
+        border: border,
+      );
 
   /// The subtype of the outline, ie text, note, etc
   final String subtype;

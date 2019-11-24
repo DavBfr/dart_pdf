@@ -44,9 +44,14 @@ class PdfBorder extends PdfObject {
   /// @param style The style of the border
   /// @param dash The line pattern definition
   /// @see [PdfAnnot]
-  PdfBorder(PdfDocument pdfDocument, this.width,
-      {this.style = PdfBorderStyle.solid, this.dash})
-      : super(pdfDocument);
+  PdfBorder(
+    PdfDocument pdfDocument,
+    this.width, {
+    this.style = PdfBorderStyle.solid,
+    this.dash,
+  })  : assert(width != null),
+        assert(style != null),
+        super(pdfDocument);
 
   /// The style of the border
   final PdfBorderStyle style;

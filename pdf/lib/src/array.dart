@@ -17,7 +17,11 @@
 part of pdf;
 
 class PdfArrayObject extends PdfObject {
-  PdfArrayObject(PdfDocument pdfDocument, this.values) : super(pdfDocument);
+  PdfArrayObject(
+    PdfDocument pdfDocument,
+    this.values,
+  )   : assert(values != null),
+        super(pdfDocument);
 
   final List<String> values;
 

@@ -41,17 +41,22 @@ class PdfRect {
   double get horizondalCenter => x + width / 2;
   double get verticalCenter => y + height / 2;
 
-  @deprecated
+  @Deprecated('Use `left` instead')
   double get l => left;
-  @deprecated
+
+  @Deprecated('Use `bottom` instead')
   double get b => bottom;
-  @deprecated
+
+  @Deprecated('Use `right` instead')
   double get r => right;
-  @deprecated
+
+  @Deprecated('Use `top` instead')
   double get t => top;
-  @deprecated
+
+  @Deprecated('Use `width` instead')
   double get w => width;
-  @deprecated
+
+  @Deprecated('Use `height` instead')
   double get h => height;
 
   @override

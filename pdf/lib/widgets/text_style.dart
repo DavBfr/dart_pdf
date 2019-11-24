@@ -343,7 +343,7 @@ class TextStyle {
     );
   }
 
-  @Deprecated('use font instead')
+  @Deprecated('use `font` instead')
   Font get paintFont => font;
 
   Font get font {

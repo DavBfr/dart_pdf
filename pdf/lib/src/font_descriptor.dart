@@ -17,8 +17,12 @@
 part of pdf;
 
 class PdfFontDescriptor extends PdfObject {
-  PdfFontDescriptor(this.ttfFont, this.file)
-      : super(ttfFont.pdfDocument, '/FontDescriptor');
+  PdfFontDescriptor(
+    this.ttfFont,
+    this.file,
+  )   : assert(ttfFont != null),
+        assert(file != null),
+        super(ttfFont.pdfDocument, '/FontDescriptor');
 
   final PdfObjectStream file;
 

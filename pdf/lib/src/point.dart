@@ -22,10 +22,10 @@ class PdfPoint {
 
   final double x, y;
 
-  @deprecated
+  @Deprecated('Use `x` instead')
   double get w => x;
 
-  @deprecated
+  @Deprecated('Use `y` instead')
   double get h => y;
 
   static const PdfPoint zero = PdfPoint(0.0, 0.0);

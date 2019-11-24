@@ -21,7 +21,8 @@ class PdfObject {
   /// Pdf Object Type
   /// @param type the Pdf Object Type
   PdfObject(this.pdfDocument, [String type])
-      : objser = pdfDocument._genSerial() {
+      : assert(pdfDocument != null),
+        objser = pdfDocument._genSerial() {
     if (type != null) {
       params['/Type'] = PdfStream.string(type);
     }

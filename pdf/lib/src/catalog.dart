@@ -23,8 +23,14 @@ class PdfCatalog extends PdfObject {
   /// @param pagemode How the document should appear when opened.
   /// Allowed values are usenone, useoutlines, usethumbs or fullscreen.
   PdfCatalog(
-      PdfDocument pdfDocument, this.pdfPageList, this.pageMode, this.names)
-      : super(pdfDocument, '/Catalog');
+    PdfDocument pdfDocument,
+    this.pdfPageList,
+    this.pageMode,
+    this.names,
+  )   : assert(pdfPageList != null),
+        assert(pageMode != null),
+        assert(names != null),
+        super(pdfDocument, '/Catalog');
 
   /// The pages of the document
   final PdfPageList pdfPageList;

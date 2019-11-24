@@ -16,7 +16,7 @@
 
 part of printing;
 
-@deprecated
+@Deprecated('Use `Document` instead')
 class PdfDoc extends Document {
   /// Wrapper for a [Document] with zlib compression enabled by default
   PdfDoc(
