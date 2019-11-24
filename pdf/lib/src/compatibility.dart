@@ -205,6 +205,7 @@ class PDFImage extends PdfImage {
             height: height,
             alpha: alpha,
             alphaChannel: false,
+            isRGB: true,
             jpeg: false,
             orientation: PdfImageOrientation.topLeft);
 }

@@ -51,6 +51,7 @@ class PdfImage extends PdfXObject {
         height: height,
         alpha: alpha,
         alphaChannel: false,
+        isRGB: true,
         jpeg: false,
         orientation: orientation,
       );
@@ -62,12 +63,14 @@ class PdfImage extends PdfXObject {
     @required int height,
     @required this.alpha,
     @required this.alphaChannel,
+    @required this.isRGB,
     @required this.jpeg,
     @required this.orientation,
   })  : assert(alphaChannel == false || alpha == true),
         assert(width != null),
         assert(height != null),
         assert(jpeg != null),
+        assert(isRGB != null),
         assert(orientation != null),
         _width = width,
         _height = height,
@@ -86,16 +89,17 @@ class PdfImage extends PdfXObject {
         height: height,
         alpha: alpha,
         alphaChannel: true,
+        isRGB: false,
         jpeg: jpeg,
         orientation: orientation,
       );
       params['/SMask'] = PdfStream.string('${_sMask.objser} 0 R');
     }
 
-    if (alphaChannel) {
-      params['/ColorSpace'] = PdfStream.string('/DeviceGray');
-    } else {
+    if (isRGB) {
       params['/ColorSpace'] = PdfStream.string('/DeviceRGB');
+    } else {
+      params['/ColorSpace'] = PdfStream.string('/DeviceGray');
     }
 
     if (jpeg) {
@@ -118,6 +122,7 @@ class PdfImage extends PdfXObject {
       height: info.height,
       jpeg: true,
       alpha: false,
+      isRGB: info.isRGB,
       alphaChannel: false,
       orientation: orientation ?? info.orientation,
     );
@@ -144,6 +149,9 @@ class PdfImage extends PdfXObject {
 
   /// The image data is a jpeg image
   final bool jpeg;
+
+  /// The image data is a color RGB image
+  final bool isRGB;
 
   /// The internal orientation of the image
   final PdfImageOrientation orientation;

@@ -24,6 +24,7 @@ class PdfJpegInfo {
 
     int width;
     int height;
+    int color;
     int offset = 0;
     while (offset < buffer.lengthInBytes) {
       while (buffer.getUint8(offset) == 0xff) {
@@ -55,6 +56,7 @@ class PdfJpegInfo {
       if (mrkr == 0xc0) {
         height = buffer.getUint16(offset + 1);
         width = buffer.getUint16(offset + 3);
+        color = buffer.getUint8(offset + 5);
         break;
       }
       offset += len - 2;
@@ -62,14 +64,18 @@ class PdfJpegInfo {
 
     final Map<PdfExifTag, dynamic> tags = _findExifInJpeg(buffer);
 
-    return PdfJpegInfo._(width, height, tags);
+    return PdfJpegInfo._(width, height, color, tags);
   }
 
-  PdfJpegInfo._(this.width, this.height, this.tags);
+  PdfJpegInfo._(this.width, this.height, this._color, this.tags);
 
   final int width;
 
   final int height;
+
+  final int _color;
+
+  bool get isRGB => _color == 3;
 
   final Map<PdfExifTag, dynamic> tags;
 

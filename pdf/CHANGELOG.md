@@ -16,6 +16,7 @@
 - Simplify PdfImage constructor
 - Implement Image orientation
 - Add Exif reader
+- Add support for GreyScale Jpeg
 
 ## 1.3.23
 
