@@ -12,6 +12,7 @@
 - Add Footer Widget
 - Fix Page orientation
 - Add Ascii85 test
+- Add more warnings on type1 fonts
 
 ## 1.3.23
 

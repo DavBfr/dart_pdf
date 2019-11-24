@@ -20,7 +20,12 @@ class PdfType1Font extends PdfFont {
   /// Constructs a [PdfTtfFont]
   PdfType1Font._create(PdfDocument pdfDocument, this.fontName, this.ascent,
       this.descent, this.widths)
-      : super._create(pdfDocument, subtype: '/Type1');
+      : assert(() {
+          print(
+              '$fontName has no Unicode support see https://github.com/DavBfr/dart_pdf/issues/76');
+          return true;
+        }()),
+        super._create(pdfDocument, subtype: '/Type1');
 
   /// The font's real name
   @override
