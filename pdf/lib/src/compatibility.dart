@@ -193,18 +193,14 @@ class PDFGraphics extends PdfGraphics {
 
 @deprecated
 class PDFImage extends PdfImage {
-  PDFImage(PdfDocument pdfDocument,
-      {@required Uint8List image,
-      @required int width,
-      @required int height,
-      bool alpha = true,
-      bool alphaChannel = false})
-      : super(pdfDocument,
-            image: image,
-            width: width,
-            height: height,
-            alpha: alpha,
-            alphaChannel: alphaChannel);
+  PDFImage(
+    PdfDocument pdfDocument, {
+    @required Uint8List image,
+    @required int width,
+    @required int height,
+    bool alpha = true,
+  }) : super._(pdfDocument,
+            image: image, width: width, height: height, alpha: alpha);
 }
 
 @deprecated

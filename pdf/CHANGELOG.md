@@ -13,6 +13,7 @@
 - Fix Page orientation
 - Add Ascii85 test
 - Add more warnings on type1 fonts
+- Simplify PdfImage constructor
 
 ## 1.3.23
 

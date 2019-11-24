@@ -23,8 +23,22 @@ class PdfImage extends PdfXObject {
   /// @param width
   /// @param height
   /// @param alpha if the image is transparent
-  /// @param alphaChannel if this is transparency mask
-  PdfImage(PdfDocument pdfDocument,
+  factory PdfImage(
+    PdfDocument pdfDocument, {
+    @required Uint8List image,
+    @required int width,
+    @required int height,
+    bool alpha = true,
+  }) =>
+      PdfImage._(
+        pdfDocument,
+        image: image,
+        width: width,
+        height: height,
+        alpha: alpha,
+      );
+
+  PdfImage._(PdfDocument pdfDocument,
       {@required this.image,
       @required this.width,
       @required this.height,
@@ -42,7 +56,7 @@ class PdfImage extends PdfXObject {
     params['/Name'] = PdfStream.string(_name);
 
     if (alphaChannel == false && alpha) {
-      final PdfImage _sMask = PdfImage(pdfDocument,
+      final PdfImage _sMask = PdfImage._(pdfDocument,
           image: image,
           width: width,
           height: height,
@@ -103,7 +117,7 @@ class PdfImage extends PdfXObject {
       offset += len - 2;
     }
 
-    return PdfImage(pdfDocument,
+    return PdfImage._(pdfDocument,
         image: image, width: width, height: height, jpeg: true, alpha: false);
   }
 
