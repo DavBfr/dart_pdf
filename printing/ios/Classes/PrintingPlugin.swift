@@ -18,7 +18,7 @@ import Flutter
 import UIKit
 import WebKit
 
-public class SwiftPrintingPlugin: NSObject, FlutterPlugin, UIPrintInteractionControllerDelegate {
+public class PrintingPlugin: NSObject, FlutterPlugin, UIPrintInteractionControllerDelegate {
     private var channel: FlutterMethodChannel?
     private var renderer: PdfPrintPageRenderer?
     private var urlObservation: NSKeyValueObservation?
@@ -31,7 +31,7 @@ public class SwiftPrintingPlugin: NSObject, FlutterPlugin, UIPrintInteractionCon
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "net.nfet.printing", binaryMessenger: registrar.messenger())
-        let instance = SwiftPrintingPlugin(channel)
+        let instance = PrintingPlugin(channel)
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
 

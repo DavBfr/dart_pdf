@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.0
+
+- Simplify iOS code
+
 ## 2.1.9
 
 - Add Markdown example

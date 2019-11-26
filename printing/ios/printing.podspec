@@ -8,12 +8,11 @@ Pod::Spec.new do |s|
   s.description      = <<-DESC
 Plugin that allows Flutter apps to generate and print documents to android or ios compatible printers
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/DavBfr/dart_pdf/tree/master/printing'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'David PHAM-VAN' => 'dev.nfet.net@gmail.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
-  s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
   
   s.ios.deployment_target = '8.0'
