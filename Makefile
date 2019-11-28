@@ -76,6 +76,7 @@ test-pdf: $(FONTS) get-pdf .coverage
 	test/compare-pdf.sh pdf test/golden
 
 test-printing: $(FONTS) get-printing .coverage
+	cd printing; flutter test --coverage --coverage-path lcov.info
 	cd printing/example; flutter test --coverage --coverage-path ../lcov.info
 
 test-readme: $(FONTS) get-readme
