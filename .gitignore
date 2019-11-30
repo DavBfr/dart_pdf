@@ -47,3 +47,4 @@ test/diff
 
 ref
 !test/golden/*.pdf
+.flutter-plugins-dependencies

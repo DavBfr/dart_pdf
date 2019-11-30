@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart' as fw;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
@@ -10,13 +11,15 @@ import 'example_widgets.dart';
 Future<Document> generateDocument(PdfPageFormat format) async {
   final Document pdf = Document(title: 'My Résumé', author: 'David PHAM-VAN');
 
-  final PdfImage profileImage = await pdfImageFromImageProvider(
-      pdf: pdf.document,
-      image: const fw.NetworkImage(
-          'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=200'),
-      onError: (dynamic exception, StackTrace stackTrace) {
-        print('Unable to download image');
-      });
+  final PdfImage profileImage = kIsWeb
+      ? null
+      : await pdfImageFromImageProvider(
+          pdf: pdf.document,
+          image: const fw.NetworkImage(
+              'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=200'),
+          onError: (dynamic exception, StackTrace stackTrace) {
+            print('Unable to download image');
+          });
 
   final PageTheme pageTheme = myPageTheme(format);
 
