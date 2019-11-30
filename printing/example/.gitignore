@@ -72,6 +72,14 @@
 lib/generated_plugin_registrant.dart
 **/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
 
+# macOS
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Flutter/ephemeral
+**/macos/Pods
+**/macos/Runner.xcodeproj/xcuserdata
+**/macos/Runner.xcworkspace/xcuserdata
+**/ios/Flutter/Flutter.podspec
+
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3
 !**/ios/**/default.mode2v3

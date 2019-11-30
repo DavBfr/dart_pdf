@@ -7,6 +7,7 @@
 - Add Printing.info()
 - Use PageTheme in example
 - Save shared pdf in cache on Android
+- Implement macOS embedding support
 
 ## 2.1.9
 
