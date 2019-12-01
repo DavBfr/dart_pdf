@@ -18,12 +18,10 @@ Future<Document> generateDocument(PdfPageFormat format) async {
         print('Unable to download image');
       });
 
-  pdf.addPage(MyPage(
-    pageFormat: format.applyMargin(
-        left: 2.0 * PdfPageFormat.cm,
-        top: 4.0 * PdfPageFormat.cm,
-        right: 2.0 * PdfPageFormat.cm,
-        bottom: 2.0 * PdfPageFormat.cm),
+  final PageTheme pageTheme = myPageTheme(format);
+
+  pdf.addPage(Page(
+    pageTheme: pageTheme,
     build: (Context context) => Row(children: <Widget>[
       Expanded(
           child: Column(

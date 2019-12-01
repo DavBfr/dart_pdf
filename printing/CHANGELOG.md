@@ -5,6 +5,7 @@
 - Simplify iOS code
 - Improve native code
 - Add Printing.info()
+- Use PageTheme in example
 
 ## 2.1.9
 
