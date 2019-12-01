@@ -666,3 +666,74 @@ class Builder extends StatelessWidget {
   @override
   Widget build(Context context) => builder(context);
 }
+
+class FullPage extends SingleChildWidget {
+  FullPage({
+    @required this.ignoreMargins,
+    Widget child,
+  })  : assert(ignoreMargins != null),
+        super(child: child);
+
+  final bool ignoreMargins;
+
+  BoxConstraints _getConstraints(Context context) {
+    return ignoreMargins
+        ? BoxConstraints.tightFor(
+            width: context.page.pageFormat.width,
+            height: context.page.pageFormat.height,
+          )
+        : BoxConstraints.tightFor(
+            width: context.page.pageFormat.availableWidth,
+            height: context.page.pageFormat.availableHeight,
+          );
+  }
+
+  PdfRect _getBox(Context context) {
+    final PdfRect box = _getConstraints(context).constrainRect();
+    if (ignoreMargins) {
+      return box;
+    }
+
+    return PdfRect.fromPoints(
+        PdfPoint(
+          context.page.pageFormat.marginLeft,
+          context.page.pageFormat.marginTop,
+        ),
+        box.size);
+  }
+
+  @override
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    final BoxConstraints constraints = _getConstraints(context);
+
+    if (child != null) {
+      child.layout(context, constraints, parentUsesSize: false);
+      assert(child.box != null);
+    }
+
+    box = _getBox(context);
+    print('layout box: $box');
+  }
+
+  @override
+  void debugPaint(Context context) {}
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+
+    if (child == null) {
+      return;
+    }
+
+    final PdfRect box = _getBox(context);
+    final Matrix4 mat = Matrix4.tryInvert(context.canvas.getTransform());
+    mat.translate(box.x, box.y);
+    context.canvas
+      ..saveContext()
+      ..setTransform(mat);
+    child.paint(context);
+    context.canvas.restoreContext();
+  }
+}

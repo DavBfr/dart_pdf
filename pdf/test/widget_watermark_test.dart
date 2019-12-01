@@ -25,7 +25,10 @@ void main() {
     final Document pdf = Document();
 
     final PageTheme pageTheme = PageTheme(
-      buildBackground: (Context context) => Watermark.text('DRAFT'),
+      buildBackground: (Context context) => FullPage(
+        ignoreMargins: true,
+        child: Watermark.text('DRAFT'),
+      ),
       buildForeground: (Context context) => Align(
         alignment: Alignment.bottomLeft,
         child: SizedBox(

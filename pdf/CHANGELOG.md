@@ -17,6 +17,7 @@
 - Implement Image orientation
 - Add Exif reader
 - Add support for GreyScale Jpeg
+- Add FullPage widget
 
 ## 1.3.23
 

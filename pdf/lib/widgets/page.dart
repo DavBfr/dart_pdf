@@ -104,6 +104,14 @@ class Page {
       page: _pdfPage,
       canvas: canvas,
     ).inheritFrom(calculatedTheme);
+
+    assert(() {
+      if (Document.debug) {
+        debugPaint(context);
+      }
+      return true;
+    }());
+
     if (pageTheme.buildBackground != null) {
       final Widget child = pageTheme.buildBackground(context);
       if (child != null) {
@@ -111,6 +119,7 @@ class Page {
         paint(child, context);
       }
     }
+
     if (_build != null) {
       final Widget child = _build(context);
       if (child != null) {
@@ -118,6 +127,7 @@ class Page {
         paint(child, context);
       }
     }
+
     if (pageTheme.buildForeground != null) {
       final Widget child = pageTheme.buildForeground(context);
       if (child != null) {
@@ -144,13 +154,6 @@ class Page {
 
   @protected
   void paint(Widget child, Context context) {
-    assert(() {
-      if (Document.debug) {
-        debugPaint(context);
-      }
-      return true;
-    }());
-
     if (child == null) {
       return;
     }
