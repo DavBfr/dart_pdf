@@ -6,6 +6,7 @@
 - Improve native code
 - Add Printing.info()
 - Use PageTheme in example
+- Save shared pdf in cache on Android
 
 ## 2.1.9
 

@@ -155,9 +155,14 @@ public class PrintingJob extends PrintDocumentAdapter {
         assert name != null;
 
         try {
-            final File externalFilesDirectory =
-                    context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-            File shareFile = new File(externalFilesDirectory, name);
+            final File shareDirectory = new File(context.getCacheDir(), "share");
+            if (!shareDirectory.exists()) {
+                if (!shareDirectory.mkdirs()) {
+                    throw new IOException("Unable to create cache directory");
+                }
+            }
+
+            File shareFile = new File(shareDirectory, name);
 
             FileOutputStream stream = new FileOutputStream(shareFile);
             stream.write(data);
