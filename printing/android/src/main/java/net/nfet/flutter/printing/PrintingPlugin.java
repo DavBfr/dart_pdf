@@ -75,11 +75,16 @@ public class PrintingPlugin extends PrintDocumentAdapter implements MethodCallHa
     public static void registerWith(Registrar registrar) {
         try {
             final Activity activity = registrar.activity();
-            final MethodChannel channel = new MethodChannel(registrar.messenger(), "printing");
+
+            if (activity == null) {
+                return;
+            }
+
+            final MethodChannel channel = new MethodChannel(registrar.messenger(), "net.nfet.printing");
             final PrintingPlugin plugin = new PrintingPlugin(activity, channel);
             channel.setMethodCallHandler(plugin);
 
-            if (printManager == null && activity != null) {
+            if (printManager == null) {
                 printManager = (PrintManager) activity.getSystemService(Context.PRINT_SERVICE);
             }
         } catch (Exception e) {
