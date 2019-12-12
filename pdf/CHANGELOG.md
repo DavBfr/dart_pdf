@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.25
+
+- Add more warnings on type1 fonts
+- Simplify PdfImage constructor
+- Implement Image orientation
+- Add Exif reader
+- Add support for GreyScale Jpeg
+- Add FullPage widget
+
 ## 1.3.24
 
 - Update Web example
@@ -12,12 +21,6 @@
 - Add Footer Widget
 - Fix Page orientation
 - Add Ascii85 test
-- Add more warnings on type1 fonts
-- Simplify PdfImage constructor
-- Implement Image orientation
-- Add Exif reader
-- Add support for GreyScale Jpeg
-- Add FullPage widget
 
 ## 1.3.23
 

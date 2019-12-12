@@ -1,6 +1,8 @@
 # Changelog
 
-## 2.2.0
+## 3.0.0
+
+Breaking change: this version is only compatible with flutter >= 1.12
 
 - Simplify iOS code
 - Improve native code
