@@ -27,6 +27,7 @@
 .pub/
 /build/
 .metadata
+.flutter-plugins-dependencies
 
 # Android related
 **/android/**/gradle-wrapper.jar

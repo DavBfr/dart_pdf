@@ -6,6 +6,7 @@
 - Update printing example
 - Change the channel name
 - Add Builder widget
+- Improve Android registration
 
 ## 2.1.8
 
