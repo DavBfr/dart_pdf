@@ -198,8 +198,9 @@ orientation: $orientation''';
         }
         final int offset = numValues > 4 ? valueOffset : (entryOffset + 8);
         final Uint8List result = Uint8List(numValues);
-        for (int i = 0; i < result.length; ++i)
+        for (int i = 0; i < result.length; ++i) {
           result[i] = file.getUint8(offset + i);
+        }
         return result;
       case 2: // ascii, 8-bit byte
         final int offset = numValues > 4 ? valueOffset : (entryOffset + 8);
@@ -210,8 +211,9 @@ orientation: $orientation''';
         }
         final int offset = numValues > 2 ? valueOffset : (entryOffset + 8);
         final Uint16List result = Uint16List(numValues);
-        for (int i = 0; i < result.length; ++i)
+        for (int i = 0; i < result.length; ++i) {
           result[i] = file.getUint16(offset + i * 2, bigEnd);
+        }
         return result;
       case 4: // long, 32 bit int
         if (numValues == 1) {
@@ -219,8 +221,9 @@ orientation: $orientation''';
         }
         final int offset = valueOffset;
         final Uint32List result = Uint32List(numValues);
-        for (int i = 0; i < result.length; ++i)
+        for (int i = 0; i < result.length; ++i) {
           result[i] = file.getUint32(offset + i * 4, bigEnd);
+        }
         return result;
       case 5: // rational = two long values, first is numerator, second is denominator
         if (numValues == 1) {
@@ -242,8 +245,9 @@ orientation: $orientation''';
         }
         final int offset = valueOffset;
         final Int32List result = Int32List(numValues);
-        for (int i = 0; i < result.length; ++i)
+        for (int i = 0; i < result.length; ++i) {
           result[i] = file.getInt32(offset + i * 4, bigEnd);
+        }
         return result;
       case 10: // signed rational, two slongs, first is numerator, second is denominator
         if (numValues == 1) {
@@ -265,8 +269,9 @@ orientation: $orientation''';
         }
         final int offset = valueOffset;
         final Float32List result = Float32List(numValues);
-        for (int i = 0; i < result.length; ++i)
+        for (int i = 0; i < result.length; ++i) {
           result[i] = file.getFloat32(offset + i * 4, bigEnd);
+        }
         return result;
       case 12: // double float, 64 bit float
         if (numValues == 1) {
@@ -274,8 +279,9 @@ orientation: $orientation''';
         }
         final int offset = valueOffset;
         final Float64List result = Float64List(numValues);
-        for (int i = 0; i < result.length; ++i)
+        for (int i = 0; i < result.length; ++i) {
           result[i] = file.getFloat64(offset + i * 8, bigEnd);
+        }
         return result;
     }
   }
