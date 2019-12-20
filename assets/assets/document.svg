@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 150 230"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="gradient-1">
+      <stop offset="0" style="stop-color: rgb(255, 255, 255);"/>
+      <stop offset="1" style="stop-color: rgb(161, 161, 161);"/>
+    </linearGradient>
+    <linearGradient id="gradient-1-0" gradientUnits="userSpaceOnUse" x1="119.315" y1="36.313" x2="119.315" y2="216.359" xlink:href="#gradient-1"/>
+  </defs>
+  <rect x="-67.203" y="-48.72" width="276.134" height="354.501" style="fill: rgb(93, 32, 205);"/>
+  <ellipse style="fill: rgb(141, 81, 252);" cx="119.315" cy="126.336" rx="139.238" ry="98.673" transform="matrix(0.93642, 0.35088, -0.35088, 0.93642, -15.610807, -59.255697)"/>
+  <ellipse style="fill: url(#gradient-1-0);" cx="119.315" cy="126.336" rx="130.398" ry="90.023" transform="matrix(0.952861, 0.303408, -0.303408, 0.952861, -26.924128, -56.954295)"/>
+</svg>
