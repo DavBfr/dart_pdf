@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// ignore_for_file: omit_local_variable_types
+
 part of widget;
 
 enum TextAlign { left, right, center, justify }
@@ -308,6 +310,9 @@ class _WidgetSpan extends _Span {
   }
 }
 
+typedef _VisitorCallback = bool Function(
+    InlineSpan span, TextStyle parentStyle);
+
 @immutable
 abstract class InlineSpan {
   const InlineSpan({this.style, this.baseline, this.annotation});
@@ -329,8 +334,7 @@ abstract class InlineSpan {
     return buffer.toString();
   }
 
-  bool visitChildren(bool visitor(InlineSpan span, TextStyle parentStyle),
-      TextStyle parentStyle);
+  bool visitChildren(_VisitorCallback visitor, TextStyle parentStyle);
 }
 
 class WidgetSpan extends InlineSpan {
@@ -348,8 +352,7 @@ class WidgetSpan extends InlineSpan {
 
   /// Calls `visitor` on this [WidgetSpan]. There are no children spans to walk.
   @override
-  bool visitChildren(bool visitor(InlineSpan span, TextStyle parentStyle),
-      TextStyle parentStyle) {
+  bool visitChildren(_VisitorCallback visitor, TextStyle parentStyle) {
     final TextStyle _style = parentStyle?.merge(style);
 
     if (child != null) {
@@ -376,8 +379,7 @@ class TextSpan extends InlineSpan {
   final List<InlineSpan> children;
 
   @override
-  bool visitChildren(bool visitor(InlineSpan span, TextStyle parentStyle),
-      TextStyle parentStyle) {
+  bool visitChildren(_VisitorCallback visitor, TextStyle parentStyle) {
     final TextStyle _style = parentStyle?.merge(style);
 
     if (text != null) {

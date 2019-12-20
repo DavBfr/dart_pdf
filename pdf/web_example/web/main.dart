@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// ignore_for_file: omit_local_variable_types
+
 import 'dart:async';
 import 'dart:html';
 import 'dart:js' as js;

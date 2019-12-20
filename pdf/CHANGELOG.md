@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.26
+
+- Update Analysis options
+
 ## 1.3.25
 
 - Add more warnings on type1 fonts
