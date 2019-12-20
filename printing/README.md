@@ -7,6 +7,8 @@ See the example on how to use the plugin.
 
 <img alt="Example document" src="https://raw.githubusercontent.com/DavBfr/dart_pdf/master/printing/example.png" width="300">
 
+This example is also available on the web here: <https://davbfr.github.io/dart_pdf/>
+
 This plugin uses the `pdf` package <https://pub.dev/packages/pdf>
 for pdf creation. Please refer to <https://pub.dev/documentation/pdf/latest/>
 for documentation.

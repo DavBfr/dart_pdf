@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.1
+
+- Add a link to the Web example
+
 ## 3.0.0
 
 Breaking change: this version is only compatible with flutter >= 1.12

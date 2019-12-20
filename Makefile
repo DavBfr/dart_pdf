@@ -143,4 +143,9 @@ ref:
 	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/pdf/adobe_supplement_iso32000.pdf'
 	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_reference_1-7.pdf'
 
+gh-pages:
+	cd printing/example; flutter build web
+	git checkout gh-pages
+	mv -f printing/example/build/web/* .
+
 .PHONY: test format format-dart format-clang clean publish-pdf publish-printing analyze ref
