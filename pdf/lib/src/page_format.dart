@@ -23,7 +23,9 @@ class PdfPageFormat {
       double marginLeft = 0.0,
       double marginRight = 0.0,
       double marginAll})
-      : marginTop = marginAll ?? marginTop,
+      : assert(width > 0),
+        assert(height > 0),
+        marginTop = marginAll ?? marginTop,
         marginBottom = marginAll ?? marginBottom,
         marginLeft = marginAll ?? marginLeft,
         marginRight = marginAll ?? marginRight;
@@ -38,6 +40,14 @@ class PdfPageFormat {
       PdfPageFormat(8.5 * inch, 11.0 * inch, marginAll: inch);
   static const PdfPageFormat legal =
       PdfPageFormat(8.5 * inch, 14.0 * inch, marginAll: inch);
+
+  static const PdfPageFormat roll57 =
+      PdfPageFormat(57 * mm, double.infinity, marginAll: 5 * mm);
+  static const PdfPageFormat roll80 =
+      PdfPageFormat(80 * mm, double.infinity, marginAll: 5 * mm);
+
+  static const PdfPageFormat undefined =
+      PdfPageFormat(double.infinity, double.infinity);
 
   static const PdfPageFormat standard = a4;
 

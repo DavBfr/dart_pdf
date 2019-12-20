@@ -111,6 +111,9 @@ class MultiPage extends Page {
       return;
     }
 
+    assert(pageFormat.width > 0 && pageFormat.width < double.infinity);
+    assert(pageFormat.height > 0 && pageFormat.height < double.infinity);
+
     final EdgeInsets _margin = margin;
     final bool _mustRotate = mustRotate;
     final double pageHeight =

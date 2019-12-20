@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.27
+
+- Add Roll Paper support
+
 ## 1.3.26
 
 - Update Analysis options

@@ -52,7 +52,7 @@ class Page {
 
   final PageTheme pageTheme;
 
-  PdfPageFormat get pageFormat => pageTheme.pageFormat;
+  PdfPageFormat get pageFormat => _pdfPage?.pageFormat ?? pageTheme.pageFormat;
 
   PageOrientation get orientation => pageTheme.orientation;
 
@@ -92,7 +92,7 @@ class Page {
   void postProcess(Document document) {
     final PdfGraphics canvas = _pdfPage.getGraphics();
     final EdgeInsets _margin = margin;
-    final BoxConstraints constraints = mustRotate
+    BoxConstraints constraints = mustRotate
         ? BoxConstraints(
             maxWidth: pageFormat.height - _margin.vertical,
             maxHeight: pageFormat.width - _margin.horizontal)
@@ -107,6 +107,43 @@ class Page {
       canvas: canvas,
     ).inheritFrom(calculatedTheme);
 
+    Widget background;
+    Widget content;
+    Widget foreground;
+
+    if (_build != null) {
+      content = _build(context);
+      if (content != null) {
+        final PdfPoint size = layout(content, context, constraints);
+
+        if (_pdfPage.pageFormat.height == double.infinity) {
+          _pdfPage.pageFormat =
+              _pdfPage.pageFormat.copyWith(width: size.x, height: size.y);
+          constraints = mustRotate
+              ? BoxConstraints(
+                  maxWidth: _pdfPage.pageFormat.height - _margin.vertical,
+                  maxHeight: _pdfPage.pageFormat.width - _margin.horizontal)
+              : BoxConstraints(
+                  maxWidth: _pdfPage.pageFormat.width - _margin.horizontal,
+                  maxHeight: _pdfPage.pageFormat.height - _margin.vertical);
+        }
+      }
+    }
+
+    if (pageTheme.buildBackground != null) {
+      background = pageTheme.buildBackground(context);
+      if (background != null) {
+        layout(background, context, constraints);
+      }
+    }
+
+    if (pageTheme.buildForeground != null) {
+      foreground = pageTheme.buildForeground(context);
+      if (foreground != null) {
+        layout(foreground, context, constraints);
+      }
+    }
+
     assert(() {
       if (Document.debug) {
         debugPaint(context);
@@ -114,44 +151,42 @@ class Page {
       return true;
     }());
 
-    if (pageTheme.buildBackground != null) {
-      final Widget child = pageTheme.buildBackground(context);
-      if (child != null) {
-        layout(child, context, constraints);
-        paint(child, context);
-      }
+    if (background != null) {
+      paint(background, context);
     }
 
-    if (_build != null) {
-      final Widget child = _build(context);
-      if (child != null) {
-        layout(child, context, constraints);
-        paint(child, context);
-      }
+    if (content != null) {
+      paint(content, context);
     }
 
-    if (pageTheme.buildForeground != null) {
-      final Widget child = pageTheme.buildForeground(context);
-      if (child != null) {
-        layout(child, context, constraints);
-        paint(child, context);
-      }
+    if (foreground != null) {
+      paint(foreground, context);
     }
   }
 
   @protected
-  void layout(Widget child, Context context, BoxConstraints constraints,
+  PdfPoint layout(Widget child, Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    if (child != null) {
-      final EdgeInsets _margin = margin;
-      child.layout(context, constraints, parentUsesSize: parentUsesSize);
-      assert(child.box != null);
-      child.box = PdfRect(
-          _margin.left,
-          pageFormat.height - child.box.height - _margin.top,
-          child.box.width,
-          child.box.height);
+    if (child == null) {
+      return PdfPoint(pageFormat.width, pageFormat.height);
     }
+
+    final EdgeInsets _margin = margin;
+    child.layout(context, constraints, parentUsesSize: parentUsesSize);
+    assert(child.box != null);
+
+    final double width = pageFormat.width == double.infinity
+        ? child.box.width + _margin.left + _margin.right
+        : pageFormat.width;
+
+    final double height = pageFormat.height == double.infinity
+        ? child.box.height + _margin.top + _margin.bottom
+        : pageFormat.height;
+
+    child.box = PdfRect(_margin.left, height - child.box.height - _margin.top,
+        child.box.width, child.box.height);
+
+    return PdfPoint(width, height);
   }
 
   @protected

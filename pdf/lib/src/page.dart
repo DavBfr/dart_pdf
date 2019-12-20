@@ -32,7 +32,7 @@ class PdfPage extends PdfObject {
   }
 
   /// This is this page format, ie the size of the page, margins, and rotation
-  final PdfPageFormat pageFormat;
+  PdfPageFormat pageFormat;
 
   /// This holds the contents of the page.
   List<PdfObjectStream> contents = <PdfObjectStream>[];

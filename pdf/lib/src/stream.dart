@@ -50,11 +50,15 @@ class PdfStream {
   }
 
   void putNum(double d) {
+    assert(d != double.infinity);
     putString(d.toStringAsFixed(precision));
   }
 
   void putNumList(List<double> d) {
-    putString(d.map((double v) => v.toStringAsFixed(precision)).join(' '));
+    putString(d.map((double v) {
+      assert(v != double.infinity);
+      return v.toStringAsFixed(precision);
+    }).join(' '));
   }
 
   void putIntList(List<int> d) {

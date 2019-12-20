@@ -679,6 +679,9 @@ class FullPage extends SingleChildWidget {
   final bool ignoreMargins;
 
   BoxConstraints _getConstraints(Context context) {
+    assert(context.page.pageFormat.width != double.infinity);
+    assert(context.page.pageFormat.height != double.infinity);
+
     return ignoreMargins
         ? BoxConstraints.tightFor(
             width: context.page.pageFormat.width,
