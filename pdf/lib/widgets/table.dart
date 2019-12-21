@@ -86,14 +86,91 @@ class _TableContext extends WidgetContext {
   int lastLine = 0;
 }
 
+class _ColumnLayout {
+  _ColumnLayout(this.width, this.flex);
+
+  final double width;
+  final double flex;
+}
+
+abstract class TableColumnWidth {
+  const TableColumnWidth();
+
+  _ColumnLayout layout(
+      Widget child, Context context, BoxConstraints constraints);
+}
+
+class IntrinsicColumnWidth extends TableColumnWidth {
+  const IntrinsicColumnWidth({this.flex});
+
+  final double flex;
+
+  @override
+  _ColumnLayout layout(
+      Widget child, Context context, BoxConstraints constraints) {
+    if (flex != null) {
+      return _ColumnLayout(0, flex);
+    }
+
+    child.layout(context, const BoxConstraints());
+    assert(child.box != null);
+    final double calculatedWidth =
+        child.box.width == double.infinity ? 0 : child.box.width;
+    final double childFlex = flex ??
+        (child is Expanded
+            ? child.flex.toDouble()
+            : (child.box.width == double.infinity ? 1 : 0));
+    return _ColumnLayout(calculatedWidth, childFlex);
+  }
+}
+
+class FixedColumnWidth extends TableColumnWidth {
+  const FixedColumnWidth(this.width) : assert(width != null);
+
+  final double width;
+
+  @override
+  _ColumnLayout layout(
+      Widget child, Context context, BoxConstraints constraints) {
+    return _ColumnLayout(width, 0);
+  }
+}
+
+class FlexColumnWidth extends TableColumnWidth {
+  const FlexColumnWidth([this.flex = 1.0]) : assert(flex != null);
+
+  final double flex;
+
+  @override
+  _ColumnLayout layout(
+      Widget child, Context context, BoxConstraints constraints) {
+    return _ColumnLayout(0, flex);
+  }
+}
+
+class FractionColumnWidth extends TableColumnWidth {
+  const FractionColumnWidth(this.value);
+
+  final double value;
+
+  @override
+  _ColumnLayout layout(
+      Widget child, Context context, BoxConstraints constraints) {
+    return _ColumnLayout(constraints.maxWidth * value, 0);
+  }
+}
+
 /// A widget that uses the table layout algorithm for its children.
 class Table extends Widget implements SpanningWidget {
   Table(
       {this.children = const <TableRow>[],
       this.border,
       this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
+      this.columnWidths,
+      this.defaultColumnWidth = const IntrinsicColumnWidth(),
       this.tableWidth = TableWidth.max})
       : assert(children != null),
+        assert(defaultColumnWidth != null),
         super();
 
   factory Table.fromTextArray(
@@ -140,6 +217,9 @@ class Table extends Widget implements SpanningWidget {
 
   _TableContext _context = _TableContext();
 
+  final TableColumnWidth defaultColumnWidth;
+  final Map<int, TableColumnWidth> columnWidths;
+
   @override
   WidgetContext saveContext() {
     return _context;
@@ -163,21 +243,20 @@ class Table extends Widget implements SpanningWidget {
     for (TableRow row in children) {
       int n = 0;
       for (Widget child in row.children) {
-        child.layout(context, const BoxConstraints());
-        assert(child.box != null);
-        final double calculatedWidth =
-            child.box.width == double.infinity ? 0.0 : child.box.width;
-        final double childFlex = child is Expanded
-            ? child.flex.toDouble()
-            : (child.box.width == double.infinity ? 1.0 : 0.0);
+        final TableColumnWidth columnWidth =
+            columnWidths != null && columnWidths[n] != null
+                ? columnWidths[n]
+                : defaultColumnWidth;
+        final _ColumnLayout columnLayout =
+            columnWidth.layout(child, context, constraints);
         if (flex.length < n + 1) {
-          flex.add(childFlex);
-          _widths.add(calculatedWidth);
+          flex.add(columnLayout.flex);
+          _widths.add(columnLayout.width);
         } else {
-          if (childFlex > 0) {
-            flex[n] *= childFlex;
+          if (columnLayout.flex > 0) {
+            flex[n] = math.max(flex[n], columnLayout.flex);
           }
-          _widths[n] = math.max(_widths[n], calculatedWidth);
+          _widths[n] = math.max(_widths[n], columnLayout.width);
         }
         n++;
       }

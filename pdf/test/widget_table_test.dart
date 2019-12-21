@@ -131,6 +131,20 @@ void main() {
             ]));
   });
 
+  test('Table Widget Widths', () {
+    pdf.addPage(Page(
+      build: (Context context) => Table(
+        children: buildTable(context: context, count: 20),
+        border: const TableBorder(),
+        columnWidths: <int, TableColumnWidth>{
+          0: const FixedColumnWidth(80),
+          1: const FlexColumnWidth(2),
+          2: const FractionColumnWidth(.2),
+        },
+      ),
+    ));
+  });
+
   tearDownAll(() {
     final File file = File('widgets-table.pdf');
     file.writeAsBytesSync(pdf.save());

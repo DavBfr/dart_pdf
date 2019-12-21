@@ -3,6 +3,7 @@
 ## 1.3.27
 
 - Add Roll Paper support
+- Implement custom table widths
 
 ## 1.3.26
 
