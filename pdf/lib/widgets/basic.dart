@@ -718,7 +718,6 @@ class FullPage extends SingleChildWidget {
     }
 
     box = _getBox(context);
-    print('layout box: $box');
   }
 
   @override
