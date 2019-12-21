@@ -21,11 +21,13 @@ class _PrintJob {
     this.onLayout,
     this.onHtmlRendered,
     this.onCompleted,
+    this.onPageRasterized,
   });
 
   final LayoutCallback onLayout;
   final Completer<List<int>> onHtmlRendered;
   final Completer<bool> onCompleted;
+  final StreamController<PdfRaster> onPageRasterized;
 
   int index;
 }

@@ -109,7 +109,7 @@ await Printing.layoutPdf(
    ```java
    defaultConfig {
        ...
-       minSdkVersion 19  // <-- Change this line to 19 or more
+       minSdkVersion 21  // <-- Change this line to 21 or more
        ...
    }
    ```

@@ -31,4 +31,5 @@ part 'src/print_job.dart';
 part 'src/printer.dart';
 part 'src/printing.dart';
 part 'src/printing_info.dart';
+part 'src/raster.dart';
 part 'src/widgets.dart';

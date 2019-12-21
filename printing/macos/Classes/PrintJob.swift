@@ -168,6 +168,41 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         result(NSNumber(value: 1))
     }
 
+    public func rasterPdf(data: Data, pages: [Int]?, scale: CGFloat) {
+        let provider = CGDataProvider(data: data as CFData)!
+        let document = CGPDFDocument(provider)!
+
+        DispatchQueue.global().async {
+            let pageCount = document.numberOfPages
+
+            for pageNum in pages ?? Array(0 ... pageCount - 1) {
+                guard let page = document.page(at: pageNum + 1) else { continue }
+                let rect = page.getBoxRect(.mediaBox)
+                let width = Int(rect.width * scale)
+                let height = Int(rect.height * scale)
+                let stride = width * 4
+                var data = Data(repeating: 0, count: stride * height)
+
+                data.withUnsafeMutableBytes { (ptr: UnsafeMutablePointer<UInt8>) in
+                    let rgb = CGColorSpaceCreateDeviceRGB()
+                    let context = CGContext(data: ptr, width: width, height: height, bitsPerComponent: 8, bytesPerRow: stride, space: rgb, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+                    if context != nil {
+                        context!.scaleBy(x: scale, y: scale)
+                        context!.drawPDFPage(page)
+                    }
+                }
+
+                DispatchQueue.main.sync {
+                    self.printing.onPageRasterized(printJob: self, imageData: data, width: width, height: height)
+                }
+            }
+
+            DispatchQueue.main.sync {
+                self.printing.onPageRasterEnd(printJob: self)
+            }
+        }
+    }
+
     public static func printingInfo() -> NSDictionary {
         let data: NSDictionary = [
             "directPrint": false,
@@ -175,6 +210,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
             "canPrint": true,
             "canConvertHtml": true,
             "canShare": true,
+            "canRaster": true,
         ]
         return data
     }

@@ -111,6 +111,15 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
 //            ))
         } else if call.method == "printingInfo" {
             result(PrintJob.printingInfo())
+        } else if call.method == "rasterPdf" {
+            let doc = args["doc"] as! FlutterStandardTypedData
+            let pages = args["pages"] as? [Int]
+            let scale = CGFloat((args["scale"] as! NSNumber).floatValue)
+            let printJob = PrintJob(printing: self, index: args["job"] as! Int)
+            printJob.rasterPdf(data: doc.data,
+                               pages: pages,
+                               scale: scale)
+            result(NSNumber(value: 1))
         } else {
             result(FlutterMethodNotImplemented)
         }
@@ -164,5 +173,23 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             "job": printJob.index,
         ]
         channel.invokeMethod("onHtmlError", arguments: data)
+    }
+
+    /// send pdf to raster data result to flutter
+    public func onPageRasterized(printJob: PrintJob, imageData: Data, width: Int, height: Int) {
+        let data: NSDictionary = [
+            "image": FlutterStandardTypedData(bytes: imageData),
+            "width": width,
+            "height": height,
+            "job": printJob.index,
+        ]
+        channel.invokeMethod("onPageRasterized", arguments: data)
+    }
+
+    public func onPageRasterEnd(printJob: PrintJob) {
+        let data: NSDictionary = [
+            "job": printJob.index,
+        ]
+        channel.invokeMethod("onPageRasterEnd", arguments: data)
     }
 }

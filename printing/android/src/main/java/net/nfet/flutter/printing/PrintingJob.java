@@ -18,11 +18,15 @@ package net.nfet.flutter.printing;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
-import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.print.PageRange;
 import android.print.PdfConvert;
@@ -32,16 +36,20 @@ import android.print.PrintDocumentInfo;
 import android.print.PrintJob;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
+import android.util.Log;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.FileProvider;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 
 /**
@@ -71,6 +79,7 @@ public class PrintingJob extends PrintDocumentAdapter {
         result.put("canPrint", true);
         result.put("canConvertHtml", true);
         result.put("canShare", true);
+        result.put("canRaster", true);
         return result;
     }
 
@@ -239,5 +248,80 @@ public class PrintingJob extends PrintDocumentAdapter {
 
         // Content layout reflow is complete
         callback.onLayoutFinished(info, true);
+    }
+
+    void rasterPdf(final byte[] data, final int[] pages, final Double scale) {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+            Log.e("PDF", "PDF Raster available since Android 5.0 Lollipop (API 21)");
+            printing.onPageRasterEnd(this);
+            return;
+        }
+
+        Thread thread = new Thread(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public void run() {
+                try {
+                    File file = File.createTempFile("printing", null, null);
+                    FileOutputStream oStream = new FileOutputStream(file);
+                    oStream.write(data);
+                    oStream.close();
+
+                    FileInputStream iStream = new FileInputStream(file);
+                    ParcelFileDescriptor parcelFD = ParcelFileDescriptor.dup(iStream.getFD());
+                    PdfRenderer renderer = new PdfRenderer(parcelFD);
+
+                    if (!file.delete()) {
+                        Log.e("PDF", "Unable to delete temporary file");
+                    }
+
+                    final int pageCount = pages != null ? pages.length : renderer.getPageCount();
+                    for (int i = 0; i < pageCount; i++) {
+                        PdfRenderer.Page page = renderer.openPage(pages == null ? i : pages[i]);
+
+                        final int width = Double.valueOf(page.getWidth() * scale).intValue();
+                        final int height = Double.valueOf(page.getHeight() * scale).intValue();
+                        int stride = width * 4;
+
+                        Matrix transform = new Matrix();
+                        transform.setScale(scale.floatValue(), scale.floatValue());
+
+                        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+                        page.render(
+                                bitmap, null, transform, PdfRenderer.Page.RENDER_MODE_FOR_PRINT);
+
+                        page.close();
+
+                        final ByteBuffer buf = ByteBuffer.allocate(stride * height);
+                        bitmap.copyPixelsToBuffer(buf);
+                        bitmap.recycle();
+
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                printing.onPageRasterized(
+                                        PrintingJob.this, buf.array(), width, height);
+                            }
+                        });
+                    }
+
+                    renderer.close();
+                    iStream.close();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        printing.onPageRasterEnd(PrintingJob.this);
+                    }
+                });
+            }
+        });
+
+        thread.start();
     }
 }

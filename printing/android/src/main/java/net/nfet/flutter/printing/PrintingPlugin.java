@@ -125,6 +125,16 @@ public class PrintingPlugin implements MethodCallHandler {
                 result.success(PrintingJob.printingInfo());
                 break;
             }
+            case "rasterPdf": {
+                final byte[] document = call.argument("doc");
+                final int[] pages = call.argument("pages");
+                Double scale = call.argument("scale");
+                final PrintingJob printJob =
+                        new PrintingJob(activity, this, (int) call.argument("job"));
+                printJob.rasterPdf(document, pages, scale);
+                result.success(1);
+                break;
+            }
             default:
                 result.notImplemented();
                 break;
@@ -193,5 +203,23 @@ public class PrintingPlugin implements MethodCallHandler {
         args.put("job", printJob.index);
 
         channel.invokeMethod("onHtmlError", args);
+    }
+
+    /// send pdf to raster data result to flutter
+    void onPageRasterized(PrintingJob printJob, byte[] imageData, int width, int height) {
+        HashMap<String, Object> args = new HashMap<>();
+        args.put("image", imageData);
+        args.put("width", width);
+        args.put("height", height);
+        args.put("job", printJob.index);
+
+        channel.invokeMethod("onPageRasterized", args);
+    }
+
+    void onPageRasterEnd(PrintingJob printJob) {
+        HashMap<String, Object> args = new HashMap<>();
+        args.put("job", printJob.index);
+
+        channel.invokeMethod("onPageRasterEnd", args);
     }
 }

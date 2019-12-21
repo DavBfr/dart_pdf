@@ -68,6 +68,20 @@ mixin Printing {
         final _PrintJob job = _printJobs[call.arguments['job']];
         job.onHtmlRendered.completeError(call.arguments['error']);
         break;
+      case 'onPageRasterized':
+        final _PrintJob job = _printJobs[call.arguments['job']];
+        final PdfRaster raster = PdfRaster._(
+          call.arguments['width'],
+          call.arguments['height'],
+          call.arguments['image'],
+        );
+        job.onPageRasterized.add(raster);
+        break;
+      case 'onPageRasterEnd':
+        final _PrintJob job = _printJobs[call.arguments['job']];
+        job.onPageRasterized.close();
+        _printJobs.remove(job.index);
+        break;
     }
   }
 
@@ -272,5 +286,27 @@ mixin Printing {
     }
 
     return PrintingInfo.fromMap(result);
+  }
+
+  static Stream<PdfRaster> raster(
+    List<int> document, {
+    List<int> pages,
+    double dpi = PdfPageFormat.inch,
+  }) {
+    _channel.setMethodCallHandler(_handleMethod);
+
+    final _PrintJob job = _newPrintJob(_PrintJob(
+      onPageRasterized: StreamController<PdfRaster>(),
+    ));
+
+    final Map<String, dynamic> params = <String, dynamic>{
+      'doc': Uint8List.fromList(document),
+      'pages': pages,
+      'scale': dpi / PdfPageFormat.inch,
+      'job': job.index,
+    };
+
+    _channel.invokeMethod<void>('rasterPdf', params);
+    return job.onPageRasterized.stream;
   }
 }

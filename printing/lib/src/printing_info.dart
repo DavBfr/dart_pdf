@@ -23,6 +23,7 @@ class PrintingInfo {
         canPrint: map['canPrint'],
         canConvertHtml: map['canConvertHtml'],
         canShare: map['canShare'],
+        canRaster: map['canRaster'],
       );
 
   const PrintingInfo._({
@@ -31,11 +32,13 @@ class PrintingInfo {
     this.canPrint = false,
     this.canConvertHtml = false,
     this.canShare = false,
+    this.canRaster = false,
   })  : assert(directPrint != null),
         assert(dynamicLayout != null),
         assert(canPrint != null),
         assert(canConvertHtml != null),
-        assert(canShare != null);
+        assert(canShare != null),
+        assert(canRaster != null);
 
   static const PrintingInfo unavailable = PrintingInfo._();
 
@@ -44,4 +47,5 @@ class PrintingInfo {
   final bool canPrint;
   final bool canConvertHtml;
   final bool canShare;
+  final bool canRaster;
 }

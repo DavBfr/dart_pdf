@@ -15,6 +15,7 @@ import 'package:pdf/widgets.dart' as pdf;
 import 'package:printing/printing.dart';
 
 import 'document.dart';
+import 'image_viewer.dart';
 import 'viewer.dart';
 
 void main() {
@@ -79,6 +80,22 @@ class MyAppState extends State<MyApp> {
       context,
       MaterialPageRoute<dynamic>(
           builder: (BuildContext context) => PdfViewer(file: file)),
+    );
+  }
+
+  Future<void> _rasterToImage() async {
+    final List<int> doc = (await generateDocument(PdfPageFormat.a4)).save();
+
+    final List<ImageProvider> images = <ImageProvider>[];
+
+    await for (PdfRaster page in Printing.raster(doc)) {
+      images.add(PdfRasterImage(page));
+    }
+
+    Navigator.push<dynamic>(
+      context,
+      MaterialPageRoute<dynamic>(
+          builder: (BuildContext context) => ImageViewer(images: images)),
     );
   }
 
@@ -242,6 +259,11 @@ class MyAppState extends State<MyApp> {
                 ),
                 RaisedButton(
                     child: const Text('Save to file'), onPressed: _saveAsFile),
+                RaisedButton(
+                  child: const Text('Raster to Image'),
+                  onPressed:
+                      printingInfo?.canRaster ?? false ? _rasterToImage : null,
+                ),
                 RaisedButton(
                   child: const Text('Print Html'),
                   onPressed:
