@@ -48,4 +48,13 @@ class PrintingInfo {
   final bool canConvertHtml;
   final bool canShare;
   final bool canRaster;
+
+  @override
+  String toString() => '''PrintingInfo:
+  canPrint: $canPrint
+  directPrint: $directPrint
+  dynamicLayout: $dynamicLayout
+  canConvertHtml: $canConvertHtml
+  canShare: $canShare
+  canRaster: $canRaster''';
 }
