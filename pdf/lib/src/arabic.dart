@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// ignore_for_file: omit_local_variable_types
+
 part of pdf;
 
 class PdfArabic {
@@ -155,7 +157,10 @@ class PdfArabic {
     1613: 64607, // Shadda + Kasratan
     1614: 64608, // Shadda + Fatha
     1615: 64609, // Shadda + Damma
-    1616: 64610 // Shadda + Kasra
+    1616: 64610, // Shadda + Kasra
+    1617: 1617,
+    1618: 1618,
+    // 1548: 1548,
   };
 
   static const int _noChangeInForm = -1;
@@ -197,91 +202,41 @@ class PdfArabic {
         _arabicSubstitionA[letter].length == 4;
   }
 
-  static bool isArabicDiacritic(int letter) {
+  static bool _isArabicDiacritic(int letter) {
     return _arabicDiacritics.containsKey(letter);
   }
-
-  // static List<int> _resolveLigaturesr(List<int> letters) {
-  //   final List<int> result = <int>[];
-  //   int effectedLetters = 0;
-  //   int insert = 0;
-  //   dynamic tmpLigatures = _ligatures;
-
-  //   // print(letters);
-
-  //   for (int i = letters.length - 1; i >= 0; i--) {
-  //     // print('loop: $i');
-  //     if (tmpLigatures.containsKey(letters[i])) {
-  //       effectedLetters++;
-  //       tmpLigatures = tmpLigatures[letters[i]];
-  //       // print('tmpLigatures ${letters[i]} => $tmpLigatures');
-
-  //       if (tmpLigatures is int) {
-  //         // print('add $tmpLigatures');
-  //         result.insert(insert, tmpLigatures);
-  //         tmpLigatures = _ligatures;
-  //         effectedLetters = 0;
-  //       }
-  //       // print('$i == ${letters.length} - 1');
-  //       if (i - (effectedLetters - 1) == 0) {
-  //         tmpLigatures = _ligatures;
-  //         // print('add ${letters[i]} => $i $effectedLetters');
-  //         result.insert(insert, letters[i - (effectedLetters - 1)]);
-  //         i += (effectedLetters - 1);
-  //         effectedLetters = 0;
-  //       }
-  //     } else {
-  //       tmpLigatures = _ligatures;
-  //       final int letter = letters[i - effectedLetters];
-  //       // print('${letters[i]} add ${letter} ($effectedLetters)');
-  //       result.insert(insert, letter);
-  //       if (isArabicDiacritic(letter)) {
-  //         insert++;
-  //       }
-  //       i += effectedLetters;
-  //       effectedLetters = 0;
-  //     }
-  //   }
-
-  //   return result;
-  // }
 
   static List<int> _resolveLigatures(List<int> lettersq) {
     final List<int> result = <int>[];
     int effectedLetters = 0;
     dynamic tmpLigatures = _ligatures;
-    int insert = 0;
     final List<int> letters = lettersq.reversed.toList();
-
-    // print(letters);
+    int index = 0;
 
     for (int i = 0; i < letters.length; i += 1) {
       if (tmpLigatures.containsKey(letters[i])) {
         effectedLetters++;
         tmpLigatures = tmpLigatures[letters[i]];
-        // print('${letters[i]} => $tmpLigatures');
 
         if (tmpLigatures is int) {
-          // print('add $tmpLigatures');
-          result.insert(insert, tmpLigatures);
+          result.insert(index, tmpLigatures);
           tmpLigatures = _ligatures;
           effectedLetters = 0;
         }
-        // print('$i == ${letters.length} - 1');
+
         if (i - (effectedLetters - 1) == letters.length - 1) {
           tmpLigatures = _ligatures;
-          // print('add ${letters[i]} => $i $effectedLetters');
-          result.insert(insert, letters[i - (effectedLetters - 1)]);
+          result.insert(index, letters[i - (effectedLetters - 1)]);
           i = i - (effectedLetters - 1);
           effectedLetters = 0;
         }
       } else {
         tmpLigatures = _ligatures;
         final int letter = letters[i - effectedLetters];
-        // print('${letters[i]} add ${letter} $effectedLetters');
-        result.insert(insert, letter);
-        if (isArabicDiacritic(letter)) {
-          insert++;
+
+        result.insert(index, letter);
+        if (_isArabicDiacritic(letter)) {
+          index++;
         }
         i = i - effectedLetters;
         effectedLetters = 0;
@@ -291,7 +246,7 @@ class PdfArabic {
     return result;
   }
 
-  static int getCorrectForm(int currentChar, int beforeChar, int nextChar) {
+  static int _getCorrectForm(int currentChar, int beforeChar, int nextChar) {
     if (_isInArabicSubstitutionA(currentChar) == false) {
       return _noChangeInForm;
     }
@@ -318,8 +273,8 @@ class PdfArabic {
     return _initialForm;
   }
 
-  static Iterable<int> parse(String text) sync* {
-    final List<String> words = text.split(' ');
+  static Iterable<String> _parse(String text) sync* {
+    final List<String> words = text.split(RegExp(r'\s+'));
 
     bool first = true;
     for (String word in words) {
@@ -334,30 +289,47 @@ class PdfArabic {
           isArabic = true;
 
           final int position =
-              getCorrectForm(currentLetter, prevLetter, nextLetter);
+              _getCorrectForm(currentLetter, prevLetter, nextLetter);
           if (position != -1) {
             newWord.insert(0, _arabicSubstitionA[currentLetter][position]);
           } else {
             newWord.add(currentLetter);
           }
         } else {
-          if (isArabic && currentLetter > 32)
+          if (isArabic && currentLetter > 32) {
             newWord.insert(0, currentLetter);
-          else
+          } else {
             newWord.add(currentLetter);
+          }
         }
       }
 
       if (!first) {
-        yield 32;
+        yield ' ';
       }
       first = false;
 
-      yield* _resolveLigatures(newWord);
+      yield String.fromCharCodes(_resolveLigatures(newWord));
     }
   }
 
-  static String convert(String input) {
-    return String.fromCharCodes(parse(input));
+  static String _removeDiacritic(String input) {
+    final List<int> result = <int>[];
+
+    for (int char in input.codeUnits) {
+      if (!_isArabicDiacritic(char)) {
+        result.add(char);
+      }
+    }
+
+    return String.fromCharCodes(result);
+  }
+
+  static String convert(String input, {bool diacritic = false}) {
+    if (!diacritic) {
+      input = _removeDiacritic(input);
+    }
+
+    return List<String>.from(_parse(input)).reversed.join('');
   }
 }
