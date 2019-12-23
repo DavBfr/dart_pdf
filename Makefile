@@ -13,8 +13,8 @@
  # limitations under the License.
 
  DART_SRC=$(shell find . -name '*.dart')
- CLNG_SRC=$(shell find printing/ios -name '*.java' -o -name '*.m' -o -name '*.h') $(shell find printing/android -name '*.java' -o -name '*.m' -o -name '*.h')
- SWFT_SRC=$(shell find . -name '*.swift')
+ CLNG_SRC=$(shell find printing/ios printing/macos printing/windows printing/android -name '*.cpp' -o -name '*.m' -o -name '*.h' -o -name '*.java')
+ SWFT_SRC=$(shell find printing/ios printing/macos -name '*.swift')
  FONTS=pdf/open-sans.ttf pdf/open-sans-bold.ttf pdf/roboto.ttf pdf/noto-sans.ttf pdf/genyomintw.ttf demo/assets/roboto1.ttf demo/assets/roboto2.ttf demo/assets/roboto3.ttf demo/assets/open-sans.ttf demo/assets/open-sans-bold.ttf pdf/hacen-tunisia.ttf
  COV_PORT=9292
 
@@ -63,13 +63,13 @@ pdf/hacen-tunisia.ttf:
 format: format-dart format-clang format-swift
 
 format-dart: $(DART_SRC)
-	dartfmt -w --fix $^
+	dart format --fix $^
 
 format-clang: $(CLNG_SRC)
 	clang-format -style=Chromium -i $^
 
 format-swift: $(SWFT_SRC)
-	swiftformat --swiftversion 4.2 $^
+	which swiftformat && swiftformat --swiftversion 4.2 $^ || true
 
 .coverage:
 	which coverage || pub global activate coverage
@@ -83,7 +83,7 @@ printing/example/.metadata:
 	rm -rf printing/example/test
 
 pdf/pubspec.lock: pdf/pubspec.yaml
-	cd pdf; pub get
+	cd pdf; dart pub get
 
 printing/pubspec.lock: printing/pubspec.yaml
 	cd printing; flutter packages get
@@ -122,50 +122,50 @@ clean:
 publish-pdf: format clean
 	test -z "$(shell git status --porcelain)"
 	find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	cd pdf; pub publish -f
+	cd pdf; dart pub publish -f
 	find pdf -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 	git tag $(shell grep version pdf/pubspec.yaml | sed 's/version\s*:\s*/pdf-/g')
 
 publish-printing: format clean
 	test -z "$(shell git status --porcelain)"
 	find printing -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	cd printing; pub publish -f
+	cd printing; dart pub publish -f
 	find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 	git tag $(shell grep version printing/pubspec.yaml | sed 's/version\s*:\s*/printing-/g')
 
 .pana:
-	which pana || pub global activate pana
+	which pana || dart pub global activate pana
 	touch $@
 
 analyze-pdf: .pana
 	@find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	@pub global run pana --no-warning --source path pdf 2> /dev/null | python test/pana_report.py
+	@dart pub global run pana --no-warning --source path pdf 2> /dev/null | python test/pana_report.py
 	@find pdf -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 analyze-printing: .pana
 	@find printing -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	@pub global run pana --no-warning --source path printing 2> /dev/null | python test/pana_report.py
+	@dart pub global run pana --no-warning --source path printing 2> /dev/null | python test/pana_report.py
 	@find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 analyze: analyze-pdf analyze-printing
 
 analyze-ci-pdf: .pana
 	@find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	@pub global run pana --no-warning --source path pdf
+	@dart pub global run pana --no-warning --source path pdf
 	@find pdf -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 analyze-ci-printing: .pana
 	@find printing -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	@pub global run pana --no-warning --source path printing
+	@dart pub global run pana --no-warning --source path printing
 	@find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 .dartfix:
-	which dartfix || pub global activate dartfix
+	which dartfix || dart pub global activate dartfix
 	touch $@
 
 fix: get .dartfix
-	cd pdf; pub global run dartfix:fix --overwrite .
-	cd printing; pub global run dartfix:fix --overwrite .
+	cd pdf; dart pub global run dartfix:fix --overwrite .
+	cd printing; dart pub global run dartfix:fix --overwrite .
 
 ref:
 	mkdir -p ref

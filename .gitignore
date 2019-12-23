@@ -50,3 +50,5 @@ ref
 .flutter-plugins-dependencies
 
 cache_*
+
+.vscode

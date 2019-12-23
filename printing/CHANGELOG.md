@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.7.0
+
+- Add beta support for Windows Desktop
+
 ## 3.6.4
 
 - Remove useless android dependencies, reduces the final apk file size.
