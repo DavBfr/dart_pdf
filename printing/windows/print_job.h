@@ -41,7 +41,7 @@ class PrintJob {
  public:
   PrintJob(Printing* printing, int index);
 
-  ~PrintJob() { printf("Delete PrintJob #%d\n", index); }
+  // ~PrintJob() { printf("Delete PrintJob #%d\n", index); }
 
   int id() { return index; }
 
@@ -49,7 +49,7 @@ class PrintJob {
                       std::vector<uint8_t> data,
                       std::string withPrinter);
 
-  void printPdf(std::string name);
+  bool printPdf(std::string name);
 
   void writeJob(std::vector<uint8_t> data);
 

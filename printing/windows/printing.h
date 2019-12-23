@@ -37,10 +37,6 @@ class Printing {
 
   virtual ~Printing();
 
-  PrintJob* createJob(int num);
-
-  void remove(PrintJob* job);
-
   void onPageRasterized(std::vector<uint8_t> data,
                         int width,
                         int height,

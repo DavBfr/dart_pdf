@@ -37,7 +37,7 @@ void PrintJob::directPrintPdf(std::string name,
                               std::vector<uint8_t> data,
                               std::string withPrinter) {}
 
-void PrintJob::printPdf(std::string name) {
+bool PrintJob::printPdf(std::string name) {
   PRINTDLG pd;
   // HWND hwnd;
 
@@ -60,7 +60,7 @@ void PrintJob::printPdf(std::string name) {
   auto r = PrintDlg(&pd);
 
   if (r == 1) {
-    printf("ncopies: %d\n", pd.nCopies);
+    // printf("ncopies: %d\n", pd.nCopies);
     // printf("hDevMode: %d\n", (int)pd.hDevMode);
 
     // DEVMODE* b = static_cast<DEVMODE*>(GlobalLock(pd.hDevMode));
@@ -89,24 +89,27 @@ void PrintJob::printPdf(std::string name) {
     auto marginRight = pageWidth - printableWidth - marginLeft;
     auto marginBottom = pageHeight - printableHeight - marginTop;
 
-    printf("dpiX: %f\n", dpiX);
-    printf("HORZRES: %d\n", GetDeviceCaps(pd.hDC, HORZRES));
-    printf("PHYSICALOFFSETX: %d\n", GetDeviceCaps(pd.hDC, PHYSICALOFFSETX));
-    printf("pageWidth: %f\n", pageWidth);
+    // printf("dpiX: %f\n", dpiX);
+    // printf("HORZRES: %d\n", GetDeviceCaps(pd.hDC, HORZRES));
+    // printf("PHYSICALOFFSETX: %d\n", GetDeviceCaps(pd.hDC, PHYSICALOFFSETX));
+    // printf("pageWidth: %f\n", pageWidth);
 
     hDC = pd.hDC;
     hDevMode = pd.hDevMode;
     hDevNames = pd.hDevNames;
 
-    printf("HDC: %llu  job: %d\n", (size_t)pd.hDC, index);
+    // printf("HDC: %llu  job: %d\n", (size_t)pd.hDC, index);
 
     printing->onLayout(this, pageWidth, pageHeight, marginLeft, marginTop,
                        marginRight, marginBottom);
+    return true;
   }
+
+  return false;
 }
 
 void PrintJob::writeJob(std::vector<uint8_t> data) {
-  printf("hDC: %llu  job: %d\n", (size_t)hDC, index);
+  // printf("hDC: %llu  job: %d\n", (size_t)hDC, index);
   auto dpiX = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSX)) / 72;
   auto dpiY = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSY)) / 72;
 
@@ -141,16 +144,16 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
 
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
-    printf("Error loading the document: %d\n", FPDF_GetLastError());
+    // printf("Error loading the document: %d\n", FPDF_GetLastError());
     return;
   }
 
   auto pages = FPDF_GetPageCount(doc);
-  printf("Page count: %d\n", pages);
+  // printf("Page count: %d\n", pages);
 
   for (auto pageNum = 0; pageNum < pages; pageNum++) {
     r = StartPage(hDC);
-    printf("StartPage = %d\n", r);
+    // printf("StartPage = %d\n", r);
 
     auto page = FPDF_LoadPage(doc, pageNum);
     // print(FPDF_GetLastError());
@@ -160,23 +163,23 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
 
     // print('$width x $height');
 
-    printf("pdfWidth: %f  dpiX: %f  \n", pdfWidth, dpiX);
+    // printf("pdfWidth: %f  dpiX: %f  \n", pdfWidth, dpiX);
     int bWidth = static_cast<int>(pdfWidth * dpiX);
     int bHeight = static_cast<int>(pdfHeight * dpiY);
 
-    printf("bwidth/bheight: %d x %d\n", bWidth, bHeight);
+    // printf("bwidth/bheight: %d x %d\n", bWidth, bHeight);
 
     FPDF_RenderPage(hDC, page, 0, 0, bWidth, bHeight, 0, FPDF_ANNOT);
 
     r = EndPage(hDC);
-    printf("EndPage = %d\n", r);
+    // printf("EndPage = %d\n", r);
   }
 
   FPDF_CloseDocument(doc);
   FPDF_DestroyLibrary();
 
   r = EndDoc(hDC);
-  printf("EndDoc = %d\n", r);
+  // printf("EndDoc = %d\n", r);
   //     DeleteDC(printerDC);
   DeleteDC(hDC);
   GlobalFree(hDevNames);
@@ -241,13 +244,13 @@ void PrintJob::rasterPdf(std::vector<uint8_t> data,
 
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
-    fprintf(stderr, "Error: %d\n", FPDF_GetLastError());
+    // printf(stderr, "Error: %d\n", FPDF_GetLastError());
     printing->onPageRasterEnd(this);
     return;
   }
 
   auto pageCount = FPDF_GetPageCount(doc);
-  printf("pdf: pages:%d\n", pageCount);
+  // printf("pdf: pages:%d\n", pageCount);
 
   if (pages.size() == 0) {
     // Use all pages
@@ -262,14 +265,14 @@ void PrintJob::rasterPdf(std::vector<uint8_t> data,
 
     auto page = FPDF_LoadPage(doc, n);
     if (!page) {
-      printf("Page Error: %d\n", FPDF_GetLastError());
+      // printf("Page Error: %d\n", FPDF_GetLastError());
       continue;
     }
 
     auto width = FPDF_GetPageWidth(page);
     auto height = FPDF_GetPageHeight(page);
 
-    printf("pdf: page:%d w:%f h:%f\n", n, width, height);
+    // printf("pdf: page:%d w:%f h:%f\n", n, width, height);
 
     auto bWidth = static_cast<int>(width * scale);
     auto bHeight = static_cast<int>(height * scale);

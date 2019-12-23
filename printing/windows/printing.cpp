@@ -26,14 +26,6 @@ Printing::Printing() {}
 
 Printing::~Printing() {}
 
-PrintJob* Printing::createJob(int num) {
-  return new PrintJob{this, num};
-}
-
-void Printing::remove(PrintJob* job) {
-  delete job;
-}
-
 void Printing::onPageRasterized(std::vector<uint8_t> data,
                                 int width,
                                 int height,
@@ -63,44 +55,32 @@ void Printing::onPageRasterEnd(PrintJob* job) {
 
 class OnLayoutResult : public flutter::MethodResult<flutter::EncodableValue> {
  public:
-  OnLayoutResult(PrintJob* job_) : job(job_) {
-    n = 90;
-    printf("OnLayoutResult (%d) %p\n", job->id(), this);
-  }
-
-  OnLayoutResult(const OnLayoutResult& other) {
-    job = other.job;
-    printf("OnLayoutResult copy (%d) %p\n", job->id(), this);
-  }
-
-  OnLayoutResult(const OnLayoutResult&& other) {
-    job = other.job;
-    printf("OnLayoutResult move (%d) %p\n", job->id(), this);
-  }
-
-  ~OnLayoutResult() {
-    printf("OnLayoutResult delete (%d) %p\n", job->id(), this);
+  OnLayoutResult(PrintJob* job) : job(job) {
+    // printf("OnLayoutResult (%d) %p\n", job->id(), this);
   }
 
  private:
   PrintJob* job;
-  int n = 0;
 
  protected:
   void SuccessInternal(const flutter::EncodableValue* result) {
     auto doc = std::get<std::vector<uint8_t>>(*result);
-    printf("Success! n:%d (%d) %llu bytes %p\n", n, job->id(), doc.size(),
-           this);
+    // printf("Success! (%d) %llu bytes %p\n", job->id(), doc.size(), this);
     job->writeJob(doc);
+    delete job;
   }
 
   void ErrorInternal(const std::string& error_code,
                      const std::string& error_message,
                      const flutter::EncodableValue* error_details) {
     printf("Error!\n");
+    delete job;
   }
 
-  void NotImplementedInternal() { printf("NotImplemented!\n"); }
+  void NotImplementedInternal() {
+    printf("NotImplemented!\n");
+    delete job;
+  }
 };
 
 void Printing::onLayout(PrintJob* job,
@@ -110,8 +90,9 @@ void Printing::onLayout(PrintJob* job,
                         double marginTop,
                         double marginRight,
                         double marginBottom) {
-  printf("onLayout (%d) %fx%f %f %f %f %f\n", job->id(), pageWidth, pageHeight,
-         marginLeft, marginTop, marginRight, marginBottom);
+  // printf("onLayout (%d) %fx%f %f %f %f %f\n", job->id(), pageWidth,
+  // pageHeight,
+  //  marginLeft, marginTop, marginRight, marginBottom);
 
   // auto result = std::make_unique<OnLayoutResult>(job);
 

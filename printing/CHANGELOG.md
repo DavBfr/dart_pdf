@@ -3,6 +3,7 @@
 ## 3.7.1
 
 - Fix Pdf Raster on WEB
+- Fix Windows memory leaks
 
 ## 3.7.0
 
