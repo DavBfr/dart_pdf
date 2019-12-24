@@ -35,7 +35,6 @@ class ArabicText {
 Document pdf;
 Font hacen;
 TextStyle style;
-TextStyle red;
 
 void main() {
   setUpAll(() {
@@ -46,7 +45,6 @@ void main() {
     final Uint8List fontData = File('hacen-tunisia.ttf').readAsBytesSync();
     hacen = Font.ttf(fontData.buffer.asByteData());
     style = TextStyle(font: hacen, fontSize: 30);
-    red = style.copyWith(color: PdfColors.red);
   });
 
   test('Arabic Diacritics', () {
@@ -65,7 +63,6 @@ void main() {
 
   test('Arabic Default Reshaping', () {
     final List<ArabicText> cases = <ArabicText>[
-      ArabicText('السلام عليكم', 'ﺍﻟﺴﻼﻡ ﻋﻠﻴﻜﻢ'),
       ArabicText('السَلَاْمٌ عَلَيْكُمْ', 'ﺍﻟﺴﻼﻡ ﻋﻠﻴﻜﻢ'),
       ArabicText(
           'اللغة العربية هي أكثر اللغات', 'ﺍﻟﻠﻐﺔ ﺍﻟﻌﺮﺑﻴﺔ ﻫﻲ ﺃﻛﺜﺮ ﺍﻟﻠﻐﺎﺕ'),
@@ -90,17 +87,10 @@ void main() {
           for (ArabicText item in cases)
             Padding(
               padding: const EdgeInsets.only(bottom: 15),
-              child: Stack(
-                children: <Widget>[
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Text(item.reshaped, style: red),
-                  ),
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Text(PdfArabic.convert(item.original), style: style),
-                  ),
-                ],
+              child: Text(
+                item.original + '\n',
+                textDirection: TextDirection.rtl,
+                style: style,
               ),
             ),
         ],
@@ -113,6 +103,33 @@ void main() {
         equals(item.reshaped.codeUnits),
       );
     }
+  });
+
+  test('Text Widgets Arabic', () {
+    final Uint8List fontData = File('hacen-tunisia.ttf').readAsBytesSync();
+    final Font ttf = Font.ttf(fontData.buffer.asByteData());
+
+    pdf.addPage(Page(
+      build: (Context context) => RichText(
+        textDirection: TextDirection.rtl,
+        text: TextSpan(
+          text: 'قهوة\n',
+          style: TextStyle(
+            font: ttf,
+            fontSize: 30,
+          ),
+          children: const <TextSpan>[
+            TextSpan(
+              text:
+                  'القهوة مشروب يعد من بذور الب المحمصة، وينمو في أكثر من 70 لداً. خصوصاً في المناطق الاستوائية في أمريكا الشمالية والجنوبية وجنوب شرق آسيا وشبه القارة الهندية وأفريقيا. ويقال أن البن الأخضر هو ثاني أكثر السلع تداولاً في العالم بعد النفط الخام.',
+              style: TextStyle(
+                fontSize: 20,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
   });
 
   tearDownAll(() {

@@ -54,9 +54,6 @@ class TtfParser {
     _parseCMap();
     _parseIndexes();
     _parseGlyphs();
-    if (tableOffsets.containsKey(gsub_table)) {
-      _parseGsub();
-    }
   }
 
   static const String head_table = 'head';
@@ -67,7 +64,6 @@ class TtfParser {
   static const String maxp_table = 'maxp';
   static const String loca_table = 'loca';
   static const String glyf_table = 'glyf';
-  static const String gsub_table = 'GSUB';
 
   final UnmodifiableByteDataView bytes;
   final Map<String, int> tableOffsets = <String, int>{};
@@ -371,20 +367,5 @@ class TtfParser {
       Uint8List.view(bytes.buffer, start, offset - start),
       components,
     );
-  }
-
-  void _parseGsub() {
-    // print(fontName);
-    // print(tableOffsets);
-    //
-    // final int basePosition = tableOffsets[gsub_table];
-    // print('GSUB Version: ${bytes.getUint32(basePosition).toRadixString(16)}');
-    // final int scriptListOffset =
-    // bytes.getUint16(basePosition + 4) + basePosition;
-    // final int featureListOffset =
-    // bytes.getUint16(basePosition + 6) + basePosition;
-    // final int lookupListOffset =
-    // bytes.getUint16(basePosition + 8) + basePosition;
-    // print('GSUB Offsets: $scriptListOffset $featureListOffset $lookupListOffset');
   }
 }

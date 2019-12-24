@@ -863,6 +863,7 @@ class Text extends RichText {
     String text, {
     TextStyle style,
     TextAlign textAlign,
+    TextDirection textDirection = TextDirection.ltr,
     bool softWrap,
     bool tightBounds = false,
     double textScaleFactor = 1.0,
@@ -873,6 +874,7 @@ class Text extends RichText {
             textAlign: textAlign,
             softWrap: softWrap,
             tightBounds: tightBounds,
+            textDirection: textDirection,
             textScaleFactor: textScaleFactor,
             maxLines: maxLines);
 }

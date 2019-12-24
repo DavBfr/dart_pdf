@@ -274,7 +274,7 @@ class PdfArabic {
   }
 
   static Iterable<String> _parse(String text) sync* {
-    final List<String> words = text.split(RegExp(r'\s+'));
+    final List<String> words = text.split(' ');
 
     bool first = true;
     for (String word in words) {
@@ -330,6 +330,6 @@ class PdfArabic {
       input = _removeDiacritic(input);
     }
 
-    return List<String>.from(_parse(input)).reversed.join('');
+    return List<String>.from(_parse(input)).join('');
   }
 }
