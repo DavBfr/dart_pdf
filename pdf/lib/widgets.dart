@@ -22,9 +22,12 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
+import 'package:qr/qr.dart';
+import 'package:barcode/barcode.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 part 'widgets/annotations.dart';
+part 'widgets/barcode.dart';
 part 'widgets/basic.dart';
 part 'widgets/clip.dart';
 part 'widgets/container.dart';
@@ -40,6 +43,7 @@ part 'widgets/page.dart';
 part 'widgets/page_theme.dart';
 part 'widgets/placeholders.dart';
 part 'widgets/progress.dart';
+part 'widgets/qrcode.dart';
 part 'widgets/stack.dart';
 part 'widgets/table.dart';
 part 'widgets/text.dart';

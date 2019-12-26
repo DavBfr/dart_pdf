@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.28
+
+- Add Barcode Widget
+- Add QrCode Widget
+
 ## 1.3.27
 
 - Add Roll Paper support
