@@ -20,10 +20,10 @@ import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:barcode/barcode.dart';
 import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:qr/qr.dart';
-import 'package:barcode/barcode.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 part 'widgets/annotations.dart';

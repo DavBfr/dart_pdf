@@ -23,6 +23,8 @@ class _BarcodeWidget extends Widget {
     @required this.data,
     this.barcode,
     this.color = PdfColors.black,
+    this.drawText,
+    this.textStyle,
   });
 
   /// the barcode data
@@ -31,6 +33,10 @@ class _BarcodeWidget extends Widget {
   final Barcode barcode;
 
   final PdfColor color;
+
+  final bool drawText;
+
+  final TextStyle textStyle;
 
   @override
   void layout(Context context, BoxConstraints constraints,
@@ -42,30 +48,87 @@ class _BarcodeWidget extends Widget {
   void paint(Context context) {
     super.paint(context);
 
-    final BarcodeDraw draw = barcode.draw;
-    if (draw is _BarcodeDraw) {
-      draw
-        ..canvas = context.canvas
-        ..left = box.left
-        ..top = box.top;
+    final List<BarcodeText> textList = <BarcodeText>[];
+
+    for (BarcodeElement element in barcode.make(
+      data,
+      width: box.width,
+      height: box.height,
+      drawText: drawText,
+      fontHeight: textStyle.fontSize,
+    )) {
+      if (element is BarcodeBar) {
+        if (element.black) {
+          context.canvas.drawRect(
+            box.left + element.left,
+            box.top + element.top - element.height,
+            element.width,
+            element.height,
+          );
+        }
+      } else if (element is BarcodeText) {
+        textList.add(element);
+      }
     }
 
-    context.canvas.setFillColor(color);
-    barcode.make(data, box.width, box.height);
-    context.canvas.fillPath();
-  }
-}
+    context.canvas
+      ..setFillColor(color)
+      ..fillPath();
 
-class _BarcodeDraw extends BarcodeDraw {
-  PdfGraphics canvas;
-  double left;
-  double top;
+    if (drawText) {
+      final PdfFont font = textStyle.font.getFont(context);
+
+      for (BarcodeText text in textList) {
+        final PdfFontMetrics metrics = font.stringMetrics(text.text);
+
+        final double left = text.left +
+            box.left +
+            (text.width - metrics.width * text.height) / 2;
+
+        final double top = box.top -
+            text.top -
+            metrics.descent * textStyle.fontSize -
+            text.height;
+
+        context.canvas
+          ..setFillColor(textStyle.color)
+          ..drawString(
+            font,
+            text.height,
+            text.text,
+            left,
+            top,
+          );
+      }
+    }
+  }
 
   @override
-  void fillRect(
-      double left, double top, double width, double height, bool black) {
-    if (black) {
-      canvas.drawRect(this.left + left, this.top + top - height, width, height);
+  void debugPaint(Context context) {
+    super.debugPaint(context);
+
+    if (drawText) {
+      for (BarcodeElement element in barcode.make(
+        data,
+        width: box.width,
+        height: box.height,
+        drawText: drawText,
+        fontHeight: textStyle.fontSize,
+      )) {
+        if (element is BarcodeText) {
+          context.canvas.drawRect(
+            box.x + element.left,
+            box.y + box.height - element.top - element.height,
+            element.width,
+            element.height,
+          );
+        }
+      }
+
+      context.canvas
+        ..setStrokeColor(PdfColors.blue)
+        ..setLineWidth(1)
+        ..strokePath();
     }
   }
 }
@@ -110,30 +173,23 @@ class BarcodeWidget extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    final TextStyle _textStyle = textStyle ?? TextStyle(font: Font.courier());
+    final TextStyle defaultstyle = Theme.of(context).defaultTextStyle.copyWith(
+          font: Font.courier(),
+          fontNormal: Font.courier(),
+          fontBold: Font.courierBold(),
+          fontItalic: Font.courierOblique(),
+          fontBoldItalic: Font.courierBoldOblique(),
+          lineSpacing: 1,
+        );
+    final TextStyle _textStyle = defaultstyle.merge(textStyle);
 
     Widget barcode = _BarcodeWidget(
       data: data,
       color: color,
-      barcode: Barcode.fromType(
-        type: type,
-        draw: _BarcodeDraw(),
-      ),
+      barcode: Barcode.fromType(type),
+      drawText: drawText,
+      textStyle: _textStyle,
     );
-
-    if (drawText) {
-      barcode = Column(
-        children: <Widget>[
-          Flexible(child: barcode),
-          Text(
-            data,
-            style: _textStyle,
-            textAlign: TextAlign.center,
-            softWrap: false,
-          ),
-        ],
-      );
-    }
 
     if (padding != null) {
       barcode = Padding(padding: padding, child: barcode);

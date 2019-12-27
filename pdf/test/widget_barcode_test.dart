@@ -18,6 +18,7 @@
 
 import 'dart:io';
 
+import 'package:barcode/barcode.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
@@ -30,13 +31,36 @@ void main() {
     pdf = Document();
   });
 
-  test('Barcode Widgets Code39', () {
+  test('Barcode Widgets', () {
     pdf.addPage(
-      Page(
-        build: (Context context) => BarcodeWidget(
-          data: 'HELLO 123',
-          width: 200,
-          height: 50,
+      MultiPage(
+        build: (Context context) => List<Widget>.generate(
+          BarcodeType.values.length,
+          (int index) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Text(BarcodeType.values[index].toString()),
+                BarcodeWidget(
+                  type: BarcodeType.values[index],
+                  data: 'HELLO 123',
+                  width: 200,
+                  height: 50,
+                  margin: const EdgeInsets.symmetric(vertical: 20),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  decoration: BoxDecoration(
+                      border: BoxBorder(
+                    color: PdfColors.blue,
+                    top: true,
+                    bottom: true,
+                    left: true,
+                    right: true,
+                  )),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
