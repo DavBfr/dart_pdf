@@ -25,6 +25,40 @@ import 'package:test/test.dart';
 
 Document pdf;
 
+Widget barcode(Barcode barcode, String data) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: <Widget>[
+      Flexible(
+        fit: FlexFit.tight,
+        child: Center(
+          child: Text(barcode.name),
+        ),
+      ),
+      Flexible(
+        fit: FlexFit.tight,
+        child: BarcodeWidget(
+          barcode: barcode,
+          data: data,
+          width: 200,
+          height: 80,
+          margin: const EdgeInsets.symmetric(vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+          decoration: BoxDecoration(
+            border: BoxBorder(
+              color: PdfColors.blue,
+              top: true,
+              bottom: true,
+              left: true,
+              right: true,
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
 void main() {
   setUpAll(() {
     Document.debug = true;
@@ -34,34 +68,16 @@ void main() {
   test('Barcode Widgets', () {
     pdf.addPage(
       MultiPage(
-        build: (Context context) => List<Widget>.generate(
-          BarcodeType.values.length,
-          (int index) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Text(BarcodeType.values[index].toString()),
-                BarcodeWidget(
-                  type: BarcodeType.values[index],
-                  data: 'HELLO 123',
-                  width: 200,
-                  height: 50,
-                  margin: const EdgeInsets.symmetric(vertical: 20),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                  decoration: BoxDecoration(
-                      border: BoxBorder(
-                    color: PdfColors.blue,
-                    top: true,
-                    bottom: true,
-                    left: true,
-                    right: true,
-                  )),
-                ),
-              ],
-            );
-          },
-        ),
+        build: (Context context) => <Widget>[
+          barcode(Barcode.code39(), 'CODE 39'),
+          barcode(Barcode.code93(), 'CODE 93'),
+          barcode(Barcode.code128(), 'Barcode 128'),
+          barcode(Barcode.ean13(), '590123412345'),
+          barcode(Barcode.ean8(), '9638507'),
+          barcode(Barcode.isbn(), '978316148410'),
+          barcode(Barcode.upcA(), '98765432109'),
+          barcode(Barcode.upcE(), '06510000432'),
+        ],
       ),
     );
   });

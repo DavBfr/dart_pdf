@@ -136,7 +136,9 @@ class _BarcodeWidget extends Widget {
 class BarcodeWidget extends StatelessWidget {
   BarcodeWidget({
     @required this.data,
-    this.type = BarcodeType.Code39,
+    @Deprecated('Use `Barcode.fromType(type)` instead')
+        BarcodeType type = BarcodeType.Code39,
+    Barcode barcode,
     this.color = PdfColors.black,
     this.backgroundColor,
     this.decoration,
@@ -146,12 +148,14 @@ class BarcodeWidget extends StatelessWidget {
     this.height,
     this.drawText = true,
     this.textStyle,
-  });
+  }) :
+        // ignore: deprecated_member_use_from_same_package
+        barcode = barcode ?? Barcode.fromType(type);
 
   /// the barcode data
   final String data;
 
-  final BarcodeType type;
+  final Barcode barcode;
 
   final PdfColor color;
 
@@ -183,38 +187,38 @@ class BarcodeWidget extends StatelessWidget {
         );
     final TextStyle _textStyle = defaultstyle.merge(textStyle);
 
-    Widget barcode = _BarcodeWidget(
+    Widget child = _BarcodeWidget(
       data: data,
       color: color,
-      barcode: Barcode.fromType(type),
+      barcode: barcode,
       drawText: drawText,
       textStyle: _textStyle,
     );
 
     if (padding != null) {
-      barcode = Padding(padding: padding, child: barcode);
+      child = Padding(padding: padding, child: child);
     }
 
     if (decoration != null) {
-      barcode = DecoratedBox(
+      child = DecoratedBox(
         decoration: decoration,
-        child: barcode,
+        child: child,
       );
     } else if (backgroundColor != null) {
-      barcode = DecoratedBox(
+      child = DecoratedBox(
         decoration: BoxDecoration(color: backgroundColor),
-        child: barcode,
+        child: child,
       );
     }
 
     if (width != null || height != null) {
-      barcode = SizedBox(width: width, height: height, child: barcode);
+      child = SizedBox(width: width, height: height, child: child);
     }
 
     if (margin != null) {
-      barcode = Padding(padding: margin, child: barcode);
+      child = Padding(padding: margin, child: child);
     }
 
-    return barcode;
+    return child;
   }
 }

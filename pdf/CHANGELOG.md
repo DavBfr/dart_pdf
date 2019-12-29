@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.30
+
+- Improve BarcodeWidget
+
 ## 1.3.29
 
 - Use Barcode stable API
