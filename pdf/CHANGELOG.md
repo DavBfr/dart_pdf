@@ -1,8 +1,10 @@
 # Changelog
 
-## 1.3.30
+## 1.4.0
 
 - Improve BarcodeWidget
+- Fix BarcodeWidget positioning
+- Update dependency to barcode ^1.4.0
 
 ## 1.3.29
 

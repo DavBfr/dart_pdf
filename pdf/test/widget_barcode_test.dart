@@ -44,7 +44,7 @@ Widget barcode(Barcode barcode, String data) {
           height: 80,
           margin: const EdgeInsets.symmetric(vertical: 20),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             border: BoxBorder(
               color: PdfColors.blue,
               top: true,
@@ -93,7 +93,7 @@ void main() {
           decoration: BoxDecoration(
               borderRadius: 20,
               color: PdfColors.white,
-              border: BoxBorder(
+              border: const BoxBorder(
                 color: PdfColors.blue,
                 top: true,
                 bottom: true,

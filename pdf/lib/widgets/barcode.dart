@@ -61,7 +61,7 @@ class _BarcodeWidget extends Widget {
         if (element.black) {
           context.canvas.drawRect(
             box.left + element.left,
-            box.top + element.top - element.height,
+            box.top - element.top - element.height,
             element.width,
             element.height,
           );
@@ -81,14 +81,27 @@ class _BarcodeWidget extends Widget {
       for (BarcodeText text in textList) {
         final PdfFontMetrics metrics = font.stringMetrics(text.text);
 
-        final double left = text.left +
-            box.left +
-            (text.width - metrics.width * text.height) / 2;
-
         final double top = box.top -
             text.top -
             metrics.descent * textStyle.fontSize -
             text.height;
+
+        double left;
+        switch (text.align) {
+          case BarcodeTextAlign.left:
+            left = text.left + box.left;
+            break;
+          case BarcodeTextAlign.center:
+            left = text.left +
+                box.left +
+                (text.width - metrics.width * text.height) / 2;
+            break;
+          case BarcodeTextAlign.right:
+            left = text.left +
+                box.left +
+                (text.width - metrics.width * text.height);
+            break;
+        }
 
         context.canvas
           ..setFillColor(textStyle.color)
