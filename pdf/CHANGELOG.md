@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.1
+
+- Update dependency to barcode ^1.5.0
+
 ## 1.4.0
 
 - Improve BarcodeWidget

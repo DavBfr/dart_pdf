@@ -197,6 +197,7 @@ class BarcodeWidget extends StatelessWidget {
           fontItalic: Font.courierOblique(),
           fontBoldItalic: Font.courierBoldOblique(),
           lineSpacing: 1,
+          fontSize: height != null ? height * 0.2 : null,
         );
     final TextStyle _textStyle = defaultstyle.merge(textStyle);
 
