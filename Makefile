@@ -47,7 +47,7 @@ format-swift: $(SWFT_SRC)
 	swiftformat --swiftversion 4.2 $^
 
 .coverage:
-	pub global activate coverage
+	which coverage || pub global activate coverage
 	touch $@
 
 node_modules:
@@ -94,17 +94,21 @@ clean:
 	git clean -fdx -e .vscode -e ref
 
 publish-pdf: format clean
+	test -z "$(shell git status --porcelain)"
 	find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
 	cd pdf; pub publish -f
 	find pdf -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
+	git tag $(shell grep version pdf/pubspec.yaml | sed 's/version\s*:\s*/pdf-/g')
 
 publish-printing: format clean
+	test -z "$(shell git status --porcelain)"
 	find printing -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
 	cd printing; pub publish -f
 	find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
+	git tag $(shell grep version printing/pubspec.yaml | sed 's/version\s*:\s*/printing-/g')
 
 .pana:
-	pub global activate pana
+	which pana || pub global activate pana
 	touch $@
 
 analyze-pdf: .pana
@@ -130,7 +134,7 @@ analyze-ci-printing: .pana
 	@find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 .dartfix:
-	pub global activate dartfix
+	which dartfix || pub global activate dartfix
 	touch $@
 
 fix: get .dartfix
