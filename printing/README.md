@@ -88,6 +88,15 @@ await Printing.layoutPdf(
         ));
 ```
 
+Convert a Pdf to images, one image per page, get only pages 1 and 2 at 72 dpi:
+
+```dart
+await for (var page in Printing.raster(pdf.save(), pages: [0, 1], dpi: 72)) {
+  final image = page.toImage();
+  // ...or page.toPng()
+}
+```
+
 ## Installing
 
 1. Add this to your package's `pubspec.yaml` file:
