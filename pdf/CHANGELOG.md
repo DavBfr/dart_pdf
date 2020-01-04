@@ -3,6 +3,7 @@
 ## 1.4.1
 
 - Update dependency to barcode ^1.5.0
+- Update type1 font warning url
 
 ## 1.4.0
 

@@ -22,7 +22,7 @@ class PdfType1Font extends PdfFont {
       this.descent, this.widths)
       : assert(() {
           print(
-              '$fontName has no Unicode support see https://github.com/DavBfr/dart_pdf/issues/76');
+              '$fontName has no Unicode support see https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management');
           return true;
         }()),
         super._create(pdfDocument, subtype: '/Type1');

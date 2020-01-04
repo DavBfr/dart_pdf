@@ -146,7 +146,7 @@ abstract class PdfFont extends PdfObject {
 Can not decode the string to Latin1.
 This font does not support Unicode characters.
 If you want to use strings other than Latin strings, use a TrueType (TTF) font instead.
-See https://github.com/DavBfr/dart_pdf/issues/76
+See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
 ---------------------------------------------''');
       rethrow;
     }
@@ -174,6 +174,7 @@ See https://github.com/DavBfr/dart_pdf/issues/76
 Can not decode the string to Latin1.
 This font does not support Unicode characters.
 If you want to use strings other than Latin strings, use a TrueType (TTF) font instead.
+See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
 ---------------------------------------------''');
       rethrow;
     }
