@@ -1,12 +1,12 @@
-# Pdf creation library for dart / flutter
+# Pdf creation library for dart/flutter
 
-This library is divided in two parts:
+This library is divided into two parts:
 
 * a low-level Pdf creation library that takes care of the pdf bits generation.
 * a Widgets system similar to Flutter's, for easy high-level Pdf creation.
 
 It can create a full multi-pages document with graphics,
-images and text using TrueType fonts. With the ease of use you already know.
+images, and text using TrueType fonts. With the ease of use you already know.
 
 <img alt="Example document" src="https://raw.githubusercontent.com/DavBfr/dart_pdf/master/pdf/example.jpg">
 
@@ -16,7 +16,7 @@ for full flutter print and share operation.
 The coordinate system is using the internal Pdf unit:
 
 * 1.0 is defined as 1 / 72.0 inch
-* you can use the constants for centimeters, millimeters and inch defined in PdfPageFormat
+* you can use the constants for centimeters, millimeters, and inch defined in PdfPageFormat
 
 [![Buy Me A Coffee](https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/custom_images/orange_img.png "Buy Me A Coffee")](https://www.buymeacoffee.com/JORBmbw9h "Buy Me A Coffee")
 

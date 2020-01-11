@@ -1,13 +1,13 @@
 # Printing
 
-Plugin that allows Flutter apps to generate and print
+A plugin that allows Flutter apps to generate and print
 documents to android or ios compatible printers
 
 See the example on how to use the plugin.
 
 <img alt="Example document" src="https://raw.githubusercontent.com/DavBfr/dart_pdf/master/printing/example.png" width="300">
 
-This example is also available on the web here: <https://davbfr.github.io/dart_pdf/>
+This example is also available on the web here: <https://davbfr.github.io/dart_pdf/>.
 
 This plugin uses the `pdf` package <https://pub.dev/packages/pdf>
 for pdf creation. Please refer to <https://pub.dev/documentation/pdf/latest/>
@@ -78,7 +78,7 @@ Or share the document to other applications:
 await Printing.sharePdf(bytes: pdf.save(), filename: 'my-document.pdf');
 ```
 
-To print an HTML document, simply do:
+To print an HTML document:
 
 ```dart
 await Printing.layoutPdf(

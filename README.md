@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/DavBfr/dart_pdf.svg?branch=master)](https://travis-ci.org/DavBfr/dart_pdf)
 
-This set of plugin allows Flutter apps to generate and print pdf files to device printer. This plugin works for iOS and Android.
+This set of plugins allows Flutter apps to generate and print pdf files to the device printer. This plugin works for iOS and Android.
 
 * dart pdf: <https://pub.dev/packages/pdf>
 * flutter printing: <https://pub.dev/packages/printing>
