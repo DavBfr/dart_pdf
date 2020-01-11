@@ -26,19 +26,20 @@ import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
 Document pdf;
+PdfImage image;
 
 void main() {
-  setUpAll(() {
+  setUpAll(() async {
     Document.debug = true;
     pdf = Document();
-  });
 
-  test('Pdf Jpeg Download', () async {
-    final PdfImage image = PdfImage.jpeg(
+    image = PdfImage.jpeg(
       pdf.document,
       image: await download('https://www.nfet.net/nfet.jpg'),
     );
+  });
 
+  test('Pdf Jpeg Download', () async {
     pdf.addPage(Page(
       build: (Context context) => Center(child: Image(image)),
     ));
@@ -60,6 +61,25 @@ void main() {
             ),
           ),
         ),
+      ),
+    );
+  });
+
+  test('Pdf Image fit', () async {
+    pdf.addPage(
+      MultiPage(
+        build: (Context context) =>
+            List<Widget>.generate(BoxFit.values.length, (int index) {
+          final BoxFit fit = BoxFit.values[index];
+          return SizedBox(
+            width: 200,
+            height: 100,
+            child: Image(
+              image,
+              fit: fit,
+            ),
+          );
+        }),
       ),
     );
   });

@@ -18,9 +18,73 @@
 
 part of widget;
 
+void _paintImage({
+  @required PdfGraphics canvas,
+  @required PdfRect rect,
+  @required PdfImage image,
+  double scale = 1.0,
+  BoxFit fit,
+  Alignment alignment = Alignment.center,
+}) {
+  assert(canvas != null);
+  assert(image != null);
+  assert(alignment != null);
+  final PdfPoint outputSize = rect.size;
+  final PdfPoint inputSize =
+      PdfPoint(image.width.toDouble(), image.height.toDouble());
+  fit ??= BoxFit.scaleDown;
+  final FittedSizes fittedSizes = applyBoxFit(
+      fit, PdfPoint(inputSize.x / scale, inputSize.y / scale), outputSize);
+  final PdfPoint sourceSize =
+      PdfPoint(fittedSizes.source.x * scale, fittedSizes.source.y * scale);
+  final PdfPoint destinationSize = fittedSizes.destination;
+  final double halfWidthDelta = (outputSize.x - destinationSize.x) / 2.0;
+  final double halfHeightDelta = (outputSize.y - destinationSize.y) / 2.0;
+  final double dx = halfWidthDelta + alignment.x * halfWidthDelta;
+  final double dy = halfHeightDelta + alignment.y * halfHeightDelta;
+
+  final PdfPoint destinationPosition = rect.topLeft.translate(dx, dy);
+  final PdfRect destinationRect =
+      PdfRect.fromPoints(destinationPosition, destinationSize);
+  final PdfRect sourceRect = alignment.inscribe(
+    sourceSize,
+    PdfRect.fromPoints(PdfPoint.zero, inputSize),
+  );
+  _drawImageRect(canvas, image, sourceRect, destinationRect);
+}
+
+void _drawImageRect(PdfGraphics canvas, PdfImage image, PdfRect sourceRect,
+    PdfRect destinationRect) {
+  final double fw = destinationRect.width / sourceRect.width;
+  final double fh = destinationRect.height / sourceRect.height;
+
+  canvas.saveContext();
+  canvas
+    ..drawRect(
+      destinationRect.x,
+      destinationRect.y,
+      destinationRect.width,
+      destinationRect.height,
+    )
+    ..clipPath()
+    ..drawImage(
+      image,
+      destinationRect.x - sourceRect.x * fw,
+      destinationRect.y - sourceRect.y * fh,
+      image.width.toDouble() * fw,
+      image.height.toDouble() * fh,
+    )
+    ..restoreContext();
+}
+
 class Image extends Widget {
-  Image(this.image, {this.fit = BoxFit.contain})
-      : assert(image != null),
+  Image(
+    this.image, {
+    this.fit = BoxFit.contain,
+    this.alignment = Alignment.center,
+    this.width,
+    this.height,
+  })  : assert(image != null),
         aspectRatio = image.height.toDouble() / image.width.toDouble();
 
   final PdfImage image;
@@ -28,6 +92,12 @@ class Image extends Widget {
   final double aspectRatio;
 
   final BoxFit fit;
+
+  final Alignment alignment;
+
+  final double width;
+
+  final double height;
 
   @override
   void layout(Context context, BoxConstraints constraints,
@@ -50,7 +120,13 @@ class Image extends Widget {
   void paint(Context context) {
     super.paint(context);
 
-    context.canvas.drawImage(image, box.x, box.y, box.width, box.height);
+    _paintImage(
+      canvas: context.canvas,
+      image: image,
+      rect: box,
+      alignment: alignment,
+      fit: fit,
+    );
   }
 }
 

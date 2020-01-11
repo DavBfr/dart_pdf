@@ -4,6 +4,7 @@
 
 - Update dependency to barcode ^1.5.0
 - Update type1 font warning url
+- Fix Image fit
 
 ## 1.4.0
 
