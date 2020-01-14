@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.0
+
+- Migrate to the new Android plugins APIs
+
 ## 3.0.2
 
 - Add Raster PDF to Image

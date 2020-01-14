@@ -58,14 +58,14 @@ import java.util.HashMap;
 public class PrintingJob extends PrintDocumentAdapter {
     private static PrintManager printManager;
     private final Context context;
-    private final PrintingPlugin printing;
+    private final PrintingHandler printing;
     private PrintJob printJob;
     private byte[] documentData;
     private String jobName;
     private LayoutResultCallback callback;
     int index;
 
-    PrintingJob(Context context, PrintingPlugin printing, int index) {
+    PrintingJob(Context context, PrintingHandler printing, int index) {
         this.context = context;
         this.printing = printing;
         this.index = index;
