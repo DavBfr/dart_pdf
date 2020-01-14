@@ -134,21 +134,28 @@ public class PrintingJob extends PrintDocumentAdapter {
             public void run() {
                 try {
                     final boolean[] wait = {true};
+                    int count = 5 * 60 * 10; // That's 10 minutes.
                     while (wait[0]) {
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
                             public void run() {
-                                int state = printJob.getInfo().getState();
+                                int state = printJob == null ? PrintJobInfo.STATE_FAILED
+                                                             : printJob.getInfo().getState();
 
                                 if (state == PrintJobInfo.STATE_COMPLETED) {
                                     printing.onCompleted(PrintingJob.this, true, "");
                                     wait[0] = false;
-                                } else if (state == PrintJobInfo.STATE_CANCELED) {
+                                } else if (state == PrintJobInfo.STATE_CANCELED
+                                        || state == PrintJobInfo.STATE_FAILED) {
                                     printing.onCompleted(PrintingJob.this, false, "User canceled");
                                     wait[0] = false;
                                 }
                             }
                         });
+
+                        if (--count <= 0) {
+                            throw new Exception("Timeout waiting for the job to finish");
+                        }
 
                         if (wait[0]) {
                             Thread.sleep(200);
