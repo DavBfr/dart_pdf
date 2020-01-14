@@ -3,6 +3,7 @@
 ## 3.1.0
 
 - Migrate to the new Android plugins APIs
+- Fix Android app freeze
 
 ## 3.0.2
 

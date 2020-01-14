@@ -128,25 +128,47 @@ public class PrintingJob extends PrintDocumentAdapter {
 
     @Override
     public void onFinish() {
-        try {
-            while (true) {
-                int state = printJob.getInfo().getState();
+        Thread thread = new Thread(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public void run() {
+                try {
+                    final boolean[] wait = {true};
+                    while (wait[0]) {
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                int state = printJob.getInfo().getState();
 
-                if (state == PrintJobInfo.STATE_COMPLETED) {
-                    printing.onCompleted(this, true, "");
-                    break;
-                } else if (state == PrintJobInfo.STATE_CANCELED) {
-                    printing.onCompleted(this, false, "User canceled");
-                    break;
+                                if (state == PrintJobInfo.STATE_COMPLETED) {
+                                    printing.onCompleted(PrintingJob.this, true, "");
+                                    wait[0] = false;
+                                } else if (state == PrintJobInfo.STATE_CANCELED) {
+                                    printing.onCompleted(PrintingJob.this, false, "User canceled");
+                                    wait[0] = false;
+                                }
+                            }
+                        });
+
+                        if (wait[0]) {
+                            Thread.sleep(200);
+                        }
+                    }
+                } catch (final Exception e) {
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            printing.onCompleted(PrintingJob.this,
+                                    printJob != null && printJob.isCompleted(), e.getMessage());
+                        }
+                    });
                 }
 
-                Thread.sleep(200);
+                printJob = null;
             }
-        } catch (Exception e) {
-            printing.onCompleted(this, printJob != null && printJob.isCompleted(), e.getMessage());
-        }
+        });
 
-        printJob = null;
+        thread.start();
     }
 
     void printPdf(@NonNull String name, Double width, Double height, Double marginLeft,
