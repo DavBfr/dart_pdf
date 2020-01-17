@@ -16,3 +16,7 @@ script:
   - make analyze-ci-printing
   - make test
   - make test-readme
+  - bash <(curl -s https://codecov.io/bash)
+cache:
+  directories:
+    - $HOME/.pub-cache
