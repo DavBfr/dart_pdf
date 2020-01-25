@@ -3,11 +3,12 @@
 ## 1.5.0
 
 - Fix Align debug painting
+- Fix GridView when empty
 
 ## 1.4.1
 
 - Update dependency to barcode ^1.5.0
-- Update type1 font warning url
+- Update type1 font warning URL
 - Fix Image fit
 
 ## 1.4.0

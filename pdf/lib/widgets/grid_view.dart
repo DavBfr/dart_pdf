@@ -56,10 +56,15 @@ class GridView extends MultiChildWidget implements SpanningWidget {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
+    if (children.isEmpty) {
+      box = PdfRect.zero;
+      return;
+    }
+
     assert(() {
       if (constraints.maxHeight.isInfinite && childAspectRatio.isInfinite) {
         print(
-            'Unable to calculate the GridView dimensions. Please set one the height constraints or childAspectRatio.');
+            'Unable to calculate the GridView dimensions. Please set the height constraints or childAspectRatio.');
         return false;
       }
       return true;
@@ -207,6 +212,10 @@ class GridView extends MultiChildWidget implements SpanningWidget {
   @override
   void debugPaint(Context context) {
     super.debugPaint(context);
+
+    if (children.isEmpty) {
+      return;
+    }
 
     context.canvas
       ..setFillColor(PdfColors.lime)
