@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.0
+
+- Fix Align debug painting
+
 ## 1.4.1
 
 - Update dependency to barcode ^1.5.0

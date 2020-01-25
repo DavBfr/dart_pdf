@@ -333,9 +333,8 @@ class Align extends SingleChildWidget {
       return;
     }
 
-    if (child.box.bottom > box.bottom) {
-      final double headSize =
-          math.min((child.box.bottom - box.bottom) * 0.2, 10);
+    if (child.box.bottom > 0) {
+      final double headSize = math.min((child.box.bottom) * 0.2, 10);
       context.canvas
         ..moveTo(
           box.left + child.box.horizondalCenter,
@@ -366,8 +365,8 @@ class Align extends SingleChildWidget {
             box.bottom + child.box.top + headSize);
     }
 
-    if (child.box.left > box.left) {
-      final double headSize = math.min((child.box.left - box.left) * 0.2, 10);
+    if (child.box.left > 0) {
+      final double headSize = math.min((child.box.left) * 0.2, 10);
       context.canvas
         ..moveTo(box.left, box.bottom + child.box.verticalCenter)
         ..lineTo(
