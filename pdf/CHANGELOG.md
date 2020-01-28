@@ -4,6 +4,7 @@
 
 - Fix Align debug painting
 - Fix GridView when empty
+- Reorder MultiPage paint operations
 
 ## 1.4.1
 
@@ -94,7 +95,7 @@
 
 ## 1.3.16
 
-- Add better debugPaint on Align Widget
+- Add better debug painting on Align Widget
 - Fix Transform placement when Alignment and Origin are Null
 - Add Transform.rotateBox constructor
 - Add Wrap Widget
@@ -126,7 +127,7 @@
 ## 1.3.10
 
 - Deprecate the document argument in Printing.sharePdf()
-- Add default value to alpha in PdfColor variants
+- Add a default value to alpha in PdfColor variants
 - Fix Table Widget
 - Add Flexible and Spacer Widgets
 
@@ -186,7 +187,7 @@
 - Fix dart lint warnings
 - Improve font bounds calculation
 - Add RichText Widget
-- Fix MultiPage max height
+- Fix MultiPage max-height
 - Add Stack Widget
 - Update Readme
 
@@ -196,13 +197,13 @@
 
 ## 1.3.0
 
-- Add a Flutter like widget system
+- Add a Flutter-like Widget system
 
 ## 1.2.0
 
 - Change license to Apache 2.0
 - Improve PdfRect
-- Add support for CMYK, HSL anf HSV colors
+- Add support for CMYK, HSL and HSV colors
 - Implement rounded rect
 
 ## 1.1.1
@@ -225,7 +226,7 @@
 - Implement drawShape
 - Add support for Jpeg images
 - Fix numeric conversions in graphic operations
-- Add unicode support for annotations and info block
+- Add Unicode support for annotations and info block
 - Add Flutter example
 
 ## 1.0.8
@@ -258,7 +259,7 @@
 
 ## 1.0.2
 
-- Update sdk support for 2.0.0
+- Update SDK support for 2.0.0
 
 ## 1.0.1
 

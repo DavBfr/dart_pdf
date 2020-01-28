@@ -84,6 +84,24 @@ class TableBorder extends BoxBorder {
 class _TableContext extends WidgetContext {
   int firstLine = 0;
   int lastLine = 0;
+
+  @override
+  void apply(WidgetContext other) {
+    if (other is _TableContext) {
+      firstLine = other.firstLine;
+      lastLine = other.lastLine;
+    }
+  }
+
+  @override
+  WidgetContext clone() {
+    return _TableContext()
+      ..firstLine = firstLine
+      ..lastLine = lastLine;
+  }
+
+  @override
+  String toString() => '$runtimeType firstLine: $firstLine lastLine: $lastLine';
 }
 
 class _ColumnLayout {
@@ -215,7 +233,7 @@ class Table extends Widget implements SpanningWidget {
   final List<double> _widths = <double>[];
   final List<double> _heights = <double>[];
 
-  _TableContext _context = _TableContext();
+  final _TableContext _context = _TableContext();
 
   final TableColumnWidth defaultColumnWidth;
   final Map<int, TableColumnWidth> columnWidths;
@@ -227,7 +245,7 @@ class Table extends Widget implements SpanningWidget {
 
   @override
   void restoreContext(WidgetContext context) {
-    _context = context;
+    _context.apply(context);
     _context.firstLine = _context.lastLine;
   }
 

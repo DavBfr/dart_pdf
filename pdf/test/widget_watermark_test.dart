@@ -18,15 +18,19 @@
 
 import 'dart:io';
 
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
-void main() {
-  test('Pdf Widgets Watermark', () {
-    Document.debug = true;
-    final Document pdf = Document();
+Document pdf;
+PageTheme pageTheme;
 
-    final PageTheme pageTheme = PageTheme(
+void main() {
+  setUpAll(() {
+    Document.debug = true;
+    pdf = Document();
+
+    pageTheme = PageTheme(
       buildBackground: (Context context) => FullPage(
         ignoreMargins: true,
         child: Watermark.text('DRAFT'),
@@ -40,7 +44,9 @@ void main() {
         ),
       ),
     );
+  });
 
+  test('Pdf Widgets Watermark Page', () {
     pdf.addPage(
       Page(
         pageTheme: pageTheme,
@@ -51,7 +57,9 @@ void main() {
         ),
       ),
     );
+  });
 
+  test('Pdf Widgets Watermark MultiPage', () {
     pdf.addPage(
       MultiPage(
         pageTheme: pageTheme,
@@ -63,7 +71,38 @@ void main() {
         ),
       ),
     );
+  });
 
+  test('Pdf Widgets Watermark Page Count', () async {
+    final PageTheme pageTheme = PageTheme(
+      buildBackground: (Context context) =>
+          (context.pageNumber == context.pagesCount)
+              ? Align(
+                  alignment: Alignment.topRight,
+                  child: SizedBox(
+                      width: 200,
+                      height: 200,
+                      child: PdfLogo(color: PdfColors.blue200)),
+                )
+              : Container(),
+    );
+
+    pdf.addPage(
+      MultiPage(
+        pageTheme: pageTheme,
+        build: (Context context) => <Widget>[
+          Wrap(
+            children: List<Widget>.generate(
+              670,
+              (_) => Text('Hello World '),
+            ),
+          ),
+        ],
+      ),
+    );
+  });
+
+  tearDownAll(() {
     final File file = File('widgets-watermark.pdf');
     file.writeAsBytesSync(pdf.save());
   });

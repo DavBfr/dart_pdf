@@ -26,8 +26,27 @@ class _GridViewContext extends WidgetContext {
   double childMainAxis;
 
   @override
+  void apply(WidgetContext other) {
+    if (other is _GridViewContext) {
+      firstChild = other.firstChild;
+      lastChild = other.lastChild;
+      childCrossAxis = other.childCrossAxis;
+      childMainAxis = other.childMainAxis;
+    }
+  }
+
+  @override
+  WidgetContext clone() {
+    return _GridViewContext()
+      ..firstChild = firstChild
+      ..lastChild = lastChild
+      ..childCrossAxis = childCrossAxis
+      ..childMainAxis = childMainAxis;
+  }
+
+  @override
   String toString() =>
-      'GridViewContext first:$firstChild last:$lastChild size:${childCrossAxis}x$childMainAxis';
+      '$runtimeType first:$firstChild last:$lastChild size:${childCrossAxis}x$childMainAxis';
 }
 
 class GridView extends MultiChildWidget implements SpanningWidget {

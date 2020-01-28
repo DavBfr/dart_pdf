@@ -44,7 +44,22 @@ class _WrapContext extends WidgetContext {
   int lastChild = 0;
 
   @override
-  String toString() => 'WrapContext first:$firstChild last:$lastChild';
+  void apply(WidgetContext other) {
+    if (other is _WrapContext) {
+      firstChild = other.firstChild;
+      lastChild = other.lastChild;
+    }
+  }
+
+  @override
+  WidgetContext clone() {
+    return _WrapContext()
+      ..firstChild = firstChild
+      ..lastChild = lastChild;
+  }
+
+  @override
+  String toString() => '$runtimeType first:$firstChild last:$lastChild';
 }
 
 /// A widget that displays its children in multiple horizontal or vertical runs.

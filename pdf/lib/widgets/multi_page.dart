@@ -18,14 +18,20 @@
 
 part of widget;
 
-class WidgetContext {}
+abstract class WidgetContext {
+  WidgetContext clone();
+
+  void apply(WidgetContext other);
+}
 
 abstract class SpanningWidget extends Widget {
   bool get canSpan => false;
 
+  /// Get unmodified mutable context object
   @protected
   WidgetContext saveContext();
 
+  /// Aplpy the context for next layout
   @protected
   void restoreContext(WidgetContext context);
 }
@@ -38,17 +44,37 @@ class NewPage extends Widget {
   }
 }
 
+@immutable
+class _MultiPageWidget {
+  const _MultiPageWidget({
+    @required this.child,
+    @required this.x,
+    @required this.y,
+    @required this.constraints,
+    @required this.widgetContext,
+  });
+
+  final Widget child;
+  final double x;
+  final double y;
+  final BoxConstraints constraints;
+  final WidgetContext widgetContext;
+}
+
+@immutable
 class _MultiPageInstance {
-  const _MultiPageInstance(
-      {@required this.context,
-      @required this.constraints,
-      @required this.fullConstraints,
-      @required this.offsetStart});
+  _MultiPageInstance({
+    @required this.context,
+    @required this.constraints,
+    @required this.fullConstraints,
+    @required this.offsetStart,
+  });
 
   final Context context;
   final BoxConstraints constraints;
   final BoxConstraints fullConstraints;
   final double offsetStart;
+  final List<_MultiPageWidget> widgets = <_MultiPageWidget>[];
 }
 
 class MultiPage extends Page {
@@ -168,16 +194,6 @@ class MultiPage extends Page {
           return true;
         }());
 
-        if (pageTheme.buildBackground != null) {
-          final Widget child = pageTheme.buildBackground(context);
-          if (child != null) {
-            child.layout(context, fullConstraints, parentUsesSize: false);
-            assert(child.box != null);
-            _paintChild(context, child, _margin.left, _margin.bottom,
-                pageFormat.height);
-          }
-        }
-
         offsetStart = pageHeight -
             (_mustRotate ? pageHeightMargin - margin.bottom : _margin.top);
         offsetEnd =
@@ -238,17 +254,23 @@ class MultiPage extends Page {
 
         final SpanningWidget span = child;
 
-        child.layout(
-            context, constraints.copyWith(maxHeight: offsetStart - offsetEnd),
-            parentUsesSize: false);
+        final BoxConstraints localConstraints =
+            constraints.copyWith(maxHeight: offsetStart - offsetEnd);
+        child.layout(context, localConstraints, parentUsesSize: false);
         assert(child.box != null);
-        _paintChild(context, child, _margin.left,
-            offsetStart - child.box.height, pageFormat.height);
+        widgetContext = span.saveContext();
+        _pages.last.widgets.add(
+          _MultiPageWidget(
+            child: child,
+            x: _margin.left,
+            y: offsetStart - child.box.height,
+            constraints: localConstraints,
+            widgetContext: widgetContext?.clone(),
+          ),
+        );
 
         // Has it finished spanning?
-        if (span.canSpan) {
-          widgetContext = span.saveContext();
-        } else {
+        if (!span.canSpan) {
           sameCount = 0;
           index++;
         }
@@ -258,8 +280,17 @@ class MultiPage extends Page {
         continue;
       }
 
-      _paintChild(context, child, _margin.left, offsetStart - child.box.height,
-          pageFormat.height);
+      _pages.last.widgets.add(
+        _MultiPageWidget(
+          child: child,
+          x: _margin.left,
+          y: offsetStart - child.box.height,
+          constraints: constraints,
+          widgetContext:
+              child is SpanningWidget ? child.saveContext().clone() : null,
+        ),
+      );
+
       offsetStart -= child.box.height;
       sameCount = 0;
       index++;
@@ -271,6 +302,29 @@ class MultiPage extends Page {
     final EdgeInsets _margin = margin;
 
     for (_MultiPageInstance page in _pages) {
+      if (pageTheme.buildBackground != null) {
+        final Widget child = pageTheme.buildBackground(page.context);
+        if (child != null) {
+          child.layout(page.context, page.fullConstraints,
+              parentUsesSize: false);
+          assert(child.box != null);
+          _paintChild(page.context, child, _margin.left, _margin.bottom,
+              pageFormat.height);
+        }
+      }
+
+      for (_MultiPageWidget widget in page.widgets) {
+        final Widget child = widget.child;
+        if (child is SpanningWidget) {
+          final WidgetContext context = child.saveContext();
+          context.apply(widget.widgetContext);
+        }
+        child.layout(page.context, widget.constraints, parentUsesSize: false);
+        assert(child.box != null);
+        _paintChild(
+            page.context, widget.child, widget.x, widget.y, pageFormat.height);
+      }
+
       if (header != null) {
         final Widget headerWidget = header(page.context);
         if (headerWidget != null) {
