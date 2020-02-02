@@ -7,6 +7,7 @@
 - Reorder MultiPage paint operations
 - Fix Bullet widget styling
 - Fix HSV and HSL Color constructors
+- Add PageTheme.copyWith
 
 ## 1.4.1
 
