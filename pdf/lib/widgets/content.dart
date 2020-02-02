@@ -164,23 +164,27 @@ class Bullet extends StatelessWidget {
   @override
   Widget build(Context context) {
     return Container(
-        margin: margin,
-        padding: padding,
-        child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                width: bulletSize,
-                height: bulletSize,
-                margin: bulletMargin,
-                decoration:
-                    BoxDecoration(color: bulletColor, shape: bulletShape),
-              ),
-              Expanded(
-                  child: Text(text,
-                      textAlign: textAlign,
-                      style: Theme.of(context).bulletStyle))
-            ]));
+      margin: margin,
+      padding: padding,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            width: bulletSize,
+            height: bulletSize,
+            margin: bulletMargin,
+            decoration: BoxDecoration(color: bulletColor, shape: bulletShape),
+          ),
+          Expanded(
+            child: Text(
+              text,
+              textAlign: textAlign,
+              style: Theme.of(context).bulletStyle.merge(style),
+            ),
+          )
+        ],
+      ),
+    );
   }
 }
 

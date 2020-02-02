@@ -5,6 +5,7 @@
 - Fix Align debug painting
 - Fix GridView when empty
 - Reorder MultiPage paint operations
+- Fix Bullet widget styling
 
 ## 1.4.1
 
