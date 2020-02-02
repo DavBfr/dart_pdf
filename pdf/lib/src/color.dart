@@ -247,8 +247,8 @@ class PdfColorHsv extends PdfColor {
       blue = secondary;
     }
 
-    return PdfColorHsv._(hue, saturation, value, red + match, green + match,
-        blue + match, alpha);
+    return PdfColorHsv._(hue, saturation, value, (red + match).clamp(0.0, 1.0),
+        (green + match).clamp(0.0, 1.0), (blue + match).clamp(0.0, 1.0), alpha);
   }
 
   const PdfColorHsv._(this.hue, this.saturation, this.value, double red,
@@ -375,13 +375,22 @@ class PdfColorHsl extends PdfColor {
       green = 0.0;
       blue = secondary;
     }
-    return PdfColorHsl._(hue, saturation, lightness, alpha, red + match,
-        green + match, blue + match);
+    return PdfColorHsl._(
+        hue,
+        saturation,
+        lightness,
+        alpha,
+        (red + match).clamp(0.0, 1.0),
+        (green + match).clamp(0.0, 1.0),
+        (blue + match).clamp(0.0, 1.0));
   }
 
   const PdfColorHsl._(this.hue, this.saturation, this.lightness, double alpha,
       double red, double green, double blue)
-      : super(red, green, blue, alpha);
+      : assert(hue >= 0 && hue < 360),
+        assert(saturation >= 0 && saturation <= 1),
+        assert(lightness >= 0 && lightness <= 1),
+        super(red, green, blue, alpha);
 
   factory PdfColorHsl.fromRgb(double red, double green, double blue,
       [double alpha = 1.0]) {

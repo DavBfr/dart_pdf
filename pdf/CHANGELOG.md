@@ -6,6 +6,7 @@
 - Fix GridView when empty
 - Reorder MultiPage paint operations
 - Fix Bullet widget styling
+- Fix HSV and HSL Color constructors
 
 ## 1.4.1
 
