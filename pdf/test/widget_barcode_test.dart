@@ -85,10 +85,10 @@ void main() {
           size: 200,
           padding: const EdgeInsets.all(20),
           margin: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
               borderRadius: 20,
               color: PdfColors.white,
-              border: const BoxBorder(
+              border: BoxBorder(
                 color: PdfColors.blue,
                 top: true,
                 bottom: true,
