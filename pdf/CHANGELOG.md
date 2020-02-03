@@ -9,6 +9,7 @@
 - Fix HSV and HSL Color constructors
 - Add PageTheme.copyWith
 - Add more font drawing options
+- Add Opacity Widget
 
 ## 1.4.1
 

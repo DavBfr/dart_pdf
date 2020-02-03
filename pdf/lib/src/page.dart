@@ -41,6 +41,18 @@ class PdfPage extends PdfObject {
   /// -1 indicates no thumbnail.
   PdfObject thumbnail;
 
+  /// Isolated transparency: If this flag is true, objects within the group
+  /// shall be composited against a fully transparent initial backdrop;
+  /// if false, they shall be composited against the group’s backdrop
+  bool isolatedTransparency = false;
+
+  /// Whether the transparency group is a knockout group.
+  /// If this flag is false, later objects within the group shall be composited
+  /// with earlier ones with which they overlap; if true, they shall be
+  /// composited with the group’s initial backdrop and shall overwrite any
+  /// earlier overlapping objects.
+  bool knockoutTransparency = false;
+
   /// This holds any Annotations contained within this page.
   List<PdfAnnot> annotations = <PdfAnnot>[];
 
@@ -113,6 +125,20 @@ class PdfPage extends PdfObject {
     // Now the XObjects
     if (xObjects.isNotEmpty) {
       resources['/XObject'] = PdfStream()..putObjectDictionary(xObjects);
+    }
+
+    if (pdfDocument.hasGraphicStates) {
+      // Declare Transparency Group settings
+      params['/Group'] = PdfStream()
+        ..putDictionary(<String, PdfStream>{
+          '/Type': PdfStream.string('/Group'),
+          '/S': PdfStream.string('/Transparency'),
+          '/CS': PdfStream.string('/DeviceRGB'),
+          '/I': PdfStream()..putBool(isolatedTransparency),
+          '/K': PdfStream()..putBool(knockoutTransparency),
+        });
+
+      resources['/ExtGState'] = pdfDocument.graphicStates.ref();
     }
 
     params['/Resources'] = PdfStream.dictionary(resources);

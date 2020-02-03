@@ -98,6 +98,9 @@ class PdfDocument {
   /// Object used to sign the document
   PdfSignature sign;
 
+  /// Graphics state, representing only opacity.
+  PdfGraphicStates _graphicStates;
+
   /// The PDF specification version
   final String version = '1.7';
 
@@ -148,6 +151,14 @@ class PdfDocument {
     }
     return _outline;
   }
+
+  /// Graphic states for opacity and transfer modes
+  PdfGraphicStates get graphicStates {
+    _graphicStates ??= PdfGraphicStates(this);
+    return _graphicStates;
+  }
+
+  bool get hasGraphicStates => _graphicStates != null;
 
   /// This writes the document to an OutputStream.
   ///

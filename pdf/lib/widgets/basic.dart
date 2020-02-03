@@ -740,3 +740,29 @@ class FullPage extends SingleChildWidget {
     context.canvas.restoreContext();
   }
 }
+
+class Opacity extends SingleChildWidget {
+  Opacity({
+    @required this.opacity,
+    Widget child,
+  })  : assert(opacity != null),
+        super(child: child);
+
+  final double opacity;
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+
+    if (child != null) {
+      final Matrix4 mat = Matrix4.identity();
+      mat.translate(box.x, box.y);
+      context.canvas
+        ..saveContext()
+        ..setTransform(mat)
+        ..setGraphicState(PdfGraphicState(opacity: opacity));
+      child.paint(context);
+      context.canvas.restoreContext();
+    }
+  }
+}

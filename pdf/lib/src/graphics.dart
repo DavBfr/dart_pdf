@@ -320,6 +320,12 @@ class PdfGraphics {
     }
   }
 
+  /// Set the graphic state for drawing
+  void setGraphicState(PdfGraphicState state) {
+    final String name = page.pdfDocument.graphicStates.stateName(state);
+    buf.putString('$name gs\n');
+  }
+
   /// Set the transformation Matrix
   void setTransform(Matrix4 t) {
     final Float64List s = t.storage;
