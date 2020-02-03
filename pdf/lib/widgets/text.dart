@@ -218,11 +218,13 @@ class _Word extends _Span {
     PdfPoint point,
   ) {
     context.canvas.drawString(
-        style.font.getFont(context),
-        style.fontSize * textScaleFactor,
-        text,
-        point.x + offset.x,
-        point.y + offset.y);
+      style.font.getFont(context),
+      style.fontSize * textScaleFactor,
+      text,
+      point.x + offset.x,
+      point.y + offset.y,
+      mode: style.renderingMode,
+    );
   }
 
   @override

@@ -20,11 +20,11 @@ part of pdf;
 
 class PdfTtfFont extends PdfFont {
   /// Constructs a [PdfTtfFont]
-  PdfTtfFont(PdfDocument pdfDocument, ByteData bytes)
+  PdfTtfFont(PdfDocument pdfDocument, ByteData bytes, {bool protect = false})
       : font = TtfParser(bytes),
         super._create(pdfDocument, subtype: '/TrueType') {
     file = PdfObjectStream(pdfDocument, isBinary: true);
-    unicodeCMap = PdfUnicodeCmap(pdfDocument);
+    unicodeCMap = PdfUnicodeCmap(pdfDocument, protect);
     descriptor = PdfFontDescriptor(this, file);
     widthsObject = PdfArrayObject(pdfDocument, <String>[]);
   }

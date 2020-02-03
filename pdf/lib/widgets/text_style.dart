@@ -112,6 +112,7 @@ class TextStyle {
     this.decorationColor,
     this.decorationStyle,
     this.decorationThickness,
+    this.renderingMode,
   })  : assert(inherit || color != null),
         assert(inherit || fontNormal != null),
         assert(inherit || fontBold != null),
@@ -127,6 +128,7 @@ class TextStyle {
         assert(inherit || decoration != null),
         assert(inherit || decorationStyle != null),
         assert(inherit || decorationThickness != null),
+        assert(inherit || renderingMode != null),
         fontNormal = fontNormal ??
             (fontStyle != FontStyle.italic && fontWeight != FontWeight.bold
                 ? font
@@ -163,6 +165,7 @@ class TextStyle {
       decorationColor: null,
       decorationStyle: TextDecorationStyle.solid,
       decorationThickness: 1,
+      renderingMode: PdfTextRenderingMode.fill,
     );
   }
 
@@ -210,6 +213,8 @@ class TextStyle {
 
   final double decorationThickness;
 
+  final PdfTextRenderingMode renderingMode;
+
   TextStyle copyWith({
     PdfColor color,
     Font font,
@@ -229,6 +234,7 @@ class TextStyle {
     PdfColor decorationColor,
     TextDecorationStyle decorationStyle,
     double decorationThickness,
+    PdfTextRenderingMode renderingMode,
   }) {
     return TextStyle(
       inherit: inherit,
@@ -250,6 +256,7 @@ class TextStyle {
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,
       decorationThickness: decorationThickness ?? this.decorationThickness,
+      renderingMode: renderingMode ?? this.renderingMode,
     );
   }
 
@@ -342,6 +349,7 @@ class TextStyle {
       decorationColor: other.decorationColor,
       decorationStyle: other.decorationStyle,
       decorationThickness: other.decorationThickness,
+      renderingMode: other.renderingMode,
     );
   }
 
@@ -370,5 +378,5 @@ class TextStyle {
 
   @override
   String toString() =>
-      'TextStyle(color:$color font:$font size:$fontSize weight:$fontWeight style:$fontStyle letterSpacing:$letterSpacing wordSpacing:$wordSpacing lineSpacing:$lineSpacing height:$height background:$background decoration:$decoration decorationColor:$decorationColor decorationStyle:$decorationStyle decorationThickness:$decorationThickness)';
+      'TextStyle(color:$color font:$font size:$fontSize weight:$fontWeight style:$fontStyle letterSpacing:$letterSpacing wordSpacing:$wordSpacing lineSpacing:$lineSpacing height:$height background:$background decoration:$decoration decorationColor:$decorationColor decorationStyle:$decorationStyle decorationThickness:$decorationThickness, renderingMode:$renderingMode)';
 }

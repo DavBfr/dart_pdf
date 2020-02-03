@@ -20,6 +20,32 @@ part of pdf;
 
 enum PdfLineCap { joinMiter, joinRound, joinBevel }
 
+enum PdfTextRenderingMode {
+  /// Fill text
+  fill,
+
+  /// Stroke text
+  stroke,
+
+  /// Fill, then stroke text
+  fillAndStroke,
+
+  /// Neither fill nor stroke text (invisible)
+  invisible,
+
+  /// Fill text and add to path for clipping
+  fillAndClip,
+
+  /// Stroke text and add to path for clipping
+  strokeAndClip,
+
+  /// Fill, then stroke text and add to path for clipping
+  fillStrokeAndClip,
+
+  /// Add text to path for clipping
+  clip
+}
+
 @immutable
 class _PdfGraphicsContext {
   const _PdfGraphicsContext({@required this.ctm}) : assert(ctm != null);
@@ -213,7 +239,18 @@ class PdfGraphics {
   /// @param x coordinate
   /// @param y coordinate
   /// @param s String to draw
-  void drawString(PdfFont font, double size, String s, double x, double y) {
+  void drawString(
+    PdfFont font,
+    double size,
+    String s,
+    double x,
+    double y, {
+    double charSpace = 0,
+    double wordSpace = 0,
+    double scale = 1,
+    PdfTextRenderingMode mode = PdfTextRenderingMode.fill,
+    double rise = 0,
+  }) {
     if (!page.fonts.containsKey(font.name)) {
       page.fonts[font.name] = font;
     }
@@ -223,8 +260,28 @@ class PdfGraphics {
     buf.putString(' Td ${font.name} ');
     buf.putNum(size);
     buf.putString(' Tf ');
+    if (charSpace != 0) {
+      buf.putNum(charSpace);
+      buf.putString(' Tc ');
+    }
+    if (wordSpace != 0) {
+      buf.putNum(wordSpace);
+      buf.putString(' Tw ');
+    }
+    if (scale != 1) {
+      buf.putNum(scale * 100);
+      buf.putString(' Tz ');
+    }
+    if (rise != 0) {
+      buf.putNum(rise);
+      buf.putString(' Ts ');
+    }
+    if (mode != PdfTextRenderingMode.fill) {
+      buf.putString('${mode.index} Tr ');
+    }
+    buf.putString('[');
     buf.putStream(font.putText(s));
-    buf.putString(' Tj ET\n');
+    buf.putString(']TJ ET\n');
   }
 
   /// Sets the color for drawing

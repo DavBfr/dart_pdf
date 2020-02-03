@@ -8,6 +8,7 @@
 - Fix Bullet widget styling
 - Fix HSV and HSL Color constructors
 - Add PageTheme.copyWith
+- Add more font drawing options
 
 ## 1.4.1
 
