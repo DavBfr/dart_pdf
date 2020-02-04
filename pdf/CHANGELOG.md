@@ -10,6 +10,7 @@
 - Add PageTheme.copyWith
 - Add more font drawing options
 - Add Opacity Widget
+- Fix Text height with TrueType fonts
 
 ## 1.4.1
 

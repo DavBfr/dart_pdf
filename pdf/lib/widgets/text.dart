@@ -405,6 +405,7 @@ class RichText extends Widget {
       {@required this.text,
       this.textAlign = TextAlign.left,
       this.softWrap = true,
+      this.tightBounds = false,
       this.textScaleFactor = 1.0,
       this.maxLines})
       : assert(text != null);
@@ -418,6 +419,8 @@ class RichText extends Widget {
   final double textScaleFactor;
 
   final bool softWrap;
+
+  final bool tightBounds;
 
   final int maxLines;
 
@@ -551,14 +554,10 @@ class RichText extends Widget {
             }
 
             final double baseline = span.baseline * textScaleFactor;
-            top = math.min(
-              top ?? metrics.top + baseline,
-              metrics.top + baseline,
-            );
-            bottom = math.max(
-              bottom ?? metrics.bottom + baseline,
-              metrics.bottom + baseline,
-            );
+            final double mt = tightBounds ? metrics.top : metrics.descent;
+            final double mb = tightBounds ? metrics.bottom : metrics.ascent;
+            top = math.min(top ?? mt + baseline, mt + baseline);
+            bottom = math.max(bottom ?? mb + baseline, mb + baseline);
 
             final _Word wd = _Word(
               word,
@@ -785,6 +784,7 @@ class Text extends RichText {
     TextStyle style,
     TextAlign textAlign = TextAlign.left,
     bool softWrap = true,
+    bool tightBounds = false,
     double textScaleFactor = 1.0,
     int maxLines,
   })  : assert(text != null),
@@ -792,6 +792,7 @@ class Text extends RichText {
             text: TextSpan(text: text, style: style),
             textAlign: textAlign,
             softWrap: softWrap,
+            tightBounds: tightBounds,
             textScaleFactor: textScaleFactor,
             maxLines: maxLines);
 }

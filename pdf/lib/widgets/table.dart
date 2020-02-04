@@ -191,8 +191,11 @@ class Table extends Widget implements SpanningWidget {
         assert(defaultColumnWidth != null),
         super();
 
-  factory Table.fromTextArray(
-      {@required Context context, @required List<List<String>> data}) {
+  factory Table.fromTextArray({
+    @required Context context,
+    @required List<List<String>> data,
+    EdgeInsets margin = const EdgeInsets.all(5),
+  }) {
     final List<TableRow> rows = <TableRow>[];
     for (List<String> row in data) {
       final List<Widget> tableRow = <Widget>[];
@@ -200,13 +203,13 @@ class Table extends Widget implements SpanningWidget {
         for (String cell in row) {
           tableRow.add(Container(
               alignment: Alignment.center,
-              margin: const EdgeInsets.all(5),
+              margin: margin,
               child: Text(cell, style: Theme.of(context).tableHeader)));
         }
       } else {
         for (String cell in row) {
           tableRow.add(Container(
-              margin: const EdgeInsets.all(5),
+              margin: margin,
               child: Text(cell, style: Theme.of(context).tableCell)));
         }
       }

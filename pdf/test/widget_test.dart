@@ -56,85 +56,116 @@ void main() {
         margin: const EdgeInsets.all(10),
         build: (Context context) => Column(children: <Widget>[
               Container(
-                  padding: const EdgeInsets.all(5),
-                  margin: const EdgeInsets.only(bottom: 10),
-                  decoration: const BoxDecoration(
-                      color: PdfColors.amber,
-                      border: BoxBorder(
-                          top: true,
-                          bottom: true,
-                          left: true,
-                          right: true,
-                          width: 2)),
-                  child: Text('Hello World',
-                      textScaleFactor: 2, textAlign: TextAlign.center)),
+                padding: const EdgeInsets.all(5),
+                margin: const EdgeInsets.only(bottom: 10),
+                decoration: const BoxDecoration(
+                    color: PdfColors.amber,
+                    border: BoxBorder(
+                        top: true,
+                        bottom: true,
+                        left: true,
+                        right: true,
+                        width: 2)),
+                child: Text(
+                  'Hello World',
+                  textScaleFactor: 2,
+                  textAlign: TextAlign.center,
+                ),
+              ),
               Align(
-                  alignment: Alignment.topLeft,
-                  child: Link(
-                      destination: 'anchor',
-                      child: Text(
-                        'Internal link',
-                        style: const TextStyle(
-                          color: PdfColors.blue,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ))),
+                alignment: Alignment.topLeft,
+                child: Link(
+                  destination: 'anchor',
+                  child: Text(
+                    'Internal link',
+                    style: const TextStyle(
+                      color: PdfColors.blue,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ),
               Padding(padding: const EdgeInsets.all(5)),
               Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Image(im),
-                    PdfLogo(),
-                    Column(children: <Widget>[
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  Image(im),
+                  PdfLogo(),
+                  Column(
+                    children: <Widget>[
                       Text('(', style: symbol),
                       Text('4', style: symbol),
-                    ]),
-                  ]),
+                    ],
+                  ),
+                ],
+              ),
               Padding(
-                  padding: const EdgeInsets.only(left: 30, top: 20),
-                  child: Lorem(textAlign: TextAlign.justify)),
+                padding: const EdgeInsets.only(left: 30, top: 20),
+                child: Lorem(textAlign: TextAlign.justify),
+              ),
               Expanded(
                 child: FittedBox(
                   child: Transform.rotateBox(
                     angle: 0.2,
-                    child: Text('Expanded'),
+                    child: Text(
+                      'Expanded',
+                      tightBounds: true,
+                    ),
                   ),
                 ),
               ),
               Container(
-                  padding: const EdgeInsets.only(top: 5),
-                  decoration: const BoxDecoration(
-                      border: BoxBorder(top: true, width: 1)),
-                  child: Text("That's all Folks!",
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context)
-                          .defaultTextStyle
-                          .copyWith(font: Font.timesBoldItalic()),
-                      textScaleFactor: 3)),
+                decoration:
+                    const BoxDecoration(border: BoxBorder(top: true, width: 1)),
+                child: Text(
+                  "That's all Folks!",
+                  tightBounds: true,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).defaultTextStyle.copyWith(
+                        font: Font.timesBoldItalic(),
+                      ),
+                  textScaleFactor: 3,
+                ),
+              ),
             ])));
   });
 
   test('Pdf Widgets page 2', () {
-    pdf.addPage(Page(
+    pdf.addPage(
+      Page(
         pageFormat: const PdfPageFormat(400, 400),
         margin: const EdgeInsets.all(10),
         build: (Context context) => Center(
-            child: GridView(
-                crossAxisCount: 3,
-                direction: Axis.vertical,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                padding: const EdgeInsets.all(10),
-                children: List<Widget>.generate(
-                    9, (int n) => FittedBox(child: Text('${n + 1}')))))));
+          child: GridView(
+            crossAxisCount: 3,
+            direction: Axis.vertical,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            padding: const EdgeInsets.all(10),
+            children: List<Widget>.generate(
+              9,
+              (int n) => FittedBox(
+                child: Text('${n + 1}', tightBounds: true),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   });
 
-  test('Pdf Widgets page 3', () {
-    pdf.addPage(MultiPage(
-        pageFormat: const PdfPageFormat(400, 200),
-        margin: const EdgeInsets.all(10),
-        build: (Context context) => <Widget>[
-              Table.fromTextArray(context: context, data: <List<String>>[
+  test(
+    'Pdf Widgets page 3',
+    () {
+      pdf.addPage(
+        MultiPage(
+          pageFormat: const PdfPageFormat(400, 200),
+          margin: const EdgeInsets.all(10),
+          build: (Context context) => <Widget>[
+            Table.fromTextArray(
+              context: context,
+              margin: const EdgeInsets.all(3),
+              data: <List<String>>[
                 <String>['Company', 'Contact', 'Country'],
                 <String>['Alfreds Futterkiste', 'Maria Anders', 'Germany'],
                 <String>[
@@ -165,82 +196,96 @@ void main() {
                 <String>['Dynatronics Accessories', "Cong Ch'en", 'China'],
                 <String>['York Steak House', 'Outi Vuorinen', 'Finland'],
                 <String>['Weathervane', 'Else Jeremiassen', 'Iceland'],
-              ]),
-              Anchor(name: 'anchor', child: Text('Anchor')),
-            ]));
-  });
+              ],
+            ),
+            Anchor(name: 'anchor', child: Text('Anchor')),
+          ],
+        ),
+      );
+    },
+  );
 
-  test('Pdf Widgets page 4', () {
-    pdf.addPage(Page(
-        pageFormat: const PdfPageFormat(400, 200),
-        margin: const EdgeInsets.all(10),
-        build: (Context context) => Stack(overflow: Overflow.visible,
-                // fit: StackFit.expand,
-                // alignment: Alignment.bottomRight,
-                children: <Widget>[
-                  Positioned(
-                      right: 10,
-                      top: 10,
-                      child: CustomPaint(
-                          size: const PdfPoint(50, 50),
-                          painter: (PdfGraphics canvas, PdfPoint size) {
-                            canvas
-                              ..setColor(PdfColors.indigo)
-                              ..drawRRect(0, 0, size.x, size.y, 10, 10)
-                              ..fillPath();
-                          })),
-                  Positioned(
-                      left: 10,
-                      bottom: 10,
-                      child: RichText(
-                        text: TextSpan(
-                          text: 'Hello ',
-                          style: Theme.of(context).defaultTextStyle,
-                          children: <TextSpan>[
-                            TextSpan(
-                                text: 'bold',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                    color: PdfColors.blue)),
-                            const TextSpan(
-                              text: ' world!',
-                            ),
-                          ],
+  test(
+    'Pdf Widgets page 4',
+    () {
+      pdf.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(400, 200),
+          margin: const EdgeInsets.all(10),
+          build: (Context context) => Stack(
+            overflow: Overflow.visible,
+            // fit: StackFit.expand,
+            // alignment: Alignment.bottomRight,
+            children: <Widget>[
+              Positioned(
+                  right: 10,
+                  top: 10,
+                  child: CustomPaint(
+                      size: const PdfPoint(50, 50),
+                      painter: (PdfGraphics canvas, PdfPoint size) {
+                        canvas
+                          ..setColor(PdfColors.indigo)
+                          ..drawRRect(0, 0, size.x, size.y, 10, 10)
+                          ..fillPath();
+                      })),
+              Positioned(
+                  left: 10,
+                  bottom: 10,
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'Hello ',
+                      style: Theme.of(context).defaultTextStyle,
+                      children: <TextSpan>[
+                        TextSpan(
+                            text: 'bold',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                                color: PdfColors.blue)),
+                        const TextSpan(
+                          text: ' world!',
                         ),
-                      )),
-                  Positioned(
-                      right: 10,
-                      bottom: 10,
-                      child: UrlLink(
-                          child: Text(
-                            'https://github.com/DavBfr/dart_pdf/',
-                            style: const TextStyle(
-                              color: PdfColors.grey,
-                              fontSize: 8,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                          destination: 'https://github.com/DavBfr/dart_pdf/')),
-                  Positioned(
-                      left: 10,
-                      top: 10,
-                      child: Container(
-                          width: 100,
-                          height: 100,
-                          child: Stack(
-                              alignment: Alignment.center,
-                              fit: StackFit.expand,
-                              children: <Widget>[
-                                Center(
-                                    child: Text('30%', textScaleFactor: 1.5)),
-                                CircularProgressIndicator(
-                                    value: .3,
-                                    backgroundColor: PdfColors.grey300,
-                                    strokeWidth: 15),
-                              ])))
-                ])));
-  });
+                      ],
+                    ),
+                  )),
+              Positioned(
+                  right: 10,
+                  bottom: 10,
+                  child: UrlLink(
+                      child: Text(
+                        'https://github.com/DavBfr/dart_pdf/',
+                        style: const TextStyle(
+                          color: PdfColors.grey,
+                          fontSize: 8,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                      destination: 'https://github.com/DavBfr/dart_pdf/')),
+              Positioned(
+                left: 10,
+                top: 10,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    fit: StackFit.expand,
+                    children: <Widget>[
+                      Center(child: Text('30%', textScaleFactor: 1.5)),
+                      CircularProgressIndicator(
+                          value: .3,
+                          backgroundColor: PdfColors.grey300,
+                          strokeWidth: 15),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 
   tearDownAll(() {
     final File file = File('widgets.pdf');
