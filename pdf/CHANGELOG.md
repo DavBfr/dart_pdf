@@ -12,6 +12,7 @@
 - Add Opacity Widget
 - Fix Text height with TrueType fonts
 - Convert Flex to a SpanningWidget
+- Add Partitions Widget
 
 ## 1.4.1
 
