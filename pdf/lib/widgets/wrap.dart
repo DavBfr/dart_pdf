@@ -109,7 +109,10 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
   bool get textDirection => false;
 
   @override
-  bool get canSpan => _context.lastChild < children.length;
+  bool get canSpan => true;
+
+  @override
+  bool get hasMoreWidgets => _context.lastChild < children.length;
 
   final _WrapContext _context = _WrapContext();
 

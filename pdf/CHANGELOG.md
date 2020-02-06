@@ -11,6 +11,7 @@
 - Add more font drawing options
 - Add Opacity Widget
 - Fix Text height with TrueType fonts
+- Convert Flex to a SpanningWidget
 
 ## 1.4.1
 

@@ -224,6 +224,9 @@ class Table extends Widget implements SpanningWidget {
   @override
   bool get canSpan => true;
 
+  @override
+  bool get hasMoreWidgets => true;
+
   /// The rows of the table.
   final List<TableRow> children;
 

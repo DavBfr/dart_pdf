@@ -25,7 +25,9 @@ abstract class WidgetContext {
 }
 
 abstract class SpanningWidget extends Widget {
-  bool get canSpan => false;
+  bool get canSpan;
+
+  bool get hasMoreWidgets;
 
   /// Get unmodified mutable context object
   @protected
@@ -170,6 +172,10 @@ class MultiPage extends Page {
 
     while (index < children.length) {
       final Widget child = children[index];
+      bool canSpan = false;
+      if (child is SpanningWidget) {
+        canSpan = child.canSpan;
+      }
 
       assert(() {
         // Detect too big widgets
@@ -226,7 +232,7 @@ class MultiPage extends Page {
       }
 
       // If we are processing a multi-page widget, we restore its context
-      if (widgetContext != null && child is SpanningWidget) {
+      if (widgetContext != null && canSpan && child is SpanningWidget) {
         child.restoreContext(widgetContext);
         widgetContext = null;
       }
@@ -238,14 +244,13 @@ class MultiPage extends Page {
       if (offsetStart - child.box.height < offsetEnd) {
         // If it is not a multi-page widget and its height
         // is smaller than a full new page, we schedule a new page creation
-        if (child.box.height <= pageHeight - pageHeightMargin &&
-            !(child is SpanningWidget)) {
+        if (child.box.height <= pageHeight - pageHeightMargin && !canSpan) {
           context = null;
           continue;
         }
 
         // Else we crash if the widget is too big and cannot be splitted
-        if (!(child is SpanningWidget)) {
+        if (!canSpan) {
           throw Exception(
               'Widget won\'t fit into the page as its height (${child.box.height}) '
               'exceed a page height (${pageHeight - pageHeightMargin}). '
@@ -270,7 +275,7 @@ class MultiPage extends Page {
         );
 
         // Has it finished spanning?
-        if (!span.canSpan) {
+        if (!span.hasMoreWidgets) {
           sameCount = 0;
           index++;
         }
@@ -286,8 +291,9 @@ class MultiPage extends Page {
           x: _margin.left,
           y: offsetStart - child.box.height,
           constraints: constraints,
-          widgetContext:
-              child is SpanningWidget ? child.saveContext().clone() : null,
+          widgetContext: child is SpanningWidget && canSpan
+              ? child.saveContext().clone()
+              : null,
         ),
       );
 
@@ -315,7 +321,7 @@ class MultiPage extends Page {
 
       for (_MultiPageWidget widget in page.widgets) {
         final Widget child = widget.child;
-        if (child is SpanningWidget) {
+        if (child is SpanningWidget && child.canSpan) {
           final WidgetContext context = child.saveContext();
           context.apply(widget.widgetContext);
         }

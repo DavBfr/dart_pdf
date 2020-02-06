@@ -56,7 +56,28 @@ enum VerticalDirection {
 
 typedef _ChildSizingFunction = double Function(Widget child, double extent);
 
-class Flex extends MultiChildWidget {
+class _FlexContext extends WidgetContext {
+  int firstChild = 0;
+  int lastChild = 0;
+
+  @override
+  void apply(WidgetContext other) {
+    if (other is _FlexContext) {
+      firstChild = other.firstChild;
+      lastChild = other.lastChild;
+    }
+  }
+
+  @override
+  WidgetContext clone() {
+    return _FlexContext()..apply(this);
+  }
+
+  @override
+  String toString() => '$runtimeType first:$firstChild last:$lastChild';
+}
+
+class Flex extends MultiChildWidget implements SpanningWidget {
   Flex({
     @required this.direction,
     this.mainAxisAlignment = MainAxisAlignment.start,
@@ -79,6 +100,8 @@ class Flex extends MultiChildWidget {
   final CrossAxisAlignment crossAxisAlignment;
 
   final VerticalDirection verticalDirection;
+
+  final _FlexContext _context = _FlexContext();
 
   double _getIntrinsicSize(
       {Axis sizingDirection,
@@ -209,7 +232,6 @@ class Flex extends MultiChildWidget {
       {bool parentUsesSize = false}) {
     // Determine used flex factor, size inflexible items, calculate free space.
     int totalFlex = 0;
-    final int totalChildren = children.length;
     Widget lastFlexChild;
     assert(constraints != null);
     final double maxMainSize = direction == Axis.horizontal
@@ -219,8 +241,9 @@ class Flex extends MultiChildWidget {
 
     double crossSize = 0;
     double allocatedSize = 0; // Sum of the sizes of the non-flexible children.
+    int index = _context.firstChild;
 
-    for (Widget child in children) {
+    for (Widget child in children.sublist(_context.firstChild)) {
       final int flex = child is Flexible ? child.flex : 0;
       final FlexFit fit = child is Flexible ? child.fit : FlexFit.loose;
       if (flex > 0) {
@@ -266,9 +289,16 @@ class Flex extends MultiChildWidget {
         assert(child.box != null);
         allocatedSize += _getMainSize(child);
         crossSize = math.max(crossSize, _getCrossSize(child));
+        if (direction == Axis.vertical &&
+            allocatedSize > constraints.maxHeight) {
+          break;
+        }
       }
       lastFlexChild = child;
+      index++;
     }
+    _context.lastChild = index;
+    final int totalChildren = _context.lastChild - _context.firstChild;
 
     // Distribute free space to flexible children, and determine baseline.
     final double freeSpace =
@@ -409,7 +439,9 @@ class Flex extends MultiChildWidget {
             direction == Axis.vertical);
     double childMainPosition =
         flipMainAxis ? actualSize - leadingSpace : leadingSpace;
-    for (Widget child in children) {
+
+    for (Widget child
+        in children.sublist(_context.firstChild, _context.lastChild)) {
       double childCrossPosition;
       switch (crossAxisAlignment) {
         case CrossAxisAlignment.start:
@@ -458,10 +490,30 @@ class Flex extends MultiChildWidget {
     context.canvas
       ..saveContext()
       ..setTransform(mat);
-    for (Widget child in children) {
+
+    for (Widget child
+        in children.sublist(_context.firstChild, _context.lastChild)) {
       child.paint(context);
     }
     context.canvas.restoreContext();
+  }
+
+  @override
+  bool get canSpan => direction == Axis.vertical;
+
+  @override
+  bool get hasMoreWidgets => true;
+
+  @override
+  void restoreContext(WidgetContext context) {
+    if (context is _FlexContext) {
+      _context.firstChild = context.lastChild;
+    }
+  }
+
+  @override
+  WidgetContext saveContext() {
+    return _context;
   }
 }
 

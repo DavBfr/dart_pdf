@@ -328,6 +328,9 @@ class GridView extends MultiChildWidget implements SpanningWidget {
   bool get canSpan => true;
 
   @override
+  bool get hasMoreWidgets => true;
+
+  @override
   void restoreContext(WidgetContext context) {
     if (context is _GridViewContext) {
       _context.firstChild = context.lastChild;
