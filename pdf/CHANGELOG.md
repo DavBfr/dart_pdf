@@ -13,6 +13,7 @@
 - Fix Text height with TrueType fonts
 - Convert Flex to a SpanningWidget
 - Add Partitions Widget
+- Fix a TrueType parser issue with some Chinese fonts
 
 ## 1.4.1
 
