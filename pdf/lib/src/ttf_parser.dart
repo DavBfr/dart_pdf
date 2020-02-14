@@ -89,9 +89,9 @@ class TtfParser {
 
   int get descent => bytes.getInt16(tableOffsets[hhea_table] + 6);
 
-  int get numOfLongHorMetrics => bytes.getInt16(tableOffsets[hhea_table] + 34);
+  int get numOfLongHorMetrics => bytes.getUint16(tableOffsets[hhea_table] + 34);
 
-  int get numGlyphs => bytes.getInt16(tableOffsets[maxp_table] + 4);
+  int get numGlyphs => bytes.getUint16(tableOffsets[maxp_table] + 4);
 
   String get fontName => _fontName;
 
