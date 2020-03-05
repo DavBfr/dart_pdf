@@ -21,13 +21,19 @@ part of widget;
 /// A horizontal group of cells in a [Table].
 @immutable
 class TableRow {
-  const TableRow({this.children, this.repeat = false});
+  const TableRow({
+    this.children,
+    this.repeat = false,
+    this.verticalAlignment,
+  });
 
   /// The widgets that comprise the cells in this row.
   final List<Widget> children;
 
   /// Repeat this row on all pages
   final bool repeat;
+
+  final TableCellVerticalAlignment verticalAlignment;
 }
 
 enum TableCellVerticalAlignment { bottom, middle, top }
@@ -189,6 +195,7 @@ class Table extends Widget implements SpanningWidget {
       this.tableWidth = TableWidth.max})
       : assert(children != null),
         assert(defaultColumnWidth != null),
+        assert(defaultVerticalAlignment != null),
         super();
 
   factory Table.fromTextArray({
@@ -355,22 +362,44 @@ class Table extends Widget implements SpanningWidget {
 
     // Compute final y position
     index = 0;
+    int heightIndex = 0;
     for (TableRow row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
 
+      final TableCellVerticalAlignment align =
+          row.verticalAlignment ?? defaultVerticalAlignment;
+
       for (Widget child in row.children) {
+        double childY;
+
+        switch (align) {
+          case TableCellVerticalAlignment.bottom:
+            childY = totalHeight - child.box.y - _heights[heightIndex];
+            break;
+          case TableCellVerticalAlignment.middle:
+            childY = totalHeight -
+                child.box.y -
+                (_heights[heightIndex] + child.box.height) / 2;
+            break;
+          case TableCellVerticalAlignment.top:
+            childY = totalHeight - child.box.y - child.box.height;
+            break;
+        }
+
         child.box = PdfRect(
-            child.box.x,
-            totalHeight - child.box.y - child.box.height,
-            child.box.width,
-            child.box.height);
+          child.box.x,
+          childY,
+          child.box.width,
+          child.box.height,
+        );
       }
 
       if (index >= _context.lastLine) {
         break;
       }
+      heightIndex++;
     }
 
     box = PdfRect(0, 0, totalWidth, totalHeight);

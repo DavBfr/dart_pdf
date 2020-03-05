@@ -3,6 +3,7 @@
 ## 1.6.0
 
 - Improve Annotations
+- Implement table row vertical alignment
 
 ## 1.5.0
 
