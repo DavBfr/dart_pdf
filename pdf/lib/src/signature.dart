@@ -18,29 +18,33 @@
 
 part of pdf;
 
-@immutable
-class PdfSignatureRange {
-  const PdfSignatureRange(this.start, this.end);
+enum PdfSigFlags { signaturesExist, appendOnly }
 
-  final int start;
-  final int end;
-}
+class PdfSignature extends PdfObject {
+  PdfSignature(
+    PdfDocument pdfDocument, {
+    @required this.crypto,
+    Set<PdfSigFlags> flags,
+  })  : assert(crypto != null),
+        flags = flags ?? const <PdfSigFlags>{PdfSigFlags.signaturesExist},
+        super(pdfDocument, '/Sig');
 
-abstract class PdfSignature extends PdfObject {
-  PdfSignature(PdfDocument pdfDocument) : super(pdfDocument, '/Sig');
+  final Set<PdfSigFlags> flags;
+
+  final PdfSignatureBase crypto;
+
+  int get flagsValue => flags
+      .map<int>((PdfSigFlags e) => 1 >> e.index)
+      .reduce((int a, int b) => a | b);
 
   int _offsetStart;
   int _offsetEnd;
 
-  void preSign();
-
-  void sign(PdfStream os, List<PdfSignatureRange> ranges);
-
   @override
   void _write(PdfStream os) {
-    preSign();
+    crypto.preSign(params);
 
-    _offsetStart = os.offset;
+    _offsetStart = os.offset + '$objser $objgen obj\n'.length;
     super._write(os);
     _offsetEnd = os.offset;
   }
@@ -49,16 +53,13 @@ abstract class PdfSignature extends PdfObject {
     assert(_offsetStart != null && _offsetEnd != null,
         'Must reserve the object space before signing the document');
 
-    final List<PdfSignatureRange> ranges = <PdfSignatureRange>[
-      PdfSignatureRange(0, _offsetStart),
-      PdfSignatureRange(_offsetEnd, os.offset),
-    ];
-
-    sign(os, ranges);
-    final PdfStream signature = PdfStream();
-    super._write(signature);
-
-    assert(signature.offset == _offsetEnd - _offsetStart);
-    os.output().replaceRange(_offsetStart, _offsetEnd, signature.output());
+    crypto.sign(os, params, _offsetStart, _offsetEnd);
   }
+}
+
+abstract class PdfSignatureBase {
+  void preSign(Map<String, PdfStream> params);
+
+  void sign(PdfStream os, Map<String, PdfStream> params, int offsetStart,
+      int offsetEnd);
 }

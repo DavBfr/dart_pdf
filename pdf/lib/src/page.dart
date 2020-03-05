@@ -107,7 +107,7 @@ class PdfPage extends PdfObject {
     // the /Contents pages object
     if (contents.isNotEmpty) {
       if (contents.length == 1) {
-        params['/Contents'] = contents[0].ref();
+        params['/Contents'] = contents.first.ref();
       } else {
         params['/Contents'] = PdfStream()..putObjectArray(contents);
       }

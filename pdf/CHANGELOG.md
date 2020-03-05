@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.0
+
+- Improve Annotations
+
 ## 1.5.0
 
 - Fix Align debug painting

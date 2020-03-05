@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// ignore_for_file: omit_local_variable_types
+
 part of pdf;
 
 class PdfCatalog extends PdfObject {
@@ -67,8 +69,25 @@ class PdfCatalog extends PdfObject {
         PdfStream.string(PdfDocument._PdfPageModes[pageMode.index]);
 
     if (pdfDocument.sign != null) {
-      params['/Perms'] = PdfStream.dictionary(
-          <String, PdfStream>{'/DocMDP': pdfDocument.sign.ref()});
+      params['/Perms'] = PdfStream.dictionary(<String, PdfStream>{
+        '/DocMDP': pdfDocument.sign.ref(),
+      });
+    }
+
+    final List<PdfAnnot> widgets = <PdfAnnot>[];
+    for (PdfPage page in pdfDocument.pdfPageList.pages) {
+      for (PdfAnnot annot in page.annotations) {
+        if (annot.annot.subtype == '/Widget') {
+          widgets.add(annot);
+        }
+      }
+    }
+
+    if (widgets.isNotEmpty) {
+      params['/AcroForm'] = PdfStream.dictionary(<String, PdfStream>{
+        '/SigFlags': PdfStream.intNum(pdfDocument.sign?.flagsValue ?? 0),
+        '/Fields': PdfStream()..putObjectArray(widgets),
+      });
     }
   }
 }

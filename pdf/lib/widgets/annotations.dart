@@ -39,7 +39,7 @@ class Anchor extends SingleChildWidget {
     if (description != null) {
       final Vector3 rb = mat.transform3(Vector3(box.right, box.top, 0));
       final PdfRect ibox = PdfRect.fromLTRB(lt.x, lt.y, rb.x, rb.y);
-      PdfAnnot.text(context.page, content: description, rect: ibox);
+      PdfAnnot(context.page, PdfAnnotText(rect: ibox, content: description));
     }
   }
 }
@@ -62,10 +62,12 @@ class AnnotationLink extends AnnotationBuilder {
 
   @override
   void build(Context context, PdfRect box) {
-    PdfAnnot.namedLink(
+    PdfAnnot(
       context.page,
-      rect: localToGlobal(context, box),
-      dest: destination,
+      PdfAnnotNamedLink(
+        rect: localToGlobal(context, box),
+        dest: destination,
+      ),
     );
   }
 }
@@ -77,10 +79,63 @@ class AnnotationUrl extends AnnotationBuilder {
 
   @override
   void build(Context context, PdfRect box) {
-    PdfAnnot.urlLink(
+    PdfAnnot(
       context.page,
-      rect: localToGlobal(context, box),
-      dest: destination,
+      PdfAnnotUrlLink(
+        rect: localToGlobal(context, box),
+        url: destination,
+      ),
+    );
+  }
+}
+
+class AnnotationSignature extends AnnotationBuilder {
+  AnnotationSignature(
+    this.crypto, {
+    this.name,
+    this.signFlags,
+    this.border,
+    this.flags,
+    this.date,
+    this.color,
+    this.highlighting,
+  }) : assert(crypto != null);
+
+  final Set<PdfSigFlags> signFlags;
+
+  final PdfSignatureBase crypto;
+
+  final String name;
+
+  final PdfBorder border;
+
+  final Set<PdfAnnotFlags> flags;
+
+  final DateTime date;
+
+  final PdfColor color;
+
+  final PdfAnnotHighlighting highlighting;
+
+  @override
+  void build(Context context, PdfRect box) {
+    context.document.sign ??= PdfSignature(
+      context.document,
+      crypto: crypto,
+      flags: signFlags,
+    );
+
+    PdfAnnot(
+      context.page,
+      PdfAnnotSign(
+        localToGlobal(context, box),
+        fieldName: name,
+        border: border,
+        flags: flags,
+        date: date,
+        color: color,
+        highlighting: highlighting,
+      ),
     );
   }
 }
@@ -116,4 +171,31 @@ class UrlLink extends Annotation {
   UrlLink({@required Widget child, String destination})
       : assert(child != null),
         super(child: child, builder: AnnotationUrl(destination));
+}
+
+class Signature extends Annotation {
+  Signature({
+    @required Widget child,
+    @required PdfSignatureBase crypto,
+    @required String name,
+    Set<PdfSigFlags> signFlags,
+    PdfBorder border,
+    Set<PdfAnnotFlags> flags,
+    DateTime date,
+    PdfColor color,
+    PdfAnnotHighlighting highlighting,
+  })  : assert(child != null),
+        assert(crypto != null),
+        super(
+            child: child,
+            builder: AnnotationSignature(
+              crypto,
+              signFlags: signFlags,
+              name: name,
+              border: border,
+              flags: flags,
+              date: date,
+              color: color,
+              highlighting: highlighting,
+            ));
 }

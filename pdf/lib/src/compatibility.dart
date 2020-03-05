@@ -15,6 +15,7 @@
  */
 
 // ignore_for_file: omit_local_variable_types
+// ignore_for_file: avoid_unused_constructor_parameters
 
 part of pdf;
 
@@ -33,13 +34,7 @@ class PDFAnnot extends PdfAnnot {
       double fb,
       double fr,
       double ft})
-      : super._create(pdfPage,
-            type: type,
-            content: s,
-            srcRect: PdfRect.fromLTRB(l, t, r, b),
-            subtype: subtype,
-            dest: dest,
-            destRect: PdfRect.fromLTRB(fl, ft, fr, fb));
+      : super(pdfPage, PdfAnnotText(rect: PdfRect(l, b, r, t), content: s));
 
   factory PDFAnnot.annotation(
           PdfPage pdfPage, String s, double l, double b, double r, double t) =>
@@ -342,12 +337,11 @@ class PDFPage extends PdfPage {
       double vh = PDFAnnot.FULL_PAGE]) {
     final PdfPoint xy1 = cxy(x, y + h);
     final PdfPoint xy2 = cxy(x + w, y);
-    final PdfPoint xy3 = cxy(vx, vy + vh);
-    final PdfPoint xy4 = cxy(vx + vw, vy);
-    final PdfAnnot ob = PdfAnnot.link(this,
-        srcRect: PdfRect.fromLTRB(xy1.x, xy1.y, xy2.x, xy2.y),
-        dest: dest,
-        destRect: PdfRect.fromLTRB(xy3.x, xy3.y, xy4.x, xy4.y));
+    final PdfAnnot ob = PdfAnnot.urlLink(
+      this,
+      rect: PdfRect.fromLTRB(xy1.x, xy1.y, xy2.x, xy2.y),
+      dest: 'https://github.com/DavBfr/dart_pdf',
+    );
     return ob;
   }
 
