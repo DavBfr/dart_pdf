@@ -162,7 +162,7 @@ class BarcodeWidget extends StatelessWidget {
     this.drawText = true,
     this.textStyle,
   }) :
-        // ignore: deprecated_member_use_from_same_package
+        // ignore: deprecated_member_use,deprecated_member_use_from_same_package
         barcode = barcode ?? Barcode.fromType(type);
 
   /// the barcode data
