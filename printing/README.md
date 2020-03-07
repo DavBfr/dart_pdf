@@ -99,12 +99,7 @@ await for (var page in Printing.raster(pdf.save(), pages: [0, 1], dpi: 72)) {
 
 ## Installing
 
-1. Add this to your package's `pubspec.yaml` file:
-
-   ```yaml
-   dependencies:
-     printing: any       # <-- Add this line
-   ```
+1. Add this package to your package's `pubspec.yaml` file as described on the installation tab
 
 2. Enable Swift on the iOS project, in `ios/Podfile`:
 
