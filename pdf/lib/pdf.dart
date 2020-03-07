@@ -38,6 +38,7 @@ part 'src/catalog.dart';
 part 'src/color.dart';
 part 'src/colors.dart';
 part 'src/compatibility.dart';
+part 'src/data_types.dart';
 part 'src/document.dart';
 part 'src/encryption.dart';
 part 'src/exif.dart';

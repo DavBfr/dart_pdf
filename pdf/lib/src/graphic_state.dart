@@ -27,15 +27,15 @@ class PdfGraphicState {
   final double opacity;
 
   @protected
-  PdfStream _output() {
-    final Map<String, PdfStream> params = <String, PdfStream>{};
+  PdfDict _output() {
+    final PdfDict params = PdfDict();
 
     if (opacity != null) {
-      params['/CA'] = PdfStream.num(opacity);
-      params['/ca'] = PdfStream.num(opacity);
+      params['/CA'] = PdfNum(opacity);
+      params['/ca'] = PdfNum(opacity);
     }
 
-    return PdfStream.dictionary(params);
+    return params;
   }
 
   @override

@@ -46,12 +46,12 @@ class PdfObjectStream extends PdfObject {
       _data = buf.output();
     } else if (pdfDocument.deflate != null) {
       _data = pdfDocument.deflate(buf.output());
-      params['/Filter'] = PdfStream.string('/FlateDecode');
+      params['/Filter'] = const PdfName('/FlateDecode');
     } else if (isBinary) {
       // This is a Ascii85 stream
       final Ascii85Encoder e = Ascii85Encoder();
       _data = e.convert(buf.output());
-      params['/Filter'] = PdfStream.string('/ASCII85Decode');
+      params['/Filter'] = const PdfName('/ASCII85Decode');
     } else {
       // This is a non-deflated stream
       _data = buf.output();
@@ -59,7 +59,7 @@ class PdfObjectStream extends PdfObject {
     if (pdfDocument.encryption != null) {
       _data = pdfDocument.encryption.encrypt(_data, this);
     }
-    params['/Length'] = PdfStream.intNum(_data.length);
+    params['/Length'] = PdfNum(_data.length);
   }
 
   @override

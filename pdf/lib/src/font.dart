@@ -119,9 +119,9 @@ abstract class PdfFont extends PdfObject {
   void _prepare() {
     super._prepare();
 
-    params['/Subtype'] = PdfStream.string(subtype);
-    params['/Name'] = PdfStream.string(name);
-    params['/Encoding'] = PdfStream.string('/WinAnsiEncoding');
+    params['/Subtype'] = PdfName(subtype);
+    params['/Name'] = PdfName(name);
+    params['/Encoding'] = const PdfName('/WinAnsiEncoding');
   }
 
   @Deprecated('Use `glyphMetrics` instead')
@@ -166,9 +166,9 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
   PdfStream putText(String text) {
     try {
       return PdfStream()
-        ..putBytes(latin1.encode('('))
+        ..putByte(40)
         ..putTextBytes(latin1.encode(text))
-        ..putBytes(latin1.encode(')'));
+        ..putByte(41);
     } catch (e) {
       assert(false, '''\n---------------------------------------------
 Can not decode the string to Latin1.

@@ -4,6 +4,7 @@
 
 - Improve Annotations
 - Implement table row vertical alignment
+- Improve Internal data structure
 
 ## 1.5.0
 

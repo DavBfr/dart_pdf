@@ -94,8 +94,8 @@ class PdfPage extends PdfObject {
     params['/Parent'] = pdfDocument.pdfPageList.ref();
 
     // the /MediaBox for the page size
-    params['/MediaBox'] = PdfStream()
-      ..putNumArray(<double>[0, 0, pageFormat.width, pageFormat.height]);
+    params['/MediaBox'] =
+        PdfArray.fromNum(<double>[0, 0, pageFormat.width, pageFormat.height]);
 
     // Rotation (if not zero)
 //        if(rotate!=0) {
@@ -109,39 +109,38 @@ class PdfPage extends PdfObject {
       if (contents.length == 1) {
         params['/Contents'] = contents.first.ref();
       } else {
-        params['/Contents'] = PdfStream()..putObjectArray(contents);
+        params['/Contents'] = PdfArray.fromObjects(contents);
       }
     }
 
     // Now the resources
     /// This holds any resources for this page
-    final Map<String, PdfStream> resources = <String, PdfStream>{};
+    final PdfDict resources = PdfDict();
 
     // fonts
     if (fonts.isNotEmpty) {
-      resources['/Font'] = PdfStream()..putObjectDictionary(fonts);
+      resources['/Font'] = PdfDict.fromObjectMap(fonts);
     }
 
     // Now the XObjects
     if (xObjects.isNotEmpty) {
-      resources['/XObject'] = PdfStream()..putObjectDictionary(xObjects);
+      resources['/XObject'] = PdfDict.fromObjectMap(xObjects);
     }
 
     if (pdfDocument.hasGraphicStates) {
       // Declare Transparency Group settings
-      params['/Group'] = PdfStream()
-        ..putDictionary(<String, PdfStream>{
-          '/Type': PdfStream.string('/Group'),
-          '/S': PdfStream.string('/Transparency'),
-          '/CS': PdfStream.string('/DeviceRGB'),
-          '/I': PdfStream()..putBool(isolatedTransparency),
-          '/K': PdfStream()..putBool(knockoutTransparency),
-        });
+      params['/Group'] = PdfDict(<String, PdfDataType>{
+        '/Type': const PdfName('/Group'),
+        '/S': const PdfName('/Transparency'),
+        '/CS': const PdfName('/DeviceRGB'),
+        '/I': PdfBool(isolatedTransparency),
+        '/K': PdfBool(knockoutTransparency),
+      });
 
       resources['/ExtGState'] = pdfDocument.graphicStates.ref();
     }
 
-    params['/Resources'] = PdfStream.dictionary(resources);
+    params['/Resources'] = resources;
 
     // The thumbnail
     if (thumbnail != null) {
@@ -150,7 +149,7 @@ class PdfPage extends PdfObject {
 
     // The /Annots object
     if (annotations.isNotEmpty) {
-      params['/Annots'] = PdfStream()..putObjectArray(annotations);
+      params['/Annots'] = PdfArray.fromObjects(annotations);
     }
   }
 }

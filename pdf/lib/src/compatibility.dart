@@ -73,7 +73,7 @@ class PDFAnnot extends PdfAnnot {
 @deprecated
 class PDFArrayObject extends PdfArrayObject {
   PDFArrayObject(PdfDocument pdfDocument, List<String> values)
-      : super(pdfDocument, values);
+      : super(pdfDocument, null);
 }
 
 @deprecated

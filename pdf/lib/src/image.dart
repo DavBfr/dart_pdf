@@ -78,10 +78,10 @@ class PdfImage extends PdfXObject {
         _height = height,
         super(pdfDocument, '/Image', isBinary: true) {
     _name = '/Image$objser';
-    params['/Width'] = PdfStream.string(width.toString());
-    params['/Height'] = PdfStream.string(height.toString());
-    params['/BitsPerComponent'] = PdfStream.intNum(8);
-    params['/Name'] = PdfStream.string(_name);
+    params['/Width'] = PdfNum(width);
+    params['/Height'] = PdfNum(height);
+    params['/BitsPerComponent'] = const PdfNum(8);
+    params['/Name'] = PdfName(_name);
 
     if (alphaChannel == false && alpha) {
       final PdfImage _sMask = PdfImage._(
@@ -95,17 +95,17 @@ class PdfImage extends PdfXObject {
         jpeg: jpeg,
         orientation: orientation,
       );
-      params['/SMask'] = PdfStream.string('${_sMask.objser} 0 R');
+      params['/SMask'] = PdfIndirect(_sMask.objser, 0);
     }
 
     if (isRGB) {
-      params['/ColorSpace'] = PdfStream.string('/DeviceRGB');
+      params['/ColorSpace'] = const PdfName('/DeviceRGB');
     } else {
-      params['/ColorSpace'] = PdfStream.string('/DeviceGray');
+      params['/ColorSpace'] = const PdfName('/DeviceGray');
     }
 
     if (jpeg) {
-      params['/Intent'] = PdfStream.string('/RelativeColorimetric');
+      params['/Intent'] = const PdfName('/RelativeColorimetric');
     }
   }
 
@@ -163,7 +163,7 @@ class PdfImage extends PdfXObject {
   void _prepare() {
     if (jpeg) {
       buf.putBytes(image);
-      params['/Filter'] = PdfStream.string('/DCTDecode');
+      params['/Filter'] = const PdfName('/DCTDecode');
       super._prepare();
       return;
     }

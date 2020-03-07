@@ -113,16 +113,17 @@ class PdfOutput {
     // now the trailer object
     os.putString('trailer\n');
 
-    final Map<String, PdfStream> params = <String, PdfStream>{};
+    final PdfDict params = PdfDict();
 
     // the number of entries (REQUIRED)
-    params['/Size'] = PdfStream.intNum(offsets.length + 1);
+    params['/Size'] = PdfNum(offsets.length + 1);
 
     // the /Root catalog indirect reference (REQUIRED)
     if (rootID != null) {
       params['/Root'] = rootID.ref();
-      final PdfStream id = PdfStream.binary(rootID.pdfDocument.documentID);
-      params['/ID'] = PdfStream.array(<PdfStream>[id, id]);
+      final PdfString id =
+          PdfString(rootID.pdfDocument.documentID, PdfStringFormat.binary);
+      params['/ID'] = PdfArray(<PdfDataType>[id, id]);
     } else {
       throw Exception('Root object is not present in document');
     }
@@ -138,7 +139,7 @@ class PdfOutput {
     }
 
     // end the trailer object
-    os.putDictionary(params);
+    params.output(os);
     os.putString('\nstartxref\n$xref\n%%EOF\n');
 
     if (signatureID != null) {

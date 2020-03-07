@@ -42,7 +42,7 @@ class PdfSignature extends PdfObject {
 
   @override
   void _write(PdfStream os) {
-    crypto.preSign(params);
+    crypto.preSign(this, params);
 
     _offsetStart = os.offset + '$objser $objgen obj\n'.length;
     super._write(os);
@@ -53,13 +53,13 @@ class PdfSignature extends PdfObject {
     assert(_offsetStart != null && _offsetEnd != null,
         'Must reserve the object space before signing the document');
 
-    crypto.sign(os, params, _offsetStart, _offsetEnd);
+    crypto.sign(this, os, params, _offsetStart, _offsetEnd);
   }
 }
 
 abstract class PdfSignatureBase {
-  void preSign(Map<String, PdfStream> params);
+  void preSign(PdfObject object, PdfDict params);
 
-  void sign(PdfStream os, Map<String, PdfStream> params, int offsetStart,
+  void sign(PdfObject object, PdfStream os, PdfDict params, int offsetStart,
       int offsetEnd);
 }

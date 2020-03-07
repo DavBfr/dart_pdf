@@ -86,7 +86,7 @@ class PdfAnnot extends PdfObject {
   @override
   void _prepare() {
     super._prepare();
-    annot.build(pdfPage, params);
+    annot.build(pdfPage, this, params);
   }
 }
 
@@ -145,44 +145,44 @@ abstract class PdfAnnotBase {
 
   @protected
   @mustCallSuper
-  void build(PdfPage page, Map<String, PdfStream> params) {
-    params['/Subtype'] = PdfStream.string(subtype);
-    params['/Rect'] = PdfStream()
-      ..putNumArray(<double>[rect.left, rect.bottom, rect.right, rect.top]);
+  void build(PdfPage page, PdfObject object, PdfDict params) {
+    params['/Subtype'] = PdfName(subtype);
+    params['/Rect'] = PdfArray.fromNum(
+        <double>[rect.left, rect.bottom, rect.right, rect.top]);
 
     params['/P'] = page.ref();
 
     // handle the border
     if (border == null) {
-      params['/Border'] = PdfStream.string('[0 0 0]');
+      params['/Border'] = PdfArray.fromNum(const <int>[0, 0, 0]);
     } else {
       params['/BS'] = border.ref();
     }
 
     if (content != null) {
-      params['/Contents'] = PdfStream()..putLiteral(content);
+      params['/Contents'] = PdfSecString.fromString(object, content);
     }
 
     if (name != null) {
-      params['/NM'] = PdfStream()..putLiteral(name);
+      params['/NM'] = PdfSecString.fromString(object, name);
     }
 
     if (flags != null) {
-      params['/F'] = PdfStream.intNum(flagValue);
+      params['/F'] = PdfNum(flagValue);
     }
 
     if (date != null) {
-      params['/M'] = PdfStream()..putDate(date);
+      params['/M'] = PdfSecString.fromDate(object, date);
     }
 
     if (color != null) {
       if (color is PdfColorCmyk) {
         final PdfColorCmyk k = color;
-        params['/C'] = PdfStream()
-          ..putNumList(<double>[k.cyan, k.magenta, k.yellow, k.black]);
+        params['/C'] =
+            PdfArray.fromNum(<double>[k.cyan, k.magenta, k.yellow, k.black]);
       } else {
-        params['/C'] = PdfStream()
-          ..putNumList(<double>[color.red, color.green, color.blue]);
+        params['/C'] =
+            PdfArray.fromNum(<double>[color.red, color.green, color.blue]);
       }
     }
   }
@@ -231,15 +231,14 @@ class PdfAnnotNamedLink extends PdfAnnotBase {
   final String dest;
 
   @override
-  void build(PdfPage page, Map<String, PdfStream> params) {
-    super.build(page, params);
-    params['/A'] = PdfStream()
-      ..putDictionary(
-        <String, PdfStream>{
-          '/S': PdfStream()..putString('/GoTo'),
-          '/D': PdfStream()..putText(dest),
-        },
-      );
+  void build(PdfPage page, PdfObject object, PdfDict params) {
+    super.build(page, object, params);
+    params['/A'] = PdfDict(
+      <String, PdfDataType>{
+        '/S': const PdfName('/GoTo'),
+        '/D': PdfSecString.fromString(object, dest),
+      },
+    );
   }
 }
 
@@ -264,15 +263,14 @@ class PdfAnnotUrlLink extends PdfAnnotBase {
   final String url;
 
   @override
-  void build(PdfPage page, Map<String, PdfStream> params) {
-    super.build(page, params);
-    params['/A'] = PdfStream()
-      ..putDictionary(
-        <String, PdfStream>{
-          '/S': PdfStream()..putString('/URI'),
-          '/URI': PdfStream()..putText(url),
-        },
-      );
+  void build(PdfPage page, PdfObject object, PdfDict params) {
+    super.build(page, object, params);
+    params['/A'] = PdfDict(
+      <String, PdfDataType>{
+        '/S': const PdfName('/URI'),
+        '/URI': PdfSecString.fromString(object, url),
+      },
+    );
   }
 }
 
@@ -289,7 +287,6 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
     DateTime date,
     PdfColor color,
     this.highlighting,
-    this.value,
   }) : super(
           subtype: '/Widget',
           rect: rect,
@@ -305,20 +302,14 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
 
   final PdfAnnotHighlighting highlighting;
 
-  final PdfStream value;
-
   @override
-  void build(PdfPage page, Map<String, PdfStream> params) {
-    super.build(page, params);
+  void build(PdfPage page, PdfObject object, PdfDict params) {
+    super.build(page, object, params);
 
-    params['/FT'] = PdfStream.string(fieldType);
+    params['/FT'] = PdfName(fieldType);
 
     if (fieldName != null) {
-      params['/T'] = PdfStream()..putLiteral(fieldName);
-    }
-
-    if (value != null) {
-      params['/V'] = value;
+      params['/T'] = PdfSecString.fromString(object, fieldName);
     }
   }
 }
@@ -344,8 +335,8 @@ class PdfAnnotSign extends PdfAnnotWidget {
         );
 
   @override
-  void build(PdfPage page, Map<String, PdfStream> params) {
-    super.build(page, params);
+  void build(PdfPage page, PdfObject object, PdfDict params) {
+    super.build(page, object, params);
     assert(page.pdfDocument.sign != null);
     params['/V'] = page.pdfDocument.sign.ref();
   }

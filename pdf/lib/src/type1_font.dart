@@ -44,7 +44,7 @@ class PdfType1Font extends PdfFont {
   void _prepare() {
     super._prepare();
 
-    params['/BaseFont'] = PdfStream.string('/' + fontName);
+    params['/BaseFont'] = PdfName('/' + fontName);
   }
 
   @override

@@ -87,24 +87,27 @@ class PdfOutline extends PdfObject {
 
     // These are for kids only
     if (parent != null) {
-      params['/Title'] = PdfStream.string(title);
-      final List<PdfStream> dests = <PdfStream>[];
+      params['/Title'] = PdfSecString.fromString(this, title);
+      final PdfArray dests = PdfArray();
       dests.add(dest.ref());
 
       if (destMode == PdfOutlineMode.fitpage) {
-        dests.add(PdfStream.string('/Fit'));
+        dests.add(const PdfName('/Fit'));
       } else {
-        dests.add(PdfStream.string(
-            '/FitR ${rect.left} ${rect.bottom} ${rect.right} ${rect.top}'));
+        dests.add(const PdfName('/FitR'));
+        dests.add(PdfNum(rect.left));
+        dests.add(PdfNum(rect.bottom));
+        dests.add(PdfNum(rect.right));
+        dests.add(PdfNum(rect.top));
       }
       params['/Parent'] = parent.ref();
-      params['/Dest'] = PdfStream.array(dests);
+      params['/Dest'] = dests;
 
       // were a descendent, so by default we are closed. Find out how many
       // entries are below us
       final int c = descendants();
       if (c > 0) {
-        params['/Count'] = PdfStream.intNum(-c);
+        params['/Count'] = PdfNum(-c);
       }
 
       final int index = parent.getIndex(this);
@@ -120,7 +123,7 @@ class PdfOutline extends PdfObject {
     } else {
       // the number of outlines in this document
       // were the top level node, so all are open by default
-      params['/Count'] = PdfStream.intNum(outlines.length);
+      params['/Count'] = PdfNum(outlines.length);
     }
 
     // These only valid if we have children

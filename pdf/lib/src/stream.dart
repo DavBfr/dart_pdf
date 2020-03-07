@@ -36,13 +36,8 @@ class PdfStream {
     }
   }
 
-  static PdfStream string(String s) => PdfStream()..putString(s);
-
-  void putStringUtf16(String s) {
-    for (int codeUnit in s.codeUnits) {
-      _stream.add(codeUnit & 0xff);
-      _stream.add((codeUnit >> 8) & 0xff);
-    }
+  void putByte(int s) {
+    _stream.add(s);
   }
 
   void putBytes(List<int> s) {
@@ -60,13 +55,6 @@ class PdfStream {
       return v.toStringAsFixed(precision);
     }).join(' '));
   }
-
-  void putIntList(List<int> d) {
-    putString(d.map((int v) => v.toString()).join(' '));
-  }
-
-  static PdfStream num(double d) => PdfStream()..putNum(d);
-  static PdfStream intNum(int i) => PdfStream()..putString(i.toString());
 
   /// Escape special characters
   /// \ddd Character code ddd (octal)
@@ -109,105 +97,6 @@ class PdfStream {
           _stream.add(c);
       }
     }
-  }
-
-  void putText(String s) {
-    putBytes(latin1.encode('('));
-    putTextBytes(latin1.encode(s));
-    putBytes(latin1.encode(')'));
-  }
-
-  void putLiteral(String s) {
-    putBytes(latin1.encode('('));
-    putBytes(<int>[0xfe, 0xff]);
-    putTextBytes(encodeUtf16be(s));
-    putBytes(latin1.encode(')'));
-  }
-
-  void putBool(bool value) {
-    putString(value ? 'true' : 'false');
-  }
-
-  /// Returns the ASCII/Unicode code unit corresponding to the hexadecimal digit
-  /// [digit].
-  int _codeUnitForDigit(int digit) =>
-      digit < 10 ? digit + 0x30 : digit + 0x61 - 10;
-
-  void putBinary(List<int> s) {
-    _stream.add(0x3c);
-    for (int byte in s) {
-      _stream.add(_codeUnitForDigit((byte & 0xF0) >> 4));
-      _stream.add(_codeUnitForDigit(byte & 0x0F));
-    }
-    _stream.add(0x3e);
-  }
-
-  static PdfStream binary(List<int> s) => PdfStream()..putBinary(s);
-
-  void putArray(List<PdfStream> values) {
-    putString('[');
-    for (PdfStream val in values) {
-      putStream(val);
-      putString(' ');
-    }
-    putString(']');
-  }
-
-  void putObjectArray(List<PdfObject> values) {
-    putString('[');
-    for (PdfObject val in values) {
-      putStream(val.ref());
-      putString(' ');
-    }
-    putString(']');
-  }
-
-  void putStringArray(List<String> values) {
-    putString('[' + values.join(' ') + ']');
-  }
-
-  void putDate(DateTime date) {
-    final DateTime utcDate = date.toUtc();
-    final String year = utcDate.year.toString().padLeft(4, '0');
-    final String month = utcDate.month.toString().padLeft(2, '0');
-    final String day = utcDate.day.toString().padLeft(2, '0');
-    final String hour = utcDate.hour.toString().padLeft(2, '0');
-    final String minute = utcDate.minute.toString().padLeft(2, '0');
-    final String second = utcDate.second.toString().padLeft(2, '0');
-    putText('D:$year$month$day$hour$minute${second}Z');
-  }
-
-  void putNumArray(List<double> values) {
-    putString('[');
-    putNumList(values);
-    putString(']');
-  }
-
-  void putIntArray(List<int> values) {
-    putString('[');
-    putIntList(values);
-    putString(']');
-  }
-
-  static PdfStream array(List<PdfStream> values) =>
-      PdfStream()..putArray(values);
-
-  void putDictionary(Map<String, PdfStream> values) {
-    putString('<< ');
-    values.forEach((String k, PdfStream v) {
-      putString('$k ');
-      putStream(v);
-      putString('\n');
-    });
-    putString('>>');
-  }
-
-  static PdfStream dictionary(Map<String, PdfStream> values) =>
-      PdfStream()..putDictionary(values);
-
-  void putObjectDictionary(Map<String, PdfObject> values) {
-    putDictionary(values.map((String string, PdfObject object) =>
-        MapEntry<String, PdfStream>(string, object.ref())));
   }
 
   int get offset => _stream.length;

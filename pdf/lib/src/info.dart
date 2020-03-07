@@ -27,28 +27,28 @@ class PdfInfo extends PdfObject {
       this.producer})
       : super(pdfDocument, null) {
     if (author != null) {
-      params['/Author'] = PdfStream()..putLiteral(author);
+      params['/Author'] = PdfSecString.fromString(this, author);
     }
     if (creator != null) {
-      params['/Creator'] = PdfStream()..putLiteral(creator);
+      params['/Creator'] = PdfSecString.fromString(this, creator);
     }
     if (title != null) {
-      params['/Title'] = PdfStream()..putLiteral(title);
+      params['/Title'] = PdfSecString.fromString(this, title);
     }
     if (subject != null) {
-      params['/Subject'] = PdfStream()..putLiteral(subject);
+      params['/Subject'] = PdfSecString.fromString(this, subject);
     }
     if (keywords != null) {
-      params['/Keywords'] = PdfStream()..putLiteral(keywords);
+      params['/Keywords'] = PdfSecString.fromString(this, keywords);
     }
     if (producer != null) {
-      params['/Producer'] = PdfStream()
-        ..putLiteral('$producer ($_libraryName)');
+      params['/Producer'] =
+          PdfSecString.fromString(this, '$producer ($_libraryName)');
     } else {
-      params['/Producer'] = PdfStream()..putLiteral(_libraryName);
+      params['/Producer'] = PdfSecString.fromString(this, _libraryName);
     }
 
-    params['/CreationDate'] = PdfStream()..putDate(DateTime.now());
+    params['/CreationDate'] = PdfSecString.fromDate(this, DateTime.now());
   }
 
   static const String _libraryName = 'https://github.com/DavBfr/dart_pdf';
