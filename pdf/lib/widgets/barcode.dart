@@ -149,9 +149,7 @@ class _BarcodeWidget extends Widget {
 class BarcodeWidget extends StatelessWidget {
   BarcodeWidget({
     @required this.data,
-    @Deprecated('Use `Barcode.fromType(type)` instead')
-        BarcodeType type = BarcodeType.Code39,
-    Barcode barcode,
+    @required this.barcode,
     this.color = PdfColors.black,
     this.backgroundColor,
     this.decoration,
@@ -161,9 +159,7 @@ class BarcodeWidget extends StatelessWidget {
     this.height,
     this.drawText = true,
     this.textStyle,
-  }) :
-        // ignore: deprecated_member_use,deprecated_member_use_from_same_package
-        barcode = barcode ?? Barcode.fromType(type);
+  }) : assert(barcode != null);
 
   /// the barcode data
   final String data;

@@ -25,55 +25,6 @@ class PdfAnnot extends PdfObject {
     pdfPage.annotations.add(this);
   }
 
-  /// Create a text annotation
-  @deprecated
-  factory PdfAnnot.text(
-    PdfPage pdfPage, {
-    @required PdfRect rect,
-    @required String content,
-    PdfBorder border,
-  }) =>
-      PdfAnnot(
-          pdfPage,
-          PdfAnnotText(
-            rect: rect,
-            content: content,
-            border: border,
-          ));
-
-  /// Creates an external link annotation
-  @deprecated
-  factory PdfAnnot.urlLink(
-    PdfPage pdfPage, {
-    @required PdfRect rect,
-    @required String dest,
-    PdfBorder border,
-  }) =>
-      PdfAnnot(
-          pdfPage,
-          PdfAnnotUrlLink(
-            rect: rect,
-            url: dest,
-            border: border,
-          ));
-
-  /// Creates a link annotation to a named destination
-  @deprecated
-  factory PdfAnnot.namedLink(
-    PdfPage pdfPage, {
-    @required PdfRect rect,
-    @required String dest,
-    PdfBorder border,
-  }) =>
-      PdfAnnot(
-        pdfPage,
-        PdfAnnotNamedLink(
-          rect: rect,
-          dest: dest,
-          border: border,
-        ),
-      );
-
   /// The annotation content
   final PdfAnnotBase annot;
 
