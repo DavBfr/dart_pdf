@@ -180,15 +180,6 @@ class PdfGraphics {
     lineTo(x2, y2);
   }
 
-  /// Draws a polygon, linking the first and last coordinates.
-  ///
-  /// @param xp Array of x coordinates
-  /// @param yp Array of y coordinates
-  /// @param np number of points in polygon
-  void drawPolygon(PdfPolygon p) {
-    _polygon(p.points);
-  }
-
   void drawEllipse(double x, double y, double r1, double r2) {
     moveTo(x, y - r2);
     curveTo(x + _m4 * r1, y - r2, x + r1, y - _m4 * r2, x + r1, y);
@@ -682,22 +673,6 @@ class PdfGraphics {
       lastAction = action;
       action = a;
       points = <double>[];
-    }
-  }
-
-  /// This is used to add a polygon to the current path.
-  /// Used by drawPolygon()
-  ///
-  /// @param p Array of coordinates
-  /// @see #drawPolygon
-  /// @see #drawPolyline
-  /// @see #fillPolygon
-  void _polygon(List<PdfPoint> p) {
-    // newPath() not needed here as moveto does it ;-)
-    moveTo(p[0].x, p[0].y);
-
-    for (int i = 1; i < p.length; i++) {
-      lineTo(p[i].x, p[i].y);
     }
   }
 

@@ -58,7 +58,6 @@ part 'src/page.dart';
 part 'src/page_format.dart';
 part 'src/page_list.dart';
 part 'src/point.dart';
-part 'src/polygon.dart';
 part 'src/rect.dart';
 part 'src/signature.dart';
 part 'src/stream.dart';
