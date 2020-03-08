@@ -280,7 +280,7 @@ class PdfGraphics {
       buf.putString('${mode.index} Tr ');
     }
     buf.putString('[');
-    buf.putStream(font.putText(s));
+    font.putText(buf, s);
     buf.putString(']TJ ET\n');
   }
 

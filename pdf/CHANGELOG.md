@@ -6,6 +6,7 @@
 - Implement table row vertical alignment
 - Improve Internal data structure
 - Remove deprecated functions
+- Optimize file size
 
 ## 1.5.0
 

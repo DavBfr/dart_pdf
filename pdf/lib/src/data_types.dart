@@ -72,17 +72,26 @@ class PdfString extends PdfDataType {
   const PdfString(this.value, [this.format = PdfStringFormat.litteral]);
 
   factory PdfString.fromString(String value) {
-    try {
-      return PdfString(latin1.encode(value), PdfStringFormat.litteral);
-    } catch (e) {
-      return PdfString(
-        Uint8List.fromList(<int>[0xfe, 0xff] + encodeUtf16be(value)),
-        PdfStringFormat.litteral,
-      );
-    }
+    return PdfString(_string(value), PdfStringFormat.litteral);
   }
 
   factory PdfString.fromDate(DateTime date) {
+    return PdfString(_date(date));
+  }
+
+  final Uint8List value;
+
+  final PdfStringFormat format;
+
+  static Uint8List _string(String value) {
+    try {
+      return latin1.encode(value);
+    } catch (e) {
+      return Uint8List.fromList(<int>[0xfe, 0xff] + encodeUtf16be(value));
+    }
+  }
+
+  static Uint8List _date(DateTime date) {
     final DateTime utcDate = date.toUtc();
     final String year = utcDate.year.toString().padLeft(4, '0');
     final String month = utcDate.month.toString().padLeft(2, '0');
@@ -90,20 +99,15 @@ class PdfString extends PdfDataType {
     final String hour = utcDate.hour.toString().padLeft(2, '0');
     final String minute = utcDate.minute.toString().padLeft(2, '0');
     final String second = utcDate.second.toString().padLeft(2, '0');
-    return PdfString.fromString('D:$year$month$day$hour$minute${second}Z');
+    return _string('D:$year$month$day$hour$minute${second}Z');
   }
-
-  final Uint8List value;
-
-  final PdfStringFormat format;
 
   /// Returns the ASCII/Unicode code unit corresponding to the hexadecimal digit
   /// [digit].
   int _codeUnitForDigit(int digit) =>
       digit < 10 ? digit + 0x30 : digit + 0x61 - 10;
 
-  @override
-  void output(PdfStream s) {
+  void _output(PdfStream s, Uint8List value) {
     switch (format) {
       case PdfStringFormat.binary:
         s.putByte(0x3c);
@@ -121,6 +125,11 @@ class PdfString extends PdfDataType {
         break;
     }
   }
+
+  @override
+  void output(PdfStream s) {
+    _output(s, value);
+  }
 }
 
 class PdfSecString extends PdfString {
@@ -129,28 +138,11 @@ class PdfSecString extends PdfString {
       : super(value, format);
 
   factory PdfSecString.fromString(PdfObject object, String value) {
-    try {
-      return PdfSecString(
-          object, latin1.encode(value), PdfStringFormat.litteral);
-    } catch (e) {
-      return PdfSecString(
-        object,
-        Uint8List.fromList(<int>[0xfe, 0xff] + encodeUtf16be(value)),
-        PdfStringFormat.litteral,
-      );
-    }
+    return PdfSecString(object, PdfString._string(value));
   }
 
   factory PdfSecString.fromDate(PdfObject object, DateTime date) {
-    final DateTime utcDate = date.toUtc();
-    final String year = utcDate.year.toString().padLeft(4, '0');
-    final String month = utcDate.month.toString().padLeft(2, '0');
-    final String day = utcDate.day.toString().padLeft(2, '0');
-    final String hour = utcDate.hour.toString().padLeft(2, '0');
-    final String minute = utcDate.minute.toString().padLeft(2, '0');
-    final String second = utcDate.second.toString().padLeft(2, '0');
-    return PdfSecString.fromString(
-        object, 'D:$year$month$day$hour$minute${second}Z');
+    return PdfSecString(object, PdfString._date(date));
   }
 
   final PdfObject object;
@@ -162,22 +154,7 @@ class PdfSecString extends PdfString {
     }
 
     final List<int> enc = object.pdfDocument.encryption.encrypt(value, object);
-    switch (format) {
-      case PdfStringFormat.binary:
-        s.putByte(0x3c);
-        for (int byte in enc) {
-          s.putByte(_codeUnitForDigit((byte & 0xF0) >> 4));
-          s.putByte(_codeUnitForDigit(byte & 0x0F));
-        }
-        s.putByte(0x3e);
-
-        break;
-      case PdfStringFormat.litteral:
-        s.putByte(40);
-        s.putTextBytes(enc);
-        s.putByte(41);
-        break;
-    }
+    _output(s, Uint8List.fromList(enc));
   }
 }
 
@@ -231,11 +208,6 @@ class PdfArray extends PdfDataType {
     return PdfArray(list.map<PdfNum>((num e) => PdfNum(e)).toList());
   }
 
-  // factory PdfArray.fromStrings(List<String> list) {
-  //   return PdfArray(
-  //       list.map<PdfString>((String e) => PdfString.fromString(e)).toList());
-  // }
-
   final List<PdfDataType> values = <PdfDataType>[];
 
   void add(PdfDataType v) {
@@ -246,12 +218,17 @@ class PdfArray extends PdfDataType {
   void output(PdfStream s) {
     s.putString('[');
     if (values.isNotEmpty) {
-      for (int n = 0; n < values.length - 1; n++) {
+      for (int n = 0; n < values.length; n++) {
         final PdfDataType val = values[n];
+        if (n > 0 &&
+            !(val is PdfName ||
+                val is PdfString ||
+                val is PdfArray ||
+                val is PdfDict)) {
+          s.putByte(0x20);
+        }
         val.output(s);
-        s.putString(' ');
       }
-      values.last.output(s);
     }
     s.putString(']');
   }
@@ -283,13 +260,15 @@ class PdfDict extends PdfDataType {
 
   @override
   void output(PdfStream s) {
-    s.putString('<< ');
+    s.putBytes(const <int>[0x3c, 0x3c]);
     values.forEach((String k, PdfDataType v) {
-      s.putString('$k ');
+      s.putString(k);
+      if (v is PdfNum || v is PdfBool || v is PdfNull || v is PdfIndirect) {
+        s.putByte(0x20);
+      }
       v.output(s);
-      s.putString('\n');
     });
-    s.putString('>>');
+    s.putBytes(const <int>[0x3e, 0x3e]);
   }
 
   bool containsKey(String key) {

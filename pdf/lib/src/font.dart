@@ -163,9 +163,9 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
   @override
   String toString() => 'Font($fontName)';
 
-  PdfStream putText(String text) {
+  void putText(PdfStream stream, String text) {
     try {
-      return PdfStream()
+      stream
         ..putByte(40)
         ..putTextBytes(latin1.encode(text))
         ..putByte(41);

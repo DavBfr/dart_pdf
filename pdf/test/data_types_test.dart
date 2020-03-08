@@ -70,15 +70,28 @@ void main() {
   });
 
   test('PdfDataTypes Array', () {
-    expect(PdfArray(<PdfDataType>[]).toString(), '[]');
+    expect(PdfArray().toString(), '[]');
     expect(
       PdfArray(<PdfDataType>[const PdfNum(1), const PdfNum(2)]).toString(),
       '[1 2]',
     );
+    expect(
+      PdfArray(<PdfDataType>[
+        const PdfName('/Name'),
+        const PdfName('/Other'),
+        const PdfBool(false),
+        const PdfNum(2.5),
+        const PdfNull(),
+        PdfString.fromString('helło'),
+        PdfArray(),
+        PdfDict(),
+      ]).toString(),
+      '[/Name/Other false 2.50000 null(þÿ\x00h\x00e\x00l\x01B\x00o)[]<<>>]',
+    );
   });
 
   test('PdfDataTypes Dict', () {
-    expect(PdfDict(<String, PdfDataType>{}).toString(), '<< >>');
+    expect(PdfDict().toString(), '<<>>');
 
     expect(
       PdfDict(<String, PdfDataType>{
@@ -91,7 +104,7 @@ void main() {
         '/Array': PdfArray(<PdfDataType>[]),
         '/Dict': PdfDict(<String, PdfDataType>{}),
       }).toString(),
-      '<< /Name /Value\n/Bool true\n/Num 42\n/String (hello)\n/Null null\n/Indirect 55 0 R\n/Array []\n/Dict << >>\n>>',
+      '<</Name/Value/Bool true/Num 42/String(hello)/Null null/Indirect 55 0 R/Array[]/Dict<<>>>>',
     );
   });
 }

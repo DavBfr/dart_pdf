@@ -135,13 +135,13 @@ class PdfTtfFont extends PdfFont {
   }
 
   @override
-  PdfStream putText(String text) {
+  void putText(PdfStream stream, String text) {
     if (!font.unicode) {
-      return super.putText(text);
+      super.putText(stream, text);
     }
 
     final Runes runes = text.runes;
-    final PdfStream stream = PdfStream();
+
     stream.putByte(0x3c);
     for (int rune in runes) {
       int char = unicodeCMap.cmap.indexOf(rune);
@@ -153,7 +153,6 @@ class PdfTtfFont extends PdfFont {
       stream.putBytes(latin1.encode(char.toRadixString(16).padLeft(4, '0')));
     }
     stream.putByte(0x3e);
-    return stream;
   }
 
   @override
