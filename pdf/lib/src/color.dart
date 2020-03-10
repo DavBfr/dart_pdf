@@ -141,6 +141,17 @@ class PdfColor {
     return 0.2126 * R + 0.7152 * G + 0.0722 * B;
   }
 
+  /// Build a Material Color shade using the given [strength].
+  ///
+  /// To lighten a color, set the [strength] value to < .5
+  /// To darken a color, set the [strength] value to > .5
+  PdfColor shade(double strength) {
+    final double ds = 1.5 - strength;
+    final PdfColorHsl hsl = toHsl();
+
+    return PdfColorHsl(hsl.hue, hsl.saturation, hsl.lightness * ds);
+  }
+
   /// Get a complementary color with hue shifted by -120°
   PdfColor get complementary => toHsv().complementary;
 

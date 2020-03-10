@@ -7,6 +7,7 @@
 - Improve Internal data structure
 - Remove deprecated functions
 - Optimize file size
+- Add PdfColor.shade
 
 ## 1.5.0
 
