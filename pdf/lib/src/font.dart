@@ -19,6 +19,14 @@
 part of pdf;
 
 abstract class PdfFont extends PdfObject {
+  static const String CANNOT_DECODE_TO_LATIN1_MESSAGE =
+      '''---------------------------------------------
+Cannot decode the string to Latin1.
+This font does not support Unicode characters.
+If you want to use strings other than Latin strings, use a TrueType (TTF) font instead.
+See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
+---------------------------------------------''';
+
   /// Constructs a [PdfFont]. This will attempt to map the font from a known
   /// font name to that in Pdf, defaulting to Helvetica if not possible.
   ///
@@ -142,13 +150,7 @@ abstract class PdfFont extends PdfObject {
       final Iterable<PdfFontMetrics> metrics = chars.map(glyphMetrics);
       return PdfFontMetrics.append(metrics);
     } catch (e) {
-      assert(false, '''\n---------------------------------------------
-Can not decode the string to Latin1.
-This font does not support Unicode characters.
-If you want to use strings other than Latin strings, use a TrueType (TTF) font instead.
-See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
----------------------------------------------''');
-      rethrow;
+      throw '$e\n$CANNOT_DECODE_TO_LATIN1_MESSAGE';
     }
   }
 
@@ -170,13 +172,7 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
         ..putTextBytes(latin1.encode(text))
         ..putByte(41);
     } catch (e) {
-      assert(false, '''\n---------------------------------------------
-Can not decode the string to Latin1.
-This font does not support Unicode characters.
-If you want to use strings other than Latin strings, use a TrueType (TTF) font instead.
-See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
----------------------------------------------''');
-      rethrow;
+      throw '$e\n$CANNOT_DECODE_TO_LATIN1_MESSAGE';
     }
   }
 }
