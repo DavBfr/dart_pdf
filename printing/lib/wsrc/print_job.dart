@@ -96,5 +96,8 @@ class _PrintJob {
     });
   }
 
-  Future<void> cancelJob() async {}
+  /// Cancels this job with the applicable error if there is one
+  Future<void> cancelJob([dynamic error]) async {
+    await printing.onCompleted(this, false, error?.toString());
+  }
 }

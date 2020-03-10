@@ -41,13 +41,12 @@ mixin Printing {
           final List<int> bytes = await job.onLayout(format);
 
           if (bytes == null) {
-            return false;
+            throw 'onLayout returned null';
           }
 
           return Uint8List.fromList(bytes);
         } catch (e) {
-          print('Unable to print: $e');
-          return false;
+          return e.toString();
         }
         break;
       case 'onCompleted':

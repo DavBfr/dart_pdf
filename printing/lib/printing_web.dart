@@ -93,13 +93,13 @@ class PrintingPlugin {
     if (result is List<int>) {
       printJob.setDocument(result);
     } else {
-      printJob.cancelJob();
+      printJob.cancelJob(result);
     }
   }
 
   /// send completion status to flutter
   Future<void> onCompleted(_PrintJob printJob, bool completed,
-      [String error = '']) async {
+      [String error]) async {
     final Map<String, dynamic> data = <String, dynamic>{
       'completed': completed,
       'error': error,
