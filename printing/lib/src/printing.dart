@@ -122,14 +122,11 @@ mixin Printing {
     };
 
     await _channel.invokeMethod<int>('printPdf', params);
-    bool result = false;
     try {
-      result = await job.onCompleted.future;
-    } catch (e) {
-      print('Document not printed: $e');
+      return await job.onCompleted.future;
+    } finally {
+      _printJobs.remove(job.index);
     }
-    _printJobs.remove(job.index);
-    return result;
   }
 
   static Future<Map<dynamic, dynamic>> printingInfo() async {
