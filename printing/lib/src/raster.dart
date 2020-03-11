@@ -14,17 +14,28 @@
  * limitations under the License.
  */
 
-part of printing;
+import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
+import 'package:flutter/painting.dart';
+
+/// Represents a bitmap image
 class PdfRaster {
-  PdfRaster._(
+  /// Create a bitmap image
+  PdfRaster(
     this.width,
     this.height,
     this.pixels,
   );
 
+  /// The width of the image
   final int width;
+
+  /// The height of the image
   final int height;
+
+  /// The raw RGBA pixels of the image
   final Uint8List pixels;
 
   @override
@@ -52,9 +63,12 @@ class PdfRaster {
   }
 }
 
+/// Image provider for a [PdfRaster]
 class PdfRasterImage extends ImageProvider<PdfRaster> {
+  /// Create an ImageProvider from a [PdfRaster]
   PdfRasterImage(this.raster);
 
+  /// The image source
   final PdfRaster raster;
 
   Future<ImageInfo> _loadAsync() async {

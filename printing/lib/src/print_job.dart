@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-part of printing;
+import 'dart:async';
 
-class _PrintJob {
-  _PrintJob({
+import 'callback.dart';
+import 'raster.dart';
+
+class PrintJob {
+  PrintJob({
     this.onLayout,
     this.onHtmlRendered,
     this.onCompleted,

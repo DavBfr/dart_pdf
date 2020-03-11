@@ -63,11 +63,17 @@ class MyAppState extends State<MyApp> {
 
   Future<void> _printPdf() async {
     print('Print ...');
-    final bool result = await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async =>
-            (await generateDocument(format)).save());
-
-    _showPrintedToast(result);
+    try {
+      final bool result = await Printing.layoutPdf(
+          onLayout: (PdfPageFormat format) async =>
+              (await generateDocument(format)).save());
+      _showPrintedToast(result);
+    } catch (e) {
+      final ScaffoldState scaffold = Scaffold.of(shareWidget.currentContext);
+      scaffold.showSnackBar(SnackBar(
+        content: Text('Error: ${e.toString()}'),
+      ));
+    }
   }
 
   Future<void> _saveAsFile() async {

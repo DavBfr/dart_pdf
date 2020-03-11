@@ -14,31 +14,10 @@
  * limitations under the License.
  */
 
-import 'package:meta/meta.dart';
+import 'dart:async';
 
-/// Information about a printer
-@immutable
-class Printer {
-  /// Create a printer information
-  const Printer({
-    @required this.url,
-    this.name,
-    this.model,
-    this.location,
-  }) : assert(url != null);
+import 'package:pdf/pdf.dart';
 
-  /// The platform specific printer identification
-  final String url;
-
-  /// The display name of the printer
-  final String name;
-
-  /// The printer model
-  final String model;
-
-  /// The physical location of the printer
-  final String location;
-
-  @override
-  String toString() => name ?? url;
-}
+/// Callback used to generate the Pdf document dynamically when the user
+/// changes the page settings: size and margins
+typedef LayoutCallback = FutureOr<List<int>> Function(PdfPageFormat format);

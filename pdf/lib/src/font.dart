@@ -101,6 +101,14 @@ abstract class PdfFont extends PdfObject {
         pdfDocument, 'ZapfDingbats', 0.820, -0.143, _zapfDingbatsWidths);
   }
 
+  static const String _cannotDecodeMessage =
+      '''---------------------------------------------
+Cannot decode the string to Latin1.
+This font does not support Unicode characters.
+If you want to use strings other than Latin strings, use a TrueType (TTF) font instead.
+See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
+---------------------------------------------''';
+
   /// The df type of the font, usually /Type1
   final String subtype;
 
@@ -141,13 +149,12 @@ abstract class PdfFont extends PdfObject {
       final Uint8List chars = latin1.encode(s);
       final Iterable<PdfFontMetrics> metrics = chars.map(glyphMetrics);
       return PdfFontMetrics.append(metrics);
-    } catch (e) {
-      assert(false, '''\n---------------------------------------------
-Can not decode the string to Latin1.
-This font does not support Unicode characters.
-If you want to use strings other than Latin strings, use a TrueType (TTF) font instead.
-See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
----------------------------------------------''');
+    } catch (_) {
+      assert(() {
+        print(_cannotDecodeMessage);
+        return true;
+      }());
+
       rethrow;
     }
   }
@@ -169,13 +176,12 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
         ..putByte(40)
         ..putTextBytes(latin1.encode(text))
         ..putByte(41);
-    } catch (e) {
-      assert(false, '''\n---------------------------------------------
-Can not decode the string to Latin1.
-This font does not support Unicode characters.
-If you want to use strings other than Latin strings, use a TrueType (TTF) font instead.
-See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
----------------------------------------------''');
+    } catch (_) {
+      assert(() {
+        print(_cannotDecodeMessage);
+        return true;
+      }());
+
       rethrow;
     }
   }

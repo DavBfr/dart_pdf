@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.2.0
+
+- Update README
+- Remove deprecated API
+- Use plugin_platform_interface
+- Fix inconsistent API
+- Add Unit tests
+
 ## 3.1.0
 
 - Migrate to the new Android plugins APIs

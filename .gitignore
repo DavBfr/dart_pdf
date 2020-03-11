@@ -34,11 +34,11 @@ printing/android/.gradle
 pedantic_analyis_options_*.yaml
 .dartfix
 node_modules
-pdf/lcov.info
-pdf/coverage.json
+lcov.info
+coverage.json
 .coverage
 package-lock.json
-printing/lcov.info
+lcov.info
 
 test/readme.dart
 test/android

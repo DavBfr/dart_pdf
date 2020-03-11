@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-part of printing;
+import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart';
 
 /// Loads an image from a Flutter [ui.Image]
 /// into a [PdfImage] instance

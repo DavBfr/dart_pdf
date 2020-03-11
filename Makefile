@@ -77,18 +77,18 @@ test-pdf: $(FONTS) get-pdf .coverage
 
 test-printing: $(FONTS) get-printing .coverage
 	cd printing; flutter test --coverage --coverage-path lcov.info
-	cd printing/example; flutter test --coverage --coverage-path ../lcov.info
+	cd printing/example; flutter test --coverage --coverage-path lcov.info
 
 test-readme: $(FONTS) get-readme
 	cd test; dart extract_readme.dart
-	cd test; dartanalyzer readme.dart	
+	cd test; dartanalyzer readme.dart
 
 test-web:
 	cd pdf/web_example; pub get
 	cd pdf/web_example; pub run webdev build
 
 test: test-pdf test-printing node_modules test-web
-	cat pdf/lcov.info printing/lcov.info | node_modules/.bin/lcov-summary
+	cat pdf/lcov.info printing/lcov.info printing/example/lcov.info | node_modules/.bin/lcov-summary
 
 clean:
 	git clean -fdx -e .vscode -e ref
