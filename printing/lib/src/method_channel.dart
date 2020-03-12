@@ -217,7 +217,7 @@ class MethodChannelPrinting extends PrintingPlatform {
       'w': bounds.width,
       'h': bounds.height,
     };
-    return await _channel.invokeMethod('sharePdf', params);
+    return await _channel.invokeMethod<int>('sharePdf', params) != 0;
   }
 
   @override
