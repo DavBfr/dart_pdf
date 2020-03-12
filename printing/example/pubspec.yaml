@@ -12,7 +12,6 @@ dependencies:
   printing:
   path_provider:
   flutter_full_pdf_viewer:
-  cupertino_icons:
   markdown:
 
 dev_dependencies:

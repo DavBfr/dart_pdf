@@ -150,6 +150,7 @@ ref:
 gh-pages:
 	cd printing/example; flutter build web
 	git checkout gh-pages
-	mv -f printing/example/build/web/* .
+	rm -rf assets icons
+	mv -fv printing/example/build/web/* .
 
 .PHONY: test format format-dart format-clang clean publish-pdf publish-printing analyze ref
