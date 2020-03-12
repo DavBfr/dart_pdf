@@ -57,4 +57,16 @@ class PrintingInfo {
   canConvertHtml: $canConvertHtml
   canShare: $canShare
   canRaster: $canRaster''';
+
+  /// Returns a map representation of this object
+  Map<dynamic, dynamic> asMap() {
+    return <dynamic, dynamic>{
+      'canPrint': canPrint,
+      'directPrint': directPrint,
+      'dynamicLayout': dynamicLayout,
+      'canConvertHtml': canConvertHtml,
+      'canShare': canShare,
+      'canRaster': canRaster,
+    };
+  }
 }
