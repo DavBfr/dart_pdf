@@ -260,11 +260,14 @@ class MyAppState extends State<MyApp> {
                 ),
                 RaisedButton(
                   child: const Text('Print Screenshot'),
-                  onPressed:
-                      printingInfo?.canPrint ?? false ? _printScreen : null,
+                  onPressed: (printingInfo?.canPrint ?? false) && !kIsWeb
+                      ? _printScreen
+                      : null,
                 ),
                 RaisedButton(
-                    child: const Text('Save to file'), onPressed: _saveAsFile),
+                  child: const Text('Save to file'),
+                  onPressed: kIsWeb ? null : _saveAsFile,
+                ),
                 RaisedButton(
                   child: const Text('Raster to Image'),
                   onPressed:
