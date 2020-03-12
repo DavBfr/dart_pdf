@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pdf;
+import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 void main() => runApp(MyApp());
@@ -15,43 +15,51 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Printing Demo'),
+          title: Text('Printing Demo'),
         ),
         floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.print),
+          child: Icon(Icons.print),
           tooltip: 'Print Document',
           onPressed: () {
+            // This is where we print the document
             Printing.layoutPdf(
-              onLayout: buildPdf,
+              // [onLayout] will be called multiple times
+              // when the user changes the printer or printer settings
+              onLayout: (PdfPageFormat format) {
+                // Any valid Pdf document can be returned here as a list of int
+                return buildPdf(format);
+              },
             );
           },
         ),
         body: Center(
-          child: const Text('Click on the print button below'),
+          child: Text('Click on the print button below'),
         ),
       ),
     );
   }
 
+  /// This method takes a page format and generates the Pdf file data
   List<int> buildPdf(PdfPageFormat format) {
-    final Document doc = Document();
+    // Create the Pdf document
+    final pw.Document doc = pw.Document();
 
+    // Add one page with centered text "Hello World"
     doc.addPage(
-      pdf.Page(
+      pw.Page(
         pageFormat: format,
-        build: (pdf.Context context) {
-          return pdf.ConstrainedBox(
-            constraints: const pdf.BoxConstraints.expand(),
-            child: pdf.FittedBox(
-              child: pdf.Text(
-                'Hello World',
-              ),
+        build: (pw.Context context) {
+          return pw.ConstrainedBox(
+            constraints: pw.BoxConstraints.expand(),
+            child: pw.FittedBox(
+              child: pw.Text('Hello World'),
             ),
           );
         },
       ),
     );
 
+    // Build and return the final Pdf file data
     return doc.save();
   }
 }

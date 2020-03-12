@@ -7,6 +7,7 @@
 - Use plugin_platform_interface
 - Fix inconsistent API
 - Add Unit tests
+- Update example tab
 
 ## 3.1.0
 
