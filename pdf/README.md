@@ -20,16 +20,31 @@ The coordinate system is using the internal Pdf unit:
 
 [![Buy Me A Coffee](https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/custom_images/orange_img.png "Buy Me A Coffee")](https://www.buymeacoffee.com/JORBmbw9h "Buy Me A Coffee")
 
-Example:
+## Installing
+
+If you want to print the Pdf document on an actual printer with Flutter,
+follow the instructions at <https://pub.dev/packages/printing>
+
+1. Add this package to your package's `pubspec.yaml` file as described
+   on the installation tab
+
+2. Import the libraries
+
+   ```dart
+   import 'package:pdf/pdf.dart';
+   import 'package:pdf/widgets.dart' as pw;
+   ```
+
+## Examples
 
 ```dart
-final pdf = Document();
+final pdf = pw.Document();
 
-pdf.addPage(Page(
+pdf.addPage(pw.Page(
       pageFormat: PdfPageFormat.a4,
-      build: (Context context) {
-        return Center(
-          child: Text("Hello World"),
+      build: (pw.Context context) {
+        return pw.Center(
+          child: pw.Text("Hello World"),
         ); // Center
       })); // Page
 ```
@@ -45,10 +60,10 @@ final image = PdfImage(
   height: img.height,
 );
 
-pdf.addPage(Page(
-    build: (Context context) {
-      return Center(
-        child: Image(image),
+pdf.addPage(pw.Page(
+    build: (pw.Context context) {
+      return pw.Center(
+        child: pw.Image(image),
       ); // Center
     })); // Page
 ```
@@ -57,13 +72,13 @@ To use a TrueType font:
 
 ```dart
 final Uint8List fontData = File('open-sans.ttf').readAsBytesSync();
-final ttf = Font.ttf(fontData.buffer.asByteData());
+final ttf = pw.Font.ttf(fontData.buffer.asByteData());
 
-pdf.addPage(Page(
+pdf.addPage(pw.Page(
     pageFormat: PdfPageFormat.a4,
-    build: (Context context) {
-      return Center(
-        child: Text('Hello World', style: TextStyle(font: ttf, fontSize: 40)),
+    build: (pw.Context context) {
+      return pw.Center(
+        child: pw.Text('Hello World', style: pw.TextStyle(font: ttf, fontSize: 40)),
       ); // Center
     })); // Page
 ```

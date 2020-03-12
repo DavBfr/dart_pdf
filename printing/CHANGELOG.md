@@ -8,6 +8,7 @@
 - Fix inconsistent API
 - Add Unit tests
 - Update example tab
+- Uniformize examples
 
 ## 3.1.0
 

@@ -30,7 +30,7 @@ Iterable<String> getCode(List<md.Node> nodes, [bool isCode = false]) sync* {
       yield* getCode(node.children,
           node.tag == 'code' && node.attributes['class'] == 'language-dart');
     } else if (node is md.Text) {
-      if (isCode) {
+      if (isCode && !node.text.startsWith('import')) {
         yield '// ------------';
         yield node.text;
       }
@@ -40,47 +40,39 @@ Iterable<String> getCode(List<md.Node> nodes, [bool isCode = false]) sync* {
   }
 }
 
-void main() {
+void buildFile(String src, String dest, bool flutter) {
   final md.Document document = md.Document(
     extensionSet: md.ExtensionSet.commonMark,
     encodeHtml: false,
   );
 
-  final output = File('readme.dart');
+  final output = File(dest);
   final st = output.openWrite();
   st.writeln('import \'dart:io\';');
-  st.writeln('import \'dart:typed_data\';');
+  if (flutter) {
+    st.writeln('import \'package:flutter/services.dart\' show rootBundle;');
+    st.writeln('import \'package:flutter/widgets.dart\' show AssetImage;');
+    st.writeln('import \'package:path_provider/path_provider.dart\';');
+    st.writeln('import \'package:printing/printing.dart\';');
+  } else {
+    st.writeln('import \'dart:typed_data\';');
+    st.writeln('import \'package:image/image.dart\' show decodeImage;');
+  }
   st.writeln('import \'package:pdf/pdf.dart\';');
-  st.writeln('import \'package:pdf/widgets.dart\';');
-  st.writeln('import \'package:image/image.dart\' show decodeImage;');
-  st.writeln('import \'package:printing/printing.dart\';');
-  st.writeln('import \'package:flutter/services.dart\' show rootBundle;');
-  st.writeln('import \'package:flutter/widgets.dart\' show AssetImage;');
-  st.writeln('import \'package:path_provider/path_provider.dart\';');
+  st.writeln('import \'package:pdf/widgets.dart\' as pw;');
 
-  {
-    final data = File('../pdf/README.md').readAsStringSync();
-    final List<String> lines = data.replaceAll('\r\n', '\n').split('\n');
-    final List<md.Node> parsedLines = document.parseLines(lines);
-    final Iterable<String> code = getCode(parsedLines);
+  final data = File(src).readAsStringSync();
+  final List<String> lines = data.replaceAll('\r\n', '\n').split('\n');
+  final List<md.Node> parsedLines = document.parseLines(lines);
+  final Iterable<String> code = getCode(parsedLines);
 
-    st.writeln('Future pdfReadme() async {');
-    st.writeln(code.join('\n'));
-    st.writeln('}');
-  }
-  {
-    final data = File('../printing/README.md').readAsStringSync();
-    final List<String> lines = data.replaceAll('\r\n', '\n').split('\n');
-    final List<md.Node> parsedLines = document.parseLines(lines);
-    final Iterable<String> code = getCode(parsedLines);
-
-    st.writeln('Future printingReadme() async {');
-    st.writeln(code.join('\n'));
-    st.writeln('}');
-  }
   st.writeln('Future main() async {');
-  st.writeln('await pdfReadme();');
-  st.writeln('await printingReadme();');
+  st.writeln(code.join('\n'));
   st.writeln('}');
   st.close();
+}
+
+void main() {
+  buildFile('../pdf/README.md', 'readme-pdf.dart', false);
+  buildFile('../printing/README.md', 'readme-printing.dart', true);
 }

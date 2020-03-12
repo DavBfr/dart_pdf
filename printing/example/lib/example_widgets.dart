@@ -1,21 +1,21 @@
 import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 const PdfColor green = PdfColor.fromInt(0xff9ce5d0);
 const PdfColor lightGreen = PdfColor.fromInt(0xffcdf1e7);
 
-PageTheme myPageTheme(PdfPageFormat format) {
-  return PageTheme(
+pw.PageTheme myPageTheme(PdfPageFormat format) {
+  return pw.PageTheme(
     pageFormat: format.applyMargin(
         left: 2.0 * PdfPageFormat.cm,
         top: 4.0 * PdfPageFormat.cm,
         right: 2.0 * PdfPageFormat.cm,
         bottom: 2.0 * PdfPageFormat.cm),
-    buildBackground: (Context context) {
-      return FullPage(
+    buildBackground: (pw.Context context) {
+      return pw.FullPage(
         ignoreMargins: true,
-        child: CustomPaint(
+        child: pw.CustomPaint(
           size: PdfPoint(format.width, format.height),
           painter: (PdfGraphics canvas, PdfPoint size) {
             context.canvas
@@ -55,60 +55,62 @@ PageTheme myPageTheme(PdfPageFormat format) {
   );
 }
 
-class Block extends StatelessWidget {
+class Block extends pw.StatelessWidget {
   Block({this.title});
 
   final String title;
 
   @override
-  Widget build(Context context) {
-    return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
-            Container(
-              width: 6,
-              height: 6,
-              margin: const EdgeInsets.only(top: 2.5, left: 2, right: 5),
-              decoration:
-                  const BoxDecoration(color: green, shape: BoxShape.circle),
-            ),
-            Text(title,
-                style: Theme.of(context)
-                    .defaultTextStyle
-                    .copyWith(fontWeight: FontWeight.bold)),
-          ]),
-          Container(
-            decoration: const BoxDecoration(
-                border: BoxBorder(left: true, color: green, width: 2)),
-            padding: const EdgeInsets.only(left: 10, top: 5, bottom: 5),
-            margin: const EdgeInsets.only(left: 5),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Lorem(length: 20),
+  pw.Widget build(pw.Context context) {
+    return pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: <pw.Widget>[
+          pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: <pw.Widget>[
+                pw.Container(
+                  width: 6,
+                  height: 6,
+                  margin: const pw.EdgeInsets.only(top: 2.5, left: 2, right: 5),
+                  decoration: const pw.BoxDecoration(
+                      color: green, shape: pw.BoxShape.circle),
+                ),
+                pw.Text(title,
+                    style: pw.Theme.of(context)
+                        .defaultTextStyle
+                        .copyWith(fontWeight: pw.FontWeight.bold)),
+              ]),
+          pw.Container(
+            decoration: const pw.BoxDecoration(
+                border: pw.BoxBorder(left: true, color: green, width: 2)),
+            padding: const pw.EdgeInsets.only(left: 10, top: 5, bottom: 5),
+            margin: const pw.EdgeInsets.only(left: 5),
+            child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: <pw.Widget>[
+                  pw.Lorem(length: 20),
                 ]),
           ),
         ]);
   }
 }
 
-class Category extends StatelessWidget {
+class Category extends pw.StatelessWidget {
   Category({this.title});
 
   final String title;
 
   @override
-  Widget build(Context context) {
-    return Container(
-        decoration: const BoxDecoration(color: lightGreen, borderRadius: 6),
-        margin: const EdgeInsets.only(bottom: 10, top: 20),
-        padding: const EdgeInsets.fromLTRB(10, 7, 10, 4),
-        child: Text(title, textScaleFactor: 1.5));
+  pw.Widget build(pw.Context context) {
+    return pw.Container(
+        decoration: const pw.BoxDecoration(color: lightGreen, borderRadius: 6),
+        margin: const pw.EdgeInsets.only(bottom: 10, top: 20),
+        padding: const pw.EdgeInsets.fromLTRB(10, 7, 10, 4),
+        child: pw.Text(title, textScaleFactor: 1.5));
   }
 }
 
-class Percent extends StatelessWidget {
+class Percent extends pw.StatelessWidget {
   Percent({
     @required this.size,
     @required this.value,
@@ -123,7 +125,7 @@ class Percent extends StatelessWidget {
 
   final double value;
 
-  final Widget title;
+  final pw.Widget title;
 
   final double fontSize;
 
@@ -134,22 +136,22 @@ class Percent extends StatelessWidget {
   final double strokeWidth;
 
   @override
-  Widget build(Context context) {
-    final List<Widget> widgets = <Widget>[
-      Container(
+  pw.Widget build(pw.Context context) {
+    final List<pw.Widget> widgets = <pw.Widget>[
+      pw.Container(
         width: size,
         height: size,
-        child: Stack(
-          alignment: Alignment.center,
-          fit: StackFit.expand,
-          children: <Widget>[
-            Center(
-              child: Text(
+        child: pw.Stack(
+          alignment: pw.Alignment.center,
+          fit: pw.StackFit.expand,
+          children: <pw.Widget>[
+            pw.Center(
+              child: pw.Text(
                 '${(value * 100).round().toInt()}%',
                 textScaleFactor: fontSize,
               ),
             ),
-            CircularProgressIndicator(
+            pw.CircularProgressIndicator(
               value: value,
               backgroundColor: backgroundColor,
               color: color,
@@ -164,23 +166,23 @@ class Percent extends StatelessWidget {
       widgets.add(title);
     }
 
-    return Column(children: widgets);
+    return pw.Column(children: widgets);
   }
 }
 
-class UrlText extends StatelessWidget {
+class UrlText extends pw.StatelessWidget {
   UrlText(this.text, this.url);
 
   final String text;
   final String url;
 
   @override
-  Widget build(Context context) {
-    return UrlLink(
+  pw.Widget build(pw.Context context) {
+    return pw.UrlLink(
       destination: url,
-      child: Text(text,
-          style: TextStyle(
-            decoration: TextDecoration.underline,
+      child: pw.Text(text,
+          style: pw.TextStyle(
+            decoration: pw.TextDecoration.underline,
             color: PdfColors.blue,
           )),
     );

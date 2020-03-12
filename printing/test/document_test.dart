@@ -21,11 +21,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pdf;
+import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
-pdf.Document doc;
-pdf.Font ttf;
+pw.Document doc;
+pw.Font ttf;
 
 void main() {
   final String path =
@@ -53,10 +53,10 @@ void main() {
         pdf: doc.document, image: FileImage(File('$path/example.png')));
 
     doc.addPage(
-      pdf.Page(
-        build: (pdf.Context context) => pdf.Center(
-          child: pdf.Container(
-            child: pdf.Image(image),
+      pw.Page(
+        build: (pw.Context context) => pw.Center(
+          child: pw.Container(
+            child: pw.Image(image),
           ),
         ),
       ),
@@ -64,12 +64,12 @@ void main() {
   });
 
   setUpAll(() {
-    pdf.Document.debug = true;
-    pdf.RichText.debug = true;
+    pw.Document.debug = true;
+    pw.RichText.debug = true;
     final Uint8List fontData =
         File('$path/../pdf/open-sans.ttf').readAsBytesSync();
-    ttf = pdf.Font.ttf(fontData.buffer.asByteData());
-    doc = pdf.Document();
+    ttf = pw.Font.ttf(fontData.buffer.asByteData());
+    doc = pw.Document();
   });
 
   tearDownAll(() {

@@ -11,7 +11,7 @@ import 'package:markdown/markdown.dart' as markdown;
 import 'package:path_provider/path_provider.dart';
 
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pdf;
+import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 import 'document.dart';
@@ -140,7 +140,7 @@ class MyAppState extends State<MyApp> {
 
   Future<void> _sharePdf() async {
     print('Share ...');
-    final pdf.Document document = await generateDocument(PdfPageFormat.a4);
+    final pw.Document document = await generateDocument(PdfPageFormat.a4);
 
     // Calculate the widget center for iPad sharing popup position
     final RenderBox referenceBox =
@@ -165,19 +165,19 @@ class MyAppState extends State<MyApp> {
 
     final bool result =
         await Printing.layoutPdf(onLayout: (PdfPageFormat format) {
-      final pdf.Document document = pdf.Document();
+      final pw.Document document = pw.Document();
 
       final PdfImage image = PdfImage(document.document,
           image: bytes.buffer.asUint8List(),
           width: im.width,
           height: im.height);
 
-      document.addPage(pdf.Page(
+      document.addPage(pw.Page(
           pageFormat: format,
-          build: (pdf.Context context) {
-            return pdf.Center(
-              child: pdf.Expanded(
-                child: pdf.Image(image),
+          build: (pw.Context context) {
+            return pw.Center(
+              child: pw.Expanded(
+                child: pw.Image(image),
               ),
             ); // Center
           })); // Page
@@ -289,10 +289,10 @@ class MyAppState extends State<MyApp> {
                       Switch.adaptive(
                         onChanged: (bool value) {
                           setState(() {
-                            pdf.Document.debug = value;
+                            pw.Document.debug = value;
                           });
                         },
-                        value: pdf.Document.debug,
+                        value: pw.Document.debug,
                       ),
                     ],
                   )

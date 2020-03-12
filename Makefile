@@ -81,7 +81,7 @@ test-printing: $(FONTS) get-printing .coverage
 
 test-readme: $(FONTS) get-readme
 	cd test; dart extract_readme.dart
-	cd test; dartanalyzer readme.dart
+	cd test; dartanalyzer readme-*.dart
 
 test-web:
 	cd pdf/web_example; pub get

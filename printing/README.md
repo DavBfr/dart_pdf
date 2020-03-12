@@ -15,16 +15,46 @@ for documentation.
 
 [![Buy Me A Coffee](https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/custom_images/orange_img.png "Buy Me A Coffee")](https://www.buymeacoffee.com/JORBmbw9h "Buy Me A Coffee")
 
-Example:
+## Installing
+
+1. Add this package to your package's `pubspec.yaml` file as described
+   on the installation tab
+
+2. Import the libraries
+
+   ```dart
+   import 'package:pdf/pdf.dart';
+   import 'package:pdf/widgets.dart' as pw;
+   import 'package:printing/printing.dart';
+   ```
+
+3. Enable Swift on the iOS project, in `ios/Podfile`:
+
+   ```Ruby
+   target 'Runner' do
+      use_frameworks!    # <-- Add this line
+   ```
+
+4. Set minimum Android version in `android/app/build.gradle`:
+
+   ```java
+   defaultConfig {
+       ...
+       minSdkVersion 21  // <-- Change this line to 21 or more
+       ...
+   }
+   ```
+
+## Examples
 
 ```dart
-final pdf = Document();
+final doc = pw.Document();
 
-pdf.addPage(Page(
+doc.addPage(pw.Page(
       pageFormat: PdfPageFormat.a4,
-      build: (Context context) {
-        return Center(
-          child: Text("Hello World"),
+      build: (pw.Context context) {
+        return pw.Center(
+          child: pw.Text("Hello World"),
         ); // Center
       })); // Page
 ```
@@ -33,12 +63,12 @@ To load an image from an ImageProvider:
 
 ```dart
 const imageProvider = const AssetImage('assets/image.png');
-final PdfImage image = await pdfImageFromImageProvider(pdf: pdf.document, image: imageProvider);
+final PdfImage image = await pdfImageFromImageProvider(pdf: doc.document, image: imageProvider);
 
-pdf.addPage(Page(
-    build: (Context context) {
-      return Center(
-        child: Image(image),
+doc.addPage(pw.Page(
+    build: (pw.Context context) {
+      return pw.Center(
+        child: pw.Image(image),
       ); // Center
     })); // Page
 ```
@@ -47,12 +77,12 @@ To use a TrueType font from a flutter bundle:
 
 ```dart
 final font = await rootBundle.load("assets/open-sans.ttf");
-final ttf = Font.ttf(font);
+final ttf = pw.Font.ttf(font);
 
-pdf.addPage(Page(
-    build: (Context context) {
-      return Center(
-        child: Text('Dart is awesome', style: TextStyle(font: ttf, fontSize: 40)),
+doc.addPage(pw.Page(
+    build: (pw.Context context) {
+      return pw.Center(
+        child: pw.Text('Dart is awesome', style: pw.TextStyle(font: ttf, fontSize: 40)),
       ); // Center
     })); // Page
 ```
@@ -62,20 +92,20 @@ To save the pdf file using the [path_provider](https://pub.dev/packages/path_pro
 ```dart
 final output = await getTemporaryDirectory();
 final file = File("${output.path}/example.pdf");
-await file.writeAsBytes(pdf.save());
+await file.writeAsBytes(doc.save());
 ```
 
 You can also print the document using the iOS or Android print service:
 
 ```dart
 await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save());
+      onLayout: (PdfPageFormat format) async => doc.save());
 ```
 
 Or share the document to other applications:
 
 ```dart
-await Printing.sharePdf(bytes: pdf.save(), filename: 'my-document.pdf');
+await Printing.sharePdf(bytes: doc.save(), filename: 'my-document.pdf');
 ```
 
 To print an HTML document:
@@ -91,29 +121,8 @@ await Printing.layoutPdf(
 Convert a Pdf to images, one image per page, get only pages 1 and 2 at 72 dpi:
 
 ```dart
-await for (var page in Printing.raster(pdf.save(), pages: [0, 1], dpi: 72)) {
-  final image = page.toImage();
-  // ...or page.toPng()
+await for (var page in Printing.raster(doc.save(), pages: [0, 1], dpi: 72)) {
+  final image = page.toImage(); // ...or page.toPng()
+  print(image);
 }
 ```
-
-## Installing
-
-1. Add this package to your package's `pubspec.yaml` file as described on the installation tab
-
-2. Enable Swift on the iOS project, in `ios/Podfile`:
-
-   ```Ruby
-   target 'Runner' do
-      use_frameworks!    # <-- Add this line
-   ```
-
-3. Set minimum Android version in `android/app/build.gradle`:
-
-   ```java
-   defaultConfig {
-       ...
-       minSdkVersion 21  // <-- Change this line to 21 or more
-       ...
-   }
-   ```

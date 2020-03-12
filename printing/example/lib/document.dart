@@ -1,72 +1,73 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/widgets.dart' as fw;
+import 'package:flutter/widgets.dart';
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 import 'example_widgets.dart';
 
-Future<Document> generateDocument(PdfPageFormat format) async {
-  final Document pdf = Document(title: 'My Résumé', author: 'David PHAM-VAN');
+Future<pw.Document> generateDocument(PdfPageFormat format) async {
+  final pw.Document doc =
+      pw.Document(title: 'My Résumé', author: 'David PHAM-VAN');
 
   final PdfImage profileImage = kIsWeb
       ? null
       : await pdfImageFromImageProvider(
-          pdf: pdf.document,
-          image: const fw.NetworkImage(
+          pdf: doc.document,
+          image: const NetworkImage(
               'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=200'),
           onError: (dynamic exception, StackTrace stackTrace) {
             print('Unable to download image');
           });
 
-  final PageTheme pageTheme = myPageTheme(format);
+  final pw.PageTheme pageTheme = myPageTheme(format);
 
-  pdf.addPage(Page(
+  doc.addPage(pw.Page(
     pageTheme: pageTheme,
-    build: (Context context) => Row(children: <Widget>[
-      Expanded(
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-            Container(
-                padding: const EdgeInsets.only(left: 30, bottom: 20),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text('Parnella Charlesbois',
+    build: (pw.Context context) => pw.Row(children: <pw.Widget>[
+      pw.Expanded(
+          child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: <pw.Widget>[
+            pw.Container(
+                padding: const pw.EdgeInsets.only(left: 30, bottom: 20),
+                child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: <pw.Widget>[
+                      pw.Text('Parnella Charlesbois',
                           textScaleFactor: 2,
-                          style: Theme.of(context)
+                          style: pw.Theme.of(context)
                               .defaultTextStyle
-                              .copyWith(fontWeight: FontWeight.bold)),
-                      Padding(padding: const EdgeInsets.only(top: 10)),
-                      Text('Electrotyper',
+                              .copyWith(fontWeight: pw.FontWeight.bold)),
+                      pw.Padding(padding: const pw.EdgeInsets.only(top: 10)),
+                      pw.Text('Electrotyper',
                           textScaleFactor: 1.2,
-                          style: Theme.of(context).defaultTextStyle.copyWith(
-                              fontWeight: FontWeight.bold, color: green)),
-                      Padding(padding: const EdgeInsets.only(top: 20)),
-                      Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Text('568 Port Washington Road'),
-                                  Text('Nordegg, AB T0M 2H0'),
-                                  Text('Canada, ON'),
+                          style: pw.Theme.of(context).defaultTextStyle.copyWith(
+                              fontWeight: pw.FontWeight.bold, color: green)),
+                      pw.Padding(padding: const pw.EdgeInsets.only(top: 20)),
+                      pw.Row(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: <pw.Widget>[
+                            pw.Column(
+                                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                children: <pw.Widget>[
+                                  pw.Text('568 Port Washington Road'),
+                                  pw.Text('Nordegg, AB T0M 2H0'),
+                                  pw.Text('Canada, ON'),
                                 ]),
-                            Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Text('+1 403-721-6898'),
+                            pw.Column(
+                                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                children: <pw.Widget>[
+                                  pw.Text('+1 403-721-6898'),
                                   UrlText('p.charlesbois@yahoo.com',
                                       'mailto:p.charlesbois@yahoo.com'),
                                   UrlText('wholeprices.ca',
                                       'https://wholeprices.ca'),
                                 ]),
-                            Padding(padding: EdgeInsets.zero)
+                            pw.Padding(padding: pw.EdgeInsets.zero)
                           ]),
                     ])),
             Category(title: 'Work Experience'),
@@ -77,32 +78,32 @@ Future<Document> generateDocument(PdfPageFormat format) async {
             Block(title: 'Bachelor Of Commerce'),
             Block(title: 'Bachelor Interior Design'),
           ])),
-      Container(
+      pw.Container(
         height: double.infinity,
         width: 2,
-        margin: const EdgeInsets.symmetric(horizontal: 5),
+        margin: const pw.EdgeInsets.symmetric(horizontal: 5),
         color: green,
       ),
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          ClipOval(
-              child: Container(
+      pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.center,
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: <pw.Widget>[
+          pw.ClipOval(
+              child: pw.Container(
                   width: 100,
                   height: 100,
                   color: lightGreen,
                   child: profileImage == null
-                      ? Container()
-                      : Image(profileImage))),
-          Column(children: <Widget>[
-            Percent(size: 60, value: .7, title: Text('Word')),
-            Percent(size: 60, value: .4, title: Text('Excel')),
+                      ? pw.Container()
+                      : pw.Image(profileImage))),
+          pw.Column(children: <pw.Widget>[
+            Percent(size: 60, value: .7, title: pw.Text('Word')),
+            Percent(size: 60, value: .4, title: pw.Text('Excel')),
           ]),
-          QrCodeWidget(data: 'Parnella Charlesbois', size: 60),
+          pw.QrCodeWidget(data: 'Parnella Charlesbois', size: 60),
         ],
       )
     ]),
   ));
-  return pdf;
+  return doc;
 }

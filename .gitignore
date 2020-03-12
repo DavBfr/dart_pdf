@@ -40,7 +40,7 @@ coverage.json
 package-lock.json
 lcov.info
 
-test/readme.dart
+test/readme*.dart
 test/android
 test/ios
 test/diff

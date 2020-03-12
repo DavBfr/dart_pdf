@@ -8,6 +8,7 @@
 - Remove deprecated functions
 - Optimize file size
 - Add PdfColor.shade
+- Uniformize examples
 
 ## 1.5.0
 
