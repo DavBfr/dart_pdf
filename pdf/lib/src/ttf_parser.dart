@@ -16,6 +16,12 @@
 
 // ignore_for_file: omit_local_variable_types
 
+// Links:
+// * https://fontdrop.info/
+// * https://docs.microsoft.com/en-us/typography/opentype/spec/gsub
+// * https://docs.microsoft.com/en-us/typography/script-development/bengali
+// * https://developer.apple.com/fonts/TrueType-Reference-Manual/
+
 part of pdf;
 
 @immutable
@@ -54,6 +60,9 @@ class TtfParser {
     _parseCMap();
     _parseIndexes();
     _parseGlyphs();
+    if (tableOffsets.containsKey(gsub_table)) {
+      _parseGsub();
+    }
   }
 
   static const String head_table = 'head';
@@ -64,6 +73,7 @@ class TtfParser {
   static const String maxp_table = 'maxp';
   static const String loca_table = 'loca';
   static const String glyf_table = 'glyf';
+  static const String gsub_table = 'GSUB';
 
   final UnmodifiableByteDataView bytes;
   final Map<String, int> tableOffsets = <String, int>{};
@@ -367,5 +377,138 @@ class TtfParser {
       Uint8List.view(bytes.buffer, start, offset - start),
       components,
     );
+  }
+
+  void _hexDump(int offset, int length, [int highlight, int highlightLength]) {
+    const reset = '\x1B[0m';
+    const red = '\x1B[1;31m';
+    String s = '';
+    String t = '';
+    int n = 0;
+    bool hl = false;
+    for (int i = 0; i < length; i++) {
+      final int b = bytes.getUint8(offset + i);
+      if (highlight != null && highlightLength != null) {
+        if (offset + i >= highlight &&
+            offset + i < highlight + highlightLength) {
+          if (!hl) {
+            hl = true;
+            s += red;
+            t += red;
+          }
+        } else {
+          if (hl) {
+            hl = false;
+            s += reset;
+            t += reset;
+          }
+        }
+      }
+      s += b.toRadixString(16).padLeft(2, '0') + ' ';
+      if (b > 31 && b < 128) {
+        t += String.fromCharCode(b);
+      } else {
+        t += '.';
+      }
+
+      n++;
+      if (n % 16 == 0) {
+        if (hl) {
+          s += reset;
+          t += reset;
+          hl = false;
+        }
+        print('$s   $t');
+        s = '';
+        t = '';
+      }
+    }
+    print('$s   $t');
+  }
+
+  void _parseGsub() {
+    final int basePosition = tableOffsets[gsub_table];
+    final int majorVersion = bytes.getUint16(basePosition);
+    final int minorVersion = bytes.getUint16(basePosition + 2);
+
+    print('GSUB Version: $majorVersion.$minorVersion');
+
+    if (majorVersion != 1 || minorVersion > 1) {
+      return;
+    }
+
+    final int scriptListOffset =
+        bytes.getUint16(basePosition + 4) + basePosition;
+    final int featureListOffset =
+        bytes.getUint16(basePosition + 6) + basePosition;
+    final int lookupListOffset =
+        bytes.getUint16(basePosition + 8) + basePosition;
+    print(
+        'GSUB Offsets: $scriptListOffset $featureListOffset $lookupListOffset');
+
+    final int scriptCount = bytes.getUint16(scriptListOffset);
+
+    for (int i = 0; i < scriptCount; i++) {
+      final String tag = utf8
+          .decode(bytes.buffer.asUint8List(scriptListOffset + 2 + 6 * i, 4));
+      final int scriptOffset =
+          bytes.getUint16(scriptListOffset + 6 + 6 * i) + scriptListOffset;
+      print('Script $tag => $scriptOffset');
+
+      final int defaultLangSys = bytes.getUint16(scriptOffset) + scriptOffset;
+      print('   defaultLangSys: $defaultLangSys');
+
+      print('   default:');
+      final int requiredFeatureIndex = bytes.getUint16(defaultLangSys + 2);
+      if (requiredFeatureIndex != 0xffff) {
+        print('      requiredFeatureIndex: $requiredFeatureIndex');
+      }
+      final int featureIndexCount = bytes.getUint16(defaultLangSys + 4);
+      print('      featureIndexCount: $featureIndexCount');
+      final List<int> features = List<int>(featureIndexCount);
+      for (int j = 0; j < featureIndexCount; j++) {
+        features[j] = bytes.getUint16(defaultLangSys + 6 + j * 2);
+      }
+      print('      features: $features');
+
+      final int langSysCount = bytes.getUint16(scriptOffset + 2);
+      print('   langSysCount: $langSysCount');
+    }
+
+    return;
+
+    // Read lookup table
+    final int lookupCount = bytes.getUint16(lookupListOffset);
+    print('lookupCount: $lookupCount');
+    final List<int> lookups = List<int>(lookupCount);
+    for (int i = 0; i < lookupCount; i++) {
+      final int offset =
+          bytes.getUint16(lookupListOffset + 2 + 2 * i) + lookupListOffset;
+      lookups[i] = offset;
+      print('Lookup Table $i $offset');
+
+      final int lookupType =
+          bytes.getUint16(offset); //	Different enumerations for GSUB and GPOS
+      print('   lookupType $lookupType');
+      final int lookupFlag = bytes.getUint16(offset + 2); // Lookup qualifiers
+      print('   lookupFlag $lookupFlag');
+      final int subTableCount =
+          bytes.getUint16(offset + 4); //	Number of subtables for this lookup
+      final List<int> subTables = List<int>(subTableCount);
+
+      print('   subTableCount $subTableCount');
+
+      for (int j = 0; j < subTableCount; j++) {
+        final int subTableOffset =
+            bytes.getUint16(offset + 6 + 2 * j) + lookupListOffset;
+        subTables[j] = subTableOffset;
+        //	Array of offsets to lookup subtables, from beginning of Lookup table
+        print('      subTable $j $subTableOffset');
+      }
+      // final int markFilteringSet = bytes.getUint16(offset +
+      //     8 +
+      //     2 * subTableCount); //	Index (base 0) into GDEF mark glyph sets structure. This
+      // print('   markFilteringSet: $markFilteringSet');
+    }
   }
 }
