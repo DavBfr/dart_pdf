@@ -37,6 +37,8 @@ class PrintingPlugin extends PrintingPlatform {
     PrintingPlatform.instance = PrintingPlugin();
   }
 
+  static const String _frameId = '__net_nfet_printing__';
+
   @override
   Future<PrintingInfo> info() async {
     return const PrintingInfo(
@@ -61,8 +63,11 @@ class PrintingPlugin extends PrintingPlatform {
     }
 
     final bool isChrome = js.context['chrome'] != null;
+    final bool isSafari = js.context['safari'] != null;
+    // Maybe Firefox 75 will support iframe printing
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=911444
 
-    if (!isChrome) {
+    if (!isChrome && !isSafari) {
       final String pr = 'data:application/pdf;base64,${base64.encode(result)}';
       final html.Window win = js.context['window'];
       win.open(pr, name);
@@ -77,33 +82,32 @@ class PrintingPlugin extends PrintingPlatform {
     );
     final String pdfUrl = html.Url.createObjectUrl(pdfFile);
     final html.HtmlDocument doc = js.context['document'];
-    final html.IFrameElement frame = doc.createElement('iframe');
+
+    final html.IFrameElement frame =
+        doc.getElementById(_frameId) ?? doc.createElement('iframe');
     frame.setAttribute(
       'style',
       'visibility: hidden; height: 0; width: 0; position: absolute;',
       // 'height: 400px; width: 600px; position: absolute; z-index: 1000',
     );
 
+    frame.setAttribute('sandbox', 'allow-scripts');
+    frame.setAttribute('id', _frameId);
     frame.setAttribute('src', pdfUrl);
 
-    frame.addEventListener('load', (html.Event event) {
+    html.EventListener load;
+    load = (html.Event event) {
+      frame.removeEventListener('load', load);
       final js.JsObject win =
           js.JsObject.fromBrowserObject(frame)['contentWindow'];
-
-      win.callMethod('addEventListener', <dynamic>[
-        'afterprint',
-        js.allowInterop<html.EventListener>((html.Event event) {
-          frame.remove();
-          completer.complete(true);
-        }),
-      ]);
-
       frame.focus();
       win.callMethod('print');
-    });
+      completer.complete(true);
+    };
+
+    frame.addEventListener('load', load);
 
     doc.body.append(frame);
-
     return completer.future;
   }
 
