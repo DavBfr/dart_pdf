@@ -126,3 +126,10 @@ await for (var page in Printing.raster(doc.save(), pages: [0, 1], dpi: 72)) {
   print(image);
 }
 ```
+
+To print an existing Pdf file from a Flutter asset:
+
+```dart
+final pdf = await rootBundle.load('document.pdf');
+await Printing.layoutPdf(onLayout: (_) => pdf.buffer.asUint8List());
+```
