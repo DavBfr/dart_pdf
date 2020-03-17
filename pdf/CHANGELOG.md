@@ -9,6 +9,7 @@
 - Optimize file size
 - Add PdfColor.shade
 - Uniformize examples
+- Fix context painting empty Table
 
 ## 1.5.0
 

@@ -409,15 +409,15 @@ class Table extends Widget implements SpanningWidget {
   void paint(Context context) {
     super.paint(context);
 
+    if (_context.lastLine == 0) {
+      return;
+    }
+
     final Matrix4 mat = Matrix4.identity();
     mat.translate(box.x, box.y);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
-
-    if (_context.lastLine == 0) {
-      return;
-    }
 
     int index = 0;
     for (TableRow row in children) {
