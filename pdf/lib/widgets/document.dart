@@ -66,7 +66,7 @@ class Document {
     _pages.add(page);
   }
 
-  List<int> save() {
+  Uint8List save() {
     if (!_paint) {
       for (Page page in _pages) {
         page.postProcess(this);

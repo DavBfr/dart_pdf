@@ -9,6 +9,7 @@
 - Add Unit tests
 - Update example tab
 - Uniformize examples
+- Optimize memory footprint
 
 ## 3.1.0
 

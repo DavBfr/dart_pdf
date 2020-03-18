@@ -15,6 +15,7 @@
  */
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/rendering.dart' show Rect, Offset;
 import 'package:meta/meta.dart';
@@ -83,7 +84,7 @@ mixin Printing {
   /// Displays a platform popup to share the Pdf document to another application
   static Future<bool> sharePdf({
     @Deprecated('use bytes with document.save()') PdfDocument document,
-    List<int> bytes,
+    Uint8List bytes,
     String filename = 'document.pdf',
     Rect bounds,
   }) {
@@ -105,7 +106,7 @@ mixin Printing {
   }
 
   /// Convert an html document to a pdf data
-  static Future<List<int>> convertHtml({
+  static Future<Uint8List> convertHtml({
     @required String html,
     String baseUrl,
     PdfPageFormat format = PdfPageFormat.standard,
@@ -134,7 +135,7 @@ mixin Printing {
   }
 
   static Stream<PdfRaster> raster(
-    List<int> document, {
+    Uint8List document, {
     List<int> pages,
     double dpi = PdfPageFormat.inch,
   }) {
@@ -150,7 +151,7 @@ mixin Printing {
   @Deprecated('use Printing.layoutPdf(onLayout: (_) => document.save());')
   static Future<void> printPdf({
     @Deprecated('use bytes with document.save()') PdfDocument document,
-    List<int> bytes,
+    Uint8List bytes,
   }) async {
     assert(document != null || bytes != null);
     assert(!(document == null && bytes == null));

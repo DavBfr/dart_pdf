@@ -15,6 +15,7 @@
  */
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'callback.dart';
 import 'raster.dart';
@@ -28,7 +29,7 @@ class PrintJob {
   });
 
   final LayoutCallback onLayout;
-  final Completer<List<int>> onHtmlRendered;
+  final Completer<Uint8List> onHtmlRendered;
   final Completer<bool> onCompleted;
   final StreamController<PdfRaster> onPageRasterized;
 

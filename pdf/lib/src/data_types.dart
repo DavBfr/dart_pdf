@@ -35,7 +35,7 @@ abstract class PdfDataType {
     return String.fromCharCodes(toStream().output());
   }
 
-  List<int> toList() {
+  Uint8List toList() {
     return toStream().output();
   }
 }
@@ -153,8 +153,8 @@ class PdfSecString extends PdfString {
       return super.output(s);
     }
 
-    final List<int> enc = object.pdfDocument.encryption.encrypt(value, object);
-    _output(s, Uint8List.fromList(enc));
+    final Uint8List enc = object.pdfDocument.encryption.encrypt(value, object);
+    _output(s, enc);
   }
 }
 

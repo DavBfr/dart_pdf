@@ -15,9 +15,10 @@
  */
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 
 /// Callback used to generate the Pdf document dynamically when the user
 /// changes the page settings: size and margins
-typedef LayoutCallback = FutureOr<List<int>> Function(PdfPageFormat format);
+typedef LayoutCallback = FutureOr<Uint8List> Function(PdfPageFormat format);

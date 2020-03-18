@@ -20,28 +20,51 @@ part of pdf;
 
 class PdfStream {
   static const int precision = 5;
-  final List<int> _stream = <int>[];
+
+  static const int _grow = 65536;
+
+  Uint8List _stream = Uint8List(_grow);
+
+  int _offset = 0;
+
+  void _ensureCapacity(int size) {
+    if (_stream.length - _offset >= size) {
+      return;
+    }
+
+    final int newSize = math.max(_offset + size + _grow, _offset * 2);
+    final Uint8List newBuffer = Uint8List(newSize);
+    newBuffer.setAll(0, _stream);
+    _stream = newBuffer;
+  }
+
+  void putByte(int s) {
+    _ensureCapacity(1);
+    _stream[_offset++] = s;
+  }
+
+  void putBytes(List<int> s) {
+    _ensureCapacity(s.length);
+    _stream.setAll(_offset, s);
+    _offset += s.length;
+  }
 
   void putStream(PdfStream s) {
-    _stream.addAll(s._stream);
+    putBytes(s._stream);
   }
+
+  int get offset => _offset;
+
+  Uint8List output() => _stream.sublist(0, _offset);
 
   void putString(String s) {
     for (int codeUnit in s.codeUnits) {
       if (codeUnit <= 0x7f) {
-        _stream.add(codeUnit);
+        putByte(codeUnit);
       } else {
-        _stream.add(0x20);
+        putByte(0x20);
       }
     }
-  }
-
-  void putByte(int s) {
-    _stream.add(s);
-  }
-
-  void putBytes(List<int> s) {
-    _stream.addAll(s);
   }
 
   void putNum(double d) {
@@ -62,44 +85,40 @@ class PdfStream {
     for (int c in s) {
       switch (c) {
         case 0x0a: // \n Line feed (LF)
-          _stream.add(0x5c);
-          _stream.add(0x6e);
+          putByte(0x5c);
+          putByte(0x6e);
           break;
         case 0x0d: // \r Carriage return (CR)
-          _stream.add(0x5c);
-          _stream.add(0x72);
+          putByte(0x5c);
+          putByte(0x72);
           break;
         case 0x09: // \t Horizontal tab (HT)
-          _stream.add(0x5c);
-          _stream.add(0x74);
+          putByte(0x5c);
+          putByte(0x74);
           break;
         case 0x08: // \b Backspace (BS)
-          _stream.add(0x5c);
-          _stream.add(0x62);
+          putByte(0x5c);
+          putByte(0x62);
           break;
         case 0x0c: // \f Form feed (FF)
-          _stream.add(0x5c);
-          _stream.add(0x66);
+          putByte(0x5c);
+          putByte(0x66);
           break;
         case 0x28: // \( Left parenthesis
-          _stream.add(0x5c);
-          _stream.add(0x28);
+          putByte(0x5c);
+          putByte(0x28);
           break;
         case 0x29: // \) Right parenthesis
-          _stream.add(0x5c);
-          _stream.add(0x29);
+          putByte(0x5c);
+          putByte(0x29);
           break;
         case 0x5c: // \\ Backslash
-          _stream.add(0x5c);
-          _stream.add(0x5c);
+          putByte(0x5c);
+          putByte(0x5c);
           break;
         default:
-          _stream.add(c);
+          putByte(c);
       }
     }
   }
-
-  int get offset => _stream.length;
-
-  List<int> output() => _stream;
 }

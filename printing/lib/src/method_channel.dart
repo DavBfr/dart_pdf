@@ -54,7 +54,7 @@ class MethodChannelPrinting extends PrintingPlatform {
             marginBottom: call.arguments['marginBottom'],
           );
 
-          final List<int> bytes = await job.onLayout(format);
+          final Uint8List bytes = await job.onLayout(format);
 
           if (bytes == null) {
             throw 'onLayout returned null';
@@ -186,7 +186,7 @@ class MethodChannelPrinting extends PrintingPlatform {
       onCompleted: Completer<bool>(),
     ));
 
-    final List<int> bytes = await onLayout(format);
+    final Uint8List bytes = await onLayout(format);
     if (bytes == null) {
       return false;
     }
@@ -205,7 +205,7 @@ class MethodChannelPrinting extends PrintingPlatform {
 
   @override
   Future<bool> sharePdf(
-    List<int> bytes,
+    Uint8List bytes,
     String filename,
     Rect bounds,
   ) async {
@@ -221,10 +221,10 @@ class MethodChannelPrinting extends PrintingPlatform {
   }
 
   @override
-  Future<List<int>> convertHtml(
+  Future<Uint8List> convertHtml(
       String html, String baseUrl, PdfPageFormat format) async {
     final PrintJob job = _newPrintJob(PrintJob(
-      onHtmlRendered: Completer<List<int>>(),
+      onHtmlRendered: Completer<Uint8List>(),
     ));
 
     final Map<String, dynamic> params = <String, dynamic>{
@@ -240,14 +240,14 @@ class MethodChannelPrinting extends PrintingPlatform {
     };
 
     await _channel.invokeMethod<void>('convertHtml', params);
-    final List<int> result = await job.onHtmlRendered.future;
+    final Uint8List result = await job.onHtmlRendered.future;
     _printJobs.remove(job.index);
     return result;
   }
 
   @override
   Stream<PdfRaster> raster(
-    List<int> document,
+    Uint8List document,
     List<int> pages,
     double dpi,
   ) {

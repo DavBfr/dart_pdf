@@ -56,7 +56,7 @@ class PrintingPlugin extends PrintingPlatform {
     String name,
     PdfPageFormat format,
   ) async {
-    final List<int> result = await onLayout(format);
+    final Uint8List result = await onLayout(format);
 
     if (result == null || result.isEmpty) {
       return false;
@@ -83,7 +83,7 @@ class PrintingPlugin extends PrintingPlatform {
     final String pdfUrl = html.Url.createObjectUrl(pdfFile);
     final html.HtmlDocument doc = js.context['document'];
 
-    final html.IFrameElement frame =
+    final html.Element frame =
         doc.getElementById(_frameId) ?? doc.createElement('iframe');
     frame.setAttribute(
       'style',
@@ -112,7 +112,7 @@ class PrintingPlugin extends PrintingPlatform {
 
   @override
   Future<bool> sharePdf(
-    List<int> bytes,
+    Uint8List bytes,
     String filename,
     Rect bounds,
   ) async {
@@ -130,7 +130,7 @@ class PrintingPlugin extends PrintingPlatform {
   }
 
   @override
-  Future<List<int>> convertHtml(
+  Future<Uint8List> convertHtml(
     String html,
     String baseUrl,
     PdfPageFormat format,
@@ -157,7 +157,7 @@ class PrintingPlugin extends PrintingPlatform {
 
   @override
   Stream<PdfRaster> raster(
-    List<int> document,
+    Uint8List document,
     List<int> pages,
     double dpi,
   ) {

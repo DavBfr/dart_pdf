@@ -35,7 +35,7 @@ class PdfObjectStream extends PdfObject {
   /// defines if the stream needs to be converted to ascii85
   final bool isBinary;
 
-  List<int> _data;
+  Uint8List _data;
 
   @override
   void _prepare() {

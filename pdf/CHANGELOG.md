@@ -12,6 +12,7 @@
 - Fix context painting empty Table
 - Fix Text decoration placements
 - Improve image buffer management
+- Optimize memory footprint
 
 ## 1.5.0
 

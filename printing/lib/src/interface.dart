@@ -15,6 +15,7 @@
  */
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/rendering.dart' show Rect;
 import 'package:pdf/pdf.dart';
@@ -81,13 +82,13 @@ abstract class PrintingPlatform extends PlatformInterface {
 
   /// Displays a platform popup to share the Pdf document to another application
   Future<bool> sharePdf(
-    List<int> bytes,
+    Uint8List bytes,
     String filename,
     Rect bounds,
   );
 
   /// Convert an html document to a pdf data
-  Future<List<int>> convertHtml(
+  Future<Uint8List> convertHtml(
     String html,
     String baseUrl,
     PdfPageFormat format,
@@ -95,7 +96,7 @@ abstract class PrintingPlatform extends PlatformInterface {
 
   /// Convert a Pdf document to bitmap images
   Stream<PdfRaster> raster(
-    List<int> document,
+    Uint8List document,
     List<int> pages,
     double dpi,
   );

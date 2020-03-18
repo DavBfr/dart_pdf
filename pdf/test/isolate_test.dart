@@ -61,7 +61,7 @@ void main() {
     final ReceivePort receivePort = ReceivePort();
 
     receivePort.listen((dynamic data) async {
-      if (data is List<int>) {
+      if (data is Uint8List) {
         print('Received a ${data.length} bytes PDF');
         final File file = File('isolate.pdf');
         await file.writeAsBytes(data);

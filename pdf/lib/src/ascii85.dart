@@ -18,9 +18,9 @@
 
 part of pdf;
 
-class Ascii85Encoder extends Converter<List<int>, List<int>> {
+class Ascii85Encoder extends Converter<Uint8List, Uint8List> {
   @override
-  List<int> convert(List<int> input) {
+  Uint8List convert(Uint8List input) {
     final Uint8List output = Uint8List(_maxEncodedLen(input.length) + 2);
 
     int outputOffset = 0;

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pdf/pdf.dart';
@@ -56,7 +58,7 @@ void main() {
 
     expect(
       await Printing.sharePdf(
-        bytes: <int>[],
+        bytes: Uint8List(0),
       ),
       null,
     );
@@ -106,7 +108,7 @@ void main() {
     );
 
     expect(
-      Printing.raster(<int>[]),
+      Printing.raster(Uint8List(0)),
       null,
     );
   });
