@@ -11,6 +11,7 @@
 - Uniformize examples
 - Fix context painting empty Table
 - Fix Text decoration placements
+- Improve image buffer management
 
 ## 1.5.0
 
