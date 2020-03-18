@@ -10,6 +10,7 @@
 - Add PdfColor.shade
 - Uniformize examples
 - Fix context painting empty Table
+- Fix Text decoration placements
 
 ## 1.5.0
 
