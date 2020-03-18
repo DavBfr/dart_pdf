@@ -24,8 +24,8 @@ import 'dart:ui';
 import 'package:flutter/rendering.dart' show Rect;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:pdf/pdf.dart';
-import 'package:printing/src/raster.dart';
 import 'package:printing/src/printer.dart';
+import 'package:printing/src/raster.dart';
 
 import 'callback.dart';
 import 'interface.dart';
@@ -91,7 +91,6 @@ class PrintingPlugin extends PrintingPlatform {
       // 'height: 400px; width: 600px; position: absolute; z-index: 1000',
     );
 
-    frame.setAttribute('sandbox', 'allow-scripts');
     frame.setAttribute('id', _frameId);
     frame.setAttribute('src', pdfUrl);
 
