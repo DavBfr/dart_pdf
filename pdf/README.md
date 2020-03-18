@@ -49,15 +49,13 @@ pdf.addPage(pw.Page(
       })); // Page
 ```
 
-To load an image it is possible to use the dart library [image](https://pub.dev/packages/image):
+To load an image from a file:
 
 ```dart
-final img = decodeImage(File('test.webp').readAsBytesSync());
-final image = PdfImage(
+final img = decodeImage();
+final image = PdfImage.file(
   pdf.document,
-  image: img.data.buffer.asUint8List(),
-  width: img.width,
-  height: img.height,
+  bytes: File('test.webp').readAsBytesSync(),
 );
 
 pdf.addPage(pw.Page(

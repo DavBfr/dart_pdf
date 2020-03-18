@@ -17,6 +17,7 @@ dependencies:
   archive: ^2.0.10
   qr: ^1.2.0
   barcode: ^1.5.0
+  image: ^2.1.4
 
 dev_dependencies:
   test:

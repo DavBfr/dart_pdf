@@ -14,6 +14,7 @@
 - Improve image buffer management
 - Optimize memory footprint
 - Add an exception if a jpeg image is not a supported format
+- Add more image loading functions
 
 ## 1.5.0
 

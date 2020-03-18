@@ -41,6 +41,8 @@ class PdfImage extends PdfXObject {
     bool alpha = true,
     PdfImageOrientation orientation = PdfImageOrientation.topLeft,
   }) {
+    assert(image != null);
+
     final PdfImage im = PdfImage._(
       pdfDocument,
       width,
@@ -105,6 +107,42 @@ class PdfImage extends PdfXObject {
 
     im.buf.putBytes(image);
     return im;
+  }
+
+  factory PdfImage.fromImage(
+    PdfDocument pdfDocument, {
+    @required im.Image image,
+    PdfImageOrientation orientation = PdfImageOrientation.topLeft,
+  }) {
+    assert(image != null);
+
+    return PdfImage(
+      pdfDocument,
+      image: image.getBytes(format: im.Format.rgba),
+      width: image.width,
+      height: image.height,
+      alpha: image.channels == im.Channels.rgba,
+      orientation: orientation,
+    );
+  }
+
+  factory PdfImage.file(
+    PdfDocument pdfDocument, {
+    @required Uint8List bytes,
+    PdfImageOrientation orientation = PdfImageOrientation.topLeft,
+  }) {
+    assert(bytes != null);
+
+    if (im.JpegDecoder().isValidFile(bytes)) {
+      return PdfImage.jpeg(pdfDocument, image: bytes);
+    }
+
+    final im.Image image = im.decodeImage(bytes);
+    return PdfImage.fromImage(
+      pdfDocument,
+      image: image,
+      orientation: orientation,
+    );
   }
 
   factory PdfImage._alpha(
