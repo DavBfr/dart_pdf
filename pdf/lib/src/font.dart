@@ -172,10 +172,7 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
 
   void putText(PdfStream stream, String text) {
     try {
-      stream
-        ..putByte(40)
-        ..putTextBytes(latin1.encode(text))
-        ..putByte(41);
+      PdfString(latin1.encode(text), PdfStringFormat.litteral).output(stream);
     } catch (_) {
       assert(() {
         print(_cannotDecodeMessage);

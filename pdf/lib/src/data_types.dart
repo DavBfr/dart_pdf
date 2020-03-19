@@ -24,7 +24,7 @@ abstract class PdfDataType {
 
   void output(PdfStream s);
 
-  PdfStream toStream() {
+  PdfStream _toStream() {
     final PdfStream s = PdfStream();
     output(s);
     return s;
@@ -32,11 +32,12 @@ abstract class PdfDataType {
 
   @override
   String toString() {
-    return String.fromCharCodes(toStream().output());
+    return String.fromCharCodes(_toStream().output());
   }
 
+  @visibleForTesting
   Uint8List toList() {
-    return toStream().output();
+    return _toStream().output();
   }
 }
 
@@ -52,7 +53,13 @@ class PdfBool extends PdfDataType {
 }
 
 class PdfNum extends PdfDataType {
-  const PdfNum(this.value);
+  const PdfNum(this.value)
+      : assert(value != null),
+        assert(value != double.infinity),
+        assert(value != double.nan),
+        assert(value != double.negativeInfinity);
+
+  static const int precision = 5;
 
   final num value;
 
@@ -61,7 +68,23 @@ class PdfNum extends PdfDataType {
     if (value is int) {
       s.putString(value.toInt().toString());
     } else {
-      s.putNum(value);
+      s.putString(value.toStringAsFixed(precision));
+    }
+  }
+}
+
+class PdfNumList extends PdfDataType {
+  PdfNumList(this.values) : assert(values != null);
+
+  final List<num> values;
+
+  @override
+  void output(PdfStream s) {
+    for (int n = 0; n < values.length; n++) {
+      if (n > 0) {
+        s.putByte(0x20);
+      }
+      PdfNum(values[n]).output(s);
     }
   }
 }
@@ -102,6 +125,49 @@ class PdfString extends PdfDataType {
     return _string('D:$year$month$day$hour$minute${second}Z');
   }
 
+  /// Escape special characters
+  /// \ddd Character code ddd (octal)
+  void _putTextBytes(PdfStream s, List<int> b) {
+    for (int c in b) {
+      switch (c) {
+        case 0x0a: // \n Line feed (LF)
+          s.putByte(0x5c);
+          s.putByte(0x6e);
+          break;
+        case 0x0d: // \r Carriage return (CR)
+          s.putByte(0x5c);
+          s.putByte(0x72);
+          break;
+        case 0x09: // \t Horizontal tab (HT)
+          s.putByte(0x5c);
+          s.putByte(0x74);
+          break;
+        case 0x08: // \b Backspace (BS)
+          s.putByte(0x5c);
+          s.putByte(0x62);
+          break;
+        case 0x0c: // \f Form feed (FF)
+          s.putByte(0x5c);
+          s.putByte(0x66);
+          break;
+        case 0x28: // \( Left parenthesis
+          s.putByte(0x5c);
+          s.putByte(0x28);
+          break;
+        case 0x29: // \) Right parenthesis
+          s.putByte(0x5c);
+          s.putByte(0x29);
+          break;
+        case 0x5c: // \\ Backslash
+          s.putByte(0x5c);
+          s.putByte(0x5c);
+          break;
+        default:
+          s.putByte(c);
+      }
+    }
+  }
+
   /// Returns the ASCII/Unicode code unit corresponding to the hexadecimal digit
   /// [digit].
   int _codeUnitForDigit(int digit) =>
@@ -116,11 +182,10 @@ class PdfString extends PdfDataType {
           s.putByte(_codeUnitForDigit(byte & 0x0F));
         }
         s.putByte(0x3e);
-
         break;
       case PdfStringFormat.litteral:
         s.putByte(40);
-        s.putTextBytes(value);
+        _putTextBytes(s, value);
         s.putByte(41);
         break;
     }

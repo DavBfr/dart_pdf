@@ -138,28 +138,28 @@ class PdfGraphics {
     buf.putString('q ');
     switch (img.orientation) {
       case PdfImageOrientation.topLeft:
-        buf.putNumList(<double>[w, 0, 0, h, x, y]);
+        PdfNumList(<double>[w, 0, 0, h, x, y]).output(buf);
         break;
       case PdfImageOrientation.topRight:
-        buf.putNumList(<double>[-w, 0, 0, h, w + x, y]);
+        PdfNumList(<double>[-w, 0, 0, h, w + x, y]).output(buf);
         break;
       case PdfImageOrientation.bottomRight:
-        buf.putNumList(<double>[-w, 0, 0, -h, w + x, h + y]);
+        PdfNumList(<double>[-w, 0, 0, -h, w + x, h + y]).output(buf);
         break;
       case PdfImageOrientation.bottomLeft:
-        buf.putNumList(<double>[w, 0, 0, -h, x, h + y]);
+        PdfNumList(<double>[w, 0, 0, -h, x, h + y]).output(buf);
         break;
       case PdfImageOrientation.leftTop:
-        buf.putNumList(<double>[0, -h, -w, 0, w + x, h + y]);
+        PdfNumList(<double>[0, -h, -w, 0, w + x, h + y]).output(buf);
         break;
       case PdfImageOrientation.rightTop:
-        buf.putNumList(<double>[0, -h, w, 0, x, h + y]);
+        PdfNumList(<double>[0, -h, w, 0, x, h + y]).output(buf);
         break;
       case PdfImageOrientation.rightBottom:
-        buf.putNumList(<double>[0, h, w, 0, x, y]);
+        PdfNumList(<double>[0, h, w, 0, x, y]).output(buf);
         break;
       case PdfImageOrientation.leftBottom:
-        buf.putNumList(<double>[0, h, -w, 0, w + x, y]);
+        PdfNumList(<double>[0, h, -w, 0, w + x, y]).output(buf);
         break;
     }
 
@@ -200,7 +200,7 @@ class PdfGraphics {
     double w,
     double h,
   ) {
-    buf.putNumList(<double>[x, y, w, h]);
+    PdfNumList(<double>[x, y, w, h]).output(buf);
     buf.putString(' re\n');
   }
 
@@ -247,24 +247,24 @@ class PdfGraphics {
     }
 
     buf.putString('BT ');
-    buf.putNumList(<double>[x, y]);
+    PdfNumList(<double>[x, y]).output(buf);
     buf.putString(' Td ${font.name} ');
-    buf.putNum(size);
+    PdfNum(size).output(buf);
     buf.putString(' Tf ');
     if (charSpace != 0) {
-      buf.putNum(charSpace);
+      PdfNum(charSpace).output(buf);
       buf.putString(' Tc ');
     }
     if (wordSpace != 0) {
-      buf.putNum(wordSpace);
+      PdfNum(wordSpace).output(buf);
       buf.putString(' Tw ');
     }
     if (scale != 1) {
-      buf.putNum(scale * 100);
+      PdfNum(scale * 100).output(buf);
       buf.putString(' Tz ');
     }
     if (rise != 0) {
-      buf.putNum(rise);
+      PdfNum(rise).output(buf);
       buf.putString(' Ts ');
     }
     if (mode != PdfTextRenderingMode.fill) {
@@ -288,11 +288,11 @@ class PdfGraphics {
   /// @param c Color to use
   void setFillColor(PdfColor color) {
     if (color is PdfColorCmyk) {
-      buf.putNumList(
-          <double>[color.cyan, color.magenta, color.yellow, color.black]);
+      PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
+          .output(buf);
       buf.putString(' k\n');
     } else {
-      buf.putNumList(<double>[color.red, color.green, color.blue]);
+      PdfNumList(<double>[color.red, color.green, color.blue]).output(buf);
       buf.putString(' rg\n');
     }
   }
@@ -302,11 +302,11 @@ class PdfGraphics {
   /// @param c Color to use
   void setStrokeColor(PdfColor color) {
     if (color is PdfColorCmyk) {
-      buf.putNumList(
-          <double>[color.cyan, color.magenta, color.yellow, color.black]);
+      PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
+          .output(buf);
       buf.putString(' K\n');
     } else {
-      buf.putNumList(<double>[color.red, color.green, color.blue]);
+      PdfNumList(<double>[color.red, color.green, color.blue]).output(buf);
       buf.putString(' RG\n');
     }
   }
@@ -320,7 +320,7 @@ class PdfGraphics {
   /// Set the transformation Matrix
   void setTransform(Matrix4 t) {
     final Float64List s = t.storage;
-    buf.putNumList(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]);
+    PdfNumList(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]).output(buf);
     buf.putString(' cm\n');
     _context.ctm.multiply(t);
   }
@@ -335,7 +335,7 @@ class PdfGraphics {
   /// @param x coordinate
   /// @param y coordinate
   void lineTo(double x, double y) {
-    buf.putNumList(<double>[x, y]);
+    PdfNumList(<double>[x, y]).output(buf);
     buf.putString(' l\n');
   }
 
@@ -344,7 +344,7 @@ class PdfGraphics {
   /// @param x coordinate
   /// @param y coordinate
   void moveTo(double x, double y) {
-    buf.putNumList(<double>[x, y]);
+    PdfNumList(<double>[x, y]).output(buf);
     buf.putString(' m\n');
   }
 
@@ -360,7 +360,7 @@ class PdfGraphics {
   /// @param y3 end point
   void curveTo(
       double x1, double y1, double x2, double y2, double x3, double y3) {
-    buf.putNumList(<double>[x1, y1, x2, y2, x3, y3]);
+    PdfNumList(<double>[x1, y1, x2, y2, x3, y3]).output(buf);
     buf.putString(' c\n');
   }
 
@@ -685,12 +685,12 @@ class PdfGraphics {
   }
 
   void setLineWidth(double width) {
-    buf.putNum(width);
+    PdfNum(width).output(buf);
     buf.putString(' w\n');
   }
 
   void setMiterLimit(double limit) {
-    buf.putNum(limit);
+    PdfNum(limit).output(buf);
     buf.putString(' M\n');
   }
 }
