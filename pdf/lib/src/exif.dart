@@ -64,6 +64,10 @@ class PdfJpegInfo {
       offset += len - 2;
     }
 
+    if (height == null) {
+      throw 'Unable to find a Jpeg image in the file';
+    }
+
     final Map<PdfExifTag, dynamic> tags = _findExifInJpeg(buffer);
 
     return PdfJpegInfo._(width, height, color, tags);
