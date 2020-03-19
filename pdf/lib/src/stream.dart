@@ -49,6 +49,10 @@ class PdfStream {
     _offset += s.length;
   }
 
+  void setBytes(int offset, Iterable<int> iterable) {
+    _stream.setAll(offset, iterable);
+  }
+
   void putStream(PdfStream s) {
     putBytes(s._stream);
   }
