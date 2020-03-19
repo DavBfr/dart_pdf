@@ -45,8 +45,9 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         }
     }
 
-    func cancelJob() {
+    func cancelJob(_ error: String?) {
         pdfDocument = nil
+        printing.onCompleted(printJob: self, completed: false, error: error as NSString?)
     }
 
     func setDocument(_ data: Data?) {

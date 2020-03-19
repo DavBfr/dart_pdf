@@ -44,26 +44,22 @@ class MethodChannelPrinting extends PrintingPlatform {
     switch (call.method) {
       case 'onLayout':
         final PrintJob job = _printJobs[call.arguments['job']];
-        try {
-          final PdfPageFormat format = PdfPageFormat(
-            call.arguments['width'],
-            call.arguments['height'],
-            marginLeft: call.arguments['marginLeft'],
-            marginTop: call.arguments['marginTop'],
-            marginRight: call.arguments['marginRight'],
-            marginBottom: call.arguments['marginBottom'],
-          );
+        final PdfPageFormat format = PdfPageFormat(
+          call.arguments['width'],
+          call.arguments['height'],
+          marginLeft: call.arguments['marginLeft'],
+          marginTop: call.arguments['marginTop'],
+          marginRight: call.arguments['marginRight'],
+          marginBottom: call.arguments['marginBottom'],
+        );
 
-          final Uint8List bytes = await job.onLayout(format);
+        final Uint8List bytes = await job.onLayout(format);
 
-          if (bytes == null) {
-            throw 'onLayout returned null';
-          }
-
-          return Uint8List.fromList(bytes);
-        } catch (e) {
-          return e.toString();
+        if (bytes == null) {
+          throw 'onLayout returned null';
         }
+
+        return Uint8List.fromList(bytes);
         break;
       case 'onCompleted':
         final bool completed = call.arguments['completed'];

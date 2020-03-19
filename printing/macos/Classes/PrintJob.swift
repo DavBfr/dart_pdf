@@ -101,7 +101,9 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         )
     }
 
-    public func cancelJob() {}
+    func cancelJob(_ error: String?) {
+        printing.onCompleted(printJob: self, completed: false, error: error as NSString?)
+    }
 
     public static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String) {
         let tempFile = NSTemporaryDirectory() + name

@@ -43,7 +43,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
             case "cancelJob": {
                 final PrintingJob printJob =
                         new PrintingJob(activity, this, (int) call.argument("job"));
-                printJob.cancelJob();
+                printJob.cancelJob(null);
                 result.success(1);
                 break;
             }
@@ -125,18 +125,18 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                 if (result instanceof byte[]) {
                     printJob.setDocument((byte[]) result);
                 } else {
-                    printJob.cancelJob();
+                    printJob.cancelJob("Unknown data received");
                 }
             }
 
             @Override
             public void error(String errorCode, String errorMessage, Object errorDetails) {
-                printJob.cancelJob();
+                printJob.cancelJob(errorMessage);
             }
 
             @Override
             public void notImplemented() {
-                printJob.cancelJob();
+                printJob.cancelJob("notImplemented");
             }
         });
     }

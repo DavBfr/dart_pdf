@@ -187,9 +187,10 @@ public class PrintingJob extends PrintDocumentAdapter {
         printJob = printManager.print(name, this, null);
     }
 
-    void cancelJob() {
+    void cancelJob(String message) {
         if (callback != null) callback.onLayoutCancelled();
         if (printJob != null) printJob.cancel();
+        printing.onCompleted(PrintingJob.this, false, message);
     }
 
     static void sharePdf(final Context context, final byte[] data, final String name) {
