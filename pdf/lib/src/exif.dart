@@ -55,7 +55,7 @@ class PdfJpegInfo {
       final int len = buffer.getUint16(offset);
       offset += 2;
 
-      if (mrkr == 0xc0) {
+      if (mrkr >= 0xc0 && mrkr <= 0xcf) {
         height = buffer.getUint16(offset + 1);
         width = buffer.getUint16(offset + 3);
         color = buffer.getUint8(offset + 5);
