@@ -30,7 +30,7 @@ class PdfStream {
       return;
     }
 
-    final int newSize = math.max(_offset + size + _grow, _offset * 2);
+    final int newSize = _offset + size + _grow;
     final Uint8List newBuffer = Uint8List(newSize);
     newBuffer.setAll(0, _stream);
     _stream = newBuffer;
