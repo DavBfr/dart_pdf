@@ -143,11 +143,14 @@ public class PrintingJob extends PrintDocumentAdapter {
                                                              : printJob.getInfo().getState();
 
                                 if (state == PrintJobInfo.STATE_COMPLETED) {
-                                    printing.onCompleted(PrintingJob.this, true, "");
+                                    printing.onCompleted(PrintingJob.this, true, null);
                                     wait[0] = false;
-                                } else if (state == PrintJobInfo.STATE_CANCELED
-                                        || state == PrintJobInfo.STATE_FAILED) {
-                                    printing.onCompleted(PrintingJob.this, false, "User canceled");
+                                } else if (state == PrintJobInfo.STATE_CANCELED) {
+                                    printing.onCompleted(PrintingJob.this, false, null);
+                                    wait[0] = false;
+                                } else if (state == PrintJobInfo.STATE_FAILED) {
+                                    printing.onCompleted(
+                                            PrintingJob.this, false, "Unable to print");
                                     wait[0] = false;
                                 }
                             }
