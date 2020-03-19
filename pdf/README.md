@@ -92,3 +92,10 @@ To save the pdf file:
 final file = File("example.pdf");
 await file.writeAsBytes(pdf.save());
 ```
+
+## Encryption and Digital Signature
+
+Encryption using RC4-40, RC4-128, AES-128, and AES-256 is fully supported using a separate library.
+This library also provides SHA1 or SHA-256 Digital Signature using your x509 certificate. The graphic signature is represented by a clickable widget that shows Digital Signature information.
+
+Drop me an email for availability and more information.
