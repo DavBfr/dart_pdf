@@ -52,7 +52,6 @@ pdf.addPage(pw.Page(
 To load an image from a file:
 
 ```dart
-final img = decodeImage();
 final image = PdfImage.file(
   pdf.document,
   bytes: File('test.webp').readAsBytesSync(),
