@@ -33,7 +33,7 @@ Breaking change: this version is only compatible with flutter >= 1.12
 - Improve native code
 - Add Printing.info()
 - Use PageTheme in example
-- Save shared pdf in cache on Android
+- Save shared pdf in the cache on Android
 - Implement macOS embedding support
 - Implement Flutter Web support
 
@@ -56,7 +56,7 @@ Breaking change: this version is only compatible with flutter >= 1.12
 
 ## 2.1.6
 
-- Add qrcode to example
+- Add QrCode to example
 - Cancel print job in case of layout error
 
 ## 2.1.5
@@ -78,7 +78,7 @@ Breaking change: this version is only compatible with flutter >= 1.12
 
 ## 2.1.0
 
-- Add html to pdf platform conversion
+- Add HTML to pdf platform conversion
 - Fix issue with flutter 1.6.2+
 
 ## 2.0.4
@@ -87,7 +87,7 @@ Breaking change: this version is only compatible with flutter >= 1.12
 
 ## 2.0.3
 
-- Add file save and view to example application
+- Add file save and view to the example application
 - Convert print screen example to Widgets
 - Deprecate the document argument in Printing.sharePdf()
 
@@ -130,15 +130,15 @@ Breaking change: this version is only compatible with flutter >= 1.12
 
 ## 1.3.1
 
-- Fix pana linting notices
+- Fix Pana linting notices
 
 ## 1.3.0
 
-- Add a Flutter like widget system
+- Add a Flutter like Widget system
 
 ## 1.2.0
 
-- Fix compileSdkVersion to match appcompat
+- Fix compileSdkVersion to match AppCompat
 - Change license to Apache 2.0
 - Implement asynchronous printing driven by the OS
 
@@ -146,7 +146,7 @@ Breaking change: this version is only compatible with flutter >= 1.12
 
 - Rename classes to satisfy Dart conventions
 - Remove useless new and const keywords
-- Changed appcompat dependency to 26.1.0
+- Changed AppCompat dependency to 26.1.0
 
 ## 1.0.6
 
@@ -173,7 +173,7 @@ Breaking change: this version is only compatible with flutter >= 1.12
 
 ## 1.0.1
 
-- Fixed sdk version
+- Fixed SDK version
 
 ## 1.0.0
 
