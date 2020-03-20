@@ -19,6 +19,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
+import 'package:image/image.dart' as im;
 
 /// Represents a bitmap image
 class PdfRaster {
@@ -60,6 +61,11 @@ class PdfRaster {
     final ByteData data =
         await image.toByteData(format: ui.ImageByteFormat.png);
     return data.buffer.asUint8List();
+  }
+
+  /// Returns the image as an [Image] object from the pub:image library
+  im.Image asImage() {
+    return im.Image.fromBytes(width, height, pixels);
   }
 }
 

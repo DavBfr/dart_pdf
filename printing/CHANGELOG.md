@@ -10,6 +10,7 @@
 - Update example tab
 - Uniformize examples
 - Optimize memory footprint
+- Add PdfRaster.asImage()
 
 ## 3.1.0
 
