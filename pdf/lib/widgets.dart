@@ -16,15 +16,23 @@
 
 library widget;
 
+import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 
 import 'package:barcode/barcode.dart';
 import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:qr/qr.dart';
 import 'package:vector_math/vector_math_64.dart';
+
+
+import 'package:flutter/material.dart' as material;
+import 'package:flutter/rendering.dart';
+
 
 part 'widgets/annotations.dart';
 part 'widgets/barcode.dart';
@@ -51,4 +59,5 @@ part 'widgets/text.dart';
 part 'widgets/text_style.dart';
 part 'widgets/theme.dart';
 part 'widgets/widget.dart';
+part 'widgets/widget_wrapper.dart';
 part 'widgets/wrap.dart';
