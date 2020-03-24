@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:markdown/markdown.dart' as markdown;
 import 'package:path_provider/path_provider.dart';
-
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -156,21 +153,17 @@ class MyAppState extends State<MyApp> {
   }
 
   Future<void> _printScreen() async {
-    final RenderRepaintBoundary boundary =
-        previewContainer.currentContext.findRenderObject();
-    final ui.Image im = await boundary.toImage();
-    final ByteData bytes =
-        await im.toByteData(format: ui.ImageByteFormat.rawRgba);
-    print('Print Screen ${im.width}x${im.height} ...');
-
     final bool result =
-        await Printing.layoutPdf(onLayout: (PdfPageFormat format) {
+        await Printing.layoutPdf(onLayout: (PdfPageFormat format) async {
       final pw.Document document = pw.Document();
 
-      final PdfImage image = PdfImage(document.document,
-          image: bytes.buffer.asUint8List(),
-          width: im.width,
-          height: im.height);
+      final PdfImage image = await wrapWidget(
+        document.document,
+        key: previewContainer,
+        pixelRatio: 2.0,
+      );
+
+      print('Print Screen ${image.width}x${image.height}...');
 
       document.addPage(pw.Page(
           pageFormat: format,

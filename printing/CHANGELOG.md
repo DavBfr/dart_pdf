@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.0
+
+- Add wrapWidget helper
+
 ## 3.2.1
 
 - Add meta and image dependencies

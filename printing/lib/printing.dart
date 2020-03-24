@@ -20,3 +20,4 @@ export 'src/printer.dart';
 export 'src/printing.dart';
 export 'src/printing_info.dart';
 export 'src/raster.dart';
+export 'src/widget_wrapper.dart';
