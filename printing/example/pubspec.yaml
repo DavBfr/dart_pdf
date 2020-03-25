@@ -17,6 +17,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  test:
 
 dependency_overrides:
   printing:

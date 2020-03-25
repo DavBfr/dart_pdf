@@ -252,6 +252,7 @@ class MyAppState extends State<MyApp> {
                   onPressed: printingInfo?.canShare ?? false ? _sharePdf : null,
                 ),
                 RaisedButton(
+                  key: const Key('screenshot'),
                   child: const Text('Print Screenshot'),
                   onPressed: (printingInfo?.canPrint ?? false) && !kIsWeb
                       ? _printScreen

@@ -3,6 +3,7 @@
 ## 3.3.0
 
 - Add wrapWidget helper
+- Add integration tests for wrapWidget
 
 ## 3.2.1
 
