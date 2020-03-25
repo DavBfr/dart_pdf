@@ -23,5 +23,6 @@ dependencies:
   image: ^2.1.4
 
 dev_dependencies:
+  flutter_driver:
+    sdk: flutter
   test:
-  pedantic: 1.9.0
