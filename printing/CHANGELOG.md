@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.1
+
+- Add meta and image dependencies
+
 ## 3.2.0
 
 - Update README
