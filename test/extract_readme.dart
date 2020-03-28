@@ -56,7 +56,6 @@ void buildFile(String src, String dest, bool flutter) {
     st.writeln('import \'package:printing/printing.dart\';');
   } else {
     st.writeln('import \'dart:typed_data\';');
-    st.writeln('import \'package:image/image.dart\' show decodeImage;');
   }
   st.writeln('import \'package:pdf/pdf.dart\';');
   st.writeln('import \'package:pdf/widgets.dart\' as pw;');
