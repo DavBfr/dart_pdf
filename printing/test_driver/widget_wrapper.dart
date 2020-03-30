@@ -1,8 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart' as material;
-import 'package:flutter_test/flutter_test.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart';
+
 import 'package:flutter_driver/driver_extension.dart';
 
 final material.GlobalKey keyIcons = material.GlobalKey();

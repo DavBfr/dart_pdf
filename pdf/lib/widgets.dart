@@ -30,10 +30,6 @@ import 'package:qr/qr.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 
-import 'package:flutter/material.dart' as material;
-import 'package:flutter/rendering.dart';
-
-
 part 'widgets/annotations.dart';
 part 'widgets/barcode.dart';
 part 'widgets/basic.dart';
@@ -59,5 +55,5 @@ part 'widgets/text.dart';
 part 'widgets/text_style.dart';
 part 'widgets/theme.dart';
 part 'widgets/widget.dart';
-part 'widgets/widget_wrapper.dart';
+part '../../printing/lib/src/pdf_widget_wrapper.dart';
 part 'widgets/wrap.dart';

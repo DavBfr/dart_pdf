@@ -1,8 +1,15 @@
-part of widget;
+import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart' as material;
+import 'package:flutter/rendering.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart';
+
 
 class WidgetWrapper {
   static Future<Image> from(
-      PdfDocument document, {@required material.GlobalKey key, int width, int height}) async {
+      PdfDocument document, {@material.required material.GlobalKey key, int width, int height}) async {
 
     final RenderRepaintBoundary wrappedWidget =
     key.currentContext.findRenderObject();
@@ -10,7 +17,7 @@ class WidgetWrapper {
 
     image = await image.resize(width: width, height: height);
 
-    ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+    final ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
     final Uint8List imageData = byteData.buffer.asUint8List();
     final PdfImage img = PdfImage(document, image: imageData, width: image.width, height: image.height);
     return Image(img);

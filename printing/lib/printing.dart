@@ -16,6 +16,7 @@
 
 export 'src/asset_utils.dart';
 export 'src/callback.dart';
+export 'src/pdf_widget_wrapper.dart';
 export 'src/printer.dart';
 export 'src/printing.dart';
 export 'src/printing_info.dart';
