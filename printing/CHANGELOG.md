@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.1
+
+- Remove width and height parameters from wrapWidget helper
+
 ## 3.3.0
 
 - Add wrapWidget helper

@@ -35,44 +35,10 @@ Future<PdfImage> wrapWidget(
 
   final RenderRepaintBoundary wrappedWidget =
       key.currentContext.findRenderObject();
-  ui.Image image = await wrappedWidget.toImage(pixelRatio: pixelRatio);
-
-  image = await _resize(image, width, height);
-
+  final ui.Image image = await wrappedWidget.toImage(pixelRatio: pixelRatio);
   final ByteData byteData =
       await image.toByteData(format: ui.ImageByteFormat.rawRgba);
   final Uint8List imageData = byteData.buffer.asUint8List();
   return PdfImage(document,
       image: imageData, width: image.width, height: image.height);
-}
-
-Future<ui.Image> _resize(
-  ui.Image image,
-  int width,
-  int height,
-) async {
-  if (width == null && height == null) {
-    return image;
-  }
-
-  width ??= (height / image.height * image.width).toInt();
-  height ??= (width / image.width * image.height).toInt();
-
-  final Completer<ui.Image> ptr = Completer<ui.Image>();
-  final Uint8List data =
-      (await image.toByteData(format: ui.ImageByteFormat.rawRgba))
-          .buffer
-          .asUint8List();
-  ui.decodeImageFromPixels(
-    data,
-    image.width,
-    image.height,
-    ui.PixelFormat.rgba8888,
-    (ui.Image result) {
-      ptr.complete(result);
-    },
-    targetWidth: width,
-    targetHeight: height,
-  );
-  return ptr.future;
 }
