@@ -45,20 +45,20 @@ class Axes extends BoxBorder {
       [List<double> widths, List<double> heights]) {
 
     super.paintRect(context,
-        PdfRect.fromLTRB(box.left + 10, box.bottom + 10, box.right, box.top));
+        PdfRect.fromLTRB(box.left + gridTextSize*1.25, box.bottom + gridTextSize*1.25, box.right, box.top));
 
     for (int sep = 0; sep <= xMax.ceil().toInt(); sep += separatorEvery) {
       context.canvas
         ..setColor(PdfColor.fromRYB(1, 1, 1))
         ..drawString(font, gridTextSize, sep.toString(), 0,
-            box.top / xMax.ceil().toInt() * sep);
+            box.top / xMax.ceil().toInt() * sep - (sep == 0 ? 0 : gridTextSize*(2/3)));
     }
 
     for (int sep = 0; sep <= yMax.ceil().toInt(); sep += separatorEvery) {
       context.canvas
         ..setColor(PdfColor.fromRYB(1, 1, 1))
         ..drawString(font, gridTextSize, sep.toString(),
-            box.right / yMax.ceil().toInt() * sep, 0);
+            box.right / yMax.ceil().toInt() * sep - (sep == 0 ? 0 : gridTextSize*(2/3)), 0);
     }
   }
 }
