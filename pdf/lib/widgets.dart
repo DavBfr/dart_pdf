@@ -54,3 +54,4 @@ part 'widgets/text_style.dart';
 part 'widgets/theme.dart';
 part 'widgets/widget.dart';
 part 'widgets/wrap.dart';
+part 'widgets/chart.dart';

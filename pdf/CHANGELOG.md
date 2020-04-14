@@ -6,6 +6,7 @@
 - Fix PdfColors.shade()
 - Add dashed lines to Decoration Widgets
 - Add TableRow decoration
+- Add Chart Widget [Marco Papula]
 
 ## 1.6.2
 
