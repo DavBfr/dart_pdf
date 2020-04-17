@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.1
+
+- Fix Image width and height attributes
+
 ## 1.6.0
 
 - Improve Annotations

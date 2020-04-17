@@ -102,12 +102,14 @@ class Image extends Widget {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    final double w = constraints.hasBoundedWidth
-        ? constraints.maxWidth
-        : constraints.constrainWidth(image.width.toDouble());
-    final double h = constraints.hasBoundedHeight
-        ? constraints.maxHeight
-        : constraints.constrainHeight(image.height.toDouble());
+    final double w = width ??
+        (constraints.hasBoundedWidth
+            ? constraints.maxWidth
+            : constraints.constrainWidth(image.width.toDouble()));
+    final double h = height ??
+        (constraints.hasBoundedHeight
+            ? constraints.maxHeight
+            : constraints.constrainHeight(image.height.toDouble()));
 
     final FittedSizes sizes = applyBoxFit(
         fit,
