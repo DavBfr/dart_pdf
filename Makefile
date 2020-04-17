@@ -33,7 +33,7 @@ pdf/noto-sans.ttf:
 	curl -L "https://raw.githubusercontent.com/google/fonts/master/ofl/notosans/NotoSans-Regular.ttf" > $@
 
 pdf/genyomintw.ttf:
-	curl -L "https://github.com/ButTaiwan/genyo-font/raw/master/TW/GenYoMinTW-Heavy.ttf" > $@
+	curl -L "https://github.com/ButTaiwan/genyo-font/raw/bc2fa246196fefc1ef9e9843bc8cdba22523a39d/TW/GenYoMinTW-Heavy.ttf" > $@
 
 format: format-dart format-clang format-swift
 
