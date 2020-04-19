@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.2
+
+- Use the Barcode library to generate QR-Codes
+
 ## 1.6.1
 
 - Fix Image width and height attributes

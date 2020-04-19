@@ -23,8 +23,9 @@ import 'dart:typed_data';
 import 'package:barcode/barcode.dart';
 import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
-import 'package:qr/qr.dart';
 import 'package:vector_math/vector_math_64.dart';
+
+export 'package:barcode/barcode.dart';
 
 part 'widgets/annotations.dart';
 part 'widgets/barcode.dart';

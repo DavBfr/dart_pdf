@@ -100,7 +100,12 @@ Future<pw.Document> generateDocument(PdfPageFormat format) async {
             Percent(size: 60, value: .7, title: pw.Text('Word')),
             Percent(size: 60, value: .4, title: pw.Text('Excel')),
           ]),
-          pw.QrCodeWidget(data: 'Parnella Charlesbois', size: 60),
+          pw.BarcodeWidget(
+            data: 'Parnella Charlesbois',
+            width: 60,
+            height: 60,
+            barcode: pw.Barcode.qrCode(),
+          ),
         ],
       )
     ]),
