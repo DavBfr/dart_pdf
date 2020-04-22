@@ -5,6 +5,7 @@
 - Use the Barcode library to generate QR-Codes
 - Fix Jpeg size detection
 - Update dependency to Barcode 1.8.0
+- Fix graphic state operator
 
 ## 1.6.1
 
