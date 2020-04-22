@@ -3,6 +3,7 @@
 ## 1.6.2
 
 - Use the Barcode library to generate QR-Codes
+- Fix Jpeg size detection
 
 ## 1.6.1
 
