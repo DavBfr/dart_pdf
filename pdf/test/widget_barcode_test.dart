@@ -56,7 +56,7 @@ Widget barcode(
 
 void main() {
   setUpAll(() {
-    Document.debug = true;
+    // Document.debug = true;
     pdf = Document();
   });
 
@@ -76,7 +76,10 @@ void main() {
           barcode(Barcode.ean5(), '30897', width: 60),
           barcode(Barcode.itf14(), '2578639587234'),
           barcode(Barcode.telepen(), 'Telepen'),
+          barcode(Barcode.codabar(), '1234-5678'),
           barcode(Barcode.qrCode(), 'QR-Code!', width: 120, height: 120),
+          barcode(Barcode.pdf417(), 'PDF147 Demo', height: 35),
+          barcode(Barcode.dataMatrix(), 'Data Matrix', width: 120, height: 120),
         ],
       ),
     );

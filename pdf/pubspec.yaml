@@ -15,7 +15,7 @@ dependencies:
   utf: ^0.9.0
   crypto: ^2.0.6
   archive: ^2.0.10
-  barcode: ^1.7.0
+  barcode: ^1.8.0
   image: ^2.1.4
 
 dev_dependencies:
