@@ -71,8 +71,8 @@ class Axes extends BoxBorder {
       context.canvas
         ..setStrokeColor(PdfColors.grey)
         ..setLineWidth(1.0)
-        ..drawLine(left, yPos + font.descent + font.ascent-0.5, right,
-            yPos + font.descent + font.ascent-0.5)
+        ..drawLine(left, yPos + font.descent + font.ascent - 0.5, right,
+            yPos + font.descent + font.ascent - 0.5)
         ..strokePath();
     }
 
@@ -93,12 +93,14 @@ class ScatterChart extends Widget {
       this.yAxis,
       this.xAxisMargin = 10,
       this.yAxisMargin = 2,
+        this.pointSize = 3,
+        this.pointColor = PdfColors.red,
       this.gridTextStyle}) {
     yAxis = List<double>.generate(
         xAxisIntersect + 1,
         (int i) =>
             i / xAxisIntersect.toDouble() * data.reduce(math.max).ceil());
-    xAxis ??= List<double>.generate(data.length+1, (int i) => i.toDouble());
+    xAxis ??= List<double>.generate(data.length + 1, (int i) => i.toDouble());
 
     maxValue = data.reduce(math.max);
 
@@ -122,6 +124,8 @@ class ScatterChart extends Widget {
   List<double> yAxis;
   int xAxisMargin;
   int yAxisMargin;
+  double pointSize;
+  PdfColor pointColor;
   final TextStyle gridTextStyle;
   Axes axes;
 
@@ -170,54 +174,29 @@ class ScatterChart extends Widget {
     var right = box.right - maxTextWidth / 2;
     var bottom = box.bottom + textHeight + yAxisMargin;
 
-    // TODO cleanup this mess
-    int i = 1;
-    double pointSize = 3;
-
-    print(data.toString());
-    print(maxValue);
-    var dataMax = data.reduce(math.max);
-//    for (var point in data) {
+    var lastPoint = 0.0;
     data.asMap().forEach((int i, double point) {
-
-//      print(point / maxValue);
       context.canvas
-        ..setColor(PdfColors.red)
-        ..setLineWidth(3)
+        ..setStrokeColor(PdfColors.red)
+        ..setLineWidth(2.0)
+        ..drawLine(
+            left + (right - left) * i / xAxis.last - pointSize / 2,
+            bottom + (top - bottom) * lastPoint / maxValue,
+            left + (right - left) * (i + 1) / xAxis.last - pointSize / 2,
+            bottom + (top - bottom) * point / maxValue)
+        ..strokePath();
+
+      context.canvas
+        ..setColor(pointColor)
         ..drawEllipse(
-            left + (right - left) * (i+1) / xAxis.last - pointSize / 2,
-//            top -
-//                bottom +
-//                yAxisMargin +
-//                textHeight +
-//                + font.descent +
-//                font.ascent -
-//                pointSize / 2,
+            left + (right - left) * (i + 1) / xAxis.last - pointSize / 2,
             bottom + (top - bottom) * point / maxValue,
             pointSize,
             pointSize)
         ..fillPath();
+
+      lastPoint = point;
     });
-
-//    for (int i = 0; i < xData.length; i++) {
-//      context.canvas
-//          ..setFillColor(PdfColor.fromRYB(0.9, 0.9, 0.9))
-//          ..drawEllipse(xData[i], yData[i], 10, 10);
-
-//      context.canvas
-//        ..setStrokeColor(PdfColor.fromRYB(0.9, 0.9, 0.9))
-//        ..setFillColor(PdfColor.fromRYB(0.9, 0.9, 0.9))
-//        ..setLineWidth(10)
-//        ..moveTo(gridTextSize * 2, gridTextSize * 2)
-//        ..drawEllipse(
-//            xData[i] * (box.width - gridTextSize * 2.5) / xMax +
-//                gridTextSize * 2,
-//            yData[i] * (box.height - gridTextSize * 2.5) / yMax +
-//                gridTextSize * 2,
-//            2,
-//            2)
-//        ..strokePath();
-//    }
 
     context.canvas.restoreContext();
   }
