@@ -18,24 +18,16 @@ class Axes extends BoxBorder {
 
   TextStyle textStyle;
 
-  void paint(Context context, PdfRect box) {
-    final style = textStyle ?? Theme.of(context).defaultTextStyle;
+  void paint(Context context, PdfRect box, TextStyle style, double maxTextWidth,
+      double textHeight) {
     final font = style.font.getFont(context);
 
-//    final maxValue = data.reduce(
-//            (max, y) => max.toString().length > y.toString().length ? max : y);
-    final maxTextWidth =
-        (font.stringMetrics(maxValue.toString()) * (style.fontSize)).width;
-    final textHeight = (font.stringMetrics(' ') * (style.fontSize)).height;
-
-//    var grid = PdfRect.fromLTRB(
-     var left =    box.left + maxTextWidth + xMargin;
-     var top =    box.top - textHeight / 2;
-      var right =   box.right - maxTextWidth / 2;
-      var bottom =   box.bottom + textHeight + yMargin;
-//    );
-
-//    var font = textStyle.font.getFont(context);
+    print("box ${box.bottom}");
+    print("box ${box.top}");
+    var left = box.left + maxTextWidth + xMargin;
+    var top = box.top - textHeight / 2;
+    var right = box.right - maxTextWidth / 2;
+    var bottom = box.bottom + textHeight + yMargin;
 
     context.canvas
       ..setColor(PdfColors.black)
@@ -79,20 +71,15 @@ class Axes extends BoxBorder {
       context.canvas
         ..setStrokeColor(PdfColors.grey)
         ..setLineWidth(1.0)
-        ..drawLine(left, yPos + font.descent + font.ascent, right,
-            yPos + font.descent + font.ascent)
+        ..drawLine(left, yPos + font.descent + font.ascent-0.5, right,
+            yPos + font.descent + font.ascent-0.5)
         ..strokePath();
     }
 
-//    super.paintRect(
-//        context,
-//        PdfRect.fromLTRB(left, top + font.descent + font.ascent + 1, right,
-//            bottom));
-
     super.paintRect(
         context,
-        PdfRect.fromLTRB(left, bottom, right,
-            top + font.descent + font.ascent + 1));
+        PdfRect.fromLTRB(
+            left, bottom, right, top + font.descent + font.ascent + 1));
   }
 }
 
@@ -111,10 +98,9 @@ class ScatterChart extends Widget {
         xAxisIntersect + 1,
         (int i) =>
             i / xAxisIntersect.toDouble() * data.reduce(math.max).ceil());
-    xAxis ??= List<double>.generate(data.length, (int i) => i.toDouble());
+    xAxis ??= List<double>.generate(data.length+1, (int i) => i.toDouble());
 
-    var maxValue = data.reduce(
-        (max, y) => max.toString().length > y.toString().length ? max : y);
+    maxValue = data.reduce(math.max);
 
     axes = Axes(
         xAxis: xAxis,
@@ -131,13 +117,13 @@ class ScatterChart extends Widget {
   final List<double> data;
   double maxTextWidth;
   double textHeight;
+  double maxValue;
   List<double> xAxis;
   List<double> yAxis;
   int xAxisMargin;
   int yAxisMargin;
   final TextStyle gridTextStyle;
   Axes axes;
-  PdfRect gridBox;
 
   @override
   void layout(Context context, BoxConstraints constraints,
@@ -166,49 +152,52 @@ class ScatterChart extends Widget {
     final style = gridTextStyle ?? Theme.of(context).defaultTextStyle;
     final font = style.font.getFont(context);
 
-    final maxValue = data.reduce(
-        (max, y) => max.toString().length > y.toString().length ? max : y);
     final maxTextWidth =
         (font.stringMetrics(maxValue.toString()) * (style.fontSize)).width;
     final textHeight = (font.stringMetrics(' ') * (style.fontSize)).height;
 
-    var gridBox = PdfRect.fromLTRB(
-        box.left + maxTextWidth + xAxisMargin,
-        box.top - textHeight / 2,
-        box.right - maxTextWidth / 2,
-        box.bottom + textHeight + yAxisMargin);
-
+    box = PdfRect(0, 0, box.width, box.height);
     axes.paint(
       context,
-      PdfRect(0, 0, box.width, box.height),
+      box,
+      style,
+      maxTextWidth,
+      textHeight,
     );
+
+    var left = box.left + maxTextWidth + xAxisMargin;
+    var top = box.top - textHeight / 2;
+    var right = box.right - maxTextWidth / 2;
+    var bottom = box.bottom + textHeight + yAxisMargin;
 
     // TODO cleanup this mess
     int i = 1;
     double pointSize = 3;
 
+    print(data.toString());
+    print(maxValue);
     var dataMax = data.reduce(math.max);
-    for (var point in data) {
-      print(point / maxValue);
+//    for (var point in data) {
+    data.asMap().forEach((int i, double point) {
+
+//      print(point / maxValue);
       context.canvas
         ..setColor(PdfColors.red)
         ..setLineWidth(3)
         ..drawEllipse(
-            gridBox.left +
-                (gridBox.right - gridBox.left) * i / xAxis.last -
-                pointSize / 2,
-            gridBox.top -
-                gridBox.bottom +
-                yAxisMargin +
-                textHeight +
-                font.descent +
-                font.ascent -
-                pointSize / 2,
+            left + (right - left) * (i+1) / xAxis.last - pointSize / 2,
+//            top -
+//                bottom +
+//                yAxisMargin +
+//                textHeight +
+//                + font.descent +
+//                font.ascent -
+//                pointSize / 2,
+            bottom + (top - bottom) * point / maxValue,
             pointSize,
             pointSize)
         ..fillPath();
-      i++;
-    }
+    });
 
 //    for (int i = 0; i < xData.length; i++) {
 //      context.canvas
