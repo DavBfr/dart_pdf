@@ -181,7 +181,7 @@ class UrlText extends pw.StatelessWidget {
     return pw.UrlLink(
       destination: url,
       child: pw.Text(text,
-          style: pw.TextStyle(
+          style: const pw.TextStyle(
             decoration: pw.TextDecoration.underline,
             color: PdfColors.blue,
           )),
