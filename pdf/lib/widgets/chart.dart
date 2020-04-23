@@ -83,7 +83,9 @@ class ScatterChart extends Widget {
       this.yAxisMargin = 2,
       this.pointSize = 3,
       this.pointColor = PdfColors.red,
-      this.pointLine = true,
+      this.drawLine = true,
+      this.drawPoints = true,
+      this.firstPoint,
       this.pointLineWidth = 2.0,
       this.pointLineColor = PdfColors.red,
       this.gridTextStyle}) {
@@ -95,6 +97,7 @@ class ScatterChart extends Widget {
 
     assert(maxValue >= data.reduce(math.max));
     assert(xAxis.length > data.length);
+    assert(drawLine || drawPoints);
 
     axes = Axes(
         xAxis: xAxis,
@@ -118,7 +121,9 @@ class ScatterChart extends Widget {
   int yAxisMargin;
   double pointSize;
   PdfColor pointColor;
-  bool pointLine;
+  bool drawLine;
+  bool drawPoints;
+  double firstPoint;
   double pointLineWidth;
   PdfColor pointLineColor;
 
@@ -172,32 +177,39 @@ class ScatterChart extends Widget {
     var gridRight = box.right - maxTextWidth / 2;
     var gridBottom = box.bottom + textHeight + yAxisMargin;
 
-    if (pointLine) {
-      var lastPoint = 0.0;
+    if (drawLine) {
+      var lastPoint = firstPoint;
       data.asMap().forEach((int i, double point) {
-        context.canvas
-          ..setStrokeColor(pointLineColor)
-          ..setLineWidth(pointLineWidth)
-          ..drawLine(
+        if (lastPoint != null) {
+          context.canvas.drawLine(
               gridLeft + (gridRight - gridLeft) * i / (xAxis.length - 1),
               gridBottom + (gridTop - gridBottom) * lastPoint / maxValue,
               gridLeft + (gridRight - gridLeft) * (i + 1) / (xAxis.length - 1),
-              gridBottom + (gridTop - gridBottom) * point / maxValue)
-          ..strokePath();
-        lastPoint = point;
+              gridBottom + (gridTop - gridBottom) * point / maxValue);
+          lastPoint = point;
+        }
       });
+
+      context.canvas
+        ..setStrokeColor(pointLineColor)
+        ..setLineWidth(pointLineWidth)
+        ..setLineCap(PdfLineCap.joinRound)
+        ..setLineJoin(PdfLineCap.joinRound)
+        ..strokePath();
     }
 
-    data.asMap().forEach((int i, double point) {
-      context.canvas
-        ..setColor(pointColor)
-        ..drawEllipse(
-            gridLeft + (gridRight - gridLeft) * (i + 1) / (xAxis.length - 1),
-            gridBottom + (gridTop - gridBottom) * point / maxValue,
-            pointSize,
-            pointSize)
-        ..fillPath();
-    });
+    if (drawPoints) {
+      data.asMap().forEach((int i, double point) {
+        context.canvas
+          ..setColor(pointColor)
+          ..drawEllipse(
+              gridLeft + (gridRight - gridLeft) * (i + 1) / (xAxis.length - 1),
+              gridBottom + (gridTop - gridBottom) * point / maxValue,
+              pointSize,
+              pointSize)
+          ..fillPath();
+      });
+    }
 
     context.canvas.restoreContext();
   }

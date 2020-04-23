@@ -43,7 +43,16 @@ void main() {
       pdf.addPage(Page(
         build: (Context context) => ScatterChart(
           data: <double>[1, 3, 5],
-          pointLine: false,
+          drawLine: false,
+        ),
+      ));
+    });
+
+    test('Default ScatterChart without dots', () {
+      pdf.addPage(Page(
+        build: (Context context) => ScatterChart(
+          data: <double>[1, 3, 5],
+          drawPoints: false,
         ),
       ));
     });
