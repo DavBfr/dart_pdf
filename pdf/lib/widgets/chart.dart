@@ -22,12 +22,10 @@ class Axes extends BoxBorder {
       double textHeight) {
     final font = style.font.getFont(context);
 
-    print("box ${box.bottom}");
-    print("box ${box.top}");
-    var left = box.left + maxTextWidth + xMargin;
-    var top = box.top - textHeight / 2;
-    var right = box.right - maxTextWidth / 2;
-    var bottom = box.bottom + textHeight + yMargin;
+    var gridLeft = box.left + maxTextWidth + xMargin;
+    var gridTop = box.top - textHeight / 2;
+    var gridRight = box.right - maxTextWidth / 2;
+    var gridBottom = box.bottom + textHeight + yMargin;
 
     context.canvas
       ..setColor(PdfColors.black)
@@ -50,7 +48,7 @@ class Axes extends BoxBorder {
           style.font.getFont(context),
           style.fontSize,
           x.toString(),
-          left + (right - left) * x / xAxis.last - textWidth / 2,
+          gridLeft + (gridRight - gridLeft) * x / xAxis.last - textWidth / 2,
           0,
         );
     }
@@ -58,7 +56,7 @@ class Axes extends BoxBorder {
     for (double y in yAxis.where((double y) => y != yAxis.first)) {
       var textWidth =
           (font.stringMetrics(y.toString()) * (style.fontSize)).width;
-      var yPos = bottom + (top - bottom) * y / yAxis.last;
+      var yPos = gridBottom + (gridTop - gridBottom) * y / yAxis.last;
       context.canvas
         ..drawString(
           style.font.getFont(context),
@@ -71,7 +69,7 @@ class Axes extends BoxBorder {
       context.canvas
         ..setStrokeColor(PdfColors.grey)
         ..setLineWidth(1.0)
-        ..drawLine(left, yPos + font.descent + font.ascent - 0.5, right,
+        ..drawLine(gridLeft, yPos + font.descent + font.ascent - 0.5, gridRight,
             yPos + font.descent + font.ascent - 0.5)
         ..strokePath();
     }
@@ -79,7 +77,7 @@ class Axes extends BoxBorder {
     super.paintRect(
         context,
         PdfRect.fromLTRB(
-            left, bottom, right, top + font.descent + font.ascent + 1));
+            gridLeft, gridBottom, gridRight, gridTop + font.descent + font.ascent + 1));
   }
 }
 
@@ -93,8 +91,11 @@ class ScatterChart extends Widget {
       this.yAxis,
       this.xAxisMargin = 10,
       this.yAxisMargin = 2,
-        this.pointSize = 3,
-        this.pointColor = PdfColors.red,
+      this.pointSize = 3,
+      this.pointColor = PdfColors.red,
+      this.pointLine = true,
+      this.pointLineWidth = 2.0,
+      this.pointLineColor = PdfColors.red,
       this.gridTextStyle}) {
     yAxis = List<double>.generate(
         xAxisIntersect + 1,
@@ -103,6 +104,9 @@ class ScatterChart extends Widget {
     xAxis ??= List<double>.generate(data.length + 1, (int i) => i.toDouble());
 
     maxValue = data.reduce(math.max);
+
+    assert(yAxis.reduce(math.max) >= maxValue);
+    assert(xAxis.length > data.length);
 
     axes = Axes(
         xAxis: xAxis,
@@ -126,6 +130,10 @@ class ScatterChart extends Widget {
   int yAxisMargin;
   double pointSize;
   PdfColor pointColor;
+  bool pointLine;
+  double pointLineWidth;
+  PdfColor pointLineColor;
+
   final TextStyle gridTextStyle;
   Axes axes;
 
@@ -161,6 +169,7 @@ class ScatterChart extends Widget {
     final textHeight = (font.stringMetrics(' ') * (style.fontSize)).height;
 
     box = PdfRect(0, 0, box.width, box.height);
+
     axes.paint(
       context,
       box,
@@ -169,33 +178,36 @@ class ScatterChart extends Widget {
       textHeight,
     );
 
-    var left = box.left + maxTextWidth + xAxisMargin;
-    var top = box.top - textHeight / 2;
-    var right = box.right - maxTextWidth / 2;
-    var bottom = box.bottom + textHeight + yAxisMargin;
+    var gridLeft = box.left + maxTextWidth + xAxisMargin;
+    var gridTop = box.top - textHeight / 2;
+    var gridRight = box.right - maxTextWidth / 2;
+    var gridBottom = box.bottom + textHeight + yAxisMargin;
 
-    var lastPoint = 0.0;
+    if (pointLine) {
+      var lastPoint = 0.0;
+      data.asMap().forEach((int i, double point) {
+        context.canvas
+          ..setStrokeColor(pointLineColor)
+          ..setLineWidth(pointLineWidth)
+          ..drawLine(
+              gridLeft + (gridRight - gridLeft) * i / xAxis.last - pointSize / 2,
+              gridBottom + (gridTop - gridBottom) * lastPoint / maxValue,
+              gridLeft + (gridRight - gridLeft) * (i + 1) / xAxis.last - pointSize / 2,
+              gridBottom + (gridTop - gridBottom) * point / maxValue)
+          ..strokePath();
+        lastPoint = point;
+      });
+    }
+
     data.asMap().forEach((int i, double point) {
-      context.canvas
-        ..setStrokeColor(PdfColors.red)
-        ..setLineWidth(2.0)
-        ..drawLine(
-            left + (right - left) * i / xAxis.last - pointSize / 2,
-            bottom + (top - bottom) * lastPoint / maxValue,
-            left + (right - left) * (i + 1) / xAxis.last - pointSize / 2,
-            bottom + (top - bottom) * point / maxValue)
-        ..strokePath();
-
       context.canvas
         ..setColor(pointColor)
         ..drawEllipse(
-            left + (right - left) * (i + 1) / xAxis.last - pointSize / 2,
-            bottom + (top - bottom) * point / maxValue,
+            gridLeft + (gridRight - gridLeft) * (i + 1) / xAxis.last - pointSize / 2,
+            gridBottom + (gridTop - gridBottom) * point / maxValue,
             pointSize,
             pointSize)
         ..fillPath();
-
-      lastPoint = point;
     });
 
     context.canvas.restoreContext();
