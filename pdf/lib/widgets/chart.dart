@@ -73,7 +73,8 @@ class Axes extends BoxBorder {
 class ScatterChart extends Widget {
   ScatterChart(
       {@required this.data,
-      this.ratio = 2,
+      this.width = 500,
+      this.height = 250,
       this.fit = BoxFit.contain,
       int yNrSeparators = 5,
       this.xAxis,
@@ -104,7 +105,8 @@ class ScatterChart extends Widget {
         maxValue: maxValue);
   }
 
-  final double ratio;
+  final double height;
+  final double width;
   final BoxFit fit;
   final List<double> data;
   double maxTextWidth;
@@ -126,8 +128,6 @@ class ScatterChart extends Widget {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    double height = 100;
-    double width = height * ratio;
     final w = constraints.hasBoundedWidth
         ? constraints.maxWidth
         : constraints.constrainWidth(width.toDouble());
