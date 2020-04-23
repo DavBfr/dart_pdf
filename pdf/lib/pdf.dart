@@ -50,6 +50,7 @@ part 'src/font_metrics.dart';
 part 'src/formxobject.dart';
 part 'src/function.dart';
 part 'src/graphic_state.dart';
+part 'src/graphic_stream.dart';
 part 'src/graphics.dart';
 part 'src/image.dart';
 part 'src/info.dart';

@@ -36,6 +36,7 @@ import 'widget_chart_test.dart' as widget_chart;
 import 'widget_clip_test.dart' as widget_clip;
 import 'widget_container_test.dart' as widget_container;
 import 'widget_flex_test.dart' as widget_flex;
+import 'widget_form_test.dart' as widget_form;
 import 'widget_grid_view_test.dart' as widget_grid_view;
 import 'widget_multipage_test.dart' as widget_multipage;
 import 'widget_opacity_test.dart' as widget_opacity;
@@ -68,6 +69,7 @@ void main() {
   widget_clip.main();
   widget_container.main();
   widget_flex.main();
+  widget_form.main();
   widget_grid_view.main();
   widget_multipage.main();
   widget_opacity.main();

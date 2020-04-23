@@ -21,4 +21,6 @@ class PdfXObject extends PdfObjectStream {
       : super(pdfDocument, type: '/XObject', isBinary: isBinary) {
     params['/Subtype'] = PdfName(subtype);
   }
+
+  String get name => 'X$objser';
 }

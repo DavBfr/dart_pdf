@@ -45,6 +45,7 @@ part 'widgets/decoration.dart';
 part 'widgets/document.dart';
 part 'widgets/flex.dart';
 part 'widgets/font.dart';
+part 'widgets/forms.dart';
 part 'widgets/geometry.dart';
 part 'widgets/grid_view.dart';
 part 'widgets/image.dart';

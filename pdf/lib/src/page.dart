@@ -18,7 +18,7 @@
 
 part of pdf;
 
-class PdfPage extends PdfObject {
+class PdfPage extends PdfObject with PdfGraphicStream {
   /// This constructs a Page object, which will hold any contents for this
   /// page.
   ///
@@ -41,29 +41,8 @@ class PdfPage extends PdfObject {
   /// -1 indicates no thumbnail.
   PdfObject thumbnail;
 
-  /// Isolated transparency: If this flag is true, objects within the group
-  /// shall be composited against a fully transparent initial backdrop;
-  /// if false, they shall be composited against the group’s backdrop
-  bool isolatedTransparency = false;
-
-  /// Whether the transparency group is a knockout group.
-  /// If this flag is false, later objects within the group shall be composited
-  /// with earlier ones with which they overlap; if true, they shall be
-  /// composited with the group’s initial backdrop and shall overwrite any
-  /// earlier overlapping objects.
-  bool knockoutTransparency = false;
-
   /// This holds any Annotations contained within this page.
   List<PdfAnnot> annotations = <PdfAnnot>[];
-
-  /// The fonts associated with this page
-  final Map<String, PdfFont> fonts = <String, PdfFont>{};
-
-  /// The fonts associated with this page
-  final Map<String, PdfShading> shading = <String, PdfShading>{};
-
-  /// The xobjects or other images in the pdf
-  final Map<String, PdfXObject> xObjects = <String, PdfXObject>{};
 
   /// This returns a [PdfGraphics] object, which can then be used to render
   /// on to this page. If a previous [PdfGraphics] object was used, this object
@@ -88,7 +67,6 @@ class PdfPage extends PdfObject {
     annotations.add(ob);
   }
 
-  /// @param os OutputStream to send the object to
   @override
   void _prepare() {
     super._prepare();
@@ -115,47 +93,6 @@ class PdfPage extends PdfObject {
         params['/Contents'] = PdfArray.fromObjects(contents);
       }
     }
-
-    // Now the resources
-    /// This holds any resources for this page
-    final PdfDict resources = PdfDict();
-
-    resources['/ProcSet'] = PdfArray(const <PdfName>[
-      PdfName('/PDF'),
-      PdfName('/Text'),
-      PdfName('/ImageB'),
-      PdfName('/ImageC'),
-    ]);
-
-    // fonts
-    if (fonts.isNotEmpty) {
-      resources['/Font'] = PdfDict.fromObjectMap(fonts);
-    }
-
-    // shading
-    if (shading.isNotEmpty) {
-      resources['/Shading'] = PdfDict.fromObjectMap(shading);
-    }
-
-    // Now the XObjects
-    if (xObjects.isNotEmpty) {
-      resources['/XObject'] = PdfDict.fromObjectMap(xObjects);
-    }
-
-    if (pdfDocument.hasGraphicStates) {
-      // Declare Transparency Group settings
-      params['/Group'] = PdfDict(<String, PdfDataType>{
-        '/Type': const PdfName('/Group'),
-        '/S': const PdfName('/Transparency'),
-        '/CS': const PdfName('/DeviceRGB'),
-        '/I': PdfBool(isolatedTransparency),
-        '/K': PdfBool(knockoutTransparency),
-      });
-
-      resources['/ExtGState'] = pdfDocument.graphicStates.ref();
-    }
-
-    params['/Resources'] = resources;
 
     // The thumbnail
     if (thumbnail != null) {

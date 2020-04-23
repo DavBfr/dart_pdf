@@ -199,5 +199,6 @@ class PdfImage extends PdfXObject {
   final PdfImageOrientation orientation;
 
   /// Name of the image
+  @override
   String get name => '/I$objser';
 }

@@ -52,3 +52,4 @@ ref
 cache_*
 
 .vscode
+package.json

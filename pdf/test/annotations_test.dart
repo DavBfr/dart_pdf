@@ -35,17 +35,17 @@ void main() {
 
     PdfAnnot(
       page,
-      const PdfAnnotText(
-        rect: PdfRect(100, 100, 50, 50),
+      PdfAnnotText(
+        rect: const PdfRect(100, 100, 50, 50),
         content: 'Hello',
       ),
     );
 
     PdfAnnot(
       page,
-      const PdfAnnotNamedLink(
+      PdfAnnotNamedLink(
         dest: 'target',
-        rect: PdfRect(100, 150, 50, 50),
+        rect: const PdfRect(100, 150, 50, 50),
       ),
     );
     g.drawRect(100, 150, 50, 50);
@@ -53,12 +53,25 @@ void main() {
 
     PdfAnnot(
       page,
-      const PdfAnnotUrlLink(
-        rect: PdfRect(100, 250, 50, 50),
+      PdfAnnotUrlLink(
+        rect: const PdfRect(100, 250, 50, 50),
         url: 'https://github.com/DavBfr/dart_pdf/',
       ),
     );
     g.drawRect(100, 250, 50, 50);
+    g.strokePath();
+
+    PdfAnnot(
+      page,
+      PdfTextField(
+        rect: const PdfRect(100, 50, 50, 20),
+        fieldName: 'test',
+        font: PdfFont.helvetica(pdf),
+        fontSize: 10,
+        textColor: PdfColors.blue,
+      ),
+    );
+    // g.drawRect(100, 50, 50, 20);
     g.strokePath();
 
     final File file = File('annotations.pdf');

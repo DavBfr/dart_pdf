@@ -55,7 +55,7 @@ class _PdfGraphicsContext {
 }
 
 class PdfGraphics {
-  PdfGraphics(this.page, this.buf) {
+  PdfGraphics(this._page, this.buf) {
     _context = _PdfGraphicsContext(ctm: Matrix4.identity());
   }
 
@@ -66,17 +66,11 @@ class PdfGraphics {
   _PdfGraphicsContext _context;
   final Queue<_PdfGraphicsContext> _contextQueue = Queue<_PdfGraphicsContext>();
 
-  final PdfPage page;
+  final PdfGraphicStream _page;
 
   final PdfStream buf;
 
-  PdfFont get defaultFont {
-    if (page.pdfDocument.fonts.isEmpty) {
-      PdfFont.helvetica(page.pdfDocument);
-    }
-
-    return page.pdfDocument.fonts.elementAt(0);
-  }
+  PdfFont get defaultFont => _page.getDefaultFont();
 
   void fillPath() {
     buf.putString('f\n');
@@ -97,7 +91,7 @@ class PdfGraphics {
   /// Apply a shader
   void applyShader(PdfShading shader) {
     // The shader needs to be registered in the page resources
-    page.shading[shader.name] = shader;
+    _page.addShader(shader);
     buf.putString('${shader.name} sh\n');
   }
 
@@ -139,7 +133,7 @@ class PdfGraphics {
     h ??= img.height.toDouble() * w / img.width.toDouble();
 
     // The image needs to be registered in the page resources
-    page.xObjects[img.name] = img;
+    _page.addXObject(img);
 
     // q w 0 0 h x y cm % the coordinate matrix
     buf.putString('q ');
@@ -232,6 +226,40 @@ class PdfGraphics {
     lineTo(x, y + rv);
   }
 
+  /// Set the current font and size
+  void setFont(
+    PdfFont font,
+    double size, {
+    double charSpace = 0,
+    double wordSpace = 0,
+    double scale = 1,
+    PdfTextRenderingMode mode = PdfTextRenderingMode.fill,
+    double rise = 0,
+  }) {
+    buf.putString('${font.name} ');
+    PdfNum(size).output(buf);
+    buf.putString(' Tf\n');
+    if (charSpace != 0) {
+      PdfNum(charSpace).output(buf);
+      buf.putString(' Tc\n');
+    }
+    if (wordSpace != 0) {
+      PdfNum(wordSpace).output(buf);
+      buf.putString(' Tw\n');
+    }
+    if (scale != 1) {
+      PdfNum(scale * 100).output(buf);
+      buf.putString(' Tz\n');
+    }
+    if (rise != 0) {
+      PdfNum(rise).output(buf);
+      buf.putString(' Ts\n');
+    }
+    if (mode != PdfTextRenderingMode.fill) {
+      buf.putString('${mode.index} Tr\n');
+    }
+  }
+
   /// This draws a string.
   ///
   /// @param x coordinate
@@ -249,34 +277,17 @@ class PdfGraphics {
     PdfTextRenderingMode mode = PdfTextRenderingMode.fill,
     double rise = 0,
   }) {
-    if (!page.fonts.containsKey(font.name)) {
-      page.fonts[font.name] = font;
-    }
+    _page.addFont(font);
 
     buf.putString('BT ');
     PdfNumList(<double>[x, y]).output(buf);
-    buf.putString(' Td ${font.name} ');
-    PdfNum(size).output(buf);
-    buf.putString(' Tf ');
-    if (charSpace != 0) {
-      PdfNum(charSpace).output(buf);
-      buf.putString(' Tc ');
-    }
-    if (wordSpace != 0) {
-      PdfNum(wordSpace).output(buf);
-      buf.putString(' Tw ');
-    }
-    if (scale != 1) {
-      PdfNum(scale * 100).output(buf);
-      buf.putString(' Tz ');
-    }
-    if (rise != 0) {
-      PdfNum(rise).output(buf);
-      buf.putString(' Ts ');
-    }
-    if (mode != PdfTextRenderingMode.fill) {
-      buf.putString('${mode.index} Tr ');
-    }
+    buf.putString(' Td ');
+    setFont(font, size,
+        charSpace: charSpace,
+        mode: mode,
+        rise: rise,
+        scale: scale,
+        wordSpace: wordSpace);
     buf.putString('[');
     font.putText(buf, s);
     buf.putString(']TJ ET\n');
@@ -320,7 +331,7 @@ class PdfGraphics {
 
   /// Set the graphic state for drawing
   void setGraphicState(PdfGraphicState state) {
-    final String name = page.pdfDocument.graphicStates.stateName(state);
+    final String name = _page.stateName(state);
     buf.putString('$name gs\n');
   }
 

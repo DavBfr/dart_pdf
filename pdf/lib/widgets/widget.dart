@@ -79,6 +79,22 @@ class Context {
     }
     return copyWith(inherited: inherited);
   }
+
+  PdfRect localToGlobal(PdfRect box) {
+    final Matrix4 mat = canvas.getTransform();
+    final Vector3 lt = mat.transform3(Vector3(box.left, box.bottom, 0));
+    final Vector3 lb = mat.transform3(Vector3(box.left, box.top, 0));
+    final Vector3 rt = mat.transform3(Vector3(box.right, box.bottom, 0));
+    final Vector3 rb = mat.transform3(Vector3(box.right, box.top, 0));
+    final List<double> x = <double>[lt.x, lb.x, rt.x, rb.x];
+    final List<double> y = <double>[lt.y, lb.y, rt.y, rb.y];
+    return PdfRect.fromLTRB(
+      x.reduce(math.min),
+      y.reduce(math.min),
+      x.reduce(math.max),
+      y.reduce(math.max),
+    );
+  }
 }
 
 class Inherited {

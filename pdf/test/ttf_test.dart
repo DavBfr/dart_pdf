@@ -22,7 +22,8 @@ import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:test/test.dart';
 
-void printText(PdfGraphics canvas, String text, PdfFont font, double top) {
+void printText(
+    PdfPage page, PdfGraphics canvas, String text, PdfFont font, double top) {
   text = text + font.fontName;
   const double fontSize = 20;
   final PdfFontMetrics metrics = font.stringMetrics(text) * fontSize;
@@ -30,7 +31,7 @@ void printText(PdfGraphics canvas, String text, PdfFont font, double top) {
   const double deb = 5;
 
   const double x = 50;
-  final double y = canvas.page.pageFormat.height - top;
+  final double y = page.pageFormat.height - top;
 
   canvas
     ..drawRect(x + metrics.left, y + metrics.top, metrics.width, metrics.height)
@@ -51,12 +52,13 @@ void printText(PdfGraphics canvas, String text, PdfFont font, double top) {
     ..drawString(font, fontSize, text, x, y);
 }
 
-void printTextTtf(PdfGraphics canvas, String text, File ttfFont, double top) {
+void printTextTtf(
+    PdfPage page, PdfGraphics canvas, String text, File ttfFont, double top) {
   final Uint8List fontData = ttfFont.readAsBytesSync();
   final PdfTtfFont font =
-      PdfTtfFont(canvas.page.pdfDocument, fontData.buffer.asByteData());
+      PdfTtfFont(page.pdfDocument, fontData.buffer.asByteData());
 
-  printText(canvas, text, font, top);
+  printText(page, canvas, text, font, top);
 }
 
 void main() {
@@ -69,11 +71,12 @@ void main() {
     int top = 0;
     const String s = 'Hello Lukáča ';
 
-    printTextTtf(g, s, File('open-sans.ttf'), 30.0 + 30.0 * top++);
-    printTextTtf(g, s, File('open-sans-bold.ttf'), 30.0 + 30.0 * top++);
-    printTextTtf(g, s, File('roboto.ttf'), 30.0 + 30.0 * top++);
-    printTextTtf(g, s, File('noto-sans.ttf'), 30.0 + 30.0 * top++);
-    printTextTtf(g, '你好 檯號 ', File('genyomintw.ttf'), 30.0 + 30.0 * top++);
+    printTextTtf(page, g, s, File('open-sans.ttf'), 30.0 + 30.0 * top++);
+    printTextTtf(page, g, s, File('open-sans-bold.ttf'), 30.0 + 30.0 * top++);
+    printTextTtf(page, g, s, File('roboto.ttf'), 30.0 + 30.0 * top++);
+    printTextTtf(page, g, s, File('noto-sans.ttf'), 30.0 + 30.0 * top++);
+    printTextTtf(
+        page, g, '你好 檯號 ', File('genyomintw.ttf'), 30.0 + 30.0 * top++);
 
     final File file = File('ttf.pdf');
     file.writeAsBytesSync(pdf.save());

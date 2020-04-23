@@ -45,13 +45,6 @@ class Anchor extends SingleChildWidget {
 }
 
 abstract class AnnotationBuilder {
-  PdfRect localToGlobal(Context context, PdfRect box) {
-    final Matrix4 mat = context.canvas.getTransform();
-    final Vector3 lt = mat.transform3(Vector3(box.left, box.bottom, 0));
-    final Vector3 rb = mat.transform3(Vector3(box.right, box.top, 0));
-    return PdfRect.fromLTRB(lt.x, lt.y, rb.x, rb.y);
-  }
-
   void build(Context context, PdfRect box);
 }
 
@@ -65,7 +58,7 @@ class AnnotationLink extends AnnotationBuilder {
     PdfAnnot(
       context.page,
       PdfAnnotNamedLink(
-        rect: localToGlobal(context, box),
+        rect: context.localToGlobal(box),
         dest: destination,
       ),
     );
@@ -82,7 +75,7 @@ class AnnotationUrl extends AnnotationBuilder {
     PdfAnnot(
       context.page,
       PdfAnnotUrlLink(
-        rect: localToGlobal(context, box),
+        rect: context.localToGlobal(box),
         url: destination,
       ),
     );
@@ -128,13 +121,89 @@ class AnnotationSignature extends AnnotationBuilder {
     PdfAnnot(
       context.page,
       PdfAnnotSign(
-        localToGlobal(context, box),
+        rect: context.localToGlobal(box),
         fieldName: name,
         border: border,
         flags: flags,
         date: date,
         color: color,
         highlighting: highlighting,
+      ),
+    );
+  }
+}
+
+class AnnotationTextField extends AnnotationBuilder {
+  AnnotationTextField({
+    this.name,
+    this.border,
+    this.flags,
+    this.date,
+    this.color,
+    this.backgroundColor,
+    this.highlighting,
+    this.maxLength,
+    this.alternateName,
+    this.mappingName,
+    this.fieldFlags,
+    this.value,
+    this.defaultValue,
+    this.textStyle,
+  });
+
+  final String name;
+
+  final PdfBorder border;
+
+  final Set<PdfAnnotFlags> flags;
+
+  final DateTime date;
+
+  final PdfColor color;
+
+  final PdfColor backgroundColor;
+
+  final PdfAnnotHighlighting highlighting;
+
+  final int maxLength;
+
+  final String value;
+
+  final String defaultValue;
+
+  final TextStyle textStyle;
+
+  final String alternateName;
+
+  final String mappingName;
+
+  final Set<PdfFieldFlags> fieldFlags;
+
+  @override
+  void build(Context context, PdfRect box) {
+    final TextStyle _textStyle =
+        Theme.of(context).defaultTextStyle.merge(textStyle);
+
+    PdfAnnot(
+      context.page,
+      PdfTextField(
+        rect: context.localToGlobal(box),
+        fieldName: name,
+        border: border,
+        flags: flags,
+        date: date,
+        color: color,
+        backgroundColor: backgroundColor,
+        highlighting: highlighting,
+        maxLength: maxLength,
+        alternateName: alternateName,
+        mappingName: mappingName,
+        fieldFlags: fieldFlags,
+        value: value,
+        defaultValue: defaultValue,
+        font: _textStyle.font.getFont(context),
+        fontSize: _textStyle.fontSize,
+        textColor: _textStyle.color,
       ),
     );
   }
@@ -197,5 +266,44 @@ class Signature extends Annotation {
               date: date,
               color: color,
               highlighting: highlighting,
+            ));
+}
+
+class TextField extends Annotation {
+  TextField({
+    Widget child,
+    double width = 120,
+    double height = 13,
+    String name,
+    PdfBorder border,
+    Set<PdfAnnotFlags> flags,
+    DateTime date,
+    PdfColor color,
+    PdfColor backgroundColor,
+    PdfAnnotHighlighting highlighting,
+    int maxLength,
+    String alternateName,
+    String mappingName,
+    Set<PdfFieldFlags> fieldFlags,
+    String value,
+    String defaultValue,
+    TextStyle textStyle,
+  }) : super(
+            child: child ?? SizedBox(width: width, height: height),
+            builder: AnnotationTextField(
+              name: name,
+              border: border,
+              flags: flags,
+              date: date,
+              color: color,
+              backgroundColor: backgroundColor,
+              highlighting: highlighting,
+              maxLength: maxLength,
+              alternateName: alternateName,
+              mappingName: mappingName,
+              fieldFlags: fieldFlags,
+              value: value,
+              defaultValue: defaultValue,
+              textStyle: textStyle,
             ));
 }

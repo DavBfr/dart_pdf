@@ -98,6 +98,11 @@ class PdfString extends PdfDataType {
     return PdfString(_string(value), PdfStringFormat.litteral);
   }
 
+  factory PdfString.fromStream(PdfObject object, PdfStream value,
+      [PdfStringFormat format = PdfStringFormat.litteral]) {
+    return PdfString(value.output(), format);
+  }
+
   factory PdfString.fromDate(DateTime date) {
     return PdfString(_date(date));
   }
@@ -203,11 +208,28 @@ class PdfSecString extends PdfString {
       : super(value, format);
 
   factory PdfSecString.fromString(PdfObject object, String value) {
-    return PdfSecString(object, PdfString._string(value));
+    return PdfSecString(
+      object,
+      PdfString._string(value),
+      PdfStringFormat.litteral,
+    );
+  }
+
+  factory PdfSecString.fromStream(PdfObject object, PdfStream value,
+      [PdfStringFormat format = PdfStringFormat.litteral]) {
+    return PdfSecString(
+      object,
+      value.output(),
+      PdfStringFormat.litteral,
+    );
   }
 
   factory PdfSecString.fromDate(PdfObject object, DateTime date) {
-    return PdfSecString(object, PdfString._date(date));
+    return PdfSecString(
+      object,
+      PdfString._date(date),
+      PdfStringFormat.litteral,
+    );
   }
 
   final PdfObject object;
@@ -338,5 +360,30 @@ class PdfDict extends PdfDataType {
 
   bool containsKey(String key) {
     return values.containsKey(key);
+  }
+}
+
+class PdfColorType extends PdfDataType {
+  const PdfColorType(this.color);
+
+  final PdfColor color;
+
+  @override
+  void output(PdfStream s) {
+    if (color is PdfColorCmyk) {
+      final PdfColorCmyk k = color;
+      PdfArray.fromNum(<double>[
+        k.cyan,
+        k.magenta,
+        k.yellow,
+        k.black,
+      ]).output(s);
+    } else {
+      PdfArray.fromNum(<double>[
+        color.red,
+        color.green,
+        color.blue,
+      ]).output(s);
+    }
   }
 }

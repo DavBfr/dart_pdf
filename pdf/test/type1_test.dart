@@ -21,7 +21,8 @@ import 'dart:io';
 import 'package:pdf/pdf.dart';
 import 'package:test/test.dart';
 
-void printText(PdfGraphics canvas, String text, PdfFont font, double top) {
+void printText(
+    PdfPage page, PdfGraphics canvas, String text, PdfFont font, double top) {
   text = text + font.fontName;
   const double fontSize = 20;
   final PdfFontMetrics metrics = font.stringMetrics(text) * fontSize;
@@ -29,7 +30,7 @@ void printText(PdfGraphics canvas, String text, PdfFont font, double top) {
   const double deb = 5;
 
   const double x = 50;
-  final double y = canvas.page.pageFormat.height - top;
+  final double y = page.pageFormat.height - top;
 
   canvas
     ..drawRect(x + metrics.left, y + metrics.top, metrics.width, metrics.height)
@@ -60,23 +61,24 @@ void main() {
     int top = 0;
     const String s = 'Hello ';
 
-    printText(g, s, PdfFont.courier(pdf), 20.0 + 30.0 * top++);
-    printText(g, s, PdfFont.courierBold(pdf), 20.0 + 30.0 * top++);
-    printText(g, s, PdfFont.courierOblique(pdf), 20.0 + 30.0 * top++);
-    printText(g, s, PdfFont.courierBoldOblique(pdf), 20.0 + 30.0 * top++);
+    printText(page, g, s, PdfFont.courier(pdf), 20.0 + 30.0 * top++);
+    printText(page, g, s, PdfFont.courierBold(pdf), 20.0 + 30.0 * top++);
+    printText(page, g, s, PdfFont.courierOblique(pdf), 20.0 + 30.0 * top++);
+    printText(page, g, s, PdfFont.courierBoldOblique(pdf), 20.0 + 30.0 * top++);
 
-    printText(g, s, PdfFont.helvetica(pdf), 20.0 + 30.0 * top++);
-    printText(g, s, PdfFont.helveticaBold(pdf), 20.0 + 30.0 * top++);
-    printText(g, s, PdfFont.helveticaOblique(pdf), 20.0 + 30.0 * top++);
-    printText(g, s, PdfFont.helveticaBoldOblique(pdf), 20.0 + 30.0 * top++);
+    printText(page, g, s, PdfFont.helvetica(pdf), 20.0 + 30.0 * top++);
+    printText(page, g, s, PdfFont.helveticaBold(pdf), 20.0 + 30.0 * top++);
+    printText(page, g, s, PdfFont.helveticaOblique(pdf), 20.0 + 30.0 * top++);
+    printText(
+        page, g, s, PdfFont.helveticaBoldOblique(pdf), 20.0 + 30.0 * top++);
 
-    printText(g, s, PdfFont.times(pdf), 20.0 + 30.0 * top++);
-    printText(g, s, PdfFont.timesBold(pdf), 20.0 + 30.0 * top++);
-    printText(g, s, PdfFont.timesItalic(pdf), 20.0 + 30.0 * top++);
-    printText(g, s, PdfFont.timesBoldItalic(pdf), 20.0 + 30.0 * top++);
+    printText(page, g, s, PdfFont.times(pdf), 20.0 + 30.0 * top++);
+    printText(page, g, s, PdfFont.timesBold(pdf), 20.0 + 30.0 * top++);
+    printText(page, g, s, PdfFont.timesItalic(pdf), 20.0 + 30.0 * top++);
+    printText(page, g, s, PdfFont.timesBoldItalic(pdf), 20.0 + 30.0 * top++);
 
-    printText(g, s, PdfFont.symbol(pdf), 20.0 + 30.0 * top++);
-    printText(g, s, PdfFont.zapfDingbats(pdf), 20.0 + 30.0 * top++);
+    printText(page, g, s, PdfFont.symbol(pdf), 20.0 + 30.0 * top++);
+    printText(page, g, s, PdfFont.zapfDingbats(pdf), 20.0 + 30.0 * top++);
 
     final File file = File('type1.pdf');
     file.writeAsBytesSync(pdf.save());
