@@ -27,20 +27,7 @@ class Axes extends BoxBorder {
     var gridRight = box.right - maxTextWidth / 2;
     var gridBottom = box.bottom + textHeight + yMargin;
 
-    context.canvas
-      ..setColor(PdfColors.black)
-      ..drawString(
-        style.font.getFont(context),
-        style.fontSize,
-        xAxis.first.toStringAsFixed(1),
-        maxTextWidth / 2 -
-            (font.stringMetrics(xAxis.first.toStringAsFixed(1)) * (style.fontSize))
-                    .width /
-                2,
-        0,
-      );
-
-    for (double x in xAxis.where((double x) => x != xAxis.first)) {
+    xAxis.asMap().forEach((int i, double x) {
       var textWidth =
           (font.stringMetrics(x.toStringAsFixed(1)) * (style.fontSize)).width;
       context.canvas
@@ -48,10 +35,12 @@ class Axes extends BoxBorder {
           style.font.getFont(context),
           style.fontSize,
           x.toStringAsFixed(1),
-          gridLeft + (gridRight - gridLeft) * x / xAxis.last - textWidth / 2,
+          gridLeft +
+              (gridRight - gridLeft) * i / (xAxis.length - 1) -
+              textWidth / 2,
           0,
         );
-    }
+    });
 
     for (double y in yAxis.where((double y) => y != yAxis.first)) {
       var textWidth =
@@ -76,8 +65,8 @@ class Axes extends BoxBorder {
 
     super.paintRect(
         context,
-        PdfRect.fromLTRB(
-            gridLeft, gridBottom, gridRight, gridTop + font.descent + font.ascent + 1));
+        PdfRect.fromLTRB(gridLeft, gridBottom, gridRight,
+            gridTop + font.descent + font.ascent + 1));
   }
 }
 
@@ -87,6 +76,7 @@ class ScatterChart extends Widget {
       this.ratio = 2,
       this.fit = BoxFit.contain,
       int yNrSeparators = 5,
+      this.xAxis,
       this.yAxis,
       this.xAxisMargin = 10,
       this.yAxisMargin = 2,
@@ -96,11 +86,9 @@ class ScatterChart extends Widget {
       this.pointLineWidth = 2.0,
       this.pointLineColor = PdfColors.red,
       this.gridTextStyle}) {
-    yAxis ??= List<double>.generate(
-        yNrSeparators + 1,
-        (int i) =>
-            i / yNrSeparators.toDouble() * data.reduce(math.max).ceil());
-    xAxis = List<double>.generate(data.length + 1, (int i) => i.toDouble());
+    yAxis ??= List<double>.generate(yNrSeparators + 1,
+        (int i) => i / yNrSeparators.toDouble() * data.reduce(math.max).ceil());
+    xAxis ??= List<double>.generate(data.length + 1, (int i) => i.toDouble());
 
     maxValue = yAxis.reduce(math.max);
 
@@ -165,7 +153,8 @@ class ScatterChart extends Widget {
     final font = style.font.getFont(context);
 
     final maxTextWidth =
-        (font.stringMetrics(maxValue.toStringAsFixed(1)) * (style.fontSize)).width;
+        (font.stringMetrics(maxValue.toStringAsFixed(1)) * (style.fontSize))
+            .width;
     final textHeight = (font.stringMetrics(' ') * (style.fontSize)).height;
 
     box = PdfRect(0, 0, box.width, box.height);
@@ -190,9 +179,9 @@ class ScatterChart extends Widget {
           ..setStrokeColor(pointLineColor)
           ..setLineWidth(pointLineWidth)
           ..drawLine(
-              gridLeft + (gridRight - gridLeft) * i / xAxis.last - pointSize / 2,
+              gridLeft + (gridRight - gridLeft) * i / (xAxis.length - 1),
               gridBottom + (gridTop - gridBottom) * lastPoint / maxValue,
-              gridLeft + (gridRight - gridLeft) * (i + 1) / xAxis.last - pointSize / 2,
+              gridLeft + (gridRight - gridLeft) * (i + 1) / (xAxis.length - 1),
               gridBottom + (gridTop - gridBottom) * point / maxValue)
           ..strokePath();
         lastPoint = point;
@@ -203,7 +192,7 @@ class ScatterChart extends Widget {
       context.canvas
         ..setColor(pointColor)
         ..drawEllipse(
-            gridLeft + (gridRight - gridLeft) * (i + 1) / xAxis.last - pointSize / 2,
+            gridLeft + (gridRight - gridLeft) * (i + 1) / (xAxis.length - 1),
             gridBottom + (gridTop - gridBottom) * point / maxValue,
             pointSize,
             pointSize)
