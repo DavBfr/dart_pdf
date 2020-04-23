@@ -85,7 +85,7 @@ class ScatterChart extends Widget {
       this.pointColor = PdfColors.red,
       this.drawLine = true,
       this.drawPoints = true,
-      this.firstPoint,
+      this.lineStartingPoint,
       this.pointLineWidth = 2.0,
       this.pointLineColor = PdfColors.red,
       this.gridTextStyle}) {
@@ -123,7 +123,7 @@ class ScatterChart extends Widget {
   PdfColor pointColor;
   bool drawLine;
   bool drawPoints;
-  double firstPoint;
+  double lineStartingPoint;
   double pointLineWidth;
   PdfColor pointLineColor;
 
@@ -178,7 +178,7 @@ class ScatterChart extends Widget {
     var gridBottom = box.bottom + textHeight + yAxisMargin;
 
     if (drawLine) {
-      var lastPoint = firstPoint;
+      var lastPoint = lineStartingPoint;
       data.asMap().forEach((int i, double point) {
         if (lastPoint != null) {
           context.canvas.drawLine(
