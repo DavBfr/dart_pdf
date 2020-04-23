@@ -78,6 +78,16 @@ void main() {
         ),
       ));
     });
+
+    test('ScatterChart with custom size', () {
+      pdf.addPage(Page(
+        build: (Context context) => ScatterChart(
+          data: <double>[1, 3, 3, 5, 2],
+          width: 300,
+          height: 200,
+        ),
+      ));
+    });
   });
 
   tearDownAll(() {
