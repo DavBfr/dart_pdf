@@ -152,7 +152,6 @@ void main() {
               pointSize: 8,
               pointLineColor: PdfColors.blue,
               pointLineWidth: 6,
-              pointLine: false,
             ),
             pw.Padding(padding: const pw.EdgeInsets.all(10)),
             pw.Paragraph(
