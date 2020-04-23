@@ -32,9 +32,9 @@ class Axes extends BoxBorder {
       ..drawString(
         style.font.getFont(context),
         style.fontSize,
-        xAxis.first.toString(),
+        xAxis.first.toStringAsFixed(1),
         maxTextWidth / 2 -
-            (font.stringMetrics(xAxis.first.toString()) * (style.fontSize))
+            (font.stringMetrics(xAxis.first.toStringAsFixed(1)) * (style.fontSize))
                     .width /
                 2,
         0,
@@ -42,12 +42,12 @@ class Axes extends BoxBorder {
 
     for (double x in xAxis.where((double x) => x != xAxis.first)) {
       var textWidth =
-          (font.stringMetrics(x.toString()) * (style.fontSize)).width;
+          (font.stringMetrics(x.toStringAsFixed(1)) * (style.fontSize)).width;
       context.canvas
         ..drawString(
           style.font.getFont(context),
           style.fontSize,
-          x.toString(),
+          x.toStringAsFixed(1),
           gridLeft + (gridRight - gridLeft) * x / xAxis.last - textWidth / 2,
           0,
         );
@@ -55,13 +55,13 @@ class Axes extends BoxBorder {
 
     for (double y in yAxis.where((double y) => y != yAxis.first)) {
       var textWidth =
-          (font.stringMetrics(y.toString()) * (style.fontSize)).width;
+          (font.stringMetrics(y.toStringAsFixed(1)) * (style.fontSize)).width;
       var yPos = gridBottom + (gridTop - gridBottom) * y / yAxis.last;
       context.canvas
         ..drawString(
           style.font.getFont(context),
           style.fontSize,
-          y.toString(),
+          y.toStringAsFixed(1),
           maxTextWidth / 2 - textWidth / 2,
           yPos - font.ascent,
         );
@@ -83,11 +83,10 @@ class Axes extends BoxBorder {
 
 class ScatterChart extends Widget {
   ScatterChart(
-      {this.data,
-      this.width = 200,
-      this.height = 100,
+      {@required this.data,
+      this.ratio = 2,
       this.fit = BoxFit.contain,
-      int xAxisIntersect = 5,
+      int yNrSeparators = 5,
       this.yAxis,
       this.xAxisMargin = 10,
       this.yAxisMargin = 2,
@@ -97,15 +96,15 @@ class ScatterChart extends Widget {
       this.pointLineWidth = 2.0,
       this.pointLineColor = PdfColors.red,
       this.gridTextStyle}) {
-    yAxis = List<double>.generate(
-        xAxisIntersect + 1,
+    yAxis ??= List<double>.generate(
+        yNrSeparators + 1,
         (int i) =>
-            i / xAxisIntersect.toDouble() * data.reduce(math.max).ceil());
-    xAxis ??= List<double>.generate(data.length + 1, (int i) => i.toDouble());
+            i / yNrSeparators.toDouble() * data.reduce(math.max).ceil());
+    xAxis = List<double>.generate(data.length + 1, (int i) => i.toDouble());
 
-    maxValue = data.reduce(math.max);
+    maxValue = yAxis.reduce(math.max);
 
-    assert(yAxis.reduce(math.max) >= maxValue);
+    assert(maxValue >= data.reduce(math.max));
     assert(xAxis.length > data.length);
 
     axes = Axes(
@@ -117,8 +116,7 @@ class ScatterChart extends Widget {
         maxValue: maxValue);
   }
 
-  final double width;
-  final double height;
+  final double ratio;
   final BoxFit fit;
   final List<double> data;
   double maxTextWidth;
@@ -140,6 +138,8 @@ class ScatterChart extends Widget {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
+    double height = 100;
+    double width = height * ratio;
     final w = constraints.hasBoundedWidth
         ? constraints.maxWidth
         : constraints.constrainWidth(width.toDouble());
@@ -165,7 +165,7 @@ class ScatterChart extends Widget {
     final font = style.font.getFont(context);
 
     final maxTextWidth =
-        (font.stringMetrics(maxValue.toString()) * (style.fontSize)).width;
+        (font.stringMetrics(maxValue.toStringAsFixed(1)) * (style.fontSize)).width;
     final textHeight = (font.stringMetrics(' ') * (style.fontSize)).height;
 
     box = PdfRect(0, 0, box.width, box.height);
