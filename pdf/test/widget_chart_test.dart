@@ -30,70 +30,92 @@ void main() {
     pdf = Document();
   });
 
-  group('ScatterChart test', () {
-    test('Default ScatterChart', () {
+  group('LineChart test', () {
+    test('Default LineChart', () {
       pdf.addPage(Page(
-        build: (Context context) => ScatterChart(
-          data: <double>[1, 3, 5],
+        build: (Context context) => Chart(
+          grid: LinearGrid(
+            xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
+            yAxis: <double>[0, 3, 6, 9],
+          ),
+          data: <DataSet>[
+            LineDataSet(
+              data: <double>[1, 3, 7],
+            ),
+          ],
         ),
       ));
     });
 
-    test('Default ScatterChart without lines connecting points', () {
+    test('Default LineChart without lines connecting points', () {
       pdf.addPage(Page(
-        build: (Context context) => ScatterChart(
-          data: <double>[1, 3, 5],
-          drawLine: false,
+        build: (Context context) => Chart(
+          grid: LinearGrid(
+            xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
+            yAxis: <double>[0, 3, 6, 9],
+          ),
+          data: <DataSet>[
+            LineDataSet(
+              data: <double>[1, 3, 7],
+              drawLine: false,
+            ),
+          ],
         ),
       ));
     });
 
     test('Default ScatterChart without dots', () {
       pdf.addPage(Page(
-        build: (Context context) => ScatterChart(
-          data: <double>[1, 3, 5],
-          drawPoints: false,
+        build: (Context context) => Chart(
+          grid: LinearGrid(
+            xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
+            yAxis: <double>[0, 3, 6, 9],
+          ),
+          data: <DataSet>[
+            LineDataSet(
+              data: <double>[1, 3, 7],
+              drawPoints: false,
+            ),
+          ],
         ),
       ));
     });
 
     test('ScatterChart with custom points and lines', () {
       pdf.addPage(Page(
-        build: (Context context) => ScatterChart(
-          data: <double>[1, 3, 5, 4],
-          pointLineWidth: 4,
-          pointLineColor: PdfColors.green,
-          pointColor: PdfColors.blue,
-          pointSize: 5,
-        ),
-      ));
-    });
-
-    test('ScatterChart with custom yAxis grid', () {
-      pdf.addPage(Page(
-        build: (Context context) => ScatterChart(
-          data: <double>[1, 3, 5, 4],
-          yAxis: <double>[0, 3, 6, 9],
-        ),
-      ));
-    });
-
-    test('ScatterChart with custom grid', () {
-      pdf.addPage(Page(
-        build: (Context context) => ScatterChart(
-          data: <double>[1, 3, 5],
-          yAxis: <double>[0, 3, 6, 9],
-          xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
+        build: (Context context) => Chart(
+          grid: LinearGrid(
+            xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
+            yAxis: <double>[0, 3, 6, 9],
+          ),
+          data: <DataSet>[
+            LineDataSet(
+              data: <double>[1, 3, 7],
+              drawLine: false,
+              pointColor: PdfColors.red,
+              pointSize: 4,
+              lineColor: PdfColors.purple,
+              lineWidth: 4,
+            ),
+          ],
         ),
       ));
     });
 
     test('ScatterChart with custom size', () {
       pdf.addPage(Page(
-        build: (Context context) => ScatterChart(
-          data: <double>[1, 3, 3, 5, 2],
-          width: 300,
-          height: 200,
+        build: (Context context) => Chart(
+          width: 200,
+          height: 100,
+          grid: LinearGrid(
+            xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
+            yAxis: <double>[0, 3, 6, 9],
+          ),
+          data: <DataSet>[
+            LineDataSet(
+              data: <double>[1, 3, 7],
+            ),
+          ],
         ),
       ));
     });
