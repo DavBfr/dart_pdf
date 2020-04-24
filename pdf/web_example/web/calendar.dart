@@ -76,12 +76,12 @@ class Calendar extends StatelessWidget {
     PdfColor color = PdfColors.grey300;
 
     if (currentDay) {
-      style = TextStyle(color: PdfColors.red);
+      style = const TextStyle(color: PdfColors.red);
       color = PdfColors.lightBlue50;
     }
 
     if (!currentMonth) {
-      style = TextStyle(color: PdfColors.grey);
+      style = const TextStyle(color: PdfColors.grey);
       color = PdfColors.grey100;
     }
 

@@ -37,7 +37,7 @@ Uint8List buildPdf() {
         child: FittedBox(
           child: Text(
             'Hello!',
-            style: TextStyle(color: PdfColors.blueGrey),
+            style: const TextStyle(color: PdfColors.blueGrey),
           ),
         ),
       );
