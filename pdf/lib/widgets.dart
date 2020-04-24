@@ -33,6 +33,7 @@ part 'widgets/basic.dart';
 part 'widgets/clip.dart';
 part 'widgets/container.dart';
 part 'widgets/content.dart';
+part 'widgets/decoration.dart';
 part 'widgets/document.dart';
 part 'widgets/flex.dart';
 part 'widgets/font.dart';
