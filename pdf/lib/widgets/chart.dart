@@ -202,8 +202,8 @@ class LineDataSet extends DataSet {
               box.bottom + box.height * lastPoint / maxValue,
               box.left + box.width * (i + 1) / data.length,
               box.bottom + box.height * point / maxValue);
-          lastPoint = point;
         }
+        lastPoint = point;
       });
 
       context.canvas

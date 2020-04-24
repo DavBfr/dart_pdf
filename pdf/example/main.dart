@@ -153,11 +153,12 @@ void main() {
               ),
               data: <pw.DataSet>[
                 pw.LineDataSet(
-                  data: <double>[1, 3, 7],
+                  data: <double>[1, 3, 7, 2, 1, 4],
                   pointColor: PdfColors.green,
                   pointSize: 8,
                   lineColor: PdfColors.blue,
                   lineWidth: 6,
+                  lineStartingPoint: 0,
                 ),
               ],
             ),
