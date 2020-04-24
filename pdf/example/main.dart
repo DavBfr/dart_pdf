@@ -144,14 +144,22 @@ void main() {
               <String>['2012', 'PDF 1.7', 'Acrobat XI'],
               <String>['2017', 'PDF 2.0', 'Acrobat DC'],
             ]),
-            pw.ScatterChart(
-              data: <double>[1, 3, 7],
-              yAxis: <double>[0, 3, 6, 9],
-              xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
-              pointColor: PdfColors.green,
-              pointSize: 8,
-              pointLineColor: PdfColors.blue,
-              pointLineWidth: 6,
+            pw.Chart(
+              width: 500,
+              height: 250,
+              grid: pw.LinearGrid(
+                xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
+                yAxis: <double>[0, 3, 6, 9],
+              ),
+              data: <pw.DataSet>[
+                pw.LineDataSet(
+                  data: <double>[1, 3, 7],
+                  pointColor: PdfColors.green,
+                  pointSize: 8,
+                  lineColor: PdfColors.blue,
+                  lineWidth: 6,
+                ),
+              ],
             ),
             pw.Padding(padding: const pw.EdgeInsets.all(10)),
             pw.Paragraph(
