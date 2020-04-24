@@ -94,6 +94,13 @@ class PdfGraphics {
     buf.putString('W n\n');
   }
 
+  /// Apply a shader
+  void applyShader(PdfShading shader) {
+    // The shader needs to be registered in the page resources
+    page.shading[shader.name] = shader;
+    buf.putString('${shader.name} sh\n');
+  }
+
   /// This releases any resources used by this Graphics object. You must use
   /// this method once finished with it.
   ///

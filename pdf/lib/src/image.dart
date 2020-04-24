@@ -199,5 +199,5 @@ class PdfImage extends PdfXObject {
   final PdfImageOrientation orientation;
 
   /// Name of the image
-  String get name => '/Image$objser';
+  String get name => '/I$objser';
 }
