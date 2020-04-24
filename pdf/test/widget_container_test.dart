@@ -158,6 +158,73 @@ void main() {
     ));
   });
 
+  test('Container Widgets LinearGradient', () {
+    pdf.addPage(Page(
+      build: (Context context) => Container(
+        alignment: Alignment.center,
+        margin: const EdgeInsets.all(30),
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+            borderRadius: 20,
+            gradient: LinearGradient(
+              colors: <PdfColor>[
+                PdfColors.blue,
+                PdfColors.red,
+                PdfColors.yellow,
+              ],
+              begin: Alignment.bottomLeft,
+              end: Alignment.topRight,
+              stops: <double>[0, .8, 1.0],
+              tileMode: TileMode.clamp,
+            ),
+            border: BoxBorder(
+              color: PdfColors.blue800,
+              top: true,
+              left: true,
+              right: true,
+              bottom: true,
+              width: 2,
+            )),
+        width: 200,
+        height: 400,
+      ),
+    ));
+  });
+
+  test('Container Widgets RadialGradient', () {
+    pdf.addPage(Page(
+      build: (Context context) => Container(
+        alignment: Alignment.center,
+        margin: const EdgeInsets.all(30),
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+            borderRadius: 20,
+            gradient: RadialGradient(
+              colors: <PdfColor>[
+                PdfColors.blue,
+                PdfColors.red,
+                PdfColors.yellow,
+              ],
+              stops: <double>[0.0, .2, 1.0],
+              center: FractionalOffset(.7, .2),
+              focal: FractionalOffset(.7, .45),
+              focalRadius: 1,
+            ),
+            border: BoxBorder(
+              color: PdfColors.blue800,
+              top: true,
+              left: true,
+              right: true,
+              bottom: true,
+              width: 2,
+            )),
+        width: 200,
+        height: 400,
+        // child: Placeholder(),
+      ),
+    ));
+  });
+
   tearDownAll(() {
     final File file = File('widgets-container.pdf');
     file.writeAsBytesSync(pdf.save());

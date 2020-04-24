@@ -18,7 +18,11 @@
 
 part of pdf;
 
-class PdfFunction extends PdfObjectStream {
+abstract class PdfBaseFunction extends PdfObject {
+  PdfBaseFunction(PdfDocument pdfDocument) : super(pdfDocument);
+}
+
+class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
   PdfFunction(
     PdfDocument pdfDocument, {
     this.colors,
@@ -43,6 +47,39 @@ class PdfFunction extends PdfObjectStream {
     params['/Order'] = const PdfNum(3);
     params['/Domain'] = PdfArray.fromNum(const <num>[0, 1]);
     params['/Range'] = PdfArray.fromNum(const <num>[0, 1, 0, 1, 0, 1]);
-    params['/Size'] = PdfNum(colors.length);
+    params['/Size'] = PdfArray.fromNum(<int>[colors.length]);
+  }
+}
+
+class PdfStitchingFunction extends PdfBaseFunction {
+  PdfStitchingFunction(
+    PdfDocument pdfDocument, {
+    @required this.functions,
+    @required this.bounds,
+    this.domainStart = 0,
+    this.domainEnd = 1,
+  })  : assert(functions != null),
+        assert(bounds != null),
+        super(pdfDocument);
+
+  final List<PdfFunction> functions;
+
+  final List<double> bounds;
+
+  final double domainStart;
+
+  final double domainEnd;
+
+  @override
+  void _prepare() {
+    super._prepare();
+
+    params['/FunctionType'] = const PdfNum(3);
+    params['/Functions'] = PdfArray.fromObjects(functions);
+    params['/Order'] = const PdfNum(3);
+    params['/Domain'] = PdfArray.fromNum(<num>[domainStart, domainEnd]);
+    params['/Bounds'] = PdfArray.fromNum(bounds);
+    params['/Encode'] = PdfArray.fromNum(
+        List<int>.generate(functions.length * 2, (int i) => i % 2));
   }
 }

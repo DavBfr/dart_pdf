@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.0
+
+- Implement Linear and Radial gradients in BoxDecoration
+
 ## 1.6.2
 
 - Use the Barcode library to generate QR-Codes

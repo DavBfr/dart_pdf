@@ -155,6 +155,198 @@ class DecorationImage {
   }
 }
 
+/// Defines what happens at the edge of the gradient.
+enum TileMode {
+  /// Edge is clamped to the final color.
+  clamp,
+
+  /// Edge is repeated from first color to last.
+  // repeated,
+
+  /// Edge is mirrored from last color to first.
+  // mirror,
+}
+
+/// A 2D gradient.
+@immutable
+abstract class Gradient {
+  /// Initialize the gradient's colors and stops.
+  const Gradient({
+    @required this.colors,
+    this.stops,
+  }) : assert(colors != null);
+
+  final List<PdfColor> colors;
+
+  /// A list of values from 0.0 to 1.0 that denote fractions along the gradient.
+  final List<double> stops;
+
+  PdfBaseFunction _buildFunction(
+    Context context,
+    List<PdfColor> colors,
+    List<double> stops,
+  ) {
+    if (stops == null) {
+      return PdfFunction(
+        context.document,
+        colors: colors,
+      );
+    }
+
+    final List<PdfFunction> fn = <PdfFunction>[];
+
+    PdfColor lc = colors.first;
+    for (final PdfColor c in colors.sublist(1)) {
+      fn.add(PdfFunction(
+        context.document,
+        colors: <PdfColor>[lc, c],
+      ));
+      lc = c;
+    }
+
+    return PdfStitchingFunction(
+      context.document,
+      functions: fn,
+      bounds: stops.sublist(1, stops.length - 1),
+      domainStart: stops.first,
+      domainEnd: stops.last,
+    );
+  }
+
+  void paint(Context context, PdfRect box);
+}
+
+/// A 2D linear gradient.
+class LinearGradient extends Gradient {
+  /// Creates a linear gradient.
+  const LinearGradient({
+    this.begin = Alignment.centerLeft,
+    this.end = Alignment.centerRight,
+    @required List<PdfColor> colors,
+    List<double> stops,
+    this.tileMode = TileMode.clamp,
+  })  : assert(begin != null),
+        assert(end != null),
+        assert(tileMode != null),
+        super(colors: colors, stops: stops);
+
+  /// The offset at which stop 0.0 of the gradient is placed.
+  final Alignment begin;
+
+  /// The offset at which stop 1.0 of the gradient is placed.
+  final Alignment end;
+
+  /// How this gradient should tile the plane beyond in the region before
+  final TileMode tileMode;
+
+  @override
+  void paint(Context context, PdfRect box) {
+    if (colors.isEmpty) {
+      return;
+    }
+
+    if (colors.length == 1) {
+      context.canvas
+        ..setFillColor(colors.first)
+        ..fillPath();
+    }
+
+    assert(stops == null || stops.length == colors.length);
+
+    context.canvas
+      ..saveContext()
+      ..clipPath()
+      ..applyShader(
+        PdfShading(
+          context.document,
+          shadingType: PdfShadingType.axial,
+          boundingBox: box,
+          function: _buildFunction(context, colors, stops),
+          start: begin.withinRect(box),
+          end: end.withinRect(box),
+          extendStart: true,
+          extendEnd: true,
+        ),
+      )
+      ..restoreContext();
+  }
+}
+
+/// A 2D radial gradient.
+class RadialGradient extends Gradient {
+  /// Creates a radial gradient.
+  ///
+  /// The [colors] argument must not be null. If [stops] is non-null, it must
+  /// have the same length as [colors].
+  const RadialGradient({
+    this.center = Alignment.center,
+    this.radius = 0.5,
+    @required List<PdfColor> colors,
+    List<double> stops,
+    this.tileMode = TileMode.clamp,
+    this.focal,
+    this.focalRadius = 0.0,
+  })  : assert(center != null),
+        assert(radius != null),
+        assert(tileMode != null),
+        assert(focalRadius != null),
+        super(colors: colors, stops: stops);
+
+  /// The center of the gradient
+  final Alignment center;
+
+  /// The radius of the gradient
+  final double radius;
+
+  /// How this gradient should tile the plane beyond the outer ring at [radius]
+  /// pixels from the [center].
+  final TileMode tileMode;
+
+  /// The focal point of the gradient.
+  final Alignment focal;
+
+  /// The radius of the focal point of the gradient.
+  final double focalRadius;
+
+  @override
+  void paint(Context context, PdfRect box) {
+    if (colors.isEmpty) {
+      return;
+    }
+
+    if (colors.length == 1) {
+      context.canvas
+        ..setFillColor(colors.first)
+        ..fillPath();
+    }
+
+    assert(stops == null || stops.length == colors.length);
+
+    final Alignment _focal = focal ?? center;
+
+    final double _radius = math.min(box.width, box.height);
+
+    context.canvas
+      ..saveContext()
+      ..clipPath()
+      ..applyShader(
+        PdfShading(
+          context.document,
+          shadingType: PdfShadingType.radial,
+          boundingBox: box,
+          function: _buildFunction(context, colors, stops),
+          start: _focal.withinRect(box),
+          end: center.withinRect(box),
+          radius0: focalRadius * _radius,
+          radius1: radius * _radius,
+          extendStart: true,
+          extendEnd: true,
+        ),
+      )
+      ..restoreContext();
+  }
+}
+
 enum BoxShape { circle, rectangle }
 
 @immutable
@@ -163,6 +355,7 @@ class BoxDecoration {
       {this.color,
       this.border,
       this.borderRadius,
+      this.gradient,
       this.image,
       this.shape = BoxShape.rectangle})
       : assert(shape != null);
@@ -173,6 +366,7 @@ class BoxDecoration {
   final double borderRadius;
   final BoxShape shape;
   final DecorationImage image;
+  final Gradient gradient;
 
   void paint(Context context, PdfRect box) {
     assert(box.x != null);
@@ -198,6 +392,25 @@ class BoxDecoration {
       context.canvas
         ..setFillColor(color)
         ..fillPath();
+    }
+
+    if (gradient != null) {
+      switch (shape) {
+        case BoxShape.rectangle:
+          if (borderRadius == null) {
+            context.canvas.drawRect(box.x, box.y, box.width, box.height);
+          } else {
+            context.canvas.drawRRect(box.x, box.y, box.width, box.height,
+                borderRadius, borderRadius);
+          }
+          break;
+        case BoxShape.circle:
+          context.canvas.drawEllipse(box.x + box.width / 2.0,
+              box.y + box.height / 2.0, box.width / 2.0, box.height / 2.0);
+          break;
+      }
+
+      gradient.paint(context, box);
     }
 
     if (image != null) {

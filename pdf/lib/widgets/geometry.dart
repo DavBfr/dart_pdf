@@ -332,7 +332,7 @@ class Alignment {
     final double halfHeight = rect.height / 2.0;
     return PdfPoint(
       rect.left + halfWidth + x * halfWidth,
-      rect.top + halfHeight + y * halfHeight,
+      rect.bottom + halfHeight + y * halfHeight,
     );
   }
 
@@ -351,6 +351,16 @@ class Alignment {
 
   @override
   String toString() => '($x, $y)';
+}
+
+/// An offset that's expressed as a fraction of a [PdfPoint].
+@immutable
+class FractionalOffset extends Alignment {
+  /// Creates a fractional offset.
+  const FractionalOffset(double dx, double dy)
+      : assert(dx != null),
+        assert(dy != null),
+        super(dx * 2 - 1, 1 - dy * 2);
 }
 
 /// The pair of sizes returned by [applyBoxFit].

@@ -45,16 +45,24 @@ class PdfObjectStream extends PdfObject {
       // The data is already in the right format
       _data = buf.output();
     } else if (pdfDocument.deflate != null) {
-      _data = pdfDocument.deflate(buf.output());
-      params['/Filter'] = const PdfName('/FlateDecode');
-    } else if (isBinary) {
-      // This is a Ascii85 stream
-      final Ascii85Encoder e = Ascii85Encoder();
-      _data = e.convert(buf.output());
-      params['/Filter'] = const PdfName('/ASCII85Decode');
-    } else {
-      // This is a non-deflated stream
-      _data = buf.output();
+      final Uint8List original = buf.output();
+      final Uint8List newData = pdfDocument.deflate(original);
+      if (newData.lengthInBytes < original.lengthInBytes) {
+        params['/Filter'] = const PdfName('/FlateDecode');
+        _data = newData;
+      }
+    }
+
+    if (_data == null) {
+      if (isBinary) {
+        // This is a Ascii85 stream
+        final Ascii85Encoder e = Ascii85Encoder();
+        _data = e.convert(buf.output());
+        params['/Filter'] = const PdfName('/ASCII85Decode');
+      } else {
+        // This is a non-deflated stream
+        _data = buf.output();
+      }
     }
     if (pdfDocument.encryption != null) {
       _data = pdfDocument.encryption.encrypt(_data, this);
