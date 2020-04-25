@@ -25,6 +25,7 @@ class TableRow {
     this.children,
     this.repeat = false,
     this.verticalAlignment,
+    this.decoration,
   });
 
   /// The widgets that comprise the cells in this row.
@@ -32,6 +33,8 @@ class TableRow {
 
   /// Repeat this row on all pages
   final bool repeat;
+
+  final BoxDecoration decoration;
 
   final TableCellVerticalAlignment verticalAlignment;
 }
@@ -424,6 +427,16 @@ class Table extends Widget implements SpanningWidget {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
+
+      final Widget child = row.children.first;
+      if (child != null && row.decoration != null) {
+        row.decoration.paint(
+          context,
+          PdfRect(0, child.box.y, box.width, child.box.height),
+          PaintPhase.background,
+        );
+      }
+
       for (Widget child in row.children) {
         context.canvas
           ..saveContext()
@@ -437,6 +450,27 @@ class Table extends Widget implements SpanningWidget {
         break;
       }
     }
+
+    index = 0;
+    for (TableRow row in children) {
+      if (index++ < _context.firstLine && !row.repeat) {
+        continue;
+      }
+
+      final Widget child = row.children.first;
+      if (child != null && row.decoration != null) {
+        row.decoration.paint(
+          context,
+          PdfRect(0, child.box.y, box.width, child.box.height),
+          PaintPhase.foreground,
+        );
+      }
+
+      if (index >= _context.lastLine) {
+        break;
+      }
+    }
+
     context.canvas.restoreContext();
 
     if (border != null) {

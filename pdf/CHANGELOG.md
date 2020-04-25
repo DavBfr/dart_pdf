@@ -5,6 +5,7 @@
 - Implement Linear and Radial gradients in BoxDecoration
 - Fix PdfColors.shade()
 - Add dashed lines to Decoration Widgets
+- Add TableRow decoration
 
 ## 1.6.2
 
