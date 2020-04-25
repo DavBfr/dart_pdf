@@ -40,7 +40,11 @@ void main() {
           ),
           data: <DataSet>[
             LineDataSet(
-              data: <double>[1, 3, 7],
+              data: <ChartValue>[
+                ChartValue(1, 1),
+                ChartValue(2, 3),
+                ChartValue(3, 7),
+              ],
             ),
           ],
         ),
@@ -56,7 +60,11 @@ void main() {
           ),
           data: <DataSet>[
             LineDataSet(
-              data: <double>[1, 3, 7],
+              data: <ChartValue>[
+                ChartValue(1, 1),
+                ChartValue(2, 3),
+                ChartValue(3, 7),
+              ],
               drawLine: false,
             ),
           ],
@@ -73,7 +81,11 @@ void main() {
           ),
           data: <DataSet>[
             LineDataSet(
-              data: <double>[1, 3, 7],
+              data: <ChartValue>[
+                ChartValue(1, 1),
+                ChartValue(2, 3),
+                ChartValue(3, 7),
+              ],
               drawPoints: false,
             ),
           ],
@@ -90,7 +102,11 @@ void main() {
           ),
           data: <DataSet>[
             LineDataSet(
-              data: <double>[1, 3, 7],
+              data: <ChartValue>[
+                ChartValue(1, 1),
+                ChartValue(2, 3),
+                ChartValue(3, 7),
+              ],
               drawLine: false,
               pointColor: PdfColors.red,
               pointSize: 4,
@@ -113,7 +129,11 @@ void main() {
           ),
           data: <DataSet>[
             LineDataSet(
-              data: <double>[1, 3, 7],
+              data: <ChartValue>[
+                ChartValue(1, 1),
+                ChartValue(2, 3),
+                ChartValue(3, 7),
+              ],
             ),
           ],
         ),
