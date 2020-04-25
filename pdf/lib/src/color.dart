@@ -149,7 +149,8 @@ class PdfColor {
     final double ds = 1.5 - strength;
     final PdfColorHsl hsl = toHsl();
 
-    return PdfColorHsl(hsl.hue, hsl.saturation, hsl.lightness * ds);
+    return PdfColorHsl(
+        hsl.hue, hsl.saturation, (hsl.lightness * ds).clamp(0.0, 1.0));
   }
 
   /// Get a complementary color with hue shifted by -120°

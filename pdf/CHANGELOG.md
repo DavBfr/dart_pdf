@@ -3,6 +3,7 @@
 ## 1.7.0
 
 - Implement Linear and Radial gradients in BoxDecoration
+- Fix PdfColors.shade()
 
 ## 1.6.2
 
