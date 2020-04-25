@@ -93,7 +93,7 @@ class LinearGrid extends Grid {
 
   @override
   void layout(Context context, PdfRect box) {
-    style = textStyle ?? Theme.of(context).defaultTextStyle;
+    style = Theme.of(context).defaultTextStyle.merge(textStyle);
     font = style.font.getFont(context);
 
     xAxisFontMetric =
@@ -114,6 +114,7 @@ class LinearGrid extends Grid {
   void paint(Context context, PdfRect box) {
     xAxis.asMap().forEach((int i, double x) {
       context.canvas
+        ..setColor(style.color)
         ..drawString(
           style.font.getFont(context),
           style.fontSize,
@@ -130,6 +131,7 @@ class LinearGrid extends Grid {
           (font.stringMetrics(y.toStringAsFixed(1)) * (style.fontSize)).width;
       final double yPos = gridBox.bottom + gridBox.height * y / yAxis.last;
       context.canvas
+        ..setColor(style.color)
         ..drawString(
           style.font.getFont(context),
           style.fontSize,
