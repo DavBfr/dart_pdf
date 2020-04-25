@@ -153,12 +153,19 @@ void main() {
               ),
               data: <pw.DataSet>[
                 pw.LineDataSet(
-                  data: <double>[1, 3, 7, 2, 1, 4],
+                  data: <pw.ChartValue>[
+                    pw.ChartValue(1, 1),
+                    pw.ChartValue(2, 3),
+                    pw.ChartValue(3, 7),
+                    pw.ChartValue(4, 2),
+                    pw.ChartValue(5, 1),
+                    pw.ChartValue(6, 4),
+                  ],
                   pointColor: PdfColors.green,
                   pointSize: 8,
                   lineColor: PdfColors.blue,
                   lineWidth: 6,
-                  lineStartingPoint: 0,
+                  lineStartingPoint: pw.ChartValue(0, 0),
                 ),
               ],
             ),

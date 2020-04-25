@@ -2,6 +2,19 @@ part of widget;
 
 // ignore_for_file: omit_local_variable_types
 
+extension Sorting on List {
+  bool isSortedAscending() {
+    double prev = first;
+    for (double elem in this) {
+      if (prev > elem) {
+        return false;
+      }
+      prev = elem;
+    }
+    return true;
+  }
+}
+
 class Chart extends Widget {
   Chart({
     @required this.grid,
@@ -50,7 +63,7 @@ class Chart extends Widget {
 
     grid.paint(context, box);
     for (DataSet dataSet in data) {
-      dataSet.paint(context, grid.gridBox);
+      dataSet.paint(context, grid);
     }
     context.canvas.restoreContext();
   }
@@ -58,6 +71,10 @@ class Chart extends Widget {
 
 abstract class Grid {
   PdfRect gridBox;
+  double xOffset;
+  double xTotal;
+  double yOffset;
+  double yTotal;
 
   void layout(Context context, PdfRect box);
   void paint(Context context, PdfRect box);
@@ -74,7 +91,8 @@ class LinearGrid extends Grid {
     this.color = PdfColors.black,
     this.separatorLineWidth = 1,
     this.separatorColor = PdfColors.grey,
-  });
+  })  : assert(xAxis.isSortedAscending()),
+        assert(yAxis.isSortedAscending());
 
   final List<double> xAxis;
   final List<double> yAxis;
@@ -108,6 +126,11 @@ class LinearGrid extends Grid {
         box.bottom + xAxisFontMetric.height + yMargin,
         box.right - xAxisFontMetric.width / 2,
         box.top - yAxisFontMetric.height / 2);
+
+    xOffset = xAxis.reduce(math.min);
+    yOffset = yAxis.reduce(math.min);
+    xTotal = xAxis.reduce(math.max) - xOffset;
+    yTotal = yAxis.reduce(math.max) - yOffset;
   }
 
   @override
@@ -160,9 +183,15 @@ class LinearGrid extends Grid {
   }
 }
 
+class ChartValue {
+  ChartValue(this.xVal, this.yVal);
+  final double xVal;
+  final double yVal;
+}
+
 abstract class DataSet {
   void layout(Context context, PdfRect box);
-  void paint(Context context, PdfRect box);
+  void paint(Context context, Grid grid);
 }
 
 class LineDataSet extends DataSet {
@@ -177,36 +206,43 @@ class LineDataSet extends DataSet {
     this.lineStartingPoint,
   }) : assert(drawLine || drawPoints);
 
-  final List<double> data;
+  final List<ChartValue> data;
   final PdfColor pointColor;
   final double pointSize;
   final PdfColor lineColor;
   final double lineWidth;
   final bool drawLine;
   final bool drawPoints;
-  final double lineStartingPoint;
+  final ChartValue lineStartingPoint;
 
   double maxValue;
 
   @override
-  void layout(Context context, PdfRect box) {
-    maxValue = data.reduce(math.max);
-  }
+  void layout(Context context, PdfRect box) {}
 
   @override
-  void paint(Context context, PdfRect box) {
+  void paint(Context context, Grid grid) {
     if (drawLine) {
-      double lastPoint = lineStartingPoint;
-      data.asMap().forEach((int i, double point) {
-        if (lastPoint != null) {
+      ChartValue lastValue = lineStartingPoint;
+      for (ChartValue value in data) {
+        if (lastValue != null) {
           context.canvas.drawLine(
-              box.left + box.width * i / data.length,
-              box.bottom + box.height * lastPoint / maxValue,
-              box.left + box.width * (i + 1) / data.length,
-              box.bottom + box.height * point / maxValue);
+            grid.gridBox.left +
+                grid.gridBox.width *
+                    (lastValue.xVal - grid.xOffset) /
+                    grid.xTotal,
+            grid.gridBox.bottom +
+                grid.gridBox.height *
+                    (lastValue.yVal - grid.yOffset) /
+                    grid.yTotal,
+            grid.gridBox.left +
+                grid.gridBox.width * (value.xVal - grid.xOffset) / grid.xTotal,
+            grid.gridBox.bottom +
+                grid.gridBox.height * (value.yVal - grid.yOffset) / grid.yTotal,
+          );
         }
-        lastPoint = point;
-      });
+        lastValue = value;
+      }
 
       context.canvas
         ..setStrokeColor(lineColor)
@@ -217,13 +253,23 @@ class LineDataSet extends DataSet {
     }
 
     if (drawPoints) {
-      data.asMap().forEach((int i, double point) {
+      for (ChartValue value in data) {
         context.canvas
           ..setColor(pointColor)
-          ..drawEllipse(box.left + box.width * (i + 1) / data.length,
-              box.bottom + box.height * point / maxValue, pointSize, pointSize)
+          ..drawEllipse(
+              grid.gridBox.left +
+                  grid.gridBox.width *
+                      (value.xVal - grid.xOffset) /
+                      grid.xTotal,
+              grid.gridBox.bottom +
+                  grid.gridBox.height *
+                      (value.yVal - grid.yOffset) /
+                      grid.yTotal,
+              pointSize,
+              pointSize)
           ..fillPath();
-      });
+      }
+      ;
     }
   }
 }
