@@ -700,4 +700,9 @@ class PdfGraphics {
     PdfNum(limit).output(buf);
     buf.putString(' M\n');
   }
+
+  void setLineDashPattern([List<int> array = const <int>[], int phase = 0]) {
+    PdfArray.fromNum(array).output(buf);
+    buf.putString(' $phase d\n');
+  }
 }

@@ -20,23 +20,29 @@ part of widget;
 
 enum DecorationPosition { background, foreground }
 
+enum BorderStyle { none, solid, dashed, dotted }
+
 @immutable
 class BoxBorder {
-  const BoxBorder(
-      {this.left = false,
-      this.top = false,
-      this.right = false,
-      this.bottom = false,
-      this.color = PdfColors.black,
-      this.width = 1.0})
-      : assert(color != null),
+  const BoxBorder({
+    this.left = false,
+    this.top = false,
+    this.right = false,
+    this.bottom = false,
+    this.color = PdfColors.black,
+    this.width = 1.0,
+    this.style = BorderStyle.solid,
+  })  : assert(color != null),
         assert(width != null),
-        assert(width >= 0.0);
+        assert(width >= 0.0),
+        assert(style != null);
 
   final bool top;
   final bool bottom;
   final bool left;
   final bool right;
+
+  final BorderStyle style;
 
   /// The color of the
   final PdfColor color;
@@ -50,41 +56,63 @@ class BoxBorder {
     assert(box.width != null);
     assert(box.height != null);
 
-    if (top || bottom || left || right) {
-      context.canvas
-        ..setStrokeColor(color)
-        ..setLineWidth(width);
+    if (!(top || bottom || left || right)) {
+      return;
+    }
 
-      if (top) {
-        context.canvas.drawLine(box.x, box.top, box.right, box.top);
+    switch (style) {
+      case BorderStyle.none:
+        return;
+      case BorderStyle.solid:
+        break;
+      case BorderStyle.dashed:
+        context.canvas
+          ..saveContext()
+          ..setLineDashPattern(const <int>[3, 3]);
+        break;
+      case BorderStyle.dotted:
+        context.canvas
+          ..saveContext()
+          ..setLineDashPattern(const <int>[1, 1]);
+        break;
+    }
+
+    context.canvas
+      ..setStrokeColor(color)
+      ..setLineWidth(width);
+
+    if (top) {
+      context.canvas.drawLine(box.x, box.top, box.right, box.top);
+    }
+
+    if (right) {
+      if (!top) {
+        context.canvas.moveTo(box.right, box.top);
       }
+      context.canvas.lineTo(box.right, box.y);
+    }
 
-      if (right) {
-        if (!top) {
-          context.canvas.moveTo(box.right, box.top);
-        }
-        context.canvas.lineTo(box.right, box.y);
+    if (bottom) {
+      if (!right) {
+        context.canvas.moveTo(box.right, box.y);
       }
+      context.canvas.lineTo(box.x, box.y);
+    }
 
-      if (bottom) {
-        if (!right) {
-          context.canvas.moveTo(box.right, box.y);
-        }
-        context.canvas.lineTo(box.x, box.y);
+    if (left) {
+      if (!bottom) {
+        context.canvas.moveTo(box.x, box.y);
+        context.canvas.lineTo(box.x, box.top);
+      } else if (right && top) {
+        context.canvas.closePath();
+      } else {
+        context.canvas.lineTo(box.x, box.top);
       }
+    }
 
-      if (left) {
-        if (!bottom) {
-          context.canvas.moveTo(box.x, box.y);
-          context.canvas.lineTo(box.x, box.top);
-        } else if (right && top) {
-          context.canvas.closePath();
-        } else {
-          context.canvas.lineTo(box.x, box.top);
-        }
-      }
-
-      context.canvas.strokePath();
+    context.canvas.strokePath();
+    if (style != BorderStyle.solid) {
+      context.canvas.restoreContext();
     }
   }
 
@@ -349,6 +377,8 @@ class RadialGradient extends Gradient {
 
 enum BoxShape { circle, rectangle }
 
+enum PaintPhase { all, background, foreground }
+
 @immutable
 class BoxDecoration {
   const BoxDecoration(
@@ -368,86 +398,94 @@ class BoxDecoration {
   final DecorationImage image;
   final Gradient gradient;
 
-  void paint(Context context, PdfRect box) {
+  void paint(
+    Context context,
+    PdfRect box, [
+    PaintPhase phase = PaintPhase.all,
+  ]) {
     assert(box.x != null);
     assert(box.y != null);
     assert(box.width != null);
     assert(box.height != null);
 
-    if (color != null) {
-      switch (shape) {
-        case BoxShape.rectangle:
-          if (borderRadius == null) {
-            context.canvas.drawRect(box.x, box.y, box.width, box.height);
-          } else {
-            context.canvas.drawRRect(box.x, box.y, box.width, box.height,
-                borderRadius, borderRadius);
-          }
-          break;
-        case BoxShape.circle:
-          context.canvas.drawEllipse(box.x + box.width / 2.0,
-              box.y + box.height / 2.0, box.width / 2.0, box.height / 2.0);
-          break;
-      }
-      context.canvas
-        ..setFillColor(color)
-        ..fillPath();
-    }
-
-    if (gradient != null) {
-      switch (shape) {
-        case BoxShape.rectangle:
-          if (borderRadius == null) {
-            context.canvas.drawRect(box.x, box.y, box.width, box.height);
-          } else {
-            context.canvas.drawRRect(box.x, box.y, box.width, box.height,
-                borderRadius, borderRadius);
-          }
-          break;
-        case BoxShape.circle:
-          context.canvas.drawEllipse(box.x + box.width / 2.0,
-              box.y + box.height / 2.0, box.width / 2.0, box.height / 2.0);
-          break;
+    if (phase == PaintPhase.all || phase == PaintPhase.background) {
+      if (color != null) {
+        switch (shape) {
+          case BoxShape.rectangle:
+            if (borderRadius == null) {
+              context.canvas.drawRect(box.x, box.y, box.width, box.height);
+            } else {
+              context.canvas.drawRRect(box.x, box.y, box.width, box.height,
+                  borderRadius, borderRadius);
+            }
+            break;
+          case BoxShape.circle:
+            context.canvas.drawEllipse(box.x + box.width / 2.0,
+                box.y + box.height / 2.0, box.width / 2.0, box.height / 2.0);
+            break;
+        }
+        context.canvas
+          ..setFillColor(color)
+          ..fillPath();
       }
 
-      gradient.paint(context, box);
-    }
+      if (gradient != null) {
+        switch (shape) {
+          case BoxShape.rectangle:
+            if (borderRadius == null) {
+              context.canvas.drawRect(box.x, box.y, box.width, box.height);
+            } else {
+              context.canvas.drawRRect(box.x, box.y, box.width, box.height,
+                  borderRadius, borderRadius);
+            }
+            break;
+          case BoxShape.circle:
+            context.canvas.drawEllipse(box.x + box.width / 2.0,
+                box.y + box.height / 2.0, box.width / 2.0, box.height / 2.0);
+            break;
+        }
 
-    if (image != null) {
-      context.canvas.saveContext();
-      switch (shape) {
-        case BoxShape.circle:
-          context.canvas
-            ..drawEllipse(box.x + box.width / 2.0, box.y + box.height / 2.0,
-                box.width / 2.0, box.height / 2.0)
-            ..clipPath();
+        gradient.paint(context, box);
+      }
 
-          break;
-        case BoxShape.rectangle:
-          if (borderRadius != null) {
+      if (image != null) {
+        context.canvas.saveContext();
+        switch (shape) {
+          case BoxShape.circle:
             context.canvas
-              ..drawRRect(box.x, box.y, box.width, box.height, borderRadius,
-                  borderRadius)
+              ..drawEllipse(box.x + box.width / 2.0, box.y + box.height / 2.0,
+                  box.width / 2.0, box.height / 2.0)
               ..clipPath();
-          }
-          break;
+
+            break;
+          case BoxShape.rectangle:
+            if (borderRadius != null) {
+              context.canvas
+                ..drawRRect(box.x, box.y, box.width, box.height, borderRadius,
+                    borderRadius)
+                ..clipPath();
+            }
+            break;
+        }
+        image.paint(context, box);
+        context.canvas.restoreContext();
       }
-      image.paint(context, box);
-      context.canvas.restoreContext();
     }
 
-    if (border != null) {
-      switch (shape) {
-        case BoxShape.circle:
-          border.paintEllipse(context, box);
-          break;
-        case BoxShape.rectangle:
-          if (borderRadius != null) {
-            border.paintRRect(context, box, borderRadius);
-          } else {
-            border.paintRect(context, box);
-          }
-          break;
+    if (phase == PaintPhase.all || phase == PaintPhase.foreground) {
+      if (border != null) {
+        switch (shape) {
+          case BoxShape.circle:
+            border.paintEllipse(context, box);
+            break;
+          case BoxShape.rectangle:
+            if (borderRadius != null) {
+              border.paintRRect(context, box, borderRadius);
+            } else {
+              border.paintRect(context, box);
+            }
+            break;
+        }
       }
     }
   }
