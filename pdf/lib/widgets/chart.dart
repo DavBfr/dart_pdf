@@ -184,9 +184,9 @@ class LinearGrid extends Grid {
 }
 
 class ChartValue {
-  ChartValue(this.xVal, this.yVal);
-  final double xVal;
-  final double yVal;
+  ChartValue(this.x, this.y);
+  final double x;
+  final double y;
 }
 
 abstract class DataSet {
@@ -228,17 +228,15 @@ class LineDataSet extends DataSet {
         if (lastValue != null) {
           context.canvas.drawLine(
             grid.gridBox.left +
-                grid.gridBox.width *
-                    (lastValue.xVal - grid.xOffset) /
-                    grid.xTotal,
+                grid.gridBox.width * (lastValue.x - grid.xOffset) / grid.xTotal,
             grid.gridBox.bottom +
                 grid.gridBox.height *
-                    (lastValue.yVal - grid.yOffset) /
+                    (lastValue.y - grid.yOffset) /
                     grid.yTotal,
             grid.gridBox.left +
-                grid.gridBox.width * (value.xVal - grid.xOffset) / grid.xTotal,
+                grid.gridBox.width * (value.x - grid.xOffset) / grid.xTotal,
             grid.gridBox.bottom +
-                grid.gridBox.height * (value.yVal - grid.yOffset) / grid.yTotal,
+                grid.gridBox.height * (value.y - grid.yOffset) / grid.yTotal,
           );
         }
         lastValue = value;
@@ -258,13 +256,9 @@ class LineDataSet extends DataSet {
           ..setColor(pointColor)
           ..drawEllipse(
               grid.gridBox.left +
-                  grid.gridBox.width *
-                      (value.xVal - grid.xOffset) /
-                      grid.xTotal,
+                  grid.gridBox.width * (value.x - grid.xOffset) / grid.xTotal,
               grid.gridBox.bottom +
-                  grid.gridBox.height *
-                      (value.yVal - grid.yOffset) /
-                      grid.yTotal,
+                  grid.gridBox.height * (value.y - grid.yOffset) / grid.yTotal,
               pointSize,
               pointSize)
           ..fillPath();
