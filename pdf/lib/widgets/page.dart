@@ -28,7 +28,7 @@ class Page {
       {PageTheme pageTheme,
       PdfPageFormat pageFormat,
       BuildCallback build,
-      Theme theme,
+      ThemeData theme,
       PageOrientation orientation,
       EdgeInsets margin,
       bool clip = false})
@@ -58,7 +58,7 @@ class Page {
 
   final BuildCallback _build;
 
-  Theme get theme => pageTheme.theme;
+  ThemeData get theme => pageTheme.theme;
 
   bool get mustRotate => pageTheme.mustRotate;
 
@@ -100,7 +100,8 @@ class Page {
             maxWidth: pageFormat.width - _margin.horizontal,
             maxHeight: pageFormat.height - _margin.vertical);
 
-    final Theme calculatedTheme = theme ?? document.theme ?? Theme.base();
+    final ThemeData calculatedTheme =
+        theme ?? document.theme ?? ThemeData.base();
     final Context context = Context(
       document: document.document,
       page: _pdfPage,

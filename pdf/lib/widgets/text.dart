@@ -441,26 +441,32 @@ class TextSpan extends InlineSpan {
 class RichText extends Widget {
   RichText(
       {@required this.text,
-      this.textAlign = TextAlign.left,
-      this.softWrap = true,
+      TextAlign textAlign,
+      bool softWrap,
       this.tightBounds = false,
       this.textScaleFactor = 1.0,
-      this.maxLines})
-      : assert(text != null);
+      int maxLines})
+      : assert(text != null),
+        _textAlign = textAlign,
+        _softWrap = softWrap,
+        _maxLines = maxLines;
 
   static bool debug = false;
 
   final InlineSpan text;
 
-  final TextAlign textAlign;
+  TextAlign get textAlign => _textAlign;
+  TextAlign _textAlign;
 
   final double textScaleFactor;
 
-  final bool softWrap;
+  bool get softWrap => _softWrap;
+  bool _softWrap;
 
   final bool tightBounds;
 
-  final int maxLines;
+  int get maxLines => _maxLines;
+  int _maxLines;
 
   final List<_Span> _spans = <_Span>[];
 
@@ -524,7 +530,11 @@ class RichText extends Widget {
     _spans.clear();
     _decorations.clear();
 
-    final TextStyle defaultstyle = Theme.of(context).defaultTextStyle;
+    final ThemeData theme = Theme.of(context);
+    final TextStyle defaultstyle = theme.defaultTextStyle;
+    _softWrap ??= theme.softWrap;
+    _maxLines ??= theme.maxLines;
+    _textAlign ??= theme.textAlign;
 
     final double constraintWidth = constraints.hasBoundedWidth
         ? constraints.maxWidth
@@ -821,8 +831,8 @@ class Text extends RichText {
   Text(
     String text, {
     TextStyle style,
-    TextAlign textAlign = TextAlign.left,
-    bool softWrap = true,
+    TextAlign textAlign,
+    bool softWrap,
     bool tightBounds = false,
     double textScaleFactor = 1.0,
     int maxLines,

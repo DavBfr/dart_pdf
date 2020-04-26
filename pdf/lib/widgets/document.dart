@@ -55,7 +55,7 @@ class Document {
 
   final PdfDocument document;
 
-  final Theme theme;
+  final ThemeData theme;
 
   final List<Page> _pages = <Page>[];
 

@@ -40,7 +40,7 @@ class PageTheme {
 
   final BuildCallback buildForeground;
 
-  final Theme theme;
+  final ThemeData theme;
 
   final bool clip;
 

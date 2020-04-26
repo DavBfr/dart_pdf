@@ -73,7 +73,7 @@ void main() {
   });
 
   test('Theme Page 1', () {
-    final Theme theme = Theme.withFont(base: roboto);
+    final ThemeData theme = ThemeData.withFont(base: roboto);
 
     pdf.addPage(Page(
       theme: theme,
@@ -84,7 +84,7 @@ void main() {
   });
 
   test('Theme Page 2', () {
-    final Theme theme = Theme.base().copyWith(
+    final ThemeData theme = ThemeData.base().copyWith(
       tableHeader: TextStyle(font: openSansBold),
       tableCell: TextStyle(font: roboto),
     );
@@ -107,11 +107,11 @@ void main() {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             Text('Hello default'),
-            InheritedWidget(
-              inherited: Theme.withFont(
+            Theme(
+              data: ThemeData.withFont(
                 base: roboto,
               ),
-              build: (Context context) => Text('Hello themed'),
+              child: Text('Hello themed'),
             ),
           ],
         ),
@@ -124,7 +124,7 @@ void main() {
         pageFormat: PdfPageFormat.a4,
         orientation: PageOrientation.portrait,
         margin: const EdgeInsets.all(8.0),
-        theme: Theme(
+        theme: ThemeData(
           defaultTextStyle: TextStyle(font: Font.courier(), fontSize: 10.0),
         ),
         build: (Context context) {

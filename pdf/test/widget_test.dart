@@ -38,7 +38,7 @@ void main() {
 
     pdf = Document(
         title: 'Widgets Test',
-        theme: Theme.withFont(
+        theme: ThemeData.withFont(
           base: Font.ttf(defaultFont.buffer.asByteData()),
           bold: Font.ttf(defaultFontBold.buffer.asByteData()),
         ));

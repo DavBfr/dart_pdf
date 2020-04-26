@@ -8,6 +8,7 @@
 - Add TableRow decoration
 - Add Chart Widget [Marco Papula]
 - Add Divider Widget
+- Replace Theme with ThemeData
 
 ## 1.6.2
 

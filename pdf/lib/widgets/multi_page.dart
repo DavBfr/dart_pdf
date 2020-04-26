@@ -87,7 +87,7 @@ class MultiPage extends Page {
       this.crossAxisAlignment = CrossAxisAlignment.start,
       this.header,
       this.footer,
-      Theme theme,
+      ThemeData theme,
       this.maxPages = 20,
       PageOrientation orientation,
       EdgeInsets margin})
@@ -159,7 +159,8 @@ class MultiPage extends Page {
         : BoxConstraints(
             maxWidth: pageFormat.width - _margin.horizontal,
             maxHeight: pageFormat.height - _margin.vertical);
-    final Theme calculatedTheme = theme ?? document.theme ?? Theme.base();
+    final ThemeData calculatedTheme =
+        theme ?? document.theme ?? ThemeData.base();
     Context context;
     double offsetEnd;
     double offsetStart;

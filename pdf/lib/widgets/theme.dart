@@ -19,8 +19,8 @@
 part of widget;
 
 @immutable
-class Theme extends Inherited {
-  factory Theme({
+class ThemeData extends Inherited {
+  factory ThemeData({
     TextStyle defaultTextStyle,
     TextStyle paragraphStyle,
     TextStyle header0,
@@ -32,8 +32,11 @@ class Theme extends Inherited {
     TextStyle bulletStyle,
     TextStyle tableHeader,
     TextStyle tableCell,
+    bool softWrap,
+    TextAlign textAlign,
+    int maxLines,
   }) {
-    final Theme base = Theme.base();
+    final ThemeData base = ThemeData.base();
     return base.copyWith(
       defaultTextStyle: defaultTextStyle,
       paragraphStyle: paragraphStyle,
@@ -46,10 +49,13 @@ class Theme extends Inherited {
       header5: header5,
       tableHeader: tableHeader,
       tableCell: tableCell,
+      softWrap: softWrap,
+      textAlign: textAlign,
+      maxLines: maxLines,
     );
   }
 
-  Theme._({
+  ThemeData._({
     @required this.defaultTextStyle,
     @required this.paragraphStyle,
     @required this.header0,
@@ -61,6 +67,9 @@ class Theme extends Inherited {
     @required this.bulletStyle,
     @required this.tableHeader,
     @required this.tableCell,
+    @required this.softWrap,
+    @required this.textAlign,
+    this.maxLines,
   })  : assert(defaultTextStyle.inherit == false),
         assert(paragraphStyle.inherit == false),
         assert(header0.inherit == false),
@@ -71,9 +80,12 @@ class Theme extends Inherited {
         assert(header5.inherit == false),
         assert(bulletStyle.inherit == false),
         assert(tableHeader.inherit == false),
-        assert(tableCell.inherit == false);
+        assert(tableCell.inherit == false),
+        assert(softWrap != null),
+        assert(maxLines == null || maxLines > 0);
 
-  factory Theme.withFont({Font base, Font bold, Font italic, Font boldItalic}) {
+  factory ThemeData.withFont(
+      {Font base, Font bold, Font italic, Font boldItalic}) {
     final TextStyle defaultStyle = TextStyle.defaultStyle().copyWith(
         font: base,
         fontNormal: base,
@@ -82,7 +94,7 @@ class Theme extends Inherited {
         fontBoldItalic: boldItalic);
     final double fontSize = defaultStyle.fontSize;
 
-    return Theme._(
+    return ThemeData._(
       defaultTextStyle: defaultStyle,
       paragraphStyle: defaultStyle.copyWith(lineSpacing: 5),
       bulletStyle: defaultStyle.copyWith(lineSpacing: 5),
@@ -95,12 +107,14 @@ class Theme extends Inherited {
       tableHeader: defaultStyle.copyWith(
           fontSize: fontSize * 0.8, fontWeight: FontWeight.bold),
       tableCell: defaultStyle.copyWith(fontSize: fontSize * 0.8),
+      softWrap: true,
+      textAlign: TextAlign.left,
     );
   }
 
-  factory Theme.base() => Theme.withFont();
+  factory ThemeData.base() => ThemeData.withFont();
 
-  Theme copyWith({
+  ThemeData copyWith({
     TextStyle defaultTextStyle,
     TextStyle paragraphStyle,
     TextStyle header0,
@@ -112,8 +126,11 @@ class Theme extends Inherited {
     TextStyle bulletStyle,
     TextStyle tableHeader,
     TextStyle tableCell,
+    bool softWrap,
+    TextAlign textAlign,
+    int maxLines,
   }) =>
-      Theme._(
+      ThemeData._(
         defaultTextStyle: this.defaultTextStyle.merge(defaultTextStyle),
         paragraphStyle: this.paragraphStyle.merge(paragraphStyle),
         bulletStyle: this.bulletStyle.merge(bulletStyle),
@@ -125,11 +142,10 @@ class Theme extends Inherited {
         header5: this.header5.merge(header5),
         tableHeader: this.tableHeader.merge(tableHeader),
         tableCell: this.tableCell.merge(tableCell),
+        softWrap: softWrap ?? this.softWrap,
+        textAlign: textAlign ?? this.textAlign,
+        maxLines: maxLines ?? this.maxLines,
       );
-
-  static Theme of(Context context) {
-    return context.inherited[Theme];
-  }
 
   final TextStyle defaultTextStyle;
 
@@ -147,4 +163,102 @@ class Theme extends Inherited {
   final TextStyle tableHeader;
 
   final TextStyle tableCell;
+
+  final TextAlign textAlign;
+  final bool softWrap;
+  final int maxLines;
+}
+
+class Theme extends StatelessWidget {
+  Theme({
+    @required this.data,
+    @required this.child,
+  })  : assert(data != null),
+        assert(child != null);
+
+  final ThemeData data;
+
+  final Widget child;
+
+  static ThemeData of(Context context) {
+    return context.inherited[ThemeData];
+  }
+
+  @Deprecated('Use ThemeData.base()')
+  static ThemeData base() => ThemeData.base();
+
+  @Deprecated('Use ThemeData.withFont()')
+  static ThemeData withFont(
+          {Font base, Font bold, Font italic, Font boldItalic}) =>
+      ThemeData.withFont(
+          base: base, bold: bold, italic: italic, boldItalic: boldItalic);
+
+  @override
+  Widget build(Context context) {
+    return InheritedWidget(
+      inherited: data,
+      build: (Context context) => child,
+    );
+  }
+}
+
+class DefaultTextStyle extends StatelessWidget implements Inherited {
+  DefaultTextStyle({
+    @required this.style,
+    @required this.child,
+    this.textAlign,
+    this.softWrap = true,
+    this.maxLines,
+  })  : assert(style != null),
+        assert(child != null),
+        assert(softWrap != null),
+        assert(maxLines == null || maxLines > 0);
+
+  static Widget merge({
+    TextStyle style,
+    TextAlign textAlign,
+    bool softWrap,
+    int maxLines,
+    @required Widget child,
+  }) {
+    assert(child != null);
+    return Builder(
+      builder: (Context context) {
+        final ThemeData parent = Theme.of(context);
+
+        return DefaultTextStyle(
+          style: parent.defaultTextStyle.merge(style),
+          textAlign: textAlign ?? parent.textAlign,
+          softWrap: softWrap ?? parent.softWrap,
+          maxLines: maxLines ?? parent.maxLines,
+          child: child,
+        );
+      },
+    );
+  }
+
+  final TextStyle style;
+
+  final Widget child;
+
+  final TextAlign textAlign;
+
+  final bool softWrap;
+
+  final int maxLines;
+
+  @override
+  Widget build(Context context) {
+    final ThemeData theme = Theme.of(context).copyWith(
+      defaultTextStyle: style,
+      textAlign: textAlign,
+      softWrap: softWrap,
+      maxLines: maxLines,
+    );
+
+    return InheritedWidget(
+      inherited: theme,
+      build: (Context context) => child,
+    );
+  }
 }
