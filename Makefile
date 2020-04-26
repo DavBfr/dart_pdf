@@ -15,16 +15,23 @@
  DART_SRC=$(shell find . -name '*.dart')
  CLNG_SRC=$(shell find printing/ios -name '*.java' -o -name '*.m' -o -name '*.h') $(shell find printing/android -name '*.java' -o -name '*.m' -o -name '*.h')
  SWFT_SRC=$(shell find . -name '*.swift')
- FONTS=pdf/open-sans.ttf pdf/open-sans-bold.ttf pdf/roboto.ttf pdf/noto-sans.ttf pdf/genyomintw.ttf
+ FONTS=pdf/open-sans.ttf pdf/open-sans-bold.ttf pdf/roboto.ttf pdf/noto-sans.ttf pdf/genyomintw.ttf demo/assets/roboto1.ttf demo/assets/roboto2.ttf demo/assets/roboto3.ttf demo/assets/open-sans.ttf demo/assets/open-sans-bold.ttf
  COV_PORT=9292
 
-all: $(FONTS) format
+all: $(FONTS) demo/assets/logo.png demo/assets/profile.jpg format
 
 pdf/open-sans.ttf:
 	curl -L "https://github.com/google/fonts/raw/master/apache/opensans/OpenSans-Regular.ttf" > $@
 
+demo/assets/open-sans.ttf: pdf/open-sans.ttf
+	cp $^ $@
+
 pdf/open-sans-bold.ttf:
 	curl -L "https://github.com/google/fonts/raw/master/apache/opensans/OpenSans-Bold.ttf" > $@
+	cp $@ demo/assets/
+
+demo/assets/open-sans-bold.ttf: pdf/open-sans-bold.ttf
+	cp $^ $@
 
 pdf/roboto.ttf:
 	curl -L "https://github.com/google/fonts/raw/master/apache/robotomono/RobotoMono-Regular.ttf" > $@
@@ -34,6 +41,21 @@ pdf/noto-sans.ttf:
 
 pdf/genyomintw.ttf:
 	curl -L "https://github.com/ButTaiwan/genyo-font/raw/bc2fa246196fefc1ef9e9843bc8cdba22523a39d/TW/GenYoMinTW-Heavy.ttf" > $@
+
+demo/assets/roboto1.ttf:
+	curl -L "https://fonts.gstatic.com/s/roboto/v20/KFOlCnqEu92Fr1MmSU5vAw.ttf" > $@
+
+demo/assets/roboto2.ttf:
+	curl -L "https://fonts.gstatic.com/s/roboto/v20/KFOlCnqEu92Fr1MmWUlvAw.ttf" > $@
+
+demo/assets/roboto3.ttf:
+	curl -L "https://fonts.gstatic.com/s/roboto/v20/KFOkCnqEu92Fr1MmgWxP.ttf" > $@
+
+demo/assets/logo.png:
+	curl -L "https://pigment.github.io/fake-logos/logos/medium/color/auto-speed.png" > $@
+
+demo/assets/profile.jpg:
+	curl -L "https://www.fakepersongenerator.com/Face/female/female20151024334209870.jpg" > $@
 
 format: format-dart format-clang format-swift
 
@@ -58,15 +80,14 @@ get-pdf:
 
 get-printing:
 	cd printing; flutter packages get
-	cd printing/example; flutter packages get
 
-get-web:
-	cd pdf/web_example; pub get
+get-demo:
+	cd demo; flutter packages get
 
 get-readme:
 	cd test; flutter packages get
 
-get: $(FONTS) get-pdf get-printing get-web get-readme
+get: $(FONTS) get-pdf get-printing get-demo get-readme
 
 test-pdf: $(FONTS) get-pdf .coverage
 	cd pdf; pub global run coverage:collect_coverage --port=$(COV_PORT) -o coverage.json --resume-isolates --wait-paused &\
@@ -77,18 +98,16 @@ test-pdf: $(FONTS) get-pdf .coverage
 
 test-printing: $(FONTS) get-printing .coverage
 	cd printing; flutter test --coverage --coverage-path lcov.info
-	cd printing/example; flutter test --coverage --coverage-path lcov.info
+
+test-demo: $(FONTS) get-printing .coverage
+	cd demo; flutter test --coverage --coverage-path lcov.info
 
 test-readme: $(FONTS) get-readme
 	cd test; dart extract_readme.dart
 	cd test; dartanalyzer readme-*.dart
 
-test-web:
-	cd pdf/web_example; pub get
-	cd pdf/web_example; pub run webdev build
-
-test: test-pdf test-printing node_modules test-web
-	cat pdf/lcov.info printing/lcov.info printing/example/lcov.info | node_modules/.bin/lcov-summary
+test: test-pdf test-printing test-demo node_modules
+	cat pdf/lcov.info printing/lcov.info demo/lcov.info | node_modules/.bin/lcov-summary
 
 clean:
 	git clean -fdx -e .vscode -e ref
@@ -148,9 +167,9 @@ ref:
 	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_reference_1-7.pdf'
 
 gh-pages:
-	cd printing/example; flutter build web
+	cd demo; flutter build web
 	git checkout gh-pages
 	rm -rf assets icons
-	mv -fv printing/example/build/web/* .
+	mv -fv demo/build/web/* .
 
 .PHONY: test format format-dart format-clang clean publish-pdf publish-printing analyze ref

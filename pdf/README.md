@@ -8,7 +8,11 @@ This library is divided into two parts:
 It can create a full multi-pages document with graphics,
 images, and text using TrueType fonts. With the ease of use you already know.
 
+See an interactive demo here: <https://davbfr.github.io/dart_pdf/>.
+
+<a href="https://davbfr.github.io/dart_pdf/">
 <img alt="Example document" src="https://raw.githubusercontent.com/DavBfr/dart_pdf/master/pdf/example.jpg">
+</a>
 
 Use the `printing` package <https://pub.dev/packages/printing>
 for full flutter print and share operation.

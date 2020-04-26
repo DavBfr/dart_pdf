@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
+// ignore_for_file: always_specify_types
+
+import 'dart:typed_data';
 
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -39,6 +41,7 @@ class Calendar extends StatelessWidget {
   ) {
     return Container(
       width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
       child: Text(
         DateFormat.yMMMM().format(date),
         style: const TextStyle(
@@ -122,7 +125,7 @@ class Calendar extends StatelessWidget {
           child: Container(
             foregroundDecoration: BoxDecoration(
               border: BoxBorder(
-                color: PdfColors.black,
+                color: PdfColors.grey,
                 top: true,
                 left: true,
                 right: index % 7 == 6,
@@ -146,7 +149,7 @@ class Calendar extends StatelessWidget {
         return Container(
           foregroundDecoration: BoxDecoration(
             border: BoxBorder(
-              color: PdfColors.black,
+              color: PdfColors.grey,
               left: true,
               right: index % 7 == 6,
               bottom: true,
@@ -158,16 +161,32 @@ class Calendar extends StatelessWidget {
     );
 
     return Container(
-      padding: const EdgeInsets.all(20),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           title(context, DateTime(_year, _month)),
           head,
-          Flexible(flex: 1, child: body),
+          Expanded(child: body),
         ],
       ),
     );
   }
+}
+
+Future<Uint8List> generateCalendar(PdfPageFormat pageFormat) async {
+  //Create a PDF document.
+  final document = Document();
+
+  document.addPage(
+    Page(
+      pageFormat: pageFormat,
+      orientation: PageOrientation.landscape,
+      build: (context) => Calendar(
+        date: DateTime.now(),
+      ),
+    ),
+  );
+
+  return document.save();
 }

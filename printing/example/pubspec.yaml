@@ -4,30 +4,16 @@ description: Pdf Printing Example
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.3.0 <3.0.0"
+  sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   printing:
-  path_provider:
-  flutter_full_pdf_viewer:
-  markdown:
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_driver:
-    sdk: flutter
-  test:
+  pdf:
 
 dependency_overrides:
   printing:
-    path: ..
+    path: ../
   pdf:
     path: ../../pdf
-
-flutter:
-  uses-material-design: true
-  assets:
-    - assets/
