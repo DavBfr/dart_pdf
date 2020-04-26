@@ -7,6 +7,7 @@
 - Add dashed lines to Decoration Widgets
 - Add TableRow decoration
 - Add Chart Widget [Marco Papula]
+- Add Divider Widget
 
 ## 1.6.2
 
