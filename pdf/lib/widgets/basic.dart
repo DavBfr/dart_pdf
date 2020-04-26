@@ -819,3 +819,56 @@ class Divider extends StatelessWidget {
     );
   }
 }
+
+class VerticalDivider extends StatelessWidget {
+  VerticalDivider({
+    this.width,
+    this.thickness,
+    this.indent,
+    this.endIndent,
+    this.color,
+  })  : assert(width == null || width >= 0.0),
+        assert(thickness == null || thickness >= 0.0),
+        assert(indent == null || indent >= 0.0),
+        assert(endIndent == null || endIndent >= 0.0);
+
+  /// The color to use when painting the line.
+  final PdfColor color;
+
+  /// The amount of empty space to the trailing edge of the divider.
+  final double endIndent;
+
+  /// The divider's width extent.
+  final double width;
+
+  /// The amount of empty space to the leading edge of the divider.
+  final double indent;
+
+  /// The thickness of the line drawn within the divider.
+  final double thickness;
+
+  @override
+  Widget build(Context context) {
+    final double width = this.width ?? 16;
+    final double thickness = this.thickness ?? 1;
+    final double indent = this.indent ?? 0;
+    final double endIndent = this.endIndent ?? 0;
+
+    return SizedBox(
+      width: width,
+      child: Center(
+        child: Container(
+          width: thickness,
+          margin: EdgeInsets.only(top: indent, bottom: endIndent),
+          decoration: BoxDecoration(
+            border: BoxBorder(
+              left: true,
+              color: color,
+              width: thickness,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
