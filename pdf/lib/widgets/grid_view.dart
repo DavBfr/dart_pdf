@@ -59,6 +59,7 @@ class GridView extends MultiChildWidget implements SpanningWidget {
       this.childAspectRatio = double.infinity,
       List<Widget> children = const <Widget>[]})
       : assert(padding != null),
+        assert(crossAxisCount != null),
         super(children: children);
 
   final Axis direction;
