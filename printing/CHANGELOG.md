@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.4.0
+
+- Add PdfPreview Widget
+
 ## 3.3.1
 
 - Remove width and height parameters from wrapWidget helper
