@@ -31,6 +31,7 @@ import 'ttf_test.dart' as ttf;
 import 'type1_test.dart' as type1;
 import 'widget_barcode_test.dart' as widget_barcode;
 import 'widget_basic_test.dart' as widget_basic;
+import 'widget_chart_test.dart' as widget_chart;
 import 'widget_clip_test.dart' as widget_clip;
 import 'widget_container_test.dart' as widget_container;
 import 'widget_flex_test.dart' as widget_flex;
@@ -59,8 +60,9 @@ void main() {
   roll.main();
   ttf.main();
   type1.main();
-  widget_basic.main();
   widget_barcode.main();
+  widget_basic.main();
+  widget_chart.main();
   widget_clip.main();
   widget_container.main();
   widget_flex.main();

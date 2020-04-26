@@ -40,10 +40,10 @@ void main() {
           ),
           data: <DataSet>[
             LineDataSet(
-              data: <ChartValue>[
-                ChartValue(1, 1),
-                ChartValue(2, 3),
-                ChartValue(3, 7),
+              data: const <LineChartValue>[
+                LineChartValue(1, 1),
+                LineChartValue(2, 3),
+                LineChartValue(3, 7),
               ],
             ),
           ],
@@ -60,10 +60,10 @@ void main() {
           ),
           data: <DataSet>[
             LineDataSet(
-              data: <ChartValue>[
-                ChartValue(1, 1),
-                ChartValue(2, 3),
-                ChartValue(3, 7),
+              data: const <LineChartValue>[
+                LineChartValue(1, 1),
+                LineChartValue(2, 3),
+                LineChartValue(3, 7),
               ],
               drawLine: false,
             ),
@@ -81,10 +81,10 @@ void main() {
           ),
           data: <DataSet>[
             LineDataSet(
-              data: <ChartValue>[
-                ChartValue(1, 1),
-                ChartValue(2, 3),
-                ChartValue(3, 7),
+              data: const <LineChartValue>[
+                LineChartValue(1, 1),
+                LineChartValue(2, 3),
+                LineChartValue(3, 7),
               ],
               drawPoints: false,
             ),
@@ -102,10 +102,10 @@ void main() {
           ),
           data: <DataSet>[
             LineDataSet(
-              data: <ChartValue>[
-                ChartValue(1, 1),
-                ChartValue(2, 3),
-                ChartValue(3, 7),
+              data: const <LineChartValue>[
+                LineChartValue(1, 1),
+                LineChartValue(2, 3),
+                LineChartValue(3, 7),
               ],
               drawLine: false,
               pointColor: PdfColors.red,
@@ -120,22 +120,24 @@ void main() {
 
     test('ScatterChart with custom size', () {
       pdf.addPage(Page(
-        build: (Context context) => Chart(
+        build: (Context context) => SizedBox(
           width: 200,
           height: 100,
-          grid: LinearGrid(
-            xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
-            yAxis: <double>[0, 3, 6, 9],
-          ),
-          data: <DataSet>[
-            LineDataSet(
-              data: <ChartValue>[
-                ChartValue(1, 1),
-                ChartValue(2, 3),
-                ChartValue(3, 7),
-              ],
+          child: Chart(
+            grid: LinearGrid(
+              xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
+              yAxis: <double>[0, 3, 6, 9],
             ),
-          ],
+            data: <DataSet>[
+              LineDataSet(
+                data: const <LineChartValue>[
+                  LineChartValue(1, 1),
+                  LineChartValue(2, 3),
+                  LineChartValue(3, 7),
+                ],
+              ),
+            ],
+          ),
         ),
       ));
     });

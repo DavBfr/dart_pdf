@@ -33,36 +33,39 @@ class Chart extends Widget {
   Chart({
     @required this.grid,
     @required this.data,
-    this.width = 500,
-    this.height = 250,
-    this.fit = BoxFit.contain,
   });
 
-  final double width;
-  final double height;
-  final BoxFit fit;
-  final Grid grid;
+  final ChartGrid grid;
+
   final List<DataSet> data;
-  PdfRect gridBox;
+
+  PdfPoint _computeSize(BoxConstraints constraints) {
+    if (constraints.isTight) {
+      return constraints.smallest;
+    }
+
+    double width = constraints.maxWidth;
+    double height = constraints.maxHeight;
+
+    const double aspectRatio = 1;
+
+    if (!width.isFinite) {
+      width = height * aspectRatio;
+    }
+
+    if (!height.isFinite) {
+      height = width * aspectRatio;
+    }
+
+    return constraints.constrain(PdfPoint(width, height));
+  }
 
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    final double w = constraints.hasBoundedWidth
-        ? constraints.maxWidth
-        : constraints.constrainWidth(width.toDouble());
-    final double h = constraints.hasBoundedHeight
-        ? constraints.maxHeight
-        : constraints.constrainHeight(height.toDouble());
+    box = PdfRect.fromPoints(PdfPoint.zero, _computeSize(constraints));
 
-    final FittedSizes sizes =
-        applyBoxFit(fit, PdfPoint(width, height), PdfPoint(w, h));
-
-    box = PdfRect.fromPoints(PdfPoint.zero, sizes.destination);
-    grid.layout(context, box);
-    for (DataSet dataSet in data) {
-      dataSet.layout(context, grid.gridBox);
-    }
+    grid.layout(context, box.size);
   }
 
   @override
@@ -75,26 +78,27 @@ class Chart extends Widget {
       ..saveContext()
       ..setTransform(mat);
 
-    grid.paint(context, box);
+    grid.paintBackground(context, box.size);
     for (DataSet dataSet in data) {
-      dataSet.paint(context, grid);
+      dataSet.paintBackground(context, grid);
     }
+    for (DataSet dataSet in data) {
+      dataSet.paintForeground(context, grid);
+    }
+    grid.paintForeground(context, box.size);
     context.canvas.restoreContext();
   }
 }
 
-abstract class Grid {
-  PdfRect gridBox;
-  double xOffset;
-  double xTotal;
-  double yOffset;
-  double yTotal;
+abstract class ChartGrid {
+  void layout(Context context, PdfPoint size);
+  void paintBackground(Context context, PdfPoint size);
+  void paintForeground(Context context, PdfPoint size);
 
-  void layout(Context context, PdfRect box);
-  void paint(Context context, PdfRect box);
+  PdfPoint tochart(PdfPoint p);
 }
 
-class LinearGrid extends Grid {
+class LinearGrid extends ChartGrid {
   LinearGrid({
     @required this.xAxis,
     @required this.yAxis,
@@ -115,16 +119,29 @@ class LinearGrid extends Grid {
   final TextStyle textStyle;
   final double lineWidth;
   final PdfColor color;
+  final double separatorLineWidth;
+  final PdfColor separatorColor;
 
   TextStyle style;
   PdfFont font;
   PdfFontMetrics xAxisFontMetric;
   PdfFontMetrics yAxisFontMetric;
-  double separatorLineWidth;
-  PdfColor separatorColor;
+  PdfRect gridBox;
+  double xOffset;
+  double xTotal;
+  double yOffset;
+  double yTotal;
 
   @override
-  void layout(Context context, PdfRect box) {
+  PdfPoint tochart(PdfPoint p) {
+    return PdfPoint(
+      gridBox.left + gridBox.width * (p.x - xOffset) / xTotal,
+      gridBox.bottom + gridBox.height * (p.y - yOffset) / yTotal,
+    );
+  }
+
+  @override
+  void layout(Context context, PdfPoint size) {
     style = Theme.of(context).defaultTextStyle.merge(textStyle);
     font = style.font.getFont(context);
 
@@ -136,10 +153,10 @@ class LinearGrid extends Grid {
             (style.fontSize);
 
     gridBox = PdfRect.fromLTRB(
-        box.left + yAxisFontMetric.width + xMargin,
-        box.bottom + xAxisFontMetric.height + yMargin,
-        box.right - xAxisFontMetric.width / 2,
-        box.top - yAxisFontMetric.height / 2);
+        yAxisFontMetric.width + xMargin,
+        xAxisFontMetric.height + yMargin,
+        size.x - xAxisFontMetric.width / 2,
+        size.y - yAxisFontMetric.height / 2);
 
     xOffset = xAxis.reduce(math.min);
     yOffset = yAxis.reduce(math.min);
@@ -148,7 +165,7 @@ class LinearGrid extends Grid {
   }
 
   @override
-  void paint(Context context, PdfRect box) {
+  void paintBackground(Context context, PdfPoint size) {
     xAxis.asMap().forEach((int i, double x) {
       context.canvas
         ..setColor(style.color)
@@ -195,63 +212,59 @@ class LinearGrid extends Grid {
       ..drawLine(gridBox.left, gridBox.bottom, gridBox.left, gridBox.top)
       ..strokePath();
   }
+
+  @override
+  void paintForeground(Context context, PdfPoint size) {}
 }
 
-class ChartValue {
-  ChartValue(this.x, this.y);
+@immutable
+abstract class ChartValue {
+  const ChartValue();
+}
+
+class LineChartValue extends ChartValue {
+  const LineChartValue(this.x, this.y);
   final double x;
   final double y;
+
+  PdfPoint get point => PdfPoint(x, y);
 }
 
 abstract class DataSet {
-  void layout(Context context, PdfRect box);
-  void paint(Context context, Grid grid);
+  void paintBackground(Context context, ChartGrid grid);
+  void paintForeground(Context context, ChartGrid grid);
 }
 
 class LineDataSet extends DataSet {
   LineDataSet({
     @required this.data,
-    this.pointColor = PdfColors.green,
-    this.pointSize = 8,
+    this.pointColor = PdfColors.blue,
+    this.pointSize = 3,
     this.lineColor = PdfColors.blue,
     this.lineWidth = 2,
     this.drawLine = true,
     this.drawPoints = true,
-    this.lineStartingPoint,
   }) : assert(drawLine || drawPoints);
 
-  final List<ChartValue> data;
+  final List<LineChartValue> data;
   final PdfColor pointColor;
   final double pointSize;
   final PdfColor lineColor;
   final double lineWidth;
   final bool drawLine;
   final bool drawPoints;
-  final ChartValue lineStartingPoint;
 
   double maxValue;
 
   @override
-  void layout(Context context, PdfRect box) {}
-
-  @override
-  void paint(Context context, Grid grid) {
+  void paintBackground(Context context, ChartGrid grid) {
     if (drawLine) {
-      ChartValue lastValue = lineStartingPoint;
-      for (ChartValue value in data) {
+      LineChartValue lastValue;
+      for (LineChartValue value in data) {
         if (lastValue != null) {
-          context.canvas.drawLine(
-            grid.gridBox.left +
-                grid.gridBox.width * (lastValue.x - grid.xOffset) / grid.xTotal,
-            grid.gridBox.bottom +
-                grid.gridBox.height *
-                    (lastValue.y - grid.yOffset) /
-                    grid.yTotal,
-            grid.gridBox.left +
-                grid.gridBox.width * (value.x - grid.xOffset) / grid.xTotal,
-            grid.gridBox.bottom +
-                grid.gridBox.height * (value.y - grid.yOffset) / grid.yTotal,
-          );
+          final PdfPoint p1 = grid.tochart(lastValue.point);
+          final PdfPoint p2 = grid.tochart(value.point);
+          context.canvas.drawLine(p1.x, p1.y, p2.x, p2.y);
         }
         lastValue = value;
       }
@@ -265,18 +278,16 @@ class LineDataSet extends DataSet {
     }
 
     if (drawPoints) {
-      for (ChartValue value in data) {
+      for (LineChartValue value in data) {
+        final PdfPoint p = grid.tochart(value.point);
         context.canvas
           ..setColor(pointColor)
-          ..drawEllipse(
-              grid.gridBox.left +
-                  grid.gridBox.width * (value.x - grid.xOffset) / grid.xTotal,
-              grid.gridBox.bottom +
-                  grid.gridBox.height * (value.y - grid.yOffset) / grid.yTotal,
-              pointSize,
-              pointSize)
+          ..drawEllipse(p.x, p.y, pointSize, pointSize)
           ..fillPath();
       }
     }
   }
+
+  @override
+  void paintForeground(Context context, ChartGrid grid) {}
 }
