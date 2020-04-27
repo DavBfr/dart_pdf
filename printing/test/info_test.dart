@@ -23,7 +23,7 @@ void main() {
   });
 
   test('PrintingInfo', () async {
-    final PrintingInfo info = PrintingInfo.unavailable;
+    const PrintingInfo info = PrintingInfo.unavailable;
     expect(info.canConvertHtml, false);
     expect(info.directPrint, false);
     expect(info.dynamicLayout, false);
