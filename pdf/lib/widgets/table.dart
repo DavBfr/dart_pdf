@@ -187,48 +187,156 @@ class FractionColumnWidth extends TableColumnWidth {
   }
 }
 
+typedef OnCellFormat = String Function(int index, dynamic data);
+
 /// A widget that uses the table layout algorithm for its children.
 class Table extends Widget implements SpanningWidget {
-  Table(
-      {this.children = const <TableRow>[],
-      this.border,
-      this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
-      this.columnWidths,
-      this.defaultColumnWidth = const IntrinsicColumnWidth(),
-      this.tableWidth = TableWidth.max})
-      : assert(children != null),
+  Table({
+    this.children = const <TableRow>[],
+    this.border,
+    this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
+    this.columnWidths,
+    this.defaultColumnWidth = const IntrinsicColumnWidth(),
+    this.tableWidth = TableWidth.max,
+  })  : assert(children != null),
         assert(defaultColumnWidth != null),
         assert(defaultVerticalAlignment != null),
         super();
 
   factory Table.fromTextArray({
-    @required Context context,
-    @required List<List<String>> data,
-    EdgeInsets margin = const EdgeInsets.all(5),
+    Context context,
+    @required List<List<dynamic>> data,
+    @deprecated EdgeInsets margin,
+    EdgeInsets cellPadding = const EdgeInsets.all(5),
+    double cellHeight = 0,
+    Alignment cellAlignment = Alignment.topLeft,
+    Map<int, Alignment> cellAlignments,
+    TextStyle cellStyle,
+    TextStyle oddCellStyle,
+    OnCellFormat cellFormat,
+    int headerCount = 1,
+    List<dynamic> headers,
+    EdgeInsets headerPadding,
+    double headerHeight,
+    Alignment headerAlignment = Alignment.center,
+    Map<int, Alignment> headerAlignments,
+    TextStyle headerStyle,
+    OnCellFormat headerFormat,
+    TableBorder border = const TableBorder(),
+    Map<int, TableColumnWidth> columnWidths,
+    IntrinsicColumnWidth defaultColumnWidth = const IntrinsicColumnWidth(),
+    TableWidth tableWidth = TableWidth.max,
+    BoxDecoration headerDecoration,
+    BoxDecoration rowDecoration,
+    BoxDecoration oddRowDecoration,
   }) {
+    assert(data != null);
+    assert(headerCount != null && headerCount >= 0);
+    assert(cellHeight != null);
+
+    if (margin != null) {
+      cellPadding = margin;
+    }
+
+    if (context != null) {
+      final ThemeData theme = Theme.of(context);
+      headerStyle ??= theme.tableHeader;
+      cellStyle ??= theme.tableCell;
+    }
+
+    headerPadding ??= cellPadding;
+    headerHeight ??= cellHeight;
+    oddRowDecoration ??= rowDecoration;
+    oddCellStyle ??= cellStyle;
+    cellAlignments ??= const <int, Alignment>{};
+    headerAlignments ??= cellAlignments;
+
     final List<TableRow> rows = <TableRow>[];
-    for (List<String> row in data) {
+
+    int rowNum = 0;
+    if (headers != null) {
       final List<Widget> tableRow = <Widget>[];
-      if (row == data.first) {
-        for (String cell in row) {
-          tableRow.add(Container(
-              alignment: Alignment.center,
-              margin: margin,
-              child: Text(cell, style: Theme.of(context).tableHeader)));
+
+      for (final dynamic cell in headers) {
+        tableRow.add(
+          Container(
+            alignment: headerAlignments[tableRow.length] ?? headerAlignment,
+            padding: headerPadding,
+            constraints: BoxConstraints(minHeight: headerHeight),
+            child: Text(
+              headerFormat == null
+                  ? cell.toString()
+                  : headerFormat(tableRow.length, cell),
+              style: headerStyle,
+            ),
+          ),
+        );
+      }
+      rows.add(TableRow(
+        children: tableRow,
+        repeat: true,
+        decoration: headerDecoration,
+      ));
+      rowNum++;
+    }
+
+    for (final List<dynamic> row in data) {
+      final List<Widget> tableRow = <Widget>[];
+      final bool isOdd = (rowNum - headerCount) % 2 != 0;
+
+      if (rowNum < headerCount) {
+        for (final dynamic cell in row) {
+          tableRow.add(
+            Container(
+              alignment: headerAlignments[tableRow.length] ?? headerAlignment,
+              padding: headerPadding,
+              constraints: BoxConstraints(minHeight: headerHeight),
+              child: Text(
+                headerFormat == null
+                    ? cell.toString()
+                    : headerFormat(tableRow.length, cell),
+                style: headerStyle,
+              ),
+            ),
+          );
         }
       } else {
-        for (String cell in row) {
-          tableRow.add(Container(
-              margin: margin,
-              child: Text(cell, style: Theme.of(context).tableCell)));
+        for (final dynamic cell in row) {
+          tableRow.add(
+            Container(
+              alignment: cellAlignments[tableRow.length] ?? cellAlignment,
+              padding: cellPadding,
+              constraints: BoxConstraints(minHeight: cellHeight),
+              child: Text(
+                cellFormat == null
+                    ? cell.toString()
+                    : cellFormat(tableRow.length, cell),
+                style: isOdd ? oddCellStyle : cellStyle,
+              ),
+            ),
+          );
         }
       }
-      rows.add(TableRow(children: tableRow, repeat: row == data.first));
+
+      BoxDecoration decoration = isOdd ? oddRowDecoration : rowDecoration;
+      if (rowNum < headerCount) {
+        decoration = headerDecoration;
+      }
+
+      rows.add(TableRow(
+        children: tableRow,
+        repeat: rowNum < headerCount,
+        decoration: decoration,
+      ));
+      rowNum++;
     }
     return Table(
-        border: const TableBorder(),
-        tableWidth: TableWidth.max,
-        children: rows);
+      border: border,
+      tableWidth: tableWidth,
+      children: rows,
+      columnWidths: columnWidths,
+      defaultColumnWidth: defaultColumnWidth,
+    );
   }
 
   @override

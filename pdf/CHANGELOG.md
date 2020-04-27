@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.0
+
+- Improve Table.fromTextArray()
+
 ## 1.7.1
 
 - Fix justified text softWrap issue

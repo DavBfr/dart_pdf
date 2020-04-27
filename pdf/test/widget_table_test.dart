@@ -186,6 +186,52 @@ void main() {
     );
   });
 
+  test('Table fromTextArray', () {
+    pdf.addPage(Page(
+      build: (Context context) => Table.fromTextArray(
+        context: context,
+        tableWidth: TableWidth.min,
+        data: <List<dynamic>>[
+          <dynamic>['One', 'Two', 'Three'],
+          <dynamic>[1, 2, 3],
+          <dynamic>[4, 5, 6],
+        ],
+      ),
+    ));
+  });
+
+  test('Table fromTextArray with formatting', () {
+    pdf.addPage(Page(
+      build: (Context context) => Table.fromTextArray(
+        border: null,
+        cellAlignment: Alignment.center,
+        headerDecoration: const BoxDecoration(
+          borderRadius: 2,
+          color: PdfColors.indigo,
+        ),
+        headerHeight: 25,
+        cellHeight: 40,
+        headerStyle: TextStyle(
+          color: PdfColors.white,
+          fontWeight: FontWeight.bold,
+        ),
+        rowDecoration: const BoxDecoration(
+          border: BoxBorder(
+            bottom: true,
+            color: PdfColors.indigo,
+            width: .5,
+          ),
+        ),
+        headers: <dynamic>['One', 'Two', 'Three'],
+        data: <List<dynamic>>[
+          <dynamic>[1, 2, 3],
+          <dynamic>[4, 5, 6],
+          <dynamic>[7, 8, 9],
+        ],
+      ),
+    ));
+  });
+
   tearDownAll(() {
     final File file = File('widgets-table.pdf');
     file.writeAsBytesSync(pdf.save());
