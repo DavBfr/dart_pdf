@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.1
+
+- Fix justified text softWrap issue
+
 ## 1.7.0
 
 - Implement Linear and Radial gradients in BoxDecoration

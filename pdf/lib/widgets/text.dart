@@ -644,7 +644,7 @@ class RichText extends Widget {
                   _decorations.sublist(decorationStart),
                   constraintWidth,
                   offsetX - space.advanceWidth * style.wordSpacing,
-                  false,
+                  true,
                   bottom,
                 ));
 
