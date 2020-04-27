@@ -3,6 +3,7 @@
 ## 1.8.0
 
 - Improve Table.fromTextArray()
+- Add curved LineDataSet Chart
 
 ## 1.7.1
 

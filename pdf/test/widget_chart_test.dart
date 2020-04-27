@@ -33,6 +33,7 @@ void main() {
   group('LineChart test', () {
     test('Default LineChart', () {
       pdf.addPage(Page(
+        pageFormat: PdfPageFormat.standard.landscape,
         build: (Context context) => Chart(
           grid: LinearGrid(
             xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
@@ -53,6 +54,7 @@ void main() {
 
     test('Default LineChart without lines connecting points', () {
       pdf.addPage(Page(
+        pageFormat: PdfPageFormat.standard.landscape,
         build: (Context context) => Chart(
           grid: LinearGrid(
             xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
@@ -95,6 +97,7 @@ void main() {
 
     test('ScatterChart with custom points and lines', () {
       pdf.addPage(Page(
+        pageFormat: PdfPageFormat.standard.landscape,
         build: (Context context) => Chart(
           grid: LinearGrid(
             xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
@@ -110,7 +113,7 @@ void main() {
               drawLine: false,
               pointColor: PdfColors.red,
               pointSize: 4,
-              lineColor: PdfColors.purple,
+              color: PdfColors.purple,
               lineWidth: 4,
             ),
           ],
@@ -120,6 +123,7 @@ void main() {
 
     test('ScatterChart with custom size', () {
       pdf.addPage(Page(
+        pageFormat: PdfPageFormat.standard.landscape,
         build: (Context context) => SizedBox(
           width: 200,
           height: 100,
@@ -138,6 +142,29 @@ void main() {
               ),
             ],
           ),
+        ),
+      ));
+    });
+
+    test('LineChart with curved lines', () {
+      pdf.addPage(Page(
+        pageFormat: PdfPageFormat.standard.landscape,
+        build: (Context context) => Chart(
+          grid: LinearGrid(
+            xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
+            yAxis: <double>[0, 3, 6, 9],
+          ),
+          data: <DataSet>[
+            LineDataSet(
+              drawPoints: false,
+              isCurved: true,
+              data: const <LineChartValue>[
+                LineChartValue(1, 1),
+                LineChartValue(3, 7),
+                LineChartValue(5, 3),
+              ],
+            ),
+          ],
         ),
       ));
     });

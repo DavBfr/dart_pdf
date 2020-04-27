@@ -18,86 +18,6 @@
 
 part of widget;
 
-bool _isSortedAscending(List<double> list) {
-  double prev = list.first;
-  for (double elem in list) {
-    if (prev > elem) {
-      return false;
-    }
-    prev = elem;
-  }
-  return true;
-}
-
-class Chart extends Widget {
-  Chart({
-    @required this.grid,
-    @required this.data,
-  });
-
-  final ChartGrid grid;
-
-  final List<DataSet> data;
-
-  PdfPoint _computeSize(BoxConstraints constraints) {
-    if (constraints.isTight) {
-      return constraints.smallest;
-    }
-
-    double width = constraints.maxWidth;
-    double height = constraints.maxHeight;
-
-    const double aspectRatio = 1;
-
-    if (!width.isFinite) {
-      width = height * aspectRatio;
-    }
-
-    if (!height.isFinite) {
-      height = width * aspectRatio;
-    }
-
-    return constraints.constrain(PdfPoint(width, height));
-  }
-
-  @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
-    box = PdfRect.fromPoints(PdfPoint.zero, _computeSize(constraints));
-
-    grid.layout(context, box.size);
-  }
-
-  @override
-  void paint(Context context) {
-    super.paint(context);
-
-    final Matrix4 mat = Matrix4.identity();
-    mat.translate(box.x, box.y);
-    context.canvas
-      ..saveContext()
-      ..setTransform(mat);
-
-    grid.paintBackground(context, box.size);
-    for (DataSet dataSet in data) {
-      dataSet.paintBackground(context, grid);
-    }
-    for (DataSet dataSet in data) {
-      dataSet.paintForeground(context, grid);
-    }
-    grid.paintForeground(context, box.size);
-    context.canvas.restoreContext();
-  }
-}
-
-abstract class ChartGrid {
-  void layout(Context context, PdfPoint size);
-  void paintBackground(Context context, PdfPoint size);
-  void paintForeground(Context context, PdfPoint size);
-
-  PdfPoint tochart(PdfPoint p);
-}
-
 class LinearGrid extends ChartGrid {
   LinearGrid({
     @required this.xAxis,
@@ -107,7 +27,7 @@ class LinearGrid extends ChartGrid {
     this.textStyle,
     this.lineWidth = 1,
     this.color = PdfColors.black,
-    this.separatorLineWidth = 1,
+    this.separatorLineWidth = .5,
     this.separatorColor = PdfColors.grey,
   })  : assert(_isSortedAscending(xAxis)),
         assert(_isSortedAscending(yAxis));
@@ -131,6 +51,17 @@ class LinearGrid extends ChartGrid {
   double xTotal;
   double yOffset;
   double yTotal;
+
+  static bool _isSortedAscending(List<double> list) {
+    double prev = list.first;
+    for (double elem in list) {
+      if (prev > elem) {
+        return false;
+      }
+      prev = elem;
+    }
+    return true;
+  }
 
   @override
   PdfPoint tochart(PdfPoint p) {
@@ -215,79 +146,4 @@ class LinearGrid extends ChartGrid {
 
   @override
   void paintForeground(Context context, PdfPoint size) {}
-}
-
-@immutable
-abstract class ChartValue {
-  const ChartValue();
-}
-
-class LineChartValue extends ChartValue {
-  const LineChartValue(this.x, this.y);
-  final double x;
-  final double y;
-
-  PdfPoint get point => PdfPoint(x, y);
-}
-
-abstract class DataSet {
-  void paintBackground(Context context, ChartGrid grid);
-  void paintForeground(Context context, ChartGrid grid);
-}
-
-class LineDataSet extends DataSet {
-  LineDataSet({
-    @required this.data,
-    this.pointColor = PdfColors.blue,
-    this.pointSize = 3,
-    this.lineColor = PdfColors.blue,
-    this.lineWidth = 2,
-    this.drawLine = true,
-    this.drawPoints = true,
-  }) : assert(drawLine || drawPoints);
-
-  final List<LineChartValue> data;
-  final PdfColor pointColor;
-  final double pointSize;
-  final PdfColor lineColor;
-  final double lineWidth;
-  final bool drawLine;
-  final bool drawPoints;
-
-  double maxValue;
-
-  @override
-  void paintBackground(Context context, ChartGrid grid) {
-    if (drawLine) {
-      LineChartValue lastValue;
-      for (LineChartValue value in data) {
-        if (lastValue != null) {
-          final PdfPoint p1 = grid.tochart(lastValue.point);
-          final PdfPoint p2 = grid.tochart(value.point);
-          context.canvas.drawLine(p1.x, p1.y, p2.x, p2.y);
-        }
-        lastValue = value;
-      }
-
-      context.canvas
-        ..setStrokeColor(lineColor)
-        ..setLineWidth(lineWidth)
-        ..setLineCap(PdfLineCap.joinRound)
-        ..setLineJoin(PdfLineCap.joinRound)
-        ..strokePath();
-    }
-
-    if (drawPoints) {
-      for (LineChartValue value in data) {
-        final PdfPoint p = grid.tochart(value.point);
-        context.canvas
-          ..setColor(pointColor)
-          ..drawEllipse(p.x, p.y, pointSize, pointSize)
-          ..fillPath();
-      }
-    }
-  }
-
-  @override
-  void paintForeground(Context context, ChartGrid grid) {}
 }
