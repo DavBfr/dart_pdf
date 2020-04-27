@@ -4,6 +4,7 @@
 
 - Fix justified text softWrap issue
 - Set a default color for Dividers
+- Fix InheritedWidget issue with multiple pages
 
 ## 1.7.0
 
