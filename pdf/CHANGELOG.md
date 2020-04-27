@@ -3,6 +3,7 @@
 ## 1.7.1
 
 - Fix justified text softWrap issue
+- Set a default color for Dividers
 
 ## 1.7.0
 

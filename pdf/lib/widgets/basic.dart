@@ -800,6 +800,7 @@ class Divider extends StatelessWidget {
     final double thickness = this.thickness ?? 1;
     final double indent = this.indent ?? 0;
     final double endIndent = this.endIndent ?? 0;
+    final PdfColor color = this.color ?? PdfColors.black;
 
     return SizedBox(
       height: height,
@@ -853,6 +854,7 @@ class VerticalDivider extends StatelessWidget {
     final double thickness = this.thickness ?? 1;
     final double indent = this.indent ?? 0;
     final double endIndent = this.endIndent ?? 0;
+    final PdfColor color = this.color ?? PdfColors.black;
 
     return SizedBox(
       width: width,
