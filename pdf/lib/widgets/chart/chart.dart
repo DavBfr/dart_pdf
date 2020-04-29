@@ -18,6 +18,7 @@
 
 part of widget;
 
+/// This widget is in preview and the API is subject to change
 class Chart extends Widget {
   Chart({
     @required this.grid,
@@ -68,12 +69,17 @@ class Chart extends Widget {
       ..setTransform(mat);
 
     grid.paintBackground(context, box.size);
+    grid.clip(context, box.size);
     for (DataSet dataSet in data) {
       dataSet.paintBackground(context, grid);
     }
+    grid.unClip(context, box.size);
+    grid.paint(context, box.size);
+    grid.clip(context, box.size);
     for (DataSet dataSet in data) {
       dataSet.paintForeground(context, grid);
     }
+    grid.unClip(context, box.size);
     grid.paintForeground(context, box.size);
     context.canvas.restoreContext();
   }
@@ -82,7 +88,11 @@ class Chart extends Widget {
 abstract class ChartGrid {
   void layout(Context context, PdfPoint size);
   void paintBackground(Context context, PdfPoint size);
+  void paint(Context context, PdfPoint size);
   void paintForeground(Context context, PdfPoint size);
+
+  void clip(Context context, PdfPoint size);
+  void unClip(Context context, PdfPoint size);
 
   PdfPoint tochart(PdfPoint p);
 }

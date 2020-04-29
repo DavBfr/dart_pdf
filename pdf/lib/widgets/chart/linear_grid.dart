@@ -18,6 +18,8 @@
 
 part of widget;
 
+typedef GridAxisFormat = String Function(double value);
+
 class LinearGrid extends ChartGrid {
   LinearGrid({
     @required this.xAxis,
@@ -28,7 +30,11 @@ class LinearGrid extends ChartGrid {
     this.lineWidth = 1,
     this.color = PdfColors.black,
     this.separatorLineWidth = .5,
+    this.drawXDivisions = false,
+    this.drawYDivisions = true,
     this.separatorColor = PdfColors.grey,
+    this.xAxisFormat = _defaultFormat,
+    this.yAxisFormat = _defaultFormat,
   })  : assert(_isSortedAscending(xAxis)),
         assert(_isSortedAscending(yAxis));
 
@@ -41,26 +47,66 @@ class LinearGrid extends ChartGrid {
   final PdfColor color;
   final double separatorLineWidth;
   final PdfColor separatorColor;
+  final bool drawXDivisions;
+  final bool drawYDivisions;
+  final GridAxisFormat xAxisFormat;
+  final GridAxisFormat yAxisFormat;
 
   TextStyle style;
   PdfFont font;
-  PdfFontMetrics xAxisFontMetric;
-  PdfFontMetrics yAxisFontMetric;
   PdfRect gridBox;
   double xOffset;
   double xTotal;
   double yOffset;
   double yTotal;
 
+  static String _defaultFormat(double v) => v.toString();
+
   static bool _isSortedAscending(List<double> list) {
     double prev = list.first;
-    for (double elem in list) {
+    for (final double elem in list) {
       if (prev > elem) {
         return false;
       }
       prev = elem;
     }
     return true;
+  }
+
+  @override
+  void layout(Context context, PdfPoint size) {
+    style = Theme.of(context).defaultTextStyle.merge(textStyle);
+    font = style.font.getFont(context);
+
+    double xMaxWidth = 0;
+    double xMaxHeight = 0;
+    for (final double value in xAxis) {
+      final PdfFontMetrics metrics =
+          font.stringMetrics(xAxisFormat(value)) * style.fontSize;
+      xMaxWidth = math.max(xMaxWidth, metrics.width);
+      xMaxHeight = math.max(xMaxHeight, metrics.maxHeight);
+    }
+
+    double yMaxWidth = 0;
+    double yMaxHeight = 0;
+    for (final double value in yAxis) {
+      final PdfFontMetrics metrics =
+          font.stringMetrics(yAxisFormat(value)) * style.fontSize;
+      yMaxWidth = math.max(yMaxWidth, metrics.width);
+      yMaxHeight = math.max(yMaxHeight, metrics.maxHeight);
+    }
+
+    gridBox = PdfRect.fromLTRB(
+      yMaxWidth + xMargin,
+      xMaxHeight + yMargin,
+      size.x - xMaxWidth / 2,
+      size.y - yMaxHeight / 2,
+    );
+
+    xOffset = xAxis.reduce(math.min);
+    yOffset = yAxis.reduce(math.min);
+    xTotal = xAxis.reduce(math.max) - xOffset;
+    yTotal = yAxis.reduce(math.max) - yOffset;
   }
 
   @override
@@ -71,79 +117,129 @@ class LinearGrid extends ChartGrid {
     );
   }
 
-  @override
-  void layout(Context context, PdfPoint size) {
-    style = Theme.of(context).defaultTextStyle.merge(textStyle);
-    font = style.font.getFont(context);
+  double get xAxisOffset => gridBox.bottom;
 
-    xAxisFontMetric =
-        font.stringMetrics(xAxis.reduce(math.max).toStringAsFixed(1)) *
-            (style.fontSize);
-    yAxisFontMetric =
-        font.stringMetrics(yAxis.reduce(math.max).toStringAsFixed(1)) *
-            (style.fontSize);
+  double get yAxisOffset => gridBox.left;
 
-    gridBox = PdfRect.fromLTRB(
-        yAxisFontMetric.width + xMargin,
-        xAxisFontMetric.height + yMargin,
-        size.x - xAxisFontMetric.width / 2,
-        size.y - yAxisFontMetric.height / 2);
-
-    xOffset = xAxis.reduce(math.min);
-    yOffset = yAxis.reduce(math.min);
-    xTotal = xAxis.reduce(math.max) - xOffset;
-    yTotal = yAxis.reduce(math.max) - yOffset;
+  void _drawAxis(Context context, PdfPoint size) {
+    context.canvas
+      ..moveTo(size.x, gridBox.bottom)
+      ..lineTo(gridBox.left - xMargin / 2, gridBox.bottom)
+      ..moveTo(gridBox.left, gridBox.bottom)
+      ..lineTo(gridBox.left, size.y)
+      ..setStrokeColor(color)
+      ..setLineWidth(lineWidth)
+      ..setLineCap(PdfLineCap.joinMiter)
+      ..strokePath();
   }
 
-  @override
-  void paintBackground(Context context, PdfPoint size) {
-    xAxis.asMap().forEach((int i, double x) {
-      context.canvas
-        ..setColor(style.color)
-        ..drawString(
-          style.font.getFont(context),
-          style.fontSize,
-          x.toStringAsFixed(1),
-          gridBox.left +
-              gridBox.width * i / (xAxis.length - 1) -
-              xAxisFontMetric.width / 2,
-          0,
-        );
-    });
-
-    for (double y in yAxis.where((double y) => y != yAxis.first)) {
-      final double textWidth =
-          (font.stringMetrics(y.toStringAsFixed(1)) * (style.fontSize)).width;
-      final double yPos = gridBox.bottom + gridBox.height * y / yAxis.last;
-      context.canvas
-        ..setColor(style.color)
-        ..drawString(
-          style.font.getFont(context),
-          style.fontSize,
-          y.toStringAsFixed(1),
-          xAxisFontMetric.width / 2 - textWidth / 2,
-          yPos - font.ascent,
-        );
-
+  void _drawYDivisions(Context context, PdfPoint size) {
+    for (final double y in yAxis.sublist(1)) {
+      final PdfPoint p = tochart(PdfPoint(0, y));
       context.canvas.drawLine(
-          gridBox.left,
-          yPos + font.descent + font.ascent - separatorLineWidth / 2,
-          gridBox.right,
-          yPos + font.descent + font.ascent - separatorLineWidth / 2);
+        gridBox.left,
+        p.y,
+        size.x,
+        p.y,
+      );
     }
+
     context.canvas
       ..setStrokeColor(separatorColor)
       ..setLineWidth(separatorLineWidth)
-      ..strokePath();
-
-    context.canvas
-      ..setStrokeColor(color)
-      ..setLineWidth(lineWidth)
-      ..drawLine(gridBox.left, gridBox.bottom, gridBox.right, gridBox.bottom)
-      ..drawLine(gridBox.left, gridBox.bottom, gridBox.left, gridBox.top)
+      ..setLineCap(PdfLineCap.joinMiter)
       ..strokePath();
   }
 
+  void _drawXDivisions(Context context, PdfPoint size) {
+    for (final double x in xAxis.sublist(1)) {
+      final PdfPoint p = tochart(PdfPoint(x, 0));
+      context.canvas.drawLine(
+        p.x,
+        size.y,
+        p.x,
+        gridBox.bottom,
+      );
+    }
+
+    context.canvas
+      ..setStrokeColor(separatorColor)
+      ..setLineWidth(separatorLineWidth)
+      ..setLineCap(PdfLineCap.joinMiter)
+      ..strokePath();
+  }
+
+  void _drawYValues(Context context, PdfPoint size) {
+    for (final double y in yAxis) {
+      final String v = yAxisFormat(y);
+      final PdfFontMetrics metrics = font.stringMetrics(v) * style.fontSize;
+      final PdfPoint p = tochart(PdfPoint(0, y));
+
+      context.canvas
+        ..setColor(style.color)
+        ..drawString(
+          style.font.getFont(context),
+          style.fontSize,
+          v,
+          gridBox.left - xMargin - metrics.width,
+          p.y - (metrics.ascent + metrics.descent) / 2,
+        );
+    }
+  }
+
+  void _drawXValues(Context context, PdfPoint size) {
+    for (final double x in xAxis) {
+      final String v = xAxisFormat(x);
+      final PdfFontMetrics metrics = font.stringMetrics(v) * style.fontSize;
+      final PdfPoint p = tochart(PdfPoint(x, 0));
+
+      context.canvas
+        ..setColor(style.color)
+        ..drawString(
+          style.font.getFont(context),
+          style.fontSize,
+          v,
+          p.x - metrics.width / 2,
+          -metrics.descent,
+        );
+    }
+  }
+
   @override
-  void paintForeground(Context context, PdfPoint size) {}
+  void paintBackground(Context context, PdfPoint size) {}
+
+  @override
+  void paint(Context context, PdfPoint size) {
+    if (drawXDivisions) {
+      _drawXDivisions(context, size);
+    }
+    if (drawYDivisions) {
+      _drawYDivisions(context, size);
+    }
+  }
+
+  @override
+  void paintForeground(Context context, PdfPoint size) {
+    _drawAxis(context, size);
+    _drawXValues(context, size);
+    _drawYValues(context, size);
+  }
+
+  @override
+  void clip(Context context, PdfPoint size) {
+    context.canvas
+      ..saveContext()
+      ..drawRect(
+        gridBox.left,
+        gridBox.bottom,
+        size.x - gridBox.left,
+        size.y - gridBox.bottom,
+      )
+      ..clipPath();
+  }
+
+  @override
+  void unClip(Context context, PdfPoint size) {
+    context.canvas.restoreContext();
+  }
 }

@@ -33,6 +33,7 @@ part 'widgets/basic.dart';
 part 'widgets/chart/chart.dart';
 part 'widgets/chart/linear_grid.dart';
 part 'widgets/chart/line_chart.dart';
+part 'widgets/chart/bar_chart.dart';
 part 'widgets/clip.dart';
 part 'widgets/container.dart';
 part 'widgets/content.dart';

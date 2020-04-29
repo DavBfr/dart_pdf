@@ -35,21 +35,31 @@ class LineDataSet extends DataSet {
     this.lineWidth = 2,
     this.drawLine = true,
     this.drawPoints = true,
+    this.drawSurface = false,
+    this.surfaceOpacity = .2,
+    this.surfaceColor,
     this.isCurved = false,
     this.smoothness = 0.35,
-  }) : assert(drawLine || drawPoints);
+  }) : assert(drawLine || drawPoints || drawSurface);
 
   final List<LineChartValue> data;
-  final PdfColor pointColor;
-  final double pointSize;
+
+  final bool drawLine;
   final PdfColor color;
   final double lineWidth;
-  final bool drawLine;
+
   final bool drawPoints;
+  final PdfColor pointColor;
+  final double pointSize;
+
+  final bool drawSurface;
+  final PdfColor surfaceColor;
+  final double surfaceOpacity;
+
   final bool isCurved;
   final double smoothness;
 
-  void _drawLine(Context context, ChartGrid grid) {
+  void _drawLine(Context context, ChartGrid grid, bool moveTo) {
     if (data.length < 2) {
       return;
     }
@@ -57,7 +67,11 @@ class LineDataSet extends DataSet {
     PdfPoint t = const PdfPoint(0, 0);
 
     final PdfPoint p = grid.tochart(data.first.point);
-    context.canvas.moveTo(p.x, p.y);
+    if (moveTo) {
+      context.canvas.moveTo(p.x, p.y);
+    } else {
+      context.canvas.lineTo(p.x, p.y);
+    }
 
     for (int i = 1; i < data.length; i++) {
       final PdfPoint p = grid.tochart(data[i].point);
@@ -82,6 +96,20 @@ class LineDataSet extends DataSet {
     }
   }
 
+  void _drawSurface(Context context, ChartGrid grid) {
+    if (data.length < 2) {
+      return;
+    }
+
+    final double y = (grid is LinearGrid) ? grid.xAxisOffset : 0;
+    _drawLine(context, grid, true);
+
+    final PdfPoint pe = grid.tochart(data.last.point);
+    context.canvas.lineTo(pe.x, y);
+    final PdfPoint pf = grid.tochart(data.first.point);
+    context.canvas.lineTo(pf.x, y);
+  }
+
   void _drawPoints(Context context, ChartGrid grid) {
     for (final LineChartValue value in data) {
       final PdfPoint p = grid.tochart(value.point);
@@ -90,7 +118,31 @@ class LineDataSet extends DataSet {
   }
 
   @override
-  void paintBackground(Context context, ChartGrid grid) {}
+  void paintBackground(Context context, ChartGrid grid) {
+    if (data.isEmpty) {
+      return;
+    }
+
+    if (drawSurface) {
+      _drawSurface(context, grid);
+
+      if (surfaceOpacity != 1) {
+        context.canvas
+          ..saveContext()
+          ..setGraphicState(
+            PdfGraphicState(opacity: surfaceOpacity),
+          );
+      }
+
+      context.canvas
+        ..setFillColor(surfaceColor ?? color)
+        ..fillPath();
+
+      if (surfaceOpacity != 1) {
+        context.canvas.restoreContext();
+      }
+    }
+  }
 
   @override
   void paintForeground(Context context, ChartGrid grid) {
@@ -99,7 +151,7 @@ class LineDataSet extends DataSet {
     }
 
     if (drawLine) {
-      _drawLine(context, grid);
+      _drawLine(context, grid, true);
 
       context.canvas
         ..setStrokeColor(color)
