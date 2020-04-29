@@ -31,7 +31,7 @@ List<TableRow> buildTable(
   final List<TableRow> rows = <TableRow>[];
   {
     final List<Widget> tableRow = <Widget>[];
-    for (String cell in <String>['Hue', 'Color', 'ARGB']) {
+    for (String cell in <String>['Hue', 'Color', 'RGBA']) {
       tableRow.add(Container(
           alignment: Alignment.center,
           margin: const EdgeInsets.all(5),

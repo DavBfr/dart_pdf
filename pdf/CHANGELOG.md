@@ -4,6 +4,7 @@
 
 - Improve Table.fromTextArray()
 - Add curved LineDataSet Chart
+- Fix PdfColors.fromHex()
 
 ## 1.7.1
 

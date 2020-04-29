@@ -19,27 +19,56 @@
 part of pdf;
 
 class PdfColor {
+  /// Create a color with red, green, blue and alpha components
+  /// values between 0 and 1
   const PdfColor(this.red, this.green, this.blue, [this.alpha = 1.0])
       : assert(red >= 0 && red <= 1),
         assert(green >= 0 && green <= 1),
         assert(blue >= 0 && blue <= 1),
         assert(alpha >= 0 && alpha <= 1);
 
+  /// Return a color with: 0xAARRGGBB
   const PdfColor.fromInt(int color)
       : red = (color >> 16 & 0xff) / 255.0,
         green = (color >> 8 & 0xff) / 255.0,
         blue = (color & 0xff) / 255.0,
         alpha = (color >> 24 & 0xff) / 255.0;
 
+  /// Can parse colors in the form:
+  /// * #RRGGBBAA
+  /// * #RRGGBB
+  /// * #RGB
+  /// * RRGGBBAA
+  /// * RRGGBB
+  /// * RGB
   factory PdfColor.fromHex(String color) {
     if (color.startsWith('#')) {
       color = color.substring(1);
     }
-    return PdfColor(
-        (int.parse(color.substring(0, 1), radix: 16) >> 16 & 0xff) / 255.0,
-        (int.parse(color.substring(2, 3), radix: 16) >> 8 & 0xff) / 255.0,
-        (int.parse(color.substring(4, 5), radix: 16) & 0xff) / 255.0,
-        (int.parse(color.substring(6, 7), radix: 16) >> 24 & 0xff) / 255.0);
+
+    double red;
+    double green;
+    double blue;
+    double alpha = 1;
+
+    if (color.length == 3) {
+      red = int.parse(color.substring(0, 1) * 2, radix: 16) / 255;
+      green = int.parse(color.substring(1, 2) * 2, radix: 16) / 255;
+      blue = int.parse(color.substring(2, 3) * 2, radix: 16) / 255;
+      return PdfColor(red, green, blue, alpha);
+    }
+
+    assert(color.length == 3 || color.length == 6 || color.length == 8);
+
+    red = int.parse(color.substring(0, 2), radix: 16) / 255;
+    green = int.parse(color.substring(2, 4), radix: 16) / 255;
+    blue = int.parse(color.substring(4, 6), radix: 16) / 255;
+
+    if (color.length == 8) {
+      alpha = int.parse(color.substring(6, 8), radix: 16) / 255;
+    }
+
+    return PdfColor(red, green, blue, alpha);
   }
 
   factory PdfColor.fromRYB(double red, double yellow, double blue,
@@ -113,7 +142,12 @@ class PdfColor {
           (((blue * 255.0).round() & 0xff) << 0)) &
       0xFFFFFFFF;
 
-  String toHex() => '#' + toInt().toRadixString(16);
+  String toHex() {
+    final int i = toInt();
+    final String rgb = (i & 0xffffff).toRadixString(16);
+    final String a = ((i & 0xff000000) >> 24).toRadixString(16);
+    return '#$rgb$a';
+  }
 
   PdfColorCmyk toCmyk() {
     return PdfColorCmyk.fromRgb(red, green, blue, alpha);

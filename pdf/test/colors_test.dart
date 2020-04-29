@@ -45,7 +45,7 @@ class Color extends StatelessWidget {
           children: <Widget>[
             Text(name, style: style),
             Text(varient ?? '', style: style),
-            Padding(padding: const EdgeInsets.all(2 * PdfPageFormat.mm)),
+            SizedBox(height: 4 * PdfPageFormat.mm),
             Text(color.toHex(), style: hexStyle),
             Row(
                 mainAxisSize: MainAxisSize.max,
@@ -707,6 +707,44 @@ void main() {
                 );
               })),
             ]));
+  });
+
+  group('Pdf Colors Conversions', () {
+    test('fromHex #RRGGBBAA', () {
+      final PdfColor c = PdfColor.fromHex('#12345678');
+      expect(c.red, 0x12 / 255);
+      expect(c.green, 0x34 / 255);
+      expect(c.blue, 0x56 / 255);
+      expect(c.alpha, 0x78 / 255);
+    });
+
+    test('fromHex RRGGBBAA', () {
+      final PdfColor c = PdfColor.fromHex('12345678');
+      expect(c.red, 0x12 / 255);
+      expect(c.green, 0x34 / 255);
+      expect(c.blue, 0x56 / 255);
+      expect(c.alpha, 0x78 / 255);
+    });
+
+    test('fromHex RRGGBB', () {
+      final PdfColor c = PdfColor.fromHex('123456');
+      expect(c.red, 0x12 / 255);
+      expect(c.green, 0x34 / 255);
+      expect(c.blue, 0x56 / 255);
+      expect(c.alpha, 1);
+    });
+
+    test('fromHex RGB', () {
+      final PdfColor c = PdfColor.fromHex('18f');
+      expect(c.red, 0x11 / 255);
+      expect(c.green, 0x88 / 255);
+      expect(c.blue, 0xff / 255);
+      expect(c.alpha, 1);
+    });
+
+    test('toHex RGB', () {
+      expect(PdfColor.fromHex('#12345678').toHex(), '#12345678');
+    });
   });
 
   tearDownAll(() {
