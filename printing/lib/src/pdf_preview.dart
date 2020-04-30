@@ -17,6 +17,7 @@ class PdfPreview extends StatefulWidget {
     this.initialPageFormat,
     this.allowPrinting = true,
     this.allowSharing = true,
+    this.maxPageWidth,
     this.canChangePageFormat = true,
     this.actions,
     this.pageFormats,
@@ -32,6 +33,8 @@ class PdfPreview extends StatefulWidget {
   final bool allowPrinting;
 
   final bool allowSharing;
+
+  final double maxPageWidth;
 
   final bool canChangePageFormat;
 
@@ -148,8 +151,8 @@ class _PdfPreviewState extends State<PdfPreview> {
     }
 
     final MediaQueryData mq = MediaQuery.of(context);
-    dpi = (mq.size.width - 16) *
-        min(mq.devicePixelRatio, 2) /
+    dpi = (min(mq.size.width - 16, widget.maxPageWidth)) *
+        mq.devicePixelRatio /
         pageFormat.width *
         72;
 
@@ -205,7 +208,6 @@ class _PdfPreviewState extends State<PdfPreview> {
     final ThemeData theme = Theme.of(context);
 
     final Widget scrollView = Container(
-      width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: <Color>[Colors.grey.shade400, Colors.grey.shade200],
@@ -213,7 +215,14 @@ class _PdfPreviewState extends State<PdfPreview> {
           end: Alignment.bottomCenter,
         ),
       ),
-      child: _createPreview(),
+      width: double.infinity,
+      alignment: Alignment.center,
+      child: Container(
+        constraints: widget.maxPageWidth != null
+            ? BoxConstraints(maxWidth: widget.maxPageWidth)
+            : null,
+        child: _createPreview(),
+      ),
     );
 
     final List<Widget> actions = <Widget>[];
