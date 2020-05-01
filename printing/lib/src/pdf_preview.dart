@@ -254,8 +254,8 @@ class _PdfPreviewState extends State<PdfPreview> {
       final List<String> keys = _pageFormats.keys.toList();
       actions.add(
         DropdownButton<PdfPageFormat>(
-          style: theme.accentTextTheme.button,
-          // dropdownColor: Colors.grey.shade700,
+          // style: theme.accentTextTheme.button,
+          dropdownColor: Colors.grey.shade700,
           icon: Icon(
             Icons.arrow_drop_down,
             color: theme.accentIconTheme.color,
@@ -329,9 +329,11 @@ class _PdfPreviewState extends State<PdfPreview> {
           Material(
             elevation: 4,
             color: theme.primaryColor,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: actions,
+            child: SafeArea(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: actions,
+              ),
             ),
           )
       ],
