@@ -80,6 +80,7 @@ void main() {
           barcode(Barcode.qrCode(), 'QR-Code!', width: 120, height: 120),
           barcode(Barcode.pdf417(), 'PDF147 Demo', height: 35),
           barcode(Barcode.dataMatrix(), 'Data Matrix', width: 120, height: 120),
+          barcode(Barcode.aztec(), 'Aztec', width: 120, height: 120),
         ],
       ),
     );
