@@ -65,7 +65,7 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   double dpi = 10;
 
-  dynamic error;
+  Object error;
 
   static const Map<String, PdfPageFormat> defaultPageFormats =
       <String, PdfPageFormat>{
@@ -179,9 +179,8 @@ class _PdfPreviewState extends State<PdfPreview> {
     if (error != null) {
       Widget content = _showError();
       assert(() {
-        content = ErrorWidget.withDetails(
-          message: error.toString(),
-        );
+        print(error);
+        content = ErrorWidget(error);
         return true;
       }());
       return content;
