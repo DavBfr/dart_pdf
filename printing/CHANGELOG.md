@@ -3,6 +3,7 @@
 ## 3.4.0
 
 - Add PdfPreview Widget
+- Implement Printing.raster() on Flutter Web
 
 ## 3.3.1
 

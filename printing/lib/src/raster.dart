@@ -24,7 +24,7 @@ import 'package:image/image.dart' as im;
 /// Represents a bitmap image
 class PdfRaster {
   /// Create a bitmap image
-  PdfRaster(
+  const PdfRaster(
     this.width,
     this.height,
     this.pixels,
@@ -40,7 +40,7 @@ class PdfRaster {
   final Uint8List pixels;
 
   @override
-  String toString() => 'Image ${width}x$height ${pixels.lengthInBytes} bytes';
+  String toString() => 'Image ${width}x$height ${width * height * 4} bytes';
 
   /// Decode RGBA raw image to dart:ui Image
   Future<ui.Image> toImage() {

@@ -17,13 +17,18 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html' as html;
+import 'dart:html';
+import 'dart:io';
 import 'dart:js' as js;
+import 'dart:js_util';
 import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/rendering.dart' show Rect;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:image/image.dart' as im;
 import 'package:pdf/pdf.dart';
+import 'package:printing/src/pdfjs.dart';
 import 'package:printing/src/printer.dart';
 import 'package:printing/src/raster.dart';
 
@@ -41,12 +46,17 @@ class PrintingPlugin extends PrintingPlatform {
 
   @override
   Future<PrintingInfo> info() async {
-    return const PrintingInfo(
+    final dynamic workerSrc = js.context.callMethod('eval', <String>[
+      'typeof pdfjsLib !== "undefined" && pdfjsLib.GlobalWorkerOptions.workerSrc!="";'
+    ]);
+
+    return PrintingInfo(
       directPrint: false,
       dynamicLayout: false,
       canPrint: true,
       canConvertHtml: false,
       canShare: true,
+      canRaster: workerSrc,
     );
   }
 
@@ -160,7 +170,99 @@ class PrintingPlugin extends PrintingPlatform {
     Uint8List document,
     List<int> pages,
     double dpi,
-  ) {
-    throw UnimplementedError();
+  ) async* {
+    final PdfJsDocLoader t = PdfJs.getDocument(Settings()..data = document);
+
+    final PdfJsDoc d = await promiseToFuture(t.promise);
+    final int numPages = d.numPages;
+
+    final html.CanvasElement canvas =
+        js.context['document'].createElement('canvas');
+    final html.CanvasRenderingContext2D context = canvas.getContext('2d');
+
+    for (int i = 0; i < numPages; i++) {
+      final PdfJsPage page = await promiseToFuture(d.getPage(i + 1));
+      final PdfJsViewport viewport = page.getViewport(Settings()..scale = 1.5);
+
+      canvas.height = viewport.height.toInt();
+      canvas.width = viewport.width.toInt();
+
+      final Settings renderContext = Settings()
+        ..canvasContext = context
+        ..viewport = viewport;
+
+      await promiseToFuture<void>(page.render(renderContext).promise);
+
+      // final Uint8ClampedList data =
+      // context.getImageData(0, 0, canvas.width, canvas.height).data;
+
+      // Convert the image to PNG
+      final Completer<void> completer = Completer<void>();
+      final html.Blob blob = await canvas.toBlob();
+      final BytesBuilder data = BytesBuilder();
+      final html.FileReader r = FileReader();
+      r.readAsArrayBuffer(blob);
+      r.onLoadEnd.listen(
+        (ProgressEvent e) {
+          data.add(r.result);
+          completer.complete();
+        },
+      );
+      await completer.future;
+
+      yield _WebPdfRaster(
+        canvas.width,
+        canvas.height,
+        data.toBytes(),
+      );
+    }
+  }
+}
+
+class _WebPdfRaster extends PdfRaster {
+  _WebPdfRaster(
+    int width,
+    int height,
+    this.png,
+  ) : super(width, height, null);
+
+  final Uint8List png;
+
+  Uint8List _pixels;
+
+  @override
+  Uint8List get pixels {
+    if (_pixels == null) {
+      final im.Image img = asImage();
+      _pixels = img.data.buffer.asUint8List();
+    }
+
+    return _pixels;
+  }
+
+  @override
+  Future<Image> toImage() {
+    final Completer<Image> comp = Completer<Image>();
+    decodeImageFromPixels(
+      png,
+      width,
+      height,
+      PixelFormat.rgba8888,
+      (Image image) => comp.complete(image),
+    );
+    return comp.future;
+  }
+
+  @override
+  Future<Uint8List> toPng() async {
+    return png;
+  }
+
+  @override
+  im.Image asImage() {
+    if (_pixels != null) {
+      return super.asImage();
+    }
+    return im.PngDecoder().decodeImage(png);
   }
 }
