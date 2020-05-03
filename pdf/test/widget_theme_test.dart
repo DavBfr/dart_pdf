@@ -17,11 +17,12 @@
 // ignore_for_file: omit_local_variable_types
 
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
-import 'package:test/test.dart';
 import 'package:pdf/widgets.dart';
+import 'package:test/test.dart';
+
+import 'utils.dart';
 
 Document pdf;
 Font openSans;
@@ -29,11 +30,6 @@ Font openSansBold;
 Font roboto;
 Font notoSans;
 Font genyomintw;
-
-Font loadFont(String filename) {
-  final Uint8List data = File(filename).readAsBytesSync();
-  return Font.ttf(data.buffer.asByteData());
-}
 
 void main() {
   setUpAll(() {

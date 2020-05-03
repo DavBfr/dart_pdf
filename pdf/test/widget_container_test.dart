@@ -17,35 +17,14 @@
 // ignore_for_file: omit_local_variable_types
 
 import 'dart:io';
-import 'dart:math' as math;
-import 'dart:typed_data';
 
-import 'package:test/test.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
+import 'package:test/test.dart';
+
+import 'utils.dart';
 
 Document pdf;
-
-PdfImage generateBitmap(PdfDocument pdf, int w, int h) {
-  final Uint32List bm = Uint32List(w * h);
-  final double dw = w.toDouble();
-  final double dh = h.toDouble();
-  for (int y = 0; y < h; y++) {
-    for (int x = 0; x < w; x++) {
-      bm[y * w + x] = (math.sin(x / dw) * 256).toInt() |
-          (math.sin(y / dh) * 256).toInt() << 8 |
-          (math.sin(x / dw * y / dh) * 256).toInt() << 16 |
-          0xff000000;
-    }
-  }
-
-  return PdfImage(
-    pdf,
-    image: bm.buffer.asUint8List(),
-    width: w,
-    height: h,
-  );
-}
 
 void main() {
   setUpAll(() {

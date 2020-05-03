@@ -16,14 +16,14 @@
 
 // ignore_for_file: omit_local_variable_types
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
+
+import 'utils.dart';
 
 Document pdf;
 PdfImage image;
@@ -116,16 +116,6 @@ void main() {
     final File file = File('jpeg.pdf');
     file.writeAsBytesSync(pdf.save());
   });
-}
-
-Future<Uint8List> download(String url) async {
-  final HttpClient client = HttpClient();
-  final HttpClientRequest request = await client.getUrl(Uri.parse(url));
-  final HttpClientResponse response = await request.close();
-  final BytesBuilder builder = await response.fold(
-      BytesBuilder(), (BytesBuilder b, List<int> d) => b..add(d));
-  final List<int> data = builder.takeBytes();
-  return Uint8List.fromList(data);
 }
 
 const List<String> images = <String>[
