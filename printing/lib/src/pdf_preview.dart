@@ -253,8 +253,6 @@ class _PdfPreviewState extends State<PdfPreview> {
       final List<String> keys = _pageFormats.keys.toList();
       actions.add(
         DropdownButton<PdfPageFormat>(
-          // style: theme.accentTextTheme.button,
-          dropdownColor: Colors.grey.shade700,
           icon: Icon(
             Icons.arrow_drop_down,
             color: theme.accentIconTheme.color,
