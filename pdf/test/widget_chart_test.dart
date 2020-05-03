@@ -35,11 +35,11 @@ void main() {
       pdf.addPage(Page(
         pageFormat: PdfPageFormat.standard.landscape,
         build: (Context context) => Chart(
-          grid: LinearGrid(
-            xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
-            yAxis: <double>[0, 3, 6, 9],
+          grid: CartesianGrid(
+            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
           ),
-          data: <DataSet>[
+          datasets: <Dataset>[
             LineDataSet(
               data: const <LineChartValue>[
                 LineChartValue(1, 1),
@@ -56,11 +56,11 @@ void main() {
       pdf.addPage(Page(
         pageFormat: PdfPageFormat.standard.landscape,
         build: (Context context) => Chart(
-          grid: LinearGrid(
-            xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
-            yAxis: <double>[0, 3, 6, 9],
+          grid: CartesianGrid(
+            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
           ),
-          data: <DataSet>[
+          datasets: <Dataset>[
             LineDataSet(
               data: const <LineChartValue>[
                 LineChartValue(1, 1),
@@ -77,11 +77,11 @@ void main() {
     test('Default ScatterChart without dots', () {
       pdf.addPage(Page(
         build: (Context context) => Chart(
-          grid: LinearGrid(
-            xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
-            yAxis: <double>[0, 3, 6, 9],
+          grid: CartesianGrid(
+            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
           ),
-          data: <DataSet>[
+          datasets: <Dataset>[
             LineDataSet(
               data: const <LineChartValue>[
                 LineChartValue(1, 1),
@@ -99,11 +99,11 @@ void main() {
       pdf.addPage(Page(
         pageFormat: PdfPageFormat.standard.landscape,
         build: (Context context) => Chart(
-          grid: LinearGrid(
-            xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
-            yAxis: <double>[0, 3, 6, 9],
+          grid: CartesianGrid(
+            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
           ),
-          data: <DataSet>[
+          datasets: <Dataset>[
             LineDataSet(
               data: const <LineChartValue>[
                 LineChartValue(1, 1),
@@ -128,11 +128,11 @@ void main() {
           width: 200,
           height: 100,
           child: Chart(
-            grid: LinearGrid(
-              xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
-              yAxis: <double>[0, 3, 6, 9],
+            grid: CartesianGrid(
+              xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+              yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
             ),
-            data: <DataSet>[
+            datasets: <Dataset>[
               LineDataSet(
                 data: const <LineChartValue>[
                   LineChartValue(1, 1),
@@ -150,11 +150,11 @@ void main() {
       pdf.addPage(Page(
         pageFormat: PdfPageFormat.standard.landscape,
         build: (Context context) => Chart(
-          grid: LinearGrid(
-            xAxis: <double>[0, 1, 2, 3, 4, 5, 6],
-            yAxis: <double>[0, 3, 6, 9],
+          grid: CartesianGrid(
+            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
           ),
-          data: <DataSet>[
+          datasets: <Dataset>[
             LineDataSet(
               drawPoints: false,
               isCurved: true,

@@ -19,15 +19,39 @@
 part of widget;
 
 /// This widget is in preview and the API is subject to change
-class Chart extends Widget {
+class Chart extends Widget implements Inherited {
   Chart({
     @required this.grid,
-    @required this.data,
+    @required this.datasets,
+    this.overlay,
+    this.title,
+    this.bottom,
+    this.left,
+    this.right,
   });
 
+  /// The Coordinate system that will layout the content
   final ChartGrid grid;
 
-  final List<DataSet> data;
+  /// The list of dataset to display
+  final List<Dataset> datasets;
+
+  /// Legend for this chart
+  final Widget overlay;
+
+  final Widget title;
+
+  final Widget bottom;
+
+  final Widget left;
+
+  final Widget right;
+
+  Context _context;
+
+  Widget _child;
+
+  static Chart of(Context context) => context.inherited[Chart];
 
   PdfPoint _computeSize(BoxConstraints constraints) {
     if (constraints.isTight) {
@@ -50,51 +74,64 @@ class Chart extends Widget {
     return constraints.constrain(PdfPoint(width, height));
   }
 
+  Widget _build(Context context) {
+    return Column(
+      children: <Widget>[
+        if (title != null) title,
+        Expanded(
+          child: Row(
+            children: <Widget>[
+              if (left != null) left,
+              Expanded(
+                child: Stack(
+                  children: <Widget>[
+                    grid,
+                    if (overlay != null) overlay,
+                  ],
+                ),
+              ),
+              if (right != null) right,
+            ],
+          ),
+        ),
+        if (bottom != null) bottom,
+      ],
+    );
+  }
+
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
     box = PdfRect.fromPoints(PdfPoint.zero, _computeSize(constraints));
-
-    grid.layout(context, box.size);
+    _context = context.inheritFrom(this);
+    _child = _build(_context);
+    _child.layout(_context, BoxConstraints.tight(box.size));
   }
 
   @override
   void paint(Context context) {
-    super.paint(context);
+    super.paint(_context);
 
     final Matrix4 mat = Matrix4.identity();
     mat.translate(box.x, box.y);
-    context.canvas
+    _context.canvas
       ..saveContext()
       ..setTransform(mat);
 
-    grid.paintBackground(context, box.size);
-    grid.clip(context, box.size);
-    for (DataSet dataSet in data) {
-      dataSet.paintBackground(context, grid);
-    }
-    grid.unClip(context, box.size);
-    grid.paint(context, box.size);
-    grid.clip(context, box.size);
-    for (DataSet dataSet in data) {
-      dataSet.paintForeground(context, grid);
-    }
-    grid.unClip(context, box.size);
-    grid.paintForeground(context, box.size);
-    context.canvas.restoreContext();
+    _child.paint(_context);
+
+    _context.canvas.restoreContext();
   }
 }
 
-abstract class ChartGrid {
-  void layout(Context context, PdfPoint size);
-  void paintBackground(Context context, PdfPoint size);
-  void paint(Context context, PdfPoint size);
-  void paintForeground(Context context, PdfPoint size);
+abstract class ChartGrid extends Widget {
+  @override
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
+  }
 
-  void clip(Context context, PdfPoint size);
-  void unClip(Context context, PdfPoint size);
-
-  PdfPoint tochart(PdfPoint p);
+  PdfPoint toChart(PdfPoint p);
 }
 
 @immutable
@@ -102,7 +139,31 @@ abstract class ChartValue {
   const ChartValue();
 }
 
-abstract class DataSet {
-  void paintBackground(Context context, ChartGrid grid);
-  void paintForeground(Context context, ChartGrid grid);
+abstract class Dataset extends Widget {
+  Dataset({
+    this.legend,
+    this.color,
+  });
+
+  final String legend;
+
+  final PdfColor color;
+
+  void paintBackground(Context context) {}
+
+  Widget legendeShape() {
+    return Container(
+      decoration: BoxDecoration(
+        color: color,
+        border: const BoxBorder(
+          left: true,
+          top: true,
+          bottom: true,
+          right: true,
+          color: PdfColors.black,
+          width: .5,
+        ),
+      ),
+    );
+  }
 }

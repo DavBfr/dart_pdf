@@ -18,52 +18,59 @@
 
 part of widget;
 
-class BarDataSet extends DataSet {
+class BarDataSet extends Dataset {
   BarDataSet({
     @required this.data,
+    String legend,
     this.borderColor,
     this.borderWidth = 1.5,
-    this.color = PdfColors.blue,
+    PdfColor color = PdfColors.blue,
     this.drawBorder = true,
     this.drawSurface = true,
     this.surfaceOpacity = 1,
-    this.width = 20,
+    this.width = 10,
     this.offset = 0,
-    this.margin = 5,
-  }) : assert(drawBorder || drawSurface);
+  })  : assert(drawBorder || drawSurface),
+        super(
+          legend: legend,
+          color: color,
+        );
 
   final List<LineChartValue> data;
-  final double width;
-  final double offset;
-  final double margin;
 
   final bool drawBorder;
   final PdfColor borderColor;
   final double borderWidth;
 
   final bool drawSurface;
-  final PdfColor color;
+
   final double surfaceOpacity;
 
+  final double width;
+  final double offset;
+
   void _drawSurface(Context context, ChartGrid grid, LineChartValue value) {
-    final double y = (grid is LinearGrid) ? grid.xAxisOffset : 0;
-    final PdfPoint p = grid.tochart(value.point);
+    final double y = (grid is CartesianGrid) ? grid.xAxisOffset : 0;
+    final PdfPoint p = grid.toChart(value.point);
 
     context.canvas.drawRect(p.x + offset - width / 2, y, width, p.y);
   }
 
   @override
-  void paintBackground(Context context, ChartGrid grid) {}
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
+  }
 
   @override
-  void paintForeground(Context context, ChartGrid grid) {
-    if (data.isEmpty) {
-      return;
-    }
+  void paint(Context context) {
+    super.paint(context);
 
     if (data.isEmpty) {
       return;
     }
+
+    final ChartGrid grid = Chart.of(context).grid;
 
     if (drawSurface) {
       for (final LineChartValue value in data) {

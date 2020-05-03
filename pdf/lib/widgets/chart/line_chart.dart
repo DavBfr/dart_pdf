@@ -26,12 +26,13 @@ class LineChartValue extends ChartValue {
   PdfPoint get point => PdfPoint(x, y);
 }
 
-class LineDataSet extends DataSet {
+class LineDataSet extends Dataset {
   LineDataSet({
     @required this.data,
+    String legend,
     this.pointColor,
     this.pointSize = 3,
-    this.color = PdfColors.blue,
+    PdfColor color = PdfColors.blue,
     this.lineWidth = 2,
     this.drawLine = true,
     this.drawPoints = true,
@@ -40,12 +41,16 @@ class LineDataSet extends DataSet {
     this.surfaceColor,
     this.isCurved = false,
     this.smoothness = 0.35,
-  }) : assert(drawLine || drawPoints || drawSurface);
+  })  : assert(drawLine || drawPoints || drawSurface),
+        super(
+          legend: legend,
+          color: color,
+        );
 
   final List<LineChartValue> data;
 
   final bool drawLine;
-  final PdfColor color;
+
   final double lineWidth;
 
   final bool drawPoints;
@@ -59,6 +64,12 @@ class LineDataSet extends DataSet {
   final bool isCurved;
   final double smoothness;
 
+  @override
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
+  }
+
   void _drawLine(Context context, ChartGrid grid, bool moveTo) {
     if (data.length < 2) {
       return;
@@ -66,7 +77,7 @@ class LineDataSet extends DataSet {
 
     PdfPoint t = const PdfPoint(0, 0);
 
-    final PdfPoint p = grid.tochart(data.first.point);
+    final PdfPoint p = grid.toChart(data.first.point);
     if (moveTo) {
       context.canvas.moveTo(p.x, p.y);
     } else {
@@ -74,16 +85,16 @@ class LineDataSet extends DataSet {
     }
 
     for (int i = 1; i < data.length; i++) {
-      final PdfPoint p = grid.tochart(data[i].point);
+      final PdfPoint p = grid.toChart(data[i].point);
 
       if (!isCurved) {
         context.canvas.lineTo(p.x, p.y);
         continue;
       }
 
-      final PdfPoint pp = grid.tochart(data[i - 1].point);
+      final PdfPoint pp = grid.toChart(data[i - 1].point);
       final PdfPoint pn =
-          grid.tochart(data[i + 1 < data.length ? i + 1 : i].point);
+          grid.toChart(data[i + 1 < data.length ? i + 1 : i].point);
 
       final PdfPoint c1 = PdfPoint(pp.x + t.x, pp.y + t.y);
 
@@ -101,27 +112,29 @@ class LineDataSet extends DataSet {
       return;
     }
 
-    final double y = (grid is LinearGrid) ? grid.xAxisOffset : 0;
+    final double y = (grid is CartesianGrid) ? grid.xAxisOffset : 0;
     _drawLine(context, grid, true);
 
-    final PdfPoint pe = grid.tochart(data.last.point);
+    final PdfPoint pe = grid.toChart(data.last.point);
     context.canvas.lineTo(pe.x, y);
-    final PdfPoint pf = grid.tochart(data.first.point);
+    final PdfPoint pf = grid.toChart(data.first.point);
     context.canvas.lineTo(pf.x, y);
   }
 
   void _drawPoints(Context context, ChartGrid grid) {
     for (final LineChartValue value in data) {
-      final PdfPoint p = grid.tochart(value.point);
+      final PdfPoint p = grid.toChart(value.point);
       context.canvas.drawEllipse(p.x, p.y, pointSize, pointSize);
     }
   }
 
   @override
-  void paintBackground(Context context, ChartGrid grid) {
+  void paintBackground(Context context) {
     if (data.isEmpty) {
       return;
     }
+
+    final ChartGrid grid = Chart.of(context).grid;
 
     if (drawSurface) {
       _drawSurface(context, grid);
@@ -145,10 +158,14 @@ class LineDataSet extends DataSet {
   }
 
   @override
-  void paintForeground(Context context, ChartGrid grid) {
+  void paint(Context context) {
+    super.paint(context);
+
     if (data.isEmpty) {
       return;
     }
+
+    final ChartGrid grid = Chart.of(context).grid;
 
     if (drawLine) {
       _drawLine(context, grid, true);
