@@ -151,7 +151,7 @@ class _PdfPreviewState extends State<PdfPreview> {
     }
 
     final MediaQueryData mq = MediaQuery.of(context);
-    dpi = (min(mq.size.width - 16, widget.maxPageWidth)) *
+    dpi = (min(mq.size.width - 16, widget.maxPageWidth ?? double.infinity)) *
         mq.devicePixelRatio /
         pageFormat.width *
         72;
