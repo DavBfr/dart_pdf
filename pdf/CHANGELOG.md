@@ -6,6 +6,7 @@
 - Add curved LineDataSet Chart
 - Fix PdfColors.fromHex()
 - Update Barcode library to 1.9.0
+- Fix exif orientation crash
 
 ## 1.7.1
 

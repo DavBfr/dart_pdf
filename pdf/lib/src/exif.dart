@@ -96,10 +96,17 @@ class PdfJpegInfo {
           ? null
           : utf8.decode(tags[PdfExifTag.FlashpixVersion]);
 
-  PdfImageOrientation get orientation =>
-      tags == null || tags[PdfExifTag.Orientation] == null
-          ? PdfImageOrientation.topLeft
-          : PdfImageOrientation.values[tags[PdfExifTag.Orientation] - 1];
+  PdfImageOrientation get orientation {
+    if (tags == null || tags[PdfExifTag.Orientation] == null) {
+      return PdfImageOrientation.topLeft;
+    }
+
+    try {
+      return PdfImageOrientation.values[tags[PdfExifTag.Orientation] - 1];
+    } on RangeError {
+      return PdfImageOrientation.topLeft;
+    }
+  }
 
   double get xResolution => tags == null || tags[PdfExifTag.XResolution] == null
       ? null
