@@ -185,9 +185,17 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
                 let stride = width * 4
                 var data = Data(repeating: 0, count: stride * height)
 
-                data.withUnsafeMutableBytes { (ptr: UnsafeMutablePointer<UInt8>) in
+                data.withUnsafeMutableBytes { (outputBytes: UnsafeMutableRawBufferPointer) in
                     let rgb = CGColorSpaceCreateDeviceRGB()
-                    let context = CGContext(data: ptr, width: width, height: height, bitsPerComponent: 8, bytesPerRow: stride, space: rgb, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+                    let context = CGContext(
+                        data: outputBytes.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                        width: width,
+                        height: height,
+                        bitsPerComponent: 8,
+                        bytesPerRow: stride,
+                        space: rgb,
+                        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+                    )
                     if context != nil {
                         context!.scaleBy(x: scale, y: scale)
                         context!.drawPDFPage(page)
