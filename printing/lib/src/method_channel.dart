@@ -39,7 +39,7 @@ class MethodChannelPrinting extends PrintingPlatform {
   static final Map<int, PrintJob> _printJobs = <int, PrintJob>{};
   static int _jobIndex = 0;
 
-  /// Callbacks from platform plugins
+  /// Callbacks from platform plugin
   static Future<dynamic> _handleMethod(MethodCall call) async {
     switch (call.method) {
       case 'onLayout':
