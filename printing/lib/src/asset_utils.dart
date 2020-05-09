@@ -15,7 +15,6 @@
  */
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
@@ -28,8 +27,7 @@ import 'package:pdf/widgets.dart';
 /// into a [PdfImage] instance
 Future<PdfImage> pdfImageFromImage(
     {@required PdfDocument pdf, @required ui.Image image}) async {
-  final ByteData bytes =
-      await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
 
   return PdfImage(pdf,
       image: bytes.buffer.asUint8List(),
@@ -44,14 +42,12 @@ Future<PdfImage> pdfImageFromImageProvider(
     @required ImageProvider image,
     ImageConfiguration configuration,
     ImageErrorListener onError}) async {
-  final Completer<PdfImage> completer = Completer<PdfImage>();
-  final ImageStream stream =
-      image.resolve(configuration ?? ImageConfiguration.empty);
+  final completer = Completer<PdfImage>();
+  final stream = image.resolve(configuration ?? ImageConfiguration.empty);
 
   ImageStreamListener listener;
   listener = ImageStreamListener((ImageInfo image, bool sync) async {
-    final PdfImage result =
-        await pdfImageFromImage(pdf: pdf, image: image.image);
+    final result = await pdfImageFromImage(pdf: pdf, image: image.image);
     if (!completer.isCompleted) {
       completer.complete(result);
     }
@@ -75,6 +71,6 @@ Future<PdfImage> pdfImageFromImageProvider(
 /// Loads a font from an asset bundle key. If used multiple times with the same font name,
 /// it will be included multiple times in the pdf file
 Future<TtfFont> fontFromAssetBundle(String key, AssetBundle bundle) async {
-  final ByteData data = await bundle.load(key);
+  final data = await bundle.load(key);
   return TtfFont(data);
 }

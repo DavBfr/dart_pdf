@@ -23,7 +23,7 @@ void main() {
   });
 
   test('PrintingInfo', () async {
-    const PrintingInfo info = PrintingInfo.unavailable;
+    const info = PrintingInfo.unavailable;
     expect(info.canConvertHtml, false);
     expect(info.directPrint, false);
     expect(info.dynamicLayout, false);
@@ -36,7 +36,7 @@ void main() {
   });
 
   test('PrintingInfo.fromMap', () async {
-    final PrintingInfo info = PrintingInfo.fromMap(
+    final info = PrintingInfo.fromMap(
       <dynamic, dynamic>{
         'canPrint': true,
       },

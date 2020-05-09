@@ -20,7 +20,9 @@ import 'dart:typed_data';
 import 'callback.dart';
 import 'raster.dart';
 
+/// Represents a print job to communicate with the platform implementation
 class PrintJob {
+  /// Create a print job
   PrintJob({
     this.onLayout,
     this.onHtmlRendered,
@@ -28,10 +30,18 @@ class PrintJob {
     this.onPageRasterized,
   });
 
+  /// Callback used when calling Printing.layoutPdf()
   final LayoutCallback onLayout;
+
+  /// Callback used when calling Printing.convertHtml()
   final Completer<Uint8List> onHtmlRendered;
+
+  /// Future triggered when the job is done
   final Completer<bool> onCompleted;
+
+  /// Stream of rasterized pages
   final StreamController<PdfRaster> onPageRasterized;
 
+  /// The Job number
   int index;
 }

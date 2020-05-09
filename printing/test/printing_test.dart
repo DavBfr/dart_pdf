@@ -26,12 +26,12 @@ import 'package:printing/src/interface.dart';
 void main() {
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
-    final MockPrinting mock = MockPrinting();
+    final mock = MockPrinting();
     PrintingPlatform.instance = mock;
   });
 
   test('info', () async {
-    final PrintingInfo info = await Printing.info();
+    final info = await Printing.info();
     expect(info, null);
   });
 

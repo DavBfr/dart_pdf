@@ -27,7 +27,7 @@ void main() {
   });
 
   test('PdfRaster', () async {
-    final PdfRaster raster =
+    final raster =
         PdfRaster(10, 10, Uint8List.fromList(List<int>.filled(10 * 10 * 4, 0)));
     expect(raster.toString(), 'Image 10x10 400 bytes');
     expect(await raster.toImage(), isA<ui.Image>());
@@ -35,7 +35,7 @@ void main() {
   });
 
   testWidgets('PdfRasterImage', (WidgetTester tester) async {
-    final PdfRaster raster =
+    final raster =
         PdfRaster(10, 10, Uint8List.fromList(List<int>.filled(10 * 10 * 4, 0)));
 
     await tester.pumpWidget(Image(image: PdfRasterImage(raster)));

@@ -5,6 +5,7 @@
 - Add PdfPreview Widget
 - Implement Printing.raster() on Flutter Web
 - Fix Swift 5 deprecated function
+- Improve code documentation
 
 ## 3.3.1
 

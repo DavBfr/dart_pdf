@@ -36,6 +36,7 @@ import 'callback.dart';
 import 'interface.dart';
 import 'printing_info.dart';
 
+/// Print plugin targetting Flutter on the Web
 class PrintingPlugin extends PrintingPlatform {
   /// Registers this class as the default instance of [PrintingPlugin].
   static void registerWith(Registrar registrar) {
@@ -66,35 +67,34 @@ class PrintingPlugin extends PrintingPlatform {
     String name,
     PdfPageFormat format,
   ) async {
-    final Uint8List result = await onLayout(format);
+    final result = await onLayout(format);
 
     if (result == null || result.isEmpty) {
       return false;
     }
 
-    final bool isChrome = js.context['chrome'] != null;
-    final bool isSafari = js.context['safari'] != null;
+    final isChrome = js.context['chrome'] != null;
+    final isSafari = js.context['safari'] != null;
     // Maybe Firefox 75 will support iframe printing
     // https://bugzilla.mozilla.org/show_bug.cgi?id=911444
 
     if (!isChrome && !isSafari) {
-      final String pr = 'data:application/pdf;base64,${base64.encode(result)}';
+      final pr = 'data:application/pdf;base64,${base64.encode(result)}';
       final html.Window win = js.context['window'];
       win.open(pr, name);
 
       return true;
     }
 
-    final Completer<bool> completer = Completer<bool>();
-    final html.Blob pdfFile = html.Blob(
+    final completer = Completer<bool>();
+    final pdfFile = html.Blob(
       <Uint8List>[Uint8List.fromList(result)],
       'application/pdf',
     );
-    final String pdfUrl = html.Url.createObjectUrl(pdfFile);
+    final pdfUrl = html.Url.createObjectUrl(pdfFile);
     final html.HtmlDocument doc = js.context['document'];
 
-    final html.Element frame =
-        doc.getElementById(_frameId) ?? doc.createElement('iframe');
+    final frame = doc.getElementById(_frameId) ?? doc.createElement('iframe');
     frame.setAttribute(
       'style',
       'visibility: hidden; height: 0; width: 0; position: absolute;',
@@ -126,11 +126,11 @@ class PrintingPlugin extends PrintingPlatform {
     String filename,
     Rect bounds,
   ) async {
-    final html.Blob pdfFile = html.Blob(
+    final pdfFile = html.Blob(
       <Uint8List>[Uint8List.fromList(bytes)],
       'application/pdf',
     );
-    final String pdfUrl = html.Url.createObjectUrl(pdfFile);
+    final pdfUrl = html.Url.createObjectUrl(pdfFile);
     final html.HtmlDocument doc = js.context['document'];
     final html.AnchorElement link = doc.createElement('a');
     link.href = pdfUrl;
@@ -171,23 +171,23 @@ class PrintingPlugin extends PrintingPlatform {
     List<int> pages,
     double dpi,
   ) async* {
-    final PdfJsDocLoader t = PdfJs.getDocument(Settings()..data = document);
+    final t = PdfJs.getDocument(Settings()..data = document);
 
-    final PdfJsDoc d = await promiseToFuture(t.promise);
-    final int numPages = d.numPages;
+    final d = await promiseToFuture<PdfJsDoc>(t.promise);
+    final numPages = d.numPages;
 
     final html.CanvasElement canvas =
         js.context['document'].createElement('canvas');
     final html.CanvasRenderingContext2D context = canvas.getContext('2d');
 
-    for (int i = 0; i < numPages; i++) {
-      final PdfJsPage page = await promiseToFuture(d.getPage(i + 1));
-      final PdfJsViewport viewport = page.getViewport(Settings()..scale = 1.5);
+    for (var i = 0; i < numPages; i++) {
+      final page = await promiseToFuture<PdfJsPage>(d.getPage(i + 1));
+      final viewport = page.getViewport(Settings()..scale = 1.5);
 
       canvas.height = viewport.height.toInt();
       canvas.width = viewport.width.toInt();
 
-      final Settings renderContext = Settings()
+      final renderContext = Settings()
         ..canvasContext = context
         ..viewport = viewport;
 
@@ -197,10 +197,10 @@ class PrintingPlugin extends PrintingPlatform {
       // context.getImageData(0, 0, canvas.width, canvas.height).data;
 
       // Convert the image to PNG
-      final Completer<void> completer = Completer<void>();
-      final html.Blob blob = await canvas.toBlob();
-      final BytesBuilder data = BytesBuilder();
-      final html.FileReader r = FileReader();
+      final completer = Completer<void>();
+      final blob = await canvas.toBlob();
+      final data = BytesBuilder();
+      final r = FileReader();
       r.readAsArrayBuffer(blob);
       r.onLoadEnd.listen(
         (ProgressEvent e) {
@@ -233,7 +233,7 @@ class _WebPdfRaster extends PdfRaster {
   @override
   Uint8List get pixels {
     if (_pixels == null) {
-      final im.Image img = asImage();
+      final img = asImage();
       _pixels = img.data.buffer.asUint8List();
     }
 
@@ -242,7 +242,7 @@ class _WebPdfRaster extends PdfRaster {
 
   @override
   Future<Image> toImage() {
-    final Completer<Image> comp = Completer<Image>();
+    final comp = Completer<Image>();
     decodeImageFromPixels(
       png,
       width,

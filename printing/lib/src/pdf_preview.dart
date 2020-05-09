@@ -10,7 +10,9 @@ import 'printing.dart';
 import 'printing_info.dart';
 import 'raster.dart';
 
+/// Flutter widget that uses the rasterized pdf pages to display a document.
 class PdfPreview extends StatefulWidget {
+  /// Show a pdf document built on demand
   const PdfPreview({
     Key key,
     @required this.build,
@@ -26,26 +28,37 @@ class PdfPreview extends StatefulWidget {
     this.onShared,
   }) : super(key: key);
 
+  /// Called when a pdf document is needed
   final LayoutCallback build;
 
+  /// Pdf page format asked for the first display
   final PdfPageFormat initialPageFormat;
 
+  /// Add a button to print the pdf document
   final bool allowPrinting;
 
+  /// Add a button to share the pdf document
   final bool allowSharing;
 
+  /// Maximum width of the pdf document on screen
   final double maxPageWidth;
 
+  /// Add a drop-down menu to choose the page format
   final bool canChangePageFormat;
 
+  /// Additionnal actions to add to the widget
   final List<PdfPreviewAction> actions;
 
+  /// List of page formats the user can choose
   final Map<String, PdfPageFormat> pageFormats;
 
+  /// Called if an error creating the Pdf occured
   final Widget Function(BuildContext context) onError;
 
+  /// Called if the user prints the pdf document
   final void Function(BuildContext context) onPrinted;
 
+  /// Called if the user shares the pdf document
   final void Function(BuildContext context) onShared;
 
   @override
@@ -93,7 +106,7 @@ class _PdfPreviewState extends State<PdfPreview> {
       });
     }
 
-    int pageNum = 0;
+    var pageNum = 0;
     await for (final PdfRaster page in Printing.raster(_doc, dpi: dpi)) {
       setState(() {
         if (pages.length <= pageNum) {
@@ -111,9 +124,9 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   @override
   void initState() {
-    final Locale locale =
+    final locale =
         WidgetsBinding.instance.window.locale ?? const Locale('en', 'US');
-    final String cc = locale.countryCode;
+    final cc = locale.countryCode;
     if (cc == 'US' || cc == 'CA' || cc == 'MX') {
       pageFormat = widget.initialPageFormat ?? PdfPageFormat.letter;
     } else {
@@ -150,7 +163,7 @@ class _PdfPreviewState extends State<PdfPreview> {
       });
     }
 
-    final MediaQueryData mq = MediaQuery.of(context);
+    final mq = MediaQuery.of(context);
     dpi = (min(mq.size.width - 16, widget.maxPageWidth ?? double.infinity)) *
         mq.devicePixelRatio /
         pageFormat.width *
@@ -177,7 +190,7 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   Widget _createPreview() {
     if (error != null) {
-      Widget content = _showError();
+      var content = _showError();
       assert(() {
         print(error);
         content = ErrorWidget(error);
@@ -204,7 +217,7 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
 
     final Widget scrollView = Container(
       decoration: BoxDecoration(
@@ -224,7 +237,7 @@ class _PdfPreviewState extends State<PdfPreview> {
       ),
     );
 
-    final List<Widget> actions = <Widget>[];
+    final actions = <Widget>[];
 
     if (widget.allowPrinting && info.canPrint) {
       actions.add(
@@ -248,9 +261,8 @@ class _PdfPreviewState extends State<PdfPreview> {
     }
 
     if (widget.canChangePageFormat) {
-      final Map<String, PdfPageFormat> _pageFormats =
-          widget.pageFormats ?? defaultPageFormats;
-      final List<String> keys = _pageFormats.keys.toList();
+      final _pageFormats = widget.pageFormats ?? defaultPageFormats;
+      final keys = _pageFormats.keys.toList();
       actions.add(
         DropdownButton<PdfPageFormat>(
           icon: Icon(
@@ -261,8 +273,8 @@ class _PdfPreviewState extends State<PdfPreview> {
           items: List<DropdownMenuItem<PdfPageFormat>>.generate(
             _pageFormats.length,
             (int index) {
-              final String key = keys[index];
-              final PdfPageFormat val = _pageFormats[key];
+              final key = keys[index];
+              final val = _pageFormats[key];
               return DropdownMenuItem<PdfPageFormat>(
                 child: Text(key),
                 value: val,
@@ -280,7 +292,7 @@ class _PdfPreviewState extends State<PdfPreview> {
     }
 
     if (widget.actions != null) {
-      for (final PdfPreviewAction action in widget.actions) {
+      for (final action in widget.actions) {
         actions.add(
           IconButton(
             icon: action.icon,
@@ -338,7 +350,7 @@ class _PdfPreviewState extends State<PdfPreview> {
   }
 
   Future<void> _print() async {
-    final bool result = await Printing.layoutPdf(onLayout: widget.build);
+    final result = await Printing.layoutPdf(onLayout: widget.build);
 
     if (result && widget.onPrinted != null) {
       widget.onPrinted(context);
@@ -349,14 +361,14 @@ class _PdfPreviewState extends State<PdfPreview> {
     // Calculate the widget center for iPad sharing popup position
     final RenderBox referenceBox =
         shareWidget.currentContext.findRenderObject();
-    final Offset topLeft =
+    final topLeft =
         referenceBox.localToGlobal(referenceBox.paintBounds.topLeft);
-    final Offset bottomRight =
+    final bottomRight =
         referenceBox.localToGlobal(referenceBox.paintBounds.bottomRight);
-    final Rect bounds = Rect.fromPoints(topLeft, bottomRight);
+    final bounds = Rect.fromPoints(topLeft, bottomRight);
 
-    final Uint8List bytes = await widget.build(pageFormat);
-    final bool result = await Printing.sharePdf(bytes: bytes, bounds: bounds);
+    final bytes = await widget.build(pageFormat);
+    final result = await Printing.sharePdf(bytes: bytes, bounds: bounds);
 
     if (result && widget.onShared != null) {
       widget.onShared(context);
@@ -374,7 +386,7 @@ class _PdfPreviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final PdfRasterImage im = PdfRasterImage(page);
+    final im = PdfRasterImage(page);
 
     return Container(
       margin: const EdgeInsets.only(
@@ -410,12 +422,17 @@ typedef OnPdfPreviewActionPressed = void Function(
   PdfPageFormat pageFormat,
 );
 
+/// Action to add the the [PdfPreview] widget
 class PdfPreviewAction {
+  /// Represents an icon to add to [PdfPreview]
   const PdfPreviewAction({
     @required this.icon,
     @required this.onPressed,
   }) : assert(icon != null);
 
+  /// The icon to display
   final Icon icon;
+
+  /// The callback called when the user tap on the icon
   final OnPdfPreviewActionPressed onPressed;
 }

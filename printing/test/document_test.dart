@@ -15,12 +15,10 @@
  */
 
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
@@ -28,9 +26,8 @@ pw.Document doc;
 pw.Font ttf;
 
 void main() {
-  final String path =
-      Directory.current.path.split('/').last == 'test' ? '..' : '.';
-  const MethodChannel channel = MethodChannel('net.nfet.printing');
+  final path = Directory.current.path.split('/').last == 'test' ? '..' : '.';
+  const channel = MethodChannel('net.nfet.printing');
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
@@ -49,7 +46,7 @@ void main() {
   });
 
   test('pdfImageFromImageProvider(FileImage)', () async {
-    final PdfImage image = await pdfImageFromImageProvider(
+    final image = await pdfImageFromImageProvider(
         pdf: doc.document, image: FileImage(File('$path/example.png')));
 
     doc.addPage(
@@ -66,14 +63,13 @@ void main() {
   setUpAll(() {
     pw.Document.debug = true;
     pw.RichText.debug = true;
-    final Uint8List fontData =
-        File('$path/../pdf/open-sans.ttf').readAsBytesSync();
+    final fontData = File('$path/../pdf/open-sans.ttf').readAsBytesSync();
     ttf = pw.Font.ttf(fontData.buffer.asByteData());
     doc = pw.Document();
   });
 
   tearDownAll(() {
-    final File file = File('printing.pdf');
+    final file = File('printing.pdf');
     file.writeAsBytesSync(doc.save());
   });
 }

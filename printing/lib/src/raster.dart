@@ -44,7 +44,7 @@ class PdfRaster {
 
   /// Decode RGBA raw image to dart:ui Image
   Future<ui.Image> toImage() {
-    final Completer<ui.Image> comp = Completer<ui.Image>();
+    final comp = Completer<ui.Image>();
     ui.decodeImageFromPixels(
       pixels,
       width,
@@ -57,9 +57,8 @@ class PdfRaster {
 
   /// Convert to a PNG image
   Future<Uint8List> toPng() async {
-    final ui.Image image = await toImage();
-    final ByteData data =
-        await image.toByteData(format: ui.ImageByteFormat.png);
+    final image = await toImage();
+    final data = await image.toByteData(format: ui.ImageByteFormat.png);
     return data.buffer.asUint8List();
   }
 
@@ -78,7 +77,7 @@ class PdfRasterImage extends ImageProvider<PdfRaster> {
   final PdfRaster raster;
 
   Future<ImageInfo> _loadAsync() async {
-    final ui.Image uiImage = await raster.toImage();
+    final uiImage = await raster.toImage();
     return ImageInfo(image: uiImage, scale: 1);
   }
 

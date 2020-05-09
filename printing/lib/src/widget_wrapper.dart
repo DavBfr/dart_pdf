@@ -15,7 +15,6 @@
  */
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -35,10 +34,9 @@ Future<PdfImage> wrapWidget(
 
   final RenderRepaintBoundary wrappedWidget =
       key.currentContext.findRenderObject();
-  final ui.Image image = await wrappedWidget.toImage(pixelRatio: pixelRatio);
-  final ByteData byteData =
-      await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-  final Uint8List imageData = byteData.buffer.asUint8List();
+  final image = await wrappedWidget.toImage(pixelRatio: pixelRatio);
+  final byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  final imageData = byteData.buffer.asUint8List();
   return PdfImage(document,
       image: imageData, width: image.width, height: image.height);
 }
