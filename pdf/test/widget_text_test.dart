@@ -18,15 +18,17 @@
 
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:typed_data';
 
-import 'package:test/test.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
+import 'package:test/test.dart';
+
+import 'utils.dart';
 
 Document pdf;
 Font ttf;
 Font ttfBold;
+Font asian;
 
 Iterable<TextDecoration> permute(
     List<TextDecoration> prefix, List<TextDecoration> remaining) sync* {
@@ -44,10 +46,10 @@ void main() {
   setUpAll(() {
     Document.debug = true;
     RichText.debug = true;
-    final Uint8List fontData = File('open-sans.ttf').readAsBytesSync();
-    ttf = Font.ttf(fontData.buffer.asByteData());
-    final Uint8List fontDataBold = File('open-sans-bold.ttf').readAsBytesSync();
-    ttfBold = Font.ttf(fontDataBold.buffer.asByteData());
+
+    ttf = loadFont('open-sans.ttf');
+    ttfBold = loadFont('open-sans-bold.ttf');
+    asian = loadFont('genyomintw.ttf');
     pdf = Document();
   });
 
@@ -242,6 +244,29 @@ void main() {
                 ),
               ),
             ]));
+  });
+
+  test('Text Widgets RichText Multiple lang', () {
+    pdf.addPage(Page(
+      build: (Context context) => RichText(
+        text: TextSpan(
+          text: 'Hello ',
+          style: TextStyle(
+            font: ttf,
+            fontSize: 20,
+          ),
+          children: <InlineSpan>[
+            TextSpan(
+              text: '中文',
+              style: TextStyle(font: asian),
+            ),
+            TextSpan(
+              text: ' world!',
+            ),
+          ],
+        ),
+      ),
+    ));
   });
 
   tearDownAll(() {
