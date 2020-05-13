@@ -582,22 +582,15 @@ class Expanded extends Flexible {
 
 /// Spacer creates an adjustable, empty spacer that can be used to tune the
 /// spacing between widgets in a [Flex] container, like [Row] or [Column].
-class Spacer extends StatelessWidget {
-  Spacer({this.flex = 1})
+class Spacer extends Flexible {
+  Spacer({int flex = 1})
       : assert(flex != null),
         assert(flex > 0),
-        super();
-
-  /// The flex factor to use in determining how much space to take up.
-  final int flex;
-
-  @override
-  Widget build(Context context) {
-    return Expanded(
-      flex: flex,
-      child: SizedBox.shrink(),
-    );
-  }
+        super(
+          flex: flex,
+          fit: FlexFit.tight,
+          child: SizedBox.shrink(),
+        );
 }
 
 typedef IndexedWidgetBuilder = Widget Function(Context context, int index);
