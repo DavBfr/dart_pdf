@@ -260,7 +260,7 @@ void main() {
               text: '中文',
               style: TextStyle(font: asian),
             ),
-            TextSpan(
+            const TextSpan(
               text: ' world!',
             ),
           ],

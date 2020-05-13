@@ -1,4 +1,5 @@
 // ignore_for_file: always_specify_types
+// ignore_for_file: public_member_api_docs
 
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
