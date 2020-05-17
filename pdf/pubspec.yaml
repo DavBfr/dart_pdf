@@ -17,6 +17,7 @@ dependencies:
   archive: ^2.0.10
   barcode: ^1.9.0
   image: ^2.1.4
+  path_parsing: ^0.1.4
 
 dev_dependencies:
   test:
