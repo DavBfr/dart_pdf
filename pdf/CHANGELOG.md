@@ -3,6 +3,7 @@
 ## 1.8.1
 
 - Fix Wrap break condition
+- Fix drawShape method [Paweł Szot]
 
 ## 1.8.0
 

@@ -24,6 +24,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:image/image.dart' as im;
 import 'package:meta/meta.dart';
+import 'package:path_parsing/path_parsing.dart';
 import 'package:utf/utf.dart';
 import 'package:vector_math/vector_math_64.dart';
 

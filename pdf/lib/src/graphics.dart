@@ -514,173 +514,9 @@ class PdfGraphics {
     }
   }
 
-  /// https://github.com/deeplook/svglib/blob/master/svglib/svglib.py#L911
   void drawShape(String d, {bool stroke = true}) {
-    final RegExp exp =
-        RegExp(r'([MmZzLlHhVvCcSsQqTtAaE])|(-[\.0-9]+)|([\.0-9]+)');
-    final Iterable<Match> matches = exp.allMatches(d + ' E');
-    String action;
-    String lastAction;
-    List<double> points;
-    PdfPoint lastControl = const PdfPoint(0, 0);
-    PdfPoint lastPoint = const PdfPoint(0, 0);
-    for (Match m in matches) {
-      final String a = m.group(1);
-      final String b = m.group(0);
-
-      if (a == null) {
-        points.add(double.parse(b));
-        continue;
-      }
-
-      if (action != null) {
-        switch (action) {
-          case 'm': // moveto relative
-            lastPoint =
-                PdfPoint(lastPoint.x + points[0], lastPoint.y + points[1]);
-            moveTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'M': // moveto absolute
-            lastPoint = PdfPoint(points[0], points[1]);
-            moveTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'l': // lineto relative
-            lastPoint =
-                PdfPoint(lastPoint.x + points[0], lastPoint.y + points[1]);
-            lineTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'L': // lineto absolute
-            lastPoint = PdfPoint(points[0], points[1]);
-            lineTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'H': // horizontal line absolute
-            lastPoint = PdfPoint(points[0], lastPoint.y);
-            lineTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'V': // vertical line absolute
-            lastPoint = PdfPoint(lastPoint.x, points[0]);
-            lineTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'h': // horizontal line relative
-            lastPoint = PdfPoint(lastPoint.x + points[0], lastPoint.y);
-            lineTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'v': // vertical line relative
-            lastPoint = PdfPoint(lastPoint.x, lastPoint.y + points[0]);
-            lineTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'C': // cubic bezier, absolute
-            int len = 0;
-            while (len < points.length) {
-              curveTo(points[len + 0], points[len + 1], points[len + 2],
-                  points[len + 3], points[len + 4], points[len + 5]);
-              len += 6;
-            }
-            lastPoint =
-                PdfPoint(points[points.length - 2], points[points.length - 1]);
-            lastControl =
-                PdfPoint(points[points.length - 4], points[points.length - 3]);
-            break;
-          case 'S': // smooth cubic bézier, absolute
-            while (points.length >= 4) {
-              PdfPoint c1;
-              if ('cCsS'.contains(lastAction)) {
-                c1 = PdfPoint(lastPoint.x + (lastPoint.x - lastControl.x),
-                    lastPoint.y + (lastPoint.y - lastControl.y));
-              } else {
-                c1 = lastPoint;
-              }
-              lastControl = PdfPoint(points[0], points[1]);
-              lastPoint = PdfPoint(points[2], points[3]);
-              curveTo(c1.x, c1.y, lastControl.x, lastControl.y, lastPoint.x,
-                  lastPoint.y);
-              points = points.sublist(4);
-              lastAction = 'C';
-            }
-            break;
-          case 'c': // cubic bezier, relative
-            int len = 0;
-            while (len < points.length) {
-              points[len + 0] += lastPoint.x;
-              points[len + 1] += lastPoint.y;
-              points[len + 2] += lastPoint.x;
-              points[len + 3] += lastPoint.y;
-              points[len + 4] += lastPoint.x;
-              points[len + 5] += lastPoint.y;
-              curveTo(points[len + 0], points[len + 1], points[len + 2],
-                  points[len + 3], points[len + 4], points[len + 5]);
-              lastPoint = PdfPoint(points[len + 4], points[len + 5]);
-              lastControl = PdfPoint(points[len + 2], points[len + 3]);
-              len += 6;
-            }
-            break;
-          case 's': // smooth cubic bézier, relative
-            while (points.length >= 4) {
-              PdfPoint c1;
-              if ('cCsS'.contains(lastAction)) {
-                c1 = PdfPoint(lastPoint.x + (lastPoint.x - lastControl.x),
-                    lastPoint.y + (lastPoint.y - lastControl.y));
-              } else {
-                c1 = lastPoint;
-              }
-              lastControl =
-                  PdfPoint(points[0] + lastPoint.x, points[1] + lastPoint.y);
-              lastPoint =
-                  PdfPoint(points[2] + lastPoint.x, points[3] + lastPoint.y);
-              curveTo(c1.x, c1.y, lastControl.x, lastControl.y, lastPoint.x,
-                  lastPoint.y);
-              points = points.sublist(4);
-              lastAction = 'c';
-            }
-            break;
-          // case 'Q': // quadratic bezier, absolute
-          //   break;
-          // case 'T': // quadratic bezier, absolute
-          //   break;
-          // case 'q': // quadratic bezier, relative
-          //   break;
-          // case 't': // quadratic bezier, relative
-          //   break;
-          case 'A': // elliptical arc, absolute
-            int len = 0;
-            while (len < points.length) {
-              bezierArc(lastPoint.x, lastPoint.y, points[len + 0],
-                  points[len + 1], points[len + 5], points[len + 6],
-                  phi: points[len + 2] * math.pi / 180.0,
-                  large: points[len + 3] != 0.0,
-                  sweep: points[len + 4] != 0.0);
-              lastPoint = PdfPoint(points[len + 5], points[len + 6]);
-              len += 7;
-            }
-            break;
-          case 'a': // elliptical arc, relative
-            int len = 0;
-            while (len < points.length) {
-              points[len + 5] += lastPoint.x;
-              points[len + 6] += lastPoint.y;
-              bezierArc(lastPoint.x, lastPoint.y, points[len + 0],
-                  points[len + 1], points[len + 5], points[len + 6],
-                  phi: points[len + 2] * math.pi / 180.0,
-                  large: points[len + 3] != 0.0,
-                  sweep: points[len + 4] != 0.0);
-              lastPoint = PdfPoint(points[len + 5], points[len + 6]);
-              len += 7;
-            }
-            break;
-          case 'Z': // close path
-          case 'z': // close path
-            if (stroke) {
-              closePath();
-            }
-            break;
-          default:
-            print('Unknown path action: $action');
-        }
-      }
-      lastAction = action;
-      action = a;
-      points = <double>[];
-    }
+    final proxy = _PathProxy(this, stroke);
+    writeSvgPathDataToPath(d, proxy);
   }
 
   void setLineCap(PdfLineCap cap) {
@@ -704,5 +540,35 @@ class PdfGraphics {
   void setLineDashPattern([List<int> array = const <int>[], int phase = 0]) {
     PdfArray.fromNum(array).output(buf);
     buf.putString(' $phase d\n');
+  }
+}
+
+class _PathProxy extends PathProxy {
+  _PathProxy(this.canvas, this.stroke);
+
+  final PdfGraphics canvas;
+  final bool stroke;
+
+  @override
+  void close() {
+    if (stroke) {
+      canvas.closePath();
+    }
+  }
+
+  @override
+  void cubicTo(
+      double x1, double y1, double x2, double y2, double x3, double y3) {
+    canvas.curveTo(x1, y1, x2, y2, x3, y3);
+  }
+
+  @override
+  void lineTo(double x, double y) {
+    canvas.lineTo(x, y);
+  }
+
+  @override
+  void moveTo(double x, double y) {
+    canvas.moveTo(x, y);
   }
 }
