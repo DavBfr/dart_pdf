@@ -254,8 +254,6 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
     assert(childConstraints != null);
     assert(mainAxisLimit != null);
 
-    final double spacing = this.spacing;
-    final double runSpacing = this.runSpacing;
     final List<_RunMetrics> runMetrics = <_RunMetrics>[];
     final Map<Widget, int> childRunMetrics = <Widget, int>{};
     double mainAxisExtent = 0.0;
@@ -405,7 +403,8 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
       }
 
       if (crossAxisOffset < -.01 ||
-          crossAxisOffset + runCrossAxisExtent > containerCrossAxisExtent) {
+          crossAxisOffset + runCrossAxisExtent >
+              containerCrossAxisExtent + .01) {
         break;
       }
 

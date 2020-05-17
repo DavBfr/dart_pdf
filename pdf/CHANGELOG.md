@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.1
+
+- Fix Wrap break condition
+
 ## 1.8.0
 
 - Improve Table.fromTextArray()
