@@ -513,8 +513,7 @@ class PdfGraphics {
       _endToCenterParameters(x1, y1, x2, y2, large, sweep, rx, ry);
     }
   }
-
-  /// https://github.com/deeplook/svglib/blob/master/svglib/svglib.py#L911
+  
   void drawShape(String d, {bool stroke = true}) {
     final proxy = _PathProxy(this, stroke);
     writeSvgPathDataToPath(d, proxy);
