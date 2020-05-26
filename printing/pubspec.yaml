@@ -4,7 +4,7 @@ description: Plugin that allows Flutter apps to generate and print documents to 
 homepage: https://github.com/DavBfr/dart_pdf/tree/master/printing
 repository: https://github.com/DavBfr/dart_pdf
 issue_tracker: https://github.com/DavBfr/dart_pdf/issues
-version: 3.4.0
+version: 3.5.0
 
 environment:
   sdk: ">=2.3.0 <3.0.0"

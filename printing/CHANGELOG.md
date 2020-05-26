@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.5.0
+
+- Add decoration options to the PdfPreview Widget [Marcos Rodriguez]
+
 ## 3.4.0
 
 - Add PdfPreview Widget
