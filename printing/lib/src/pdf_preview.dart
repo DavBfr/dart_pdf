@@ -13,20 +13,22 @@ import 'raster.dart';
 /// Flutter widget that uses the rasterized pdf pages to display a document.
 class PdfPreview extends StatefulWidget {
   /// Show a pdf document built on demand
-  const PdfPreview({
-    Key key,
-    @required this.build,
-    this.initialPageFormat,
-    this.allowPrinting = true,
-    this.allowSharing = true,
-    this.maxPageWidth,
-    this.canChangePageFormat = true,
-    this.actions,
-    this.pageFormats,
-    this.onError,
-    this.onPrinted,
-    this.onShared,
-  }) : super(key: key);
+  const PdfPreview(
+      {Key key,
+      @required this.build,
+      this.initialPageFormat,
+      this.allowPrinting = true,
+      this.allowSharing = true,
+      this.maxPageWidth,
+      this.canChangePageFormat = true,
+      this.actions,
+      this.pageFormats,
+      this.onError,
+      this.onPrinted,
+      this.onShared,
+      this.scrollViewDecoration,
+      this.pdfPreviewPageDecoration})
+      : super(key: key);
 
   /// Called when a pdf document is needed
   final LayoutCallback build;
@@ -60,6 +62,12 @@ class PdfPreview extends StatefulWidget {
 
   /// Called if the user shares the pdf document
   final void Function(BuildContext context) onShared;
+
+  /// Decoration of scrollView
+  final Decoration scrollViewDecoration;
+
+  /// Decoration of _PdfPreviewPage
+  final Decoration pdfPreviewPageDecoration;
 
   @override
   _PdfPreviewState createState() => _PdfPreviewState();
@@ -110,9 +118,15 @@ class _PdfPreviewState extends State<PdfPreview> {
     await for (final PdfRaster page in Printing.raster(_doc, dpi: dpi)) {
       setState(() {
         if (pages.length <= pageNum) {
-          pages.add(_PdfPreviewPage(page: page));
+          pages.add(_PdfPreviewPage(
+            page: page,
+            pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
+          ));
         } else {
-          pages[pageNum] = _PdfPreviewPage(page: page);
+          pages[pageNum] = _PdfPreviewPage(
+            page: page,
+            pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
+          );
         }
       });
 
@@ -220,13 +234,14 @@ class _PdfPreviewState extends State<PdfPreview> {
     final theme = Theme.of(context);
 
     final Widget scrollView = Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: <Color>[Colors.grey.shade400, Colors.grey.shade200],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
+      decoration: widget.scrollViewDecoration ??
+          BoxDecoration(
+            gradient: LinearGradient(
+              colors: <Color>[Colors.grey.shade400, Colors.grey.shade200],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
       width: double.infinity,
       alignment: Alignment.center,
       child: Container(
@@ -380,9 +395,11 @@ class _PdfPreviewPage extends StatelessWidget {
   const _PdfPreviewPage({
     Key key,
     this.page,
+    this.pdfPreviewPageDecoration,
   }) : super(key: key);
 
   final PdfRaster page;
+  final Decoration pdfPreviewPageDecoration;
 
   @override
   Widget build(BuildContext context) {
@@ -395,16 +412,17 @@ class _PdfPreviewPage extends StatelessWidget {
         right: 8,
         bottom: 12,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            offset: Offset(0, 3),
-            blurRadius: 5,
-            color: Color(0xFF000000),
+      decoration: pdfPreviewPageDecoration ??
+          const BoxDecoration(
+            color: Colors.white,
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                offset: Offset(0, 3),
+                blurRadius: 5,
+                color: Color(0xFF000000),
+              ),
+            ],
           ),
-        ],
-      ),
       child: AspectRatio(
         aspectRatio: page.width / page.height,
         child: Image(
