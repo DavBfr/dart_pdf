@@ -13,22 +13,22 @@ import 'raster.dart';
 /// Flutter widget that uses the rasterized pdf pages to display a document.
 class PdfPreview extends StatefulWidget {
   /// Show a pdf document built on demand
-  const PdfPreview(
-      {Key key,
-      @required this.build,
-      this.initialPageFormat,
-      this.allowPrinting = true,
-      this.allowSharing = true,
-      this.maxPageWidth,
-      this.canChangePageFormat = true,
-      this.actions,
-      this.pageFormats,
-      this.onError,
-      this.onPrinted,
-      this.onShared,
-      this.scrollViewDecoration,
-      this.pdfPreviewPageDecoration})
-      : super(key: key);
+  const PdfPreview({
+    Key key,
+    @required this.build,
+    this.initialPageFormat,
+    this.allowPrinting = true,
+    this.allowSharing = true,
+    this.maxPageWidth,
+    this.canChangePageFormat = true,
+    this.actions,
+    this.pageFormats,
+    this.onError,
+    this.onPrinted,
+    this.onShared,
+    this.scrollViewDecoration,
+    this.pdfPreviewPageDecoration,
+  }) : super(key: key);
 
   /// Called when a pdf document is needed
   final LayoutCallback build;
