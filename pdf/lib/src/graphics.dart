@@ -515,7 +515,7 @@ class PdfGraphics {
   }
 
   void drawShape(String d, {bool stroke = true}) {
-    final proxy = _PathProxy(this, stroke);
+    final _PathProxy proxy = _PathProxy(this, stroke);
     writeSvgPathDataToPath(d, proxy);
   }
 
