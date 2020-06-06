@@ -14,7 +14,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
     private final Activity activity;
     private final MethodChannel channel;
 
-    public PrintingHandler(@NonNull Activity activity, @NonNull MethodChannel channel) {
+    PrintingHandler(@NonNull Activity activity, @NonNull MethodChannel channel) {
         this.activity = activity;
         this.channel = channel;
     }
@@ -34,8 +34,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                 final PrintingJob printJob =
                         new PrintingJob(activity, this, (int) call.argument("job"));
                 assert name != null;
-                printJob.printPdf(
-                        name, width, height, marginLeft, marginTop, marginRight, marginBottom);
+                printJob.printPdf(name);
 
                 result.success(1);
                 break;

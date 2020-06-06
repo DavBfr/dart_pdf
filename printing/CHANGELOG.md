@@ -3,6 +3,7 @@
 ## 3.5.0
 
 - Add decoration options to the PdfPreview Widget [Marcos Rodriguez]
+- Allow building for Android SDK 16
 
 ## 3.4.0
 
