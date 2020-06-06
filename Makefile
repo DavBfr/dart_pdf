@@ -21,23 +21,23 @@
 all: $(FONTS) demo/assets/logo.png demo/assets/profile.jpg format printing/example/.metadata get
 
 pdf/open-sans.ttf:
-	curl -L "https://github.com/google/fonts/raw/master/apache/opensans/OpenSans-Regular.ttf" > $@
+	curl -L "https://fonts.gstatic.com/s/opensans/v17/mem8YaGs126MiZpBA-U1Ug.ttf" > $@
 
 demo/assets/open-sans.ttf: pdf/open-sans.ttf
 	cp $^ $@
 
 pdf/open-sans-bold.ttf:
-	curl -L "https://github.com/google/fonts/raw/master/apache/opensans/OpenSans-Bold.ttf" > $@
+	curl -L "https://fonts.gstatic.com/s/opensans/v17/mem5YaGs126MiZpBA-UN7rg-VQ.ttf" > $@
 	cp $@ demo/assets/
 
 demo/assets/open-sans-bold.ttf: pdf/open-sans-bold.ttf
 	cp $^ $@
 
 pdf/roboto.ttf:
-	curl -L "https://github.com/google/fonts/raw/master/apache/robotomono/RobotoMono-Regular.ttf" > $@
+	curl -L "https://fonts.gstatic.com/s/robotomono/v7/L0x5DF4xlVMF-BfR8bXMIghM.ttf" > $@
 
 pdf/noto-sans.ttf:
-	curl -L "https://raw.githubusercontent.com/google/fonts/master/ofl/notosans/NotoSans-Regular.ttf" > $@
+	curl -L "https://fonts.gstatic.com/s/notosans/v9/o-0IIpQlx3QUlC5A4PNb4g.ttf" > $@
 
 pdf/genyomintw.ttf:
 	curl -L "https://github.com/ButTaiwan/genyo-font/raw/bc2fa246196fefc1ef9e9843bc8cdba22523a39d/TW/GenYoMinTW-Heavy.ttf" > $@
