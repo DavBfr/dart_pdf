@@ -18,6 +18,7 @@ package net.nfet.flutter.printing;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.pdf.PdfRenderer;
@@ -231,7 +232,10 @@ public class PrintingJob extends PrintDocumentAdapter {
 
     void convertHtml(final String data, final PrintAttributes.MediaSize size,
             final PrintAttributes.Margins margins, final String baseUrl) {
-        final WebView webView = new WebView(context.getApplicationContext());
+        Configuration configuration = context.getResources().getConfiguration();
+        configuration.fontScale = (float) 1;
+        Context webContext = context.createConfigurationContext(configuration);
+        final WebView webView = new WebView(webContext);
 
         webView.loadDataWithBaseURL(baseUrl, data, "text/HTML", "UTF-8", null);
 
