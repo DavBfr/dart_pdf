@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.0
+
+- Added pdfFileName prop to PdfPreview Widget [Marcos Rodriguez]
+
 ## 3.5.0
 
 - Add decoration options to the PdfPreview Widget [Marcos Rodriguez]
