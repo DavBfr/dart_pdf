@@ -370,7 +370,7 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   Future<void> _print() async {
     final result = await Printing.layoutPdf(
-      onLayout: widget.build,
+      onLayout: (PdfPageFormat _) => widget.build(pageFormat),
       name: widget.pdfFileName,
       format: pageFormat,
     );
