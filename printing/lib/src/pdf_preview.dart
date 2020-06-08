@@ -28,6 +28,7 @@ class PdfPreview extends StatefulWidget {
     this.onShared,
     this.scrollViewDecoration,
     this.pdfPreviewPageDecoration,
+    this.pdfFileName,
   }) : super(key: key);
 
   /// Called when a pdf document is needed
@@ -68,6 +69,9 @@ class PdfPreview extends StatefulWidget {
 
   /// Decoration of _PdfPreviewPage
   final Decoration pdfPreviewPageDecoration;
+
+  /// Name of the PDF when sharing it must include the extension
+  final String pdfFileName;
 
   @override
   _PdfPreviewState createState() => _PdfPreviewState();
@@ -365,7 +369,11 @@ class _PdfPreviewState extends State<PdfPreview> {
   }
 
   Future<void> _print() async {
-    final result = await Printing.layoutPdf(onLayout: widget.build);
+    final result = await Printing.layoutPdf(
+      onLayout: widget.build,
+      name: widget.pdfFileName,
+      format: PdfPageFormat.letter,
+    );
 
     if (result && widget.onPrinted != null) {
       widget.onPrinted(context);
@@ -383,7 +391,8 @@ class _PdfPreviewState extends State<PdfPreview> {
     final bounds = Rect.fromPoints(topLeft, bottomRight);
 
     final bytes = await widget.build(pageFormat);
-    final result = await Printing.sharePdf(bytes: bytes, bounds: bounds);
+    final result = await Printing.sharePdf(
+        bytes: bytes, bounds: bounds, filename: widget.pdfFileName);
 
     if (result && widget.onShared != null) {
       widget.onShared(context);
