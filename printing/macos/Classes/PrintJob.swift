@@ -41,7 +41,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     }
 
     // Return the number of pages available for printing
-    public override func knowsPageRange(_ range: NSRangePointer) -> Bool {
+    override public func knowsPageRange(_ range: NSRangePointer) -> Bool {
         setFrameSize(printOperation!.printPanel.printInfo.paperSize)
         setBoundsSize(printOperation!.printPanel.printInfo.paperSize)
         range.pointee.length = pdfDocument?.numberOfPages ?? 0
@@ -49,7 +49,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     }
 
     // Return the drawing rectangle for a particular page number
-    public override func rectForPage(_ page: Int) -> NSRect {
+    override public func rectForPage(_ page: Int) -> NSRect {
         self.page = pdfDocument?.page(at: page)
         return self.page?.getBoxRect(CGPDFBox.mediaBox) ?? NSZeroRect
     }
@@ -68,7 +68,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         printOperation!.runModal(for: window, delegate: self, didRun: #selector(printOperationDidRun(printOperation:success:contextInfo:)), contextInfo: nil)
     }
 
-    public override func draw(_: NSRect) {
+    override public func draw(_: NSRect) {
         if pdfDocument != nil {
             let ctx = NSGraphicsContext.current?.cgContext
             if page != nil {

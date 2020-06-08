@@ -18,26 +18,26 @@
  FONTS=pdf/open-sans.ttf pdf/open-sans-bold.ttf pdf/roboto.ttf pdf/noto-sans.ttf pdf/genyomintw.ttf demo/assets/roboto1.ttf demo/assets/roboto2.ttf demo/assets/roboto3.ttf demo/assets/open-sans.ttf demo/assets/open-sans-bold.ttf
  COV_PORT=9292
 
-all: $(FONTS) demo/assets/logo.png demo/assets/profile.jpg format
+all: $(FONTS) demo/assets/logo.png demo/assets/profile.jpg format printing/example/.metadata get
 
 pdf/open-sans.ttf:
-	curl -L "https://github.com/google/fonts/raw/master/apache/opensans/OpenSans-Regular.ttf" > $@
+	curl -L "https://fonts.gstatic.com/s/opensans/v17/mem8YaGs126MiZpBA-U1Ug.ttf" > $@
 
 demo/assets/open-sans.ttf: pdf/open-sans.ttf
 	cp $^ $@
 
 pdf/open-sans-bold.ttf:
-	curl -L "https://github.com/google/fonts/raw/master/apache/opensans/OpenSans-Bold.ttf" > $@
+	curl -L "https://fonts.gstatic.com/s/opensans/v17/mem5YaGs126MiZpBA-UN7rg-VQ.ttf" > $@
 	cp $@ demo/assets/
 
 demo/assets/open-sans-bold.ttf: pdf/open-sans-bold.ttf
 	cp $^ $@
 
 pdf/roboto.ttf:
-	curl -L "https://github.com/google/fonts/raw/master/apache/robotomono/RobotoMono-Regular.ttf" > $@
+	curl -L "https://fonts.gstatic.com/s/robotomono/v7/L0x5DF4xlVMF-BfR8bXMIghM.ttf" > $@
 
 pdf/noto-sans.ttf:
-	curl -L "https://raw.githubusercontent.com/google/fonts/master/ofl/notosans/NotoSans-Regular.ttf" > $@
+	curl -L "https://fonts.gstatic.com/s/notosans/v9/o-0IIpQlx3QUlC5A4PNb4g.ttf" > $@
 
 pdf/genyomintw.ttf:
 	curl -L "https://github.com/ButTaiwan/genyo-font/raw/bc2fa246196fefc1ef9e9843bc8cdba22523a39d/TW/GenYoMinTW-Heavy.ttf" > $@
@@ -75,34 +75,38 @@ format-swift: $(SWFT_SRC)
 node_modules:
 	npm install lcov-summary
 
-get-pdf:
+printing/example/.metadata:
+	cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
+	rm -rf printing/example/test
+
+pdf/pubspec.lock: pdf/pubspec.yaml
 	cd pdf; pub get
 
-get-printing:
+printing/pubspec.lock: printing/pubspec.yaml
 	cd printing; flutter packages get
 
-get-demo:
+demo/pubspec.lock: demo/pubspec.yaml
 	cd demo; flutter packages get
 
-get-readme:
+test/pubspec.lock: test/pubspec.yaml
 	cd test; flutter packages get
 
-get: $(FONTS) get-pdf get-printing get-demo get-readme
+get: $(FONTS) pdf/pubspec.lock printing/pubspec.lock demo/pubspec.lock test/pubspec.lock
 
-test-pdf: $(FONTS) get-pdf .coverage
+test-pdf: $(FONTS) pdf/pubspec.lock .coverage
 	cd pdf; pub global run coverage:collect_coverage --port=$(COV_PORT) -o coverage.json --resume-isolates --wait-paused &\
 	dart --enable-asserts --disable-service-auth-codes --enable-vm-service=$(COV_PORT) --pause-isolates-on-exit test/all_tests.dart
 	cd pdf; pub global run coverage:format_coverage --packages=.packages -i coverage.json --report-on lib --lcov --out lcov.info
 	cd pdf; for EXAMPLE in $(shell cd pdf; find example -name '*.dart'); do dart $$EXAMPLE; done
 	test/compare-pdf.sh pdf test/golden
 
-test-printing: $(FONTS) get-printing .coverage
+test-printing: $(FONTS) printing/pubspec.lock .coverage
 	cd printing; flutter test --coverage --coverage-path lcov.info
 
-test-demo: $(FONTS) get-printing .coverage
+test-demo: $(FONTS) demo/pubspec.lock .coverage
 	cd demo; flutter test --coverage --coverage-path lcov.info
 
-test-readme: $(FONTS) get-readme
+test-readme: $(FONTS) test/pubspec.lock
 	cd test; dart extract_readme.dart
 	cd test; dartanalyzer readme-*.dart
 

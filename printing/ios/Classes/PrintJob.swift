@@ -35,7 +35,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         super.init()
     }
 
-    public override func drawPage(at pageIndex: Int, in _: CGRect) {
+    override public func drawPage(at pageIndex: Int, in _: CGRect) {
         let ctx = UIGraphicsGetCurrentContext()
         let page = pdfDocument?.page(at: pageIndex + 1)
         ctx?.scaleBy(x: 1.0, y: -1.0)
@@ -67,7 +67,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         controller.present(animated: true, completionHandler: completionHandler)
     }
 
-    public override var numberOfPages: Int {
+    override public var numberOfPages: Int {
         let pages = pdfDocument?.numberOfPages ?? 0
         return pages
     }

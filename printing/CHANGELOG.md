@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.5.0
+
+- Add decoration options to the PdfPreview Widget [Marcos Rodriguez]
+- Allow building for Android SDK 16
+- Fix font scaling in convertHtml()
+
 ## 3.4.0
 
 - Add PdfPreview Widget
