@@ -70,7 +70,7 @@ class PdfPreview extends StatefulWidget {
   /// Decoration of _PdfPreviewPage
   final Decoration pdfPreviewPageDecoration;
 
-  /// Name of the PDF when sharing it must include the extension
+  /// Name of the PDF when sharing. It must include the extension.
   final String pdfFileName;
 
   @override
@@ -372,7 +372,7 @@ class _PdfPreviewState extends State<PdfPreview> {
     final result = await Printing.layoutPdf(
       onLayout: widget.build,
       name: widget.pdfFileName,
-      format: PdfPageFormat.letter,
+      format: pageFormat,
     );
 
     if (result && widget.onPrinted != null) {
