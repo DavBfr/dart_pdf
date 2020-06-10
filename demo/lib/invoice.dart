@@ -99,23 +99,23 @@ class Invoice {
     // Create a PDF document.
     final doc = pw.Document();
 
-    final font1 = await rootBundle.load('assets/roboto1.ttf');
-    final font2 = await rootBundle.load('assets/roboto2.ttf');
-    final font3 = await rootBundle.load('assets/roboto3.ttf');
+    // final font1 = await rootBundle.load('assets/roboto1.ttf');
+    // final font2 = await rootBundle.load('assets/roboto2.ttf');
+    // final font3 = await rootBundle.load('assets/roboto3.ttf');
 
-    _logo = PdfImage.file(
-      doc.document,
-      bytes: (await rootBundle.load('assets/logo.png')).buffer.asUint8List(),
-    );
+    // _logo = PdfImage.file(
+    //   doc.document,
+    //   bytes: (await rootBundle.load('assets/logo.png')).buffer.asUint8List(),
+    // );
 
     // Add page to the PDF
     doc.addPage(
       pw.MultiPage(
         pageTheme: _buildTheme(
           pageFormat,
-          font1 != null ? pw.Font.ttf(font1) : null,
-          font2 != null ? pw.Font.ttf(font2) : null,
-          font3 != null ? pw.Font.ttf(font3) : null,
+          // font1 != null ? pw.Font.ttf(font1) : null,
+          // font2 != null ? pw.Font.ttf(font2) : null,
+          // font3 != null ? pw.Font.ttf(font3) : null,
         ),
         header: _buildHeader,
         footer: _buildFooter,
@@ -233,14 +233,16 @@ class Invoice {
   }
 
   pw.PageTheme _buildTheme(
-      PdfPageFormat pageFormat, pw.Font base, pw.Font bold, pw.Font italic) {
+    PdfPageFormat pageFormat,
+    /* pw.Font base, pw.Font bold, pw.Font italic */
+  ) {
     return pw.PageTheme(
       pageFormat: pageFormat,
       theme: pw.ThemeData.withFont(
-        base: base,
+          /*    base: base,
         bold: bold,
-        italic: italic,
-      ),
+        italic: italic, */
+          ),
       buildBackground: (context) => pw.FullPage(
         ignoreMargins: true,
         child: pw.Stack(

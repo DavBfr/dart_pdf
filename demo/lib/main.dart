@@ -170,6 +170,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
         actions: actions,
         onPrinted: _showPrintedToast,
         onShared: _showSharedToast,
+        pdfFileName: 'test.pdf',
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.deepOrange,
