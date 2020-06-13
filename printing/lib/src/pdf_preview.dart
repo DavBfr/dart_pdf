@@ -371,7 +371,7 @@ class _PdfPreviewState extends State<PdfPreview> {
   Future<void> _print() async {
     final result = await Printing.layoutPdf(
       onLayout: widget.build,
-      name: widget.pdfFileName,
+      name: widget.pdfFileName ?? 'Document',
       format: pageFormat,
     );
 
@@ -392,7 +392,10 @@ class _PdfPreviewState extends State<PdfPreview> {
 
     final bytes = await widget.build(pageFormat);
     final result = await Printing.sharePdf(
-        bytes: bytes, bounds: bounds, filename: widget.pdfFileName);
+      bytes: bytes,
+      bounds: bounds,
+      filename: widget.pdfFileName ?? 'document.pdf',
+    );
 
     if (result && widget.onShared != null) {
       widget.onShared(context);
