@@ -766,7 +766,12 @@ class RichText extends Widget {
     context.canvas
       ..setStrokeColor(PdfColors.blue)
       ..setLineWidth(1)
-      ..drawRect(box.x, box.y, box.width, box.height)
+      ..drawRect(
+        box.x,
+        box.y,
+        box.width == double.infinity ? 1000 : box.width,
+        box.height == double.infinity ? 1000 : box.height,
+      )
       ..strokePath();
   }
 
