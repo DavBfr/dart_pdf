@@ -518,15 +518,6 @@ class RichText extends Widget {
         );
       }
 
-      for (_TextDecoration decoration in decorations) {
-        decoration.box = PdfRect.fromPoints(
-          PdfPoint(
-            totalWidth - (decoration.box.x + decoration.box.width) - delta,
-            decoration.box.y - baseline,
-          ),
-          decoration.box.size,
-        );
-      }
       return totalWidth;
     }
 
