@@ -19,6 +19,7 @@ library widget;
 import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'package:image/image.dart' as im;
 
 import 'package:barcode/barcode.dart';
 import 'package:meta/meta.dart';

@@ -204,6 +204,27 @@ void main() {
     ));
   });
 
+  test('Container Widgets BoxShadow', () {
+    pdf.addPage(Page(
+      build: (Context context) => Container(
+        margin: const EdgeInsets.all(30),
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              blurRadius: 4,
+              spreadRadius: 10,
+              offset: PdfPoint(2, 2),
+            ),
+          ],
+          color: PdfColors.blue,
+        ),
+        width: 200,
+        height: 400,
+      ),
+    ));
+  });
+
   tearDownAll(() {
     final File file = File('widgets-container.pdf');
     file.writeAsBytesSync(pdf.save());

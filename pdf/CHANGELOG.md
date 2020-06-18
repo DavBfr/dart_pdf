@@ -3,6 +3,7 @@
 ## 1.9.0
 
 - Allow MultiPage to relayout individual pages with support for flex
+- Implement BoxShadow for rect and circle BoxDecorations
 
 ## 1.8.1
 

@@ -375,20 +375,94 @@ class RadialGradient extends Gradient {
   }
 }
 
+class BoxShadow {
+  const BoxShadow({
+    this.color = PdfColors.black,
+    this.offset = PdfPoint.zero,
+    this.blurRadius = 0.0,
+    this.spreadRadius = 0.0,
+  });
+
+  final PdfColor color;
+  final PdfPoint offset;
+  final double blurRadius;
+  final double spreadRadius;
+
+  im.Image _rect(double width, double height) {
+    final im.Image shadow = im.Image(
+      (width + spreadRadius * 2).round(),
+      (height + spreadRadius * 2).round(),
+    );
+
+    im.fillRect(
+      shadow,
+      spreadRadius.round(),
+      spreadRadius.round(),
+      (spreadRadius + width).round(),
+      (spreadRadius + height).round(),
+      color.toInt(),
+    );
+
+    im.gaussianBlur(shadow, blurRadius.round());
+
+    return shadow;
+  }
+
+  im.Image _rRect(double width, double height, double rv, double rh) {
+    final im.Image shadow = im.Image(
+      (width + spreadRadius * 2).round(),
+      (height + spreadRadius * 2).round(),
+    );
+
+    im.fillRect(
+      shadow,
+      spreadRadius.round(),
+      spreadRadius.round(),
+      (spreadRadius + width).round(),
+      (spreadRadius + height).round(),
+      color.toInt(),
+    );
+
+    im.gaussianBlur(shadow, blurRadius.round());
+
+    return shadow;
+  }
+
+  im.Image _ellipse(double width, double height) {
+    final im.Image shadow = im.Image(
+      (width + spreadRadius * 2).round(),
+      (height + spreadRadius * 2).round(),
+    );
+
+    im.fillCircle(
+      shadow,
+      (spreadRadius + width / 2).round(),
+      (spreadRadius + height / 2).round(),
+      (width / 2).round(),
+      color.toInt(),
+    );
+
+    im.gaussianBlur(shadow, blurRadius.round());
+
+    return shadow;
+  }
+}
+
 enum BoxShape { circle, rectangle }
 
 enum PaintPhase { all, background, foreground }
 
 @immutable
 class BoxDecoration {
-  const BoxDecoration(
-      {this.color,
-      this.border,
-      this.borderRadius,
-      this.gradient,
-      this.image,
-      this.shape = BoxShape.rectangle})
-      : assert(shape != null);
+  const BoxDecoration({
+    this.color,
+    this.border,
+    this.borderRadius,
+    this.boxShadow,
+    this.gradient,
+    this.image,
+    this.shape = BoxShape.rectangle,
+  }) : assert(shape != null);
 
   /// The color to fill in the background of the box.
   final PdfColor color;
@@ -397,6 +471,7 @@ class BoxDecoration {
   final BoxShape shape;
   final DecorationImage image;
   final Gradient gradient;
+  final List<BoxShadow> boxShadow;
 
   void paint(
     Context context,
@@ -413,13 +488,50 @@ class BoxDecoration {
         switch (shape) {
           case BoxShape.rectangle:
             if (borderRadius == null) {
+              if (boxShadow != null) {
+                for (final BoxShadow s in boxShadow) {
+                  final im.Image i = s._rect(box.width, box.height);
+                  final PdfImage m =
+                      PdfImage.fromImage(context.document, image: i);
+                  context.canvas.drawImage(
+                    m,
+                    box.x + s.offset.x - s.spreadRadius,
+                    box.y - s.offset.y - s.spreadRadius,
+                  );
+                }
+              }
               context.canvas.drawRect(box.x, box.y, box.width, box.height);
             } else {
+              if (boxShadow != null) {
+                for (final BoxShadow s in boxShadow) {
+                  final im.Image i = s._rRect(
+                      box.width, box.height, borderRadius, borderRadius);
+                  final PdfImage m =
+                      PdfImage.fromImage(context.document, image: i);
+                  context.canvas.drawImage(
+                    m,
+                    box.x + s.offset.x - s.spreadRadius,
+                    box.y - s.offset.y - s.spreadRadius,
+                  );
+                }
+              }
               context.canvas.drawRRect(box.x, box.y, box.width, box.height,
                   borderRadius, borderRadius);
             }
             break;
           case BoxShape.circle:
+            if (boxShadow != null && box.width == box.height) {
+              for (final BoxShadow s in boxShadow) {
+                final im.Image i = s._ellipse(box.width, box.height);
+                final PdfImage m =
+                    PdfImage.fromImage(context.document, image: i);
+                context.canvas.drawImage(
+                  m,
+                  box.x + s.offset.x - s.spreadRadius,
+                  box.y - s.offset.y - s.spreadRadius,
+                );
+              }
+            }
             context.canvas.drawEllipse(box.x + box.width / 2.0,
                 box.y + box.height / 2.0, box.width / 2.0, box.height / 2.0);
             break;
