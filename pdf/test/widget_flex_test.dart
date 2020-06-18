@@ -93,6 +93,24 @@ void main() {
     );
   });
 
+  test('MultiPage Spacer', () {
+    pdf.addPage(
+      MultiPage(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        build: (Context context) => <Widget>[
+          for (int i = 0; i < 60; i++) Text('Begin $i'),
+          Spacer(), // Defaults to a flex of one.
+          Text('Middle'),
+          // Gives twice the space between Middle and End than Begin and Middle.
+          Spacer(flex: 2),
+          // Expanded(flex: 2, child: SizedBox.shrink()),
+          Text('End'),
+        ],
+      ),
+    );
+  });
+
   tearDownAll(() {
     final File file = File('widgets-flex.pdf');
     file.writeAsBytesSync(pdf.save());

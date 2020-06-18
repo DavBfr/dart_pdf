@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.0
+
+- Allow MultiPage to relayout individual pages with support for flex
+
 ## 1.8.1
 
 - Fix Wrap break condition
