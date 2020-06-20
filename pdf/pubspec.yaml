@@ -19,3 +19,7 @@ dependencies:
 dev_dependencies:
   test:
   pedantic: 1.9.0
+
+flutter:
+  assets:
+    - assets/
