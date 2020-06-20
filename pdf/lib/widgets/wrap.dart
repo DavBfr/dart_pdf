@@ -44,7 +44,22 @@ class _WrapContext extends WidgetContext {
   int lastChild = 0;
 
   @override
-  String toString() => 'WrapContext first:$firstChild last:$lastChild';
+  void apply(WidgetContext other) {
+    if (other is _WrapContext) {
+      firstChild = other.firstChild;
+      lastChild = other.lastChild;
+    }
+  }
+
+  @override
+  WidgetContext clone() {
+    return _WrapContext()
+      ..firstChild = firstChild
+      ..lastChild = lastChild;
+  }
+
+  @override
+  String toString() => '$runtimeType first:$firstChild last:$lastChild';
 }
 
 /// A widget that displays its children in multiple horizontal or vertical runs.
@@ -94,7 +109,10 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
   bool get textDirection => false;
 
   @override
-  bool get canSpan => _context.lastChild < children.length;
+  bool get canSpan => true;
+
+  @override
+  bool get hasMoreWidgets => _context.lastChild < children.length;
 
   final _WrapContext _context = _WrapContext();
 
@@ -236,8 +254,6 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
     assert(childConstraints != null);
     assert(mainAxisLimit != null);
 
-    final double spacing = this.spacing;
-    final double runSpacing = this.runSpacing;
     final List<_RunMetrics> runMetrics = <_RunMetrics>[];
     final Map<Widget, int> childRunMetrics = <Widget, int>{};
     double mainAxisExtent = 0.0;
@@ -387,7 +403,8 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
       }
 
       if (crossAxisOffset < -.01 ||
-          crossAxisOffset + runCrossAxisExtent > containerCrossAxisExtent) {
+          crossAxisOffset + runCrossAxisExtent >
+              containerCrossAxisExtent + .01) {
         break;
       }
 

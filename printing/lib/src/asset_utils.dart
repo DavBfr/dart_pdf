@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-part of printing;
+import 'dart:async';
+import 'dart:ui' as ui;
+
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart';
 
 /// Loads an image from a Flutter [ui.Image]
 /// into a [PdfImage] instance
 Future<PdfImage> pdfImageFromImage(
     {@required PdfDocument pdf, @required ui.Image image}) async {
-  final ByteData bytes =
-      await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
 
   return PdfImage(pdf,
       image: bytes.buffer.asUint8List(),
@@ -36,14 +42,12 @@ Future<PdfImage> pdfImageFromImageProvider(
     @required ImageProvider image,
     ImageConfiguration configuration,
     ImageErrorListener onError}) async {
-  final Completer<PdfImage> completer = Completer<PdfImage>();
-  final ImageStream stream =
-      image.resolve(configuration ?? ImageConfiguration.empty);
+  final completer = Completer<PdfImage>();
+  final stream = image.resolve(configuration ?? ImageConfiguration.empty);
 
   ImageStreamListener listener;
   listener = ImageStreamListener((ImageInfo image, bool sync) async {
-    final PdfImage result =
-        await pdfImageFromImage(pdf: pdf, image: image.image);
+    final result = await pdfImageFromImage(pdf: pdf, image: image.image);
     if (!completer.isCompleted) {
       completer.complete(result);
     }
@@ -67,6 +71,6 @@ Future<PdfImage> pdfImageFromImageProvider(
 /// Loads a font from an asset bundle key. If used multiple times with the same font name,
 /// it will be included multiple times in the pdf file
 Future<TtfFont> fontFromAssetBundle(String key, AssetBundle bundle) async {
-  final ByteData data = await bundle.load(key);
+  final data = await bundle.load(key);
   return TtfFont(data);
 }

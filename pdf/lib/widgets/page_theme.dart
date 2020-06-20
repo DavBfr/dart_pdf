@@ -40,7 +40,7 @@ class PageTheme {
 
   final BuildCallback buildForeground;
 
-  final Theme theme;
+  final ThemeData theme;
 
   final bool clip;
 
@@ -68,4 +68,23 @@ class PageTheme {
           pageFormat.marginRight, pageFormat.marginBottom);
     }
   }
+
+  PageTheme copyWith({
+    PdfPageFormat pageFormat,
+    BuildCallback buildBackground,
+    BuildCallback buildForeground,
+    Theme theme,
+    PageOrientation orientation,
+    EdgeInsets margin,
+    bool clip,
+  }) =>
+      PageTheme(
+        pageFormat: pageFormat ?? this.pageFormat,
+        buildBackground: buildBackground ?? this.buildBackground,
+        buildForeground: buildForeground ?? this.buildForeground,
+        theme: theme ?? this.theme,
+        orientation: orientation ?? this.orientation,
+        margin: margin ?? this.margin,
+        clip: clip ?? this.clip,
+      );
 }

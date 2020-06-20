@@ -1,5 +1,103 @@
 # Changelog
 
+## 1.9.0
+
+- Allow MultiPage to relayout individual pages with support for flex
+- Implement BoxShadow for rect and circle BoxDecorations
+
+## 1.8.1
+
+- Fix Wrap break condition
+- Fix drawShape method [Paweł Szot]
+
+## 1.8.0
+
+- Improve Table.fromTextArray()
+- Add curved LineDataSet Chart
+- Fix PdfColors.fromHex()
+- Update Barcode library to 1.9.0
+- Fix exif orientation crash
+- Fix Spacer Widget
+
+## 1.7.1
+
+- Fix justified text softWrap issue
+- Set a default color for Dividers
+- Fix InheritedWidget issue with multiple pages
+
+## 1.7.0
+
+- Implement Linear and Radial gradients in BoxDecoration
+- Fix PdfColors.shade()
+- Add dashed lines to Decoration Widgets
+- Add TableRow decoration
+- Add Chart Widget [Marco Papula]
+- Add Divider and VerticalDivider Widget
+- Replace Theme with ThemeData
+
+## 1.6.2
+
+- Use the Barcode library to generate QR-Codes
+- Fix Jpeg size detection
+- Update dependency to Barcode 1.8.0
+- Fix graphic state operator
+
+## 1.6.1
+
+- Fix Image width and height attributes
+
+## 1.6.0
+
+- Improve Annotations
+- Implement table row vertical alignment
+- Improve Internal data structure
+- Remove deprecated functions
+- Optimize file size
+- Add PdfColor.shade
+- Uniformize examples
+- Fix context painting empty Table
+- Fix Text decoration placements
+- Improve image buffer management
+- Optimize memory footprint
+- Add an exception if a jpeg image is not a supported format
+- Add more image loading functions
+
+## 1.5.0
+
+- Fix Align debug painting
+- Fix GridView when empty
+- Reorder MultiPage paint operations
+- Fix Bullet widget styling
+- Fix HSV and HSL Color constructors
+- Add PageTheme.copyWith
+- Add more font drawing options
+- Add Opacity Widget
+- Fix Text height with TrueType fonts
+- Convert Flex to a SpanningWidget
+- Add Partitions Widget
+- Fix a TrueType parser issue with some Chinese fonts
+
+## 1.4.1
+
+- Update dependency to barcode ^1.5.0
+- Update type1 font warning URL
+- Fix Image fit
+
+## 1.4.0
+
+- Improve BarcodeWidget
+- Fix BarcodeWidget positioning
+- Update dependency to barcode ^1.4.0
+
+## 1.3.29
+
+- Use Barcode stable API
+
+## 1.3.28
+
+- Add Barcode Widget
+- Add QrCode Widget
+
 ## 1.3.27
 
 - Add Roll Paper support
@@ -68,7 +166,7 @@
 
 ## 1.3.16
 
-- Add better debugPaint on Align Widget
+- Add better debug painting on Align Widget
 - Fix Transform placement when Alignment and Origin are Null
 - Add Transform.rotateBox constructor
 - Add Wrap Widget
@@ -100,7 +198,7 @@
 ## 1.3.10
 
 - Deprecate the document argument in Printing.sharePdf()
-- Add default value to alpha in PdfColor variants
+- Add a default value to alpha in PdfColor variants
 - Fix Table Widget
 - Add Flexible and Spacer Widgets
 
@@ -160,7 +258,7 @@
 - Fix dart lint warnings
 - Improve font bounds calculation
 - Add RichText Widget
-- Fix MultiPage max height
+- Fix MultiPage max-height
 - Add Stack Widget
 - Update Readme
 
@@ -170,13 +268,13 @@
 
 ## 1.3.0
 
-- Add a Flutter like widget system
+- Add a Flutter-like Widget system
 
 ## 1.2.0
 
 - Change license to Apache 2.0
 - Improve PdfRect
-- Add support for CMYK, HSL anf HSV colors
+- Add support for CMYK, HSL and HSV colors
 - Implement rounded rect
 
 ## 1.1.1
@@ -199,7 +297,7 @@
 - Implement drawShape
 - Add support for Jpeg images
 - Fix numeric conversions in graphic operations
-- Add unicode support for annotations and info block
+- Add Unicode support for annotations and info block
 - Add Flutter example
 
 ## 1.0.8
@@ -232,7 +330,7 @@
 
 ## 1.0.2
 
-- Update sdk support for 2.0.0
+- Update SDK support for 2.0.0
 
 ## 1.0.1
 

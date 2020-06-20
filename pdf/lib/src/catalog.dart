@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// ignore_for_file: omit_local_variable_types
+
 part of pdf;
 
 class PdfCatalog extends PdfObject {
@@ -50,7 +52,7 @@ class PdfCatalog extends PdfObject {
     super._prepare();
 
     /// the PDF specification version, overrides the header version starting from 1.4
-    params['/Version'] = PdfStream.string('/${pdfDocument.version}');
+    params['/Version'] = PdfName('/${pdfDocument.version}');
 
     params['/Pages'] = pdfPageList.ref();
 
@@ -63,12 +65,28 @@ class PdfCatalog extends PdfObject {
     params['/Names'] = names.ref();
 
     // the /PageMode setting
-    params['/PageMode'] =
-        PdfStream.string(PdfDocument._PdfPageModes[pageMode.index]);
+    params['/PageMode'] = PdfName(PdfDocument._PdfPageModes[pageMode.index]);
 
     if (pdfDocument.sign != null) {
-      params['/Perms'] = PdfStream.dictionary(
-          <String, PdfStream>{'/DocMDP': pdfDocument.sign.ref()});
+      params['/Perms'] = PdfDict(<String, PdfDataType>{
+        '/DocMDP': pdfDocument.sign.ref(),
+      });
+    }
+
+    final List<PdfAnnot> widgets = <PdfAnnot>[];
+    for (PdfPage page in pdfDocument.pdfPageList.pages) {
+      for (PdfAnnot annot in page.annotations) {
+        if (annot.annot.subtype == '/Widget') {
+          widgets.add(annot);
+        }
+      }
+    }
+
+    if (widgets.isNotEmpty) {
+      params['/AcroForm'] = PdfDict(<String, PdfDataType>{
+        '/SigFlags': PdfNum(pdfDocument.sign?.flagsValue ?? 0),
+        '/Fields': PdfArray.fromObjects(widgets),
+      });
     }
   }
 }

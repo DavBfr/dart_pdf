@@ -54,7 +54,9 @@ abstract class _Span {
 }
 
 class _TextDecoration {
-  _TextDecoration(this.style, this.annotation) : assert(style != null);
+  _TextDecoration(this.style, this.annotation, this.startSpan, this.endSpan)
+      : assert(startSpan <= endSpan),
+        assert(style != null);
 
   static const double _space = -0.15;
 
@@ -62,13 +64,44 @@ class _TextDecoration {
 
   final AnnotationBuilder annotation;
 
-  PdfRect box = PdfRect.zero;
+  final int startSpan;
+
+  final int endSpan;
+
+  PdfRect _box;
+
+  PdfRect _getBox(List<_Span> spans) {
+    if (_box != null) {
+      return _box;
+    }
+    final double x1 = spans[startSpan].offset.x + spans[startSpan].left;
+    final double x2 =
+        spans[endSpan].offset.x + spans[endSpan].left + spans[endSpan].width;
+    double y1 = spans[startSpan].offset.y + spans[startSpan].top;
+    double y2 = y1 + spans[startSpan].height;
+
+    for (int n = startSpan + 1; n <= endSpan; n++) {
+      final double ny1 = spans[n].offset.y + spans[n].top;
+      final double ny2 = ny1 + spans[n].height;
+      y1 = math.min(y1, ny1);
+      y2 = math.max(y2, ny2);
+    }
+
+    _box = PdfRect.fromLTRB(x1, y1, x2, y2);
+    return _box;
+  }
+
+  _TextDecoration copyWith({int endSpan}) =>
+      _TextDecoration(style, annotation, startSpan, endSpan ?? this.endSpan);
 
   void backgroundPaint(
     Context context,
     double textScaleFactor,
     PdfRect globalBox,
+    List<_Span> spans,
   ) {
+    final PdfRect box = _getBox(spans);
+
     if (annotation != null) {
       final PdfRect spanBox = PdfRect(
         globalBox.x + box.left,
@@ -95,78 +128,80 @@ class _TextDecoration {
     Context context,
     double textScaleFactor,
     PdfRect globalBox,
+    List<_Span> spans,
   ) {
-    if (style.decoration != null) {
-      final PdfFont font = style.font.getFont(context);
-      final double space =
-          _space * style.fontSize * textScaleFactor * style.decorationThickness;
+    if (style.decoration == null) {
+      return;
+    }
 
-      context.canvas
-        ..setStrokeColor(style.decorationColor ?? style.color)
-        ..setLineWidth(style.decorationThickness *
-            style.fontSize *
-            textScaleFactor *
-            0.05);
+    final PdfRect box = _getBox(spans);
 
-      if (style.decoration.contains(TextDecoration.underline)) {
-        final double base =
-            -font.descent * style.fontSize * textScaleFactor / 2;
+    final PdfFont font = style.font.getFont(context);
+    final double space =
+        _space * style.fontSize * textScaleFactor * style.decorationThickness;
 
+    context.canvas
+      ..setStrokeColor(style.decorationColor ?? style.color)
+      ..setLineWidth(
+          style.decorationThickness * style.fontSize * textScaleFactor * 0.05);
+
+    if (style.decoration.contains(TextDecoration.underline)) {
+      final double base = -font.descent * style.fontSize * textScaleFactor / 2;
+
+      context.canvas.drawLine(
+        globalBox.x + box.left,
+        globalBox.top + box.bottom + base,
+        globalBox.x + box.right,
+        globalBox.top + box.bottom + base,
+      );
+      if (style.decorationStyle == TextDecorationStyle.double) {
         context.canvas.drawLine(
           globalBox.x + box.left,
-          globalBox.top + box.bottom + base,
+          globalBox.top + box.bottom + base + space,
           globalBox.x + box.right,
-          globalBox.top + box.bottom + base,
+          globalBox.top + box.bottom + base + space,
         );
-        if (style.decorationStyle == TextDecorationStyle.double) {
-          context.canvas.drawLine(
-            globalBox.x + box.left,
-            globalBox.top + box.bottom + base + space,
-            globalBox.x + box.right,
-            globalBox.top + box.bottom + base + space,
-          );
-        }
-        context.canvas.strokePath();
       }
+      context.canvas.strokePath();
+    }
 
-      if (style.decoration.contains(TextDecoration.overline)) {
-        final double base = style.fontSize * textScaleFactor;
+    if (style.decoration.contains(TextDecoration.overline)) {
+      final double base = style.fontSize * textScaleFactor;
+      context.canvas.drawLine(
+        globalBox.x + box.left,
+        globalBox.top + box.bottom + base,
+        globalBox.x + box.right,
+        globalBox.top + box.bottom + base,
+      );
+      if (style.decorationStyle == TextDecorationStyle.double) {
         context.canvas.drawLine(
           globalBox.x + box.left,
-          globalBox.top + box.bottom + base,
+          globalBox.top + box.bottom + base - space,
           globalBox.x + box.right,
-          globalBox.top + box.bottom + base,
+          globalBox.top + box.bottom + base - space,
         );
-        if (style.decorationStyle == TextDecorationStyle.double) {
-          context.canvas.drawLine(
-            globalBox.x + box.left,
-            globalBox.top + box.bottom + base - space,
-            globalBox.x + box.right,
-            globalBox.top + box.bottom + base - space,
-          );
-        }
-        context.canvas.strokePath();
       }
+      context.canvas.strokePath();
+    }
 
-      if (style.decoration.contains(TextDecoration.lineThrough)) {
-        final double base =
-            (1 - font.descent) * style.fontSize * textScaleFactor / 2;
+    if (style.decoration.contains(TextDecoration.lineThrough)) {
+      final double base =
+          (1 - font.descent) * style.fontSize * textScaleFactor / 2;
+      context.canvas.drawLine(
+        globalBox.x + box.left,
+        globalBox.top + box.bottom + base,
+        globalBox.x + box.right,
+        globalBox.top + box.bottom + base,
+      );
+      if (style.decorationStyle == TextDecorationStyle.double) {
         context.canvas.drawLine(
           globalBox.x + box.left,
-          globalBox.top + box.bottom + base,
+          globalBox.top + box.bottom + base + space,
           globalBox.x + box.right,
-          globalBox.top + box.bottom + base,
+          globalBox.top + box.bottom + base + space,
         );
-        if (style.decorationStyle == TextDecorationStyle.double) {
-          context.canvas.drawLine(
-            globalBox.x + box.left,
-            globalBox.top + box.bottom + base + space,
-            globalBox.x + box.right,
-            globalBox.top + box.bottom + base + space,
-          );
-        }
-        context.canvas.strokePath();
       }
+      context.canvas.strokePath();
     }
   }
 
@@ -174,7 +209,10 @@ class _TextDecoration {
     Context context,
     double textScaleFactor,
     PdfRect globalBox,
+    List<_Span> spans,
   ) {
+    final PdfRect box = _getBox(spans);
+
     context.canvas
       ..setLineWidth(.5)
       ..drawRect(
@@ -199,13 +237,13 @@ class _Word extends _Span {
   double get left => metrics.left;
 
   @override
-  double get top => metrics.top;
+  double get top => metrics.descent;
 
   @override
   double get width => metrics.width;
 
   @override
-  double get height => metrics.height;
+  double get height => metrics.maxHeight;
 
   @override
   String toString() {
@@ -220,11 +258,13 @@ class _Word extends _Span {
     PdfPoint point,
   ) {
     context.canvas.drawString(
-        style.font.getFont(context),
-        style.fontSize * textScaleFactor,
-        text,
-        point.x + offset.x,
-        point.y + offset.y);
+      style.font.getFont(context),
+      style.fontSize * textScaleFactor,
+      text,
+      point.x + offset.x,
+      point.y + offset.y,
+      mode: style.renderingMode,
+    );
   }
 
   @override
@@ -403,28 +443,36 @@ class TextSpan extends InlineSpan {
 class RichText extends Widget {
   RichText(
       {@required this.text,
-      this.textAlign = TextAlign.left,
-      this.textDirection = TextDirection.ltr,
-      this.softWrap = true,
+      TextAlign textAlign,
+      TextDirection textDirection,
+      bool softWrap,
+      this.tightBounds = false,
       this.textScaleFactor = 1.0,
-      this.maxLines})
+      int maxLines})
       : assert(text != null),
-        assert(textDirection != null),
-        assert(textAlign != null);
+        _textAlign = textAlign,
+        textDirection = textDirection ?? TextDirection.ltr,
+        _softWrap = softWrap,
+        _maxLines = maxLines;
 
   static bool debug = false;
 
   final InlineSpan text;
 
-  final TextAlign textAlign;
+  TextAlign get textAlign => _textAlign;
+  TextAlign _textAlign;
 
   final TextDirection textDirection;
 
   final double textScaleFactor;
 
-  final bool softWrap;
+  bool get softWrap => _softWrap;
+  bool _softWrap;
 
-  final int maxLines;
+  final bool tightBounds;
+
+  int get maxLines => _maxLines;
+  int _maxLines;
 
   final List<_Span> _spans = <_Span>[];
 
@@ -470,15 +518,6 @@ class RichText extends Widget {
         );
       }
 
-      for (_TextDecoration decoration in decorations) {
-        decoration.box = PdfRect.fromPoints(
-          PdfPoint(
-            totalWidth - (decoration.box.x + decoration.box.width) - delta,
-            decoration.box.y - baseline,
-          ),
-          decoration.box.size,
-        );
-      }
       return totalWidth;
     }
 
@@ -486,14 +525,20 @@ class RichText extends Widget {
       span.offset = span.offset.translate(delta, -baseline);
     }
 
-    for (_TextDecoration decoration in decorations) {
-      decoration.box = PdfRect.fromPoints(
-        decoration.box.offset.translate(delta, -baseline),
-        decoration.box.size,
-      );
+    return totalWidth;
+  }
+
+  void _appendDecoration(bool append, _TextDecoration td) {
+    if (append && _decorations.isNotEmpty) {
+      final _TextDecoration last = _decorations.last;
+      if (last.style == td.style && last.annotation == td.annotation) {
+        _decorations[_decorations.length - 1] =
+            last.copyWith(endSpan: td.endSpan);
+        return;
+      }
     }
 
-    return totalWidth;
+    _decorations.add(td);
   }
 
   @override
@@ -502,7 +547,11 @@ class RichText extends Widget {
     _spans.clear();
     _decorations.clear();
 
-    final TextStyle defaultstyle = Theme.of(context).defaultTextStyle;
+    final ThemeData theme = Theme.of(context);
+    final TextStyle defaultstyle = theme.defaultTextStyle;
+    _softWrap ??= theme.softWrap;
+    _maxLines ??= theme.maxLines;
+    _textAlign ??= theme.textAlign;
 
     final double constraintWidth = constraints.hasBoundedWidth
         ? constraints.maxWidth
@@ -577,14 +626,10 @@ class RichText extends Widget {
             }
 
             final double baseline = span.baseline * textScaleFactor;
-            top = math.min(
-              top ?? metrics.top + baseline,
-              metrics.top + baseline,
-            );
-            bottom = math.max(
-              bottom ?? metrics.bottom + baseline,
-              metrics.bottom + baseline,
-            );
+            final double mt = tightBounds ? metrics.top : metrics.descent;
+            final double mb = tightBounds ? metrics.bottom : metrics.ascent;
+            top = math.min(top ?? mt + baseline, mt + baseline);
+            bottom = math.max(bottom ?? mb + baseline, mb + baseline);
 
             final _Word wd = _Word(
               word,
@@ -595,16 +640,15 @@ class RichText extends Widget {
             _spans.add(wd);
             spanCount++;
 
-            final _TextDecoration td = _TextDecoration(
-              style,
-              span.annotation,
+            _appendDecoration(
+              spanCount > 1,
+              _TextDecoration(
+                style,
+                span.annotation,
+                _spans.length - 1,
+                _spans.length - 1,
+              ),
             );
-            td.box = PdfRect(
-                offsetX,
-                -offsetY + metrics.descent + baseline,
-                metrics.maxWidth + space.advanceWidth * style.wordSpacing,
-                metrics.maxHeight);
-            _decorations.add(td);
 
             offsetX +=
                 metrics.advanceWidth + space.advanceWidth * style.wordSpacing;
@@ -618,21 +662,12 @@ class RichText extends Widget {
                   _decorations.sublist(decorationStart),
                   constraintWidth,
                   offsetX - space.advanceWidth * style.wordSpacing,
-                  false,
+                  true,
                   bottom,
                 ));
 
             spanStart += spanCount;
             decorationStart = _decorations.length;
-
-            if (_decorations.isNotEmpty) {
-              // remove the last space
-              _decorations.last.box = PdfRect.fromPoints(
-                _decorations.last.box.offset,
-                _decorations.last.box.size
-                    .translate(-space.advanceWidth * style.wordSpacing, 0),
-              );
-            }
 
             lines++;
             if (maxLines != null && lines > maxLines) {
@@ -710,12 +745,15 @@ class RichText extends Widget {
         _spans.add(ws);
         spanCount++;
 
-        final _TextDecoration td = _TextDecoration(
-          style,
-          span.annotation,
+        _appendDecoration(
+          spanCount > 1,
+          _TextDecoration(
+            style,
+            span.annotation,
+            _spans.length - 1,
+            _spans.length - 1,
+          ),
         );
-        td.box = PdfRect(offsetX, -offsetY + baseline, ws.width, ws.height);
-        _decorations.add(td);
 
         offsetX += ws.left + ws.width;
       }
@@ -746,7 +784,12 @@ class RichText extends Widget {
     context.canvas
       ..setStrokeColor(PdfColors.blue)
       ..setLineWidth(1)
-      ..drawRect(box.x, box.y, box.width, box.height)
+      ..drawRect(
+        box.x,
+        box.y,
+        box.width == double.infinity ? 1000 : box.width,
+        box.height == double.infinity ? 1000 : box.height,
+      )
       ..strokePath();
   }
 
@@ -759,7 +802,7 @@ class RichText extends Widget {
     for (_TextDecoration decoration in _decorations) {
       assert(() {
         if (Document.debug && RichText.debug) {
-          decoration.debugPaint(context, textScaleFactor, box);
+          decoration.debugPaint(context, textScaleFactor, box, _spans);
         }
         return true;
       }());
@@ -768,6 +811,7 @@ class RichText extends Widget {
         context,
         textScaleFactor,
         box,
+        _spans,
       );
     }
 
@@ -800,6 +844,7 @@ class RichText extends Widget {
         context,
         textScaleFactor,
         box,
+        _spans,
       );
     }
   }
@@ -809,9 +854,10 @@ class Text extends RichText {
   Text(
     String text, {
     TextStyle style,
-    TextAlign textAlign = TextAlign.left,
+    TextAlign textAlign,
     TextDirection textDirection = TextDirection.ltr,
-    bool softWrap = true,
+    bool softWrap,
+    bool tightBounds = false,
     double textScaleFactor = 1.0,
     int maxLines,
   })  : assert(text != null),
@@ -819,6 +865,7 @@ class Text extends RichText {
             text: TextSpan(text: text, style: style),
             textAlign: textAlign,
             softWrap: softWrap,
+            tightBounds: tightBounds,
             textDirection: textDirection,
             textScaleFactor: textScaleFactor,
             maxLines: maxLines);

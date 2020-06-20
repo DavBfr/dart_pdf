@@ -20,7 +20,7 @@ class PdfNames extends PdfObject {
   /// This constructs a Pdf Name object
   PdfNames(PdfDocument pdfDocument) : super(pdfDocument);
 
-  final List<PdfStream> _dests = <PdfStream>[];
+  final PdfArray _dests = PdfArray();
 
   void addDest(
     String name,
@@ -32,27 +32,22 @@ class PdfNames extends PdfObject {
     assert(page.pdfDocument == pdfDocument);
     assert(name != null);
 
-    _dests.add(PdfStream()..putText(name));
-    _dests.add(PdfStream()
-      ..putDictionary(<String, PdfStream>{
-        '/D': PdfStream()
-          ..putArray(<PdfStream>[
-            page.ref(),
-            PdfStream.string('/XYZ'),
-            if (posX == null) PdfStream.string('null') else PdfStream.num(posX),
-            if (posY == null) PdfStream.string('null') else PdfStream.num(posY),
-            if (posZ == null) PdfStream.string('null') else PdfStream.num(posZ),
-          ]),
-      }));
+    _dests.add(PdfSecString.fromString(this, name));
+    _dests.add(PdfDict(<String, PdfDataType>{
+      '/D': PdfArray(<PdfDataType>[
+        page.ref(),
+        const PdfName('/XYZ'),
+        if (posX == null) const PdfNull() else PdfNum(posX),
+        if (posY == null) const PdfNull() else PdfNum(posY),
+        if (posZ == null) const PdfNull() else PdfNum(posZ),
+      ]),
+    }));
   }
 
   @override
   void _prepare() {
     super._prepare();
 
-    params['/Dests'] = PdfStream()
-      ..putDictionary(<String, PdfStream>{
-        '/Names': PdfStream()..putArray(_dests),
-      });
+    params['/Dests'] = PdfDict(<String, PdfDataType>{'/Names': _dests});
   }
 }

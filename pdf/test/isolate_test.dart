@@ -25,21 +25,13 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
+import 'utils.dart';
+
 class Message {
   Message(this.image, this.sendPort);
 
   final Uint8List image;
   final SendPort sendPort;
-}
-
-Future<Uint8List> download(String url) async {
-  final HttpClient client = HttpClient();
-  final HttpClientRequest request = await client.getUrl(Uri.parse(url));
-  final HttpClientResponse response = await request.close();
-  final BytesBuilder builder = await response.fold(
-      BytesBuilder(), (BytesBuilder b, List<int> d) => b..add(d));
-  final List<int> data = builder.takeBytes();
-  return Uint8List.fromList(data);
 }
 
 void compute(Message message) {
@@ -61,7 +53,7 @@ void main() {
     final ReceivePort receivePort = ReceivePort();
 
     receivePort.listen((dynamic data) async {
-      if (data is List<int>) {
+      if (data is Uint8List) {
         print('Received a ${data.length} bytes PDF');
         final File file = File('isolate.pdf');
         await file.writeAsBytes(data);

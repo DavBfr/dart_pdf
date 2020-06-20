@@ -139,10 +139,15 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
 
         channel.invokeMethod("onLayout", arguments: arg, result: { (result: Any?) -> Void in
             if result as? Bool == false {
-                printJob.cancelJob()
-            } else {
+                printJob.cancelJob(nil)
+            } else if result is FlutterError {
+                let error = result as! FlutterError
+                printJob.cancelJob(error.message)
+            } else if result is FlutterStandardTypedData {
                 let object = result as! FlutterStandardTypedData
                 printJob.setDocument(object.data)
+            } else {
+                printJob.cancelJob("Unknown data type")
             }
         })
     }

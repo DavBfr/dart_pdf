@@ -98,6 +98,9 @@ class PdfDocument {
   /// Object used to sign the document
   PdfSignature sign;
 
+  /// Graphics state, representing only opacity.
+  PdfGraphicStates _graphicStates;
+
   /// The PDF specification version
   final String version = '1.7';
 
@@ -113,14 +116,14 @@ class PdfDocument {
   final Set<PdfFont> fonts = <PdfFont>{};
 
   /// Generates the document ID
-  List<int> _documentID;
-  List<int> get documentID {
+  Uint8List _documentID;
+  Uint8List get documentID {
     if (_documentID == null) {
       final math.Random rnd = math.Random();
-      _documentID = sha256
+      _documentID = Uint8List.fromList(sha256
           .convert(DateTime.now().toIso8601String().codeUnits +
               List<int>.generate(32, (_) => rnd.nextInt(256)))
-          .bytes;
+          .bytes);
     }
 
     return _documentID;
@@ -149,6 +152,14 @@ class PdfDocument {
     return _outline;
   }
 
+  /// Graphic states for opacity and transfer modes
+  PdfGraphicStates get graphicStates {
+    _graphicStates ??= PdfGraphicStates(this);
+    return _graphicStates;
+  }
+
+  bool get hasGraphicStates => _graphicStates != null;
+
   /// This writes the document to an OutputStream.
   ///
   /// Note: You can call this as many times as you wish, as long as
@@ -171,7 +182,7 @@ class PdfDocument {
     pos.close();
   }
 
-  List<int> save() {
+  Uint8List save() {
     final PdfStream os = PdfStream();
     _write(os);
     return os.output();

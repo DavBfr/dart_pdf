@@ -17,11 +17,12 @@
 // ignore_for_file: omit_local_variable_types
 
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
-import 'package:test/test.dart';
 import 'package:pdf/widgets.dart';
+import 'package:test/test.dart';
+
+import 'utils.dart';
 
 Document pdf;
 Font openSans;
@@ -29,11 +30,6 @@ Font openSansBold;
 Font roboto;
 Font notoSans;
 Font genyomintw;
-
-Font loadFont(String filename) {
-  final Uint8List data = File(filename).readAsBytesSync();
-  return Font.ttf(data.buffer.asByteData());
-}
 
 void main() {
   setUpAll(() {
@@ -73,7 +69,7 @@ void main() {
   });
 
   test('Theme Page 1', () {
-    final Theme theme = Theme.withFont(base: roboto);
+    final ThemeData theme = ThemeData.withFont(base: roboto);
 
     pdf.addPage(Page(
       theme: theme,
@@ -84,7 +80,7 @@ void main() {
   });
 
   test('Theme Page 2', () {
-    final Theme theme = Theme.base().copyWith(
+    final ThemeData theme = ThemeData.base().copyWith(
       tableHeader: TextStyle(font: openSansBold),
       tableCell: TextStyle(font: roboto),
     );
@@ -107,11 +103,11 @@ void main() {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             Text('Hello default'),
-            InheritedWidget(
-              inherited: Theme.withFont(
+            Theme(
+              data: ThemeData.withFont(
                 base: roboto,
               ),
-              build: (Context context) => Text('Hello themed'),
+              child: Text('Hello themed'),
             ),
           ],
         ),
@@ -124,7 +120,7 @@ void main() {
         pageFormat: PdfPageFormat.a4,
         orientation: PageOrientation.portrait,
         margin: const EdgeInsets.all(8.0),
-        theme: Theme(
+        theme: ThemeData(
           defaultTextStyle: TextStyle(font: Font.courier(), fontSize: 10.0),
         ),
         build: (Context context) {

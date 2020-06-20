@@ -203,15 +203,8 @@ class InheritedWidget extends Widget {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    if (_context == null) {
-      // final Inherited inherited = build(context);
-      if (inherited != null) {
-        _context = context.inheritFrom(inherited);
-      }
-    }
-
-    _context ??= context;
-    _child ??= build(_context);
+    _context = inherited != null ? context.inheritFrom(inherited) : context;
+    _child = build(_context);
 
     if (_child != null) {
       _child.layout(_context, constraints, parentUsesSize: parentUsesSize);

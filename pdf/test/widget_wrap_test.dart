@@ -290,6 +290,33 @@ void main() {
     pdf.addPage(Page(build: (Context context) => Wrap()));
   });
 
+  test('Wrap Widget Columns', () {
+    final math.Random rnd = math.Random(42);
+
+    pdf.addPage(
+      MultiPage(
+        pageFormat: PdfPageFormat.standard,
+        build: (Context context) => <Widget>[
+          Wrap(
+            direction: Axis.vertical,
+            children: List<Widget>.generate(
+              50,
+              (int n) => Container(
+                width: PdfPageFormat.standard.availableWidth / 3,
+                padding: const EdgeInsets.only(left: 10, right: 10, bottom: 5),
+                child: Lorem(
+                  length: rnd.nextInt(30) + 10,
+                  random: rnd,
+                  textScaleFactor: .7,
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  });
+
   tearDownAll(() {
     final File file = File('widgets-wrap.pdf');
     file.writeAsBytesSync(pdf.save());

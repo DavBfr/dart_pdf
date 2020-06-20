@@ -19,27 +19,56 @@
 part of pdf;
 
 class PdfColor {
+  /// Create a color with red, green, blue and alpha components
+  /// values between 0 and 1
   const PdfColor(this.red, this.green, this.blue, [this.alpha = 1.0])
       : assert(red >= 0 && red <= 1),
         assert(green >= 0 && green <= 1),
         assert(blue >= 0 && blue <= 1),
         assert(alpha >= 0 && alpha <= 1);
 
+  /// Return a color with: 0xAARRGGBB
   const PdfColor.fromInt(int color)
       : red = (color >> 16 & 0xff) / 255.0,
         green = (color >> 8 & 0xff) / 255.0,
         blue = (color & 0xff) / 255.0,
         alpha = (color >> 24 & 0xff) / 255.0;
 
+  /// Can parse colors in the form:
+  /// * #RRGGBBAA
+  /// * #RRGGBB
+  /// * #RGB
+  /// * RRGGBBAA
+  /// * RRGGBB
+  /// * RGB
   factory PdfColor.fromHex(String color) {
     if (color.startsWith('#')) {
       color = color.substring(1);
     }
-    return PdfColor(
-        (int.parse(color.substring(0, 1), radix: 16) >> 16 & 0xff) / 255.0,
-        (int.parse(color.substring(2, 3), radix: 16) >> 8 & 0xff) / 255.0,
-        (int.parse(color.substring(4, 5), radix: 16) & 0xff) / 255.0,
-        (int.parse(color.substring(6, 7), radix: 16) >> 24 & 0xff) / 255.0);
+
+    double red;
+    double green;
+    double blue;
+    double alpha = 1;
+
+    if (color.length == 3) {
+      red = int.parse(color.substring(0, 1) * 2, radix: 16) / 255;
+      green = int.parse(color.substring(1, 2) * 2, radix: 16) / 255;
+      blue = int.parse(color.substring(2, 3) * 2, radix: 16) / 255;
+      return PdfColor(red, green, blue, alpha);
+    }
+
+    assert(color.length == 3 || color.length == 6 || color.length == 8);
+
+    red = int.parse(color.substring(0, 2), radix: 16) / 255;
+    green = int.parse(color.substring(2, 4), radix: 16) / 255;
+    blue = int.parse(color.substring(4, 6), radix: 16) / 255;
+
+    if (color.length == 8) {
+      alpha = int.parse(color.substring(6, 8), radix: 16) / 255;
+    }
+
+    return PdfColor(red, green, blue, alpha);
   }
 
   factory PdfColor.fromRYB(double red, double yellow, double blue,
@@ -113,7 +142,12 @@ class PdfColor {
           (((blue * 255.0).round() & 0xff) << 0)) &
       0xFFFFFFFF;
 
-  String toHex() => '#' + toInt().toRadixString(16);
+  String toHex() {
+    final int i = toInt();
+    final String rgb = (i & 0xffffff).toRadixString(16);
+    final String a = ((i & 0xff000000) >> 24).toRadixString(16);
+    return '#$rgb$a';
+  }
 
   PdfColorCmyk toCmyk() {
     return PdfColorCmyk.fromRgb(red, green, blue, alpha);
@@ -139,6 +173,18 @@ class PdfColor {
     final double G = _linearizeColorComponent(green);
     final double B = _linearizeColorComponent(blue);
     return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+  }
+
+  /// Build a Material Color shade using the given [strength].
+  ///
+  /// To lighten a color, set the [strength] value to < .5
+  /// To darken a color, set the [strength] value to > .5
+  PdfColor shade(double strength) {
+    final double ds = 1.5 - strength;
+    final PdfColorHsl hsl = toHsl();
+
+    return PdfColorHsl(
+        hsl.hue, hsl.saturation, (hsl.lightness * ds).clamp(0.0, 1.0));
   }
 
   /// Get a complementary color with hue shifted by -120°
@@ -247,8 +293,8 @@ class PdfColorHsv extends PdfColor {
       blue = secondary;
     }
 
-    return PdfColorHsv._(hue, saturation, value, red + match, green + match,
-        blue + match, alpha);
+    return PdfColorHsv._(hue, saturation, value, (red + match).clamp(0.0, 1.0),
+        (green + match).clamp(0.0, 1.0), (blue + match).clamp(0.0, 1.0), alpha);
   }
 
   const PdfColorHsv._(this.hue, this.saturation, this.value, double red,
@@ -375,13 +421,22 @@ class PdfColorHsl extends PdfColor {
       green = 0.0;
       blue = secondary;
     }
-    return PdfColorHsl._(hue, saturation, lightness, alpha, red + match,
-        green + match, blue + match);
+    return PdfColorHsl._(
+        hue,
+        saturation,
+        lightness,
+        alpha,
+        (red + match).clamp(0.0, 1.0),
+        (green + match).clamp(0.0, 1.0),
+        (blue + match).clamp(0.0, 1.0));
   }
 
   const PdfColorHsl._(this.hue, this.saturation, this.lightness, double alpha,
       double red, double green, double blue)
-      : super(red, green, blue, alpha);
+      : assert(hue >= 0 && hue < 360),
+        assert(saturation >= 0 && saturation <= 1),
+        assert(lightness >= 0 && lightness <= 1),
+        super(red, green, blue, alpha);
 
   factory PdfColorHsl.fromRgb(double red, double green, double blue,
       [double alpha = 1.0]) {

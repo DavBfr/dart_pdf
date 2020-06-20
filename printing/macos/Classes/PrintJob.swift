@@ -41,7 +41,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     }
 
     // Return the number of pages available for printing
-    public override func knowsPageRange(_ range: NSRangePointer) -> Bool {
+    override public func knowsPageRange(_ range: NSRangePointer) -> Bool {
         setFrameSize(printOperation!.printPanel.printInfo.paperSize)
         setBoundsSize(printOperation!.printPanel.printInfo.paperSize)
         range.pointee.length = pdfDocument?.numberOfPages ?? 0
@@ -49,7 +49,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     }
 
     // Return the drawing rectangle for a particular page number
-    public override func rectForPage(_ page: Int) -> NSRect {
+    override public func rectForPage(_ page: Int) -> NSRect {
         self.page = pdfDocument?.page(at: page)
         return self.page?.getBoxRect(CGPDFBox.mediaBox) ?? NSZeroRect
     }
@@ -68,7 +68,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         printOperation!.runModal(for: window, delegate: self, didRun: #selector(printOperationDidRun(printOperation:success:contextInfo:)), contextInfo: nil)
     }
 
-    public override func draw(_: NSRect) {
+    override public func draw(_: NSRect) {
         if pdfDocument != nil {
             let ctx = NSGraphicsContext.current?.cgContext
             if page != nil {
@@ -101,7 +101,9 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         )
     }
 
-    public func cancelJob() {}
+    func cancelJob(_ error: String?) {
+        printing.onCompleted(printJob: self, completed: false, error: error as NSString?)
+    }
 
     public static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String) {
         let tempFile = NSTemporaryDirectory() + name
@@ -183,9 +185,17 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
                 let stride = width * 4
                 var data = Data(repeating: 0, count: stride * height)
 
-                data.withUnsafeMutableBytes { (ptr: UnsafeMutablePointer<UInt8>) in
+                data.withUnsafeMutableBytes { (outputBytes: UnsafeMutableRawBufferPointer) in
                     let rgb = CGColorSpaceCreateDeviceRGB()
-                    let context = CGContext(data: ptr, width: width, height: height, bitsPerComponent: 8, bytesPerRow: stride, space: rgb, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+                    let context = CGContext(
+                        data: outputBytes.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                        width: width,
+                        height: height,
+                        bitsPerComponent: 8,
+                        bytesPerRow: stride,
+                        space: rgb,
+                        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+                    )
                     if context != nil {
                         context!.scaleBy(x: scale, y: scale)
                         context!.drawPDFPage(page)

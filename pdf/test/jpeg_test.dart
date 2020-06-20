@@ -16,29 +16,30 @@
 
 // ignore_for_file: omit_local_variable_types
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
+import 'utils.dart';
+
 Document pdf;
+PdfImage image;
 
 void main() {
-  setUpAll(() {
+  setUpAll(() async {
     Document.debug = true;
     pdf = Document();
-  });
 
-  test('Pdf Jpeg Download', () async {
-    final PdfImage image = PdfImage.jpeg(
+    image = PdfImage.jpeg(
       pdf.document,
       image: await download('https://www.nfet.net/nfet.jpg'),
     );
+  });
 
+  test('Pdf Jpeg Download', () async {
     pdf.addPage(Page(
       build: (Context context) => Center(child: Image(image)),
     ));
@@ -64,20 +65,57 @@ void main() {
     );
   });
 
+  test('Pdf Image fit', () async {
+    pdf.addPage(
+      MultiPage(
+        build: (Context context) =>
+            List<Widget>.generate(BoxFit.values.length, (int index) {
+          final BoxFit fit = BoxFit.values[index];
+          return SizedBox(
+            width: 200,
+            height: 100,
+            child: Image(
+              image,
+              fit: fit,
+            ),
+          );
+        }),
+      ),
+    );
+  });
+
+  test('Pdf Image decode', () {
+    final Iterable<Widget> imageWidgets = imageFiles.map<Widget>(
+      (String image) => SizedBox(
+        child: Image(
+          PdfImage.file(
+            pdf.document,
+            bytes: gzip.decode(base64.decode(image)),
+          ),
+        ),
+        width: 200,
+        height: 200,
+      ),
+    );
+
+    pdf.addPage(
+      Page(
+        build: (Context context) => Center(
+          child: Wrap(
+            spacing: 20,
+            runSpacing: 20,
+            alignment: WrapAlignment.spaceEvenly,
+            children: imageWidgets.toList(),
+          ),
+        ),
+      ),
+    );
+  });
+
   tearDownAll(() {
     final File file = File('jpeg.pdf');
     file.writeAsBytesSync(pdf.save());
   });
-}
-
-Future<Uint8List> download(String url) async {
-  final HttpClient client = HttpClient();
-  final HttpClientRequest request = await client.getUrl(Uri.parse(url));
-  final HttpClientResponse response = await request.close();
-  final BytesBuilder builder = await response.fold(
-      BytesBuilder(), (BytesBuilder b, List<int> d) => b..add(d));
-  final List<int> data = builder.takeBytes();
-  return Uint8List.fromList(data);
 }
 
 const List<String> images = <String>[
@@ -89,4 +127,10 @@ const List<String> images = <String>[
   '/9j/4AAQSkZJRgABAQEA3ADcAAD/4QAiRXhpZgAASUkqAAgAAAABABIBAwABAAAABgAAAAAAAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAwAFADASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAkI/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/EABQBAQAAAAAAAAAAAAAAAAAAAAD/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwDKgAKqAAAAAAAAlWACqgAJVgAqoAAACVYAAAAAAAAAP//Z',
   '/9j/4AAQSkZJRgABAQEA3ADcAAD/4QAiRXhpZgAASUkqAAgAAAABABIBAwABAAAABwAAAAAAAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAwAFADASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAkI/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/EABQBAQAAAAAAAAAAAAAAAAAAAAD/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwDVIAAAAAAAJVgAqoAAACVYAKqAAlWAAAAAAAAAAAD/2Q==',
   '/9j/4AAQSkZJRgABAQEA3ADcAAD/4QAiRXhpZgAASUkqAAgAAAABABIBAwABAAAACAAAAAAAAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAwAFADASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAkI/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/EABQBAQAAAAAAAAAAAAAAAAAAAAD/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwDKgAAAAAAAAAKqAAAAlWACqgAJVgAqoAAAAAAACVYAP//Z',
+];
+
+const List<String> imageFiles = <String>[
+  'H4sIAKx0cl4AA/t/4/8DBgEvN083BkZGRgYPIGT4f5vBmeE/pQBoCCPFhhxgEORgUGQwYmZUYmASZGQWZPx/hEEM7FQUwMgEFBcVQBdmEAQJY6hmAJkiIoguyvD/FgMPMyPQImZBBnuGVU0LGLS1GpoaVqiyCi1lm8gY4iDK4MAYwMDA/v8mAIKohPQ4AQAA',
+  'H4sIAAV2cl4AA+sM8HPn5ZLiYmBg4PX0cAkC0kZArMjBBCRF5PMvAylTTxfHkIjDb88ZMjIYcDAoxP5XM9vcsvrBS0bOEy+7quPmLFmKDrZ+Yjx0ienafeXk7UADGDxd/VzWOSU0AQCMWbgebgAAAA==',
+  'H4sIAFZ2cl4AA3P3dLMwTzRiUGRoYGDIXCUJRDoMQAASYWBSb+lfefot/+I5W251b7635zd/2yOPac86l706te0d9/FPPte/9T7/de41K4M1ANAWLyFIAAAA'
 ];

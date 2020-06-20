@@ -20,6 +20,32 @@ part of pdf;
 
 enum PdfLineCap { joinMiter, joinRound, joinBevel }
 
+enum PdfTextRenderingMode {
+  /// Fill text
+  fill,
+
+  /// Stroke text
+  stroke,
+
+  /// Fill, then stroke text
+  fillAndStroke,
+
+  /// Neither fill nor stroke text (invisible)
+  invisible,
+
+  /// Fill text and add to path for clipping
+  fillAndClip,
+
+  /// Stroke text and add to path for clipping
+  strokeAndClip,
+
+  /// Fill, then stroke text and add to path for clipping
+  fillStrokeAndClip,
+
+  /// Add text to path for clipping
+  clip
+}
+
 @immutable
 class _PdfGraphicsContext {
   const _PdfGraphicsContext({@required this.ctm}) : assert(ctm != null);
@@ -68,6 +94,13 @@ class PdfGraphics {
     buf.putString('W n\n');
   }
 
+  /// Apply a shader
+  void applyShader(PdfShading shader) {
+    // The shader needs to be registered in the page resources
+    page.shading[shader.name] = shader;
+    buf.putString('${shader.name} sh\n');
+  }
+
   /// This releases any resources used by this Graphics object. You must use
   /// this method once finished with it.
   ///
@@ -112,28 +145,28 @@ class PdfGraphics {
     buf.putString('q ');
     switch (img.orientation) {
       case PdfImageOrientation.topLeft:
-        buf.putNumList(<double>[w, 0, 0, h, x, y]);
+        PdfNumList(<double>[w, 0, 0, h, x, y]).output(buf);
         break;
       case PdfImageOrientation.topRight:
-        buf.putNumList(<double>[-w, 0, 0, h, w + x, y]);
+        PdfNumList(<double>[-w, 0, 0, h, w + x, y]).output(buf);
         break;
       case PdfImageOrientation.bottomRight:
-        buf.putNumList(<double>[-w, 0, 0, -h, w + x, h + y]);
+        PdfNumList(<double>[-w, 0, 0, -h, w + x, h + y]).output(buf);
         break;
       case PdfImageOrientation.bottomLeft:
-        buf.putNumList(<double>[w, 0, 0, -h, x, h + y]);
+        PdfNumList(<double>[w, 0, 0, -h, x, h + y]).output(buf);
         break;
       case PdfImageOrientation.leftTop:
-        buf.putNumList(<double>[0, -h, -w, 0, w + x, h + y]);
+        PdfNumList(<double>[0, -h, -w, 0, w + x, h + y]).output(buf);
         break;
       case PdfImageOrientation.rightTop:
-        buf.putNumList(<double>[0, -h, w, 0, x, h + y]);
+        PdfNumList(<double>[0, -h, w, 0, x, h + y]).output(buf);
         break;
       case PdfImageOrientation.rightBottom:
-        buf.putNumList(<double>[0, h, w, 0, x, y]);
+        PdfNumList(<double>[0, h, w, 0, x, y]).output(buf);
         break;
       case PdfImageOrientation.leftBottom:
-        buf.putNumList(<double>[0, h, -w, 0, w + x, y]);
+        PdfNumList(<double>[0, h, -w, 0, w + x, y]).output(buf);
         break;
     }
 
@@ -152,15 +185,6 @@ class PdfGraphics {
   void drawLine(double x1, double y1, double x2, double y2) {
     moveTo(x1, y1);
     lineTo(x2, y2);
-  }
-
-  /// Draws a polygon, linking the first and last coordinates.
-  ///
-  /// @param xp Array of x coordinates
-  /// @param yp Array of y coordinates
-  /// @param np number of points in polygon
-  void drawPolygon(PdfPolygon p) {
-    _polygon(p.points);
   }
 
   void drawEllipse(double x, double y, double r1, double r2) {
@@ -183,7 +207,7 @@ class PdfGraphics {
     double w,
     double h,
   ) {
-    buf.putNumList(<double>[x, y, w, h]);
+    PdfNumList(<double>[x, y, w, h]).output(buf);
     buf.putString(' re\n');
   }
 
@@ -213,18 +237,49 @@ class PdfGraphics {
   /// @param x coordinate
   /// @param y coordinate
   /// @param s String to draw
-  void drawString(PdfFont font, double size, String s, double x, double y) {
+  void drawString(
+    PdfFont font,
+    double size,
+    String s,
+    double x,
+    double y, {
+    double charSpace = 0,
+    double wordSpace = 0,
+    double scale = 1,
+    PdfTextRenderingMode mode = PdfTextRenderingMode.fill,
+    double rise = 0,
+  }) {
     if (!page.fonts.containsKey(font.name)) {
       page.fonts[font.name] = font;
     }
 
     buf.putString('BT ');
-    buf.putNumList(<double>[x, y]);
+    PdfNumList(<double>[x, y]).output(buf);
     buf.putString(' Td ${font.name} ');
-    buf.putNum(size);
+    PdfNum(size).output(buf);
     buf.putString(' Tf ');
-    buf.putStream(font.putText(s));
-    buf.putString(' Tj ET\n');
+    if (charSpace != 0) {
+      PdfNum(charSpace).output(buf);
+      buf.putString(' Tc ');
+    }
+    if (wordSpace != 0) {
+      PdfNum(wordSpace).output(buf);
+      buf.putString(' Tw ');
+    }
+    if (scale != 1) {
+      PdfNum(scale * 100).output(buf);
+      buf.putString(' Tz ');
+    }
+    if (rise != 0) {
+      PdfNum(rise).output(buf);
+      buf.putString(' Ts ');
+    }
+    if (mode != PdfTextRenderingMode.fill) {
+      buf.putString('${mode.index} Tr ');
+    }
+    buf.putString('[');
+    font.putText(buf, s);
+    buf.putString(']TJ ET\n');
   }
 
   /// Sets the color for drawing
@@ -240,11 +295,11 @@ class PdfGraphics {
   /// @param c Color to use
   void setFillColor(PdfColor color) {
     if (color is PdfColorCmyk) {
-      buf.putNumList(
-          <double>[color.cyan, color.magenta, color.yellow, color.black]);
+      PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
+          .output(buf);
       buf.putString(' k\n');
     } else {
-      buf.putNumList(<double>[color.red, color.green, color.blue]);
+      PdfNumList(<double>[color.red, color.green, color.blue]).output(buf);
       buf.putString(' rg\n');
     }
   }
@@ -254,19 +309,25 @@ class PdfGraphics {
   /// @param c Color to use
   void setStrokeColor(PdfColor color) {
     if (color is PdfColorCmyk) {
-      buf.putNumList(
-          <double>[color.cyan, color.magenta, color.yellow, color.black]);
+      PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
+          .output(buf);
       buf.putString(' K\n');
     } else {
-      buf.putNumList(<double>[color.red, color.green, color.blue]);
+      PdfNumList(<double>[color.red, color.green, color.blue]).output(buf);
       buf.putString(' RG\n');
     }
+  }
+
+  /// Set the graphic state for drawing
+  void setGraphicState(PdfGraphicState state) {
+    final String name = page.pdfDocument.graphicStates.stateName(state);
+    buf.putString('$name gs\n');
   }
 
   /// Set the transformation Matrix
   void setTransform(Matrix4 t) {
     final Float64List s = t.storage;
-    buf.putNumList(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]);
+    PdfNumList(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]).output(buf);
     buf.putString(' cm\n');
     _context.ctm.multiply(t);
   }
@@ -281,7 +342,7 @@ class PdfGraphics {
   /// @param x coordinate
   /// @param y coordinate
   void lineTo(double x, double y) {
-    buf.putNumList(<double>[x, y]);
+    PdfNumList(<double>[x, y]).output(buf);
     buf.putString(' l\n');
   }
 
@@ -290,7 +351,7 @@ class PdfGraphics {
   /// @param x coordinate
   /// @param y coordinate
   void moveTo(double x, double y) {
-    buf.putNumList(<double>[x, y]);
+    PdfNumList(<double>[x, y]).output(buf);
     buf.putString(' m\n');
   }
 
@@ -306,7 +367,7 @@ class PdfGraphics {
   /// @param y3 end point
   void curveTo(
       double x1, double y1, double x2, double y2, double x3, double y3) {
-    buf.putNumList(<double>[x1, y1, x2, y2, x3, y3]);
+    PdfNumList(<double>[x1, y1, x2, y2, x3, y3]).output(buf);
     buf.putString(' c\n');
   }
 
@@ -453,189 +514,9 @@ class PdfGraphics {
     }
   }
 
-  /// https://github.com/deeplook/svglib/blob/master/svglib/svglib.py#L911
   void drawShape(String d, {bool stroke = true}) {
-    final RegExp exp =
-        RegExp(r'([MmZzLlHhVvCcSsQqTtAaE])|(-[\.0-9]+)|([\.0-9]+)');
-    final Iterable<Match> matches = exp.allMatches(d + ' E');
-    String action;
-    String lastAction;
-    List<double> points;
-    PdfPoint lastControl = const PdfPoint(0, 0);
-    PdfPoint lastPoint = const PdfPoint(0, 0);
-    for (Match m in matches) {
-      final String a = m.group(1);
-      final String b = m.group(0);
-
-      if (a == null) {
-        points.add(double.parse(b));
-        continue;
-      }
-
-      if (action != null) {
-        switch (action) {
-          case 'm': // moveto relative
-            lastPoint =
-                PdfPoint(lastPoint.x + points[0], lastPoint.y + points[1]);
-            moveTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'M': // moveto absolute
-            lastPoint = PdfPoint(points[0], points[1]);
-            moveTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'l': // lineto relative
-            lastPoint =
-                PdfPoint(lastPoint.x + points[0], lastPoint.y + points[1]);
-            lineTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'L': // lineto absolute
-            lastPoint = PdfPoint(points[0], points[1]);
-            lineTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'H': // horizontal line absolute
-            lastPoint = PdfPoint(points[0], lastPoint.y);
-            lineTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'V': // vertical line absolute
-            lastPoint = PdfPoint(lastPoint.x, points[0]);
-            lineTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'h': // horizontal line relative
-            lastPoint = PdfPoint(lastPoint.x + points[0], lastPoint.y);
-            lineTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'v': // vertical line relative
-            lastPoint = PdfPoint(lastPoint.x, lastPoint.y + points[0]);
-            lineTo(lastPoint.x, lastPoint.y);
-            break;
-          case 'C': // cubic bezier, absolute
-            int len = 0;
-            while (len < points.length) {
-              curveTo(points[len + 0], points[len + 1], points[len + 2],
-                  points[len + 3], points[len + 4], points[len + 5]);
-              len += 6;
-            }
-            lastPoint =
-                PdfPoint(points[points.length - 2], points[points.length - 1]);
-            lastControl =
-                PdfPoint(points[points.length - 4], points[points.length - 3]);
-            break;
-          case 'S': // smooth cubic bézier, absolute
-            while (points.length >= 4) {
-              PdfPoint c1;
-              if ('cCsS'.contains(lastAction)) {
-                c1 = PdfPoint(lastPoint.x + (lastPoint.x - lastControl.x),
-                    lastPoint.y + (lastPoint.y - lastControl.y));
-              } else {
-                c1 = lastPoint;
-              }
-              lastControl = PdfPoint(points[0], points[1]);
-              lastPoint = PdfPoint(points[2], points[3]);
-              curveTo(c1.x, c1.y, lastControl.x, lastControl.y, lastPoint.x,
-                  lastPoint.y);
-              points = points.sublist(4);
-              lastAction = 'C';
-            }
-            break;
-          case 'c': // cubic bezier, relative
-            int len = 0;
-            while (len < points.length) {
-              points[len + 0] += lastPoint.x;
-              points[len + 1] += lastPoint.y;
-              points[len + 2] += lastPoint.x;
-              points[len + 3] += lastPoint.y;
-              points[len + 4] += lastPoint.x;
-              points[len + 5] += lastPoint.y;
-              curveTo(points[len + 0], points[len + 1], points[len + 2],
-                  points[len + 3], points[len + 4], points[len + 5]);
-              lastPoint = PdfPoint(points[len + 4], points[len + 5]);
-              lastControl = PdfPoint(points[len + 2], points[len + 3]);
-              len += 6;
-            }
-            break;
-          case 's': // smooth cubic bézier, relative
-            while (points.length >= 4) {
-              PdfPoint c1;
-              if ('cCsS'.contains(lastAction)) {
-                c1 = PdfPoint(lastPoint.x + (lastPoint.x - lastControl.x),
-                    lastPoint.y + (lastPoint.y - lastControl.y));
-              } else {
-                c1 = lastPoint;
-              }
-              lastControl =
-                  PdfPoint(points[0] + lastPoint.x, points[1] + lastPoint.y);
-              lastPoint =
-                  PdfPoint(points[2] + lastPoint.x, points[3] + lastPoint.y);
-              curveTo(c1.x, c1.y, lastControl.x, lastControl.y, lastPoint.x,
-                  lastPoint.y);
-              points = points.sublist(4);
-              lastAction = 'c';
-            }
-            break;
-          // case 'Q': // quadratic bezier, absolute
-          //   break;
-          // case 'T': // quadratic bezier, absolute
-          //   break;
-          // case 'q': // quadratic bezier, relative
-          //   break;
-          // case 't': // quadratic bezier, relative
-          //   break;
-          case 'A': // elliptical arc, absolute
-            int len = 0;
-            while (len < points.length) {
-              bezierArc(lastPoint.x, lastPoint.y, points[len + 0],
-                  points[len + 1], points[len + 5], points[len + 6],
-                  phi: points[len + 2] * math.pi / 180.0,
-                  large: points[len + 3] != 0.0,
-                  sweep: points[len + 4] != 0.0);
-              lastPoint = PdfPoint(points[len + 5], points[len + 6]);
-              len += 7;
-            }
-            break;
-          case 'a': // elliptical arc, relative
-            int len = 0;
-            while (len < points.length) {
-              points[len + 5] += lastPoint.x;
-              points[len + 6] += lastPoint.y;
-              bezierArc(lastPoint.x, lastPoint.y, points[len + 0],
-                  points[len + 1], points[len + 5], points[len + 6],
-                  phi: points[len + 2] * math.pi / 180.0,
-                  large: points[len + 3] != 0.0,
-                  sweep: points[len + 4] != 0.0);
-              lastPoint = PdfPoint(points[len + 5], points[len + 6]);
-              len += 7;
-            }
-            break;
-          case 'Z': // close path
-          case 'z': // close path
-            if (stroke) {
-              closePath();
-            }
-            break;
-          default:
-            print('Unknown path action: $action');
-        }
-      }
-      lastAction = action;
-      action = a;
-      points = <double>[];
-    }
-  }
-
-  /// This is used to add a polygon to the current path.
-  /// Used by drawPolygon()
-  ///
-  /// @param p Array of coordinates
-  /// @see #drawPolygon
-  /// @see #drawPolyline
-  /// @see #fillPolygon
-  void _polygon(List<PdfPoint> p) {
-    // newPath() not needed here as moveto does it ;-)
-    moveTo(p[0].x, p[0].y);
-
-    for (int i = 1; i < p.length; i++) {
-      lineTo(p[i].x, p[i].y);
-    }
+    final _PathProxy proxy = _PathProxy(this, stroke);
+    writeSvgPathDataToPath(d, proxy);
   }
 
   void setLineCap(PdfLineCap cap) {
@@ -647,12 +528,47 @@ class PdfGraphics {
   }
 
   void setLineWidth(double width) {
-    buf.putNum(width);
+    PdfNum(width).output(buf);
     buf.putString(' w\n');
   }
 
   void setMiterLimit(double limit) {
-    buf.putNum(limit);
+    PdfNum(limit).output(buf);
     buf.putString(' M\n');
+  }
+
+  void setLineDashPattern([List<int> array = const <int>[], int phase = 0]) {
+    PdfArray.fromNum(array).output(buf);
+    buf.putString(' $phase d\n');
+  }
+}
+
+class _PathProxy extends PathProxy {
+  _PathProxy(this.canvas, this.stroke);
+
+  final PdfGraphics canvas;
+  final bool stroke;
+
+  @override
+  void close() {
+    if (stroke) {
+      canvas.closePath();
+    }
+  }
+
+  @override
+  void cubicTo(
+      double x1, double y1, double x2, double y2, double x3, double y3) {
+    canvas.curveTo(x1, y1, x2, y2, x3, y3);
+  }
+
+  @override
+  void lineTo(double x, double y) {
+    canvas.lineTo(x, y);
+  }
+
+  @override
+  void moveTo(double x, double y) {
+    canvas.moveTo(x, y);
   }
 }

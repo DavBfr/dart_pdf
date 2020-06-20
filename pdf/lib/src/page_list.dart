@@ -32,7 +32,7 @@ class PdfPageList extends PdfObject {
   void _prepare() {
     super._prepare();
 
-    params['/Kids'] = PdfStream()..putObjectArray(pages);
-    params['/Count'] = PdfStream.intNum(pages.length);
+    params['/Kids'] = PdfArray.fromObjects(pages);
+    params['/Count'] = PdfNum(pages.length);
   }
 }

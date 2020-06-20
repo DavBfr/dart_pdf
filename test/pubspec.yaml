@@ -10,15 +10,15 @@ environment:
   sdk: ">=2.1.0 <3.0.0"
   flutter: "^1.2.0"
 
-dependencies:  
+dependencies:
   flutter:
     sdk: flutter
   markdown:
-  meta: 
-  string_scanner: 
+  meta:
+  string_scanner:
   pdf:
   printing:
-  path: 
+  path:
   image:
   path_provider:
 

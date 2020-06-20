@@ -15,6 +15,9 @@
  */
 
 // ignore_for_file: omit_local_variable_types
+// https://github.com/agawish/Better-Arabic-Reshaper/tree/master/src/org/amr/arabic
+// http://mpcabd.xyz/python-arabic-text-reshaper/
+// https://github.com/Georeactor/alif-toolkit/tree/master/src
 
 part of pdf;
 

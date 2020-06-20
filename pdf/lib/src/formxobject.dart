@@ -20,8 +20,8 @@ part of pdf;
 
 class PdfFormXObject extends PdfXObject {
   PdfFormXObject(PdfDocument pdfDocument) : super(pdfDocument, '/Form') {
-    params['/FormType'] = PdfStream.string('1');
-    params['/BBox'] = PdfStream.string('[0 0 1000 1000]');
+    params['/FormType'] = const PdfNum(1);
+    params['/BBox'] = PdfArray.fromNum(const <int>[0, 0, 1000, 1000]);
   }
 
   /// The fonts associated with this page
@@ -34,7 +34,7 @@ class PdfFormXObject extends PdfXObject {
   void setMatrix(Matrix4 t) {
     final Float64List s = t.storage;
     params['/Matrix'] =
-        PdfStream.string('[${s[0]} ${s[1]} ${s[4]} ${s[5]} ${s[12]} ${s[13]}]');
+        PdfArray.fromNum(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]);
   }
 
   @override
@@ -43,20 +43,20 @@ class PdfFormXObject extends PdfXObject {
 
     // Now the resources
     /// This holds any resources for this FormXObject
-    final Map<String, PdfStream> resources = <String, PdfStream>{};
+    final PdfDict resources = PdfDict();
 
     // fonts
     if (fonts.isNotEmpty) {
-      resources['/Font'] = PdfStream()..putObjectDictionary(fonts);
+      resources['/Font'] = PdfDict.fromObjectMap(fonts);
     }
 
     // Now the XObjects
     if (xobjects.isNotEmpty) {
-      resources['/XObject'] = PdfStream()..putObjectDictionary(xobjects);
+      resources['/XObject'] = PdfDict.fromObjectMap(xobjects);
     }
 
     if (resources.isNotEmpty) {
-      params['/Resources'] = PdfStream.dictionary(resources);
+      params['/Resources'] = resources;
     }
   }
 }

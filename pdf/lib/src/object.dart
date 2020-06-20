@@ -24,14 +24,14 @@ class PdfObject {
       : assert(pdfDocument != null),
         objser = pdfDocument._genSerial() {
     if (type != null) {
-      params['/Type'] = PdfStream.string(type);
+      params['/Type'] = PdfName(type);
     }
 
     pdfDocument.objects.add(this);
   }
 
   /// This is the object parameters.
-  final Map<String, PdfStream> params = <String, PdfStream>{};
+  final PdfDict params = PdfDict();
 
   /// This is the unique serial number for this object.
   final int objser;
@@ -72,7 +72,7 @@ class PdfObject {
 
   void _writeContent(PdfStream os) {
     if (params.isNotEmpty) {
-      os.putDictionary(params);
+      params.output(os);
       os.putString('\n');
     }
   }
@@ -89,5 +89,5 @@ class PdfObject {
 
   /// Returns the unique serial number in Pdf format
   /// @return the serial number in Pdf format
-  PdfStream ref() => PdfStream.string('$objser $objgen R');
+  PdfIndirect ref() => PdfIndirect(objser, objgen);
 }

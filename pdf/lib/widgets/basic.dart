@@ -333,9 +333,8 @@ class Align extends SingleChildWidget {
       return;
     }
 
-    if (child.box.bottom > box.bottom) {
-      final double headSize =
-          math.min((child.box.bottom - box.bottom) * 0.2, 10);
+    if (child.box.bottom > 0) {
+      final double headSize = math.min((child.box.bottom) * 0.2, 10);
       context.canvas
         ..moveTo(
           box.left + child.box.horizondalCenter,
@@ -366,8 +365,8 @@ class Align extends SingleChildWidget {
             box.bottom + child.box.top + headSize);
     }
 
-    if (child.box.left > box.left) {
-      final double headSize = math.min((child.box.left - box.left) * 0.2, 10);
+    if (child.box.left > 0) {
+      final double headSize = math.min((child.box.left) * 0.2, 10);
       context.canvas
         ..moveTo(box.left, box.bottom + child.box.verticalCenter)
         ..lineTo(
@@ -739,5 +738,139 @@ class FullPage extends SingleChildWidget {
       ..setTransform(mat);
     child.paint(context);
     context.canvas.restoreContext();
+  }
+}
+
+class Opacity extends SingleChildWidget {
+  Opacity({
+    @required this.opacity,
+    Widget child,
+  })  : assert(opacity != null),
+        super(child: child);
+
+  final double opacity;
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+
+    if (child != null) {
+      final Matrix4 mat = Matrix4.identity();
+      mat.translate(box.x, box.y);
+      context.canvas
+        ..saveContext()
+        ..setTransform(mat)
+        ..setGraphicState(PdfGraphicState(opacity: opacity));
+      child.paint(context);
+      context.canvas.restoreContext();
+    }
+  }
+}
+
+class Divider extends StatelessWidget {
+  Divider({
+    this.height,
+    this.thickness,
+    this.indent,
+    this.endIndent,
+    this.color,
+  })  : assert(height == null || height >= 0.0),
+        assert(thickness == null || thickness >= 0.0),
+        assert(indent == null || indent >= 0.0),
+        assert(endIndent == null || endIndent >= 0.0);
+
+  /// The color to use when painting the line.
+  final PdfColor color;
+
+  /// The amount of empty space to the trailing edge of the divider.
+  final double endIndent;
+
+  /// The divider's height extent.
+  final double height;
+
+  /// The amount of empty space to the leading edge of the divider.
+  final double indent;
+
+  /// The thickness of the line drawn within the divider.
+  final double thickness;
+
+  @override
+  Widget build(Context context) {
+    final double height = this.height ?? 16;
+    final double thickness = this.thickness ?? 1;
+    final double indent = this.indent ?? 0;
+    final double endIndent = this.endIndent ?? 0;
+    final PdfColor color = this.color ?? PdfColors.black;
+
+    return SizedBox(
+      height: height,
+      child: Center(
+        child: Container(
+          height: thickness,
+          margin: EdgeInsets.only(left: indent, right: endIndent),
+          decoration: BoxDecoration(
+            border: BoxBorder(
+              bottom: true,
+              color: color,
+              width: thickness,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class VerticalDivider extends StatelessWidget {
+  VerticalDivider({
+    this.width,
+    this.thickness,
+    this.indent,
+    this.endIndent,
+    this.color,
+  })  : assert(width == null || width >= 0.0),
+        assert(thickness == null || thickness >= 0.0),
+        assert(indent == null || indent >= 0.0),
+        assert(endIndent == null || endIndent >= 0.0);
+
+  /// The color to use when painting the line.
+  final PdfColor color;
+
+  /// The amount of empty space to the trailing edge of the divider.
+  final double endIndent;
+
+  /// The divider's width extent.
+  final double width;
+
+  /// The amount of empty space to the leading edge of the divider.
+  final double indent;
+
+  /// The thickness of the line drawn within the divider.
+  final double thickness;
+
+  @override
+  Widget build(Context context) {
+    final double width = this.width ?? 16;
+    final double thickness = this.thickness ?? 1;
+    final double indent = this.indent ?? 0;
+    final double endIndent = this.endIndent ?? 0;
+    final PdfColor color = this.color ?? PdfColors.black;
+
+    return SizedBox(
+      width: width,
+      child: Center(
+        child: Container(
+          width: thickness,
+          margin: EdgeInsets.only(top: indent, bottom: endIndent),
+          decoration: BoxDecoration(
+            border: BoxBorder(
+              left: true,
+              color: color,
+              width: thickness,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

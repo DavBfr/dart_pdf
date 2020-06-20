@@ -31,7 +31,7 @@ List<TableRow> buildTable(
   final List<TableRow> rows = <TableRow>[];
   {
     final List<Widget> tableRow = <Widget>[];
-    for (String cell in <String>['Hue', 'Color', 'ARGB']) {
+    for (String cell in <String>['Hue', 'Color', 'RGBA']) {
       tableRow.add(Container(
           alignment: Alignment.center,
           margin: const EdgeInsets.all(5),
@@ -141,6 +141,93 @@ void main() {
           1: const FlexColumnWidth(2),
           2: const FractionColumnWidth(.2),
         },
+      ),
+    ));
+  });
+
+  test('Table Widget TableCellVerticalAlignment', () {
+    pdf.addPage(
+      MultiPage(
+        build: (Context context) {
+          return <Widget>[
+            Table(
+              defaultColumnWidth: const FixedColumnWidth(20),
+              children: List<TableRow>.generate(
+                TableCellVerticalAlignment.values.length,
+                (int index) {
+                  final TableCellVerticalAlignment align =
+                      TableCellVerticalAlignment.values[
+                          index % TableCellVerticalAlignment.values.length];
+
+                  return TableRow(
+                    verticalAlignment: align,
+                    children: <Widget>[
+                      Container(
+                        child: Text('Vertical'),
+                        color: PdfColors.red,
+                      ),
+                      Container(
+                        child: Text('alignment $index'),
+                        color: PdfColors.yellow,
+                        height: 60,
+                      ),
+                      Container(
+                        child: Text(align.toString().substring(27)),
+                        color: PdfColors.green,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ];
+        },
+      ),
+    );
+  });
+
+  test('Table fromTextArray', () {
+    pdf.addPage(Page(
+      build: (Context context) => Table.fromTextArray(
+        context: context,
+        tableWidth: TableWidth.min,
+        data: <List<dynamic>>[
+          <dynamic>['One', 'Two', 'Three'],
+          <dynamic>[1, 2, 3],
+          <dynamic>[4, 5, 6],
+        ],
+      ),
+    ));
+  });
+
+  test('Table fromTextArray with formatting', () {
+    pdf.addPage(Page(
+      build: (Context context) => Table.fromTextArray(
+        border: null,
+        cellAlignment: Alignment.center,
+        headerDecoration: const BoxDecoration(
+          borderRadius: 2,
+          color: PdfColors.indigo,
+        ),
+        headerHeight: 25,
+        cellHeight: 40,
+        headerStyle: TextStyle(
+          color: PdfColors.white,
+          fontWeight: FontWeight.bold,
+        ),
+        rowDecoration: const BoxDecoration(
+          border: BoxBorder(
+            bottom: true,
+            color: PdfColors.indigo,
+            width: .5,
+          ),
+        ),
+        headers: <dynamic>['One', 'Two', 'Three'],
+        data: <List<dynamic>>[
+          <dynamic>[1, 2, 3],
+          <dynamic>[4, 5, 6],
+          <dynamic>[7, 8, 9],
+        ],
       ),
     ));
   });

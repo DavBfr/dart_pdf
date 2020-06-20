@@ -14,19 +14,10 @@
  * limitations under the License.
  */
 
-part of printing;
-
+/// Capabilities supported for the current platform
 class PrintingInfo {
-  factory PrintingInfo.fromMap(Map<dynamic, dynamic> map) => PrintingInfo._(
-        directPrint: map['directPrint'] ?? false,
-        dynamicLayout: map['dynamicLayout'] ?? false,
-        canPrint: map['canPrint'],
-        canConvertHtml: map['canConvertHtml'],
-        canShare: map['canShare'],
-        canRaster: map['canRaster'],
-      );
-
-  const PrintingInfo._({
+  /// Create an information object
+  const PrintingInfo({
     this.directPrint = false,
     this.dynamicLayout = false,
     this.canPrint = false,
@@ -40,13 +31,38 @@ class PrintingInfo {
         assert(canShare != null),
         assert(canRaster != null);
 
-  static const PrintingInfo unavailable = PrintingInfo._();
+  /// Create an information object from a dictionnary
+  factory PrintingInfo.fromMap(Map<dynamic, dynamic> map) => PrintingInfo(
+        directPrint: map['directPrint'] ?? false,
+        dynamicLayout: map['dynamicLayout'] ?? false,
+        canPrint: map['canPrint'] ?? false,
+        canConvertHtml: map['canConvertHtml'] ?? false,
+        canShare: map['canShare'] ?? false,
+        canRaster: map['canRaster'] ?? false,
+      );
 
+  /// Default information with no feature available
+  static const PrintingInfo unavailable = PrintingInfo();
+
+  /// The platform can print directly to a printer
   final bool directPrint;
+
+  /// The platform can request a dynamic layout when the user change
+  /// the printer or printer settings
   final bool dynamicLayout;
+
+  /// The platform implementation is able to print a Pdf document
   final bool canPrint;
+
+  /// The platform implementation is able to convert an html document to Pdf
   final bool canConvertHtml;
+
+  /// The platform implementation is able to share a Pdf document
+  /// to other applications
   final bool canShare;
+
+  /// The platform implementation is able to convert pages from a Pdf document
+  /// to a stream of images
   final bool canRaster;
 
   @override
@@ -57,4 +73,16 @@ class PrintingInfo {
   canConvertHtml: $canConvertHtml
   canShare: $canShare
   canRaster: $canRaster''';
+
+  /// Returns a map representation of this object
+  Map<dynamic, dynamic> asMap() {
+    return <dynamic, dynamic>{
+      'canPrint': canPrint,
+      'directPrint': directPrint,
+      'dynamicLayout': dynamicLayout,
+      'canConvertHtml': canConvertHtml,
+      'canShare': canShare,
+      'canRaster': canRaster,
+    };
+  }
 }

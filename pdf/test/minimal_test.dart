@@ -23,7 +23,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('Pdf Minimal', () {
-    final PdfDocument pdf = PdfDocument();
+    final PdfDocument pdf = PdfDocument(compress: false);
     final PdfPage page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
 
     final PdfGraphics g = page.getGraphics();

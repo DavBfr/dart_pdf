@@ -21,13 +21,22 @@ part of widget;
 /// A horizontal group of cells in a [Table].
 @immutable
 class TableRow {
-  const TableRow({this.children, this.repeat = false});
+  const TableRow({
+    this.children,
+    this.repeat = false,
+    this.verticalAlignment,
+    this.decoration,
+  });
 
   /// The widgets that comprise the cells in this row.
   final List<Widget> children;
 
   /// Repeat this row on all pages
   final bool repeat;
+
+  final BoxDecoration decoration;
+
+  final TableCellVerticalAlignment verticalAlignment;
 }
 
 enum TableCellVerticalAlignment { bottom, middle, top }
@@ -84,6 +93,24 @@ class TableBorder extends BoxBorder {
 class _TableContext extends WidgetContext {
   int firstLine = 0;
   int lastLine = 0;
+
+  @override
+  void apply(WidgetContext other) {
+    if (other is _TableContext) {
+      firstLine = other.firstLine;
+      lastLine = other.lastLine;
+    }
+  }
+
+  @override
+  WidgetContext clone() {
+    return _TableContext()
+      ..firstLine = firstLine
+      ..lastLine = lastLine;
+  }
+
+  @override
+  String toString() => '$runtimeType firstLine: $firstLine lastLine: $lastLine';
 }
 
 class _ColumnLayout {
@@ -160,48 +187,163 @@ class FractionColumnWidth extends TableColumnWidth {
   }
 }
 
+typedef OnCellFormat = String Function(int index, dynamic data);
+
 /// A widget that uses the table layout algorithm for its children.
 class Table extends Widget implements SpanningWidget {
-  Table(
-      {this.children = const <TableRow>[],
-      this.border,
-      this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
-      this.columnWidths,
-      this.defaultColumnWidth = const IntrinsicColumnWidth(),
-      this.tableWidth = TableWidth.max})
-      : assert(children != null),
+  Table({
+    this.children = const <TableRow>[],
+    this.border,
+    this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
+    this.columnWidths,
+    this.defaultColumnWidth = const IntrinsicColumnWidth(),
+    this.tableWidth = TableWidth.max,
+  })  : assert(children != null),
         assert(defaultColumnWidth != null),
+        assert(defaultVerticalAlignment != null),
         super();
 
-  factory Table.fromTextArray(
-      {@required Context context, @required List<List<String>> data}) {
+  factory Table.fromTextArray({
+    Context context,
+    @required List<List<dynamic>> data,
+    @deprecated EdgeInsets margin,
+    EdgeInsets cellPadding = const EdgeInsets.all(5),
+    double cellHeight = 0,
+    Alignment cellAlignment = Alignment.topLeft,
+    Map<int, Alignment> cellAlignments,
+    TextStyle cellStyle,
+    TextStyle oddCellStyle,
+    OnCellFormat cellFormat,
+    int headerCount = 1,
+    List<dynamic> headers,
+    EdgeInsets headerPadding,
+    double headerHeight,
+    Alignment headerAlignment = Alignment.center,
+    Map<int, Alignment> headerAlignments,
+    TextStyle headerStyle,
+    OnCellFormat headerFormat,
+    TableBorder border = const TableBorder(),
+    Map<int, TableColumnWidth> columnWidths,
+    IntrinsicColumnWidth defaultColumnWidth = const IntrinsicColumnWidth(),
+    TableWidth tableWidth = TableWidth.max,
+    BoxDecoration headerDecoration,
+    BoxDecoration rowDecoration,
+    BoxDecoration oddRowDecoration,
+  }) {
+    assert(data != null);
+    assert(headerCount != null && headerCount >= 0);
+    assert(cellHeight != null);
+
+    if (margin != null) {
+      cellPadding = margin;
+    }
+
+    if (context != null) {
+      final ThemeData theme = Theme.of(context);
+      headerStyle ??= theme.tableHeader;
+      cellStyle ??= theme.tableCell;
+    }
+
+    headerPadding ??= cellPadding;
+    headerHeight ??= cellHeight;
+    oddRowDecoration ??= rowDecoration;
+    oddCellStyle ??= cellStyle;
+    cellAlignments ??= const <int, Alignment>{};
+    headerAlignments ??= cellAlignments;
+
     final List<TableRow> rows = <TableRow>[];
-    for (List<String> row in data) {
+
+    int rowNum = 0;
+    if (headers != null) {
       final List<Widget> tableRow = <Widget>[];
-      if (row == data.first) {
-        for (String cell in row) {
-          tableRow.add(Container(
-              alignment: Alignment.center,
-              margin: const EdgeInsets.all(5),
-              child: Text(cell, style: Theme.of(context).tableHeader)));
+
+      for (final dynamic cell in headers) {
+        tableRow.add(
+          Container(
+            alignment: headerAlignments[tableRow.length] ?? headerAlignment,
+            padding: headerPadding,
+            constraints: BoxConstraints(minHeight: headerHeight),
+            child: Text(
+              headerFormat == null
+                  ? cell.toString()
+                  : headerFormat(tableRow.length, cell),
+              style: headerStyle,
+            ),
+          ),
+        );
+      }
+      rows.add(TableRow(
+        children: tableRow,
+        repeat: true,
+        decoration: headerDecoration,
+      ));
+      rowNum++;
+    }
+
+    for (final List<dynamic> row in data) {
+      final List<Widget> tableRow = <Widget>[];
+      final bool isOdd = (rowNum - headerCount) % 2 != 0;
+
+      if (rowNum < headerCount) {
+        for (final dynamic cell in row) {
+          tableRow.add(
+            Container(
+              alignment: headerAlignments[tableRow.length] ?? headerAlignment,
+              padding: headerPadding,
+              constraints: BoxConstraints(minHeight: headerHeight),
+              child: Text(
+                headerFormat == null
+                    ? cell.toString()
+                    : headerFormat(tableRow.length, cell),
+                style: headerStyle,
+              ),
+            ),
+          );
         }
       } else {
-        for (String cell in row) {
-          tableRow.add(Container(
-              margin: const EdgeInsets.all(5),
-              child: Text(cell, style: Theme.of(context).tableCell)));
+        for (final dynamic cell in row) {
+          tableRow.add(
+            Container(
+              alignment: cellAlignments[tableRow.length] ?? cellAlignment,
+              padding: cellPadding,
+              constraints: BoxConstraints(minHeight: cellHeight),
+              child: Text(
+                cellFormat == null
+                    ? cell.toString()
+                    : cellFormat(tableRow.length, cell),
+                style: isOdd ? oddCellStyle : cellStyle,
+              ),
+            ),
+          );
         }
       }
-      rows.add(TableRow(children: tableRow, repeat: row == data.first));
+
+      BoxDecoration decoration = isOdd ? oddRowDecoration : rowDecoration;
+      if (rowNum < headerCount) {
+        decoration = headerDecoration;
+      }
+
+      rows.add(TableRow(
+        children: tableRow,
+        repeat: rowNum < headerCount,
+        decoration: decoration,
+      ));
+      rowNum++;
     }
     return Table(
-        border: const TableBorder(),
-        tableWidth: TableWidth.max,
-        children: rows);
+      border: border,
+      tableWidth: tableWidth,
+      children: rows,
+      columnWidths: columnWidths,
+      defaultColumnWidth: defaultColumnWidth,
+    );
   }
 
   @override
   bool get canSpan => true;
+
+  @override
+  bool get hasMoreWidgets => true;
 
   /// The rows of the table.
   final List<TableRow> children;
@@ -215,7 +357,7 @@ class Table extends Widget implements SpanningWidget {
   final List<double> _widths = <double>[];
   final List<double> _heights = <double>[];
 
-  _TableContext _context = _TableContext();
+  final _TableContext _context = _TableContext();
 
   final TableColumnWidth defaultColumnWidth;
   final Map<int, TableColumnWidth> columnWidths;
@@ -227,7 +369,7 @@ class Table extends Widget implements SpanningWidget {
 
   @override
   void restoreContext(WidgetContext context) {
-    _context = context;
+    _context.apply(context);
     _context.firstLine = _context.lastLine;
   }
 
@@ -331,22 +473,44 @@ class Table extends Widget implements SpanningWidget {
 
     // Compute final y position
     index = 0;
+    int heightIndex = 0;
     for (TableRow row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
 
+      final TableCellVerticalAlignment align =
+          row.verticalAlignment ?? defaultVerticalAlignment;
+
       for (Widget child in row.children) {
+        double childY;
+
+        switch (align) {
+          case TableCellVerticalAlignment.bottom:
+            childY = totalHeight - child.box.y - _heights[heightIndex];
+            break;
+          case TableCellVerticalAlignment.middle:
+            childY = totalHeight -
+                child.box.y -
+                (_heights[heightIndex] + child.box.height) / 2;
+            break;
+          case TableCellVerticalAlignment.top:
+            childY = totalHeight - child.box.y - child.box.height;
+            break;
+        }
+
         child.box = PdfRect(
-            child.box.x,
-            totalHeight - child.box.y - child.box.height,
-            child.box.width,
-            child.box.height);
+          child.box.x,
+          childY,
+          child.box.width,
+          child.box.height,
+        );
       }
 
       if (index >= _context.lastLine) {
         break;
       }
+      heightIndex++;
     }
 
     box = PdfRect(0, 0, totalWidth, totalHeight);
@@ -356,21 +520,31 @@ class Table extends Widget implements SpanningWidget {
   void paint(Context context) {
     super.paint(context);
 
+    if (_context.lastLine == 0) {
+      return;
+    }
+
     final Matrix4 mat = Matrix4.identity();
     mat.translate(box.x, box.y);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
 
-    if (_context.lastLine == 0) {
-      return;
-    }
-
     int index = 0;
     for (TableRow row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
+
+      final Widget child = row.children.first;
+      if (child != null && row.decoration != null) {
+        row.decoration.paint(
+          context,
+          PdfRect(0, child.box.y, box.width, child.box.height),
+          PaintPhase.background,
+        );
+      }
+
       for (Widget child in row.children) {
         context.canvas
           ..saveContext()
@@ -384,6 +558,27 @@ class Table extends Widget implements SpanningWidget {
         break;
       }
     }
+
+    index = 0;
+    for (TableRow row in children) {
+      if (index++ < _context.firstLine && !row.repeat) {
+        continue;
+      }
+
+      final Widget child = row.children.first;
+      if (child != null && row.decoration != null) {
+        row.decoration.paint(
+          context,
+          PdfRect(0, child.box.y, box.width, child.box.height),
+          PaintPhase.foreground,
+        );
+      }
+
+      if (index >= _context.lastLine) {
+        break;
+      }
+    }
+
     context.canvas.restoreContext();
 
     if (border != null) {

@@ -19,12 +19,18 @@
 part of pdf;
 
 class PdfUnicodeCmap extends PdfObjectStream {
-  PdfUnicodeCmap(PdfDocument pdfDocument) : super(pdfDocument);
+  PdfUnicodeCmap(PdfDocument pdfDocument, this.protect) : super(pdfDocument);
 
   final List<int> cmap = <int>[0];
 
+  final bool protect;
+
   @override
   void _prepare() {
+    if (protect) {
+      cmap.fillRange(1, cmap.length, 0x20);
+    }
+
     buf.putString('/CIDInit/ProcSet findresource begin\n'
         '12 dict begin\n'
         'begincmap\n'

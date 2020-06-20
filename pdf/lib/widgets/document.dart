@@ -55,18 +55,23 @@ class Document {
 
   final PdfDocument document;
 
-  final Theme theme;
+  final ThemeData theme;
 
   final List<Page> _pages = <Page>[];
+
+  bool _paint = false;
 
   void addPage(Page page) {
     page.generate(this);
     _pages.add(page);
   }
 
-  List<int> save() {
-    for (Page page in _pages) {
-      page.postProcess(this);
+  Uint8List save() {
+    if (!_paint) {
+      for (Page page in _pages) {
+        page.postProcess(this);
+      }
+      _paint = true;
     }
     return document.save();
   }

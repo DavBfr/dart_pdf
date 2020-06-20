@@ -55,13 +55,17 @@ class PdfJpegInfo {
       final int len = buffer.getUint16(offset);
       offset += 2;
 
-      if (mrkr == 0xc0) {
+      if (mrkr >= 0xc0 && mrkr <= 0xc2) {
         height = buffer.getUint16(offset + 1);
         width = buffer.getUint16(offset + 3);
         color = buffer.getUint8(offset + 5);
         break;
       }
       offset += len - 2;
+    }
+
+    if (height == null) {
+      throw 'Unable to find a Jpeg image in the file';
     }
 
     final Map<PdfExifTag, dynamic> tags = _findExifInJpeg(buffer);
@@ -92,10 +96,17 @@ class PdfJpegInfo {
           ? null
           : utf8.decode(tags[PdfExifTag.FlashpixVersion]);
 
-  PdfImageOrientation get orientation =>
-      tags == null || tags[PdfExifTag.Orientation] == null
-          ? PdfImageOrientation.topLeft
-          : PdfImageOrientation.values[tags[PdfExifTag.Orientation] - 1];
+  PdfImageOrientation get orientation {
+    if (tags == null || tags[PdfExifTag.Orientation] == null) {
+      return PdfImageOrientation.topLeft;
+    }
+
+    try {
+      return PdfImageOrientation.values[tags[PdfExifTag.Orientation] - 1];
+    } on RangeError {
+      return PdfImageOrientation.topLeft;
+    }
+  }
 
   double get xResolution => tags == null || tags[PdfExifTag.XResolution] == null
       ? null

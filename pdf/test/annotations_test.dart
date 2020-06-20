@@ -29,18 +29,35 @@ void main() {
     final PdfPage page1 =
         PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
 
+    pdf.pdfNames.addDest('target', page1, posY: 100);
+
     final PdfGraphics g = page.getGraphics();
 
-    PdfAnnot.text(page,
-        content: 'Hello', rect: const PdfRect(100, 100, 50, 50));
+    PdfAnnot(
+      page,
+      const PdfAnnotText(
+        rect: PdfRect(100, 100, 50, 50),
+        content: 'Hello',
+      ),
+    );
 
-    PdfAnnot.link(page, dest: page1, srcRect: const PdfRect(100, 150, 50, 50));
+    PdfAnnot(
+      page,
+      const PdfAnnotNamedLink(
+        dest: 'target',
+        rect: PdfRect(100, 150, 50, 50),
+      ),
+    );
     g.drawRect(100, 150, 50, 50);
     g.strokePath();
 
-    PdfAnnot.urlLink(page,
-        rect: const PdfRect(100, 250, 50, 50),
-        dest: 'https://github.com/DavBfr/dart_pdf/');
+    PdfAnnot(
+      page,
+      const PdfAnnotUrlLink(
+        rect: PdfRect(100, 250, 50, 50),
+        url: 'https://github.com/DavBfr/dart_pdf/',
+      ),
+    );
     g.drawRect(100, 250, 50, 50);
     g.strokePath();
 

@@ -18,6 +18,7 @@ package net.nfet.flutter.printing;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.pdf.PdfRenderer;
@@ -58,14 +59,14 @@ import java.util.HashMap;
 public class PrintingJob extends PrintDocumentAdapter {
     private static PrintManager printManager;
     private final Context context;
-    private final PrintingPlugin printing;
+    private final PrintingHandler printing;
     private PrintJob printJob;
     private byte[] documentData;
     private String jobName;
     private LayoutResultCallback callback;
     int index;
 
-    PrintingJob(Context context, PrintingPlugin printing, int index) {
+    PrintingJob(Context context, PrintingHandler printing, int index) {
         this.context = context;
         this.printing = printing;
         this.index = index;
@@ -73,13 +74,16 @@ public class PrintingJob extends PrintDocumentAdapter {
     }
 
     static HashMap<String, Object> printingInfo() {
+        final boolean canPrint = android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+        final boolean canRaster = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+
         HashMap<String, Object> result = new HashMap<>();
         result.put("directPrint", false);
-        result.put("dynamicLayout", true);
-        result.put("canPrint", true);
-        result.put("canConvertHtml", true);
+        result.put("dynamicLayout", canPrint);
+        result.put("canPrint", canPrint);
+        result.put("canConvertHtml", canRaster);
         result.put("canShare", true);
-        result.put("canRaster", true);
+        result.put("canRaster", canRaster);
         return result;
     }
 
@@ -128,36 +132,68 @@ public class PrintingJob extends PrintDocumentAdapter {
 
     @Override
     public void onFinish() {
-        try {
-            while (true) {
-                int state = printJob.getInfo().getState();
+        Thread thread = new Thread(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public void run() {
+                try {
+                    final boolean[] wait = {true};
+                    int count = 5 * 60 * 10; // That's 10 minutes.
+                    while (wait[0]) {
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                int state = printJob == null ? PrintJobInfo.STATE_FAILED
+                                                             : printJob.getInfo().getState();
 
-                if (state == PrintJobInfo.STATE_COMPLETED) {
-                    printing.onCompleted(this, true, "");
-                    break;
-                } else if (state == PrintJobInfo.STATE_CANCELED) {
-                    printing.onCompleted(this, false, "User canceled");
-                    break;
+                                if (state == PrintJobInfo.STATE_COMPLETED) {
+                                    printing.onCompleted(PrintingJob.this, true, null);
+                                    wait[0] = false;
+                                } else if (state == PrintJobInfo.STATE_CANCELED) {
+                                    printing.onCompleted(PrintingJob.this, false, null);
+                                    wait[0] = false;
+                                } else if (state == PrintJobInfo.STATE_FAILED) {
+                                    printing.onCompleted(
+                                            PrintingJob.this, false, "Unable to print");
+                                    wait[0] = false;
+                                }
+                            }
+                        });
+
+                        if (--count <= 0) {
+                            throw new Exception("Timeout waiting for the job to finish");
+                        }
+
+                        if (wait[0]) {
+                            Thread.sleep(200);
+                        }
+                    }
+                } catch (final Exception e) {
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            printing.onCompleted(PrintingJob.this,
+                                    printJob != null && printJob.isCompleted(), e.getMessage());
+                        }
+                    });
                 }
 
-                Thread.sleep(200);
+                printJob = null;
             }
-        } catch (Exception e) {
-            printing.onCompleted(this, printJob != null && printJob.isCompleted(), e.getMessage());
-        }
+        });
 
-        printJob = null;
+        thread.start();
     }
 
-    void printPdf(@NonNull String name, Double width, Double height, Double marginLeft,
-            Double marginTop, Double marginRight, Double marginBottom) {
+    void printPdf(@NonNull String name) {
         jobName = name;
         printJob = printManager.print(name, this, null);
     }
 
-    void cancelJob() {
+    void cancelJob(String message) {
         if (callback != null) callback.onLayoutCancelled();
         if (printJob != null) printJob.cancel();
+        printing.onCompleted(PrintingJob.this, false, message);
     }
 
     static void sharePdf(final Context context, final byte[] data, final String name) {
@@ -196,7 +232,10 @@ public class PrintingJob extends PrintDocumentAdapter {
 
     void convertHtml(final String data, final PrintAttributes.MediaSize size,
             final PrintAttributes.Margins margins, final String baseUrl) {
-        final WebView webView = new WebView(context.getApplicationContext());
+        Configuration configuration = context.getResources().getConfiguration();
+        configuration.fontScale = (float) 1;
+        Context webContext = context.createConfigurationContext(configuration);
+        final WebView webView = new WebView(webContext);
 
         webView.loadDataWithBaseURL(baseUrl, data, "text/HTML", "UTF-8", null);
 

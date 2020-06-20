@@ -66,18 +66,15 @@ class PdfBorder extends PdfObject {
 
   /// @param os OutputStream to send the object to
   @override
-  void _writeContent(PdfStream os) {
-    super._writeContent(os);
+  void _prepare() {
+    super._prepare();
 
-    final List<PdfStream> data = <PdfStream>[];
-    data.add(PdfStream.string('/S'));
-    data.add(PdfStream.string(
-        '/' + 'SDBIU'.substring(style.index, style.index + 1)));
-    data.add(PdfStream.string('/W $width'));
+    params['/S'] =
+        PdfName('/' + 'SDBIU'.substring(style.index, style.index + 1));
+    params['/W'] = PdfNum(width);
+
     if (dash != null) {
-      data.add(PdfStream.string('/D'));
-      data.add(PdfStream.array(dash.map((double d) => PdfStream.num(d))));
+      params['/D'] = PdfArray.fromNum(dash);
     }
-    os.putArray(data);
   }
 }

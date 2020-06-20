@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-part of printing;
+import 'package:meta/meta.dart';
 
+/// Information about a printer
 @immutable
 class Printer {
+  /// Create a printer information
   const Printer({
     @required this.url,
     this.name,
@@ -25,9 +27,16 @@ class Printer {
     this.location,
   }) : assert(url != null);
 
+  /// The platform specific printer identification
   final String url;
+
+  /// The display name of the printer
   final String name;
+
+  /// The printer model
   final String model;
+
+  /// The physical location of the printer
   final String location;
 
   @override

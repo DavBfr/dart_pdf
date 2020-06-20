@@ -33,11 +33,6 @@ enum PdfImageOrientation {
 
 class PdfImage extends PdfXObject {
   /// Creates a new [PdfImage] instance.
-  ///
-  /// @param image an [Uint8List] value
-  /// @param width
-  /// @param height
-  /// @param alpha if the image is transparent
   factory PdfImage(
     PdfDocument pdfDocument, {
     @required Uint8List image,
@@ -45,68 +40,43 @@ class PdfImage extends PdfXObject {
     @required int height,
     bool alpha = true,
     PdfImageOrientation orientation = PdfImageOrientation.topLeft,
-  }) =>
-      PdfImage._(
+  }) {
+    assert(image != null);
+
+    final PdfImage im = PdfImage._(
+      pdfDocument,
+      width,
+      height,
+      orientation,
+    );
+
+    im.params['/BitsPerComponent'] = const PdfNum(8);
+    im.params['/Name'] = PdfName(im.name);
+    im.params['/ColorSpace'] = const PdfName('/DeviceRGB');
+
+    if (alpha) {
+      final PdfImage _sMask = PdfImage._alpha(
         pdfDocument,
-        image: image,
-        width: width,
-        height: height,
-        alpha: alpha,
-        alphaChannel: false,
-        isRGB: true,
-        jpeg: false,
-        orientation: orientation,
+        image,
+        width,
+        height,
+        orientation,
       );
-
-  PdfImage._(
-    PdfDocument pdfDocument, {
-    @required this.image,
-    @required int width,
-    @required int height,
-    @required this.alpha,
-    @required this.alphaChannel,
-    @required this.isRGB,
-    @required this.jpeg,
-    @required this.orientation,
-  })  : assert(alphaChannel == false || alpha == true),
-        assert(width != null),
-        assert(height != null),
-        assert(jpeg != null),
-        assert(isRGB != null),
-        assert(orientation != null),
-        _width = width,
-        _height = height,
-        super(pdfDocument, '/Image', isBinary: true) {
-    _name = '/Image$objser';
-    params['/Width'] = PdfStream.string(width.toString());
-    params['/Height'] = PdfStream.string(height.toString());
-    params['/BitsPerComponent'] = PdfStream.intNum(8);
-    params['/Name'] = PdfStream.string(_name);
-
-    if (alphaChannel == false && alpha) {
-      final PdfImage _sMask = PdfImage._(
-        pdfDocument,
-        image: image,
-        width: width,
-        height: height,
-        alpha: alpha,
-        alphaChannel: true,
-        isRGB: false,
-        jpeg: jpeg,
-        orientation: orientation,
-      );
-      params['/SMask'] = PdfStream.string('${_sMask.objser} 0 R');
+      im.params['/SMask'] = PdfIndirect(_sMask.objser, 0);
     }
 
-    if (isRGB) {
-      params['/ColorSpace'] = PdfStream.string('/DeviceRGB');
-    } else {
-      params['/ColorSpace'] = PdfStream.string('/DeviceGray');
+    final int w = width;
+    final int h = height;
+    final int s = w * h;
+    final Uint8List out = Uint8List(s * 3);
+    for (int i = 0; i < s; i++) {
+      out[i * 3] = image[i * 4];
+      out[i * 3 + 1] = image[i * 4 + 1];
+      out[i * 3 + 2] = image[i * 4 + 2];
     }
 
-    if (jpeg) {
-      params['/Intent'] = PdfStream.string('/RelativeColorimetric');
-    }
+    im.buf.putBytes(out);
+    return im;
   }
 
   factory PdfImage.jpeg(
@@ -115,23 +85,107 @@ class PdfImage extends PdfXObject {
     PdfImageOrientation orientation,
   }) {
     assert(image != null);
-    final PdfJpegInfo info = PdfJpegInfo(image);
 
-    return PdfImage._(
+    final PdfJpegInfo info = PdfJpegInfo(image);
+    final PdfImage im = PdfImage._(
       pdfDocument,
-      image: image,
-      width: info.width,
-      height: info.height,
-      jpeg: true,
-      alpha: false,
-      isRGB: info.isRGB,
-      alphaChannel: false,
-      orientation: orientation ?? info.orientation,
+      info.width,
+      info.height,
+      orientation ?? info.orientation,
+    );
+
+    im.params['/BitsPerComponent'] = const PdfNum(8);
+    im.params['/Name'] = PdfName(im.name);
+    im.params['/Intent'] = const PdfName('/RelativeColorimetric');
+    im.params['/Filter'] = const PdfName('/DCTDecode');
+
+    if (info.isRGB) {
+      im.params['/ColorSpace'] = const PdfName('/DeviceRGB');
+    } else {
+      im.params['/ColorSpace'] = const PdfName('/DeviceGray');
+    }
+
+    im.buf.putBytes(image);
+    return im;
+  }
+
+  factory PdfImage.fromImage(
+    PdfDocument pdfDocument, {
+    @required im.Image image,
+    PdfImageOrientation orientation = PdfImageOrientation.topLeft,
+  }) {
+    assert(image != null);
+
+    return PdfImage(
+      pdfDocument,
+      image: image.getBytes(format: im.Format.rgba),
+      width: image.width,
+      height: image.height,
+      alpha: image.channels == im.Channels.rgba,
+      orientation: orientation,
     );
   }
 
-  /// RGBA Image Data
-  final Uint8List image;
+  factory PdfImage.file(
+    PdfDocument pdfDocument, {
+    @required Uint8List bytes,
+    PdfImageOrientation orientation = PdfImageOrientation.topLeft,
+  }) {
+    assert(bytes != null);
+
+    if (im.JpegDecoder().isValidFile(bytes)) {
+      return PdfImage.jpeg(pdfDocument, image: bytes);
+    }
+
+    final im.Image image = im.decodeImage(bytes);
+    return PdfImage.fromImage(
+      pdfDocument,
+      image: image,
+      orientation: orientation,
+    );
+  }
+
+  factory PdfImage._alpha(
+    PdfDocument pdfDocument,
+    Uint8List image,
+    int width,
+    int height,
+    PdfImageOrientation orientation,
+  ) {
+    final PdfImage im = PdfImage._(
+      pdfDocument,
+      width,
+      height,
+      orientation,
+    );
+
+    im.params['/BitsPerComponent'] = const PdfNum(8);
+    im.params['/Name'] = PdfName(im.name);
+    im.params['/ColorSpace'] = const PdfName('/DeviceGray');
+
+    final int w = width;
+    final int h = height;
+    final int s = w * h;
+
+    final Uint8List out = Uint8List(s);
+
+    for (int i = 0; i < s; i++) {
+      out[i] = image[i * 4 + 3];
+    }
+
+    im.buf.putBytes(out);
+    return im;
+  }
+
+  PdfImage._(
+    PdfDocument pdfDocument,
+    this._width,
+    this._height,
+    this.orientation,
+  ) : super(pdfDocument, '/Image', isBinary: true) {
+    params['/Width'] = PdfNum(_width);
+    params['/Height'] = PdfNum(_height);
+  }
 
   /// Image width
   final int _width;
@@ -141,58 +195,9 @@ class PdfImage extends PdfXObject {
   final int _height;
   int get height => orientation.index < 4 ? _height : _width;
 
-  /// Image has alpha channel
-  final bool alpha;
-
-  String _name;
-
-  /// Process alphaChannel only
-  final bool alphaChannel;
-
-  /// The image data is a jpeg image
-  final bool jpeg;
-
-  /// The image data is a color RGB image
-  final bool isRGB;
-
   /// The internal orientation of the image
   final PdfImageOrientation orientation;
 
-  /// write the pixels to the stream
-  @override
-  void _prepare() {
-    if (jpeg) {
-      buf.putBytes(image);
-      params['/Filter'] = PdfStream.string('/DCTDecode');
-      super._prepare();
-      return;
-    }
-
-    final int w = _width;
-    final int h = _height;
-    final int s = w * h;
-
-    final Uint8List out = Uint8List(alphaChannel ? s : s * 3);
-
-    if (alphaChannel) {
-      for (int i = 0; i < s; i++) {
-        out[i] = image[i * 4 + 3];
-      }
-    } else {
-      for (int i = 0; i < s; i++) {
-        out[i * 3] = image[i * 4];
-        out[i * 3 + 1] = image[i * 4 + 1];
-        out[i * 3 + 2] = image[i * 4 + 2];
-      }
-    }
-
-    buf.putBytes(out);
-
-    super._prepare();
-  }
-
-  /// Get the name
-  ///
-  /// @return a String value
-  String get name => _name;
+  /// Name of the image
+  String get name => '/I$objser';
 }

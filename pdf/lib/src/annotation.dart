@@ -19,113 +19,17 @@
 part of pdf;
 
 class PdfAnnot extends PdfObject {
-  PdfAnnot._create(PdfPage pdfPage,
-      {String type,
-      this.content,
-      this.srcRect,
-      @required this.subtype,
-      this.dest,
-      this.destRect,
-      this.border,
-      this.url,
-      this.name})
-      : assert(subtype != null),
-        super(pdfPage.pdfDocument, type ?? '/Annot') {
+  PdfAnnot(this.pdfPage, this.annot)
+      : assert(annot != null),
+        super(pdfPage.pdfDocument, '/Annot') {
     pdfPage.annotations.add(this);
   }
 
-  /// Creates a text annotation
-  /// @param rect coordinates
-  /// @param s Text for this annotation
-  factory PdfAnnot.text(
-    PdfPage pdfPage, {
-    @required PdfRect rect,
-    @required String content,
-    PdfBorder border,
-  }) =>
-      PdfAnnot._create(
-        pdfPage,
-        subtype: '/Text',
-        srcRect: rect,
-        content: content,
-        border: border,
-      );
+  /// The annotation content
+  final PdfAnnotBase annot;
 
-  /// Creates a link annotation
-  /// @param srcRect coordinates
-  /// @param dest Destination for this link. The page will fit the display.
-  /// @param destRect Rectangle describing what part of the page to be displayed
-  /// (must be in User Coordinates)
-  factory PdfAnnot.link(
-    PdfPage pdfPage, {
-    @required PdfRect srcRect,
-    @required PdfPage dest,
-    PdfRect destRect,
-    PdfBorder border,
-  }) =>
-      PdfAnnot._create(
-        pdfPage,
-        subtype: '/Link',
-        srcRect: srcRect,
-        dest: dest,
-        destRect: destRect,
-        border: border,
-      );
-
-  /// Creates an external link annotation
-  factory PdfAnnot.urlLink(
-    PdfPage pdfPage, {
-    @required PdfRect rect,
-    @required String dest,
-    PdfBorder border,
-  }) =>
-      PdfAnnot._create(
-        pdfPage,
-        subtype: '/Link',
-        srcRect: rect,
-        url: dest,
-        border: border,
-      );
-
-  /// Creates a link annotation to a named destination
-  factory PdfAnnot.namedLink(
-    PdfPage pdfPage, {
-    @required PdfRect rect,
-    @required String dest,
-    PdfBorder border,
-  }) =>
-      PdfAnnot._create(
-        pdfPage,
-        subtype: '/Link',
-        srcRect: rect,
-        name: dest,
-        border: border,
-      );
-
-  /// The subtype of the outline, ie text, note, etc
-  final String subtype;
-
-  /// The size of the annotation
-  final PdfRect srcRect;
-
-  /// The text of a text annotation
-  final String content;
-
-  /// Link to the Destination page
-  final PdfObject dest;
-
-  /// If destRect is null then this is the region of the destination page shown.
-  /// Otherwise they are ignored.
-  final PdfRect destRect;
-
-  /// the border for this annotation
-  final PdfBorder border;
-
-  /// The external url for a link
-  final String url;
-
-  /// The internal name for a link
-  final String name;
+  /// The page where the annotation will display
+  final PdfPage pdfPage;
 
   /// Output the annotation
   ///
@@ -133,52 +37,258 @@ class PdfAnnot extends PdfObject {
   @override
   void _prepare() {
     super._prepare();
+    annot.build(pdfPage, this, params);
+  }
+}
 
-    params['/Subtype'] = PdfStream.string(subtype);
-    params['/Rect'] = PdfStream()
-      ..putNumArray(
-          <double>[srcRect.left, srcRect.bottom, srcRect.right, srcRect.top]);
+enum PdfAnnotFlags {
+  invisible,
+  hidden,
+  print,
+  noZoom,
+  noRotate,
+  noView,
+  readOnly,
+  locked,
+  toggleNoView,
+  lockedContent
+}
+
+abstract class PdfAnnotBase {
+  const PdfAnnotBase({
+    @required this.subtype,
+    @required this.rect,
+    this.border,
+    this.content,
+    this.name,
+    this.flags,
+    this.date,
+    this.color,
+  })  : assert(subtype != null),
+        assert(rect != null);
+
+  /// The subtype of the outline, ie text, note, etc
+  final String subtype;
+
+  final PdfRect rect;
+
+  /// the border for this annotation
+  final PdfBorder border;
+
+  /// The text of a text annotation
+  final String content;
+
+  /// The internal name for a link
+  final String name;
+
+  /// Flags specifying various characteristics of the annotation
+  final Set<PdfAnnotFlags> flags;
+
+  /// Last modification date
+  final DateTime date;
+
+  /// Color
+  final PdfColor color;
+
+  int get flagValue => flags
+      ?.map<int>((PdfAnnotFlags e) => 1 >> e.index)
+      ?.reduce((int a, int b) => a | b);
+
+  @protected
+  @mustCallSuper
+  void build(PdfPage page, PdfObject object, PdfDict params) {
+    params['/Subtype'] = PdfName(subtype);
+    params['/Rect'] = PdfArray.fromNum(
+        <double>[rect.left, rect.bottom, rect.right, rect.top]);
+
+    params['/P'] = page.ref();
 
     // handle the border
     if (border == null) {
-      params['/Border'] = PdfStream.string('[0 0 0]');
+      params['/Border'] = PdfArray.fromNum(const <int>[0, 0, 0]);
     } else {
       params['/BS'] = border.ref();
     }
 
-    // Now the annotation subtypes
-    if (subtype == '/Text') {
-      params['/Contents'] = PdfStream()..putLiteral(content);
-    } else if (subtype == '/Link') {
-      if (url != null) {
-        params['/A'] = PdfStream()
-          ..putDictionary(<String, PdfStream>{
-            '/S': PdfStream()..putString('/URI'),
-            '/URI': PdfStream()..putText(url),
-          });
-      } else if (name != null) {
-        params['/A'] = PdfStream()
-          ..putDictionary(<String, PdfStream>{
-            '/S': PdfStream()..putString('/GoTo'),
-            '/D': PdfStream()..putText(name),
-          });
+    if (content != null) {
+      params['/Contents'] = PdfSecString.fromString(object, content);
+    }
+
+    if (name != null) {
+      params['/NM'] = PdfSecString.fromString(object, name);
+    }
+
+    if (flags != null) {
+      params['/F'] = PdfNum(flagValue);
+    }
+
+    if (date != null) {
+      params['/M'] = PdfSecString.fromDate(object, date);
+    }
+
+    if (color != null) {
+      if (color is PdfColorCmyk) {
+        final PdfColorCmyk k = color;
+        params['/C'] =
+            PdfArray.fromNum(<double>[k.cyan, k.magenta, k.yellow, k.black]);
       } else {
-        final List<PdfStream> dests = <PdfStream>[];
-        dests.add(dest.ref());
-        if (destRect == null) {
-          dests.add(PdfStream.string('/Fit'));
-        } else {
-          dests.add(PdfStream.string('/FitR '));
-          dests.add(PdfStream()
-            ..putNumList(<double>[
-              destRect.left,
-              destRect.bottom,
-              destRect.right,
-              destRect.top
-            ]));
-        }
-        params['/Dest'] = PdfStream.array(dests);
+        params['/C'] =
+            PdfArray.fromNum(<double>[color.red, color.green, color.blue]);
       }
     }
+  }
+}
+
+class PdfAnnotText extends PdfAnnotBase {
+  /// Create a text annotation
+  const PdfAnnotText({
+    @required PdfRect rect,
+    @required String content,
+    PdfBorder border,
+    String name,
+    Set<PdfAnnotFlags> flags,
+    DateTime date,
+    PdfColor color,
+  }) : super(
+          subtype: '/Text',
+          rect: rect,
+          border: border,
+          content: content,
+          name: name,
+          flags: flags,
+          date: date,
+          color: color,
+        );
+}
+
+class PdfAnnotNamedLink extends PdfAnnotBase {
+  /// Create a named link annotation
+  const PdfAnnotNamedLink({
+    @required PdfRect rect,
+    @required this.dest,
+    PdfBorder border,
+    Set<PdfAnnotFlags> flags,
+    DateTime date,
+    PdfColor color,
+  }) : super(
+          subtype: '/Link',
+          rect: rect,
+          border: border,
+          flags: flags,
+          date: date,
+          color: color,
+        );
+
+  final String dest;
+
+  @override
+  void build(PdfPage page, PdfObject object, PdfDict params) {
+    super.build(page, object, params);
+    params['/A'] = PdfDict(
+      <String, PdfDataType>{
+        '/S': const PdfName('/GoTo'),
+        '/D': PdfSecString.fromString(object, dest),
+      },
+    );
+  }
+}
+
+class PdfAnnotUrlLink extends PdfAnnotBase {
+  /// Create an url link annotation
+  const PdfAnnotUrlLink({
+    @required PdfRect rect,
+    @required this.url,
+    PdfBorder border,
+    Set<PdfAnnotFlags> flags,
+    DateTime date,
+    PdfColor color,
+  }) : super(
+          subtype: '/Link',
+          rect: rect,
+          border: border,
+          flags: flags,
+          date: date,
+          color: color,
+        );
+
+  final String url;
+
+  @override
+  void build(PdfPage page, PdfObject object, PdfDict params) {
+    super.build(page, object, params);
+    params['/A'] = PdfDict(
+      <String, PdfDataType>{
+        '/S': const PdfName('/URI'),
+        '/URI': PdfSecString.fromString(object, url),
+      },
+    );
+  }
+}
+
+enum PdfAnnotHighlighting { none, invert, outline, push, toggle }
+
+abstract class PdfAnnotWidget extends PdfAnnotBase {
+  /// Create an url link annotation
+  const PdfAnnotWidget(
+    PdfRect rect,
+    this.fieldType, {
+    this.fieldName,
+    PdfBorder border,
+    Set<PdfAnnotFlags> flags,
+    DateTime date,
+    PdfColor color,
+    this.highlighting,
+  }) : super(
+          subtype: '/Widget',
+          rect: rect,
+          border: border,
+          flags: flags,
+          date: date,
+          color: color,
+        );
+
+  final String fieldType;
+
+  final String fieldName;
+
+  final PdfAnnotHighlighting highlighting;
+
+  @override
+  void build(PdfPage page, PdfObject object, PdfDict params) {
+    super.build(page, object, params);
+
+    params['/FT'] = PdfName(fieldType);
+
+    if (fieldName != null) {
+      params['/T'] = PdfSecString.fromString(object, fieldName);
+    }
+  }
+}
+
+class PdfAnnotSign extends PdfAnnotWidget {
+  const PdfAnnotSign(
+    PdfRect rect, {
+    String fieldName,
+    PdfBorder border,
+    Set<PdfAnnotFlags> flags,
+    DateTime date,
+    PdfColor color,
+    PdfAnnotHighlighting highlighting,
+  }) : super(
+          rect,
+          '/Sig',
+          fieldName: fieldName,
+          border: border,
+          flags: flags,
+          date: date,
+          color: color,
+          highlighting: highlighting,
+        );
+
+  @override
+  void build(PdfPage page, PdfObject object, PdfDict params) {
+    super.build(page, object, params);
+    assert(page.pdfDocument.sign != null);
+    params['/V'] = page.pdfDocument.sign.ref();
   }
 }

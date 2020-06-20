@@ -19,5 +19,5 @@ part of pdf;
 abstract class PdfEncryption extends PdfObject {
   PdfEncryption(PdfDocument pdfDocument) : super(pdfDocument, null);
 
-  List<int> encrypt(List<int> input, PdfObject object);
+  Uint8List encrypt(Uint8List input, PdfObject object);
 }

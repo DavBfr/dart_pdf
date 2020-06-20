@@ -26,8 +26,27 @@ class _GridViewContext extends WidgetContext {
   double childMainAxis;
 
   @override
+  void apply(WidgetContext other) {
+    if (other is _GridViewContext) {
+      firstChild = other.firstChild;
+      lastChild = other.lastChild;
+      childCrossAxis = other.childCrossAxis;
+      childMainAxis = other.childMainAxis;
+    }
+  }
+
+  @override
+  WidgetContext clone() {
+    return _GridViewContext()
+      ..firstChild = firstChild
+      ..lastChild = lastChild
+      ..childCrossAxis = childCrossAxis
+      ..childMainAxis = childMainAxis;
+  }
+
+  @override
   String toString() =>
-      'GridViewContext first:$firstChild last:$lastChild size:${childCrossAxis}x$childMainAxis';
+      '$runtimeType first:$firstChild last:$lastChild size:${childCrossAxis}x$childMainAxis';
 }
 
 class GridView extends MultiChildWidget implements SpanningWidget {
@@ -40,6 +59,7 @@ class GridView extends MultiChildWidget implements SpanningWidget {
       this.childAspectRatio = double.infinity,
       List<Widget> children = const <Widget>[]})
       : assert(padding != null),
+        assert(crossAxisCount != null),
         super(children: children);
 
   final Axis direction;
@@ -56,10 +76,15 @@ class GridView extends MultiChildWidget implements SpanningWidget {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
+    if (children.isEmpty) {
+      box = PdfRect.zero;
+      return;
+    }
+
     assert(() {
       if (constraints.maxHeight.isInfinite && childAspectRatio.isInfinite) {
         print(
-            'Unable to calculate the GridView dimensions. Please set one the height constraints or childAspectRatio.');
+            'Unable to calculate the GridView dimensions. Please set the height constraints or childAspectRatio.');
         return false;
       }
       return true;
@@ -208,6 +233,10 @@ class GridView extends MultiChildWidget implements SpanningWidget {
   void debugPaint(Context context) {
     super.debugPaint(context);
 
+    if (children.isEmpty) {
+      return;
+    }
+
     context.canvas
       ..setFillColor(PdfColors.lime)
       ..moveTo(box.left, box.bottom)
@@ -298,6 +327,9 @@ class GridView extends MultiChildWidget implements SpanningWidget {
 
   @override
   bool get canSpan => true;
+
+  @override
+  bool get hasMoreWidgets => true;
 
   @override
   void restoreContext(WidgetContext context) {

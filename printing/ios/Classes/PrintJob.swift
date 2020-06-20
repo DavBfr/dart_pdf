@@ -35,7 +35,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         super.init()
     }
 
-    public override func drawPage(at pageIndex: Int, in _: CGRect) {
+    override public func drawPage(at pageIndex: Int, in _: CGRect) {
         let ctx = UIGraphicsGetCurrentContext()
         let page = pdfDocument?.page(at: pageIndex + 1)
         ctx?.scaleBy(x: 1.0, y: -1.0)
@@ -45,8 +45,9 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         }
     }
 
-    func cancelJob() {
+    func cancelJob(_ error: String?) {
         pdfDocument = nil
+        printing.onCompleted(printJob: self, completed: false, error: error as NSString?)
     }
 
     func setDocument(_ data: Data?) {
@@ -66,7 +67,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         controller.present(animated: true, completionHandler: completionHandler)
     }
 
-    public override var numberOfPages: Int {
+    override public var numberOfPages: Int {
         let pages = pdfDocument?.numberOfPages ?? 0
         return pages
     }
@@ -246,9 +247,17 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                 let stride = width * 4
                 var data = Data(repeating: 0, count: stride * height)
 
-                data.withUnsafeMutableBytes { (ptr: UnsafeMutablePointer<UInt8>) in
+                data.withUnsafeMutableBytes { (outputBytes: UnsafeMutableRawBufferPointer) in
                     let rgb = CGColorSpaceCreateDeviceRGB()
-                    let context = CGContext(data: ptr, width: width, height: height, bitsPerComponent: 8, bytesPerRow: stride, space: rgb, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+                    let context = CGContext(
+                        data: outputBytes.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                        width: width,
+                        height: height,
+                        bitsPerComponent: 8,
+                        bytesPerRow: stride,
+                        space: rgb,
+                        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+                    )
                     if context != nil {
                         context!.scaleBy(x: scale, y: scale)
                         context!.drawPDFPage(page)

@@ -144,13 +144,15 @@ class Font {
 }
 
 class TtfFont extends Font {
-  TtfFont(this.data);
+  TtfFont(this.data, {this.protect = false});
 
   final ByteData data;
 
+  final bool protect;
+
   @override
   PdfFont buildFont(PdfDocument pdfDocument) {
-    return PdfTtfFont(pdfDocument, data);
+    return PdfTtfFont(pdfDocument, data, protect: protect);
   }
 
   @override
