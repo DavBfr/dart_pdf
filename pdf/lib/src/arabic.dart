@@ -121,6 +121,16 @@ class PdfArabic {
     };
     */
 
+  static const Map<int, dynamic> _diacriticLigatures = <int, dynamic>{
+    0x0651: <int, int>{
+      0x064C: 0xFC5E, // Shadda + Dammatan
+      0x064D: 0xFC5F, // Shadda + Kasratan
+      0x064E: 0xFC60, // Shadda + Fatha
+      0x064F: 0xFC61, // Shadda + Damma
+      0x0650: 0xFC62, // Shadda + Kasra
+    },
+  };
+
   static const Map<int, dynamic> _ligatures = <int, dynamic>{
     0xFEDF: <int, int>{
       0xFE82:
@@ -145,26 +155,25 @@ class PdfArabic {
 //        0xFEE0: <int, int>{0xFEEA: 0xFDF2}
 //      }
 //    }, // ALLAH
-    0x0651: <int, int>{
-      0x064C: 0xFC5E, // Shadda + Dammatan
-      0x064D: 0xFC5F, // Shadda + Kasratan
-      0x064E: 0xFC60, // Shadda + Fatha
-      0x064F: 0xFC61, // Shadda + Damma
-      0x0650: 0xFC62, // Shadda + Kasra
-    }
   };
 
   static const List<int> _alfletter = <int>[1570, 1571, 1573, 1575];
 
   static const Map<int, int> _arabicDiacritics = <int, int>{
-    1611: 0xFE70, // Fathatan
-    1612: 0xFE72, // Dammatan
-    1613: 0xFE74, // Kasratan
-    1614: 0xFE76, // Fatha
-    1615: 0xFE78, // Damma
-    1616: 0xFE7A, // Kasra
+    1611: 1611, // Fathatan
+    1612: 1612, // Dammatan
+    1613: 1613, // Kasratan
+    1614: 1614, // Fatha
+    1615: 1615, // Damma
+    1616: 1616, // Kasra
     1617: 1617,
-    1618: 0xFE7E,
+    1618: 1618,
+
+    64606: 64606, // Shadda + Dammatan
+    64607: 64607, // Shadda + Kasratan
+    64608: 64608, // Shadda + Fatha
+    64609: 64609, // Shadda + Damma
+    64610: 64610, // Shadda + Kasra
     // 1548: 1548,
   };
 
@@ -217,38 +226,68 @@ class PdfArabic {
 
   static List<int> _resolveLigatures(List<int> lettersq) {
     final List<int> result = <int>[];
-    int effectedLetters = 0;
     dynamic tmpLigatures = _ligatures;
+    dynamic tmpDiacritic = _diacriticLigatures;
     final List<int> letters = lettersq.reversed.toList();
-    int index = 0;
 
-    for (int i = 0; i < letters.length; i += 1) {
-      if (tmpLigatures.containsKey(letters[i])) {
-        effectedLetters++;
+    final List<int> effectedLetters = <int>[];
+    final List<int> effectedDiacritics = <int>[];
+
+    final List<int> finalDiacritics = <int>[];
+
+    for (int i = 0; i < letters.length; i++) {
+      if (_isArabicDiacriticValue(letters[i])) {
+        effectedDiacritics.insert(0, letters[i]);
+        if (tmpDiacritic.containsKey(letters[i])) {
+          tmpDiacritic = tmpDiacritic[letters[i]];
+
+          if (tmpDiacritic is int) {
+            finalDiacritics.insert(0, tmpDiacritic);
+            tmpDiacritic = _diacriticLigatures;
+            effectedDiacritics.clear();
+          }
+        } else {
+          tmpDiacritic = _diacriticLigatures;
+
+          // add all Diacritics if there is no letter Ligatures.
+          if (effectedLetters.isEmpty) {
+            result.insertAll(0, finalDiacritics);
+            result.insertAll(0, effectedDiacritics);
+            finalDiacritics.clear();
+            effectedDiacritics.clear();
+          }
+        }
+      } else if (tmpLigatures.containsKey(letters[i])) {
+        effectedLetters.insert(0, letters[i]);
         tmpLigatures = tmpLigatures[letters[i]];
 
         if (tmpLigatures is int) {
-          result.insert(index, tmpLigatures);
+          result.insert(0, tmpLigatures);
           tmpLigatures = _ligatures;
-          effectedLetters = 0;
-        }
-
-        if (i - (effectedLetters - 1) == letters.length - 1) {
-          tmpLigatures = _ligatures;
-          result.insert(index, letters[i - (effectedLetters - 1)]);
-          i = i - (effectedLetters - 1);
-          effectedLetters = 0;
+          effectedLetters.clear();
         }
       } else {
         tmpLigatures = _ligatures;
-        final int letter = letters[i - effectedLetters];
 
-        result.insert(index, letter);
-        if (_isArabicDiacritic(letter)) {
-          index++;
+        // add effected letters if they aren't ligature.
+        if (effectedLetters.isNotEmpty) {
+          result.insertAll(0, effectedLetters);
+          effectedLetters.clear();
         }
-        i = i - effectedLetters;
-        effectedLetters = 0;
+
+        // add Diacritics after or before letter ligature.
+        if (effectedLetters.isEmpty && effectedDiacritics.isNotEmpty) {
+          result.insertAll(0, effectedDiacritics);
+          effectedDiacritics.clear();
+        }
+
+        result.insert(0, letters[i]);
+      }
+
+      // add Diacritic ligatures.
+      if (effectedLetters.isEmpty && finalDiacritics.isNotEmpty) {
+        result.insertAll(0, finalDiacritics);
+        finalDiacritics.clear();
       }
     }
 

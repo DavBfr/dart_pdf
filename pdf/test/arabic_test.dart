@@ -43,7 +43,8 @@ void main() {
     RichText.debug = true;
     pdf = Document();
 
-    final Uint8List fontData = File('assets/arial.ttf').readAsBytesSync();
+    final Uint8List fontData =
+        File('assets/hacen-tunisia.ttf').readAsBytesSync();
     arabicFont = Font.ttf(fontData.buffer.asByteData());
     style = TextStyle(font: arabicFont, fontSize: 30);
   });
@@ -64,13 +65,13 @@ void main() {
 
   test('Arabic Default Reshaping', () {
     final List<ArabicText> cases = <ArabicText>[
-      ArabicText('السَلَاْمٌ عَلَيْكُمْ', 'ﺍﻟﺴﻼﻡ ﻋﻠﻴﻜﻢ'),
+      ArabicText('السَلاْمُ عَلَيْكُمْ', 'ﺍﻟﺴﻼﻡ ﻋﻠﻴﻜﻢ'),
       ArabicText(
-          'اللغة العربية هي أكثر اللغات', 'ﺍﻟﻠﻐﺔ ﺍﻟﻌﺮﺑﻴﺔ ﻫﻲ ﺃﻛﺜﺮ ﺍﻟﻠﻐﺎﺕ'),
-      ArabicText('تحدثاً ونطقاً ضمن مجموعة', 'ﺗﺤﺪﺛﺎ ﻭﻧﻄﻘﺎ ﺿﻤﻦ ﻣﺠﻤﻮﻋﺔ'),
+          'اللغة العربيَّة هي أكثرُ اللغاتِ', 'ﺍﻟﻠﻐﺔ ﺍﻟﻌﺮﺑﻴﺔ ﻫﻲ ﺃﻛﺜﺮ ﺍﻟﻠﻐﺎﺕ'),
+      ArabicText('تحدُّثاً ونُطقاً ضِمْنَ مَجمُوعَة', 'ﺗﺤﺪﺛﺎ ﻭﻧﻄﻘﺎ ﺿﻤﻦ ﻣﺠﻤﻮﻋﺔ'),
       ArabicText('اللغات السامية', 'ﺍﻟﻠﻐﺎﺕ ﺍﻟﺴﺎﻣﻴﺔ'),
-      ArabicText('العربية لغة رسمية في', 'ﺍﻟﻌﺮﺑﻴﺔ ﻟﻐﺔ ﺭﺳﻤﻴﺔ ﻓﻲ'),
-      ArabicText('كل دول الوطن العربي', 'ﻛﻞ ﺩﻭﻝ ﺍﻟﻮﻃﻦ ﺍﻟﻌﺮﺑﻲ'),
+      ArabicText('العربية لغةٌ رسميةٌ في', 'ﺍﻟﻌﺮﺑﻴﺔ ﻟﻐﺔ ﺭﺳﻤﻴﺔ ﻓﻲ'),
+      ArabicText('كلِّ دولِ الوطنِ العربيِّ', 'ﻛﻞ ﺩﻭﻝ ﺍﻟﻮﻃﻦ ﺍﻟﻌﺮﺑﻲ'),
       ArabicText('إضافة إلى كونها لغة', 'ﺇﺿﺎﻓﺔ ﺇﻟﻰ ﻛﻮﻧﻬﺎ ﻟﻐﺔ'),
       ArabicText('رسمية في تشاد وإريتريا', 'ﺭﺳﻤﻴﺔ ﻓﻲ ﺗﺸﺎﺩ ﻭﺇﺭﻳﺘﺮﻳﺎ'),
       ArabicText('وإسرائيل. وهي إحدى اللغات', 'ﻭﺇﺳﺮﺍﺋﻴﻞ. ﻭﻫﻲ ﺇﺣﺪﻯ ﺍﻟﻠﻐﺎﺕ'),
@@ -116,7 +117,8 @@ void main() {
   });
 
   test('Text Widgets Arabic', () {
-    final Uint8List fontData = File('assets/arial.ttf').readAsBytesSync();
+    final Uint8List fontData =
+        File('assets/hacen-tunisia.ttf').readAsBytesSync();
     final Font ttf = Font.ttf(fontData.buffer.asByteData());
 
     pdf.addPage(Page(
