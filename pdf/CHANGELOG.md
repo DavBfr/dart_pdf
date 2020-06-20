@@ -5,6 +5,7 @@
 - Allow MultiPage to relayout individual pages with support for flex
 - Implement BoxShadow for rect and circle BoxDecorations
 - Implement TextStyle.letterSpacing
+- Implement Arabic writing support [Anas Altair]
 
 ## 1.8.1
 

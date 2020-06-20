@@ -59,6 +59,11 @@ class PdfTtfFont extends PdfFont {
       return PdfFontMetrics.zero;
     }
 
+    if (PdfArabic._isArabicDiacriticValue(charCode)) {
+      final PdfFontMetrics metric = font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
+      return metric.copyWith(advanceWidth: 0);
+    }
+
     return font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
   }
 

@@ -18,6 +18,7 @@ library pdf.all_tests;
 
 import '../example/main.dart' as example;
 import 'annotations_test.dart' as annotations;
+import 'arabic_test.dart' as arabic;
 import 'colors_test.dart' as colors;
 import 'complex_test.dart' as complex;
 import 'data_types_test.dart' as data_types;
@@ -48,6 +49,7 @@ import 'widget_wrap_test.dart' as widget_wrap;
 
 void main() {
   annotations.main();
+  arabic.main();
   colors.main();
   complex.main();
   data_types.main();
