@@ -290,6 +290,8 @@ class PdfArabic {
       final List<int> newWord = <int>[];
       bool isArabic = false;
 
+      int prevLetter = 0;
+
       for (int j = 0; j < word.length; j += 1) {
         final int currentLetter = word.codeUnitAt(j);
 
@@ -297,8 +299,6 @@ class PdfArabic {
           newWord.insert(0, _arabicDiacritics[currentLetter]);
           continue;
         }
-        final int prevLetter = j > 0 ? word.codeUnitAt(j - 1) : 0;
-//        final int nextLetter = j < word.length - 1 ? word.codeUnitAt(j + 1) : 0;
         final int nextLetter = word
             .split('')
             .skip(j + 1)
@@ -325,6 +325,7 @@ class PdfArabic {
             newWord.add(currentLetter);
           }
         }
+        prevLetter = currentLetter;
       }
 
       if (!first) {
