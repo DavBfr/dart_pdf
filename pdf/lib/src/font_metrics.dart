@@ -39,7 +39,10 @@ class PdfFontMetrics {
         assert(top <= bottom),
         assert((descent ?? top) <= (ascent ?? bottom));
 
-  factory PdfFontMetrics.append(Iterable<PdfFontMetrics> metrics) {
+  factory PdfFontMetrics.append(
+    Iterable<PdfFontMetrics> metrics, {
+    double letterSpacing = 0,
+  }) {
     if (metrics.isEmpty) {
       return PdfFontMetrics.zero;
     }
@@ -51,10 +54,12 @@ class PdfFontMetrics {
     double ascent;
     double descent;
     double lastBearing;
+    double spacing;
 
     for (PdfFontMetrics metric in metrics) {
       left ??= metric.left;
-      right += metric.advanceWidth;
+      spacing = metric.advanceWidth > 0 ? letterSpacing : 0;
+      right += metric.advanceWidth + spacing;
       lastBearing = metric.rightBearing;
 
       top = math.min(top ?? metric.top, metric.top);
@@ -66,11 +71,11 @@ class PdfFontMetrics {
     return PdfFontMetrics(
         left: left,
         top: top,
-        right: right - lastBearing,
+        right: right - lastBearing - spacing,
         bottom: bottom,
         ascent: ascent,
         descent: descent,
-        advanceWidth: right);
+        advanceWidth: right - spacing);
   }
 
   static const PdfFontMetrics zero =

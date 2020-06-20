@@ -4,6 +4,7 @@
 
 - Allow MultiPage to relayout individual pages with support for flex
 - Implement BoxShadow for rect and circle BoxDecorations
+- Implement TextStyle.letterSpacing
 
 ## 1.8.1
 

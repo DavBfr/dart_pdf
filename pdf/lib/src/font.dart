@@ -140,7 +140,7 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
   @Deprecated('Use `glyphMetrics` instead')
   PdfRect glyphBounds(int charCode) => glyphMetrics(charCode).toPdfRect();
 
-  PdfFontMetrics stringMetrics(String s) {
+  PdfFontMetrics stringMetrics(String s, {double letterSpacing = 0}) {
     if (s.isEmpty) {
       return PdfFontMetrics.zero;
     }
@@ -148,7 +148,7 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
     try {
       final Uint8List chars = latin1.encode(s);
       final Iterable<PdfFontMetrics> metrics = chars.map(glyphMetrics);
-      return PdfFontMetrics.append(metrics);
+      return PdfFontMetrics.append(metrics, letterSpacing: letterSpacing);
     } catch (_) {
       assert(() {
         print(_cannotDecodeMessage);

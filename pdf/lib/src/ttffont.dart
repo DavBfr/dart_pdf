@@ -156,9 +156,9 @@ class PdfTtfFont extends PdfFont {
   }
 
   @override
-  PdfFontMetrics stringMetrics(String s) {
+  PdfFontMetrics stringMetrics(String s, {double letterSpacing = 0}) {
     if (s.isEmpty || !font.unicode) {
-      return super.stringMetrics(s);
+      return super.stringMetrics(s, letterSpacing: letterSpacing);
     }
 
     final Runes runes = s.runes;
@@ -166,6 +166,6 @@ class PdfTtfFont extends PdfFont {
     runes.forEach(bytes.add);
 
     final Iterable<PdfFontMetrics> metrics = bytes.map(glyphMetrics);
-    return PdfFontMetrics.append(metrics);
+    return PdfFontMetrics.append(metrics, letterSpacing: letterSpacing);
   }
 }

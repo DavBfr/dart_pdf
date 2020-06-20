@@ -131,9 +131,12 @@ void main() {
     final String para = LoremText().paragraph(40);
 
     final List<Widget> widgets = <Widget>[];
-    for (double spacing = 0.0; spacing < 10.0; spacing += 2.0) {
+    for (double spacing = -1.0; spacing < 8.0; spacing += 2.0) {
       widgets.add(
-        Text(para, style: TextStyle(font: ttf, letterSpacing: spacing)),
+        Text(
+          '[$spacing] $para',
+          style: TextStyle(font: ttf, letterSpacing: spacing),
+        ),
       );
       widgets.add(
         SizedBox(height: 30),

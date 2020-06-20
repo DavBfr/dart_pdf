@@ -262,6 +262,7 @@ class _Word extends _Span {
       point.x + offset.x,
       point.y + offset.y,
       mode: style.renderingMode,
+      charSpace: style.letterSpacing,
     );
   }
 
@@ -569,12 +570,15 @@ class RichText extends Widget {
         for (int line = 0; line < spanLines.length; line++) {
           for (String word in spanLines[line].split(RegExp(r'\s'))) {
             if (word.isEmpty) {
-              offsetX += space.advanceWidth * style.wordSpacing;
+              offsetX +=
+                  space.advanceWidth * style.wordSpacing + style.letterSpacing;
               continue;
             }
 
-            final PdfFontMetrics metrics =
-                font.stringMetrics(word) * (style.fontSize * textScaleFactor);
+            final PdfFontMetrics metrics = font.stringMetrics(word,
+                    letterSpacing: style.letterSpacing /
+                        (style.fontSize * textScaleFactor)) *
+                (style.fontSize * textScaleFactor);
 
             if (offsetX + metrics.width > constraintWidth && spanCount > 0) {
               width = math.max(
@@ -583,7 +587,9 @@ class RichText extends Widget {
                     _spans.sublist(spanStart),
                     _decorations.sublist(decorationStart),
                     constraintWidth,
-                    offsetX - space.advanceWidth * style.wordSpacing,
+                    offsetX -
+                        space.advanceWidth * style.wordSpacing -
+                        style.letterSpacing,
                     false,
                     bottom,
                   ));
@@ -632,8 +638,9 @@ class RichText extends Widget {
               ),
             );
 
-            offsetX +=
-                metrics.advanceWidth + space.advanceWidth * style.wordSpacing;
+            offsetX += metrics.advanceWidth +
+                space.advanceWidth * style.wordSpacing +
+                style.letterSpacing;
           }
 
           if (softWrap && line < spanLines.length - 1) {
@@ -643,7 +650,9 @@ class RichText extends Widget {
                   _spans.sublist(spanStart),
                   _decorations.sublist(decorationStart),
                   constraintWidth,
-                  offsetX - space.advanceWidth * style.wordSpacing,
+                  offsetX -
+                      space.advanceWidth * style.wordSpacing -
+                      style.letterSpacing,
                   true,
                   bottom,
                 ));
@@ -672,7 +681,7 @@ class RichText extends Widget {
           }
         }
 
-        offsetX -= space.advanceWidth * style.wordSpacing;
+        offsetX -= space.advanceWidth * style.wordSpacing - style.letterSpacing;
       } else if (span is WidgetSpan) {
         span.child.layout(
             context,
