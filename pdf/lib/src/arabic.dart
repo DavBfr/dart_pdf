@@ -208,6 +208,10 @@ class PdfArabic {
     return _arabicDiacritics.containsKey(letter);
   }
 
+  static bool _isArabicDiacriticValue(int letter) {
+    return _arabicDiacritics.containsValue(letter);
+  }
+
   static List<int> _resolveLigatures(List<int> lettersq) {
     final List<int> result = <int>[];
     int effectedLetters = 0;
@@ -285,8 +289,22 @@ class PdfArabic {
 
       for (int j = 0; j < word.length; j += 1) {
         final int currentLetter = word.codeUnitAt(j);
+
+        if (_isArabicDiacritic(currentLetter)) {
+          newWord.insert(0, _arabicDiacritics[currentLetter]);
+          continue;
+        }
         final int prevLetter = j > 0 ? word.codeUnitAt(j - 1) : 0;
-        final int nextLetter = j < word.length - 1 ? word.codeUnitAt(j + 1) : 0;
+//        final int nextLetter = j < word.length - 1 ? word.codeUnitAt(j + 1) : 0;
+        final int nextLetter = word
+            .split('')
+            .skip(j + 1)
+            .map((String e) => e.codeUnitAt(0))
+            .firstWhere(
+              (int element) => !_isArabicDiacritic(element),
+              orElse: () => 0,
+            );
+
         if (_isArabicLetter(currentLetter)) {
           isArabic = true;
 

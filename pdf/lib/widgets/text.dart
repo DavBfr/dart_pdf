@@ -533,7 +533,8 @@ class RichText extends Widget {
         final PdfFontMetrics space =
             font.stringMetrics(' ') * (style.fontSize * textScaleFactor);
 
-        final List<String> spanLines = PdfArabic.convert(span.text).split('\n');
+        final List<String> spanLines =
+            PdfArabic.convert(span.text, diacritic: true).split('\n');
         for (int line = 0; line < spanLines.length; line++) {
           for (String word in spanLines[line].split(RegExp(r'\s'))) {
             if (word.isEmpty) {
