@@ -54,6 +54,9 @@ class TtfParser {
     _parseCMap();
     _parseIndexes();
     _parseGlyphs();
+    if (tableOffsets.containsKey(gsub_table)) {
+      _parseGsub();
+    }
   }
 
   static const String head_table = 'head';
@@ -64,6 +67,8 @@ class TtfParser {
   static const String maxp_table = 'maxp';
   static const String loca_table = 'loca';
   static const String glyf_table = 'glyf';
+  static const String gsub_table = 'GSUB';
+  static const String gpos_table = 'GPOS';
 
   final UnmodifiableByteDataView bytes;
   final Map<String, int> tableOffsets = <String, int>{};
@@ -96,6 +101,8 @@ class TtfParser {
   String get fontName => _fontName;
 
   bool get unicode => bytes.getUint32(0) == 0x10000;
+
+  Map<String, dynamic> gsubTables;
 
   // https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6name.html
   void _parseFontName() {
@@ -254,6 +261,13 @@ class TtfParser {
           advanceWidth: advanceWidth);
       glyphIndex++;
     }
+  }
+
+  void _parseGsub() {
+    final int basePosition = tableOffsets[gsub_table];
+    GsubTableParser parser = GsubTableParser();
+
+    gsubTables = parser.parseGsubTable(bytes, basePosition);
   }
 
   /// http://stevehanov.ca/blog/?id=143

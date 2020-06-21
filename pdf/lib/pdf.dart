@@ -32,6 +32,7 @@ import 'io/interface.dart'
     if (dart.library.io) 'io/vm.dart'
     if (dart.library.js) 'io/js.dart';
 
+part 'src/GsubTableParser.dart';
 part 'src/annotation.dart';
 part 'src/array.dart';
 part 'src/ascii85.dart';
@@ -52,6 +53,14 @@ part 'src/graphic_state.dart';
 part 'src/graphics.dart';
 part 'src/image.dart';
 part 'src/info.dart';
+part 'src/lang/apply_substitution.dart';
+part 'src/lang/bidi.dart';
+part 'src/lang/char.dart';
+part 'src/lang/feature_query.dart';
+part 'src/lang/features/arab/arab_ligature_presentation_form.dart';
+part 'src/lang/features/latn/latin_ligature.dart';
+part 'src/lang/features/dev/devnagari_ligature.dart';
+part 'src/lang/tokenizer.dart';
 part 'src/names.dart';
 part 'src/object.dart';
 part 'src/object_stream.dart';
@@ -60,11 +69,14 @@ part 'src/output.dart';
 part 'src/page.dart';
 part 'src/page_format.dart';
 part 'src/page_list.dart';
+part 'src/parse_types.dart';
 part 'src/point.dart';
+part 'src/read_buffer.dart';
 part 'src/rect.dart';
 part 'src/shading.dart';
 part 'src/signature.dart';
 part 'src/stream.dart';
+part 'src/table_parser.dart';
 part 'src/ttf_parser.dart';
 part 'src/ttf_writer.dart';
 part 'src/ttffont.dart';

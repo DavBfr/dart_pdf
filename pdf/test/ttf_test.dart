@@ -67,13 +67,18 @@ void main() {
 
     final PdfGraphics g = page.getGraphics();
     int top = 0;
-    const String s = 'Hello Lukáča ';
+    const String s = 'अनन्न';
 
-    printTextTtf(g, s, File('open-sans.ttf'), 30.0 + 30.0 * top++);
-    printTextTtf(g, s, File('open-sans-bold.ttf'), 30.0 + 30.0 * top++);
-    printTextTtf(g, s, File('roboto.ttf'), 30.0 + 30.0 * top++);
-    printTextTtf(g, s, File('noto-sans.ttf'), 30.0 + 30.0 * top++);
-    printTextTtf(g, '你好 檯號 ', File('genyomintw.ttf'), 30.0 + 30.0 * top++);
+    printTextTtf(
+        g,
+        s,
+        File(
+            'C:\\Projects\\flutter\\Softayu\\src\\plugins\\dart_pdf\\pdf\\test\\Nirmala.ttf'),
+        30.0 + 30.0 * top++);
+//    printTextTtf(g, s, File('open-sans-bold.ttf'), 30.0 + 30.0 * top++);
+//    printTextTtf(g, s, File('roboto.ttf'), 30.0 + 30.0 * top++);
+//    printTextTtf(g, s, File('noto-sans.ttf'), 30.0 + 30.0 * top++);
+//    printTextTtf(g, '你好 檯號 ', File('genyomintw.ttf'), 30.0 + 30.0 * top++);
 
     final File file = File('ttf.pdf');
     file.writeAsBytesSync(pdf.save());
@@ -94,6 +99,17 @@ void main() {
     final TtfWriter ttfWriter = TtfWriter(font);
     final Uint8List data = ttfWriter.withChars('hçHée 你好 檯號 ☃'.runes.toList());
     final File output = File('${font.fontName}.ttf');
+    output.writeAsBytesSync(data);
+  });
+
+  test('GSUB Processing', () {
+    final Uint8List fontData = File(
+            'C:\\Projects\\flutter\\Softayu\\src\\plugins\\dart_pdf\\pdf\\test\\Nirmala.ttf')
+        .readAsBytesSync();
+    final TtfParser font = TtfParser(fontData.buffer.asByteData());
+    final TtfWriter ttfWriter = TtfWriter(font);
+    final Uint8List data = ttfWriter.withChars('अनन्न'.runes.toList());
+    final File output = File('${font.fontName}.pdf');
     output.writeAsBytesSync(data);
   });
 }

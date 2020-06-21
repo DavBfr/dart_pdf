@@ -1,13 +1,6 @@
 # Specify analysis options.
-include: package:pedantic/analysis_options.yaml
 
 analyzer:
-  strong-mode:
-    implicit-dynamic: false
-  errors:
-    missing_required_param: warning
-    missing_return: warning
-    todo: ignore
 
 linter:
   rules:

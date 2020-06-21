@@ -140,10 +140,25 @@ class PdfTtfFont extends PdfFont {
       super.putText(stream, text);
     }
 
-    final Runes runes = text.runes;
+    Bidi bidi = Bidi();
+    // Create and register 'glyphIndex' state modifier
+    var charToGlyphIndexMod = (Token token, ContextParams contextParams) =>
+        this.charToGlyphIndex(token.char);
+    bidi.registerModifier('glyphIndex', null, charToGlyphIndexMod);
+
+    bidi.applyFeatures(this.font, [
+      {
+        "script": 'dev2',
+        "tags": ['half', 'nukt']
+      }
+    ]);
+
+    var indexes = bidi.getTextGlyphs(text);
+
+    //final Runes runes = text.runes;
 
     stream.putByte(0x3c);
-    for (int rune in runes) {
+    for (int rune in indexes) {
       int char = unicodeCMap.cmap.indexOf(rune);
       if (char == -1) {
         char = unicodeCMap.cmap.length;
@@ -153,6 +168,11 @@ class PdfTtfFont extends PdfFont {
       stream.putBytes(latin1.encode(char.toRadixString(16).padLeft(4, '0')));
     }
     stream.putByte(0x3e);
+  }
+
+  dynamic charToGlyphIndex(String c) {
+    var code = c.codeUnitAt(0);
+    return this.font.charToGlyphIndexMap[code] ?? null;
   }
 
   @override
