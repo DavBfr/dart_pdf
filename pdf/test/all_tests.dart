@@ -22,6 +22,7 @@ import 'arabic_test.dart' as arabic;
 import 'colors_test.dart' as colors;
 import 'complex_test.dart' as complex;
 import 'data_types_test.dart' as data_types;
+import 'indic_test.dart' as indic;
 import 'isolate_test.dart' as isolate;
 import 'jpeg_test.dart' as jpeg;
 import 'metrics_test.dart' as metrics;
@@ -58,6 +59,7 @@ void main() {
   complex.main();
   data_types.main();
   example.main();
+  indic.main();
   isolate.main();
   jpeg.main();
   metrics.main();
