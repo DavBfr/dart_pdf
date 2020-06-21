@@ -59,6 +59,11 @@ class PdfTtfFont extends PdfFont {
       return PdfFontMetrics.zero;
     }
 
+    if (PdfArabic._isArabicDiacriticValue(charCode)) {
+      final PdfFontMetrics metric = font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
+      return metric.copyWith(advanceWidth: 0);
+    }
+
     return font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
   }
 
@@ -156,9 +161,9 @@ class PdfTtfFont extends PdfFont {
   }
 
   @override
-  PdfFontMetrics stringMetrics(String s) {
+  PdfFontMetrics stringMetrics(String s, {double letterSpacing = 0}) {
     if (s.isEmpty || !font.unicode) {
-      return super.stringMetrics(s);
+      return super.stringMetrics(s, letterSpacing: letterSpacing);
     }
 
     final Runes runes = s.runes;
@@ -166,6 +171,6 @@ class PdfTtfFont extends PdfFont {
     runes.forEach(bytes.add);
 
     final Iterable<PdfFontMetrics> metrics = bytes.map(glyphMetrics);
-    return PdfFontMetrics.append(metrics);
+    return PdfFontMetrics.append(metrics, letterSpacing: letterSpacing);
   }
 }

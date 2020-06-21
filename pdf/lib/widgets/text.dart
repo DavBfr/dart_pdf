@@ -20,6 +20,8 @@ part of widget;
 
 enum TextAlign { left, right, center, justify }
 
+enum TextDirection { ltr, rtl }
+
 abstract class _Span {
   _Span(this.style);
 
@@ -262,6 +264,7 @@ class _Word extends _Span {
       point.x + offset.x,
       point.y + offset.y,
       mode: style.renderingMode,
+      charSpace: style.letterSpacing,
     );
   }
 
@@ -442,12 +445,14 @@ class RichText extends Widget {
   RichText(
       {@required this.text,
       TextAlign textAlign,
+      TextDirection textDirection,
       bool softWrap,
       this.tightBounds = false,
       this.textScaleFactor = 1.0,
       int maxLines})
       : assert(text != null),
         _textAlign = textAlign,
+        textDirection = textDirection ?? TextDirection.ltr,
         _softWrap = softWrap,
         _maxLines = maxLines;
 
@@ -457,6 +462,8 @@ class RichText extends Widget {
 
   TextAlign get textAlign => _textAlign;
   TextAlign _textAlign;
+
+  final TextDirection textDirection;
 
   final double textScaleFactor;
 
@@ -502,6 +509,17 @@ class RichText extends Widget {
           x += delta;
         }
         return totalWidth;
+    }
+
+    if (textDirection == TextDirection.rtl) {
+      for (_Span span in spans) {
+        span.offset = PdfPoint(
+          totalWidth - (span.offset.x + span.width) - delta,
+          span.offset.y - baseline,
+        );
+      }
+
+      return totalWidth;
     }
 
     for (_Span span in spans) {
@@ -565,16 +583,23 @@ class RichText extends Widget {
         final PdfFontMetrics space =
             font.stringMetrics(' ') * (style.fontSize * textScaleFactor);
 
-        final List<String> spanLines = span.text.split('\n');
+        final List<String> spanLines = (textDirection == TextDirection.rtl
+                ? PdfArabic.convert(span.text)
+                : span.text)
+            .split('\n');
+
         for (int line = 0; line < spanLines.length; line++) {
           for (String word in spanLines[line].split(RegExp(r'\s'))) {
             if (word.isEmpty) {
-              offsetX += space.advanceWidth * style.wordSpacing;
+              offsetX +=
+                  space.advanceWidth * style.wordSpacing + style.letterSpacing;
               continue;
             }
 
-            final PdfFontMetrics metrics =
-                font.stringMetrics(word) * (style.fontSize * textScaleFactor);
+            final PdfFontMetrics metrics = font.stringMetrics(word,
+                    letterSpacing: style.letterSpacing /
+                        (style.fontSize * textScaleFactor)) *
+                (style.fontSize * textScaleFactor);
 
             if (offsetX + metrics.width > constraintWidth && spanCount > 0) {
               width = math.max(
@@ -583,7 +608,9 @@ class RichText extends Widget {
                     _spans.sublist(spanStart),
                     _decorations.sublist(decorationStart),
                     constraintWidth,
-                    offsetX - space.advanceWidth * style.wordSpacing,
+                    offsetX -
+                        space.advanceWidth * style.wordSpacing -
+                        style.letterSpacing,
                     false,
                     bottom,
                   ));
@@ -632,8 +659,9 @@ class RichText extends Widget {
               ),
             );
 
-            offsetX +=
-                metrics.advanceWidth + space.advanceWidth * style.wordSpacing;
+            offsetX += metrics.advanceWidth +
+                space.advanceWidth * style.wordSpacing +
+                style.letterSpacing;
           }
 
           if (softWrap && line < spanLines.length - 1) {
@@ -643,7 +671,9 @@ class RichText extends Widget {
                   _spans.sublist(spanStart),
                   _decorations.sublist(decorationStart),
                   constraintWidth,
-                  offsetX - space.advanceWidth * style.wordSpacing,
+                  offsetX -
+                      space.advanceWidth * style.wordSpacing -
+                      style.letterSpacing,
                   true,
                   bottom,
                 ));
@@ -672,7 +702,7 @@ class RichText extends Widget {
           }
         }
 
-        offsetX -= space.advanceWidth * style.wordSpacing;
+        offsetX -= space.advanceWidth * style.wordSpacing - style.letterSpacing;
       } else if (span is WidgetSpan) {
         span.child.layout(
             context,
@@ -837,6 +867,7 @@ class Text extends RichText {
     String text, {
     TextStyle style,
     TextAlign textAlign,
+    TextDirection textDirection,
     bool softWrap,
     bool tightBounds = false,
     double textScaleFactor = 1.0,
@@ -847,6 +878,7 @@ class Text extends RichText {
             textAlign: textAlign,
             softWrap: softWrap,
             tightBounds: tightBounds,
+            textDirection: textDirection,
             textScaleFactor: textScaleFactor,
             maxLines: maxLines);
 }

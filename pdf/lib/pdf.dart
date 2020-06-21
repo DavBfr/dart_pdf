@@ -33,6 +33,7 @@ import 'io/interface.dart'
     if (dart.library.js) 'io/js.dart';
 
 part 'src/annotation.dart';
+part 'src/arabic.dart';
 part 'src/array.dart';
 part 'src/ascii85.dart';
 part 'src/border.dart';
