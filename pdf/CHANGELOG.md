@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.1
+
+- Fix dependency to Image
+
 ## 1.9.0
 
 - Allow MultiPage to relayout individual pages with support for flex
