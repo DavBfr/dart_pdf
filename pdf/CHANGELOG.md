@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.2
+
+- Fix mixing Arabic with English [Anas Altair]
+- Support Dagger alif in Arabic [Anas Altair]
 
 ## 1.10.1
 
