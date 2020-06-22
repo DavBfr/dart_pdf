@@ -186,7 +186,7 @@ class Bidi {
   /**
    * Apply required arabic ligatures
    */
-  dynamic applyDevnagariLigatures() {
+  dynamic applyDevnagariFeatures() {
     const script = 'dev2';
     if (!this.featuresTags.containsKey(script)) {
       return;
@@ -217,20 +217,20 @@ class Bidi {
    * Apply features to registered contexts
    */
   dynamic applyFeaturesToContexts() {
-    if (this.checkContextReady(SupportedScripts.arabicWord)) {
-      applyArabicPresentationForms();
-      applyArabicRequireLigatures();
-    }
-    if (this.checkContextReady(SupportedScripts.latinWord)) {
-      applyLatinLigatures();
-    }
+//    if (this.checkContextReady(SupportedScripts.arabicWord)) {
+//      applyArabicPresentationForms();
+//      applyArabicRequireLigatures();
+//    }
+//    if (this.checkContextReady(SupportedScripts.latinWord)) {
+//      applyLatinLigatures();
+//    }
 
     if (this.checkContextReady(SupportedScripts.devnagriWord)) {
-      applyDevnagariLigatures();
+      applyDevnagariFeatures();
     }
-    if (this.checkContextReady(SupportedScripts.arabicSentence)) {
-      reverseArabicSentences();
-    }
+//    if (this.checkContextReady(SupportedScripts.arabicSentence)) {
+//      reverseArabicSentences();
+//    }
   }
 
   /**

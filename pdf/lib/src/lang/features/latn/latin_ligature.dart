@@ -1,14 +1,5 @@
 part of pdf;
 
-/**
- * Update context params
- * @param {any} tokens a list of tokens
- * @param {number} index current item index
- */
-dynamic getContextParamsLatin(tokens, [index]) {
-  var context = tokens.map((token) => token.activeState["value"]);
-  return ContextParams(context, index ?? 0);
-}
 
 /**
  * Apply Arabic required ligatures to a context range
@@ -17,7 +8,7 @@ dynamic getContextParamsLatin(tokens, [index]) {
 dynamic latinLigature(range, Bidi bidi) {
   const script = 'latn';
   var tokens = bidi.tokenizer.getRangeTokens(range);
-  var contextParams = getContextParamsLatin(tokens);
+  var contextParams = getContextParams(tokens);
   contextParams.context.forEach((glyphIndex, index) {
     contextParams.setCurrentIndex(index);
     var featureQuery = FeatureQuery(bidi.query.font)
@@ -28,7 +19,7 @@ dynamic latinLigature(range, Bidi bidi) {
     if (substitutions.length) {
       substitutions
           .forEach((action) => applySubstitution(action, tokens, index));
-      contextParams = getContextParamsLatin(tokens);
+      contextParams = getContextParams(tokens);
     }
   });
 }

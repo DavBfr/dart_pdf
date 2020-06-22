@@ -23,7 +23,7 @@ import 'package:pdf/pdf.dart';
 import 'package:test/test.dart';
 
 void printText(PdfGraphics canvas, String text, PdfFont font, double top) {
-  text = text + font.fontName;
+  text = text; // + font.fontName;
   const double fontSize = 20;
   final PdfFontMetrics metrics = font.stringMetrics(text) * fontSize;
 

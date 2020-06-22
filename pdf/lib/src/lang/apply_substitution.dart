@@ -57,7 +57,7 @@ var SUBSTITUTIONS = {
   12: singleSubstitutionFormat2x,
   63: chainingSubstitutionFormat3x,
   41: ligatureSubstitutionFormat1x,
-  71: ligatureSubstitutionFormat1x,
+  71: singleSubstitutionFormat1x,
 };
 
 /**

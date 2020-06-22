@@ -53,13 +53,13 @@ class PdfTtfFont extends PdfFont {
 
   @override
   PdfFontMetrics glyphMetrics(int charCode) {
-    final int g = font.charToGlyphIndexMap[charCode];
+//    final int g = font.charToGlyphIndexMap[charCode];
 
-    if (g == null) {
+    if (charCode == null) {
       return PdfFontMetrics.zero;
     }
 
-    return font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
+    return font.glyphInfoMap[charCode] ?? PdfFontMetrics.zero;
   }
 
   void _buildTrueType(PdfDict params) {
@@ -149,23 +149,23 @@ class PdfTtfFont extends PdfFont {
     bidi.applyFeatures(this.font, [
       {
         "script": 'dev2',
-        "tags": ['half', 'nukt']
+        "tags": ['nukt', 'akhn', 'rphf', 'blwf', 'half', 'vatu', 'cjct']
       }
     ]);
 
     var indexes = bidi.getTextGlyphs(text);
 
-    //final Runes runes = text.runes;
+    final Runes runes = text.runes;
 
     stream.putByte(0x3c);
-    for (int rune in indexes) {
+    for (int rune in runes) {
       int char = unicodeCMap.cmap.indexOf(rune);
       if (char == -1) {
         char = unicodeCMap.cmap.length;
         unicodeCMap.cmap.add(rune);
       }
 
-      stream.putBytes(latin1.encode(char.toRadixString(16).padLeft(4, '0')));
+      stream.putBytes(char.toRadixString(16).padLeft(4, '0').codeUnits);
     }
     stream.putByte(0x3e);
   }

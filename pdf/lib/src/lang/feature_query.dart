@@ -127,7 +127,7 @@ class FeatureQuery {
             ligatureSubstitutionFormat1(contextParams, subtable);
       case '71':
         return (contextParams) =>
-            ligatureSubstitutionFormat1(contextParams, subtable);
+            singleSubstitutionFormat1(contextParams, subtable);
       case '21':
         return (glyphIndex) =>
             decompositionSubstitutionFormat1(glyphIndex, subtable);
