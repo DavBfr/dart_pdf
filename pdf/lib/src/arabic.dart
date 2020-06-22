@@ -324,10 +324,12 @@ class PdfArabic {
   static Iterable<String> _parse(String text) sync* {
     final List<String> words = text.split(' ');
 
+    final List<List<int>> notArabicWords = <List<int>>[];
+
     bool first = true;
     for (String word in words) {
       final List<int> newWord = <int>[];
-      bool isArabic = false;
+      bool isNewWordArabic = false;
 
       int prevLetter = 0;
 
@@ -348,31 +350,48 @@ class PdfArabic {
             );
 
         if (_isArabicLetter(currentLetter)) {
-          isArabic = true;
+          isNewWordArabic = true;
 
           final int position =
               _getCorrectForm(currentLetter, prevLetter, nextLetter);
+          prevLetter = currentLetter;
           if (position != -1) {
             newWord.insert(0, _arabicSubstitionA[currentLetter][position]);
           } else {
             newWord.add(currentLetter);
           }
         } else {
-          if (isArabic && currentLetter > 32) {
+          prevLetter = 0;
+          if (isNewWordArabic && currentLetter > 32) {
             newWord.insert(0, currentLetter);
           } else {
             newWord.add(currentLetter);
           }
         }
-        prevLetter = currentLetter;
       }
 
-      if (!first) {
+      if (!first && isNewWordArabic) {
         yield ' ';
       }
       first = false;
 
-      yield String.fromCharCodes(_resolveLigatures(newWord));
+      if (isNewWordArabic) {
+        isNewWordArabic = false;
+        for (List<int> notArabicNewWord in notArabicWords) {
+          yield '${String.fromCharCodes(notArabicNewWord)} ';
+        }
+        notArabicWords.clear();
+        yield String.fromCharCodes(_resolveLigatures(newWord));
+      } else {
+        notArabicWords.insert(0, newWord);
+      }
+    }
+    // if notArabicWords.length != 0, that means all sentence doesn't contain Arabic.
+    for (int i = 0; i < notArabicWords.length; i++) {
+      yield String.fromCharCodes(notArabicWords[i]);
+      if (i != notArabicWords.length - 1) {
+        yield ' ';
+      }
     }
   }
 
