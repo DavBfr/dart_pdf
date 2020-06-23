@@ -25,8 +25,6 @@ class PdfArabic {
   /// Arabic shape substitutions: char code => (isolated, final, initial, medial).
   /// Arabic Substition A
   static const Map<int, dynamic> _arabicSubstitionA = <int, dynamic>{
-//    0x0652: <int>[0xFE7E, 0xFE7F],
-
     0x0621: <int>[0xFE80], // ARABIC LETTER HAMZA
     0x0622: <int>[0xFE81, 0xFE82], // ARABIC LETTER ALEF WITH MADDA ABOVE
     0x0623: <int>[0xFE83, 0xFE84], // ARABIC LETTER ALEF WITH HAMZA ABOVE
@@ -128,6 +126,7 @@ class PdfArabic {
       0x064E: 0xFC60, // Shadda + Fatha
       0x064F: 0xFC61, // Shadda + Damma
       0x0650: 0xFC62, // Shadda + Kasra
+      0x0670: 0xFC63, // Shadda + Dagger alif
     },
   };
 
@@ -160,20 +159,23 @@ class PdfArabic {
   static const List<int> _alfletter = <int>[1570, 1571, 1573, 1575];
 
   static const Map<int, int> _arabicDiacritics = <int, int>{
-    1611: 1611, // Fathatan
-    1612: 1612, // Dammatan
-    1613: 1613, // Kasratan
-    1614: 1614, // Fatha
-    1615: 1615, // Damma
-    1616: 1616, // Kasra
-    1617: 1617,
-    1618: 1618,
+    0x064B: 0x064B, // Fathatan
+    0x064C: 0x064C, // Dammatan
+    0x064D: 0x064D, // Kasratan
+    0x064E: 0x064E, // Fatha
+    0x064F: 0x064F, // Damma
+    0x0650: 0x0650, // Kasra
+    0x0651: 0x0651, // Shadda
+    0x0652: 0x0652, // Sukun
 
-    64606: 64606, // Shadda + Dammatan
-    64607: 64607, // Shadda + Kasratan
-    64608: 64608, // Shadda + Fatha
-    64609: 64609, // Shadda + Damma
-    64610: 64610, // Shadda + Kasra
+    0x0670: 0x0670, // Dagger alif
+
+    0xFC5E: 0xFC5E, // Shadda + Dammatan
+    0xFC5F: 0xFC5F, // Shadda + Kasratan
+    0xFC60: 0xFC60, // Shadda + Fatha
+    0xFC61: 0xFC61, // Shadda + Damma
+    0xFC62: 0xFC62, // Shadda + Kasra
+    0xFC63: 0xFC63, // Shadda + Dagger alif
     // 1548: 1548,
   };
 
