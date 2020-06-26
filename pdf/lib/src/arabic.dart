@@ -25,6 +25,8 @@ class PdfArabic {
   /// Arabic shape substitutions: char code => (isolated, final, initial, medial).
   /// Arabic Substition A
   static const Map<int, dynamic> _arabicSubstitionA = <int, dynamic>{
+    0x0640: <int>[0x0640, 0x0640, 0x0640, 0x0640], // ARABIC TATWEEL
+
     0x0621: <int>[0xFE80], // ARABIC LETTER HAMZA
     0x0622: <int>[0xFE81, 0xFE82], // ARABIC LETTER ALEF WITH MADDA ABOVE
     0x0623: <int>[0xFE83, 0xFE84], // ARABIC LETTER ALEF WITH HAMZA ABOVE
