@@ -1,8 +1,9 @@
 # Changelog
 
-## 1.9.1
+## 1.10.0
 
-- Fix dependency to Image
+- Fix dependencies
+- Implement Barcode textPadding and bytes data
 
 ## 1.9.0
 

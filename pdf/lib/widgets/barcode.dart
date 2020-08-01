@@ -25,10 +25,11 @@ class _BarcodeWidget extends Widget {
     this.color = PdfColors.black,
     this.drawText,
     this.textStyle,
+    this.textPadding,
   });
 
   /// the barcode data
-  final String data;
+  final Uint8List data;
 
   final Barcode barcode;
 
@@ -37,6 +38,8 @@ class _BarcodeWidget extends Widget {
   final bool drawText;
 
   final TextStyle textStyle;
+
+  final double textPadding;
 
   @override
   void layout(Context context, BoxConstraints constraints,
@@ -50,12 +53,13 @@ class _BarcodeWidget extends Widget {
 
     final List<BarcodeText> textList = <BarcodeText>[];
 
-    for (BarcodeElement element in barcode.make(
+    for (BarcodeElement element in barcode.makeBytes(
       data,
       width: box.width,
       height: box.height,
       drawText: drawText,
       fontHeight: textStyle.fontSize,
+      textPadding: textPadding,
     )) {
       if (element is BarcodeBar) {
         if (element.black) {
@@ -121,12 +125,13 @@ class _BarcodeWidget extends Widget {
     super.debugPaint(context);
 
     if (drawText) {
-      for (BarcodeElement element in barcode.make(
+      for (BarcodeElement element in barcode.makeBytes(
         data,
         width: box.width,
         height: box.height,
         drawText: drawText,
         fontHeight: textStyle.fontSize,
+        textPadding: textPadding,
       )) {
         if (element is BarcodeText) {
           context.canvas.drawRect(
@@ -147,7 +152,38 @@ class _BarcodeWidget extends Widget {
 }
 
 class BarcodeWidget extends StatelessWidget {
-  BarcodeWidget({
+  /// Draw a barcode using String data
+  factory BarcodeWidget({
+    @required String data,
+    @required Barcode barcode,
+    PdfColor color = PdfColors.black,
+    PdfColor backgroundColor,
+    BoxDecoration decoration,
+    EdgeInsets margin,
+    EdgeInsets padding,
+    double width,
+    double height,
+    bool drawText = true,
+    TextStyle textStyle,
+    double textPadding = 0,
+  }) =>
+      BarcodeWidget.fromBytes(
+        data: utf8.encoder.convert(data),
+        barcode: barcode,
+        color: color,
+        backgroundColor: backgroundColor,
+        decoration: decoration,
+        margin: margin,
+        padding: padding,
+        width: width,
+        height: height,
+        drawText: drawText,
+        textStyle: textStyle,
+        textPadding: textPadding,
+      );
+
+  /// Draw a barcode using Uint8List data
+  BarcodeWidget.fromBytes({
     @required this.data,
     @required this.barcode,
     this.color = PdfColors.black,
@@ -159,29 +195,51 @@ class BarcodeWidget extends StatelessWidget {
     this.height,
     this.drawText = true,
     this.textStyle,
-  }) : assert(barcode != null);
+    this.textPadding = 0,
+  })  : assert(data != null),
+        assert(barcode != null),
+        assert(textPadding != null);
 
   /// the barcode data
-  final String data;
+  final Uint8List data;
 
+  /// The type of barcode to use.
+  /// use:
+  ///   * Barcode.code128()
+  ///   * Barcode.ean13()
+  ///   * ...
   final Barcode barcode;
 
+  /// The bars color
+  /// should be black or really dark color
   final PdfColor color;
 
+  /// The background color.
+  /// this should be white or really light color
   final PdfColor backgroundColor;
 
+  /// Padding to apply
   final EdgeInsets padding;
 
+  /// Margin to apply
   final EdgeInsets margin;
 
+  /// Width of the barcode with padding
   final double width;
 
+  /// Height of the barcode with padding
   final double height;
 
+  /// Whether to draw the text with the barcode
   final bool drawText;
 
+  /// Text style to use to draw the text
   final TextStyle textStyle;
 
+  /// Padding to add between the text and the barcode
+  final double textPadding;
+
+  /// Decoration to apply to the barcode
   final BoxDecoration decoration;
 
   @override
@@ -203,6 +261,7 @@ class BarcodeWidget extends StatelessWidget {
       barcode: barcode,
       drawText: drawText,
       textStyle: _textStyle,
+      textPadding: textPadding,
     );
 
     if (padding != null) {
