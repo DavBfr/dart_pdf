@@ -120,6 +120,7 @@ class _PdfPreviewState extends State<PdfPreview> {
 
     var pageNum = 0;
     await for (final PdfRaster page in Printing.raster(_doc, dpi: dpi)) {
+      if (!mounted) return;
       setState(() {
         if (pages.length <= pageNum) {
           pages.add(_PdfPreviewPage(
