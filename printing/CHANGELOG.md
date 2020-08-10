@@ -4,6 +4,7 @@
 
 - Added pdfFileName prop to PdfPreview Widget [Marcos Rodriguez]
 - Fix PdfPreview unhandled exception when popped [computib]
+- Allow to disable actions in PdfPreview [Nicolas Lopez]
 
 ## 3.5.0
 
