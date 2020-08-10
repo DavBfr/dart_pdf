@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.7.0
+
+- Allow to disable actions in PDF Preview
+
 ## 3.6.0
 
 - Added pdfFileName prop to PdfPreview Widget [Marcos Rodriguez]

@@ -13,23 +13,24 @@ import 'raster.dart';
 /// Flutter widget that uses the rasterized pdf pages to display a document.
 class PdfPreview extends StatefulWidget {
   /// Show a pdf document built on demand
-  const PdfPreview({
-    Key key,
-    @required this.build,
-    this.initialPageFormat,
-    this.allowPrinting = true,
-    this.allowSharing = true,
-    this.maxPageWidth,
-    this.canChangePageFormat = true,
-    this.actions,
-    this.pageFormats,
-    this.onError,
-    this.onPrinted,
-    this.onShared,
-    this.scrollViewDecoration,
-    this.pdfPreviewPageDecoration,
-    this.pdfFileName,
-  }) : super(key: key);
+  const PdfPreview(
+      {Key key,
+      @required this.build,
+      this.initialPageFormat,
+      this.allowPrinting = true,
+      this.allowSharing = true,
+      this.maxPageWidth,
+      this.canChangePageFormat = true,
+      this.actions,
+      this.pageFormats,
+      this.onError,
+      this.onPrinted,
+      this.onShared,
+      this.scrollViewDecoration,
+      this.pdfPreviewPageDecoration,
+      this.pdfFileName,
+      this.useActions = true})
+      : super(key: key);
 
   /// Called when a pdf document is needed
   final LayoutCallback build;
@@ -42,6 +43,9 @@ class PdfPreview extends StatefulWidget {
 
   /// Add a button to share the pdf document
   final bool allowSharing;
+
+  /// Allow disable actions
+  final bool useActions;
 
   /// Maximum width of the pdf document on screen
   final double maxPageWidth;
@@ -353,7 +357,7 @@ class _PdfPreviewState extends State<PdfPreview> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Expanded(child: scrollView),
-        if (actions.isNotEmpty)
+        if (actions.isNotEmpty && widget.useActions)
           Material(
             elevation: 4,
             color: theme.primaryColor,
