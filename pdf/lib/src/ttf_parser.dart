@@ -137,49 +137,52 @@ class TtfParser {
     for (int i = 0; i < numSubTables; i++) {
       final int offset = bytes.getUint32(basePosition + i * 8 + 8);
       final int format = bytes.getUint16(basePosition + offset);
-      final int length = bytes.getUint16(basePosition + offset + 2);
 
       switch (format) {
         case 0:
-          _parseCMapFormat0(basePosition + offset + 4, length);
+          _parseCMapFormat0(basePosition + offset + 2);
           break;
 
         case 4:
-          _parseCMapFormat4(basePosition + offset + 4, length);
+          _parseCMapFormat4(basePosition + offset + 2);
           break;
         case 6:
-          _parseCMapFormat6(basePosition + offset + 4, length);
+          _parseCMapFormat6(basePosition + offset + 2);
+          break;
+
+        case 12:
+          _parseCMapFormat12(basePosition + offset + 2);
           break;
       }
     }
   }
 
-  void _parseCMapFormat0(int basePosition, int length) {
-    assert(length == 262);
+  void _parseCMapFormat0(int basePosition) {
+    assert(bytes.getUint16(basePosition) == 262);
     for (int i = 0; i < 256; i++) {
       final int charCode = i;
-      final int glyphIndex = bytes.getUint8(basePosition + i);
+      final int glyphIndex = bytes.getUint8(basePosition + i + 2);
       if (glyphIndex > 0) {
         charToGlyphIndexMap[charCode] = glyphIndex;
       }
     }
   }
 
-  void _parseCMapFormat4(int basePosition, int length) {
-    final int segCount = bytes.getUint16(basePosition + 2) ~/ 2;
+  void _parseCMapFormat4(int basePosition) {
+    final int segCount = bytes.getUint16(basePosition + 4) ~/ 2;
     final List<int> endCodes = <int>[];
     for (int i = 0; i < segCount; i++) {
-      endCodes.add(bytes.getUint16(basePosition + i * 2 + 10));
+      endCodes.add(bytes.getUint16(basePosition + i * 2 + 12));
     }
     final List<int> startCodes = <int>[];
     for (int i = 0; i < segCount; i++) {
-      startCodes.add(bytes.getUint16(basePosition + (segCount + i) * 2 + 12));
+      startCodes.add(bytes.getUint16(basePosition + (segCount + i) * 2 + 14));
     }
     final List<int> idDeltas = <int>[];
     for (int i = 0; i < segCount; i++) {
-      idDeltas.add(bytes.getUint16(basePosition + (segCount * 2 + i) * 2 + 12));
+      idDeltas.add(bytes.getUint16(basePosition + (segCount * 2 + i) * 2 + 14));
     }
-    final int idRangeOffsetBasePos = basePosition + segCount * 6 + 12;
+    final int idRangeOffsetBasePos = basePosition + segCount * 6 + 14;
     final List<int> idRangeOffsets = <int>[];
     for (int i = 0; i < segCount; i++) {
       idRangeOffsets.add(bytes.getUint16(idRangeOffsetBasePos + i * 2));
@@ -204,14 +207,31 @@ class TtfParser {
     }
   }
 
-  void _parseCMapFormat6(int basePosition, int length) {
-    final int firstCode = bytes.getUint16(basePosition + 2);
-    final int entryCount = bytes.getUint16(basePosition + 4);
+  void _parseCMapFormat6(int basePosition) {
+    final int firstCode = bytes.getUint16(basePosition + 4);
+    final int entryCount = bytes.getUint16(basePosition + 6);
     for (int i = 0; i < entryCount; i++) {
       final int charCode = firstCode + i;
-      final int glyphIndex = bytes.getUint16(basePosition + i * 2 + 6);
+      final int glyphIndex = bytes.getUint16(basePosition + i * 2 + 8);
       if (glyphIndex > 0) {
         charToGlyphIndexMap[charCode] = glyphIndex;
+      }
+    }
+  }
+
+  void _parseCMapFormat12(int basePosition) {
+    final int numGroups = bytes.getUint32(basePosition + 10);
+    assert(bytes.getUint32(basePosition + 2) == 12 * numGroups + 16);
+
+    for (int i = 0; i < numGroups; i++) {
+      final int startCharCode = bytes.getUint32(basePosition + i * 12 + 14);
+      final int endCharCode = bytes.getUint32(basePosition + i * 12 + 18);
+      final int startGlyphID = bytes.getUint32(basePosition + i * 12 + 22);
+
+      for (int j = startCharCode; j <= endCharCode; j++) {
+        assert(!charToGlyphIndexMap.containsKey(j) ||
+            charToGlyphIndexMap[j] == startGlyphID + j - startCharCode);
+        charToGlyphIndexMap[j] = startGlyphID + j - startCharCode;
       }
     }
   }

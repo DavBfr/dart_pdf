@@ -196,14 +196,24 @@ class TtfWriter {
 
     {
       // CMAP table
-      final Uint8List cmap = Uint8List(_wordAlign(0x112, 4));
-      cmap.setAll(3, <int>[1, 0, 1, 0, 0, 0, 0, 0, 12, 0, 0, 1, 6]);
+      const int len = 40;
+      final Uint8List cmap = Uint8List(_wordAlign(len, 4));
       final ByteData cmapData = cmap.buffer.asByteData();
-      for (int i = 1; i < chars.length; i++) {
-        cmapData.setUint8(i + 18, i);
-      }
+      cmapData.setUint16(0, 0); // Table version number
+      cmapData.setUint16(2, 1); // Number of encoding tables that follow.
+      cmapData.setUint16(4, 3); // Platform ID
+      cmapData.setUint16(6, 1); // Platform-specific encoding ID
+      cmapData.setUint32(8, 12); // Offset from beginning of table
+      cmapData.setUint16(12, 12); // Table format
+      cmapData.setUint32(16, 28); // Table length
+      cmapData.setUint32(20, 1); // Table language
+      cmapData.setUint32(24, 1); // numGroups
+      cmapData.setUint32(28, 32); // startCharCode
+      cmapData.setUint32(32, chars.length + 31); // endCharCode
+      cmapData.setUint32(36, 0); // startGlyphID
+
       tables[TtfParser.cmap_table] = cmap;
-      tablesLength[TtfParser.cmap_table] = 0x112;
+      tablesLength[TtfParser.cmap_table] = len;
     }
 
     {

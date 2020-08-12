@@ -1,5 +1,10 @@
 # Changelog
 
+
+## 1.10.1
+
+- Fix TTF writer with more than 256 CMAP entries
+
 ## 1.10.0
 
 - Fix dependencies
