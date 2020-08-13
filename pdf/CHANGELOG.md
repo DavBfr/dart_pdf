@@ -5,6 +5,7 @@
 - Fix mixing Arabic with English [Anas Altair]
 - Support Dagger alif in Arabic [Anas Altair]
 - Support ARABIC TATWEEL [Anas Altair]
+- Update Arabic tests [Anas Altair]
 
 ## 1.10.1
 
