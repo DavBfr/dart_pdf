@@ -1,11 +1,12 @@
 # Changelog
 
-## 1.10.2
+## 1.11.0
 
 - Fix mixing Arabic with English [Anas Altair]
 - Support Dagger alif in Arabic [Anas Altair]
 - Support ARABIC TATWEEL [Anas Altair]
 - Update Arabic tests [Anas Altair]
+- Add Directionality Widget
 
 ## 1.10.1
 

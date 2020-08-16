@@ -24,6 +24,8 @@ import 'package:test/test.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 
+import 'utils.dart';
+
 Document pdf;
 
 List<TableRow> buildTable(
@@ -228,6 +230,25 @@ void main() {
           <dynamic>[4, 5, 6],
           <dynamic>[7, 8, 9],
         ],
+      ),
+    ));
+  });
+
+  test('Table fromTextArray with directionality', () {
+    pdf.addPage(Page(
+      theme: ThemeData.withFont(
+        base: loadFont('hacen-tunisia.ttf'),
+      ),
+      build: (Context context) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: Table.fromTextArray(
+          headers: <dynamic>['ثلاثة', 'اثنان', 'واحد'],
+          cellAlignment: Alignment.centerRight,
+          data: <List<dynamic>>[
+            <dynamic>['الكلب', 'قط', 'ذئب'],
+            <dynamic>['فأر', 'بقرة', 'طائر'],
+          ],
+        ),
       ),
     ));
   });

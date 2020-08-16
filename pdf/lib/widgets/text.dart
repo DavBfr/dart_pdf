@@ -445,14 +445,13 @@ class RichText extends Widget {
   RichText(
       {@required this.text,
       TextAlign textAlign,
-      TextDirection textDirection,
+      this.textDirection,
       bool softWrap,
       this.tightBounds = false,
       this.textScaleFactor = 1.0,
       int maxLines})
       : assert(text != null),
         _textAlign = textAlign,
-        textDirection = textDirection ?? TextDirection.ltr,
         _softWrap = softWrap,
         _maxLines = maxLines;
 
@@ -486,6 +485,7 @@ class RichText extends Widget {
     double wordsWidth,
     bool last,
     double baseline,
+    TextDirection textDirection,
   ) {
     double delta = 0;
     switch (textAlign) {
@@ -553,6 +553,8 @@ class RichText extends Widget {
     _softWrap ??= theme.softWrap;
     _maxLines ??= theme.maxLines;
     _textAlign ??= theme.textAlign;
+    final TextDirection _textDirection =
+        textDirection ?? Directionality.of(context);
 
     final double constraintWidth = constraints.hasBoundedWidth
         ? constraints.maxWidth
@@ -583,7 +585,7 @@ class RichText extends Widget {
         final PdfFontMetrics space =
             font.stringMetrics(' ') * (style.fontSize * textScaleFactor);
 
-        final List<String> spanLines = (textDirection == TextDirection.rtl
+        final List<String> spanLines = (_textDirection == TextDirection.rtl
                 ? PdfArabic.convert(span.text)
                 : span.text)
             .split('\n');
@@ -613,6 +615,7 @@ class RichText extends Widget {
                         style.letterSpacing,
                     false,
                     bottom,
+                    _textDirection,
                   ));
 
               spanStart += spanCount;
@@ -676,6 +679,7 @@ class RichText extends Widget {
                       style.letterSpacing,
                   true,
                   bottom,
+                  _textDirection,
                 ));
 
             spanStart += spanCount;
@@ -725,6 +729,7 @@ class RichText extends Widget {
                 offsetX,
                 false,
                 bottom,
+                _textDirection,
               ));
 
           spanStart += spanCount;
@@ -782,6 +787,7 @@ class RichText extends Widget {
           offsetX,
           true,
           bottom,
+          _textDirection,
         ));
 
     bottom ??= 0.0;
