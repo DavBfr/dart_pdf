@@ -47,7 +47,11 @@ mixin Printing {
     return PrintingPlatform.instance.layoutPdf(onLayout, name, format);
   }
 
-  /// Opens the native printer picker interface, and returns the URL of the selected printer.
+  /// Opens the native printer picker interface, and returns the URL of the
+  /// selected printer.
+  ///
+  /// This is not supported on all platforms. Check the result of [info] to
+  /// find at runtime if this feature is available or not.
   static Future<Printer> pickPrinter({Rect bounds}) {
     bounds ??= Rect.fromCircle(center: Offset.zero, radius: 10);
 
@@ -59,6 +63,9 @@ mixin Printing {
   /// returns a future with a `bool` set to true if the document is printed
   /// and false if it is canceled.
   /// throws an exception in case of error
+  ///
+  /// This is not supported on all platforms. Check the result of [info] to
+  /// find at runtime if this feature is available or not.
   static FutureOr<bool> directPrintPdf({
     @required Printer printer,
     @required LayoutCallback onLayout,
@@ -106,6 +113,9 @@ mixin Printing {
   }
 
   /// Convert an html document to a pdf data
+  ///
+  /// This is not supported on all platforms. Check the result of [info] to
+  /// find at runtime if this feature is available or not.
   static Future<Uint8List> convertHtml({
     @required String html,
     String baseUrl,
@@ -134,6 +144,15 @@ mixin Printing {
     return (await info()).asMap();
   }
 
+  /// Convert a PDF to a list of images.
+  /// ```dart
+  /// await for (final page in Printing.raster(content)) {
+  ///   final image = page.asImage();
+  /// }
+  /// ```
+  ///
+  /// This is not supported on all platforms. Check the result of [info] to
+  /// find at runtime if this feature is available or not.
   static Stream<PdfRaster> raster(
     Uint8List document, {
     List<int> pages,
