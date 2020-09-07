@@ -286,9 +286,13 @@ class Table extends Widget implements SpanningWidget {
 
       if (rowNum < headerCount) {
         for (final dynamic cell in row) {
+          final Alignment align =
+              headerAlignments[tableRow.length] ?? headerAlignment;
+          final TextAlign textAlign = _textAlign(align);
+
           tableRow.add(
             Container(
-              alignment: headerAlignments[tableRow.length] ?? headerAlignment,
+              alignment: align,
               padding: headerPadding,
               constraints: BoxConstraints(minHeight: headerHeight),
               child: Text(
@@ -296,15 +300,19 @@ class Table extends Widget implements SpanningWidget {
                     ? cell.toString()
                     : headerFormat(tableRow.length, cell),
                 style: headerStyle,
+                textAlign: textAlign,
               ),
             ),
           );
         }
       } else {
         for (final dynamic cell in row) {
+          final Alignment align =
+              cellAlignments[tableRow.length] ?? cellAlignment;
+          final TextAlign textAlign = _textAlign(align);
           tableRow.add(
             Container(
-              alignment: cellAlignments[tableRow.length] ?? cellAlignment,
+              alignment: align,
               padding: cellPadding,
               constraints: BoxConstraints(minHeight: cellHeight),
               child: Text(
@@ -312,6 +320,7 @@ class Table extends Widget implements SpanningWidget {
                     ? cell.toString()
                     : cellFormat(tableRow.length, cell),
                 style: isOdd ? oddCellStyle : cellStyle,
+                textAlign: textAlign,
               ),
             ),
           );
@@ -583,6 +592,16 @@ class Table extends Widget implements SpanningWidget {
 
     if (border != null) {
       border.paint(context, box, _widths, _heights);
+    }
+  }
+
+  static TextAlign _textAlign(Alignment align) {
+    if (align.x == 0) {
+      return TextAlign.center;
+    } else if (align.x < 0) {
+      return TextAlign.left;
+    } else {
+      return TextAlign.right;
     }
   }
 }

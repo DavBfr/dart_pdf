@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.11.1
+
+- Fix Table.fromTextArray alignments with multi-lines text
+
 ## 1.11.0
 
 - Fix mixing Arabic with English [Anas Altair]
