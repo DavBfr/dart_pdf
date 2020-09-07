@@ -17,3 +17,6 @@ dependency_overrides:
     path: ../
   pdf:
     path: ../../pdf
+
+flutter:
+  uses-material-design: true
