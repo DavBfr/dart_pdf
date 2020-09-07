@@ -417,7 +417,7 @@ class Directionality extends StatelessWidget implements Inherited {
   @override
   Widget build(Context context) {
     return InheritedWidget(
-      build: (context) => child,
+      build: (Context context) => child,
       inherited: this,
     );
   }
