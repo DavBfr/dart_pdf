@@ -13,6 +13,7 @@ dependencies:
   path_provider:
   open_file:
   url_launcher:
+  intl:
 
 dev_dependencies:
   flutter_test:
