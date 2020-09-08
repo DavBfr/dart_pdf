@@ -224,7 +224,7 @@ class Table extends Widget implements SpanningWidget {
     OnCellFormat headerFormat,
     TableBorder border = const TableBorder(),
     Map<int, TableColumnWidth> columnWidths,
-    IntrinsicColumnWidth defaultColumnWidth = const IntrinsicColumnWidth(),
+    TableColumnWidth defaultColumnWidth = const IntrinsicColumnWidth(),
     TableWidth tableWidth = TableWidth.max,
     BoxDecoration headerDecoration,
     BoxDecoration rowDecoration,
