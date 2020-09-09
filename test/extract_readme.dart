@@ -49,13 +49,12 @@ void buildFile(String src, String dest, bool flutter) {
   final output = File(dest);
   final st = output.openWrite();
   st.writeln('import \'dart:io\';');
+  st.writeln('import \'dart:typed_data\';');
   if (flutter) {
     st.writeln('import \'package:flutter/services.dart\' show rootBundle;');
     st.writeln('import \'package:flutter/widgets.dart\' show AssetImage;');
     st.writeln('import \'package:path_provider/path_provider.dart\';');
     st.writeln('import \'package:printing/printing.dart\';');
-  } else {
-    st.writeln('import \'dart:typed_data\';');
   }
   st.writeln('import \'package:pdf/pdf.dart\';');
   st.writeln('import \'package:pdf/widgets.dart\' as pw;');

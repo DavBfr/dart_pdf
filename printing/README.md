@@ -141,6 +141,23 @@ and refresh.
 
 Take a look at the [example tab](example) for a sample project.
 
+Update the `_generatePdf` method with your design.
+
+```dart
+Future<Uint8List> _generatePdf(PdfPageFormat format, String title) async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: format,
+        build: (context) => pw.Placeholder(),
+      ),
+    );
+
+    return pdf.save();
+  }
+```
+
 This widget also features a debug switch at the bottom right to display the
 drawing constraints used. This switch is available only on debug builds.
 
@@ -148,6 +165,7 @@ Moving on to your production application, you can keep only the `_generatePdf`
 function and print the document using:
 
 ```dart
+final title = 'Flutter Demo';
 await Printing.layoutPdf(onLayout: (format) => _generatePdf(format, title));
 ```
 
