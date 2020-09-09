@@ -27,6 +27,7 @@ import 'printer.dart';
 import 'printing_info.dart';
 import 'raster.dart';
 
+/// Flutter pdf printing library
 mixin Printing {
   /// Prints a Pdf document to a local printer using the platform UI
   /// the Pdf document is re-built in a [LayoutCallback] each time the
