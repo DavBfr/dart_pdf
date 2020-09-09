@@ -175,7 +175,7 @@ mixin Printing {
     assert(document != null || bytes != null);
     assert(!(document == null && bytes == null));
 
-    layoutPdf(
+    await layoutPdf(
         onLayout: (PdfPageFormat format) =>
             document != null ? document.save() : bytes);
   }

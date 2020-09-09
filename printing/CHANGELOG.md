@@ -3,6 +3,7 @@
 ## 3.6.1
 
 - Update the example to use PdfPreview
+- Add missing `await`s
 
 ## 3.6.0
 

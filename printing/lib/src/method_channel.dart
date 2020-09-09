@@ -91,7 +91,7 @@ class MethodChannelPrinting extends PrintingPlatform {
         break;
       case 'onPageRasterEnd':
         final job = _printJobs[call.arguments['job']];
-        job.onPageRasterized.close();
+        await job.onPageRasterized.close();
         _printJobs.remove(job.index);
         break;
     }
