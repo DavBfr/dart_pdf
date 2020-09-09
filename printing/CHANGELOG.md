@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.1
+
+- Update the example to use PdfPreview
+
 ## 3.6.0
 
 - Added pdfFileName prop to PdfPreview Widget [Marcos Rodriguez]

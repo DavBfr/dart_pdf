@@ -134,6 +134,23 @@ final pdf = await rootBundle.load('document.pdf');
 await Printing.layoutPdf(onLayout: (_) => pdf.buffer.asUint8List());
 ```
 
+## Designing your PDF document
+
+A good starting point is to use PdfPreview which features hot-reload pdf build
+and refresh.
+
+Take a look at the [example tab](example) for a sample project.
+
+This widget also features a debug switch at the bottom right to display the
+drawing constraints used. This switch is available only on debug builds.
+
+Moving on to your production application, you can keep only the `_generatePdf`
+function and print the document using:
+
+```dart
+await Printing.layoutPdf(onLayout: (format) => _generatePdf(format, title));
+```
+
 ## Encryption and Digital Signature
 
 Encryption using RC4-40, RC4-128, AES-128, and AES-256 is fully supported using a separate library.

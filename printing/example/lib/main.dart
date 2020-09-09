@@ -1,48 +1,46 @@
 // ignore_for_file: always_specify_types
 // ignore_for_file: public_member_api_docs
 
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp('Printing Demo'));
 
 class MyApp extends StatelessWidget {
+  const MyApp(this.title);
+
+  final String title;
+
   @override
   Widget build(BuildContext context) {
-    const title = 'Printing Demo';
-
     return MaterialApp(
-      title: title,
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text(title),
-        ),
-        body: Center(
-          child: IconButton(
-            icon: const Icon(Icons.print),
-            onPressed: _printDocument,
-          ),
+        appBar: AppBar(title: Text(title)),
+        body: PdfPreview(
+          build: (format) => _generatePdf(format, title),
         ),
       ),
     );
   }
 
-  void _printDocument() {
-    Printing.layoutPdf(
-      onLayout: (pageFormat) {
-        final doc = pw.Document();
+  Future<Uint8List> _generatePdf(PdfPageFormat format, String title) async {
+    final pdf = pw.Document();
 
-        doc.addPage(
-          pw.Page(
-            build: (pw.Context context) => pw.Center(
-              child: pw.Text('Hello World!'),
-            ),
-          ),
-        );
-
-        return doc.save();
-      },
+    pdf.addPage(
+      pw.Page(
+        pageFormat: format,
+        build: (context) {
+          return pw.Center(
+            child: pw.Text(title),
+          );
+        },
+      ),
     );
+
+    return pdf.save();
   }
 }
