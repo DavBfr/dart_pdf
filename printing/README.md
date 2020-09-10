@@ -134,6 +134,28 @@ final pdf = await rootBundle.load('document.pdf');
 await Printing.layoutPdf(onLayout: (_) => pdf.buffer.asUint8List());
 ```
 
+## Display your PDF document
+
+This package also comes with a PdfPreview widget to display a pdf document.
+
+```dart
+PdfPreview(
+  build: (format) => doc.save(),
+);
+```
+
+This widget is compatible with Android, iOS, macOS and web.
+
+For the web, a javascript library and a small script has to be added to
+your `web/index.html` file:
+
+```html
+<script src="//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.4.456/pdf.min.js"></script>
+<script type="text/javascript">
+     pdfjsLib.GlobalWorkerOptions.workerSrc = "//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.4.456/pdf.worker.min.js";
+</script>
+```
+
 ## Designing your PDF document
 
 A good starting point is to use PdfPreview which features hot-reload pdf build
@@ -161,7 +183,7 @@ Future<Uint8List> _generatePdf(PdfPageFormat format, String title) async {
 This widget also features a debug switch at the bottom right to display the
 drawing constraints used. This switch is available only on debug builds.
 
-Moving on to your production application, you can keep only the `_generatePdf`
+Moving on to your production application, you can keep the `_generatePdf`
 function and print the document using:
 
 ```dart
