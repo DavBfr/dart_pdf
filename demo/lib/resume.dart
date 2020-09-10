@@ -26,6 +26,7 @@ import 'package:pdf/widgets.dart' as pw;
 
 const PdfColor green = PdfColor.fromInt(0xff9ce5d0);
 const PdfColor lightGreen = PdfColor.fromInt(0xffcdf1e7);
+const sep = 120.0;
 
 Future<Uint8List> generateResume(PdfPageFormat format) async {
   final pw.Document doc =
@@ -38,102 +39,127 @@ Future<Uint8List> generateResume(PdfPageFormat format) async {
 
   final pw.PageTheme pageTheme = await _myPageTheme(format);
 
-  doc.addPage(pw.Page(
-    pageTheme: pageTheme,
-    build: (pw.Context context) => pw.Row(children: <pw.Widget>[
-      pw.Expanded(
-          child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: <pw.Widget>[
-            pw.Container(
-                padding: const pw.EdgeInsets.only(left: 30, bottom: 20),
-                child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: <pw.Widget>[
-                      pw.Text('Parnella Charlesbois',
-                          textScaleFactor: 2,
-                          style: pw.Theme.of(context)
-                              .defaultTextStyle
-                              .copyWith(fontWeight: pw.FontWeight.bold)),
-                      pw.Padding(padding: const pw.EdgeInsets.only(top: 10)),
-                      pw.Text('Electrotyper',
-                          textScaleFactor: 1.2,
-                          style: pw.Theme.of(context).defaultTextStyle.copyWith(
-                              fontWeight: pw.FontWeight.bold, color: green)),
-                      pw.Padding(padding: const pw.EdgeInsets.only(top: 20)),
-                      pw.Row(
+  doc.addPage(
+    pw.MultiPage(
+      pageTheme: pageTheme,
+      build: (pw.Context context) => [
+        pw.Partitions(
+          children: [
+            pw.Partition(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: <pw.Widget>[
+                  pw.Container(
+                    padding: const pw.EdgeInsets.only(left: 30, bottom: 20),
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: <pw.Widget>[
+                        pw.Text('Parnella Charlesbois',
+                            textScaleFactor: 2,
+                            style: pw.Theme.of(context)
+                                .defaultTextStyle
+                                .copyWith(fontWeight: pw.FontWeight.bold)),
+                        pw.Padding(padding: const pw.EdgeInsets.only(top: 10)),
+                        pw.Text('Electrotyper',
+                            textScaleFactor: 1.2,
+                            style: pw.Theme.of(context)
+                                .defaultTextStyle
+                                .copyWith(
+                                    fontWeight: pw.FontWeight.bold,
+                                    color: green)),
+                        pw.Padding(padding: const pw.EdgeInsets.only(top: 20)),
+                        pw.Row(
                           crossAxisAlignment: pw.CrossAxisAlignment.start,
                           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                           children: <pw.Widget>[
                             pw.Column(
-                                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                                children: <pw.Widget>[
-                                  pw.Text('568 Port Washington Road'),
-                                  pw.Text('Nordegg, AB T0M 2H0'),
-                                  pw.Text('Canada, ON'),
-                                ]),
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: <pw.Widget>[
+                                pw.Text('568 Port Washington Road'),
+                                pw.Text('Nordegg, AB T0M 2H0'),
+                                pw.Text('Canada, ON'),
+                              ],
+                            ),
                             pw.Column(
-                                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                                children: <pw.Widget>[
-                                  pw.Text('+1 403-721-6898'),
-                                  _UrlText('p.charlesbois@yahoo.com',
-                                      'mailto:p.charlesbois@yahoo.com'),
-                                  _UrlText('wholeprices.ca',
-                                      'https://wholeprices.ca'),
-                                ]),
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: <pw.Widget>[
+                                pw.Text('+1 403-721-6898'),
+                                _UrlText('p.charlesbois@yahoo.com',
+                                    'mailto:p.charlesbois@yahoo.com'),
+                                _UrlText(
+                                    'wholeprices.ca', 'https://wholeprices.ca'),
+                              ],
+                            ),
                             pw.Padding(padding: pw.EdgeInsets.zero)
-                          ]),
-                    ])),
-            _Category(title: 'Work Experience'),
-            _Block(title: 'Tour bus driver'),
-            _Block(title: 'Logging equipment operator'),
-            _Block(title: 'Foot doctor'),
-            _Category(title: 'Education'),
-            _Block(title: 'Bachelor Of Commerce'),
-            _Block(title: 'Bachelor Interior Design'),
-          ])),
-      pw.Container(
-        height: double.infinity,
-        width: 2,
-        margin: const pw.EdgeInsets.symmetric(horizontal: 5),
-        color: green,
-      ),
-      pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.center,
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: <pw.Widget>[
-          pw.ClipOval(
-            child: pw.Container(
-              width: 100,
-              height: 100,
-              color: lightGreen,
-              child: pw.Image(profileImage),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  _Category(title: 'Work Experience'),
+                  _Block(title: 'Tour bus driver'),
+                  _Block(title: 'Logging equipment operator'),
+                  _Block(title: 'Foot doctor'),
+                  _Block(title: 'Unicorn trainer'),
+                  _Block(title: 'Chief chatter'),
+                  pw.SizedBox(height: 20),
+                  _Category(title: 'Education'),
+                  _Block(title: 'Bachelor Of Commerce'),
+                  _Block(title: 'Bachelor Interior Design'),
+                ],
+              ),
             ),
-          ),
-          pw.Column(children: <pw.Widget>[
-            _Percent(size: 60, value: .7, title: pw.Text('Word')),
-            _Percent(size: 60, value: .4, title: pw.Text('Excel')),
-          ]),
-          pw.BarcodeWidget(
-            data: 'Parnella Charlesbois',
-            width: 60,
-            height: 60,
-            barcode: pw.Barcode.qrCode(),
-          ),
-        ],
-      )
-    ]),
-  ));
+            pw.Partition(
+              width: sep,
+              child: pw.Column(
+                children: [
+                  pw.Container(
+                    height: pageTheme.pageFormat.availableHeight,
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.center,
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: <pw.Widget>[
+                        pw.ClipOval(
+                          child: pw.Container(
+                            width: 100,
+                            height: 100,
+                            color: lightGreen,
+                            child: pw.Image(profileImage),
+                          ),
+                        ),
+                        pw.Column(children: <pw.Widget>[
+                          _Percent(size: 60, value: .7, title: pw.Text('Word')),
+                          _Percent(
+                              size: 60, value: .4, title: pw.Text('Excel')),
+                        ]),
+                        pw.BarcodeWidget(
+                          data: 'Parnella Charlesbois',
+                          width: 60,
+                          height: 60,
+                          barcode: pw.Barcode.qrCode(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+      ],
+    ),
+  );
   return doc.save();
 }
 
 Future<pw.PageTheme> _myPageTheme(PdfPageFormat format) async {
+  format = format.applyMargin(
+      left: 2.0 * PdfPageFormat.cm,
+      top: 4.0 * PdfPageFormat.cm,
+      right: 2.0 * PdfPageFormat.cm,
+      bottom: 2.0 * PdfPageFormat.cm);
   return pw.PageTheme(
-    pageFormat: format.applyMargin(
-        left: 2.0 * PdfPageFormat.cm,
-        top: 4.0 * PdfPageFormat.cm,
-        right: 2.0 * PdfPageFormat.cm,
-        bottom: 2.0 * PdfPageFormat.cm),
+    pageFormat: format,
     theme: pw.ThemeData.withFont(
       base: pw.Font.ttf(await rootBundle.load('assets/open-sans.ttf')),
       bold: pw.Font.ttf(await rootBundle.load('assets/open-sans-bold.ttf')),
@@ -173,7 +199,14 @@ Future<pw.PageTheme> _myPageTheme(PdfPageFormat format) async {
               ..moveTo(size.x - 30, 0)
               ..lineTo(size.x - 110, 50)
               ..lineTo(size.x - 150, 0)
-              ..fillPath();
+              ..fillPath()
+              ..setColor(green)
+              ..setLineWidth(2)
+              ..moveTo(
+                  size.x - sep - format.marginRight + 4, format.marginBottom)
+              ..lineTo(size.x - sep - format.marginRight + 4,
+                  size.y - format.marginTop)
+              ..strokePath();
           },
         ),
       );

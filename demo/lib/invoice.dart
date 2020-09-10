@@ -545,7 +545,7 @@ String _formatCurrency(double amount) {
 }
 
 String _formatDate(DateTime date) {
-  final format = DateFormat.yMMMMd('en_US');
+  final format = DateFormat.yMMMd('en_US');
   return format.format(date);
 }
 

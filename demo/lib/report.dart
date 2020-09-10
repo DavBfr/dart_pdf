@@ -223,7 +223,7 @@ Future<Uint8List> generateReport(PdfPageFormat pageFormat) async {
                         ),
                       ),
                       pw.Text(
-                        'Budget was originally \$1915. A total of \$1990 was spent on the month os January which exceeded the overall budget by \$75',
+                        'Budget was originally \$1915. A total of \$1990 was spent on the month of January which exceeded the overall budget by \$75',
                         textAlign: pw.TextAlign.justify,
                       )
                     ],
