@@ -253,6 +253,21 @@ void main() {
     ));
   });
 
+  test('Table fromTextArray with alignment', () {
+    pdf.addPage(
+      Page(
+        build: (Context context) => Table.fromTextArray(
+          cellAlignment: Alignment.center,
+          data: <List<String>>[
+            <String>['line 1', 'Text\n\n\ntext'],
+            <String>['line 2', 'Text\n\n\ntext'],
+            <String>['line 3', 'Text\n\n\ntext'],
+          ],
+        ),
+      ),
+    );
+  });
+
   tearDownAll(() {
     final File file = File('widgets-table.pdf');
     file.writeAsBytesSync(pdf.save());

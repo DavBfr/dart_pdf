@@ -39,7 +39,7 @@ class TableRow {
   final TableCellVerticalAlignment verticalAlignment;
 }
 
-enum TableCellVerticalAlignment { bottom, middle, top }
+enum TableCellVerticalAlignment { bottom, middle, top, full }
 
 enum TableWidth { min, max }
 
@@ -345,6 +345,7 @@ class Table extends Widget implements SpanningWidget {
       children: rows,
       columnWidths: columnWidths,
       defaultColumnWidth: defaultColumnWidth,
+      defaultVerticalAlignment: TableCellVerticalAlignment.full,
     );
   }
 
@@ -471,6 +472,25 @@ class Table extends Widget implements SpanningWidget {
         n++;
       }
 
+      final TableCellVerticalAlignment align =
+          row.verticalAlignment ?? defaultVerticalAlignment;
+
+      if (align == TableCellVerticalAlignment.full) {
+        // Compute the layout again to give the full height to all cells
+        n = 0;
+        x = 0;
+        for (Widget child in row.children) {
+          final BoxConstraints childConstraints =
+              BoxConstraints.tightFor(width: _widths[n], height: lineHeight);
+          child.layout(context, childConstraints);
+          assert(child.box != null);
+          child.box =
+              PdfRect(x, totalHeight, child.box.width, child.box.height);
+          x += _widths[n];
+          n++;
+        }
+      }
+
       if (totalHeight + lineHeight > constraints.maxHeight) {
         index--;
         break;
@@ -504,6 +524,7 @@ class Table extends Widget implements SpanningWidget {
                 (_heights[heightIndex] + child.box.height) / 2;
             break;
           case TableCellVerticalAlignment.top:
+          case TableCellVerticalAlignment.full:
             childY = totalHeight - child.box.y - child.box.height;
             break;
         }

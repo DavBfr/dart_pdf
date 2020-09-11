@@ -2,6 +2,10 @@
 
 ## 1.11.1
 
+- Fix Table.fromTextArray vertical alignment
+
+## 1.11.1
+
 - Fix Table.fromTextArray alignments with multi-lines text
 - Fix parameter type typo in Table.fromTextArray [Uli Prantz]
 
