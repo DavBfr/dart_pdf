@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.11.1
+## 1.11.2
 
 - Fix Table.fromTextArray vertical alignment
 
