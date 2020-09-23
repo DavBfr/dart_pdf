@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.2
+
+- Added theme color to dropdown item in pageFormat selector in page preview
+
 ## 3.6.1
 
 - Update the example to use PdfPreview
