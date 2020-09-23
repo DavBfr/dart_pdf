@@ -302,7 +302,11 @@ class _PdfPreviewState extends State<PdfPreview> {
               final key = keys[index];
               final val = _pageFormats[key];
               return DropdownMenuItem<PdfPageFormat>(
-                child: Text(key),
+                child: Text(key,
+                  style: TextStyle(
+                    color: theme.accentIconTheme.color
+                  )
+                ),
                 value: val,
               );
             },
