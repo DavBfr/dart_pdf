@@ -1,1 +1,0 @@
-test/golden/* filter=lfs diff=lfs merge=lfs -text
