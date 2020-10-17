@@ -36,6 +36,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         super.init(frame: NSZeroRect)
     }
 
+    @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

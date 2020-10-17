@@ -212,13 +212,64 @@ class PdfColorCmyk extends PdfColor {
             (1.0 - yellow) * (1.0 - black), a);
 
   const PdfColorCmyk.fromRgb(double r, double g, double b, [double a = 1.0])
-      : black = 1.0 - r > g ? r : g > b ? r > g ? r : g : b,
-        cyan = (1.0 - r - (1.0 - r > g ? r : g > b ? r > g ? r : g : b)) /
-            (1.0 - (1.0 - r > g ? r : g > b ? r > g ? r : g : b)),
-        magenta = (1.0 - g - (1.0 - r > g ? r : g > b ? r > g ? r : g : b)) /
-            (1.0 - (1.0 - r > g ? r : g > b ? r > g ? r : g : b)),
-        yellow = (1.0 - b - (1.0 - r > g ? r : g > b ? r > g ? r : g : b)) /
-            (1.0 - (1.0 - r > g ? r : g > b ? r > g ? r : g : b)),
+      : black = 1.0 - r > g
+            ? r
+            : g > b
+                ? r > g
+                    ? r
+                    : g
+                : b,
+        cyan = (1.0 -
+                r -
+                (1.0 - r > g
+                    ? r
+                    : g > b
+                        ? r > g
+                            ? r
+                            : g
+                        : b)) /
+            (1.0 -
+                (1.0 - r > g
+                    ? r
+                    : g > b
+                        ? r > g
+                            ? r
+                            : g
+                        : b)),
+        magenta = (1.0 -
+                g -
+                (1.0 - r > g
+                    ? r
+                    : g > b
+                        ? r > g
+                            ? r
+                            : g
+                        : b)) /
+            (1.0 -
+                (1.0 - r > g
+                    ? r
+                    : g > b
+                        ? r > g
+                            ? r
+                            : g
+                        : b)),
+        yellow = (1.0 -
+                b -
+                (1.0 - r > g
+                    ? r
+                    : g > b
+                        ? r > g
+                            ? r
+                            : g
+                        : b)) /
+            (1.0 -
+                (1.0 - r > g
+                    ? r
+                    : g > b
+                        ? r > g
+                            ? r
+                            : g
+                        : b)),
         super(r, g, b, a);
 
   final double cyan;

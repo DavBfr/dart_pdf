@@ -304,10 +304,7 @@ class _PdfPreviewState extends State<PdfPreview> {
               final val = _pageFormats[key];
               return DropdownMenuItem<PdfPageFormat>(
                 child: Text(key,
-                  style: TextStyle(
-                    color: theme.accentIconTheme.color
-                  )
-                ),
+                    style: TextStyle(color: theme.accentIconTheme.color)),
                 value: val,
               );
             },
@@ -458,6 +455,7 @@ class _PdfPreviewPage extends StatelessWidget {
   }
 }
 
+/// Action callback
 typedef OnPdfPreviewActionPressed = void Function(
   BuildContext context,
   LayoutCallback build,
