@@ -35,16 +35,6 @@ for documentation.
       use_frameworks!    # <-- Add this line
    ```
 
-4. Set minimum Android version in `android/app/build.gradle`:
-
-   ```java
-   defaultConfig {
-       ...
-       minSdkVersion 21  // <-- Change this line to 21 or more
-       ...
-   }
-   ```
-
 ## Examples
 
 ```dart

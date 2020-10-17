@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.3
+
+- Fix Android compilation issues
+
 ## 3.6.2
 
 - Added theme color to dropdown item in pageFormat selector in page preview

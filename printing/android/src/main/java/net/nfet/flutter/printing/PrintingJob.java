@@ -18,20 +18,35 @@ package net.nfet.flutter.printing;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.print.PageRange;
 import android.print.PdfConvert;
 import android.print.PrintAttributes;
+import android.print.PrintDocumentAdapter;
+import android.print.PrintDocumentInfo;
 import android.print.PrintJob;
+import android.print.PrintJobInfo;
 import android.print.PrintManager;
+import android.util.Log;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.FileProvider;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -39,16 +54,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
-import android.content.pm.PackageManager;
-import android.content.pm.ProviderInfo;
-import android.content.pm.ResolveInfo;
 import java.util.List;
-
-
 
 /**
  * PrintJob
  */
+@RequiresApi(api = Build.VERSION_CODES.KITKAT)
 public class PrintingJob extends PrintDocumentAdapter {
     private static PrintManager printManager;
     private final Context context;
@@ -216,11 +227,14 @@ public class PrintingJob extends PrintDocumentAdapter {
             shareIntent.putExtra(Intent.EXTRA_STREAM, apkURI);
             shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             Intent chooserIntent = Intent.createChooser(shareIntent, null);
-            List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(chooserIntent, PackageManager.MATCH_DEFAULT_ONLY);
+            List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(
+                    chooserIntent, PackageManager.MATCH_DEFAULT_ONLY);
 
             for (ResolveInfo resolveInfo : resInfoList) {
                 String packageName = resolveInfo.activityInfo.packageName;
-                context.grantUriPermission(packageName, apkURI, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                context.grantUriPermission(packageName, apkURI,
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                | Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
             context.startActivity(chooserIntent);
             shareFile.deleteOnExit();
