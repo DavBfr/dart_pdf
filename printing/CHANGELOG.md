@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.4
+
+- Remove useless android dependencies, reduces the final apk file size.
+
 ## 3.6.3
 
 - Fix Android compilation issues
