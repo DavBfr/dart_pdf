@@ -10,15 +10,15 @@ environment:
   sdk: ">=2.3.0 <3.0.0"
 
 dependencies:
-  meta: ^1.1.5
-  vector_math: ^2.0.0
-  utf: ^0.9.0
-  crypto: ^2.0.6
   archive: ^2.0.10
   barcode: ^1.16.0
+  crypto: ^2.0.6
   image: ^2.1.10
+  meta: ^1.1.5
   path_parsing: ^0.1.4
+  utf: ^0.9.0
+  vector_math: ^2.0.0
 
 dev_dependencies:
-  test:
   pedantic: 1.9.2
+  test:

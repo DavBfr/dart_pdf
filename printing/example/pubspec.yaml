@@ -9,14 +9,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  printing:
   pdf:
+  printing:
 
 dependency_overrides:
-  printing:
-    path: ../
   pdf:
     path: ../../pdf
+  printing:
+    path: ../
 
 flutter:
   uses-material-design: true

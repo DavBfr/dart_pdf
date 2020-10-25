@@ -15,11 +15,11 @@ dependencies:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
-  pdf: ^1.11.1
-  plugin_platform_interface: ^1.0.2
-  meta: ^1.1.5
   image: ^2.1.4
   js: ^0.6.1
+  meta: ^1.1.5
+  pdf: ^1.11.1
+  plugin_platform_interface: ^1.0.2
 
 dev_dependencies:
   flutter_test:
