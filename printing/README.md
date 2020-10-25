@@ -34,6 +34,8 @@ for documentation.
    target 'Runner' do
       use_frameworks!    # <-- Add this line
    ```
+4. For MacOS add printing capability by opening macos directory in XCode
+
 
 ## Examples
 
