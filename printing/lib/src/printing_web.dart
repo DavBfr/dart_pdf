@@ -193,9 +193,6 @@ class PrintingPlugin extends PrintingPlatform {
 
       await promiseToFuture<void>(page.render(renderContext).promise);
 
-      // final Uint8ClampedList data =
-      // context.getImageData(0, 0, canvas.width, canvas.height).data;
-
       // Convert the image to PNG
       final completer = Completer<void>();
       final blob = await canvas.toBlob();
@@ -233,7 +230,7 @@ class _WebPdfRaster extends PdfRaster {
   @override
   Uint8List get pixels {
     if (_pixels == null) {
-      final img = asImage();
+      final img = im.PngDecoder().decodeImage(png);
       _pixels = img.data.buffer.asUint8List();
     }
 
@@ -241,28 +238,14 @@ class _WebPdfRaster extends PdfRaster {
   }
 
   @override
-  Future<Image> toImage() {
-    final comp = Completer<Image>();
-    decodeImageFromPixels(
-      png,
-      width,
-      height,
-      PixelFormat.rgba8888,
-      (Image image) => comp.complete(image),
-    );
-    return comp.future;
+  Future<Image> toImage() async {
+    final codec = await instantiateImageCodec(png);
+    final frameInfo = await codec.getNextFrame();
+    return frameInfo.image;
   }
 
   @override
   Future<Uint8List> toPng() async {
     return png;
-  }
-
-  @override
-  im.Image asImage() {
-    if (_pixels != null) {
-      return super.asImage();
-    }
-    return im.PngDecoder().decodeImage(png);
   }
 }
