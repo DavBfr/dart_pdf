@@ -22,12 +22,14 @@ class PrintingInfo {
     this.dynamicLayout = false,
     this.canPrint = false,
     this.canConvertHtml = false,
+    this.canListPrinters = false,
     this.canShare = false,
     this.canRaster = false,
   })  : assert(directPrint != null),
         assert(dynamicLayout != null),
         assert(canPrint != null),
         assert(canConvertHtml != null),
+        assert(canListPrinters != null),
         assert(canShare != null),
         assert(canRaster != null);
 
@@ -37,6 +39,7 @@ class PrintingInfo {
         dynamicLayout: map['dynamicLayout'] ?? false,
         canPrint: map['canPrint'] ?? false,
         canConvertHtml: map['canConvertHtml'] ?? false,
+        canListPrinters: map['canListPrinters'] ?? false,
         canShare: map['canShare'] ?? false,
         canRaster: map['canRaster'] ?? false,
       );
@@ -57,6 +60,9 @@ class PrintingInfo {
   /// The platform implementation is able to convert an html document to Pdf
   final bool canConvertHtml;
 
+  /// The platform implementation is able list the available printers on the system
+  final bool canListPrinters;
+
   /// The platform implementation is able to share a Pdf document
   /// to other applications
   final bool canShare;
@@ -71,6 +77,7 @@ class PrintingInfo {
   directPrint: $directPrint
   dynamicLayout: $dynamicLayout
   canConvertHtml: $canConvertHtml
+  canListPrinters: $canListPrinters
   canShare: $canShare
   canRaster: $canRaster''';
 
@@ -81,6 +88,7 @@ class PrintingInfo {
       'directPrint': directPrint,
       'dynamicLayout': dynamicLayout,
       'canConvertHtml': canConvertHtml,
+      'canListPrinters': canListPrinters,
       'canShare': canShare,
       'canRaster': canRaster,
     };

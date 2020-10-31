@@ -52,10 +52,7 @@ class PrintingPlugin extends PrintingPlatform {
     ]);
 
     return PrintingInfo(
-      directPrint: false,
-      dynamicLayout: false,
       canPrint: true,
-      canConvertHtml: false,
       canShare: true,
       canRaster: workerSrc,
     );
@@ -155,6 +152,11 @@ class PrintingPlugin extends PrintingPlatform {
     String name,
     PdfPageFormat format,
   ) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<Printer>> listPrinters() {
     throw UnimplementedError();
   }
 

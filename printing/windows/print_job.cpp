@@ -30,16 +30,106 @@
 
 namespace nfet {
 
+const auto pdfDpi = 72;
+
+std::string toUtf8(std::wstring wstr) {
+  int cbMultiByte =
+      WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
+  LPSTR lpMultiByteStr = (LPSTR)malloc(cbMultiByte);
+  cbMultiByte = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1,
+                                    lpMultiByteStr, cbMultiByte, NULL, NULL);
+  std::string ret = lpMultiByteStr;
+  free(lpMultiByteStr);
+  return ret;
+}
+
+std::string toUtf8(TCHAR* tstr) {
+#ifndef UNICODE
+#error "Non unicode build not supported"
+#endif
+
+  if (!tstr) {
+    return std::string{};
+  }
+
+  return toUtf8(std::wstring{tstr});
+}
+
+std::wstring fromUtf8(std::string str) {
+  auto len = MultiByteToWideChar(CP_ACP, 0, str.c_str(),
+                                 static_cast<int>(str.length()), nullptr, 0);
+  if (len <= 0) {
+    return false;
+  }
+
+  auto wstr = std::wstring{};
+  wstr.resize(len);
+  MultiByteToWideChar(CP_ACP, 0, str.c_str(), static_cast<int>(str.length()),
+                      &wstr[0], len);
+
+  return wstr;
+}
+
 PrintJob::PrintJob(Printing* printing, int index)
     : printing(printing), index(index) {}
 
-void PrintJob::directPrintPdf(std::string name,
+bool PrintJob::directPrintPdf(std::string name,
                               std::vector<uint8_t> data,
-                              std::string withPrinter) {}
+                              std::string withPrinter) {
+  FPDF_InitLibraryWithConfig(nullptr);
+
+  auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
+  if (!doc) {
+    FPDF_DestroyLibrary();
+    return false;
+  }
+
+  hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(withPrinter).c_str(), NULL, NULL);
+  if (!hDC) {
+    FPDF_CloseDocument(doc);
+    FPDF_DestroyLibrary();
+    return false;
+  }
+
+  DOCINFO docInfo;
+  ZeroMemory(&docInfo, sizeof(docInfo));
+  docInfo.cbSize = sizeof(DOCINFO);
+  auto docName = fromUtf8(name);
+  docInfo.lpszDocName = docName.c_str();
+  StartDoc(hDC, &docInfo);
+
+  int pageCount = FPDF_GetPageCount(doc);
+
+  for (auto i = 0; i < pageCount; i++) {
+    StartPage(hDC);
+    auto page = FPDF_LoadPage(doc, i);
+    if (!page) {
+      EndDoc(hDC);
+      DeleteDC(hDC);
+      FPDF_CloseDocument(doc);
+      FPDF_DestroyLibrary();
+      return false;
+    }
+    auto pageWidth = FPDF_GetPageWidth(page);
+    auto pageHeight = FPDF_GetPageHeight(page);
+    auto dpiX = GetDeviceCaps(hDC, LOGPIXELSX);
+    auto dpiY = GetDeviceCaps(hDC, LOGPIXELSY);
+    auto width = static_cast<int>(pageWidth / pdfDpi * dpiX);
+    auto height = static_cast<int>(pageHeight / pdfDpi * dpiY);
+    FPDF_RenderPage(hDC, page, 0, 0, width, height, 0, FPDF_ANNOT);
+    FPDF_ClosePage(page);
+    EndPage(hDC);
+  }
+
+  EndDoc(hDC);
+  DeleteDC(hDC);
+  FPDF_CloseDocument(doc);
+  FPDF_DestroyLibrary();
+  return true;
+}
 
 bool PrintJob::printPdf(std::string name) {
   PRINTDLG pd;
-  // HWND hwnd;
 
   // Initialize PRINTDLG
   ZeroMemory(&pd, sizeof(pd));
@@ -60,20 +150,8 @@ bool PrintJob::printPdf(std::string name) {
   auto r = PrintDlg(&pd);
 
   if (r == 1) {
-    // printf("ncopies: %d\n", pd.nCopies);
-    // printf("hDevMode: %d\n", (int)pd.hDevMode);
-
-    // DEVMODE* b = static_cast<DEVMODE*>(GlobalLock(pd.hDevMode));
-    // auto pageDpi = b->dmPrintQuality;
-
-    // GlobalUnlock(pd.hDevMode);
-
-    // auto pageHeight = b->dmPaperLength;
-    // auto pageWidth = b->dmPaperWidth;
-    // auto pageScale = b->dmScale / 100;
-
-    auto dpiX = static_cast<double>(GetDeviceCaps(pd.hDC, LOGPIXELSX)) / 72;
-    auto dpiY = static_cast<double>(GetDeviceCaps(pd.hDC, LOGPIXELSY)) / 72;
+    auto dpiX = static_cast<double>(GetDeviceCaps(pd.hDC, LOGPIXELSX)) / pdfDpi;
+    auto dpiY = static_cast<double>(GetDeviceCaps(pd.hDC, LOGPIXELSY)) / pdfDpi;
     auto pageWidth =
         static_cast<double>(GetDeviceCaps(pd.hDC, PHYSICALWIDTH)) / dpiX;
     auto pageHeight =
@@ -89,16 +167,10 @@ bool PrintJob::printPdf(std::string name) {
     auto marginRight = pageWidth - printableWidth - marginLeft;
     auto marginBottom = pageHeight - printableHeight - marginTop;
 
-    // printf("dpiX: %f\n", dpiX);
-    // printf("HORZRES: %d\n", GetDeviceCaps(pd.hDC, HORZRES));
-    // printf("PHYSICALOFFSETX: %d\n", GetDeviceCaps(pd.hDC, PHYSICALOFFSETX));
-    // printf("pageWidth: %f\n", pageWidth);
-
     hDC = pd.hDC;
     hDevMode = pd.hDevMode;
     hDevNames = pd.hDevNames;
-
-    // printf("HDC: %llu  job: %d\n", (size_t)pd.hDC, index);
+    documentName = name;
 
     printing->onLayout(this, pageWidth, pageHeight, marginLeft, marginTop,
                        marginRight, marginBottom);
@@ -108,111 +180,106 @@ bool PrintJob::printPdf(std::string name) {
   return false;
 }
 
+std::vector<Printer> PrintJob::listPrinters() {
+  auto printers = std::vector<Printer>{};
+  DWORD needed = 0;
+  DWORD returned = 0;
+  const auto flags = PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS;
+
+  EnumPrinters(flags, nullptr, 1, nullptr, 0, &needed, &returned);
+
+  auto buffer = (PRINTER_INFO_1*)malloc(needed);
+  if (!buffer) {
+    return printers;
+  }
+
+  auto result = EnumPrinters(flags, nullptr, 1, (LPBYTE)buffer, needed, &needed,
+                             &returned);
+
+  if (result == 0) {
+    free(buffer);
+    return printers;
+  }
+
+  for (DWORD i = 0; i < returned; i++) {
+    printers.push_back(Printer{
+        toUtf8(buffer[i].pName),
+        toUtf8(buffer[i].pName),
+        toUtf8(buffer[i].pDescription),
+        toUtf8(buffer[i].pComment),
+    });
+  }
+
+  free(buffer);
+  return printers;
+}
+
 void PrintJob::writeJob(std::vector<uint8_t> data) {
-  // printf("hDC: %llu  job: %d\n", (size_t)hDC, index);
-  auto dpiX = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSX)) / 72;
-  auto dpiY = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSY)) / 72;
+  auto dpiX = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSX)) / pdfDpi;
+  auto dpiY = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSY)) / pdfDpi;
 
-  // GlobalFree(pd.hDevMode);
+  DOCINFO docInfo;
 
-  // print(
-  //  'Paper size: ${pageWidth} ${pageHeight}  scale: $pageScale  dpi:
-  //  $pageDpi');
+  ZeroMemory(&docInfo, sizeof(docInfo));
+  docInfo.cbSize = sizeof(docInfo);
 
-  //     final printerDC = CreateDCW(nullptr, szPrinter,nullptr,
-  //     devmode);
-  DOCINFO info;
+  auto docName = fromUtf8(documentName);
+  docInfo.lpszDocName = docName.c_str();
 
-  // memset(&info, 0, sizeof(info));
-  ZeroMemory(&info, sizeof(info));
-  info.cbSize = sizeof(info);
-  // info.fwType = 0;
-  // info.lpszDatatype = nullptr;
-  // info.lpszDocName = nullptr;
-  // info.lpszOutput = nullptr;
-  // auto printerDC = pd.hDC;
-  // print('hDC: ${pd.hDC}');
-  auto r = StartDoc(hDC, &info);
-  // print('StartDoc = $r');
+  auto r = StartDoc(hDC, &docInfo);
 
   FPDF_InitLibraryWithConfig(nullptr);
-  // final buffer = allocate<ffi.Uint8>(count : bytes.length);
-  // final nativeBuffer = buffer.asTypedList(bytes.length);
-  // nativeBuffer.setAll(0, bytes);
-
-  // auto buffer = std::vector<uint8_t>{};
 
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
-    // printf("Error loading the document: %d\n", FPDF_GetLastError());
+    FPDF_DestroyLibrary();
     return;
   }
 
   auto pages = FPDF_GetPageCount(doc);
-  // printf("Page count: %d\n", pages);
 
   for (auto pageNum = 0; pageNum < pages; pageNum++) {
     r = StartPage(hDC);
-    // printf("StartPage = %d\n", r);
 
     auto page = FPDF_LoadPage(doc, pageNum);
-    // print(FPDF_GetLastError());
+    if (!page) {
+      EndPage(hDC);
+      continue;
+    }
 
     auto pdfWidth = FPDF_GetPageWidth(page);
     auto pdfHeight = FPDF_GetPageHeight(page);
 
-    // print('$width x $height');
-
-    // printf("pdfWidth: %f  dpiX: %f  \n", pdfWidth, dpiX);
     int bWidth = static_cast<int>(pdfWidth * dpiX);
     int bHeight = static_cast<int>(pdfHeight * dpiY);
-
-    // printf("bwidth/bheight: %d x %d\n", bWidth, bHeight);
 
     FPDF_RenderPage(hDC, page, 0, 0, bWidth, bHeight, 0, FPDF_ANNOT);
 
     r = EndPage(hDC);
-    // printf("EndPage = %d\n", r);
   }
 
   FPDF_CloseDocument(doc);
   FPDF_DestroyLibrary();
 
   r = EndDoc(hDC);
-  // printf("EndDoc = %d\n", r);
-  //     DeleteDC(printerDC);
+
   DeleteDC(hDC);
   GlobalFree(hDevNames);
   ClosePrinter(hDevMode);
-}  // namespace nfet
+}
 
 void PrintJob::cancelJob(std::string error) {}
 
 bool PrintJob::sharePdf(std::vector<uint8_t> data, std::string name) {
   TCHAR lpTempPathBuffer[MAX_PATH];
-  // TCHAR szTempFileName[MAX_PATH];
 
   auto ret = GetTempPath(MAX_PATH, lpTempPathBuffer);
   if (ret > MAX_PATH || (ret == 0)) {
     return false;
   }
 
-#ifndef UNICODE
-#error "Non unicode build not supported"
-#endif
+  auto filename = fromUtf8(toUtf8(lpTempPathBuffer) + "\\" + name);
 
-  auto len = MultiByteToWideChar(CP_ACP, 0, name.c_str(),
-                                 static_cast<int>(name.length()), nullptr, 0);
-  if (len <= 0) {
-    return false;
-  }
-
-  auto w_name = std::wstring{};
-  w_name.resize(len);
-  MultiByteToWideChar(CP_ACP, 0, name.c_str(), static_cast<int>(name.length()),
-                      &w_name[0], len);
-
-  auto filename = std::wstring{lpTempPathBuffer} + L"\\" + w_name;
   auto output_file =
       std::basic_ofstream<uint8_t>{filename, std::ios::out | std::ios::binary};
   output_file.write(data.data(), data.size());
@@ -231,7 +298,6 @@ bool PrintJob::sharePdf(std::vector<uint8_t> data, std::string name) {
 
   ret = ShellExecuteEx(&ShExecInfo);
 
-  // CoTaskMemFree(pidlWinFiles);
   return ret == TRUE;
 }
 
@@ -244,13 +310,12 @@ void PrintJob::rasterPdf(std::vector<uint8_t> data,
 
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
-    // printf(stderr, "Error: %d\n", FPDF_GetLastError());
+    FPDF_DestroyLibrary();
     printing->onPageRasterEnd(this);
     return;
   }
 
   auto pageCount = FPDF_GetPageCount(doc);
-  // printf("pdf: pages:%d\n", pageCount);
 
   if (pages.size() == 0) {
     // Use all pages
@@ -265,14 +330,11 @@ void PrintJob::rasterPdf(std::vector<uint8_t> data,
 
     auto page = FPDF_LoadPage(doc, n);
     if (!page) {
-      // printf("Page Error: %d\n", FPDF_GetLastError());
       continue;
     }
 
     auto width = FPDF_GetPageWidth(page);
     auto height = FPDF_GetPageHeight(page);
-
-    // printf("pdf: page:%d w:%f h:%f\n", n, width, height);
 
     auto bWidth = static_cast<int>(width * scale);
     auto bHeight = static_cast<int>(height * scale);
@@ -308,12 +370,13 @@ void PrintJob::rasterPdf(std::vector<uint8_t> data,
   FPDF_DestroyLibrary();
 
   printing->onPageRasterEnd(this);
-}  // namespace nfet
+}
 
 std::map<std::string, bool> PrintJob::printingInfo() {
   return std::map<std::string, bool>{
-      {"directPrint", true},     {"dynamicLayout", true}, {"canPrint", true},
-      {"canConvertHtml", false}, {"canShare", true},      {"canRaster", true},
+      {"directPrint", true},     {"dynamicLayout", true},   {"canPrint", true},
+      {"canListPrinters", true}, {"canConvertHtml", false}, {"canShare", true},
+      {"canRaster", true},
   };
 }
 

@@ -4,6 +4,7 @@
 
 - Fix Pdf Raster on WEB
 - Fix Windows memory leaks
+- Implement missing Windows features
 
 ## 3.7.0
 

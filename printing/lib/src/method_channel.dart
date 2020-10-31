@@ -152,6 +152,26 @@ class MethodChannelPrinting extends PrintingPlatform {
   }
 
   @override
+  Future<List<Printer>> listPrinters() async {
+    final params = <String, dynamic>{};
+    final list =
+        await _channel.invokeMethod<List<dynamic>>('listPrinters', params);
+
+    final printers = <Printer>[];
+
+    for (final printer in list) {
+      printers.add(Printer(
+        url: printer['url'],
+        name: printer['name'],
+        model: printer['model'],
+        location: printer['location'],
+      ));
+    }
+
+    return printers;
+  }
+
+  @override
   Future<Printer> pickPrinter(Rect bounds) async {
     final params = <String, dynamic>{
       'x': bounds.left,
@@ -191,7 +211,7 @@ class MethodChannelPrinting extends PrintingPlatform {
     final params = <String, dynamic>{
       'name': name,
       'printer': printer.url,
-      'doc': Uint8List.fromList(bytes),
+      'doc': bytes,
       'job': job.index,
     };
     await _channel.invokeMethod<int>('directPrintPdf', params);

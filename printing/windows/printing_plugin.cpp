@@ -58,6 +58,7 @@ class PrintingPlugin : public flutter::Plugin {
 
  private:
   Printing printing{};
+
   // Called when a method is called on this plugin's channel from Dart.
   void HandleMethodCall(
       const flutter::MethodCall<flutter::EncodableValue>& method_call,
@@ -66,9 +67,9 @@ class PrintingPlugin : public flutter::Plugin {
       const auto* arguments =
           std::get_if<flutter::EncodableMap>(method_call.arguments());
       auto vName = arguments->find(flutter::EncodableValue("name"));
-      auto name = vName != arguments->end()
+      auto name = vName != arguments->end() && !vName->second.IsNull()
                       ? std::get<std::string>(vName->second)
-                      : std::string{};
+                      : std::string{"document"};
       auto vJob = arguments->find(flutter::EncodableValue("job"));
       auto jobNum = vJob != arguments->end() ? std::get<int>(vJob->second) : -1;
       auto job = new PrintJob{&printing, jobNum};
@@ -78,14 +79,31 @@ class PrintingPlugin : public flutter::Plugin {
       }
       result->Success(flutter::EncodableValue(res ? 1 : 0));
     } else if (method_call.method_name().compare("directPrintPdf") == 0) {
-      auto job = std::make_unique<PrintJob>(&printing, -1);
-      job->directPrintPdf("name", std::vector<uint8_t>{}, "withPrinter");
-      result->Success(nullptr);
+      const auto* arguments =
+          std::get_if<flutter::EncodableMap>(method_call.arguments());
+      auto vName = arguments->find(flutter::EncodableValue("name"));
+      auto name = vName != arguments->end() && !vName->second.IsNull()
+                      ? std::get<std::string>(vName->second)
+                      : std::string{"document"};
+      auto vDoc = arguments->find(flutter::EncodableValue("doc"));
+      auto doc = vDoc != arguments->end()
+                     ? std::get<std::vector<uint8_t>>(vDoc->second)
+                     : std::vector<uint8_t>{};
+      auto vPrinter = arguments->find(flutter::EncodableValue("printer"));
+      auto printer = vPrinter != arguments->end()
+                         ? std::get<std::string>(vPrinter->second)
+                         : std::string{};
+      auto vJob = arguments->find(flutter::EncodableValue("job"));
+      auto jobNum = vJob != arguments->end() ? std::get<int>(vJob->second) : -1;
+      auto job = std::make_unique<PrintJob>(&printing, jobNum);
+      auto res = job->directPrintPdf(name, doc, printer);
+      result->Success(flutter::EncodableValue(1));
+      printing.onCompleted(job.get(), res, "");
     } else if (method_call.method_name().compare("sharePdf") == 0) {
       const auto* arguments =
           std::get_if<flutter::EncodableMap>(method_call.arguments());
       auto vName = arguments->find(flutter::EncodableValue("name"));
-      auto name = vName != arguments->end()
+      auto name = vName != arguments->end() && !vName->second.IsNull()
                       ? std::get<std::string>(vName->second)
                       : std::string{"document.pdf"};
       auto vDoc = arguments->find(flutter::EncodableValue("doc"));
@@ -95,10 +113,23 @@ class PrintingPlugin : public flutter::Plugin {
       auto job = std::make_unique<PrintJob>(&printing, -1);
       auto res = job->sharePdf(doc, name);
       result->Success(flutter::EncodableValue(res ? 1 : 0));
-    } else if (method_call.method_name().compare("pickPrinter") == 0) {
+    } else if (method_call.method_name().compare("listPrinters") == 0) {
       auto job = std::make_unique<PrintJob>(&printing, -1);
-      job->pickPrinter(nullptr);
-      result->Success(nullptr);
+      auto printers = job->listPrinters();
+      auto pl = flutter::EncodableList{};
+      for (auto printer : printers) {
+        auto mp = flutter::EncodableMap{};
+        mp[flutter::EncodableValue("name")] =
+            flutter::EncodableValue(printer.name);
+        mp[flutter::EncodableValue("url")] =
+            flutter::EncodableValue(printer.url);
+        mp[flutter::EncodableValue("model")] =
+            flutter::EncodableValue(printer.model);
+        mp[flutter::EncodableValue("description")] =
+            flutter::EncodableValue(printer.description);
+        pl.push_back(mp);
+      }
+      result->Success(pl);
     } else if (method_call.method_name().compare("rasterPdf") == 0) {
       const auto* arguments =
           std::get_if<flutter::EncodableMap>(method_call.arguments());
@@ -106,18 +137,21 @@ class PrintingPlugin : public flutter::Plugin {
       auto doc = vDoc != arguments->end()
                      ? std::get<std::vector<uint8_t>>(vDoc->second)
                      : std::vector<uint8_t>{};
-      //     auto vPages = arguments->find(flutter::EncodableValue("pages"));
-      //     auto pages = vPages != arguments->end()
-      //                      ? std::get<flutter
-      //                      ::EncodableList>(vPages->second) : flutter
-      //                      ::EncodableList{};
+      auto vPages = arguments->find(flutter::EncodableValue("pages"));
+      auto lPages = vPages != arguments->end() && !vPages->second.IsNull()
+                        ? std::get<flutter::EncodableList>(vPages->second)
+                        : flutter::EncodableList{};
+      auto pages = std::vector<int>{};
+      for (auto page : lPages) {
+        pages.push_back(std::get<int>(page));
+      }
       auto vScale = arguments->find(flutter::EncodableValue("scale"));
       auto scale =
           vScale != arguments->end() ? std::get<double>(vScale->second) : 1;
       auto vJob = arguments->find(flutter::EncodableValue("job"));
       auto jobNum = vJob != arguments->end() ? std::get<int>(vJob->second) : -1;
       auto job = std::make_unique<PrintJob>(&printing, jobNum);
-      job->rasterPdf(doc, std::vector<int>{}, scale);
+      job->rasterPdf(doc, pages, scale);
       result->Success(nullptr);
     } else if (method_call.method_name().compare("printingInfo") == 0) {
       auto job = std::make_unique<PrintJob>(&printing, -1);

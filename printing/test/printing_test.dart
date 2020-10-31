@@ -66,7 +66,7 @@ void main() {
 
   test('pickPrinter', () async {
     expect(
-      await Printing.pickPrinter(),
+      await Printing.pickPrinter(context: null),
       null,
     );
   });

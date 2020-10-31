@@ -65,6 +65,9 @@ abstract class PrintingPlatform extends PlatformInterface {
     PdfPageFormat format,
   );
 
+  /// Enumerate the available printers on the system.
+  Future<List<Printer>> listPrinters();
+
   /// Opens the native printer picker interface, and returns the URL of the selected printer.
   Future<Printer> pickPrinter(Rect bounds);
 

@@ -24,8 +24,6 @@
 
 #include <flutter/method_channel.h>
 
-// #include "print_job.h"
-
 namespace nfet {
 
 class PrintJob;
@@ -51,6 +49,8 @@ class Printing {
                 double marginTop,
                 double marginRight,
                 double marginBottom);
+
+  void Printing::onCompleted(PrintJob* job, bool completed, std::string error);
 };
 
 }  // namespace nfet

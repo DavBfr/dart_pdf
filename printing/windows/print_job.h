@@ -30,6 +30,19 @@ namespace nfet {
 
 class Printing;
 
+struct Printer {
+  const std::string name;
+  const std::string url;
+  const std::string model;
+  const std::string description;
+
+  Printer(std::string name,
+          std::string url,
+          std::string model,
+          std::string description)
+      : name(name), url(url), model(model), description(description) {}
+};
+
 class PrintJob {
  private:
   Printing* printing;
@@ -37,17 +50,18 @@ class PrintJob {
   HGLOBAL hDevMode = nullptr;
   HGLOBAL hDevNames = nullptr;
   HDC hDC = nullptr;
+  std::string documentName;
 
  public:
   PrintJob(Printing* printing, int index);
 
-  // ~PrintJob() { printf("Delete PrintJob #%d\n", index); }
-
   int id() { return index; }
 
-  void directPrintPdf(std::string name,
+  std::vector<Printer> listPrinters();
+
+  bool directPrintPdf(std::string name,
                       std::vector<uint8_t> data,
-                      std::string withPrinter);
+                      std::string printer);
 
   bool printPdf(std::string name);
 

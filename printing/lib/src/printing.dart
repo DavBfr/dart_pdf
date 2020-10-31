@@ -17,6 +17,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show Rect, Offset;
 import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
@@ -48,15 +49,49 @@ mixin Printing {
     return PrintingPlatform.instance.layoutPdf(onLayout, name, format);
   }
 
+  /// Enumerate the available printers on the system.
+  ///
+  /// This is not supported on all platforms. Check the result of [info] to
+  /// find at runtime if this feature is available or not.
+  static Future<List<Printer>> listPrinters() {
+    return PrintingPlatform.instance.listPrinters();
+  }
+
   /// Opens the native printer picker interface, and returns the URL of the
   /// selected printer.
   ///
   /// This is not supported on all platforms. Check the result of [info] to
   /// find at runtime if this feature is available or not.
-  static Future<Printer> pickPrinter({Rect bounds}) {
+  static Future<Printer> pickPrinter({
+    @required BuildContext context,
+    Rect bounds,
+  }) async {
+    final _info = await info();
+
+    if (_info != null && _info.canListPrinters) {
+      assert(
+        context != null,
+        'Pass a BuildCOntext to pickPrinter to display a selection list',
+      );
+      final printers = await listPrinters();
+      return await showDialog<Printer>(
+        context: context,
+        builder: (context) => SimpleDialog(
+          children: printers
+              .map<Widget>(
+                (e) => SimpleDialogOption(
+                  child: Text(e.name),
+                  onPressed: () => Navigator.of(context).pop(e),
+                ),
+              )
+              .toList(),
+        ),
+      );
+    }
+
     bounds ??= Rect.fromCircle(center: Offset.zero, radius: 10);
 
-    return PrintingPlatform.instance.pickPrinter(bounds);
+    return await PrintingPlatform.instance.pickPrinter(bounds);
   }
 
   /// Prints a Pdf document to a specific local printer with no UI

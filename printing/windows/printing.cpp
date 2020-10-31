@@ -55,9 +55,7 @@ void Printing::onPageRasterEnd(PrintJob* job) {
 
 class OnLayoutResult : public flutter::MethodResult<flutter::EncodableValue> {
  public:
-  OnLayoutResult(PrintJob* job) : job(job) {
-    // printf("OnLayoutResult (%d) %p\n", job->id(), this);
-  }
+  OnLayoutResult(PrintJob* job) : job(job) {}
 
  private:
   PrintJob* job;
@@ -65,7 +63,7 @@ class OnLayoutResult : public flutter::MethodResult<flutter::EncodableValue> {
  protected:
   void SuccessInternal(const flutter::EncodableValue* result) {
     auto doc = std::get<std::vector<uint8_t>>(*result);
-    // printf("Success! (%d) %llu bytes %p\n", job->id(), doc.size(), this);
+
     job->writeJob(doc);
     delete job;
   }
@@ -73,14 +71,10 @@ class OnLayoutResult : public flutter::MethodResult<flutter::EncodableValue> {
   void ErrorInternal(const std::string& error_code,
                      const std::string& error_message,
                      const flutter::EncodableValue* error_details) {
-    printf("Error!\n");
     delete job;
   }
 
-  void NotImplementedInternal() {
-    printf("NotImplemented!\n");
-    delete job;
-  }
+  void NotImplementedInternal() { delete job; }
 };
 
 void Printing::onLayout(PrintJob* job,
@@ -90,12 +84,6 @@ void Printing::onLayout(PrintJob* job,
                         double marginTop,
                         double marginRight,
                         double marginBottom) {
-  // printf("onLayout (%d) %fx%f %f %f %f %f\n", job->id(), pageWidth,
-  // pageHeight,
-  //  marginLeft, marginTop, marginRight, marginBottom);
-
-  // auto result = std::make_unique<OnLayoutResult>(job);
-
   channel->InvokeMethod("onLayout",
                         std::make_unique<flutter::EncodableValue>(
                             flutter::EncodableValue(flutter::EncodableMap{
@@ -115,6 +103,23 @@ void Printing::onLayout(PrintJob* job,
                                  flutter::EncodableValue(marginBottom)},
                             })),
                         std::make_unique<OnLayoutResult>(job));
+}
+
+// send completion status to flutter
+void Printing::onCompleted(PrintJob* job, bool completed, std::string error) {
+  auto map = flutter::EncodableMap{
+      {flutter::EncodableValue("job"), flutter::EncodableValue(job->id())},
+      {flutter::EncodableValue("completed"),
+       flutter::EncodableValue(completed)},
+  };
+
+  if (!error.empty()) {
+    map[flutter::EncodableValue("error")] = flutter::EncodableValue(error);
+  }
+
+  channel->InvokeMethod(
+      "onCompleted",
+      std::make_unique<flutter::EncodableValue>(flutter::EncodableValue(map)));
 }
 
 }  // namespace nfet
