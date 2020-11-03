@@ -13,7 +13,7 @@
  # limitations under the License.
 
 DART_SRC=$(shell find . -name '*.dart')
-CLNG_SRC=$(shell find printing/ios printing/macos printing/windows printing/android -name '*.cpp' -o -name '*.m' -o -name '*.h' -o -name '*.java')
+CLNG_SRC=$(shell find printing/ios printing/macos printing/windows printing/linux printing/android -name '*.cpp' -o -name '*.cc' -o -name '*.m' -o -name '*.h' -o -name '*.java')
 SWFT_SRC=$(shell find printing/ios printing/macos -name '*.swift')
 FONTS=pdf/open-sans.ttf pdf/open-sans-bold.ttf pdf/roboto.ttf pdf/noto-sans.ttf pdf/genyomintw.ttf demo/assets/roboto1.ttf demo/assets/roboto2.ttf demo/assets/roboto3.ttf demo/assets/open-sans.ttf demo/assets/open-sans-bold.ttf pdf/hacen-tunisia.ttf pdf/material.ttf demo/assets/material.ttf
 COV_PORT=9292

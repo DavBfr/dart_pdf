@@ -38,6 +38,8 @@ flutter:
         pluginClass: PrintingPlugin
       ios:
         pluginClass: PrintingPlugin
+      linux:
+        pluginClass: PrintingPlugin
       macos:
         pluginClass: PrintingPlugin
       web:

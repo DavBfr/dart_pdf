@@ -8,6 +8,7 @@
 - Improve orientation handling
 - Improve directPrint
 - Remove the windows DLL
+- Add Linux platform
 
 ## 3.7.2
 
