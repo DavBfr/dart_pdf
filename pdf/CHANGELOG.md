@@ -5,6 +5,7 @@
 
 - Add textDirection parameter to PageTheme
 - Fix Bar graph offset
+- Implement vertical bar chart
 
 ## 1.11.2
 

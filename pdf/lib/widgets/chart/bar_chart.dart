@@ -30,9 +30,11 @@ class BarDataSet extends Dataset {
     this.surfaceOpacity = 1,
     this.width = 10,
     this.offset = 0,
+    this.axis = Axis.horizontal,
   })  : drawBorder = drawBorder ?? borderColor != null && color != borderColor,
         assert((drawBorder ?? borderColor != null && color != borderColor) ||
             drawSurface),
+        assert(axis != null),
         super(
           legend: legend,
           color: color,
@@ -51,11 +53,27 @@ class BarDataSet extends Dataset {
   final double width;
   final double offset;
 
-  void _drawSurface(Context context, ChartGrid grid, LineChartValue value) {
-    final double y = (grid is CartesianGrid) ? grid.xAxisOffset : 0;
-    final PdfPoint p = grid.toChart(value.point);
+  final Axis axis;
 
-    context.canvas.drawRect(p.x + offset - width / 2, y, width, p.y - y);
+  void _drawSurface(Context context, ChartGrid grid, LineChartValue value) {
+    switch (axis) {
+      case Axis.horizontal:
+        final double y = (grid is CartesianGrid) ? grid.xAxisOffset : 0;
+        final PdfPoint p = grid.toChart(value.point);
+        final double x = p.x + offset - width / 2;
+        final double height = p.y - y;
+
+        context.canvas.drawRect(x, y, width, height);
+        break;
+      case Axis.vertical:
+        final double x = (grid is CartesianGrid) ? grid.yAxisOffset : 0;
+        final PdfPoint p = grid.toChart(value.point);
+        final double y = p.y + offset - width / 2;
+        final double height = p.x - x;
+
+        context.canvas.drawRect(x, y, height, width);
+        break;
+    }
   }
 
   @override
