@@ -88,16 +88,19 @@ class MultiPage extends Page {
     this.maxPages = 20,
     PageOrientation orientation,
     EdgeInsets margin,
+    TextDirection textDirection,
   })  : _buildList = build,
         assert(mainAxisAlignment != null),
         assert(crossAxisAlignment != null),
         assert(maxPages != null && maxPages > 0),
         super(
-            pageTheme: pageTheme,
-            pageFormat: pageFormat,
-            margin: margin,
-            theme: theme,
-            orientation: orientation);
+          pageTheme: pageTheme,
+          pageFormat: pageFormat,
+          margin: margin,
+          theme: theme,
+          orientation: orientation,
+          textDirection: textDirection,
+        );
 
   final BuildListCallback _buildList;
 
@@ -168,7 +171,11 @@ class MultiPage extends Page {
     int index = 0;
     int sameCount = 0;
     final Context baseContext =
-        Context(document: document.document).inheritFrom(calculatedTheme);
+        Context(document: document.document).inheritFromAll(<Inherited>[
+      calculatedTheme,
+      if (pageTheme.textDirection != null)
+        InheritedDirectionality(pageTheme.textDirection),
+    ]);
     final List<Widget> children = _buildList(baseContext);
     WidgetContext widgetContext;
 

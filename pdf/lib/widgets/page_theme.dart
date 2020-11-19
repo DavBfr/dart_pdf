@@ -26,6 +26,7 @@ class PageTheme {
     PageOrientation orientation,
     EdgeInsets margin,
     this.clip = false,
+    this.textDirection,
   })  : pageFormat = pageFormat ?? PdfPageFormat.standard,
         orientation = orientation ?? PageOrientation.natural,
         _margin = margin;
@@ -43,6 +44,8 @@ class PageTheme {
   final ThemeData theme;
 
   final bool clip;
+
+  final TextDirection textDirection;
 
   bool get mustRotate =>
       (orientation == PageOrientation.landscape &&
@@ -77,6 +80,7 @@ class PageTheme {
     PageOrientation orientation,
     EdgeInsets margin,
     bool clip,
+    TextDirection textDirection,
   }) =>
       PageTheme(
         pageFormat: pageFormat ?? this.pageFormat,
@@ -86,5 +90,6 @@ class PageTheme {
         orientation: orientation ?? this.orientation,
         margin: margin ?? this.margin,
         clip: clip ?? this.clip,
+        textDirection: textDirection ?? this.textDirection,
       );
 }

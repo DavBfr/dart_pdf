@@ -24,21 +24,23 @@ typedef BuildListCallback = List<Widget> Function(Context context);
 enum PageOrientation { natural, landscape, portrait }
 
 class Page {
-  Page(
-      {PageTheme pageTheme,
-      PdfPageFormat pageFormat,
-      BuildCallback build,
-      ThemeData theme,
-      PageOrientation orientation,
-      EdgeInsets margin,
-      bool clip = false})
-      : assert(
+  Page({
+    PageTheme pageTheme,
+    PdfPageFormat pageFormat,
+    BuildCallback build,
+    ThemeData theme,
+    PageOrientation orientation,
+    EdgeInsets margin,
+    bool clip = false,
+    TextDirection textDirection,
+  })  : assert(
             pageTheme == null ||
                 (pageFormat == null &&
                     theme == null &&
                     orientation == null &&
                     margin == null &&
-                    clip == false),
+                    clip == false &&
+                    textDirection == null),
             'Don\'t set both pageTheme and other settings'),
         pageTheme = pageTheme ??
             PageTheme(
@@ -47,6 +49,7 @@ class Page {
               margin: margin,
               theme: theme,
               clip: clip,
+              textDirection: textDirection,
             ),
         _build = build;
 
@@ -106,7 +109,11 @@ class Page {
       document: document.document,
       page: _pdfPage,
       canvas: canvas,
-    ).inheritFrom(calculatedTheme);
+    ).inheritFromAll(<Inherited>[
+      calculatedTheme,
+      if (pageTheme.textDirection != null)
+        InheritedDirectionality(pageTheme.textDirection),
+    ]);
 
     Widget background;
     Widget content;

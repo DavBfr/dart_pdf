@@ -1,5 +1,10 @@
 # Changelog
 
+
+## 1.12.0
+
+- Add textDirection parameter to PageTheme
+
 ## 1.11.2
 
 - Fix Table.fromTextArray vertical alignment

@@ -68,9 +68,15 @@ class Context {
   }
 
   Context inheritFrom(Inherited object) {
+    return inheritFromAll(<Inherited>[object]);
+  }
+
+  Context inheritFromAll(Iterable<Inherited> objects) {
     final HashMap<Type, Inherited> inherited =
         HashMap<Type, Inherited>.of(this.inherited);
-    inherited[object.runtimeType] = object;
+    for (final Inherited object in objects) {
+      inherited[object.runtimeType] = object;
+    }
     return copyWith(inherited: inherited);
   }
 }

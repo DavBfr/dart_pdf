@@ -381,7 +381,14 @@ class TextStyle {
       'TextStyle(color:$color font:$font size:$fontSize weight:$fontWeight style:$fontStyle letterSpacing:$letterSpacing wordSpacing:$wordSpacing lineSpacing:$lineSpacing height:$height background:$background decoration:$decoration decorationColor:$decorationColor decorationStyle:$decorationStyle decorationThickness:$decorationThickness, renderingMode:$renderingMode)';
 }
 
-class Directionality extends StatelessWidget implements Inherited {
+class InheritedDirectionality extends Inherited {
+  const InheritedDirectionality(this.textDirection);
+
+  /// The text direction for this subtree.
+  final TextDirection textDirection;
+}
+
+class Directionality extends StatelessWidget {
   /// Creates a widget that determines the directionality of text and
   /// text-direction-sensitive render objects.
   ///
@@ -410,15 +417,16 @@ class Directionality extends StatelessWidget implements Inherited {
   /// TextDirection textDirection = Directionality.of(context);
   /// ```
   static TextDirection of(Context context) {
-    final Directionality widget = context.inherited[Directionality];
-    return widget?.textDirection ?? TextDirection.ltr;
+    final InheritedDirectionality inherited =
+        context.inherited[InheritedDirectionality];
+    return inherited?.textDirection ?? TextDirection.ltr;
   }
 
   @override
   Widget build(Context context) {
     return InheritedWidget(
       build: (Context context) => child,
-      inherited: this,
+      inherited: InheritedDirectionality(textDirection),
     );
   }
 }
