@@ -32,6 +32,8 @@ Code snippet to reproduce the behavior:
  - [ ] iOS
  - [ ] Android
  - [ ] Browser
+ - [ ] Windows
+ - [ ] Linux
 
 **Smartphone (please complete the following information):**
  - Device: [e.g. iPhone6]

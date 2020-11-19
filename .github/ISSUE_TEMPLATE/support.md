@@ -12,10 +12,10 @@ assignees: ''
 
      If you can't find the answer there, please consider asking a question on
      the Stack Overflow Web site:
-      * https://stackoverflow.com/questions/ask?tags=dart-pdf
+      * https://stackoverflow.com/questions/ask?title=%5Bdart-pdf%5D%20
 
      You can browse existing questions at this address:
-      * https://stackoverflow.com/questions/tagged/dart-pdf?sort=frequent
+      * https://stackoverflow.com/search?q=dart-pdf&sort=frequent
 
      Please don't file a GitHub issue for support requests. GitHub issues are
      for tracking defects in the product. If you file a bug asking for help, we
