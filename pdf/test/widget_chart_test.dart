@@ -170,6 +170,29 @@ void main() {
     });
   });
 
+  group('BarChart test', () {
+    test('Default BarChart', () {
+      pdf.addPage(Page(
+        pageFormat: PdfPageFormat.standard.landscape,
+        build: (Context context) => Chart(
+          grid: CartesianGrid(
+            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
+          ),
+          datasets: <Dataset>[
+            BarDataSet(
+              data: const <LineChartValue>[
+                LineChartValue(1, 1),
+                LineChartValue(2, 3),
+                LineChartValue(3, 7),
+              ],
+            ),
+          ],
+        ),
+      ));
+    });
+  });
+
   tearDownAll(() {
     final File file = File('widgets-chart.pdf');
     file.writeAsBytesSync(pdf.save());

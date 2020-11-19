@@ -25,12 +25,14 @@ class BarDataSet extends Dataset {
     this.borderColor,
     this.borderWidth = 1.5,
     PdfColor color = PdfColors.blue,
-    this.drawBorder = true,
+    bool drawBorder,
     this.drawSurface = true,
     this.surfaceOpacity = 1,
     this.width = 10,
     this.offset = 0,
-  })  : assert(drawBorder || drawSurface),
+  })  : drawBorder = drawBorder ?? borderColor != null && color != borderColor,
+        assert((drawBorder ?? borderColor != null && color != borderColor) ||
+            drawSurface),
         super(
           legend: legend,
           color: color,
@@ -53,7 +55,7 @@ class BarDataSet extends Dataset {
     final double y = (grid is CartesianGrid) ? grid.xAxisOffset : 0;
     final PdfPoint p = grid.toChart(value.point);
 
-    context.canvas.drawRect(p.x + offset - width / 2, y, width, p.y);
+    context.canvas.drawRect(p.x + offset - width / 2, y, width, p.y - y);
   }
 
   @override

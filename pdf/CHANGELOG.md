@@ -4,6 +4,7 @@
 ## 1.12.0
 
 - Add textDirection parameter to PageTheme
+- Fix Bar graph offset
 
 ## 1.11.2
 
