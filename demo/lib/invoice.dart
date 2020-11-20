@@ -158,7 +158,8 @@ class Invoice {
                   ),
                   pw.Container(
                     decoration: pw.BoxDecoration(
-                      borderRadius: 2,
+                      borderRadiusEx:
+                          pw.BorderRadius.all(pw.Radius.circular(2)),
                       color: accentColor,
                     ),
                     padding: const pw.EdgeInsets.only(
@@ -497,7 +498,7 @@ class Invoice {
       border: null,
       cellAlignment: pw.Alignment.centerLeft,
       headerDecoration: pw.BoxDecoration(
-        borderRadius: 2,
+        borderRadiusEx: pw.BorderRadius.all(pw.Radius.circular(2)),
         color: baseColor,
       ),
       headerHeight: 25,

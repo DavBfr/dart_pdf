@@ -262,7 +262,10 @@ class _Category extends pw.StatelessWidget {
   @override
   pw.Widget build(pw.Context context) {
     return pw.Container(
-        decoration: const pw.BoxDecoration(color: lightGreen, borderRadius: 6),
+        decoration: const pw.BoxDecoration(
+          color: lightGreen,
+          borderRadiusEx: pw.BorderRadius.all(pw.Radius.circular(6)),
+        ),
         margin: const pw.EdgeInsets.only(bottom: 10, top: 20),
         padding: const pw.EdgeInsets.fromLTRB(10, 7, 10, 4),
         child: pw.Text(title, textScaleFactor: 1.5));

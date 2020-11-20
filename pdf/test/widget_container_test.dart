@@ -40,7 +40,7 @@ void main() {
         padding: const EdgeInsets.all(20),
         decoration: const BoxDecoration(
             color: PdfColors.blue,
-            borderRadius: 20,
+            borderRadiusEx: BorderRadius.all(Radius.circular(20)),
             border: BoxBorder(
               color: PdfColors.blue800,
               top: true,
@@ -67,7 +67,7 @@ void main() {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: shape,
-              borderRadius: 10,
+              borderRadiusEx: const BorderRadius.all(Radius.circular(10)),
               image: DecorationImage(image: image, fit: fit),
             ),
             width: 100,
@@ -121,7 +121,7 @@ void main() {
               width: 200.0,
               decoration: const BoxDecoration(
                 shape: BoxShape.rectangle,
-                borderRadius: 40,
+                borderRadiusEx: BorderRadius.all(Radius.circular(40)),
                 border: BoxBorder(
                     bottom: true,
                     top: true,
@@ -144,7 +144,7 @@ void main() {
         margin: const EdgeInsets.all(30),
         padding: const EdgeInsets.all(20),
         decoration: const BoxDecoration(
-            borderRadius: 20,
+            borderRadiusEx: BorderRadius.all(Radius.circular(20)),
             gradient: LinearGradient(
               colors: <PdfColor>[
                 PdfColors.blue,
@@ -177,7 +177,7 @@ void main() {
         margin: const EdgeInsets.all(30),
         padding: const EdgeInsets.all(20),
         decoration: const BoxDecoration(
-            borderRadius: 20,
+            borderRadiusEx: BorderRadius.all(Radius.circular(20)),
             gradient: RadialGradient(
               colors: <PdfColor>[
                 PdfColors.blue,

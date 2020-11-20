@@ -51,7 +51,10 @@ List<TableRow> buildTable(
           child: Text('${h.toInt()}°', style: Theme.of(context).tableCell)),
       Container(
           margin: const EdgeInsets.all(5),
-          decoration: BoxDecoration(color: color, borderRadius: 5),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadiusEx: const BorderRadius.all(Radius.circular(5)),
+          ),
           height: Theme.of(context).tableCell.fontSize),
       Container(
           margin: const EdgeInsets.all(5),
@@ -208,7 +211,7 @@ void main() {
         border: null,
         cellAlignment: Alignment.center,
         headerDecoration: const BoxDecoration(
-          borderRadius: 2,
+          borderRadiusEx: BorderRadius.all(Radius.circular(2)),
           color: PdfColors.indigo,
         ),
         headerHeight: 25,

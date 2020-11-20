@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.13.0
+
+- Implement different border radius on all corners
 
 ## 1.12.0
 

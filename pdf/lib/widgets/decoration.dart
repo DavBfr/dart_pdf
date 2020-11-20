@@ -130,7 +130,7 @@ class BoxBorder {
       ..strokePath();
   }
 
-  void paintRRect(Context context, PdfRect box, double borderRadius) {
+  void paintRRect(Context context, PdfRect box, BorderRadius borderRadius) {
     assert(box.x != null);
     assert(box.y != null);
     assert(box.width != null);
@@ -138,10 +138,9 @@ class BoxBorder {
 
     context.canvas
       ..setStrokeColor(color)
-      ..setLineWidth(width)
-      ..drawRRect(
-          box.x, box.y, box.width, box.height, borderRadius, borderRadius)
-      ..strokePath();
+      ..setLineWidth(width);
+    borderRadius.paint(context, box);
+    context.canvas.strokePath();
   }
 }
 
@@ -408,26 +407,6 @@ class BoxShadow {
     return shadow;
   }
 
-  im.Image _rRect(double width, double height, double rv, double rh) {
-    final im.Image shadow = im.Image(
-      (width + spreadRadius * 2).round(),
-      (height + spreadRadius * 2).round(),
-    );
-
-    im.fillRect(
-      shadow,
-      spreadRadius.round(),
-      spreadRadius.round(),
-      (spreadRadius + width).round(),
-      (spreadRadius + height).round(),
-      color.toInt(),
-    );
-
-    im.gaussianBlur(shadow, blurRadius.round());
-
-    return shadow;
-  }
-
   im.Image _ellipse(double width, double height) {
     final im.Image shadow = im.Image(
       (width + spreadRadius * 2).round(),
@@ -452,26 +431,170 @@ enum BoxShape { circle, rectangle }
 
 enum PaintPhase { all, background, foreground }
 
+/// A radius for either circular or elliptical shapes.
+class Radius {
+  /// Constructs a circular radius. [x] and [y] will have the same radius value.
+  const Radius.circular(double radius) : this.elliptical(radius, radius);
+
+  /// Constructs an elliptical radius with the given radii.
+  const Radius.elliptical(this.x, this.y);
+
+  /// The radius value on the horizontal axis.
+  final double x;
+
+  /// The radius value on the vertical axis.
+  final double y;
+
+  /// A radius with [x] and [y] values set to zero.
+  static const Radius zero = Radius.circular(0.0);
+}
+
+/// An immutable set of radii for each corner of a rectangle.
+class BorderRadius {
+  /// Creates a border radius where all radii are [radius].
+  const BorderRadius.all(Radius radius)
+      : this.only(
+          topLeft: radius,
+          topRight: radius,
+          bottomLeft: radius,
+          bottomRight: radius,
+        );
+
+  /// Creates a border radius where all radii are [Radius.circular(radius)].
+  BorderRadius.circular(double radius)
+      : this.all(
+          Radius.circular(radius),
+        );
+
+  /// Creates a vertically symmetric border radius where the top and bottom
+  /// sides of the rectangle have the same radii.
+  const BorderRadius.vertical({
+    Radius top = Radius.zero,
+    Radius bottom = Radius.zero,
+  }) : this.only(
+          topLeft: top,
+          topRight: top,
+          bottomLeft: bottom,
+          bottomRight: bottom,
+        );
+
+  /// Creates a horizontally symmetrical border radius where the left and right
+  /// sides of the rectangle have the same radii.
+  const BorderRadius.horizontal({
+    Radius left = Radius.zero,
+    Radius right = Radius.zero,
+  }) : this.only(
+          topLeft: left,
+          topRight: right,
+          bottomLeft: left,
+          bottomRight: right,
+        );
+
+  /// Creates a border radius with only the given non-zero values. The other
+  /// corners will be right angles.
+  const BorderRadius.only({
+    this.topLeft = Radius.zero,
+    this.topRight = Radius.zero,
+    this.bottomLeft = Radius.zero,
+    this.bottomRight = Radius.zero,
+  });
+
+  /// A border radius with all zero radii.
+  static const BorderRadius zero = BorderRadius.all(Radius.zero);
+
+  /// The top-left [Radius].
+  final Radius topLeft;
+
+  /// The top-right [Radius].
+  final Radius topRight;
+
+  /// The bottom-left [Radius].
+  final Radius bottomLeft;
+
+  /// The bottom-right [Radius].
+  final Radius bottomRight;
+
+  void paint(Context context, PdfRect box) {
+    // Ellipse 4-spline magic number
+    const double _m4 = 0.551784;
+
+    context.canvas
+      // Start
+      ..moveTo(box.x, box.y + bottomLeft.y)
+      // bottomLeft
+      ..curveTo(
+          box.x,
+          box.y - _m4 * bottomLeft.y + bottomLeft.y,
+          box.x - _m4 * bottomLeft.x + bottomLeft.x,
+          box.y,
+          box.x + bottomLeft.x,
+          box.y)
+      // bottom
+      ..lineTo(box.x + box.width - bottomRight.x, box.y)
+      // bottomRight
+      ..curveTo(
+          box.x + _m4 * bottomRight.x + box.width - bottomRight.x,
+          box.y,
+          box.x + box.width,
+          box.y - _m4 * bottomRight.y + bottomRight.y,
+          box.x + box.width,
+          box.y + bottomRight.y)
+      // right
+      ..lineTo(box.x + box.width, box.y + box.height - topRight.y)
+      // topRight
+      ..curveTo(
+          box.x + box.width,
+          box.y + _m4 * topRight.y + box.height - topRight.y,
+          box.x + _m4 * topRight.x + box.width - topRight.x,
+          box.y + box.height,
+          box.x + box.width - topRight.x,
+          box.y + box.height)
+      // top
+      ..lineTo(box.x + topLeft.x, box.y + box.height)
+      // topLeft
+      ..curveTo(
+          box.x - _m4 * topLeft.x + topLeft.x,
+          box.y + box.height,
+          box.x,
+          box.y + _m4 * topLeft.y + box.height - topLeft.y,
+          box.x,
+          box.y + box.height - topLeft.y)
+      // left
+      ..lineTo(box.x, box.y + bottomLeft.y);
+  }
+}
+
 @immutable
 class BoxDecoration {
   const BoxDecoration({
     this.color,
     this.border,
-    this.borderRadius,
+    @Deprecated('Use borderRadiusEx with `BorderRadius.all(Radius.circular(20))`')
+        double borderRadius,
+    BorderRadius borderRadiusEx,
     this.boxShadow,
     this.gradient,
     this.image,
     this.shape = BoxShape.rectangle,
-  }) : assert(shape != null);
+  })  : assert(shape != null),
+        assert(!(borderRadius != null && borderRadiusEx != null),
+            'Don\'t set both borderRadius and borderRadiusEx'),
+        _borderRadius = borderRadiusEx,
+        _radius = borderRadius;
 
   /// The color to fill in the background of the box.
   final PdfColor color;
   final BoxBorder border;
-  final double borderRadius;
+  final BorderRadius _borderRadius;
+  final double _radius;
   final BoxShape shape;
   final DecorationImage image;
   final Gradient gradient;
   final List<BoxShadow> boxShadow;
+
+  BorderRadius get borderRadius =>
+      _borderRadius ??
+      (_radius == null ? null : BorderRadius.all(Radius.circular(_radius)));
 
   void paint(
     Context context,
@@ -504,8 +627,7 @@ class BoxDecoration {
             } else {
               if (boxShadow != null) {
                 for (final BoxShadow s in boxShadow) {
-                  final im.Image i = s._rRect(
-                      box.width, box.height, borderRadius, borderRadius);
+                  final im.Image i = s._rect(box.width, box.height);
                   final PdfImage m =
                       PdfImage.fromImage(context.document, image: i);
                   context.canvas.drawImage(
@@ -515,8 +637,7 @@ class BoxDecoration {
                   );
                 }
               }
-              context.canvas.drawRRect(box.x, box.y, box.width, box.height,
-                  borderRadius, borderRadius);
+              borderRadius.paint(context, box);
             }
             break;
           case BoxShape.circle:
@@ -547,8 +668,7 @@ class BoxDecoration {
             if (borderRadius == null) {
               context.canvas.drawRect(box.x, box.y, box.width, box.height);
             } else {
-              context.canvas.drawRRect(box.x, box.y, box.width, box.height,
-                  borderRadius, borderRadius);
+              borderRadius.paint(context, box);
             }
             break;
           case BoxShape.circle:
@@ -572,10 +692,8 @@ class BoxDecoration {
             break;
           case BoxShape.rectangle:
             if (borderRadius != null) {
-              context.canvas
-                ..drawRRect(box.x, box.y, box.width, box.height, borderRadius,
-                    borderRadius)
-                ..clipPath();
+              borderRadius.paint(context, box);
+              context.canvas.clipPath();
             }
             break;
         }
