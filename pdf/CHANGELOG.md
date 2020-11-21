@@ -4,6 +4,7 @@
 
 - Implement different border radius on all corners
 - Add AcroForm widgets
+- Add document outline support
 
 ## 1.12.0
 

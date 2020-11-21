@@ -19,13 +19,23 @@
 part of widget;
 
 class Anchor extends SingleChildWidget {
-  Anchor({Widget child, @required this.name, this.description})
-      : assert(name != null),
+  Anchor({
+    Widget child,
+    @required this.name,
+    this.description,
+    this.zoom,
+    this.setX = false,
+  })  : assert(name != null),
+        assert(setX != null),
         super(child: child);
 
   final String name;
 
   final String description;
+
+  final double zoom;
+
+  final bool setX;
 
   @override
   void paint(Context context) {
@@ -33,8 +43,14 @@ class Anchor extends SingleChildWidget {
     paintChild(context);
 
     final Matrix4 mat = context.canvas.getTransform();
-    final Vector3 lt = mat.transform3(Vector3(box.left, box.bottom, 0));
-    context.document.pdfNames.addDest(name, context.page, posY: lt.y);
+    final Vector3 lt = mat.transform3(Vector3(box.left, box.top, 0));
+    context.document.pdfNames.addDest(
+      name,
+      context.page,
+      posX: setX ? lt.x : null,
+      posY: lt.y,
+      posZ: zoom,
+    );
 
     if (description != null) {
       final Vector3 rb = mat.transform3(Vector3(box.right, box.top, 0));
@@ -306,4 +322,75 @@ class TextField extends Annotation {
               defaultValue: defaultValue,
               textStyle: textStyle,
             ));
+}
+
+class Outline extends Anchor {
+  Outline({
+    Widget child,
+    @required String name,
+    @required this.title,
+    this.level = 0,
+    this.color,
+    this.style = PdfOutlineStyle.normal,
+  })  : assert(title != null),
+        assert(level != null && level >= 0),
+        assert(style != null),
+        super(child: child, name: name, setX: true);
+
+  final String title;
+
+  final int level;
+
+  final PdfColor color;
+
+  final PdfOutlineStyle style;
+
+  PdfOutline _outline;
+
+  @override
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    super.layout(context, constraints, parentUsesSize: parentUsesSize);
+    _buildOutline(context);
+  }
+
+  @override
+  void debugPaint(Context context) {
+    context.canvas
+      ..setFillColor(PdfColors.pink100)
+      ..drawRect(box.x, box.y, box.width, box.height)
+      ..fillPath();
+  }
+
+  void _buildOutline(Context context) {
+    if (_outline != null) {
+      return;
+    }
+
+    _outline = PdfOutline(
+      context.document,
+      title: title,
+      anchor: name,
+      color: color,
+      style: style,
+    );
+
+    PdfOutline parent = context.document.outline;
+    int l = level;
+
+    while (l > 0) {
+      if (parent.effectiveLevel == l) {
+        break;
+      }
+
+      if (parent.outlines.isEmpty) {
+        parent.effectiveLevel = level;
+        break;
+      }
+      parent = parent.outlines.last;
+      l--;
+    }
+
+    parent.add(_outline);
+  }
 }

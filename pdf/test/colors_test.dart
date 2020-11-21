@@ -175,14 +175,14 @@ Document pdf;
 void main() {
   setUpAll(() {
     Document.debug = true;
-    pdf = Document();
+    pdf = Document(pageMode: PdfPageMode.outlines);
   });
 
   test('Pdf Colors', () {
     pdf.addPage(MultiPage(
         pageFormat: PdfPageFormat.standard,
         build: (Context context) => <Widget>[
-              Header(text: 'Red'),
+              Header(text: 'Red', outlineColor: PdfColors.red),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -207,7 +207,7 @@ void main() {
                     Color(PdfColors.redAccent700, 'Red', 'Accent 700'),
                   ]),
               NewPage(),
-              Header(text: 'Pink'),
+              Header(text: 'Pink', outlineColor: PdfColors.pink),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -232,7 +232,7 @@ void main() {
                     Color(PdfColors.pinkAccent700, 'Pink', 'Accent 700'),
                   ]),
               NewPage(),
-              Header(text: 'Purple'),
+              Header(text: 'Purple', outlineColor: PdfColors.purple),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -257,7 +257,7 @@ void main() {
                     Color(PdfColors.purpleAccent700, 'Purple', 'Accent 700'),
                   ]),
               NewPage(),
-              Header(text: 'Deep Purple'),
+              Header(text: 'Deep Purple', outlineColor: PdfColors.deepPurple),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -286,7 +286,7 @@ void main() {
                         'Accent 700'),
                   ]),
               NewPage(),
-              Header(text: 'Indigo'),
+              Header(text: 'Indigo', outlineColor: PdfColors.indigo),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -311,7 +311,7 @@ void main() {
                     Color(PdfColors.indigoAccent700, 'Indigo', 'Accent 700'),
                   ]),
               NewPage(),
-              Header(text: 'Blue'),
+              Header(text: 'Blue', outlineColor: PdfColors.blue),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -336,7 +336,7 @@ void main() {
                     Color(PdfColors.blueAccent700, 'Blue', 'Accent 700'),
                   ]),
               NewPage(),
-              Header(text: 'Light Blue'),
+              Header(text: 'Light Blue', outlineColor: PdfColors.lightBlue),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -365,7 +365,7 @@ void main() {
                         'Accent 700'),
                   ]),
               NewPage(),
-              Header(text: 'Cyan'),
+              Header(text: 'Cyan', outlineColor: PdfColors.cyan),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -390,7 +390,7 @@ void main() {
                     Color(PdfColors.cyanAccent700, 'Cyan', 'Accent 700'),
                   ]),
               NewPage(),
-              Header(text: 'Teal'),
+              Header(text: 'Teal', outlineColor: PdfColors.teal),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -415,7 +415,7 @@ void main() {
                     Color(PdfColors.tealAccent700, 'Teal', 'Accent 700'),
                   ]),
               NewPage(),
-              Header(text: 'Green'),
+              Header(text: 'Green', outlineColor: PdfColors.green),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -440,7 +440,7 @@ void main() {
                     Color(PdfColors.greenAccent700, 'Green', 'Accent 700'),
                   ]),
               NewPage(),
-              Header(text: 'Light Green'),
+              Header(text: 'Light Green', outlineColor: PdfColors.lightGreen),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -469,7 +469,7 @@ void main() {
                         'Accent700'),
                   ]),
               NewPage(),
-              Header(text: 'Lime'),
+              Header(text: 'Lime', outlineColor: PdfColors.lime),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -494,7 +494,7 @@ void main() {
                     Color(PdfColors.limeAccent700, 'Lime', 'Accent 700'),
                   ]),
               NewPage(),
-              Header(text: 'Yellow'),
+              Header(text: 'Yellow', outlineColor: PdfColors.yellow),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -519,7 +519,7 @@ void main() {
                     Color(PdfColors.yellowAccent700, 'Yellow', 'Accent 700'),
                   ]),
               NewPage(),
-              Header(text: 'Amber'),
+              Header(text: 'Amber', outlineColor: PdfColors.amber),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -544,7 +544,7 @@ void main() {
                     Color(PdfColors.amberAccent700, 'Amber', 'Accent 700'),
                   ]),
               NewPage(),
-              Header(text: 'Orange'),
+              Header(text: 'Orange', outlineColor: PdfColors.orange),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -569,7 +569,7 @@ void main() {
                     Color(PdfColors.orangeAccent700, 'Orange', 'Accent 700'),
                   ]),
               NewPage(),
-              Header(text: 'Deep Orange'),
+              Header(text: 'Deep Orange', outlineColor: PdfColors.deepOrange),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -598,7 +598,7 @@ void main() {
                         'Accent 700'),
                   ]),
               NewPage(),
-              Header(text: 'Brown'),
+              Header(text: 'Brown', outlineColor: PdfColors.brown),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -619,7 +619,7 @@ void main() {
                     Color(PdfColors.brown900, 'Brown', '900'),
                   ]),
               NewPage(),
-              Header(text: 'Blue Grey'),
+              Header(text: 'Blue Grey', outlineColor: PdfColors.blueGrey),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -640,7 +640,7 @@ void main() {
                     Color(PdfColors.blueGrey900, 'Blue Grey', '900'),
                   ]),
               NewPage(),
-              Header(text: 'Grey'),
+              Header(text: 'Grey', outlineColor: PdfColors.grey),
               GridView(
                   crossAxisCount: 4,
                   direction: Axis.vertical,
@@ -677,7 +677,7 @@ void main() {
       pdf.addPage(Page(
           build: (Context context) => Column(
                 children: <Widget>[
-                  Header(text: name),
+                  Header(text: name, outlineStyle: PdfOutlineStyle.italic),
                   SizedBox(
                     height: context.page.pageFormat.availableWidth,
                     child: ColorWheel(

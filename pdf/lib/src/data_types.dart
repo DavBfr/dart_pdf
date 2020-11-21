@@ -207,20 +207,27 @@ class PdfSecString extends PdfString {
       [PdfStringFormat format = PdfStringFormat.binary])
       : super(value, format);
 
-  factory PdfSecString.fromString(PdfObject object, String value) {
+  factory PdfSecString.fromString(
+    PdfObject object,
+    String value, [
+    PdfStringFormat format = PdfStringFormat.litteral,
+  ]) {
     return PdfSecString(
       object,
       PdfString._string(value),
-      PdfStringFormat.litteral,
+      format,
     );
   }
 
-  factory PdfSecString.fromStream(PdfObject object, PdfStream value,
-      [PdfStringFormat format = PdfStringFormat.litteral]) {
+  factory PdfSecString.fromStream(
+    PdfObject object,
+    PdfStream value, [
+    PdfStringFormat format = PdfStringFormat.litteral,
+  ]) {
     return PdfSecString(
       object,
       value.output(),
-      PdfStringFormat.litteral,
+      format,
     );
   }
 

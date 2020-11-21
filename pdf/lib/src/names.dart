@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+// ignore_for_file: omit_local_variable_types
+
 part of pdf;
 
 class PdfNames extends PdfObject {
   /// This constructs a Pdf Name object
   PdfNames(PdfDocument pdfDocument) : super(pdfDocument);
 
-  final PdfArray _dests = PdfArray();
+  final Map<String, PdfDataType> _dests = <String, PdfDataType>{};
 
   void addDest(
     String name,
@@ -32,8 +34,7 @@ class PdfNames extends PdfObject {
     assert(page.pdfDocument == pdfDocument);
     assert(name != null);
 
-    _dests.add(PdfSecString.fromString(this, name));
-    _dests.add(PdfDict(<String, PdfDataType>{
+    _dests[name] = PdfDict(<String, PdfDataType>{
       '/D': PdfArray(<PdfDataType>[
         page.ref(),
         const PdfName('/XYZ'),
@@ -41,13 +42,32 @@ class PdfNames extends PdfObject {
         if (posY == null) const PdfNull() else PdfNum(posY),
         if (posZ == null) const PdfNull() else PdfNum(posZ),
       ]),
-    }));
+    });
   }
 
   @override
   void _prepare() {
     super._prepare();
 
-    params['/Dests'] = PdfDict(<String, PdfDataType>{'/Names': _dests});
+    if (_dests.isEmpty) {
+      return;
+    }
+
+    final PdfArray dests = PdfArray();
+
+    final List<String> keys = _dests.keys.toList()..sort();
+
+    for (String name in keys) {
+      dests.add(PdfSecString.fromString(this, name));
+      dests.add(_dests[name]);
+    }
+
+    params['/Dests'] = PdfDict(<String, PdfDataType>{
+      '/Names': dests,
+      '/Limits': PdfArray(<PdfDataType>[
+        PdfSecString.fromString(this, keys.first),
+        PdfSecString.fromString(this, keys.last),
+      ])
+    });
   }
 }

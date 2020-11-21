@@ -22,7 +22,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 Future<Uint8List> generateDocument(PdfPageFormat format) async {
-  final pw.Document doc = pw.Document();
+  final pw.Document doc = pw.Document(pageMode: PdfPageMode.outlines);
 
   doc.addPage(pw.MultiPage(
       pageFormat:
@@ -57,6 +57,7 @@ Future<Uint8List> generateDocument(PdfPageFormat format) async {
       build: (pw.Context context) => <pw.Widget>[
             pw.Header(
                 level: 0,
+                title: 'Portable Document Format',
                 child: pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: <pw.Widget>[

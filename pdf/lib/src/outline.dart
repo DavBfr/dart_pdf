@@ -26,15 +26,36 @@ enum PdfOutlineMode {
   fitrect
 }
 
+enum PdfOutlineStyle {
+  /// Normal
+  normal,
+
+  /// Italic
+  italic,
+
+  // Bold
+  bold,
+
+  /// Italic and Bold
+  italicBold,
+}
+
 class PdfOutline extends PdfObject {
   /// Constructs a Pdf Outline object. When selected, the specified region
   /// is displayed.
-  ///
-  /// @param title Title of the outline
-  /// @param dest The destination page
-  /// @param rect coordinate
-  PdfOutline(PdfDocument pdfDocument, {this.title, this.dest, this.rect})
-      : super(pdfDocument, '/Outlines');
+  PdfOutline(
+    PdfDocument pdfDocument, {
+    this.title,
+    this.dest,
+    this.rect,
+    this.anchor,
+    this.color,
+    this.destMode = PdfOutlineMode.fitpage,
+    this.style = PdfOutlineStyle.normal,
+  })  : assert(anchor == null || (dest == null && rect == null)),
+        assert(destMode != null),
+        assert(style != null),
+        super(pdfDocument);
 
   /// This holds any outlines below us
   List<PdfOutline> outlines = <PdfOutline>[];
@@ -51,33 +72,25 @@ class PdfOutline extends PdfObject {
   /// The region on the destination page
   final PdfRect rect;
 
+  /// Named destination
+  final String anchor;
+
+  /// Color of the outline text
+  final PdfColor color;
+
   /// How the destination is handled
-  PdfOutlineMode destMode = PdfOutlineMode.fitpage;
+  final PdfOutlineMode destMode;
+
+  /// How to display the outline text
+  final PdfOutlineStyle style;
+
+  int effectiveLevel;
 
   /// This method creates an outline, and attaches it to this one.
   /// When the outline is selected, the supplied region is displayed.
-  ///
-  /// Note: the coordinates are in User space. They are converted to User
-  /// space.
-  ///
-  /// This allows you to have an outline for say a Chapter,
-  /// then under the chapter, one for each section. You are not really
-  /// limited on how deep you go, but it's best not to go below say 6 levels,
-  /// for the reader's sake.
-  ///
-  /// @param title Title of the outline
-  /// @param dest The destination page
-  /// @param x coordinate of region in User space
-  /// @param y coordinate of region in User space
-  /// @param w width of region in User space
-  /// @param h height of region in User space
-  /// @return [PdfOutline] object created, for creating sub-outlines
-  PdfOutline add({String title, PdfPage dest, PdfRect rect}) {
-    final PdfOutline outline =
-        PdfOutline(pdfDocument, title: title, dest: dest, rect: rect);
-    // Tell the outline of ourselves
+  void add(PdfOutline outline) {
     outline.parent = this;
-    return outline;
+    outlines.add(outline);
   }
 
   /// @param os OutputStream to send the object to
@@ -88,20 +101,33 @@ class PdfOutline extends PdfObject {
     // These are for kids only
     if (parent != null) {
       params['/Title'] = PdfSecString.fromString(this, title);
-      final PdfArray dests = PdfArray();
-      dests.add(dest.ref());
 
-      if (destMode == PdfOutlineMode.fitpage) {
-        dests.add(const PdfName('/Fit'));
+      if (color != null) {
+        params['/C'] = PdfColorType(color);
+      }
+
+      if (style != PdfOutlineStyle.normal) {
+        params['/F'] = PdfNum(style.index);
+      }
+
+      if (anchor != null) {
+        params['/Dest'] = PdfSecString.fromString(this, anchor);
       } else {
-        dests.add(const PdfName('/FitR'));
-        dests.add(PdfNum(rect.left));
-        dests.add(PdfNum(rect.bottom));
-        dests.add(PdfNum(rect.right));
-        dests.add(PdfNum(rect.top));
+        final PdfArray dests = PdfArray();
+        dests.add(dest.ref());
+
+        if (destMode == PdfOutlineMode.fitpage) {
+          dests.add(const PdfName('/Fit'));
+        } else {
+          dests.add(const PdfName('/FitR'));
+          dests.add(PdfNum(rect.left));
+          dests.add(PdfNum(rect.bottom));
+          dests.add(PdfNum(rect.right));
+          dests.add(PdfNum(rect.top));
+        }
+        params['/Dest'] = dests;
       }
       params['/Parent'] = parent.ref();
-      params['/Dest'] = dests;
 
       // were a descendent, so by default we are closed. Find out how many
       // entries are below us

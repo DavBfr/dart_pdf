@@ -19,15 +19,23 @@
 part of widget;
 
 class Header extends StatelessWidget {
-  Header(
-      {this.level = 1,
-      this.text,
-      this.child,
-      this.decoration,
-      this.margin,
-      this.padding,
-      this.textStyle})
-      : assert(level >= 0 && level <= 5);
+  Header({
+    this.level = 1,
+    this.text,
+    this.child,
+    this.decoration,
+    this.margin,
+    this.padding,
+    this.textStyle,
+    String title,
+    this.outlineColor,
+    this.outlineStyle = PdfOutlineStyle.normal,
+  })  : assert(level != null, level >= 0 && level <= 5),
+        assert(text != null || child != null),
+        assert(outlineStyle != null),
+        title = title ?? text;
+
+  final String title;
 
   final String text;
 
@@ -42,6 +50,10 @@ class Header extends StatelessWidget {
   final EdgeInsets padding;
 
   final TextStyle textStyle;
+
+  final PdfColor outlineColor;
+
+  final PdfOutlineStyle outlineStyle;
 
   @override
   Widget build(Context context) {
@@ -85,12 +97,26 @@ class Header extends StatelessWidget {
         _textStyle ??= Theme.of(context).header5;
         break;
     }
-    return Container(
+
+    final Widget container = Container(
       alignment: Alignment.topLeft,
       margin: _margin,
       padding: _padding,
       decoration: _decoration,
       child: child ?? Text(text, style: _textStyle),
+    );
+
+    if (title == null) {
+      return container;
+    }
+
+    return Outline(
+      name: text.hashCode.toString(),
+      title: title,
+      child: container,
+      level: level,
+      color: outlineColor,
+      style: outlineStyle,
     );
   }
 }
