@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 class _BarcodeWidget extends Widget {
@@ -51,9 +49,9 @@ class _BarcodeWidget extends Widget {
   void paint(Context context) {
     super.paint(context);
 
-    final List<BarcodeText> textList = <BarcodeText>[];
+    final textList = <BarcodeText>[];
 
-    for (BarcodeElement element in barcode.makeBytes(
+    for (var element in barcode.makeBytes(
       data,
       width: box.width,
       height: box.height,
@@ -80,12 +78,12 @@ class _BarcodeWidget extends Widget {
       ..fillPath();
 
     if (drawText) {
-      final PdfFont font = textStyle.font.getFont(context);
+      final font = textStyle.font.getFont(context);
 
-      for (BarcodeText text in textList) {
-        final PdfFontMetrics metrics = font.stringMetrics(text.text);
+      for (var text in textList) {
+        final metrics = font.stringMetrics(text.text);
 
-        final double top = box.top -
+        final top = box.top -
             text.top -
             metrics.descent * textStyle.fontSize -
             text.height;
@@ -125,7 +123,7 @@ class _BarcodeWidget extends Widget {
     super.debugPaint(context);
 
     if (drawText) {
-      for (BarcodeElement element in barcode.makeBytes(
+      for (var element in barcode.makeBytes(
         data,
         width: box.width,
         height: box.height,
@@ -244,7 +242,7 @@ class BarcodeWidget extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    final TextStyle defaultstyle = Theme.of(context).defaultTextStyle.copyWith(
+    final defaultstyle = Theme.of(context).defaultTextStyle.copyWith(
           font: Font.courier(),
           fontNormal: Font.courier(),
           fontBold: Font.courierBold(),
@@ -253,7 +251,7 @@ class BarcodeWidget extends StatelessWidget {
           lineSpacing: 1,
           fontSize: height != null ? height * 0.2 : null,
         );
-    final TextStyle _textStyle = defaultstyle.merge(textStyle);
+    final _textStyle = defaultstyle.merge(textStyle);
 
     Widget child = _BarcodeWidget(
       data: data,

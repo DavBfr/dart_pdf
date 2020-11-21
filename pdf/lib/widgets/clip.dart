@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 class ClipRect extends SingleChildWidget {
@@ -35,7 +33,7 @@ class ClipRect extends SingleChildWidget {
     super.paint(context);
 
     if (child != null) {
-      final Matrix4 mat = Matrix4.identity();
+      final mat = Matrix4.identity();
       mat.translate(box.x, box.y);
       context.canvas
         ..saveContext()
@@ -75,7 +73,7 @@ class ClipRRect extends SingleChildWidget {
     super.paint(context);
 
     if (child != null) {
-      final Matrix4 mat = Matrix4.identity();
+      final mat = Matrix4.identity();
       mat.translate(box.x, box.y);
       context.canvas
         ..saveContext()
@@ -94,8 +92,8 @@ class ClipOval extends SingleChildWidget {
 
   @override
   void debugPaint(Context context) {
-    final double rx = box.width / 2.0;
-    final double ry = box.height / 2.0;
+    final rx = box.width / 2.0;
+    final ry = box.height / 2.0;
 
     context.canvas
       ..setStrokeColor(PdfColors.deepPurple)
@@ -108,11 +106,11 @@ class ClipOval extends SingleChildWidget {
   void paint(Context context) {
     super.paint(context);
 
-    final double rx = box.width / 2.0;
-    final double ry = box.height / 2.0;
+    final rx = box.width / 2.0;
+    final ry = box.height / 2.0;
 
     if (child != null) {
-      final Matrix4 mat = Matrix4.identity();
+      final mat = Matrix4.identity();
       mat.translate(box.x, box.y);
       context.canvas
         ..saveContext()

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 class BarDataSet extends Dataset {
@@ -58,18 +56,18 @@ class BarDataSet extends Dataset {
   void _drawSurface(Context context, ChartGrid grid, LineChartValue value) {
     switch (axis) {
       case Axis.horizontal:
-        final double y = (grid is CartesianGrid) ? grid.xAxisOffset : 0;
-        final PdfPoint p = grid.toChart(value.point);
-        final double x = p.x + offset - width / 2;
-        final double height = p.y - y;
+        final y = (grid is CartesianGrid) ? grid.xAxisOffset : 0;
+        final p = grid.toChart(value.point);
+        final x = p.x + offset - width / 2;
+        final height = p.y - y;
 
         context.canvas.drawRect(x, y, width, height);
         break;
       case Axis.vertical:
-        final double x = (grid is CartesianGrid) ? grid.yAxisOffset : 0;
-        final PdfPoint p = grid.toChart(value.point);
-        final double y = p.y + offset - width / 2;
-        final double height = p.x - x;
+        final x = (grid is CartesianGrid) ? grid.yAxisOffset : 0;
+        final p = grid.toChart(value.point);
+        final y = p.y + offset - width / 2;
+        final height = p.x - x;
 
         context.canvas.drawRect(x, y, height, width);
         break;
@@ -90,10 +88,10 @@ class BarDataSet extends Dataset {
       return;
     }
 
-    final ChartGrid grid = Chart.of(context).grid;
+    final grid = Chart.of(context).grid;
 
     if (drawSurface) {
-      for (final LineChartValue value in data) {
+      for (final value in data) {
         _drawSurface(context, grid, value);
       }
 
@@ -115,7 +113,7 @@ class BarDataSet extends Dataset {
     }
 
     if (drawBorder) {
-      for (final LineChartValue value in data) {
+      for (final value in data) {
         _drawSurface(context, grid, value);
       }
 

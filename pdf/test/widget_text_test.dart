@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -34,8 +32,8 @@ Iterable<TextDecoration> permute(
     List<TextDecoration> prefix, List<TextDecoration> remaining) sync* {
   yield TextDecoration.combine(prefix);
   if (remaining.isNotEmpty) {
-    for (TextDecoration decoration in remaining) {
-      final List<TextDecoration> next = List<TextDecoration>.from(remaining);
+    for (var decoration in remaining) {
+      final next = List<TextDecoration>.from(remaining);
       next.remove(decoration);
       yield* permute(prefix + <TextDecoration>[decoration], next);
     }
@@ -79,10 +77,10 @@ void main() {
   });
 
   test('Text Widgets Alignement', () {
-    final String para = LoremText().paragraph(40);
+    final para = LoremText().paragraph(40);
 
-    final List<Widget> widgets = <Widget>[];
-    for (TextAlign align in TextAlign.values) {
+    final widgets = <Widget>[];
+    for (var align in TextAlign.values) {
       widgets.add(
         Text(
           '$align:\n' + para,
@@ -96,10 +94,10 @@ void main() {
   });
 
   test('Text Widgets lineSpacing', () {
-    final String para = LoremText().paragraph(40);
+    final para = LoremText().paragraph(40);
 
-    final List<Widget> widgets = <Widget>[];
-    for (double spacing = 0.0; spacing < 10.0; spacing += 2.0) {
+    final widgets = <Widget>[];
+    for (var spacing = 0.0; spacing < 10.0; spacing += 2.0) {
       widgets.add(
         Text(para, style: TextStyle(font: ttf, lineSpacing: spacing)),
       );
@@ -112,10 +110,10 @@ void main() {
   });
 
   test('Text Widgets wordSpacing', () {
-    final String para = LoremText().paragraph(40);
+    final para = LoremText().paragraph(40);
 
-    final List<Widget> widgets = <Widget>[];
-    for (double spacing = 0.0; spacing < 10.0; spacing += 2.0) {
+    final widgets = <Widget>[];
+    for (var spacing = 0.0; spacing < 10.0; spacing += 2.0) {
       widgets.add(
         Text(para, style: TextStyle(font: ttf, wordSpacing: spacing)),
       );
@@ -128,10 +126,10 @@ void main() {
   });
 
   test('Text Widgets letterSpacing', () {
-    final String para = LoremText().paragraph(40);
+    final para = LoremText().paragraph(40);
 
-    final List<Widget> widgets = <Widget>[];
-    for (double spacing = -1.0; spacing < 8.0; spacing += 2.0) {
+    final widgets = <Widget>[];
+    for (var spacing = -1.0; spacing < 8.0; spacing += 2.0) {
       widgets.add(
         Text(
           '[$spacing] $para',
@@ -147,7 +145,7 @@ void main() {
   });
 
   test('Text Widgets background', () {
-    final String para = LoremText().paragraph(40);
+    final para = LoremText().paragraph(40);
     pdf.addPage(MultiPage(
         build: (Context context) => <Widget>[
               Text(
@@ -161,22 +159,22 @@ void main() {
   });
 
   test('Text Widgets decoration', () {
-    final List<Widget> widgets = <Widget>[];
-    final List<TextDecoration> decorations = <TextDecoration>[
+    final widgets = <Widget>[];
+    final decorations = <TextDecoration>[
       TextDecoration.underline,
       TextDecoration.lineThrough,
       TextDecoration.overline
     ];
 
-    final Set<TextDecoration> decorationSet = Set<TextDecoration>.from(
+    final decorationSet = Set<TextDecoration>.from(
       permute(
         <TextDecoration>[],
         decorations,
       ),
     );
 
-    for (TextDecorationStyle decorationStyle in TextDecorationStyle.values) {
-      for (TextDecoration decoration in decorationSet) {
+    for (var decorationStyle in TextDecorationStyle.values) {
+      for (var decoration in decorationSet) {
         widgets.add(
           Text(
             decoration.toString().replaceAll('.', ' '),
@@ -197,11 +195,11 @@ void main() {
   });
 
   test('Text Widgets RichText', () {
-    final math.Random rnd = math.Random(42);
-    final String para = LoremText(random: rnd).paragraph(40);
+    final rnd = math.Random(42);
+    final para = LoremText(random: rnd).paragraph(40);
 
-    final List<TextSpan> spans = <TextSpan>[];
-    for (String word in para.split(' ')) {
+    final spans = <TextSpan>[];
+    for (var word in para.split(' ')) {
       spans.add(
         TextSpan(
           text: '$word',
@@ -273,7 +271,7 @@ void main() {
   });
 
   tearDownAll(() {
-    final File file = File('widgets-text.pdf');
+    final file = File('widgets-text.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 abstract class PdfBaseFunction extends PdfObject {
@@ -32,7 +30,7 @@ class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
 
   @override
   void _prepare() {
-    for (final PdfColor color in colors) {
+    for (final color in colors) {
       buf.putBytes(<int>[
         (color.red * 255.0).round() & 0xff,
         (color.green * 255.0).round() & 0xff,

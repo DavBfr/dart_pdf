@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -32,10 +30,10 @@ void main() {
   });
 
   test('Wrap Widget Horizontal 1', () {
-    final List<Widget> wraps = <Widget>[];
-    for (VerticalDirection direction in VerticalDirection.values) {
+    final wraps = <Widget>[];
+    for (var direction in VerticalDirection.values) {
       wraps.add(Text('$direction'));
-      for (WrapAlignment alignment in WrapAlignment.values) {
+      for (var alignment in WrapAlignment.values) {
         wraps.add(Text('$alignment'));
         wraps.add(
           Wrap(
@@ -64,10 +62,10 @@ void main() {
   });
 
   test('Wrap Widget Vertical 1', () {
-    final List<Widget> wraps = <Widget>[];
-    for (VerticalDirection direction in VerticalDirection.values) {
+    final wraps = <Widget>[];
+    for (var direction in VerticalDirection.values) {
       wraps.add(Transform.rotateBox(child: Text('$direction'), angle: 1.57));
-      for (WrapAlignment alignment in WrapAlignment.values) {
+      for (var alignment in WrapAlignment.values) {
         wraps.add(Transform.rotateBox(child: Text('$alignment'), angle: 1.57));
         wraps.add(
           Wrap(
@@ -96,9 +94,9 @@ void main() {
   });
 
   test('Wrap Widget Horizontal 2', () {
-    final List<Widget> wraps = <Widget>[];
-    for (WrapCrossAlignment alignment in WrapCrossAlignment.values) {
-      final math.Random rnd = math.Random(42);
+    final wraps = <Widget>[];
+    for (var alignment in WrapCrossAlignment.values) {
+      final rnd = math.Random(42);
       wraps.add(Text('$alignment'));
       wraps.add(
         Wrap(
@@ -130,9 +128,9 @@ void main() {
   });
 
   test('Wrap Widget Vertical 2', () {
-    final List<Widget> wraps = <Widget>[];
-    for (WrapCrossAlignment alignment in WrapCrossAlignment.values) {
-      final math.Random rnd = math.Random(42);
+    final wraps = <Widget>[];
+    for (var alignment in WrapCrossAlignment.values) {
+      final rnd = math.Random(42);
       wraps.add(Transform.rotateBox(child: Text('$alignment'), angle: 1.57));
       wraps.add(
         Wrap(
@@ -164,9 +162,9 @@ void main() {
   });
 
   test('Wrap Widget Horizontal 3', () {
-    final List<Widget> wraps = <Widget>[];
-    for (WrapAlignment alignment in WrapAlignment.values) {
-      final math.Random rnd = math.Random(42);
+    final wraps = <Widget>[];
+    for (var alignment in WrapAlignment.values) {
+      final rnd = math.Random(42);
       wraps.add(Text('$alignment'));
       wraps.add(
         SizedBox(
@@ -200,9 +198,9 @@ void main() {
   });
 
   test('Wrap Widget Vertical 3', () {
-    final List<Widget> wraps = <Widget>[];
-    for (WrapAlignment alignment in WrapAlignment.values) {
-      final math.Random rnd = math.Random(42);
+    final wraps = <Widget>[];
+    for (var alignment in WrapAlignment.values) {
+      final rnd = math.Random(42);
       wraps.add(Transform.rotateBox(child: Text('$alignment'), angle: 1.57));
       wraps.add(
         SizedBox(
@@ -236,7 +234,7 @@ void main() {
   });
 
   test('Wrap Widget Overlay', () {
-    final math.Random rnd = math.Random(42);
+    final rnd = math.Random(42);
     pdf.addPage(
       Page(
         pageFormat: const PdfPageFormat(200, 200),
@@ -257,7 +255,7 @@ void main() {
   });
 
   test('Wrap Widget Multipage', () {
-    final math.Random rnd = math.Random(42);
+    final rnd = math.Random(42);
     pdf.addPage(
       MultiPage(
         pageFormat: const PdfPageFormat(200, 200),
@@ -291,7 +289,7 @@ void main() {
   });
 
   test('Wrap Widget Columns', () {
-    final math.Random rnd = math.Random(42);
+    final rnd = math.Random(42);
 
     pdf.addPage(
       MultiPage(
@@ -318,7 +316,7 @@ void main() {
   });
 
   tearDownAll(() {
-    final File file = File('widgets-wrap.pdf');
+    final file = File('widgets-wrap.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

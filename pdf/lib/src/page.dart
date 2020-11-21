@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 class PdfPage extends PdfObject with PdfGraphicStream {
@@ -51,8 +49,8 @@ class PdfPage extends PdfObject with PdfGraphicStream {
   ///
   /// @return a new [PdfGraphics] object to be used to draw this page.
   PdfGraphics getGraphics() {
-    final PdfObjectStream stream = PdfObjectStream(pdfDocument);
-    final PdfGraphics g = PdfGraphics(this, stream.buf);
+    final stream = PdfObjectStream(pdfDocument);
+    final g = PdfGraphics(this, stream.buf);
     contents.add(stream);
     return g;
   }

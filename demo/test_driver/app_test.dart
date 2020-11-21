@@ -21,7 +21,7 @@ void main() {
   group('wrapWidget integration tests', () {
     FlutterDriver driver;
 
-    final SerializableFinder screenshotFinder = find.byValueKey('screenshot');
+    final screenshotFinder = find.byValueKey('screenshot');
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();

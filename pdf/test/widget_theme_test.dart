@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 
 import 'package:pdf/pdf.dart';
@@ -46,7 +44,7 @@ void main() {
   });
 
   test('Theme FontStyle', () {
-    final TextStyle style = TextStyle(
+    final style = TextStyle(
         font: roboto,
         fontBold: openSansBold,
         fontNormal: openSans,
@@ -69,7 +67,7 @@ void main() {
   });
 
   test('Theme Page 1', () {
-    final ThemeData theme = ThemeData.withFont(base: roboto);
+    final theme = ThemeData.withFont(base: roboto);
 
     pdf.addPage(Page(
       theme: theme,
@@ -80,7 +78,7 @@ void main() {
   });
 
   test('Theme Page 2', () {
-    final ThemeData theme = ThemeData.base().copyWith(
+    final theme = ThemeData.base().copyWith(
       tableHeader: TextStyle(font: openSansBold),
       tableCell: TextStyle(font: roboto),
     );
@@ -129,7 +127,7 @@ void main() {
   });
 
   tearDownAll(() {
-    final File file = File('widgets-theme.pdf');
+    final file = File('widgets-theme.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

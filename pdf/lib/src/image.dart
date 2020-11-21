@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 /// Represents the position of the first pixel in the data stream
@@ -43,7 +41,7 @@ class PdfImage extends PdfXObject {
   }) {
     assert(image != null);
 
-    final PdfImage im = PdfImage._(
+    final im = PdfImage._(
       pdfDocument,
       width,
       height,
@@ -55,7 +53,7 @@ class PdfImage extends PdfXObject {
     im.params['/ColorSpace'] = const PdfName('/DeviceRGB');
 
     if (alpha) {
-      final PdfImage _sMask = PdfImage._alpha(
+      final _sMask = PdfImage._alpha(
         pdfDocument,
         image,
         width,
@@ -65,11 +63,11 @@ class PdfImage extends PdfXObject {
       im.params['/SMask'] = PdfIndirect(_sMask.objser, 0);
     }
 
-    final int w = width;
-    final int h = height;
-    final int s = w * h;
-    final Uint8List out = Uint8List(s * 3);
-    for (int i = 0; i < s; i++) {
+    final w = width;
+    final h = height;
+    final s = w * h;
+    final out = Uint8List(s * 3);
+    for (var i = 0; i < s; i++) {
       out[i * 3] = image[i * 4];
       out[i * 3 + 1] = image[i * 4 + 1];
       out[i * 3 + 2] = image[i * 4 + 2];
@@ -86,8 +84,8 @@ class PdfImage extends PdfXObject {
   }) {
     assert(image != null);
 
-    final PdfJpegInfo info = PdfJpegInfo(image);
-    final PdfImage im = PdfImage._(
+    final info = PdfJpegInfo(image);
+    final im = PdfImage._(
       pdfDocument,
       info.width,
       info.height,
@@ -137,7 +135,7 @@ class PdfImage extends PdfXObject {
       return PdfImage.jpeg(pdfDocument, image: bytes);
     }
 
-    final im.Image image = im.decodeImage(bytes);
+    final image = im.decodeImage(bytes);
     return PdfImage.fromImage(
       pdfDocument,
       image: image,
@@ -152,7 +150,7 @@ class PdfImage extends PdfXObject {
     int height,
     PdfImageOrientation orientation,
   ) {
-    final PdfImage im = PdfImage._(
+    final im = PdfImage._(
       pdfDocument,
       width,
       height,
@@ -163,13 +161,13 @@ class PdfImage extends PdfXObject {
     im.params['/Name'] = PdfName(im.name);
     im.params['/ColorSpace'] = const PdfName('/DeviceGray');
 
-    final int w = width;
-    final int h = height;
-    final int s = w * h;
+    final w = width;
+    final h = height;
+    final s = w * h;
 
-    final Uint8List out = Uint8List(s);
+    final out = Uint8List(s);
 
-    for (int i = 0; i < s; i++) {
+    for (var i = 0; i < s; i++) {
       out[i] = image[i * 4 + 3];
     }
 

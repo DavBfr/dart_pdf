@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 
 import 'package:pdf/pdf.dart';
@@ -57,11 +55,11 @@ void main() {
   });
 
   test('Container Widgets Image', () {
-    final PdfImage image = generateBitmap(pdf.document, 100, 200);
+    final image = generateBitmap(pdf.document, 100, 200);
 
-    final List<Widget> widgets = <Widget>[];
-    for (BoxShape shape in BoxShape.values) {
-      for (BoxFit fit in BoxFit.values) {
+    final widgets = <Widget>[];
+    for (var shape in BoxShape.values) {
+      for (var fit in BoxFit.values) {
         widgets.add(
           Container(
             alignment: Alignment.center,
@@ -226,7 +224,7 @@ void main() {
   });
 
   tearDownAll(() {
-    final File file = File('widgets-container.pdf');
+    final file = File('widgets-container.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

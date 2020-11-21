@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 
 import 'package:pdf/pdf.dart';
@@ -23,15 +21,13 @@ import 'package:test/test.dart';
 
 void main() {
   test('Pdf Annotations', () {
-    final PdfDocument pdf = PdfDocument();
-    final PdfPage page =
-        PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
-    final PdfPage page1 =
-        PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
+    final pdf = PdfDocument();
+    final page = PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
+    final page1 = PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
 
     pdf.pdfNames.addDest('target', page1, posY: 100);
 
-    final PdfGraphics g = page.getGraphics();
+    final g = page.getGraphics();
 
     PdfAnnot(
       page,
@@ -74,7 +70,7 @@ void main() {
     // g.drawRect(100, 50, 50, 20);
     g.strokePath();
 
-    final File file = File('annotations.pdf');
+    final file = File('annotations.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

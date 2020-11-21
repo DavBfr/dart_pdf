@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 
 import 'package:pdf/pdf.dart';
@@ -24,13 +22,13 @@ import 'package:test/test.dart';
 void printText(
     PdfPage page, PdfGraphics canvas, String text, PdfFont font, double top) {
   text = text + font.fontName;
-  const double fontSize = 20;
-  final PdfFontMetrics metrics = font.stringMetrics(text) * fontSize;
+  const fontSize = 20.0;
+  final metrics = font.stringMetrics(text) * fontSize;
 
-  const double deb = 5;
+  const deb = 5;
 
-  const double x = 50;
-  final double y = page.pageFormat.height - top;
+  const x = 50.0;
+  final y = page.pageFormat.height - top;
 
   canvas
     ..drawRect(x + metrics.left, y + metrics.top, metrics.width, metrics.height)
@@ -53,13 +51,12 @@ void printText(
 
 void main() {
   test('Pdf Type1 Embedded Fonts', () {
-    final PdfDocument pdf = PdfDocument();
-    final PdfPage page =
-        PdfPage(pdf, pageFormat: const PdfPageFormat(500, 430));
+    final pdf = PdfDocument();
+    final page = PdfPage(pdf, pageFormat: const PdfPageFormat(500, 430));
 
-    final PdfGraphics g = page.getGraphics();
-    int top = 0;
-    const String s = 'Hello ';
+    final g = page.getGraphics();
+    var top = 0;
+    const s = 'Hello ';
 
     printText(page, g, s, PdfFont.courier(pdf), 20.0 + 30.0 * top++);
     printText(page, g, s, PdfFont.courierBold(pdf), 20.0 + 30.0 * top++);
@@ -80,7 +77,7 @@ void main() {
     printText(page, g, s, PdfFont.symbol(pdf), 20.0 + 30.0 * top++);
     printText(page, g, s, PdfFont.zapfDingbats(pdf), 20.0 + 30.0 * top++);
 
-    final File file = File('type1.pdf');
+    final file = File('type1.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

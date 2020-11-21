@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
@@ -26,16 +23,16 @@ import 'package:test/test.dart';
 
 void printMetrics(
     PdfGraphics canvas, String text, PdfFont font, PdfPoint size) {
-  final PdfFontMetrics metricsUnscales = font.stringMetrics(text);
-  final double fontSizeW = size.x / metricsUnscales.maxWidth;
-  final double fontSizeH = size.y / metricsUnscales.maxHeight;
-  final double fontSize = min(fontSizeW, fontSizeH);
-  final PdfFontMetrics metrics = metricsUnscales * fontSize;
+  final metricsUnscales = font.stringMetrics(text);
+  final fontSizeW = size.x / metricsUnscales.maxWidth;
+  final fontSizeH = size.y / metricsUnscales.maxHeight;
+  final fontSize = min(fontSizeW, fontSizeH);
+  final metrics = metricsUnscales * fontSize;
 
-  const double deb = 20;
+  const deb = 20;
 
-  final double x = (size.x - metrics.maxWidth) / 2.0;
-  final double y = (size.y - metrics.maxHeight) / 2.0 - metrics.descent;
+  final x = (size.x - metrics.maxWidth) / 2.0;
+  final y = (size.y - metrics.maxHeight) / 2.0 - metrics.descent;
 
   canvas
     ..setLineWidth(0.5)
@@ -61,14 +58,13 @@ void printMetrics(
 
 void main() {
   test('Pdf Font Metrics', () {
-    final Document pdf = Document();
+    final pdf = Document();
 
-    final File ttfFont = File('open-sans.ttf');
-    final Uint8List fontData = ttfFont.readAsBytesSync();
-    final PdfTtfFont font =
-        PdfTtfFont(pdf.document, fontData.buffer.asByteData());
+    final ttfFont = File('open-sans.ttf');
+    final fontData = ttfFont.readAsBytesSync();
+    final font = PdfTtfFont(pdf.document, fontData.buffer.asByteData());
 
-    for (int letter
+    for (var letter
         in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz&%!?0123456789'
             .codeUnits) {
       pdf.addPage(Page(
@@ -86,7 +82,7 @@ void main() {
           }));
     }
 
-    final File file = File('metrics.pdf');
+    final file = File('metrics.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

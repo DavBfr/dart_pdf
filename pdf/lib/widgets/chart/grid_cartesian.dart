@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 class CartesianGrid extends ChartGrid {
@@ -37,11 +35,11 @@ class CartesianGrid extends ChartGrid {
         '$runtimeType cannot be used without a Chart widget');
     super.layout(context, constraints, parentUsesSize: parentUsesSize);
 
-    final List<Dataset> datasets = Chart.of(context).datasets;
-    final PdfPoint size = constraints.biggest;
+    final datasets = Chart.of(context).datasets;
+    final size = constraints.biggest;
 
     // In simple conditions, this loop will run only 2 times.
-    int count = 5;
+    var count = 5;
     while (count-- > 0) {
       _xAxis._crossAxisPosition = _yAxis.axisPosition;
       _xAxis.axisPosition =
@@ -59,11 +57,11 @@ class CartesianGrid extends ChartGrid {
       }
     }
 
-    final double width = _yAxis.axisPosition;
-    final double height = _xAxis.axisPosition;
+    final width = _yAxis.axisPosition;
+    final height = _xAxis.axisPosition;
     gridBox = PdfRect(width, height, size.x - width, size.y - height);
 
-    for (final Dataset dataset in datasets) {
+    for (final dataset in datasets) {
       dataset.layout(context, BoxConstraints.tight(gridBox.size));
       dataset.box =
           PdfRect.fromPoints(PdfPoint(width, height), dataset.box.size);
@@ -103,16 +101,16 @@ class CartesianGrid extends ChartGrid {
   void paint(Context context) {
     super.paint(context);
 
-    final List<Dataset> datasets = Chart.of(context).datasets;
+    final datasets = Chart.of(context).datasets;
 
     clip(context, box.size);
-    for (Dataset dataSet in datasets) {
+    for (var dataSet in datasets) {
       dataSet.paintBackground(context);
     }
     context.canvas.restoreContext();
     paintBackground(context);
     clip(context, box.size);
-    for (Dataset dataSet in datasets) {
+    for (var dataSet in datasets) {
       dataSet.paint(context);
     }
     context.canvas.restoreContext();

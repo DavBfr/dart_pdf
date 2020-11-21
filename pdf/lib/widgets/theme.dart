@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 @immutable
@@ -36,7 +34,7 @@ class ThemeData extends Inherited {
     TextAlign textAlign,
     int maxLines,
   }) {
-    final ThemeData base = ThemeData.base();
+    final base = ThemeData.base();
     return base.copyWith(
       defaultTextStyle: defaultTextStyle,
       paragraphStyle: paragraphStyle,
@@ -86,13 +84,13 @@ class ThemeData extends Inherited {
 
   factory ThemeData.withFont(
       {Font base, Font bold, Font italic, Font boldItalic}) {
-    final TextStyle defaultStyle = TextStyle.defaultStyle().copyWith(
+    final defaultStyle = TextStyle.defaultStyle().copyWith(
         font: base,
         fontNormal: base,
         fontBold: bold,
         fontItalic: italic,
         fontBoldItalic: boldItalic);
-    final double fontSize = defaultStyle.fontSize;
+    final fontSize = defaultStyle.fontSize;
 
     return ThemeData._(
       defaultTextStyle: defaultStyle,
@@ -224,7 +222,7 @@ class DefaultTextStyle extends StatelessWidget implements Inherited {
     assert(child != null);
     return Builder(
       builder: (Context context) {
-        final ThemeData parent = Theme.of(context);
+        final parent = Theme.of(context);
 
         return DefaultTextStyle(
           style: parent.defaultTextStyle.merge(style),
@@ -249,7 +247,7 @@ class DefaultTextStyle extends StatelessWidget implements Inherited {
 
   @override
   Widget build(Context context) {
-    final ThemeData theme = Theme.of(context).copyWith(
+    final theme = Theme.of(context).copyWith(
       defaultTextStyle: style,
       textAlign: textAlign,
       softWrap: softWrap,

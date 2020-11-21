@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 class PdfNames extends PdfObject {
@@ -53,11 +51,11 @@ class PdfNames extends PdfObject {
       return;
     }
 
-    final PdfArray dests = PdfArray();
+    final dests = PdfArray();
 
-    final List<String> keys = _dests.keys.toList()..sort();
+    final keys = _dests.keys.toList()..sort();
 
-    for (String name in keys) {
+    for (var name in keys) {
       dests.add(PdfSecString.fromString(this, name));
       dests.add(_dests[name]);
     }

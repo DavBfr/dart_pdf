@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 enum PdfLineCap { joinMiter, joinRound, joinBevel }
@@ -331,13 +329,13 @@ class PdfGraphics {
 
   /// Set the graphic state for drawing
   void setGraphicState(PdfGraphicState state) {
-    final String name = _page.stateName(state);
+    final name = _page.stateName(state);
     buf.putString('$name gs\n');
   }
 
   /// Set the transformation Matrix
   void setTransform(Matrix4 t) {
-    final Float64List s = t.storage;
+    final s = t.storage;
     PdfNumList(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]).output(buf);
     buf.putString(' cm\n');
     _context.ctm.multiply(t);
@@ -383,18 +381,17 @@ class PdfGraphics {
   }
 
   double _vectorAngle(double ux, double uy, double vx, double vy) {
-    final double d =
-        math.sqrt(ux * ux + uy * uy) * math.sqrt(vx * vx + vy * vy);
+    final d = math.sqrt(ux * ux + uy * uy) * math.sqrt(vx * vx + vy * vy);
     if (d == 0.0) {
       return 0;
     }
-    double c = (ux * vx + uy * vy) / d;
+    var c = (ux * vx + uy * vy) / d;
     if (c < -1.0) {
       c = -1.0;
     } else if (c > 1.0) {
       c = 1.0;
     }
-    final double s = ux * vy - uy * vx;
+    final s = ux * vy - uy * vx;
     c = math.acos(c);
     return c.sign == s.sign ? c : -c;
   }
@@ -406,12 +403,12 @@ class PdfGraphics {
     rx = rx.abs();
     ry = ry.abs();
 
-    final double x1d = 0.5 * (x1 - x2);
-    final double y1d = 0.5 * (y1 - y2);
+    final x1d = 0.5 * (x1 - x2);
+    final y1d = 0.5 * (y1 - y2);
 
-    double r = x1d * x1d / (rx * rx) + y1d * y1d / (ry * ry);
+    var r = x1d * x1d / (rx * rx) + y1d * y1d / (ry * ry);
     if (r > 1.0) {
-      final double rr = math.sqrt(r);
+      final rr = math.sqrt(r);
       rx *= rr;
       ry *= rr;
       r = x1d * x1d / (rx * rx) + y1d * y1d / (ry * ry);
@@ -428,14 +425,14 @@ class PdfGraphics {
       r = -r;
     }
 
-    final double cxd = (r * rx * y1d) / ry;
-    final double cyd = -(r * ry * x1d) / rx;
+    final cxd = (r * rx * y1d) / ry;
+    final cyd = -(r * ry * x1d) / rx;
 
-    final double cx = cxd + 0.5 * (x1 + x2);
-    final double cy = cyd + 0.5 * (y1 + y2);
+    final cx = cxd + 0.5 * (x1 + x2);
+    final cy = cyd + 0.5 * (y1 + y2);
 
-    final double theta = _vectorAngle(1, 0, (x1d - cxd) / rx, (y1d - cyd) / ry);
-    double dTheta = _vectorAngle((x1d - cxd) / rx, (y1d - cyd) / ry,
+    final theta = _vectorAngle(1, 0, (x1d - cxd) / rx, (y1d - cyd) / ry);
+    var dTheta = _vectorAngle((x1d - cxd) / rx, (y1d - cyd) / ry,
             (-x1d - cxd) / rx, (-y1d - cyd) / ry) %
         (math.pi * 2.0);
     if (sweep == false && dTheta > 0.0) {
@@ -462,8 +459,8 @@ class PdfGraphics {
       return;
     }
 
-    final double halfFragment = fragmentsAngle * 0.5;
-    double kappa =
+    final halfFragment = fragmentsAngle * 0.5;
+    var kappa =
         (4.0 / 3.0 * (1.0 - math.cos(halfFragment)) / math.sin(halfFragment))
             .abs();
 
@@ -471,14 +468,14 @@ class PdfGraphics {
       kappa = -kappa;
     }
 
-    double theta = startAngle;
-    final double startFragment = theta + fragmentsAngle;
+    var theta = startAngle;
+    final startFragment = theta + fragmentsAngle;
 
-    double c1 = math.cos(theta);
-    double s1 = math.sin(theta);
-    for (int i = 0; i < fragmentsCount; i++) {
-      final double c0 = c1;
-      final double s0 = s1;
+    var c1 = math.cos(theta);
+    var s1 = math.sin(theta);
+    for (var i = 0; i < fragmentsCount; i++) {
+      final c0 = c1;
+      final s0 = s1;
       theta = startFragment + i * fragmentsAngle;
       c1 = math.cos(theta);
       s1 = math.sin(theta);
@@ -515,10 +512,10 @@ class PdfGraphics {
     if (phi != 0.0) {
       // Our box bézier arcs can't handle rotations directly
       // move to a well known point, eliminate phi and transform the other point
-      final Matrix4 mat = Matrix4.identity();
+      final mat = Matrix4.identity();
       mat.translate(-x1, -y1);
       mat.rotateZ(-phi);
-      final Vector3 tr = mat.transform3(Vector3(x2, y2, 0));
+      final tr = mat.transform3(Vector3(x2, y2, 0));
       _endToCenterParameters(0, 0, tr[0], tr[1], large, sweep, rx, ry);
     } else {
       _endToCenterParameters(x1, y1, x2, y2, large, sweep, rx, ry);
@@ -526,7 +523,7 @@ class PdfGraphics {
   }
 
   void drawShape(String d, {bool stroke = true}) {
-    final _PathProxy proxy = _PathProxy(this, stroke);
+    final proxy = _PathProxy(this, stroke);
     writeSvgPathDataToPath(d, proxy);
   }
 

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: always_specify_types
-
 import 'dart:math';
 import 'dart:typed_data';
 

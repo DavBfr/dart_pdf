@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 enum DecorationPosition { background, foreground }
@@ -159,15 +157,14 @@ class DecorationImage {
   final Alignment alignment;
 
   void paint(Context context, PdfRect box) {
-    final PdfPoint imageSize =
-        PdfPoint(image.width.toDouble(), image.height.toDouble());
-    final FittedSizes sizes = applyBoxFit(fit, imageSize, box.size);
-    final double scaleX = sizes.destination.x / sizes.source.x;
-    final double scaleY = sizes.destination.y / sizes.source.y;
-    final PdfRect sourceRect = alignment.inscribe(
+    final imageSize = PdfPoint(image.width.toDouble(), image.height.toDouble());
+    final sizes = applyBoxFit(fit, imageSize, box.size);
+    final scaleX = sizes.destination.x / sizes.source.x;
+    final scaleY = sizes.destination.y / sizes.source.y;
+    final sourceRect = alignment.inscribe(
         sizes.source, PdfRect.fromPoints(PdfPoint.zero, imageSize));
-    final PdfRect destinationRect = alignment.inscribe(sizes.destination, box);
-    final Matrix4 mat =
+    final destinationRect = alignment.inscribe(sizes.destination, box);
+    final mat =
         Matrix4.translationValues(destinationRect.x, destinationRect.y, 0)
           ..scale(scaleX, scaleY, 1)
           ..translate(-sourceRect.x, -sourceRect.y);
@@ -220,10 +217,10 @@ abstract class Gradient {
       );
     }
 
-    final List<PdfFunction> fn = <PdfFunction>[];
+    final fn = <PdfFunction>[];
 
-    PdfColor lc = colors.first;
-    for (final PdfColor c in colors.sublist(1)) {
+    var lc = colors.first;
+    for (final c in colors.sublist(1)) {
       fn.add(PdfFunction(
         context.document,
         colors: <PdfColor>[lc, c],
@@ -349,9 +346,9 @@ class RadialGradient extends Gradient {
 
     assert(stops == null || stops.length == colors.length);
 
-    final Alignment _focal = focal ?? center;
+    final _focal = focal ?? center;
 
-    final double _radius = math.min(box.width, box.height);
+    final _radius = math.min(box.width, box.height);
 
     context.canvas
       ..saveContext()
@@ -388,7 +385,7 @@ class BoxShadow {
   final double spreadRadius;
 
   im.Image _rect(double width, double height) {
-    final im.Image shadow = im.Image(
+    final shadow = im.Image(
       (width + spreadRadius * 2).round(),
       (height + spreadRadius * 2).round(),
     );
@@ -408,7 +405,7 @@ class BoxShadow {
   }
 
   im.Image _ellipse(double width, double height) {
-    final im.Image shadow = im.Image(
+    final shadow = im.Image(
       (width + spreadRadius * 2).round(),
       (height + spreadRadius * 2).round(),
     );
@@ -516,7 +513,7 @@ class BorderRadius {
 
   void paint(Context context, PdfRect box) {
     // Ellipse 4-spline magic number
-    const double _m4 = 0.551784;
+    const _m4 = 0.551784;
 
     context.canvas
       // Start
@@ -612,10 +609,9 @@ class BoxDecoration {
           case BoxShape.rectangle:
             if (borderRadius == null) {
               if (boxShadow != null) {
-                for (final BoxShadow s in boxShadow) {
-                  final im.Image i = s._rect(box.width, box.height);
-                  final PdfImage m =
-                      PdfImage.fromImage(context.document, image: i);
+                for (final s in boxShadow) {
+                  final i = s._rect(box.width, box.height);
+                  final m = PdfImage.fromImage(context.document, image: i);
                   context.canvas.drawImage(
                     m,
                     box.x + s.offset.x - s.spreadRadius,
@@ -626,10 +622,9 @@ class BoxDecoration {
               context.canvas.drawRect(box.x, box.y, box.width, box.height);
             } else {
               if (boxShadow != null) {
-                for (final BoxShadow s in boxShadow) {
-                  final im.Image i = s._rect(box.width, box.height);
-                  final PdfImage m =
-                      PdfImage.fromImage(context.document, image: i);
+                for (final s in boxShadow) {
+                  final i = s._rect(box.width, box.height);
+                  final m = PdfImage.fromImage(context.document, image: i);
                   context.canvas.drawImage(
                     m,
                     box.x + s.offset.x - s.spreadRadius,
@@ -642,10 +637,9 @@ class BoxDecoration {
             break;
           case BoxShape.circle:
             if (boxShadow != null && box.width == box.height) {
-              for (final BoxShadow s in boxShadow) {
-                final im.Image i = s._ellipse(box.width, box.height);
-                final PdfImage m =
-                    PdfImage.fromImage(context.document, image: i);
+              for (final s in boxShadow) {
+                final i = s._ellipse(box.width, box.height);
+                final m = PdfImage.fromImage(context.document, image: i);
                 context.canvas.drawImage(
                   m,
                   box.x + s.offset.x - s.spreadRadius,

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 abstract class WidgetContext {
@@ -119,7 +117,7 @@ class MultiPage extends Page {
   void _paintChild(
       Context context, Widget child, double x, double y, double pageHeight) {
     if (mustRotate) {
-      final EdgeInsets _margin = margin;
+      final _margin = margin;
       context.canvas
         ..saveContext()
         ..setTransform(Matrix4.identity()
@@ -146,42 +144,40 @@ class MultiPage extends Page {
     assert(pageFormat.width > 0 && pageFormat.width < double.infinity);
     assert(pageFormat.height > 0 && pageFormat.height < double.infinity);
 
-    final EdgeInsets _margin = margin;
-    final bool _mustRotate = mustRotate;
-    final double pageHeight =
-        _mustRotate ? pageFormat.width : pageFormat.height;
-    final double pageHeightMargin =
+    final _margin = margin;
+    final _mustRotate = mustRotate;
+    final pageHeight = _mustRotate ? pageFormat.width : pageFormat.height;
+    final pageHeightMargin =
         _mustRotate ? _margin.horizontal : _margin.vertical;
-    final BoxConstraints constraints = BoxConstraints(
+    final constraints = BoxConstraints(
         maxWidth: _mustRotate
             ? (pageFormat.height - _margin.vertical)
             : (pageFormat.width - _margin.horizontal));
-    final BoxConstraints fullConstraints = mustRotate
+    final fullConstraints = mustRotate
         ? BoxConstraints(
             maxWidth: pageFormat.height - _margin.vertical,
             maxHeight: pageFormat.width - _margin.horizontal)
         : BoxConstraints(
             maxWidth: pageFormat.width - _margin.horizontal,
             maxHeight: pageFormat.height - _margin.vertical);
-    final ThemeData calculatedTheme =
-        theme ?? document.theme ?? ThemeData.base();
+    final calculatedTheme = theme ?? document.theme ?? ThemeData.base();
     Context context;
     double offsetEnd;
     double offsetStart;
-    int index = 0;
-    int sameCount = 0;
-    final Context baseContext =
+    var index = 0;
+    var sameCount = 0;
+    final baseContext =
         Context(document: document.document).inheritFromAll(<Inherited>[
       calculatedTheme,
       if (pageTheme.textDirection != null)
         InheritedDirectionality(pageTheme.textDirection),
     ]);
-    final List<Widget> children = _buildList(baseContext);
+    final children = _buildList(baseContext);
     WidgetContext widgetContext;
 
     while (index < children.length) {
-      final Widget child = children[index];
-      bool canSpan = false;
+      final child = children[index];
+      var canSpan = false;
       if (child is SpanningWidget) {
         canSpan = child.canSpan;
       }
@@ -197,8 +193,7 @@ class MultiPage extends Page {
 
       // Create a new page if we don't already have one
       if (context == null || child is NewPage) {
-        final PdfPage pdfPage =
-            PdfPage(document.document, pageFormat: pageFormat);
+        final pdfPage = PdfPage(document.document, pageFormat: pageFormat);
         context =
             baseContext.copyWith(page: pdfPage, canvas: pdfPage.getGraphics());
 
@@ -222,7 +217,7 @@ class MultiPage extends Page {
         ));
 
         if (header != null) {
-          final Widget headerWidget = header(context);
+          final headerWidget = header(context);
           if (headerWidget != null) {
             headerWidget.layout(context, constraints, parentUsesSize: false);
             assert(headerWidget.box != null);
@@ -231,7 +226,7 @@ class MultiPage extends Page {
         }
 
         if (footer != null) {
-          final Widget footerWidget = footer(context);
+          final footerWidget = footer(context);
           if (footerWidget != null) {
             footerWidget.layout(context, constraints, parentUsesSize: false);
             assert(footerWidget.box != null);
@@ -268,7 +263,7 @@ class MultiPage extends Page {
 
         final SpanningWidget span = child;
 
-        final BoxConstraints localConstraints =
+        final localConstraints =
             constraints.copyWith(maxHeight: offsetStart - offsetEnd);
         child.layout(context, localConstraints, parentUsesSize: false);
         assert(child.box != null);
@@ -310,25 +305,23 @@ class MultiPage extends Page {
 
   @override
   void postProcess(Document document) {
-    final EdgeInsets _margin = margin;
-    final bool _mustRotate = mustRotate;
-    final double pageHeight =
-        _mustRotate ? pageFormat.width : pageFormat.height;
-    final double pageWidth = _mustRotate ? pageFormat.height : pageFormat.width;
-    final double pageHeightMargin =
+    final _margin = margin;
+    final _mustRotate = mustRotate;
+    final pageHeight = _mustRotate ? pageFormat.width : pageFormat.height;
+    final pageWidth = _mustRotate ? pageFormat.height : pageFormat.width;
+    final pageHeightMargin =
         _mustRotate ? _margin.horizontal : _margin.vertical;
-    final double pageWidthMargin =
-        _mustRotate ? _margin.vertical : _margin.horizontal;
-    final double availableWidth = pageWidth - pageWidthMargin;
+    final pageWidthMargin = _mustRotate ? _margin.vertical : _margin.horizontal;
+    final availableWidth = pageWidth - pageWidthMargin;
 
-    for (_MultiPageInstance page in _pages) {
-      double offsetStart = pageHeight -
+    for (var page in _pages) {
+      var offsetStart = pageHeight -
           (_mustRotate ? pageHeightMargin - _margin.bottom : _margin.top);
-      double offsetEnd =
+      var offsetEnd =
           _mustRotate ? pageHeightMargin - _margin.left : _margin.bottom;
 
       if (pageTheme.buildBackground != null) {
-        final Widget child = pageTheme.buildBackground(page.context);
+        final child = pageTheme.buildBackground(page.context);
         if (child != null) {
           child.layout(page.context, page.fullConstraints,
               parentUsesSize: false);
@@ -338,18 +331,18 @@ class MultiPage extends Page {
         }
       }
 
-      int totalFlex = 0;
-      double allocatedSize = 0;
+      var totalFlex = 0;
+      var allocatedSize = 0.0;
       Widget lastFlexChild;
-      for (_MultiPageWidget widget in page.widgets) {
-        final Widget child = widget.child;
-        final int flex = child is Flexible ? child.flex : 0;
+      for (var widget in page.widgets) {
+        final child = widget.child;
+        final flex = child is Flexible ? child.flex : 0;
         if (flex > 0) {
           totalFlex += flex;
           lastFlexChild = child;
         } else {
           if (child is SpanningWidget && child.canSpan) {
-            final WidgetContext context = child.saveContext();
+            final context = child.saveContext();
             context.apply(widget.widgetContext);
           }
 
@@ -360,7 +353,7 @@ class MultiPage extends Page {
       }
 
       if (header != null) {
-        final Widget headerWidget = header(page.context);
+        final headerWidget = header(page.context);
         if (headerWidget != null) {
           headerWidget.layout(page.context, page.constraints,
               parentUsesSize: false);
@@ -372,7 +365,7 @@ class MultiPage extends Page {
       }
 
       if (footer != null) {
-        final Widget footerWidget = footer(page.context);
+        final footerWidget = footer(page.context);
         if (footerWidget != null) {
           footerWidget.layout(page.context, page.constraints,
               parentUsesSize: false);
@@ -383,18 +376,16 @@ class MultiPage extends Page {
         }
       }
 
-      final double freeSpace =
-          math.max(0, offsetStart - offsetEnd - allocatedSize);
+      final freeSpace = math.max(0, offsetStart - offsetEnd - allocatedSize);
 
-      final double spacePerFlex =
-          totalFlex > 0 ? (freeSpace / totalFlex) : double.nan;
-      double allocatedFlexSpace = 0;
+      final spacePerFlex = totalFlex > 0 ? (freeSpace / totalFlex) : double.nan;
+      var allocatedFlexSpace = 0.0;
 
-      double leadingSpace = 0;
-      double betweenSpace = 0;
+      var leadingSpace = 0.0;
+      var betweenSpace = 0.0;
 
       if (totalFlex == 0) {
-        final int totalChildren = page.widgets.length;
+        final totalChildren = page.widgets.length;
 
         switch (mainAxisAlignment) {
           case MainAxisAlignment.start:
@@ -426,14 +417,14 @@ class MultiPage extends Page {
         }
       }
 
-      for (_MultiPageWidget widget in page.widgets) {
-        final Widget child = widget.child;
+      for (var widget in page.widgets) {
+        final child = widget.child;
 
-        final int flex = child is Flexible ? child.flex : 0;
-        final FlexFit fit = child is Flexible ? child.fit : FlexFit.loose;
+        final flex = child is Flexible ? child.flex : 0;
+        final fit = child is Flexible ? child.fit : FlexFit.loose;
         if (flex > 0) {
           assert(child is! SpanningWidget);
-          final double maxChildExtent = child == lastFlexChild
+          final maxChildExtent = child == lastFlexChild
               ? (freeSpace - allocatedFlexSpace)
               : spacePerFlex * flex;
           double minChildExtent;
@@ -447,7 +438,7 @@ class MultiPage extends Page {
               break;
           }
           assert(minChildExtent != null);
-          final BoxConstraints innerConstraints = BoxConstraints(
+          final innerConstraints = BoxConstraints(
               minWidth: widget.constraints.maxWidth,
               maxWidth: widget.constraints.maxWidth,
               minHeight: minChildExtent,
@@ -455,15 +446,15 @@ class MultiPage extends Page {
 
           child.layout(page.context, innerConstraints, parentUsesSize: false);
           assert(child.box != null);
-          final double childSize = child.box.height;
+          final childSize = child.box.height;
           assert(childSize <= maxChildExtent);
           allocatedSize += childSize;
           allocatedFlexSpace += maxChildExtent;
         }
       }
 
-      double pos = offsetStart - leadingSpace;
-      for (_MultiPageWidget widget in page.widgets) {
+      var pos = offsetStart - leadingSpace;
+      for (var widget in page.widgets) {
         pos -= widget.child.box.height;
         double x;
         switch (crossAxisAlignment) {
@@ -486,7 +477,7 @@ class MultiPage extends Page {
       }
 
       if (pageTheme.buildForeground != null) {
-        final Widget child = pageTheme.buildForeground(page.context);
+        final child = pageTheme.buildForeground(page.context);
         if (child != null) {
           child.layout(page.context, page.fullConstraints,
               parentUsesSize: false);

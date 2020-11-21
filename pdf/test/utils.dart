@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
@@ -33,7 +31,7 @@ Future<Uint8List> download(
   File file;
   if (cache) {
     if (suffix == null) {
-      final int l = url.lastIndexOf('.');
+      final l = url.lastIndexOf('.');
       if (l >= 0) {
         suffix = url.substring(l);
       }
@@ -45,10 +43,10 @@ Future<Uint8List> download(
   }
 
   print('Downloading $url');
-  final HttpClient client = HttpClient();
-  final HttpClientRequest request = await client.getUrl(Uri.parse(url));
-  final HttpClientResponse response = await request.close();
-  final BytesBuilder builder = await response.fold(
+  final client = HttpClient();
+  final request = await client.getUrl(Uri.parse(url));
+  final response = await request.close();
+  final builder = await response.fold(
       BytesBuilder(), (BytesBuilder b, List<int> d) => b..add(d));
   final List<int> data = builder.takeBytes();
 
@@ -59,11 +57,11 @@ Future<Uint8List> download(
 }
 
 PdfImage generateBitmap(PdfDocument pdf, int w, int h) {
-  final Uint32List bm = Uint32List(w * h);
-  final double dw = w.toDouble();
-  final double dh = h.toDouble();
-  for (int y = 0; y < h; y++) {
-    for (int x = 0; x < w; x++) {
+  final bm = Uint32List(w * h);
+  final dw = w.toDouble();
+  final dh = h.toDouble();
+  for (var y = 0; y < h; y++) {
+    for (var x = 0; x < w; x++) {
       bm[y * w + x] = (math.sin(x / dw) * 256).toInt() |
           (math.sin(y / dh) * 256).toInt() << 8 |
           (math.sin(x / dw * y / dh) * 256).toInt() << 16 |
@@ -80,6 +78,6 @@ PdfImage generateBitmap(PdfDocument pdf, int w, int h) {
 }
 
 Font loadFont(String filename) {
-  final Uint8List data = File(filename).readAsBytesSync();
+  final data = File(filename).readAsBytesSync();
   return Font.ttf(data.buffer.asByteData());
 }

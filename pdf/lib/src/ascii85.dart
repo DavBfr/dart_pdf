@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 class Ascii85Encoder extends Converter<Uint8List, Uint8List> {
   @override
   Uint8List convert(Uint8List input) {
-    final Uint8List output = Uint8List(_maxEncodedLen(input.length) + 2);
+    final output = Uint8List(_maxEncodedLen(input.length) + 2);
 
-    int outputOffset = 0;
-    int inputOffset = 0;
+    var outputOffset = 0;
+    var inputOffset = 0;
 
     while (inputOffset < input.length) {
       output[outputOffset + 0] = 0;
@@ -34,7 +32,7 @@ class Ascii85Encoder extends Converter<Uint8List, Uint8List> {
       output[outputOffset + 4] = 0;
 
       // Unpack 4 bytes into int to repack into base 85 5-byte.
-      int value = 0;
+      var value = 0;
 
       switch (input.length - inputOffset) {
         case 3:
@@ -65,7 +63,7 @@ class Ascii85Encoder extends Converter<Uint8List, Uint8List> {
       }
 
       // Otherwise, 5 base 85 digits starting at !.
-      for (int i = 4; i >= 0; i--) {
+      for (var i = 4; i >= 0; i--) {
         output[outputOffset + i] = 33 + value % 85;
         value ~/= 85;
       }

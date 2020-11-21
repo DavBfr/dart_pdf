@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 
 import 'package:pdf/widgets.dart';
@@ -25,7 +23,7 @@ List<Widget> lines = <Widget>[];
 
 void main() {
   setUpAll(() {
-    for (int i = 0; i < 200; i++) {
+    for (var i = 0; i < 200; i++) {
       lines.add(Text('Line $i'));
     }
   });
@@ -33,28 +31,28 @@ void main() {
   test('Pdf Widgets MultiPage', () {
     Document.debug = true;
 
-    final Document pdf = Document();
+    final pdf = Document();
 
     pdf.addPage(MultiPage(build: (Context context) => lines));
 
-    final File file = File('widgets-multipage.pdf');
+    final file = File('widgets-multipage.pdf');
     file.writeAsBytesSync(pdf.save());
 
-    final File file1 = File('widgets-multipage-1.pdf');
+    final file1 = File('widgets-multipage-1.pdf');
     file1.writeAsBytesSync(pdf.save());
   });
 
   test('Pdf Widgets MonoPage', () {
     Document.debug = true;
 
-    final Document pdf = Document();
+    final pdf = Document();
 
     pdf.addPage(Page(build: (Context context) => Column(children: lines)));
 
-    final File file = File('widgets-monopage.pdf');
+    final file = File('widgets-monopage.pdf');
     file.writeAsBytesSync(pdf.save());
 
-    final File file1 = File('widgets-monopage-1.pdf');
+    final file1 = File('widgets-monopage-1.pdf');
     file1.writeAsBytesSync(pdf.save());
   });
 }

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -70,7 +68,7 @@ void main() {
       MultiPage(
         build: (Context context) =>
             List<Widget>.generate(BoxFit.values.length, (int index) {
-          final BoxFit fit = BoxFit.values[index];
+          final fit = BoxFit.values[index];
           return SizedBox(
             width: 200,
             height: 100,
@@ -85,7 +83,7 @@ void main() {
   });
 
   test('Pdf Image decode', () {
-    final Iterable<Widget> imageWidgets = imageFiles.map<Widget>(
+    final imageWidgets = imageFiles.map<Widget>(
       (String image) => SizedBox(
         child: Image(
           PdfImage.file(
@@ -113,7 +111,7 @@ void main() {
   });
 
   tearDownAll(() {
-    final File file = File('jpeg.pdf');
+    final file = File('jpeg.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

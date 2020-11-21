@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 /// How to size the non-positioned children of a [Stack].
@@ -76,17 +74,17 @@ class Stack extends MultiChildWidget {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    final int childCount = children.length;
+    final childCount = children.length;
 
-    bool hasNonPositionedChildren = false;
+    var hasNonPositionedChildren = false;
 
     if (childCount == 0) {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
       return;
     }
 
-    double width = constraints.minWidth;
-    double height = constraints.minHeight;
+    var width = constraints.minWidth;
+    var height = constraints.minHeight;
 
     BoxConstraints nonPositionedConstraints;
     assert(fit != null);
@@ -103,14 +101,14 @@ class Stack extends MultiChildWidget {
     }
     assert(nonPositionedConstraints != null);
 
-    for (Widget child in children) {
+    for (var child in children) {
       if (!(child is Positioned)) {
         hasNonPositionedChildren = true;
 
         child.layout(context, nonPositionedConstraints, parentUsesSize: true);
         assert(child.box != null);
 
-        final PdfRect childSize = child.box;
+        final childSize = child.box;
         width = math.max(width, childSize.width);
         height = math.max(height, childSize.height);
       }
@@ -124,13 +122,13 @@ class Stack extends MultiChildWidget {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
     }
 
-    for (Widget child in children) {
+    for (var child in children) {
       if (!(child is Positioned)) {
         child.box = PdfRect.fromPoints(
             alignment.inscribe(child.box.size, box).offset, child.box.size);
       } else {
         final Positioned positioned = child;
-        BoxConstraints childConstraints = const BoxConstraints();
+        var childConstraints = const BoxConstraints();
 
         if (positioned.left != null && positioned.right != null) {
           childConstraints = childConstraints.tighten(
@@ -178,7 +176,7 @@ class Stack extends MultiChildWidget {
   void paint(Context context) {
     super.paint(context);
 
-    final Matrix4 mat = Matrix4.identity();
+    final mat = Matrix4.identity();
     mat.translate(box.x, box.y);
     context.canvas
       ..saveContext()
@@ -188,7 +186,7 @@ class Stack extends MultiChildWidget {
         ..drawRect(0, 0, box.width, box.height)
         ..clipPath();
     }
-    for (Widget child in children) {
+    for (var child in children) {
       child.paint(context);
     }
     context.canvas.restoreContext();

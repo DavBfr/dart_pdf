@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 class PdfObjectStream extends PdfObject {
@@ -45,7 +43,7 @@ class PdfObjectStream extends PdfObject {
       // The data is already in the right format
       _data = buf.output();
     } else if (pdfDocument.deflate != null) {
-      final Uint8List original = buf.output();
+      final original = buf.output();
       final Uint8List newData = pdfDocument.deflate(original);
       if (newData.lengthInBytes < original.lengthInBytes) {
         params['/Filter'] = const PdfName('/FlateDecode');
@@ -56,7 +54,7 @@ class PdfObjectStream extends PdfObject {
     if (_data == null) {
       if (isBinary) {
         // This is a Ascii85 stream
-        final Ascii85Encoder e = Ascii85Encoder();
+        final e = Ascii85Encoder();
         _data = e.convert(buf.output());
         params['/Filter'] = const PdfName('/ASCII85Decode');
       } else {

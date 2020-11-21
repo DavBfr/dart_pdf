@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 class PdfJpegInfo {
   factory PdfJpegInfo(Uint8List image) {
     assert(image != null);
 
-    final ByteData buffer = image.buffer.asByteData();
+    final buffer = image.buffer.asByteData();
 
     int width;
     int height;
     int color;
-    int offset = 0;
+    var offset = 0;
     while (offset < buffer.lengthInBytes) {
       while (buffer.getUint8(offset) == 0xff) {
         offset++;
       }
 
-      final int mrkr = buffer.getUint8(offset);
+      final mrkr = buffer.getUint8(offset);
       offset++;
 
       if (mrkr == 0xd8) {
@@ -52,7 +50,7 @@ class PdfJpegInfo {
         continue; // TEM
       }
 
-      final int len = buffer.getUint16(offset);
+      final len = buffer.getUint16(offset);
       offset += 2;
 
       if (mrkr >= 0xc0 && mrkr <= 0xc2) {
@@ -68,7 +66,7 @@ class PdfJpegInfo {
       throw 'Unable to find a Jpeg image in the file';
     }
 
-    final Map<PdfExifTag, dynamic> tags = _findExifInJpeg(buffer);
+    final tags = _findExifInJpeg(buffer);
 
     return PdfJpegInfo._(width, height, color, tags);
   }
@@ -140,12 +138,12 @@ orientation: $orientation''';
       return <PdfExifTag, dynamic>{}; // Not a valid JPEG
     }
 
-    int offset = 2;
-    final int length = buffer.lengthInBytes;
+    var offset = 2;
+    final length = buffer.lengthInBytes;
     int marker;
 
     while (offset < length) {
-      final int lastValue = buffer.getUint8(offset);
+      final lastValue = buffer.getUint8(offset);
       if (lastValue != 0xFF) {
         return <PdfExifTag,
             dynamic>{}; // Not a valid marker at offset $offset, found: $lastValue
@@ -171,14 +169,14 @@ orientation: $orientation''';
     int dirStart,
     Endian bigEnd,
   ) {
-    final int entries = file.getUint16(dirStart, bigEnd);
-    final Map<PdfExifTag, dynamic> tags = <PdfExifTag, dynamic>{};
+    final entries = file.getUint16(dirStart, bigEnd);
+    final tags = <PdfExifTag, dynamic>{};
     int entryOffset;
 
-    for (int i = 0; i < entries; i++) {
+    for (var i = 0; i < entries; i++) {
       entryOffset = dirStart + i * 12 + 2;
-      final int tagId = file.getUint16(entryOffset, bigEnd);
-      final PdfExifTag tag = _exifTags[tagId];
+      final tagId = file.getUint16(entryOffset, bigEnd);
+      final tag = _exifTags[tagId];
       if (tag != null) {
         tags[tag] = _readTagValue(
           file,
@@ -199,9 +197,9 @@ orientation: $orientation''';
     int dirStart,
     Endian bigEnd,
   ) {
-    final int type = file.getUint16(entryOffset + 2, bigEnd);
-    final int numValues = file.getUint32(entryOffset + 4, bigEnd);
-    final int valueOffset = file.getUint32(entryOffset + 8, bigEnd) + tiffStart;
+    final type = file.getUint16(entryOffset + 2, bigEnd);
+    final numValues = file.getUint32(entryOffset + 4, bigEnd);
+    final valueOffset = file.getUint32(entryOffset + 8, bigEnd) + tiffStart;
 
     switch (type) {
       case 1: // byte, 8-bit unsigned int
@@ -209,22 +207,22 @@ orientation: $orientation''';
         if (numValues == 1) {
           return file.getUint8(entryOffset + 8);
         }
-        final int offset = numValues > 4 ? valueOffset : (entryOffset + 8);
-        final Uint8List result = Uint8List(numValues);
-        for (int i = 0; i < result.length; ++i) {
+        final offset = numValues > 4 ? valueOffset : (entryOffset + 8);
+        final result = Uint8List(numValues);
+        for (var i = 0; i < result.length; ++i) {
           result[i] = file.getUint8(offset + i);
         }
         return result;
       case 2: // ascii, 8-bit byte
-        final int offset = numValues > 4 ? valueOffset : (entryOffset + 8);
+        final offset = numValues > 4 ? valueOffset : (entryOffset + 8);
         return _getStringFromDB(file, offset, numValues - 1);
       case 3: // short, 16 bit int
         if (numValues == 1) {
           return file.getUint16(entryOffset + 8, bigEnd);
         }
-        final int offset = numValues > 2 ? valueOffset : (entryOffset + 8);
-        final Uint16List result = Uint16List(numValues);
-        for (int i = 0; i < result.length; ++i) {
+        final offset = numValues > 2 ? valueOffset : (entryOffset + 8);
+        final result = Uint16List(numValues);
+        for (var i = 0; i < result.length; ++i) {
           result[i] = file.getUint16(offset + i * 2, bigEnd);
         }
         return result;
@@ -232,23 +230,23 @@ orientation: $orientation''';
         if (numValues == 1) {
           return file.getUint32(entryOffset + 8, bigEnd);
         }
-        final int offset = valueOffset;
-        final Uint32List result = Uint32List(numValues);
-        for (int i = 0; i < result.length; ++i) {
+        final offset = valueOffset;
+        final result = Uint32List(numValues);
+        for (var i = 0; i < result.length; ++i) {
           result[i] = file.getUint32(offset + i * 4, bigEnd);
         }
         return result;
       case 5: // rational = two long values, first is numerator, second is denominator
         if (numValues == 1) {
-          final int numerator = file.getUint32(valueOffset, bigEnd);
-          final int denominator = file.getUint32(valueOffset + 4, bigEnd);
+          final numerator = file.getUint32(valueOffset, bigEnd);
+          final denominator = file.getUint32(valueOffset + 4, bigEnd);
           return <int>[numerator, denominator];
         }
-        final int offset = valueOffset;
-        final List<List<int>> result = List<List<int>>(numValues);
-        for (int i = 0; i < result.length; ++i) {
-          final int numerator = file.getUint32(offset + i * 8, bigEnd);
-          final int denominator = file.getUint32(offset + i * 8 + 4, bigEnd);
+        final offset = valueOffset;
+        final result = List<List<int>>(numValues);
+        for (var i = 0; i < result.length; ++i) {
+          final numerator = file.getUint32(offset + i * 8, bigEnd);
+          final denominator = file.getUint32(offset + i * 8 + 4, bigEnd);
           result[i] = <int>[numerator, denominator];
         }
         return result;
@@ -256,23 +254,23 @@ orientation: $orientation''';
         if (numValues == 1) {
           return file.getInt32(entryOffset + 8, bigEnd);
         }
-        final int offset = valueOffset;
-        final Int32List result = Int32List(numValues);
-        for (int i = 0; i < result.length; ++i) {
+        final offset = valueOffset;
+        final result = Int32List(numValues);
+        for (var i = 0; i < result.length; ++i) {
           result[i] = file.getInt32(offset + i * 4, bigEnd);
         }
         return result;
       case 10: // signed rational, two slongs, first is numerator, second is denominator
         if (numValues == 1) {
-          final int numerator = file.getInt32(valueOffset, bigEnd);
-          final int denominator = file.getInt32(valueOffset + 4, bigEnd);
+          final numerator = file.getInt32(valueOffset, bigEnd);
+          final denominator = file.getInt32(valueOffset + 4, bigEnd);
           return <int>[numerator, denominator];
         }
-        final int offset = valueOffset;
-        final List<List<int>> result = List<List<int>>(numValues);
-        for (int i = 0; i < result.length; ++i) {
-          final int numerator = file.getInt32(offset + i * 8, bigEnd);
-          final int denominator = file.getInt32(offset + i * 8 + 4, bigEnd);
+        final offset = valueOffset;
+        final result = List<List<int>>(numValues);
+        for (var i = 0; i < result.length; ++i) {
+          final numerator = file.getInt32(offset + i * 8, bigEnd);
+          final denominator = file.getInt32(offset + i * 8 + 4, bigEnd);
           result[i] = <int>[numerator, denominator];
         }
         return result;
@@ -280,9 +278,9 @@ orientation: $orientation''';
         if (numValues == 1) {
           return file.getFloat32(entryOffset + 8, bigEnd);
         }
-        final int offset = valueOffset;
-        final Float32List result = Float32List(numValues);
-        for (int i = 0; i < result.length; ++i) {
+        final offset = valueOffset;
+        final result = Float32List(numValues);
+        for (var i = 0; i < result.length; ++i) {
           result[i] = file.getFloat32(offset + i * 4, bigEnd);
         }
         return result;
@@ -290,9 +288,9 @@ orientation: $orientation''';
         if (numValues == 1) {
           return file.getFloat64(entryOffset + 8, bigEnd);
         }
-        final int offset = valueOffset;
-        final Float64List result = Float64List(numValues);
-        for (int i = 0; i < result.length; ++i) {
+        final offset = valueOffset;
+        final result = Float64List(numValues);
+        for (var i = 0; i < result.length; ++i) {
           result[i] = file.getFloat64(offset + i * 8, bigEnd);
         }
         return result;
@@ -306,14 +304,14 @@ orientation: $orientation''';
   }
 
   static Map<PdfExifTag, dynamic> _readEXIFData(ByteData buffer, int start) {
-    final String startingString = _getStringFromDB(buffer, start, 4);
+    final startingString = _getStringFromDB(buffer, start, 4);
     if (startingString != 'Exif') {
       // Not valid EXIF data! $startingString
       return null;
     }
 
     Endian bigEnd;
-    final int tiffOffset = start + 6;
+    final tiffOffset = start + 6;
 
     // test for TIFF validity and endianness
     if (buffer.getUint16(tiffOffset) == 0x4949) {
@@ -330,18 +328,18 @@ orientation: $orientation''';
       return null;
     }
 
-    final int firstIFDOffset = buffer.getUint32(tiffOffset + 4, bigEnd);
+    final firstIFDOffset = buffer.getUint32(tiffOffset + 4, bigEnd);
 
     if (firstIFDOffset < 0x00000008) {
       // Not valid TIFF data! (First offset less than 8) $firstIFDOffset
       return null;
     }
 
-    final Map<PdfExifTag, dynamic> tags =
+    final tags =
         _readTags(buffer, tiffOffset, tiffOffset + firstIFDOffset, bigEnd);
 
     if (tags.containsKey(PdfExifTag.ExifIFDPointer)) {
-      final Map<PdfExifTag, dynamic> exifData = _readTags(buffer, tiffOffset,
+      final exifData = _readTags(buffer, tiffOffset,
           tiffOffset + tags[PdfExifTag.ExifIFDPointer], bigEnd);
       tags.addAll(exifData);
     }

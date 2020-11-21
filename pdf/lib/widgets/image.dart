@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 void _paintImage({
@@ -29,24 +27,23 @@ void _paintImage({
   assert(canvas != null);
   assert(image != null);
   assert(alignment != null);
-  final PdfPoint outputSize = rect.size;
-  final PdfPoint inputSize =
-      PdfPoint(image.width.toDouble(), image.height.toDouble());
+  final outputSize = rect.size;
+  final inputSize = PdfPoint(image.width.toDouble(), image.height.toDouble());
   fit ??= BoxFit.scaleDown;
-  final FittedSizes fittedSizes = applyBoxFit(
+  final fittedSizes = applyBoxFit(
       fit, PdfPoint(inputSize.x / scale, inputSize.y / scale), outputSize);
-  final PdfPoint sourceSize =
+  final sourceSize =
       PdfPoint(fittedSizes.source.x * scale, fittedSizes.source.y * scale);
-  final PdfPoint destinationSize = fittedSizes.destination;
-  final double halfWidthDelta = (outputSize.x - destinationSize.x) / 2.0;
-  final double halfHeightDelta = (outputSize.y - destinationSize.y) / 2.0;
-  final double dx = halfWidthDelta + alignment.x * halfWidthDelta;
-  final double dy = halfHeightDelta + alignment.y * halfHeightDelta;
+  final destinationSize = fittedSizes.destination;
+  final halfWidthDelta = (outputSize.x - destinationSize.x) / 2.0;
+  final halfHeightDelta = (outputSize.y - destinationSize.y) / 2.0;
+  final dx = halfWidthDelta + alignment.x * halfWidthDelta;
+  final dy = halfHeightDelta + alignment.y * halfHeightDelta;
 
-  final PdfPoint destinationPosition = rect.topLeft.translate(dx, dy);
-  final PdfRect destinationRect =
+  final destinationPosition = rect.topLeft.translate(dx, dy);
+  final destinationRect =
       PdfRect.fromPoints(destinationPosition, destinationSize);
-  final PdfRect sourceRect = alignment.inscribe(
+  final sourceRect = alignment.inscribe(
     sourceSize,
     PdfRect.fromPoints(PdfPoint.zero, inputSize),
   );
@@ -55,8 +52,8 @@ void _paintImage({
 
 void _drawImageRect(PdfGraphics canvas, PdfImage image, PdfRect sourceRect,
     PdfRect destinationRect) {
-  final double fw = destinationRect.width / sourceRect.width;
-  final double fh = destinationRect.height / sourceRect.height;
+  final fw = destinationRect.width / sourceRect.width;
+  final fh = destinationRect.height / sourceRect.height;
 
   canvas.saveContext();
   canvas
@@ -102,16 +99,16 @@ class Image extends Widget {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    final double w = width ??
+    final w = width ??
         (constraints.hasBoundedWidth
             ? constraints.maxWidth
             : constraints.constrainWidth(image.width.toDouble()));
-    final double h = height ??
+    final h = height ??
         (constraints.hasBoundedHeight
             ? constraints.maxHeight
             : constraints.constrainHeight(image.height.toDouble()));
 
-    final FittedSizes sizes = applyBoxFit(
+    final sizes = applyBoxFit(
         fit,
         PdfPoint(image.width.toDouble(), image.height.toDouble()),
         PdfPoint(w, h));
@@ -161,15 +158,14 @@ class Shape extends Widget {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    final double w = constraints.hasBoundedWidth
+    final w = constraints.hasBoundedWidth
         ? constraints.maxWidth
         : constraints.constrainWidth(width);
-    final double h = constraints.hasBoundedHeight
+    final h = constraints.hasBoundedHeight
         ? constraints.maxHeight
         : constraints.constrainHeight(height);
 
-    final FittedSizes sizes =
-        applyBoxFit(fit, PdfPoint(width, height), PdfPoint(w, h));
+    final sizes = applyBoxFit(fit, PdfPoint(width, height), PdfPoint(w, h));
     box = PdfRect.fromPoints(PdfPoint.zero, sizes.destination);
   }
 
@@ -177,7 +173,7 @@ class Shape extends Widget {
   void paint(Context context) {
     super.paint(context);
 
-    final Matrix4 mat = Matrix4.identity();
+    final mat = Matrix4.identity();
     mat.translate(box.x, box.y + box.height);
     mat.scale(box.width / width, -box.height / height);
     context.canvas

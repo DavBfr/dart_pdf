@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 enum PdfOutlineMode {
@@ -113,7 +111,7 @@ class PdfOutline extends PdfObject {
       if (anchor != null) {
         params['/Dest'] = PdfSecString.fromString(this, anchor);
       } else {
-        final PdfArray dests = PdfArray();
+        final dests = PdfArray();
         dests.add(dest.ref());
 
         if (destMode == PdfOutlineMode.fitpage) {
@@ -131,12 +129,12 @@ class PdfOutline extends PdfObject {
 
       // were a descendent, so by default we are closed. Find out how many
       // entries are below us
-      final int c = descendants();
+      final c = descendants();
       if (c > 0) {
         params['/Count'] = PdfNum(-c);
       }
 
-      final int index = parent.getIndex(this);
+      final index = parent.getIndex(this);
       if (index > 0) {
         // Now if were not the first, then we have a /Prev node
         params['/Prev'] = parent.getNode(index - 1).ref();
@@ -181,10 +179,10 @@ class PdfOutline extends PdfObject {
   /// Returns the total number of descendants below this one.
   /// @return the number of descendants below this one
   int descendants() {
-    int c = outlines.length; // initially the number of kids
+    var c = outlines.length; // initially the number of kids
 
     // now call each one for their descendants
-    for (PdfOutline o in outlines) {
+    for (var o in outlines) {
       c += o.descendants();
     }
 

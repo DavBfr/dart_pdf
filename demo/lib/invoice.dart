@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: always_specify_types
-
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
@@ -159,7 +157,7 @@ class Invoice {
                   pw.Container(
                     decoration: pw.BoxDecoration(
                       borderRadiusEx:
-                          pw.BorderRadius.all(pw.Radius.circular(2)),
+                          const pw.BorderRadius.all(pw.Radius.circular(2)),
                       color: accentColor,
                     ),
                     padding: const pw.EdgeInsets.only(
@@ -498,7 +496,7 @@ class Invoice {
       border: null,
       cellAlignment: pw.Alignment.centerLeft,
       headerDecoration: pw.BoxDecoration(
-        borderRadiusEx: pw.BorderRadius.all(pw.Radius.circular(2)),
+        borderRadiusEx: const pw.BorderRadius.all(pw.Radius.circular(2)),
         color: baseColor,
       ),
       headerHeight: 25,

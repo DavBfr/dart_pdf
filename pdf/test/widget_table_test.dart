@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -30,10 +28,10 @@ Document pdf;
 
 List<TableRow> buildTable(
     {@required Context context, int count = 10, bool repeatHeader = false}) {
-  final List<TableRow> rows = <TableRow>[];
+  final rows = <TableRow>[];
   {
-    final List<Widget> tableRow = <Widget>[];
-    for (String cell in <String>['Hue', 'Color', 'RGBA']) {
+    final tableRow = <Widget>[];
+    for (var cell in <String>['Hue', 'Color', 'RGBA']) {
       tableRow.add(Container(
           alignment: Alignment.center,
           margin: const EdgeInsets.all(5),
@@ -42,10 +40,10 @@ List<TableRow> buildTable(
     rows.add(TableRow(children: tableRow, repeat: repeatHeader));
   }
 
-  for (int y = 0; y < count; y++) {
-    final double h = math.sin(y / count) * 365;
+  for (var y = 0; y < count; y++) {
+    final h = math.sin(y / count) * 365;
     final PdfColor color = PdfColorHsv(h, 1.0, 1.0);
-    final List<Widget> tableRow = <Widget>[
+    final tableRow = <Widget>[
       Container(
           margin: const EdgeInsets.all(5),
           child: Text('${h.toInt()}°', style: Theme.of(context).tableCell)),
@@ -160,9 +158,8 @@ void main() {
               children: List<TableRow>.generate(
                 TableCellVerticalAlignment.values.length,
                 (int index) {
-                  final TableCellVerticalAlignment align =
-                      TableCellVerticalAlignment.values[
-                          index % TableCellVerticalAlignment.values.length];
+                  final align = TableCellVerticalAlignment
+                      .values[index % TableCellVerticalAlignment.values.length];
 
                   return TableRow(
                     verticalAlignment: align,
@@ -272,7 +269,7 @@ void main() {
   });
 
   tearDownAll(() {
-    final File file = File('widgets-table.pdf');
+    final file = File('widgets-table.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

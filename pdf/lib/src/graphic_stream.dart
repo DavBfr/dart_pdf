@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 mixin PdfGraphicStream on PdfObject {
@@ -75,7 +73,7 @@ mixin PdfGraphicStream on PdfObject {
     super._prepare();
 
     // This holds any resources for this page
-    final PdfDict resources = PdfDict();
+    final resources = PdfDict();
 
     resources['/ProcSet'] = PdfArray(const <PdfName>[
       PdfName('/PDF'),

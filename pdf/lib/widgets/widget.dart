@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 @immutable
@@ -72,22 +70,21 @@ class Context {
   }
 
   Context inheritFromAll(Iterable<Inherited> objects) {
-    final HashMap<Type, Inherited> inherited =
-        HashMap<Type, Inherited>.of(this.inherited);
-    for (final Inherited object in objects) {
+    final inherited = HashMap<Type, Inherited>.of(this.inherited);
+    for (final object in objects) {
       inherited[object.runtimeType] = object;
     }
     return copyWith(inherited: inherited);
   }
 
   PdfRect localToGlobal(PdfRect box) {
-    final Matrix4 mat = canvas.getTransform();
-    final Vector3 lt = mat.transform3(Vector3(box.left, box.bottom, 0));
-    final Vector3 lb = mat.transform3(Vector3(box.left, box.top, 0));
-    final Vector3 rt = mat.transform3(Vector3(box.right, box.bottom, 0));
-    final Vector3 rb = mat.transform3(Vector3(box.right, box.top, 0));
-    final List<double> x = <double>[lt.x, lb.x, rt.x, rb.x];
-    final List<double> y = <double>[lt.y, lb.y, rt.y, rb.y];
+    final mat = canvas.getTransform();
+    final lt = mat.transform3(Vector3(box.left, box.bottom, 0));
+    final lb = mat.transform3(Vector3(box.left, box.top, 0));
+    final rt = mat.transform3(Vector3(box.right, box.bottom, 0));
+    final rb = mat.transform3(Vector3(box.right, box.top, 0));
+    final x = <double>[lt.x, lb.x, rt.x, rb.x];
+    final y = <double>[lt.y, lb.y, rt.y, rb.y];
     return PdfRect.fromLTRB(
       x.reduce(math.min),
       y.reduce(math.min),
@@ -160,7 +157,7 @@ abstract class StatelessWidget extends Widget {
     super.paint(context);
 
     if (_child != null) {
-      final Matrix4 mat = Matrix4.identity();
+      final mat = Matrix4.identity();
       mat.translate(box.x, box.y);
       context.canvas
         ..saveContext()
@@ -194,7 +191,7 @@ abstract class SingleChildWidget extends Widget {
   @protected
   void paintChild(Context context) {
     if (child != null) {
-      final Matrix4 mat = Matrix4.identity();
+      final mat = Matrix4.identity();
       mat.translate(box.x, box.y);
       context.canvas
         ..saveContext()
@@ -243,7 +240,7 @@ class InheritedWidget extends Widget {
     super.paint(_context);
 
     if (_child != null) {
-      final Matrix4 mat = Matrix4.identity();
+      final mat = Matrix4.identity();
       mat.translate(box.x, box.y);
       context.canvas
         ..saveContext()

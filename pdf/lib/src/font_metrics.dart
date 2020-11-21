@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 @immutable
@@ -49,16 +47,16 @@ class PdfFontMetrics {
 
     double left;
     double top;
-    double right = 0;
+    var right = 0.0;
     double bottom;
     double ascent;
     double descent;
     double lastBearing;
     double spacing;
 
-    for (PdfFontMetrics metric in metrics) {
+    for (var metric in metrics) {
       left ??= metric.left;
-      spacing = metric.advanceWidth > 0 ? letterSpacing : 0;
+      spacing = metric.advanceWidth > 0 ? letterSpacing : 0.0;
       right += metric.advanceWidth + spacing;
       lastBearing = metric.rightBearing;
 

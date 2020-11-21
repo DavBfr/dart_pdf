@@ -1,5 +1,3 @@
-// ignore_for_file: always_specify_types
-
 import 'dart:io';
 
 import 'package:pdf/widgets.dart' as pw;

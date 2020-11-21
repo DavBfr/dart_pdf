@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 class PdfXref {
@@ -36,7 +34,7 @@ class PdfXref {
 
   /// @return The xref in the format of the xref section in the Pdf file
   String ref() {
-    final String rs = offset.toString().padLeft(10, '0') +
+    final rs = offset.toString().padLeft(10, '0') +
         ' ' +
         generation.toString().padLeft(5, '0');
 

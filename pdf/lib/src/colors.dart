@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 class PdfColors {
@@ -396,7 +394,7 @@ class PdfColors {
   ];
 
   static PdfColor getColor(int index) {
-    final double hue = index * 137.508;
+    final hue = index * 137.508;
     final PdfColor color = PdfColorHsv(hue % 360, 1, 1);
     if ((index / 3) % 2 == 0) {
       return PdfColor.fromRYB(color.red, color.green, color.blue);

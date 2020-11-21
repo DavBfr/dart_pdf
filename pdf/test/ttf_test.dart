@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:test/test.dart';
@@ -25,13 +22,13 @@ import 'package:test/test.dart';
 void printText(
     PdfPage page, PdfGraphics canvas, String text, PdfFont font, double top) {
   text = text + font.fontName;
-  const double fontSize = 20;
-  final PdfFontMetrics metrics = font.stringMetrics(text) * fontSize;
+  const fontSize = 20.0;
+  final metrics = font.stringMetrics(text) * fontSize;
 
-  const double deb = 5;
+  const deb = 5;
 
-  const double x = 50;
-  final double y = page.pageFormat.height - top;
+  const x = 50.0;
+  final y = page.pageFormat.height - top;
 
   canvas
     ..drawRect(x + metrics.left, y + metrics.top, metrics.width, metrics.height)
@@ -54,22 +51,20 @@ void printText(
 
 void printTextTtf(
     PdfPage page, PdfGraphics canvas, String text, File ttfFont, double top) {
-  final Uint8List fontData = ttfFont.readAsBytesSync();
-  final PdfTtfFont font =
-      PdfTtfFont(page.pdfDocument, fontData.buffer.asByteData());
+  final fontData = ttfFont.readAsBytesSync();
+  final font = PdfTtfFont(page.pdfDocument, fontData.buffer.asByteData());
 
   printText(page, canvas, text, font, top);
 }
 
 void main() {
   test('Pdf TrueType', () {
-    final PdfDocument pdf = PdfDocument(compress: false);
-    final PdfPage page =
-        PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
+    final pdf = PdfDocument(compress: false);
+    final page = PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
 
-    final PdfGraphics g = page.getGraphics();
-    int top = 0;
-    const String s = 'Hello Lukáča ';
+    final g = page.getGraphics();
+    var top = 0;
+    const s = 'Hello Lukáča ';
 
     printTextTtf(page, g, s, File('open-sans.ttf'), 30.0 + 30.0 * top++);
     printTextTtf(page, g, s, File('open-sans-bold.ttf'), 30.0 + 30.0 * top++);
@@ -78,25 +73,25 @@ void main() {
     printTextTtf(
         page, g, '你好 檯號 ', File('genyomintw.ttf'), 30.0 + 30.0 * top++);
 
-    final File file = File('ttf.pdf');
+    final file = File('ttf.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 
   test('Font SubSetting', () {
-    final Uint8List fontData = File('open-sans.ttf').readAsBytesSync();
-    final TtfParser font = TtfParser(fontData.buffer.asByteData());
-    final TtfWriter ttfWriter = TtfWriter(font);
-    final Uint8List data = ttfWriter.withChars('hçHée'.runes.toList());
-    final File output = File('${font.fontName}.ttf');
+    final fontData = File('open-sans.ttf').readAsBytesSync();
+    final font = TtfParser(fontData.buffer.asByteData());
+    final ttfWriter = TtfWriter(font);
+    final data = ttfWriter.withChars('hçHée'.runes.toList());
+    final output = File('${font.fontName}.ttf');
     output.writeAsBytesSync(data);
   });
 
   test('Font SubSetting CN', () {
-    final Uint8List fontData = File('genyomintw.ttf').readAsBytesSync();
-    final TtfParser font = TtfParser(fontData.buffer.asByteData());
-    final TtfWriter ttfWriter = TtfWriter(font);
-    final Uint8List data = ttfWriter.withChars('hçHée 你好 檯號 ☃'.runes.toList());
-    final File output = File('${font.fontName}.ttf');
+    final fontData = File('genyomintw.ttf').readAsBytesSync();
+    final font = TtfParser(fontData.buffer.asByteData());
+    final ttfWriter = TtfWriter(font);
+    final data = ttfWriter.withChars('hçHée 你好 檯號 ☃'.runes.toList());
+    final output = File('${font.fontName}.ttf');
     output.writeAsBytesSync(data);
   });
 }

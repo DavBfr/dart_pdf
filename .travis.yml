@@ -12,8 +12,7 @@ install:
   - flutter doctor
   - flutter --version
 script:
-  - make analyze-ci-pdf
-  - make analyze-ci-printing
+  - make analyze
   - make test
   - make test-readme
   - bash <(curl -s https://codecov.io/bash)

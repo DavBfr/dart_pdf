@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 /// https://opentype.js.org/
@@ -26,25 +24,25 @@ class TtfWriter {
 
   int _calcTableChecksum(ByteData table) {
     assert(table.lengthInBytes % 4 == 0);
-    int sum = 0;
-    for (int i = 0; i < table.lengthInBytes - 3; i += 4) {
+    var sum = 0;
+    for (var i = 0; i < table.lengthInBytes - 3; i += 4) {
       sum = (sum + table.getUint32(i)) & 0xffffffff;
     }
     return sum;
   }
 
   void _updateCompoundGlyph(TtfGlyphInfo glyph, Map<int, int> compoundMap) {
-    const int ARG_1_AND_2_ARE_WORDS = 1;
-    const int MORE_COMPONENTS = 32;
+    const ARG_1_AND_2_ARE_WORDS = 1;
+    const MORE_COMPONENTS = 32;
 
-    int offset = 10;
-    final ByteData bytes = glyph.data.buffer
+    var offset = 10;
+    final bytes = glyph.data.buffer
         .asByteData(glyph.data.offsetInBytes, glyph.data.lengthInBytes);
-    int flags = MORE_COMPONENTS;
+    var flags = MORE_COMPONENTS;
 
     while (flags & MORE_COMPONENTS != 0) {
       flags = bytes.getUint16(offset);
-      final int glyphIndex = bytes.getUint16(offset + 2);
+      final glyphIndex = bytes.getUint16(offset + 2);
       bytes.setUint16(offset + 2, compoundMap[glyphIndex]);
       offset += (flags & ARG_1_AND_2_ARE_WORDS != 0) ? 8 : 6;
     }
@@ -55,32 +53,31 @@ class TtfWriter {
   }
 
   Uint8List withChars(List<int> chars) {
-    final Map<String, Uint8List> tables = <String, Uint8List>{};
-    final Map<String, int> tablesLength = <String, int>{};
+    final tables = <String, Uint8List>{};
+    final tablesLength = <String, int>{};
 
     // Create the glyphs table
-    final List<TtfGlyphInfo> glyphsInfo = <TtfGlyphInfo>[];
-    final Map<int, int> compounds = <int, int>{};
+    final glyphsInfo = <TtfGlyphInfo>[];
+    final compounds = <int, int>{};
 
-    for (int index = 0; index < chars.length; index++) {
+    for (var index = 0; index < chars.length; index++) {
       if (chars[index] == 32) {
-        final TtfGlyphInfo glyph =
-            TtfGlyphInfo(32, Uint8List(0), const <int>[]);
+        final glyph = TtfGlyphInfo(32, Uint8List(0), const <int>[]);
         glyphsInfo.add(glyph);
         continue;
       }
 
-      final TtfGlyphInfo glyph =
+      final glyph =
           ttf.readGlyph(ttf.charToGlyphIndexMap[chars[index]] ?? 0).copy();
-      for (int g in glyph.compounds) {
+      for (var g in glyph.compounds) {
         compounds[g] = null;
       }
       glyphsInfo.add(glyph);
     }
 
     // Add compound glyphs
-    for (int compound in compounds.keys) {
-      final TtfGlyphInfo index = glyphsInfo.firstWhere(
+    for (var compound in compounds.keys) {
+      final index = glyphsInfo.firstWhere(
           (TtfGlyphInfo glyph) => glyph.index == compound,
           orElse: () => null);
       if (index != null) {
@@ -88,30 +85,30 @@ class TtfWriter {
         assert(compounds[compound] >= 0, 'Unable to find the glyph');
       } else {
         compounds[compound] = glyphsInfo.length;
-        final TtfGlyphInfo glyph = ttf.readGlyph(compound);
+        final glyph = ttf.readGlyph(compound);
         assert(glyph.compounds.isEmpty, 'This is not a simple glyph');
         glyphsInfo.add(glyph);
       }
     }
 
     // Add one last empty glyph
-    final TtfGlyphInfo glyph = TtfGlyphInfo(32, Uint8List(0), const <int>[]);
+    final glyph = TtfGlyphInfo(32, Uint8List(0), const <int>[]);
     glyphsInfo.add(glyph);
 
     // update compound indices
-    for (TtfGlyphInfo glyph in glyphsInfo) {
+    for (var glyph in glyphsInfo) {
       if (glyph.compounds.isNotEmpty) {
         _updateCompoundGlyph(glyph, compounds);
       }
     }
 
-    int glyphsTableLength = 0;
-    for (TtfGlyphInfo glyph in glyphsInfo) {
+    var glyphsTableLength = 0;
+    for (var glyph in glyphsInfo) {
       glyphsTableLength =
           _wordAlign(glyphsTableLength + glyph.data.lengthInBytes);
     }
-    int offset = 0;
-    final Uint8List glyphsTable = Uint8List(_wordAlign(glyphsTableLength, 4));
+    var offset = 0;
+    final glyphsTable = Uint8List(_wordAlign(glyphsTableLength, 4));
     tables[TtfParser.glyf_table] = glyphsTable;
     tablesLength[TtfParser.glyf_table] = glyphsTableLength;
 
@@ -127,9 +124,9 @@ class TtfWriter {
     }
 
     {
-      final ByteData loca = tables[TtfParser.loca_table].buffer.asByteData();
-      int index = 0;
-      for (TtfGlyphInfo glyph in glyphsInfo) {
+      final loca = tables[TtfParser.loca_table].buffer.asByteData();
+      var index = 0;
+      for (var glyph in glyphsInfo) {
         if (ttf.indexToLocFormat == 0) {
           loca.setUint16(index, offset ~/ 2);
           index += 2;
@@ -144,9 +141,9 @@ class TtfWriter {
 
     {
       // Head table
-      final int start = ttf.tableOffsets[TtfParser.head_table];
-      final int len = ttf.tableSize[TtfParser.head_table];
-      final Uint8List head = Uint8List.fromList(
+      final start = ttf.tableOffsets[TtfParser.head_table];
+      final len = ttf.tableSize[TtfParser.head_table];
+      final head = Uint8List.fromList(
           ttf.bytes.buffer.asUint8List(start, _wordAlign(len, 4)));
       head.buffer.asByteData().setUint32(8, 0); // checkSumAdjustment
       tables[TtfParser.head_table] = head;
@@ -155,9 +152,9 @@ class TtfWriter {
 
     {
       // MaxP table
-      final int start = ttf.tableOffsets[TtfParser.maxp_table];
-      final int len = ttf.tableSize[TtfParser.maxp_table];
-      final Uint8List maxp = Uint8List.fromList(
+      final start = ttf.tableOffsets[TtfParser.maxp_table];
+      final len = ttf.tableSize[TtfParser.maxp_table];
+      final maxp = Uint8List.fromList(
           ttf.bytes.buffer.asUint8List(start, _wordAlign(len, 4)));
       maxp.buffer.asByteData().setUint16(4, glyphsInfo.length);
       tables[TtfParser.maxp_table] = maxp;
@@ -166,9 +163,9 @@ class TtfWriter {
 
     {
       // HHEA table
-      final int start = ttf.tableOffsets[TtfParser.hhea_table];
-      final int len = ttf.tableSize[TtfParser.hhea_table];
-      final Uint8List hhea = Uint8List.fromList(
+      final start = ttf.tableOffsets[TtfParser.hhea_table];
+      final len = ttf.tableSize[TtfParser.hhea_table];
+      final hhea = Uint8List.fromList(
           ttf.bytes.buffer.asUint8List(start, _wordAlign(len, 4)));
       hhea.buffer
           .asByteData()
@@ -180,12 +177,12 @@ class TtfWriter {
 
     {
       // HMTX table
-      final int len = 4 * glyphsInfo.length;
-      final Uint8List hmtx = Uint8List(_wordAlign(len, 4));
-      final int hmtxOffset = ttf.tableOffsets[TtfParser.hmtx_table];
-      final ByteData hmtxData = hmtx.buffer.asByteData();
-      int index = 0;
-      for (TtfGlyphInfo glyph in glyphsInfo) {
+      final len = 4 * glyphsInfo.length;
+      final hmtx = Uint8List(_wordAlign(len, 4));
+      final hmtxOffset = ttf.tableOffsets[TtfParser.hmtx_table];
+      final hmtxData = hmtx.buffer.asByteData();
+      var index = 0;
+      for (var glyph in glyphsInfo) {
         hmtxData.setUint32(
             index, ttf.bytes.getInt32(hmtxOffset + glyph.index * 4));
         index += 4;
@@ -196,9 +193,9 @@ class TtfWriter {
 
     {
       // CMAP table
-      const int len = 40;
-      final Uint8List cmap = Uint8List(_wordAlign(len, 4));
-      final ByteData cmapData = cmap.buffer.asByteData();
+      const len = 40;
+      final cmap = Uint8List(_wordAlign(len, 4));
+      final cmapData = cmap.buffer.asByteData();
       cmapData.setUint16(0, 0); // Table version number
       cmapData.setUint16(2, 1); // Number of encoding tables that follow.
       cmapData.setUint16(4, 3); // Platform ID
@@ -217,15 +214,15 @@ class TtfWriter {
     }
 
     {
-      final List<int> bytes = <int>[];
+      final bytes = <int>[];
 
-      final int numTables = tables.length;
+      final numTables = tables.length;
 
       // Create the file header
-      final ByteData start = ByteData(12 + numTables * 16);
+      final start = ByteData(12 + numTables * 16);
       start.setUint32(0, 0x00010000);
       start.setUint16(4, numTables);
-      int pot = numTables;
+      var pot = numTables;
       while (pot & (pot - 1) != 0) {
         pot++;
       }
@@ -234,10 +231,10 @@ class TtfWriter {
       start.setUint16(10, pot * 16 - numTables * 16);
 
       // Create the table directory
-      int count = 0;
-      int offset = 12 + numTables * 16;
+      var count = 0;
+      var offset = 12 + numTables * 16;
       tables.forEach((String name, Uint8List data) {
-        final List<int> runes = name.runes.toList();
+        final runes = name.runes.toList();
         start.setUint8(12 + count * 16, runes[0]);
         start.setUint8(12 + count * 16 + 1, runes[1]);
         start.setUint8(12 + count * 16 + 2, runes[2]);

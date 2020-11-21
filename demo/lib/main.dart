@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-// ignore_for_file: always_specify_types
-
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +60,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _init() async {
-    final PrintingInfo info = await Printing.info();
+    final info = await Printing.info();
 
     _myTabs = const <Tab>[
       Tab(text: 'RÉSUMÉ'),
@@ -106,7 +103,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   }
 
   void _showPrintedToast(BuildContext context) {
-    final ScaffoldState scaffold = Scaffold.of(context);
+    final scaffold = Scaffold.of(context);
 
     scaffold.showSnackBar(
       const SnackBar(
@@ -116,7 +113,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   }
 
   void _showSharedToast(BuildContext context) {
-    final ScaffoldState scaffold = Scaffold.of(context);
+    final scaffold = Scaffold.of(context);
 
     scaffold.showSnackBar(
       const SnackBar(
@@ -130,14 +127,14 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
     LayoutCallback build,
     PdfPageFormat pageFormat,
   ) async {
-    final Uint8List bytes = await build(pageFormat);
+    final bytes = await build(pageFormat);
 
-    final Directory appDocDir = await getApplicationDocumentsDirectory();
-    final String appDocPath = appDocDir.path;
-    final File file = File(appDocPath + '/' + 'document.pdf');
+    final appDocDir = await getApplicationDocumentsDirectory();
+    final appDocPath = appDocDir.path;
+    final file = File(appDocPath + '/' + 'document.pdf');
     print('Save as file ${file.path} ...');
     await file.writeAsBytes(bytes);
-    OpenFile.open(file.path);
+    await OpenFile.open(file.path);
   }
 
   @override
@@ -174,7 +171,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.deepOrange,
         onPressed: _showSources,
-        child: Icon(Icons.code),
+        child: const Icon(Icons.code),
       ),
     );
   }

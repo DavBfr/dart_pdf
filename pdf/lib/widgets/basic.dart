@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 enum BoxFit { fill, contain, cover, fitWidth, fitHeight, none, scaleDown }
@@ -80,7 +78,7 @@ class Padding extends SingleChildWidget {
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
     if (child != null) {
-      final BoxConstraints childConstraints = constraints.deflate(padding);
+      final childConstraints = constraints.deflate(padding);
       child.layout(context, childConstraints, parentUsesSize: parentUsesSize);
       assert(child.box != null);
       box = constraints.constrainRect(
@@ -112,7 +110,7 @@ class Padding extends SingleChildWidget {
     super.paint(context);
 
     if (child != null) {
-      final Matrix4 mat = Matrix4.identity();
+      final mat = Matrix4.identity();
       mat.translate(box.x + padding.left, box.y + padding.bottom);
       context.canvas
         ..saveContext()
@@ -187,7 +185,7 @@ class Transform extends SingleChildWidget {
   final bool adjustLayout;
 
   Matrix4 get _effectiveTransform {
-    final Matrix4 result = Matrix4.identity();
+    final result = Matrix4.identity();
     if (origin != null) {
       result.translate(origin.x, origin.y);
     }
@@ -218,8 +216,8 @@ class Transform extends SingleChildWidget {
       child.layout(context, constraints, parentUsesSize: parentUsesSize);
       assert(child.box != null);
 
-      final Matrix4 mat = transform;
-      final List<double> values = mat.applyToVector3Array(<double>[
+      final mat = transform;
+      final values = mat.applyToVector3Array(<double>[
         child.box.left,
         child.box.top,
         0,
@@ -234,9 +232,9 @@ class Transform extends SingleChildWidget {
         0,
       ]);
 
-      final double dx = -math.min(
+      final dx = -math.min(
           math.min(math.min(values[0], values[3]), values[6]), values[9]);
-      final double dy = -math.min(
+      final dy = -math.min(
           math.min(math.min(values[1], values[4]), values[7]), values[10]);
 
       box = PdfRect.fromLTRB(
@@ -261,7 +259,7 @@ class Transform extends SingleChildWidget {
     super.paint(context);
 
     if (child != null) {
-      final Matrix4 mat = _effectiveTransform;
+      final mat = _effectiveTransform;
       context.canvas
         ..saveContext()
         ..setTransform(mat);
@@ -296,9 +294,9 @@ class Align extends SingleChildWidget {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    final bool shrinkWrapWidth =
+    final shrinkWrapWidth =
         widthFactor != null || constraints.maxWidth == double.infinity;
-    final bool shrinkWrapHeight =
+    final shrinkWrapHeight =
         heightFactor != null || constraints.maxHeight == double.infinity;
 
     if (child != null) {
@@ -334,7 +332,7 @@ class Align extends SingleChildWidget {
     }
 
     if (child.box.bottom > 0) {
-      final double headSize = math.min((child.box.bottom) * 0.2, 10);
+      final headSize = math.min((child.box.bottom) * 0.2, 10);
       context.canvas
         ..moveTo(
           box.left + child.box.horizondalCenter,
@@ -351,7 +349,7 @@ class Align extends SingleChildWidget {
     }
 
     if (box.bottom + child.box.top < box.top) {
-      final double headSize =
+      final headSize =
           math.min((box.top - child.box.top - box.bottom) * 0.2, 10);
       context.canvas
         ..moveTo(box.left + child.box.horizondalCenter, box.top)
@@ -366,7 +364,7 @@ class Align extends SingleChildWidget {
     }
 
     if (child.box.left > 0) {
-      final double headSize = math.min((child.box.left) * 0.2, 10);
+      final headSize = math.min((child.box.left) * 0.2, 10);
       context.canvas
         ..moveTo(box.left, box.bottom + child.box.verticalCenter)
         ..lineTo(
@@ -380,7 +378,7 @@ class Align extends SingleChildWidget {
     }
 
     if (box.left + child.box.right < box.right) {
-      final double headSize =
+      final headSize =
           math.min((box.right - child.box.right - box.left) * 0.2, 10);
       context.canvas
         ..moveTo(box.right, box.bottom + child.box.verticalCenter)
@@ -476,16 +474,15 @@ class FittedBox extends SingleChildWidget {
     super.paint(context);
 
     if (child != null) {
-      final PdfPoint childSize = child.box.size;
-      final FittedSizes sizes = applyBoxFit(fit, childSize, box.size);
-      final double scaleX = sizes.destination.x / sizes.source.x;
-      final double scaleY = sizes.destination.y / sizes.source.y;
-      final PdfRect sourceRect = alignment.inscribe(
+      final childSize = child.box.size;
+      final sizes = applyBoxFit(fit, childSize, box.size);
+      final scaleX = sizes.destination.x / sizes.source.x;
+      final scaleY = sizes.destination.y / sizes.source.y;
+      final sourceRect = alignment.inscribe(
           sizes.source, PdfRect.fromPoints(PdfPoint.zero, childSize));
-      final PdfRect destinationRect =
-          alignment.inscribe(sizes.destination, box);
+      final destinationRect = alignment.inscribe(sizes.destination, box);
 
-      final Matrix4 mat =
+      final mat =
           Matrix4.translationValues(destinationRect.x, destinationRect.y, 0)
             ..scale(scaleX, scaleY, 1)
             ..translate(-sourceRect.x, -sourceRect.y);
@@ -514,7 +511,7 @@ class AspectRatio extends SingleChildWidget {
       return constraints.smallest;
     }
 
-    double width = constraints.maxWidth;
+    var width = constraints.maxWidth;
     double height;
 
     if (width.isFinite) {
@@ -595,7 +592,7 @@ class CustomPaint extends SingleChildWidget {
   void paint(Context context) {
     super.paint(context);
 
-    final Matrix4 mat = Matrix4.identity();
+    final mat = Matrix4.identity();
     mat.translate(box.x, box.y);
     context.canvas
       ..saveContext()
@@ -693,7 +690,7 @@ class FullPage extends SingleChildWidget {
   }
 
   PdfRect _getBox(Context context) {
-    final PdfRect box = _getConstraints(context).constrainRect();
+    final box = _getConstraints(context).constrainRect();
     if (ignoreMargins) {
       return box;
     }
@@ -709,7 +706,7 @@ class FullPage extends SingleChildWidget {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    final BoxConstraints constraints = _getConstraints(context);
+    final constraints = _getConstraints(context);
 
     if (child != null) {
       child.layout(context, constraints, parentUsesSize: false);
@@ -730,8 +727,8 @@ class FullPage extends SingleChildWidget {
       return;
     }
 
-    final PdfRect box = _getBox(context);
-    final Matrix4 mat = Matrix4.tryInvert(context.canvas.getTransform());
+    final box = _getBox(context);
+    final mat = Matrix4.tryInvert(context.canvas.getTransform());
     mat.translate(box.x, box.y);
     context.canvas
       ..saveContext()
@@ -755,7 +752,7 @@ class Opacity extends SingleChildWidget {
     super.paint(context);
 
     if (child != null) {
-      final Matrix4 mat = Matrix4.identity();
+      final mat = Matrix4.identity();
       mat.translate(box.x, box.y);
       context.canvas
         ..saveContext()
@@ -796,11 +793,11 @@ class Divider extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    final double height = this.height ?? 16;
-    final double thickness = this.thickness ?? 1;
-    final double indent = this.indent ?? 0;
-    final double endIndent = this.endIndent ?? 0;
-    final PdfColor color = this.color ?? PdfColors.black;
+    final height = this.height ?? 16;
+    final thickness = this.thickness ?? 1;
+    final indent = this.indent ?? 0;
+    final endIndent = this.endIndent ?? 0;
+    final color = this.color ?? PdfColors.black;
 
     return SizedBox(
       height: height,
@@ -850,11 +847,11 @@ class VerticalDivider extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    final double width = this.width ?? 16;
-    final double thickness = this.thickness ?? 1;
-    final double indent = this.indent ?? 0;
-    final double endIndent = this.endIndent ?? 0;
-    final PdfColor color = this.color ?? PdfColors.black;
+    final width = this.width ?? 16;
+    final thickness = this.thickness ?? 1;
+    final indent = this.indent ?? 0;
+    final endIndent = this.endIndent ?? 0;
+    final color = this.color ?? PdfColors.black;
 
     return SizedBox(
       width: width,

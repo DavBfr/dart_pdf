@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 
 import 'package:pdf/widgets.dart';
@@ -47,7 +45,7 @@ void main() {
   });
 
   tearDownAll(() {
-    final File file = File('widgets-opacity.pdf');
+    final file = File('widgets-opacity.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

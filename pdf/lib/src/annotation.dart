@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 class PdfAnnot extends PdfObject {
@@ -134,7 +132,7 @@ abstract class PdfAnnotBase {
     Matrix4 matrix,
     PdfRect boundingBox,
   }) {
-    final PdfGraphicXObject s = PdfGraphicXObject(pdfDocument, '/Form');
+    final s = PdfGraphicXObject(pdfDocument, '/Form');
     String n;
     switch (type) {
       case PdfAnnotApparence.normal:
@@ -168,11 +166,10 @@ abstract class PdfAnnotBase {
       ]);
     }
 
-    final PdfRect bbox =
-        boundingBox ?? PdfRect.fromPoints(PdfPoint.zero, rect.size);
+    final bbox = boundingBox ?? PdfRect.fromPoints(PdfPoint.zero, rect.size);
     s.params['/BBox'] =
         PdfArray.fromNum(<double>[bbox.x, bbox.y, bbox.width, bbox.height]);
-    final PdfGraphics g = PdfGraphics(s, s.buf);
+    final g = PdfGraphics(s, s.buf);
     return g;
   }
 
@@ -349,7 +346,7 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
       params['/T'] = PdfSecString.fromString(object, fieldName);
     }
 
-    final PdfDict mk = PdfDict();
+    final mk = PdfDict();
     if (color != null) {
       mk.values['/BC'] = PdfColorType(color);
     }
@@ -627,8 +624,8 @@ class PdfTextField extends PdfFormField {
       params['/MaxLen'] = PdfNum(maxLength);
     }
 
-    final PdfStream buf = PdfStream();
-    final PdfGraphics g = PdfGraphics(page, buf);
+    final buf = PdfStream();
+    final g = PdfGraphics(page, buf);
     g.setFillColor(textColor);
     g.setFont(font, fontSize);
     params['/DA'] = PdfSecString.fromStream(object, buf);

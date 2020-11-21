@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 enum TextAlign { left, right, center, justify }
@@ -74,15 +72,15 @@ class _TextDecoration {
     if (_box != null) {
       return _box;
     }
-    final double x1 = spans[startSpan].offset.x + spans[startSpan].left;
-    final double x2 =
+    final x1 = spans[startSpan].offset.x + spans[startSpan].left;
+    final x2 =
         spans[endSpan].offset.x + spans[endSpan].left + spans[endSpan].width;
-    double y1 = spans[startSpan].offset.y + spans[startSpan].top;
-    double y2 = y1 + spans[startSpan].height;
+    var y1 = spans[startSpan].offset.y + spans[startSpan].top;
+    var y2 = y1 + spans[startSpan].height;
 
-    for (int n = startSpan + 1; n <= endSpan; n++) {
-      final double ny1 = spans[n].offset.y + spans[n].top;
-      final double ny2 = ny1 + spans[n].height;
+    for (var n = startSpan + 1; n <= endSpan; n++) {
+      final ny1 = spans[n].offset.y + spans[n].top;
+      final ny2 = ny1 + spans[n].height;
       y1 = math.min(y1, ny1);
       y2 = math.max(y2, ny2);
     }
@@ -100,10 +98,10 @@ class _TextDecoration {
     PdfRect globalBox,
     List<_Span> spans,
   ) {
-    final PdfRect box = _getBox(spans);
+    final box = _getBox(spans);
 
     if (annotation != null) {
-      final PdfRect spanBox = PdfRect(
+      final spanBox = PdfRect(
         globalBox.x + box.left,
         globalBox.top + box.bottom,
         box.width,
@@ -113,7 +111,7 @@ class _TextDecoration {
     }
 
     if (style.background != null) {
-      final PdfRect boundingBox = PdfRect(
+      final boundingBox = PdfRect(
         globalBox.x + box.left,
         globalBox.top + box.bottom,
         box.width,
@@ -134,10 +132,10 @@ class _TextDecoration {
       return;
     }
 
-    final PdfRect box = _getBox(spans);
+    final box = _getBox(spans);
 
-    final PdfFont font = style.font.getFont(context);
-    final double space =
+    final font = style.font.getFont(context);
+    final space =
         _space * style.fontSize * textScaleFactor * style.decorationThickness;
 
     context.canvas
@@ -146,7 +144,7 @@ class _TextDecoration {
           style.decorationThickness * style.fontSize * textScaleFactor * 0.05);
 
     if (style.decoration.contains(TextDecoration.underline)) {
-      final double base = -font.descent * style.fontSize * textScaleFactor / 2;
+      final base = -font.descent * style.fontSize * textScaleFactor / 2;
 
       context.canvas.drawLine(
         globalBox.x + box.left,
@@ -166,7 +164,7 @@ class _TextDecoration {
     }
 
     if (style.decoration.contains(TextDecoration.overline)) {
-      final double base = style.fontSize * textScaleFactor;
+      final base = style.fontSize * textScaleFactor;
       context.canvas.drawLine(
         globalBox.x + box.left,
         globalBox.top + box.bottom + base,
@@ -185,8 +183,7 @@ class _TextDecoration {
     }
 
     if (style.decoration.contains(TextDecoration.lineThrough)) {
-      final double base =
-          (1 - font.descent) * style.fontSize * textScaleFactor / 2;
+      final base = (1 - font.descent) * style.fontSize * textScaleFactor / 2;
       context.canvas.drawLine(
         globalBox.x + box.left,
         globalBox.top + box.bottom + base,
@@ -211,7 +208,7 @@ class _TextDecoration {
     PdfRect globalBox,
     List<_Span> spans,
   ) {
-    final PdfRect box = _getBox(spans);
+    final box = _getBox(spans);
 
     context.canvas
       ..setLineWidth(.5)
@@ -274,7 +271,7 @@ class _Word extends _Span {
     double textScaleFactor,
     PdfRect globalBox,
   ) {
-    const double deb = 5;
+    const deb = 5;
 
     context.canvas
       ..setLineWidth(.5)
@@ -367,7 +364,7 @@ abstract class InlineSpan {
   final AnnotationBuilder annotation;
 
   String toPlainText() {
-    final StringBuffer buffer = StringBuffer();
+    final buffer = StringBuffer();
     visitChildren((InlineSpan span, TextStyle style) {
       if (span is TextSpan) {
         buffer.write(span.text);
@@ -396,7 +393,7 @@ class WidgetSpan extends InlineSpan {
   /// Calls `visitor` on this [WidgetSpan]. There are no children spans to walk.
   @override
   bool visitChildren(_VisitorCallback visitor, TextStyle parentStyle) {
-    final TextStyle _style = parentStyle?.merge(style);
+    final _style = parentStyle?.merge(style);
 
     if (child != null) {
       if (!visitor(this, _style)) {
@@ -423,7 +420,7 @@ class TextSpan extends InlineSpan {
 
   @override
   bool visitChildren(_VisitorCallback visitor, TextStyle parentStyle) {
-    final TextStyle _style = parentStyle?.merge(style);
+    final _style = parentStyle?.merge(style);
 
     if (text != null) {
       if (!visitor(this, _style)) {
@@ -431,7 +428,7 @@ class TextSpan extends InlineSpan {
       }
     }
     if (children != null) {
-      for (InlineSpan child in children) {
+      for (var child in children) {
         if (!child.visitChildren(visitor, _style)) {
           return false;
         }
@@ -487,7 +484,7 @@ class RichText extends Widget {
     double baseline,
     TextDirection textDirection,
   ) {
-    double delta = 0;
+    var delta = 0.0;
     switch (textAlign) {
       case TextAlign.left:
         break;
@@ -503,8 +500,8 @@ class RichText extends Widget {
           break;
         }
         delta = (totalWidth - wordsWidth) / (spans.length - 1);
-        double x = 0;
-        for (_Span span in spans) {
+        var x = 0.0;
+        for (var span in spans) {
           span.offset = span.offset.translate(x, -baseline);
           x += delta;
         }
@@ -512,7 +509,7 @@ class RichText extends Widget {
     }
 
     if (textDirection == TextDirection.rtl) {
-      for (_Span span in spans) {
+      for (var span in spans) {
         span.offset = PdfPoint(
           totalWidth - (span.offset.x + span.width) - delta,
           span.offset.y - baseline,
@@ -522,7 +519,7 @@ class RichText extends Widget {
       return totalWidth;
     }
 
-    for (_Span span in spans) {
+    for (var span in spans) {
       span.offset = span.offset.translate(delta, -baseline);
     }
 
@@ -531,7 +528,7 @@ class RichText extends Widget {
 
   void _appendDecoration(bool append, _TextDecoration td) {
     if (append && _decorations.isNotEmpty) {
-      final _TextDecoration last = _decorations.last;
+      final last = _decorations.last;
       if (last.style == td.style && last.annotation == td.annotation) {
         _decorations[_decorations.length - 1] =
             last.copyWith(endSpan: td.endSpan);
@@ -548,31 +545,30 @@ class RichText extends Widget {
     _spans.clear();
     _decorations.clear();
 
-    final ThemeData theme = Theme.of(context);
-    final TextStyle defaultstyle = theme.defaultTextStyle;
+    final theme = Theme.of(context);
+    final defaultstyle = theme.defaultTextStyle;
     _softWrap ??= theme.softWrap;
     _maxLines ??= theme.maxLines;
     _textAlign ??= theme.textAlign;
-    final TextDirection _textDirection =
-        textDirection ?? Directionality.of(context);
+    final _textDirection = textDirection ?? Directionality.of(context);
 
-    final double constraintWidth = constraints.hasBoundedWidth
+    final constraintWidth = constraints.hasBoundedWidth
         ? constraints.maxWidth
         : constraints.constrainWidth();
-    final double constraintHeight = constraints.hasBoundedHeight
+    final constraintHeight = constraints.hasBoundedHeight
         ? constraints.maxHeight
         : constraints.constrainHeight();
 
-    double offsetX = 0;
-    double offsetY = 0;
-    double width = 0;
+    var offsetX = 0.0;
+    var offsetY = 0.0;
+    var width = 0.0;
     double top;
     double bottom;
 
-    int lines = 1;
-    int spanCount = 0;
-    int spanStart = 0;
-    int decorationStart = 0;
+    var lines = 1;
+    var spanCount = 0;
+    var spanStart = 0;
+    var decorationStart = 0;
 
     text.visitChildren((InlineSpan span, TextStyle style) {
       if (span is TextSpan) {
@@ -580,25 +576,25 @@ class RichText extends Widget {
           return true;
         }
 
-        final PdfFont font = style.font.getFont(context);
+        final font = style.font.getFont(context);
 
-        final PdfFontMetrics space =
+        final space =
             font.stringMetrics(' ') * (style.fontSize * textScaleFactor);
 
-        final List<String> spanLines = (_textDirection == TextDirection.rtl
+        final spanLines = (_textDirection == TextDirection.rtl
                 ? PdfArabic.convert(span.text)
                 : span.text)
             .split('\n');
 
-        for (int line = 0; line < spanLines.length; line++) {
-          for (String word in spanLines[line].split(RegExp(r'\s'))) {
+        for (var line = 0; line < spanLines.length; line++) {
+          for (var word in spanLines[line].split(RegExp(r'\s'))) {
             if (word.isEmpty) {
               offsetX +=
                   space.advanceWidth * style.wordSpacing + style.letterSpacing;
               continue;
             }
 
-            final PdfFontMetrics metrics = font.stringMetrics(word,
+            final metrics = font.stringMetrics(word,
                     letterSpacing: style.letterSpacing /
                         (style.fontSize * textScaleFactor)) *
                 (style.fontSize * textScaleFactor);
@@ -637,13 +633,13 @@ class RichText extends Widget {
               spanCount = 0;
             }
 
-            final double baseline = span.baseline * textScaleFactor;
-            final double mt = tightBounds ? metrics.top : metrics.descent;
-            final double mb = tightBounds ? metrics.bottom : metrics.ascent;
+            final baseline = span.baseline * textScaleFactor;
+            final mt = tightBounds ? metrics.top : metrics.descent;
+            final mb = tightBounds ? metrics.bottom : metrics.ascent;
             top = math.min(top ?? mt + baseline, mt + baseline);
             bottom = math.max(bottom ?? mb + baseline, mb + baseline);
 
-            final _Word wd = _Word(
+            final wd = _Word(
               word,
               style,
               metrics,
@@ -714,7 +710,7 @@ class RichText extends Widget {
               double.infinity,
               style.fontSize * textScaleFactor,
             )));
-        final _WidgetSpan ws = _WidgetSpan(
+        final ws = _WidgetSpan(
           span.child,
           style,
         );
@@ -751,7 +747,7 @@ class RichText extends Widget {
           spanCount = 0;
         }
 
-        final double baseline = span.baseline * textScaleFactor;
+        final baseline = span.baseline * textScaleFactor;
         top = math.min(top ?? baseline, baseline);
         bottom = math.max(
           bottom ?? ws.height + baseline,
@@ -817,7 +813,7 @@ class RichText extends Widget {
     TextStyle currentStyle;
     PdfColor currentColor;
 
-    for (_TextDecoration decoration in _decorations) {
+    for (var decoration in _decorations) {
       assert(() {
         if (Document.debug && RichText.debug) {
           decoration.debugPaint(context, textScaleFactor, box, _spans);
@@ -833,7 +829,7 @@ class RichText extends Widget {
       );
     }
 
-    for (_Span span in _spans) {
+    for (var span in _spans) {
       assert(() {
         if (Document.debug && RichText.debug) {
           span.debugPaint(context, textScaleFactor, box);
@@ -857,7 +853,7 @@ class RichText extends Widget {
       );
     }
 
-    for (_TextDecoration decoration in _decorations) {
+    for (var decoration in _decorations) {
       decoration.foregroundPaint(
         context,
         textScaleFactor,

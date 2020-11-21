@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 /// A horizontal group of cells in a [Table].
@@ -69,8 +67,8 @@ class TableBorder extends BoxBorder {
     super.paintRect(context, box);
 
     if (verticalInside) {
-      double offset = box.x;
-      for (double width in widths.sublist(0, widths.length - 1)) {
+      var offset = box.x;
+      for (var width in widths.sublist(0, widths.length - 1)) {
         offset += width;
         context.canvas.moveTo(offset, box.y);
         context.canvas.lineTo(offset, box.top);
@@ -79,8 +77,8 @@ class TableBorder extends BoxBorder {
     }
 
     if (horizontalInside) {
-      double offset = box.top;
-      for (double height in heights.sublist(0, heights.length - 1)) {
+      var offset = box.top;
+      for (var height in heights.sublist(0, heights.length - 1)) {
         offset -= height;
         context.canvas.moveTo(box.x, offset);
         context.canvas.lineTo(box.right, offset);
@@ -141,9 +139,9 @@ class IntrinsicColumnWidth extends TableColumnWidth {
 
     child.layout(context, const BoxConstraints());
     assert(child.box != null);
-    final double calculatedWidth =
-        child.box.width == double.infinity ? 0 : child.box.width;
-    final double childFlex = flex ??
+    final calculatedWidth =
+        child.box.width == double.infinity ? 0.0 : child.box.width;
+    final childFlex = flex ??
         (child is Expanded
             ? child.flex.toDouble()
             : (child.box.width == double.infinity ? 1 : 0));
@@ -239,7 +237,7 @@ class Table extends Widget implements SpanningWidget {
     }
 
     if (context != null) {
-      final ThemeData theme = Theme.of(context);
+      final theme = Theme.of(context);
       headerStyle ??= theme.tableHeader;
       cellStyle ??= theme.tableCell;
     }
@@ -251,11 +249,11 @@ class Table extends Widget implements SpanningWidget {
     cellAlignments ??= const <int, Alignment>{};
     headerAlignments ??= cellAlignments;
 
-    final List<TableRow> rows = <TableRow>[];
+    final rows = <TableRow>[];
 
-    int rowNum = 0;
+    var rowNum = 0;
     if (headers != null) {
-      final List<Widget> tableRow = <Widget>[];
+      final tableRow = <Widget>[];
 
       for (final dynamic cell in headers) {
         tableRow.add(
@@ -280,15 +278,14 @@ class Table extends Widget implements SpanningWidget {
       rowNum++;
     }
 
-    for (final List<dynamic> row in data) {
-      final List<Widget> tableRow = <Widget>[];
-      final bool isOdd = (rowNum - headerCount) % 2 != 0;
+    for (final row in data) {
+      final tableRow = <Widget>[];
+      final isOdd = (rowNum - headerCount) % 2 != 0;
 
       if (rowNum < headerCount) {
         for (final dynamic cell in row) {
-          final Alignment align =
-              headerAlignments[tableRow.length] ?? headerAlignment;
-          final TextAlign textAlign = _textAlign(align);
+          final align = headerAlignments[tableRow.length] ?? headerAlignment;
+          final textAlign = _textAlign(align);
 
           tableRow.add(
             Container(
@@ -307,9 +304,8 @@ class Table extends Widget implements SpanningWidget {
         }
       } else {
         for (final dynamic cell in row) {
-          final Alignment align =
-              cellAlignments[tableRow.length] ?? cellAlignment;
-          final TextAlign textAlign = _textAlign(align);
+          final align = cellAlignments[tableRow.length] ?? cellAlignment;
+          final textAlign = _textAlign(align);
           tableRow.add(
             Container(
               alignment: align,
@@ -327,7 +323,7 @@ class Table extends Widget implements SpanningWidget {
         }
       }
 
-      BoxDecoration decoration = isOdd ? oddRowDecoration : rowDecoration;
+      var decoration = isOdd ? oddRowDecoration : rowDecoration;
       if (rowNum < headerCount) {
         decoration = headerDecoration;
       }
@@ -387,20 +383,18 @@ class Table extends Widget implements SpanningWidget {
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
     // Compute required width for all row/columns width flex
-    final List<double> flex = <double>[];
+    final flex = <double>[];
     _widths.clear();
     _heights.clear();
-    int index = 0;
+    var index = 0;
 
-    for (TableRow row in children) {
-      int n = 0;
-      for (Widget child in row.children) {
-        final TableColumnWidth columnWidth =
-            columnWidths != null && columnWidths[n] != null
-                ? columnWidths[n]
-                : defaultColumnWidth;
-        final _ColumnLayout columnLayout =
-            columnWidth.layout(child, context, constraints);
+    for (var row in children) {
+      var n = 0;
+      for (var child in row.children) {
+        final columnWidth = columnWidths != null && columnWidths[n] != null
+            ? columnWidths[n]
+            : defaultColumnWidth;
+        final columnLayout = columnWidth.layout(child, context, constraints);
         if (flex.length < n + 1) {
           flex.add(columnLayout.flex);
           _widths.add(columnLayout.width);
@@ -419,15 +413,15 @@ class Table extends Widget implements SpanningWidget {
       return;
     }
 
-    final double maxWidth = _widths.reduce((double a, double b) => a + b);
+    final maxWidth = _widths.reduce((double a, double b) => a + b);
 
     // Compute column widths using flex and estimated width
     if (constraints.hasBoundedWidth) {
-      final double totalFlex = flex.reduce((double a, double b) => a + b);
-      double flexSpace = 0;
-      for (int n = 0; n < _widths.length; n++) {
+      final totalFlex = flex.reduce((double a, double b) => a + b);
+      var flexSpace = 0.0;
+      for (var n = 0; n < _widths.length; n++) {
         if (flex[n] == 0.0) {
-          final double newWidth = _widths[n] / maxWidth * constraints.maxWidth;
+          final newWidth = _widths[n] / maxWidth * constraints.maxWidth;
           if ((tableWidth == TableWidth.max && totalFlex == 0.0) ||
               newWidth < _widths[n]) {
             _widths[n] = newWidth;
@@ -435,35 +429,34 @@ class Table extends Widget implements SpanningWidget {
           flexSpace += _widths[n];
         }
       }
-      final double spacePerFlex = totalFlex > 0.0
+      final spacePerFlex = totalFlex > 0.0
           ? ((constraints.maxWidth - flexSpace) / totalFlex)
           : double.nan;
 
-      for (int n = 0; n < _widths.length; n++) {
+      for (var n = 0; n < _widths.length; n++) {
         if (flex[n] > 0.0) {
-          final double newWidth = spacePerFlex * flex[n];
+          final newWidth = spacePerFlex * flex[n];
           _widths[n] = newWidth;
         }
       }
     }
 
-    final double totalWidth = _widths.reduce((double a, double b) => a + b);
+    final totalWidth = _widths.reduce((double a, double b) => a + b);
 
     // Compute final widths
-    double totalHeight = 0;
+    var totalHeight = 0.0;
     index = 0;
-    for (TableRow row in children) {
+    for (var row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
 
-      int n = 0;
-      double x = 0;
+      var n = 0;
+      var x = 0.0;
 
-      double lineHeight = 0;
-      for (Widget child in row.children) {
-        final BoxConstraints childConstraints =
-            BoxConstraints.tightFor(width: _widths[n]);
+      var lineHeight = 0.0;
+      for (var child in row.children) {
+        final childConstraints = BoxConstraints.tightFor(width: _widths[n]);
         child.layout(context, childConstraints);
         assert(child.box != null);
         child.box = PdfRect(x, totalHeight, child.box.width, child.box.height);
@@ -472,15 +465,14 @@ class Table extends Widget implements SpanningWidget {
         n++;
       }
 
-      final TableCellVerticalAlignment align =
-          row.verticalAlignment ?? defaultVerticalAlignment;
+      final align = row.verticalAlignment ?? defaultVerticalAlignment;
 
       if (align == TableCellVerticalAlignment.full) {
         // Compute the layout again to give the full height to all cells
         n = 0;
         x = 0;
-        for (Widget child in row.children) {
-          final BoxConstraints childConstraints =
+        for (var child in row.children) {
+          final childConstraints =
               BoxConstraints.tightFor(width: _widths[n], height: lineHeight);
           child.layout(context, childConstraints);
           assert(child.box != null);
@@ -502,16 +494,15 @@ class Table extends Widget implements SpanningWidget {
 
     // Compute final y position
     index = 0;
-    int heightIndex = 0;
-    for (TableRow row in children) {
+    var heightIndex = 0;
+    for (var row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
 
-      final TableCellVerticalAlignment align =
-          row.verticalAlignment ?? defaultVerticalAlignment;
+      final align = row.verticalAlignment ?? defaultVerticalAlignment;
 
-      for (Widget child in row.children) {
+      for (var child in row.children) {
         double childY;
 
         switch (align) {
@@ -554,19 +545,19 @@ class Table extends Widget implements SpanningWidget {
       return;
     }
 
-    final Matrix4 mat = Matrix4.identity();
+    final mat = Matrix4.identity();
     mat.translate(box.x, box.y);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
 
-    int index = 0;
-    for (TableRow row in children) {
+    var index = 0;
+    for (var row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
 
-      final Widget child = row.children.first;
+      final child = row.children.first;
       if (child != null && row.decoration != null) {
         row.decoration.paint(
           context,
@@ -575,7 +566,7 @@ class Table extends Widget implements SpanningWidget {
         );
       }
 
-      for (Widget child in row.children) {
+      for (var child in row.children) {
         context.canvas
           ..saveContext()
           ..drawRect(
@@ -590,12 +581,12 @@ class Table extends Widget implements SpanningWidget {
     }
 
     index = 0;
-    for (TableRow row in children) {
+    for (var row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
 
-      final Widget child = row.children.first;
+      final child = row.children.first;
       if (child != null && row.decoration != null) {
         row.decoration.paint(
           context,

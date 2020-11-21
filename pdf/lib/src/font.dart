@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 abstract class PdfFont extends PdfObject {
@@ -146,8 +144,8 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
     }
 
     try {
-      final Uint8List chars = latin1.encode(s);
-      final Iterable<PdfFontMetrics> metrics = chars.map(glyphMetrics);
+      final chars = latin1.encode(s);
+      final metrics = chars.map(glyphMetrics);
       return PdfFontMetrics.append(metrics, letterSpacing: letterSpacing);
     } catch (_) {
       assert(() {
@@ -163,7 +161,7 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
   PdfRect stringBounds(String s) => stringMetrics(s).toPdfRect();
 
   PdfPoint stringSize(String s) {
-    final PdfFontMetrics metrics = stringMetrics(s);
+    final metrics = stringMetrics(s);
     return PdfPoint(metrics.width, metrics.height);
   }
 

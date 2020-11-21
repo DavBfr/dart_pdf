@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 enum PdfPageMode {
@@ -119,7 +117,7 @@ class PdfDocument {
   Uint8List _documentID;
   Uint8List get documentID {
     if (_documentID == null) {
-      final math.Random rnd = math.Random();
+      final rnd = math.Random();
       _documentID = Uint8List.fromList(sha256
           .convert(DateTime.now().toIso8601String().codeUnits +
               List<int>.generate(32, (_) => rnd.nextInt(256)))
@@ -172,7 +170,7 @@ class PdfDocument {
   ///
   /// @param os OutputStream to write the document to
   void _write(PdfStream os) {
-    final PdfOutput pos = PdfOutput(os);
+    final pos = PdfOutput(os);
 
     // Write each object to the [PdfStream]. We call via the output
     // as that builds the xref table
@@ -183,7 +181,7 @@ class PdfDocument {
   }
 
   Uint8List save() {
-    final PdfStream os = PdfStream();
+    final os = PdfStream();
     _write(os);
     return os.output();
   }

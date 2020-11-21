@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 class Placeholder extends Widget {
@@ -93,28 +91,28 @@ class LoremText {
   }
 
   String sentence(int length) {
-    final List<String> wordList = <String>[];
-    for (int i = 0; i < length; i++) {
-      String w = word();
+    final wordList = <String>[];
+    for (var i = 0; i < length; i++) {
+      var w = word();
       if (i < length - 1 && random.nextInt(10) == 0) {
         w += ',';
       }
       wordList.add(w);
     }
-    final String text = wordList.join(' ') + '.';
+    final text = wordList.join(' ') + '.';
     return text[0].toUpperCase() + text.substring(1);
   }
 
   String paragraph(int length) {
-    int wordsCount = 0;
-    final List<String> sentenceList = <String>[];
-    int n = 0;
+    var wordsCount = 0;
+    final sentenceList = <String>[];
+    var n = 0;
     while (wordsCount < length) {
       n++;
       if (n > 100) {
         break;
       }
-      final int count = math.min(length,
+      final count = math.min(length,
           math.max(10, math.min(3, random.nextInt(length - wordsCount))));
       sentenceList.add(sentence(count));
       wordsCount += count;
@@ -143,8 +141,8 @@ class Lorem extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    final LoremText lorem = LoremText(random: random);
-    final String text = lorem.paragraph(length);
+    final lorem = LoremText(random: random);
+    final text = lorem.paragraph(length);
 
     return Text(text,
         style: style,

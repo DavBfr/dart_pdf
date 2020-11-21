@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 @immutable
@@ -40,12 +38,12 @@ class TtfGlyphInfo {
 
 class TtfParser {
   TtfParser(ByteData bytes) : bytes = UnmodifiableByteDataView(bytes) {
-    final int numTables = bytes.getUint16(4);
+    final numTables = bytes.getUint16(4);
 
-    for (int i = 0; i < numTables; i++) {
-      final String name = utf8.decode(bytes.buffer.asUint8List(i * 16 + 12, 4));
-      final int offset = bytes.getUint32(i * 16 + 20);
-      final int size = bytes.getUint32(i * 16 + 24);
+    for (var i = 0; i < numTables; i++) {
+      final name = utf8.decode(bytes.buffer.asUint8List(i * 16 + 12, 4));
+      final offset = bytes.getUint32(i * 16 + 20);
+      final size = bytes.getUint32(i * 16 + 24);
       tableOffsets[name] = offset;
       tableSize[name] = size;
     }
@@ -99,15 +97,15 @@ class TtfParser {
 
   // https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6name.html
   void _parseFontName() {
-    final int basePosition = tableOffsets[name_table];
-    final int count = bytes.getUint16(basePosition + 2);
-    final int stringOffset = bytes.getUint16(basePosition + 4);
-    int pos = basePosition + 6;
-    for (int i = 0; i < count; i++) {
-      final int platformID = bytes.getUint16(pos);
-      final int nameID = bytes.getUint16(pos + 6);
-      final int length = bytes.getUint16(pos + 8);
-      final int offset = bytes.getUint16(pos + 10);
+    final basePosition = tableOffsets[name_table];
+    final count = bytes.getUint16(basePosition + 2);
+    final stringOffset = bytes.getUint16(basePosition + 4);
+    var pos = basePosition + 6;
+    for (var i = 0; i < count; i++) {
+      final platformID = bytes.getUint16(pos);
+      final nameID = bytes.getUint16(pos + 6);
+      final length = bytes.getUint16(pos + 8);
+      final offset = bytes.getUint16(pos + 10);
       pos += 12;
       if (platformID == 1 && nameID == 6) {
         try {
@@ -132,11 +130,11 @@ class TtfParser {
   }
 
   void _parseCMap() {
-    final int basePosition = tableOffsets[cmap_table];
-    final int numSubTables = bytes.getUint16(basePosition + 2);
-    for (int i = 0; i < numSubTables; i++) {
-      final int offset = bytes.getUint32(basePosition + i * 8 + 8);
-      final int format = bytes.getUint16(basePosition + offset);
+    final basePosition = tableOffsets[cmap_table];
+    final numSubTables = bytes.getUint16(basePosition + 2);
+    for (var i = 0; i < numSubTables; i++) {
+      final offset = bytes.getUint32(basePosition + i * 8 + 8);
+      final format = bytes.getUint16(basePosition + offset);
 
       switch (format) {
         case 0:
@@ -159,9 +157,9 @@ class TtfParser {
 
   void _parseCMapFormat0(int basePosition) {
     assert(bytes.getUint16(basePosition) == 262);
-    for (int i = 0; i < 256; i++) {
-      final int charCode = i;
-      final int glyphIndex = bytes.getUint8(basePosition + i + 2);
+    for (var i = 0; i < 256; i++) {
+      final charCode = i;
+      final glyphIndex = bytes.getUint8(basePosition + i + 2);
       if (glyphIndex > 0) {
         charToGlyphIndexMap[charCode] = glyphIndex;
       }
@@ -169,36 +167,36 @@ class TtfParser {
   }
 
   void _parseCMapFormat4(int basePosition) {
-    final int segCount = bytes.getUint16(basePosition + 4) ~/ 2;
-    final List<int> endCodes = <int>[];
-    for (int i = 0; i < segCount; i++) {
+    final segCount = bytes.getUint16(basePosition + 4) ~/ 2;
+    final endCodes = <int>[];
+    for (var i = 0; i < segCount; i++) {
       endCodes.add(bytes.getUint16(basePosition + i * 2 + 12));
     }
-    final List<int> startCodes = <int>[];
-    for (int i = 0; i < segCount; i++) {
+    final startCodes = <int>[];
+    for (var i = 0; i < segCount; i++) {
       startCodes.add(bytes.getUint16(basePosition + (segCount + i) * 2 + 14));
     }
-    final List<int> idDeltas = <int>[];
-    for (int i = 0; i < segCount; i++) {
+    final idDeltas = <int>[];
+    for (var i = 0; i < segCount; i++) {
       idDeltas.add(bytes.getUint16(basePosition + (segCount * 2 + i) * 2 + 14));
     }
-    final int idRangeOffsetBasePos = basePosition + segCount * 6 + 14;
-    final List<int> idRangeOffsets = <int>[];
-    for (int i = 0; i < segCount; i++) {
+    final idRangeOffsetBasePos = basePosition + segCount * 6 + 14;
+    final idRangeOffsets = <int>[];
+    for (var i = 0; i < segCount; i++) {
       idRangeOffsets.add(bytes.getUint16(idRangeOffsetBasePos + i * 2));
     }
-    for (int s = 0; s < segCount - 1; s++) {
-      final int startCode = startCodes[s];
-      final int endCode = endCodes[s];
-      final int idDelta = idDeltas[s];
-      final int idRangeOffset = idRangeOffsets[s];
-      final int idRangeOffsetAddress = idRangeOffsetBasePos + s * 2;
-      for (int c = startCode; c <= endCode; c++) {
+    for (var s = 0; s < segCount - 1; s++) {
+      final startCode = startCodes[s];
+      final endCode = endCodes[s];
+      final idDelta = idDeltas[s];
+      final idRangeOffset = idRangeOffsets[s];
+      final idRangeOffsetAddress = idRangeOffsetBasePos + s * 2;
+      for (var c = startCode; c <= endCode; c++) {
         int glyphIndex;
         if (idRangeOffset == 0) {
           glyphIndex = (idDelta + c) % 65536;
         } else {
-          final int glyphIndexAddress =
+          final glyphIndexAddress =
               idRangeOffset + 2 * (c - startCode) + idRangeOffsetAddress;
           glyphIndex = bytes.getUint16(glyphIndexAddress);
         }
@@ -208,11 +206,11 @@ class TtfParser {
   }
 
   void _parseCMapFormat6(int basePosition) {
-    final int firstCode = bytes.getUint16(basePosition + 4);
-    final int entryCount = bytes.getUint16(basePosition + 6);
-    for (int i = 0; i < entryCount; i++) {
-      final int charCode = firstCode + i;
-      final int glyphIndex = bytes.getUint16(basePosition + i * 2 + 8);
+    final firstCode = bytes.getUint16(basePosition + 4);
+    final entryCount = bytes.getUint16(basePosition + 6);
+    for (var i = 0; i < entryCount; i++) {
+      final charCode = firstCode + i;
+      final glyphIndex = bytes.getUint16(basePosition + i * 2 + 8);
       if (glyphIndex > 0) {
         charToGlyphIndexMap[charCode] = glyphIndex;
       }
@@ -220,15 +218,15 @@ class TtfParser {
   }
 
   void _parseCMapFormat12(int basePosition) {
-    final int numGroups = bytes.getUint32(basePosition + 10);
+    final numGroups = bytes.getUint32(basePosition + 10);
     assert(bytes.getUint32(basePosition + 2) == 12 * numGroups + 16);
 
-    for (int i = 0; i < numGroups; i++) {
-      final int startCharCode = bytes.getUint32(basePosition + i * 12 + 14);
-      final int endCharCode = bytes.getUint32(basePosition + i * 12 + 18);
-      final int startGlyphID = bytes.getUint32(basePosition + i * 12 + 22);
+    for (var i = 0; i < numGroups; i++) {
+      final startCharCode = bytes.getUint32(basePosition + i * 12 + 14);
+      final endCharCode = bytes.getUint32(basePosition + i * 12 + 18);
+      final startGlyphID = bytes.getUint32(basePosition + i * 12 + 22);
 
-      for (int j = startCharCode; j <= endCharCode; j++) {
+      for (var j = startCharCode; j <= endCharCode; j++) {
         assert(!charToGlyphIndexMap.containsKey(j) ||
             charToGlyphIndexMap[j] == startGlyphID + j - startCharCode);
         charToGlyphIndexMap[j] = startGlyphID + j - startCharCode;
@@ -237,14 +235,14 @@ class TtfParser {
   }
 
   void _parseIndexes() {
-    final int basePosition = tableOffsets[loca_table];
-    final int numGlyphs = this.numGlyphs;
+    final basePosition = tableOffsets[loca_table];
+    final numGlyphs = this.numGlyphs;
     if (indexToLocFormat == 0) {
-      for (int i = 0; i < numGlyphs; i++) {
+      for (var i = 0; i < numGlyphs; i++) {
         glyphOffsets.add(bytes.getUint16(basePosition + i * 2) * 2);
       }
     } else {
-      for (int i = 0; i < numGlyphs; i++) {
+      for (var i = 0; i < numGlyphs; i++) {
         glyphOffsets.add(bytes.getUint32(basePosition + i * 4));
       }
     }
@@ -252,16 +250,16 @@ class TtfParser {
 
   /// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
   void _parseGlyphs() {
-    final int baseOffset = tableOffsets[glyf_table];
-    final int hmtxOffset = tableOffsets[hmtx_table];
-    final int unitsPerEm = this.unitsPerEm;
-    int glyphIndex = 0;
-    for (int offset in glyphOffsets) {
-      final int xMin = bytes.getInt16(baseOffset + offset + 2); // 2
-      final int yMin = bytes.getInt16(baseOffset + offset + 4); // 4
-      final int xMax = bytes.getInt16(baseOffset + offset + 6); // 6
-      final int yMax = bytes.getInt16(baseOffset + offset + 8); // 8
-      final double advanceWidth = glyphIndex < numOfLongHorMetrics
+    final baseOffset = tableOffsets[glyf_table];
+    final hmtxOffset = tableOffsets[hmtx_table];
+    final unitsPerEm = this.unitsPerEm;
+    var glyphIndex = 0;
+    for (var offset in glyphOffsets) {
+      final xMin = bytes.getInt16(baseOffset + offset + 2); // 2
+      final yMin = bytes.getInt16(baseOffset + offset + 4); // 4
+      final xMax = bytes.getInt16(baseOffset + offset + 6); // 6
+      final yMax = bytes.getInt16(baseOffset + offset + 8); // 8
+      final advanceWidth = glyphIndex < numOfLongHorMetrics
           ? bytes.getInt16(hmtxOffset + glyphIndex * 4).toDouble() / unitsPerEm
           : null;
       glyphInfoMap[glyphIndex] = PdfFontMetrics(
@@ -281,9 +279,9 @@ class TtfParser {
     assert(index != null);
     assert(index < glyphOffsets.length);
 
-    final int start = tableOffsets[glyf_table] + glyphOffsets[index];
+    final start = tableOffsets[glyf_table] + glyphOffsets[index];
 
-    final int numberOfContours = bytes.getInt16(start);
+    final numberOfContours = bytes.getInt16(start);
     assert(numberOfContours >= -1);
 
     if (numberOfContours == -1) {
@@ -295,15 +293,15 @@ class TtfParser {
 
   TtfGlyphInfo _readSimpleGlyph(
       int glyph, int start, int offset, int numberOfContours) {
-    const int X_IS_BYTE = 2;
-    const int Y_IS_BYTE = 4;
-    const int REPEAT = 8;
-    const int X_DELTA = 16;
-    const int Y_DELTA = 32;
+    const X_IS_BYTE = 2;
+    const Y_IS_BYTE = 4;
+    const REPEAT = 8;
+    const X_DELTA = 16;
+    const Y_DELTA = 32;
 
-    int numPoints = 1;
+    var numPoints = 1;
 
-    for (int i = 0; i < numberOfContours; i++) {
+    for (var i = 0; i < numberOfContours; i++) {
       numPoints = math.max(numPoints, bytes.getUint16(offset) + 1);
       offset += 2;
     }
@@ -319,14 +317,14 @@ class TtfParser {
       );
     }
 
-    final List<int> flags = <int>[];
+    final flags = <int>[];
 
-    for (int i = 0; i < numPoints; i++) {
-      final int flag = bytes.getUint8(offset++);
+    for (var i = 0; i < numPoints; i++) {
+      final flag = bytes.getUint8(offset++);
       flags.add(flag);
 
       if (flag & REPEAT != 0) {
-        int repeatCount = bytes.getUint8(offset++);
+        var repeatCount = bytes.getUint8(offset++);
         assert(repeatCount > 0);
         i += repeatCount;
         while (repeatCount-- > 0) {
@@ -335,11 +333,11 @@ class TtfParser {
       }
     }
 
-    int byteFlag = X_IS_BYTE;
-    int deltaFlag = X_DELTA;
-    for (int a = 0; a < 2; a++) {
-      for (int i = 0; i < numPoints; i++) {
-        final int flag = flags[i];
+    var byteFlag = X_IS_BYTE;
+    var deltaFlag = X_DELTA;
+    for (var a = 0; a < 2; a++) {
+      for (var i = 0; i < numPoints; i++) {
+        final flag = flags[i];
         if (flag & byteFlag != 0) {
           offset++;
         } else if (~flag & deltaFlag != 0) {
@@ -358,17 +356,17 @@ class TtfParser {
   }
 
   TtfGlyphInfo _readCompoundGlyph(int glyph, int start, int offset) {
-    const int ARG_1_AND_2_ARE_WORDS = 1;
-    const int MORE_COMPONENTS = 32;
-    const int WE_HAVE_INSTRUCTIONS = 256;
+    const ARG_1_AND_2_ARE_WORDS = 1;
+    const MORE_COMPONENTS = 32;
+    const WE_HAVE_INSTRUCTIONS = 256;
 
-    final List<int> components = <int>[];
-    bool hasInstructions = false;
-    int flags = MORE_COMPONENTS;
+    final components = <int>[];
+    var hasInstructions = false;
+    var flags = MORE_COMPONENTS;
 
     while (flags & MORE_COMPONENTS != 0) {
       flags = bytes.getUint16(offset);
-      final int glyphIndex = bytes.getUint16(offset + 2);
+      final glyphIndex = bytes.getUint16(offset + 2);
       offset += (flags & ARG_1_AND_2_ARE_WORDS != 0) ? 8 : 6;
 
       components.add(glyphIndex);

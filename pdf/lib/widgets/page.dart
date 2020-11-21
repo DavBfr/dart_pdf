@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 typedef BuildCallback = Widget Function(Context context);
@@ -71,7 +69,7 @@ class Page {
 
   @protected
   void debugPaint(Context context) {
-    final EdgeInsets _margin = margin;
+    final _margin = margin;
     context.canvas
       ..setFillColor(PdfColors.lightGreen)
       ..moveTo(0, 0)
@@ -93,9 +91,9 @@ class Page {
 
   @protected
   void postProcess(Document document) {
-    final PdfGraphics canvas = _pdfPage.getGraphics();
-    final EdgeInsets _margin = margin;
-    BoxConstraints constraints = mustRotate
+    final canvas = _pdfPage.getGraphics();
+    final _margin = margin;
+    var constraints = mustRotate
         ? BoxConstraints(
             maxWidth: pageFormat.height - _margin.vertical,
             maxHeight: pageFormat.width - _margin.horizontal)
@@ -103,9 +101,8 @@ class Page {
             maxWidth: pageFormat.width - _margin.horizontal,
             maxHeight: pageFormat.height - _margin.vertical);
 
-    final ThemeData calculatedTheme =
-        theme ?? document.theme ?? ThemeData.base();
-    final Context context = Context(
+    final calculatedTheme = theme ?? document.theme ?? ThemeData.base();
+    final context = Context(
       document: document.document,
       page: _pdfPage,
       canvas: canvas,
@@ -122,7 +119,7 @@ class Page {
     if (_build != null) {
       content = _build(context);
       if (content != null) {
-        final PdfPoint size = layout(content, context, constraints);
+        final size = layout(content, context, constraints);
 
         if (_pdfPage.pageFormat.height == double.infinity) {
           _pdfPage.pageFormat =
@@ -179,15 +176,15 @@ class Page {
       return PdfPoint(pageFormat.width, pageFormat.height);
     }
 
-    final EdgeInsets _margin = margin;
+    final _margin = margin;
     child.layout(context, constraints, parentUsesSize: parentUsesSize);
     assert(child.box != null);
 
-    final double width = pageFormat.width == double.infinity
+    final width = pageFormat.width == double.infinity
         ? child.box.width + _margin.left + _margin.right
         : pageFormat.width;
 
-    final double height = pageFormat.height == double.infinity
+    final height = pageFormat.height == double.infinity
         ? child.box.height + _margin.top + _margin.bottom
         : pageFormat.height;
 
@@ -204,7 +201,7 @@ class Page {
     }
 
     if (pageTheme.clip) {
-      final EdgeInsets _margin = margin;
+      final _margin = margin;
       context.canvas
         ..saveContext()
         ..drawRect(
@@ -217,7 +214,7 @@ class Page {
     }
 
     if (mustRotate) {
-      final EdgeInsets _margin = margin;
+      final _margin = margin;
       context.canvas
         ..saveContext()
         ..setTransform(Matrix4.identity()

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 enum FontWeight { normal, bold }
@@ -30,8 +28,8 @@ class TextDecoration {
 
   /// Creates a decoration that paints the union of all the given decorations.
   factory TextDecoration.combine(List<TextDecoration> decorations) {
-    int mask = 0;
-    for (TextDecoration decoration in decorations) {
+    var mask = 0;
+    for (var decoration in decorations) {
       mask |= decoration._mask;
     }
     return TextDecoration._(mask);
@@ -73,7 +71,7 @@ class TextDecoration {
     if (_mask == 0) {
       return 'TextDecoration.none';
     }
-    final List<String> values = <String>[];
+    final values = <String>[];
     if (_mask & underline._mask != 0) {
       values.add('underline');
     }

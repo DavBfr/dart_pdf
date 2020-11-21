@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 
 import 'package:pdf/pdf.dart';
@@ -48,9 +46,8 @@ void main() {
   });
 
   test('Arabic Diacritics', () {
-    final ArabicText a =
-        ArabicText('السلام', <int>[65249, 65276, 65204, 65247, 65165]);
-    final ArabicText b = ArabicText('السَلَاْمٌ',
+    final a = ArabicText('السلام', <int>[65249, 65276, 65204, 65247, 65165]);
+    final b = ArabicText('السَلَاْمٌ',
         <int>[1612, 65249, 1618, 1614, 65276, 1614, 65204, 65247, 65165]);
 
     expect(
@@ -64,7 +61,7 @@ void main() {
   });
 
   test('Arabic Default Reshaping', () {
-    final List<ArabicText> cases = <ArabicText>[
+    final cases = <ArabicText>[
       ArabicText('الـــسَلاْمُ عَلَيْكُمْ', <int>[
         1615,
         65249,
@@ -453,7 +450,7 @@ void main() {
       ),
     );
 
-    for (ArabicText item in cases) {
+    for (var item in cases) {
       try {
         expect(
           PdfArabic.convert(item.original).codeUnits,
@@ -490,7 +487,7 @@ void main() {
   });
 
   tearDownAll(() {
-    final File file = File('arabic.pdf');
+    final file = File('arabic.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

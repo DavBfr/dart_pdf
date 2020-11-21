@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 class Partition implements SpanningWidget {
@@ -80,7 +78,7 @@ class _PartitionsContext extends WidgetContext {
   @override
   void apply(WidgetContext other) {
     if (other is _PartitionsContext) {
-      for (int index = 0; index < partitionContext.length; index++) {
+      for (var index = 0; index < partitionContext.length; index++) {
         partitionContext[index]?.apply(other.partitionContext[index]);
       }
     }
@@ -88,9 +86,8 @@ class _PartitionsContext extends WidgetContext {
 
   @override
   WidgetContext clone() {
-    final _PartitionsContext context =
-        _PartitionsContext(partitionContext.length);
-    for (int index = 0; index < partitionContext.length; index++) {
+    final context = _PartitionsContext(partitionContext.length);
+    for (var index = 0; index < partitionContext.length; index++) {
       context.partitionContext[index] = partitionContext[index].clone();
     }
 
@@ -124,15 +121,15 @@ class Partitions extends Widget implements SpanningWidget {
     assert(constraints != null);
 
     // Determine used flex factor, size inflexible items, calculate free space.
-    final double maxMainSize = constraints.maxWidth;
-    final bool canFlex = maxMainSize < double.infinity;
-    double allocatedSize = 0; // Sum of the sizes of the non-flexible children.
-    int totalFlex = 0;
-    final List<double> widths = List<double>.filled(children.length, 0);
+    final maxMainSize = constraints.maxWidth;
+    final canFlex = maxMainSize < double.infinity;
+    var allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
+    var totalFlex = 0;
+    final widths = List<double>.filled(children.length, 0);
 
     // Calculate fixed width columns
-    int index = 0;
-    for (Partition child in children) {
+    var index = 0;
+    for (var child in children) {
       if (child.flex > 0) {
         assert(() {
           if (!canFlex) {
@@ -152,14 +149,14 @@ class Partitions extends Widget implements SpanningWidget {
 
     // Distribute free space to flexible children, and determine baseline.
     if (totalFlex > 0 && canFlex) {
-      final double freeSpace =
+      final freeSpace =
           math.max(0, (canFlex ? maxMainSize : 0.0) - allocatedSize);
-      final double spacePerFlex = freeSpace / totalFlex;
+      final spacePerFlex = freeSpace / totalFlex;
 
       index = 0;
-      for (Partition child in children) {
+      for (var child in children) {
         if (child.flex > 0) {
-          final double childExtent = spacePerFlex * child.flex;
+          final childExtent = spacePerFlex * child.flex;
           allocatedSize += childExtent;
           widths[index] = childExtent;
         }
@@ -168,11 +165,11 @@ class Partitions extends Widget implements SpanningWidget {
     }
 
     // Layout the columns and compute the total height
-    double totalHeight = 0;
+    var totalHeight = 0.0;
     index = 0;
-    for (Partition child in children) {
+    for (var child in children) {
       if (widths[index] > 0) {
-        final BoxConstraints innerConstraints = BoxConstraints(
+        final innerConstraints = BoxConstraints(
             minWidth: widths[index],
             maxWidth: widths[index],
             maxHeight: constraints.maxHeight);
@@ -186,10 +183,10 @@ class Partitions extends Widget implements SpanningWidget {
 
     // Update Y positions
     index = 0;
-    allocatedSize = 0;
-    for (Partition child in children) {
+    allocatedSize = 0.0;
+    for (var child in children) {
       if (widths[index] > 0) {
-        final double offsetY = totalHeight - child.box.height;
+        final offsetY = totalHeight - child.box.height;
         child.box = PdfRect.fromPoints(
             PdfPoint(allocatedSize, offsetY), child.box.size);
         totalHeight = math.max(totalHeight, child.box.height);
@@ -205,12 +202,12 @@ class Partitions extends Widget implements SpanningWidget {
   void paint(Context context) {
     super.paint(context);
 
-    final Matrix4 mat = Matrix4.identity();
+    final mat = Matrix4.identity();
     mat.translate(box.x, box.y);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
-    for (Partition child in children) {
+    for (var child in children) {
       child.paint(context);
     }
     context.canvas.restoreContext();
@@ -219,8 +216,8 @@ class Partitions extends Widget implements SpanningWidget {
   @override
   void restoreContext(WidgetContext context) {
     _context.apply(context);
-    int index = 0;
-    for (final Partition child in children) {
+    var index = 0;
+    for (final child in children) {
       child.restoreContext(_context.partitionContext[index]);
       index++;
     }
@@ -228,8 +225,8 @@ class Partitions extends Widget implements SpanningWidget {
 
   @override
   WidgetContext saveContext() {
-    int index = 0;
-    for (final Partition child in children) {
+    var index = 0;
+    for (final child in children) {
       _context.partitionContext[index] = child.saveContext();
       index++;
     }

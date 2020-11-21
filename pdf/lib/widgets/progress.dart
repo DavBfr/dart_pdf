@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 class CircularProgressIndicator extends Widget {
@@ -46,23 +44,23 @@ class CircularProgressIndicator extends Widget {
     super.paint(context);
 
     final double adjustedValue = value.clamp(0.00001, .99999);
-    final double rx = box.width / 2;
-    final double ry = box.height / 2;
-    const double angleStart = math.pi / 2;
-    final double angleEnd = angleStart - math.pi * 2 * adjustedValue;
-    final PdfPoint startTop = PdfPoint(
+    final rx = box.width / 2;
+    final ry = box.height / 2;
+    const angleStart = math.pi / 2;
+    final angleEnd = angleStart - math.pi * 2 * adjustedValue;
+    final startTop = PdfPoint(
       box.x + rx + math.cos(angleStart) * rx,
       box.y + ry + math.sin(angleStart) * ry,
     );
-    final PdfPoint endTop = PdfPoint(
+    final endTop = PdfPoint(
       box.x + rx + math.cos(angleEnd) * rx,
       box.y + ry + math.sin(angleEnd) * ry,
     );
-    final PdfPoint startBottom = PdfPoint(
+    final startBottom = PdfPoint(
       box.x + rx + math.cos(angleStart) * (rx - strokeWidth),
       box.y + ry + math.sin(angleStart) * (ry - strokeWidth),
     );
-    final PdfPoint endBottom = PdfPoint(
+    final endBottom = PdfPoint(
       box.x + rx + math.cos(angleEnd) * (rx - strokeWidth),
       box.y + ry + math.sin(angleEnd) * (ry - strokeWidth),
     );

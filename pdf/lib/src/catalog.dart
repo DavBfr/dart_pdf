@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 class PdfCatalog extends PdfObject {
@@ -73,9 +71,9 @@ class PdfCatalog extends PdfObject {
       });
     }
 
-    final List<PdfAnnot> widgets = <PdfAnnot>[];
-    for (PdfPage page in pdfDocument.pdfPageList.pages) {
-      for (PdfAnnot annot in page.annotations) {
+    final widgets = <PdfAnnot>[];
+    for (var page in pdfDocument.pdfPageList.pages) {
+      for (var annot in page.annotations) {
         if (annot.annot.subtype == '/Widget') {
           widgets.add(annot);
         }

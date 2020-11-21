@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 class LineChartValue extends ChartValue {
@@ -75,33 +73,32 @@ class LineDataSet extends Dataset {
       return;
     }
 
-    PdfPoint t = const PdfPoint(0, 0);
+    var t = const PdfPoint(0, 0);
 
-    final PdfPoint p = grid.toChart(data.first.point);
+    final p = grid.toChart(data.first.point);
     if (moveTo) {
       context.canvas.moveTo(p.x, p.y);
     } else {
       context.canvas.lineTo(p.x, p.y);
     }
 
-    for (int i = 1; i < data.length; i++) {
-      final PdfPoint p = grid.toChart(data[i].point);
+    for (var i = 1; i < data.length; i++) {
+      final p = grid.toChart(data[i].point);
 
       if (!isCurved) {
         context.canvas.lineTo(p.x, p.y);
         continue;
       }
 
-      final PdfPoint pp = grid.toChart(data[i - 1].point);
-      final PdfPoint pn =
-          grid.toChart(data[i + 1 < data.length ? i + 1 : i].point);
+      final pp = grid.toChart(data[i - 1].point);
+      final pn = grid.toChart(data[i + 1 < data.length ? i + 1 : i].point);
 
-      final PdfPoint c1 = PdfPoint(pp.x + t.x, pp.y + t.y);
+      final c1 = PdfPoint(pp.x + t.x, pp.y + t.y);
 
       t = PdfPoint(
           (pn.x - pp.x) / 2 * smoothness, (pn.y - pp.y) / 2 * smoothness);
 
-      final PdfPoint c2 = PdfPoint(p.x - t.x, p.y - t.y);
+      final c2 = PdfPoint(p.x - t.x, p.y - t.y);
 
       context.canvas.curveTo(c1.x, c1.y, c2.x, c2.y, p.x, p.y);
     }
@@ -112,18 +109,18 @@ class LineDataSet extends Dataset {
       return;
     }
 
-    final double y = (grid is CartesianGrid) ? grid.xAxisOffset : 0;
+    final y = (grid is CartesianGrid) ? grid.xAxisOffset : 0;
     _drawLine(context, grid, true);
 
-    final PdfPoint pe = grid.toChart(data.last.point);
+    final pe = grid.toChart(data.last.point);
     context.canvas.lineTo(pe.x, y);
-    final PdfPoint pf = grid.toChart(data.first.point);
+    final pf = grid.toChart(data.first.point);
     context.canvas.lineTo(pf.x, y);
   }
 
   void _drawPoints(Context context, ChartGrid grid) {
-    for (final LineChartValue value in data) {
-      final PdfPoint p = grid.toChart(value.point);
+    for (final value in data) {
+      final p = grid.toChart(value.point);
       context.canvas.drawEllipse(p.x, p.y, pointSize, pointSize);
     }
   }
@@ -134,7 +131,7 @@ class LineDataSet extends Dataset {
       return;
     }
 
-    final ChartGrid grid = Chart.of(context).grid;
+    final grid = Chart.of(context).grid;
 
     if (drawSurface) {
       _drawSurface(context, grid);
@@ -165,7 +162,7 @@ class LineDataSet extends Dataset {
       return;
     }
 
-    final ChartGrid grid = Chart.of(context).grid;
+    final grid = Chart.of(context).grid;
 
     if (drawLine) {
       _drawLine(context, grid, true);

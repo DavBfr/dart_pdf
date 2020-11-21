@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 
 import 'package:pdf/pdf.dart';
@@ -49,7 +47,7 @@ void main() {
   });
 
   tearDownAll(() {
-    final File file = File('roll-paper.pdf');
+    final file = File('roll-paper.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

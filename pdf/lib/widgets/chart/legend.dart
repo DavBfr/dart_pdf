@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 class ChartLegend extends StatelessWidget {
@@ -38,7 +36,7 @@ class ChartLegend extends StatelessWidget {
   final EdgeInsets padding;
 
   Widget _buildLegend(Context context, Dataset dataset) {
-    final TextStyle style = Theme.of(context).defaultTextStyle.merge(textStyle);
+    final style = Theme.of(context).defaultTextStyle.merge(textStyle);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -62,7 +60,7 @@ class ChartLegend extends StatelessWidget {
     assert(Chart.of(context) != null,
         '$runtimeType cannot be used without a Chart widget');
 
-    final List<Dataset> datasets = Chart.of(context).datasets;
+    final datasets = Chart.of(context).datasets;
 
     final Widget wrap = Wrap(
       direction: direction,

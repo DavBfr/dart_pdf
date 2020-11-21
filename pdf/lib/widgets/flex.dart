@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 enum FlexFit {
@@ -114,15 +112,15 @@ class Flex extends MultiChildWidget implements SpanningWidget {
       // INTRINSIC MAIN SIZE
       // Intrinsic main size is the smallest size the flex container can take
       // while maintaining the min/max-content contributions of its flex items.
-      double totalFlex = 0;
-      double inflexibleSpace = 0;
-      double maxFlexFractionSoFar = 0;
+      var totalFlex = 0.0;
+      var inflexibleSpace = 0.0;
+      var maxFlexFractionSoFar = 0.0;
 
-      for (Widget child in children) {
-        final int flex = child is Flexible ? child.flex : 0;
+      for (var child in children) {
+        final flex = child is Flexible ? child.flex : 0;
         totalFlex += flex;
         if (flex > 0) {
-          final double flexFraction = childSize(child, extent) / flex;
+          final flexFraction = childSize(child, extent) / flex;
           maxFlexFractionSoFar = math.max(maxFlexFractionSoFar, flexFraction);
         } else {
           inflexibleSpace += childSize(child, extent);
@@ -136,12 +134,12 @@ class Flex extends MultiChildWidget implements SpanningWidget {
       // with the children sized using their max intrinsic dimensions.
 
       // Get inflexible space using the max intrinsic dimensions of fixed children in the main direction.
-      final double availableMainSpace = extent;
-      int totalFlex = 0;
-      double inflexibleSpace = 0;
-      double maxCrossSize = 0;
-      for (Widget child in children) {
-        final int flex = child is Flexible ? child.flex : 0;
+      final availableMainSpace = extent;
+      var totalFlex = 0;
+      var inflexibleSpace = 0.0;
+      var maxCrossSize = 0.0;
+      for (var child in children) {
+        final flex = child is Flexible ? child.flex : 0;
         totalFlex += flex;
         double mainSize;
         double crossSize;
@@ -163,12 +161,12 @@ class Flex extends MultiChildWidget implements SpanningWidget {
 
       // Determine the spacePerFlex by allocating the remaining available space.
       // When you're over-constrained spacePerFlex can be negative.
-      final double spacePerFlex =
-          math.max(0, (availableMainSpace - inflexibleSpace) / totalFlex);
+      final spacePerFlex =
+          math.max(0.0, (availableMainSpace - inflexibleSpace) / totalFlex);
 
       // Size remaining (flexible) items, find the maximum cross size.
-      for (Widget child in children) {
-        final int flex = child is Flexible ? child.flex : 0;
+      for (var child in children) {
+        final flex = child is Flexible ? child.flex : 0;
         if (flex > 0) {
           maxCrossSize =
               math.max(maxCrossSize, childSize(child, spacePerFlex * flex));
@@ -231,25 +229,24 @@ class Flex extends MultiChildWidget implements SpanningWidget {
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
     // Determine used flex factor, size inflexible items, calculate free space.
-    int totalFlex = 0;
+    var totalFlex = 0;
     Widget lastFlexChild;
     assert(constraints != null);
-    final double maxMainSize = direction == Axis.horizontal
+    final maxMainSize = direction == Axis.horizontal
         ? constraints.maxWidth
         : constraints.maxHeight;
-    final bool canFlex = maxMainSize < double.infinity;
+    final canFlex = maxMainSize < double.infinity;
 
-    double crossSize = 0;
-    double allocatedSize = 0; // Sum of the sizes of the non-flexible children.
-    int index = _context.firstChild;
+    var crossSize = 0.0;
+    var allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
+    var index = _context.firstChild;
 
-    for (Widget child in children.sublist(_context.firstChild)) {
-      final int flex = child is Flexible ? child.flex : 0;
-      final FlexFit fit = child is Flexible ? child.fit : FlexFit.loose;
+    for (var child in children.sublist(_context.firstChild)) {
+      final flex = child is Flexible ? child.flex : 0;
+      final fit = child is Flexible ? child.fit : FlexFit.loose;
       if (flex > 0) {
         assert(() {
-          final String dimension =
-              direction == Axis.horizontal ? 'width' : 'height';
+          final dimension = direction == Axis.horizontal ? 'width' : 'height';
           if (!canFlex &&
               (mainAxisSize == MainAxisSize.max || fit == FlexFit.tight)) {
             throw Exception(
@@ -298,21 +295,21 @@ class Flex extends MultiChildWidget implements SpanningWidget {
       index++;
     }
     _context.lastChild = index;
-    final int totalChildren = _context.lastChild - _context.firstChild;
+    final totalChildren = _context.lastChild - _context.firstChild;
 
     // Distribute free space to flexible children, and determine baseline.
-    final double freeSpace =
-        math.max(0, (canFlex ? maxMainSize : 0.0) - allocatedSize);
-    double allocatedFlexSpace = 0;
+    final freeSpace =
+        math.max(0.0, (canFlex ? maxMainSize : 0.0) - allocatedSize);
+    var allocatedFlexSpace = 0.0;
     if (totalFlex > 0) {
-      final double spacePerFlex =
+      final spacePerFlex =
           canFlex && totalFlex > 0 ? (freeSpace / totalFlex) : double.nan;
 
-      for (Widget child in children) {
-        final int flex = child is Flexible ? child.flex : 0;
-        final FlexFit fit = child is Flexible ? child.fit : FlexFit.loose;
+      for (var child in children) {
+        final flex = child is Flexible ? child.flex : 0;
+        final fit = child is Flexible ? child.fit : FlexFit.loose;
         if (flex > 0) {
-          final double maxChildExtent = canFlex
+          final maxChildExtent = canFlex
               ? (child == lastFlexChild
                   ? (freeSpace - allocatedFlexSpace)
                   : spacePerFlex * flex)
@@ -364,7 +361,7 @@ class Flex extends MultiChildWidget implements SpanningWidget {
           }
           child.layout(context, innerConstraints, parentUsesSize: true);
           assert(child.box != null);
-          final double childSize = _getMainSize(child);
+          final childSize = _getMainSize(child);
           assert(childSize <= maxChildExtent);
           allocatedSize += childSize;
           allocatedFlexSpace += maxChildExtent;
@@ -374,7 +371,7 @@ class Flex extends MultiChildWidget implements SpanningWidget {
     }
 
     // Align items along the main axis.
-    final double idealSize = canFlex && mainAxisSize == MainAxisSize.max
+    final idealSize = canFlex && mainAxisSize == MainAxisSize.max
         ? maxMainSize
         : allocatedSize;
     double actualSize;
@@ -396,10 +393,10 @@ class Flex extends MultiChildWidget implements SpanningWidget {
     box = PdfRect.fromPoints(PdfPoint.zero, size);
     actualSizeDelta = actualSize - allocatedSize;
 
-    final double remainingSpace = math.max(0, actualSizeDelta);
+    final remainingSpace = math.max(0.0, actualSizeDelta);
     double leadingSpace;
     double betweenSpace;
-    final bool flipMainAxis = (verticalDirection == VerticalDirection.down &&
+    final flipMainAxis = (verticalDirection == VerticalDirection.down &&
             direction == Axis.vertical) ||
         (verticalDirection == VerticalDirection.up &&
             direction == Axis.horizontal);
@@ -433,14 +430,14 @@ class Flex extends MultiChildWidget implements SpanningWidget {
     }
 
     // Position elements
-    final bool flipCrossAxis = (verticalDirection == VerticalDirection.down &&
+    final flipCrossAxis = (verticalDirection == VerticalDirection.down &&
             direction == Axis.horizontal) ||
         (verticalDirection == VerticalDirection.up &&
             direction == Axis.vertical);
-    double childMainPosition =
+    var childMainPosition =
         flipMainAxis ? actualSize - leadingSpace : leadingSpace;
 
-    for (Widget child
+    for (var child
         in children.sublist(_context.firstChild, _context.lastChild)) {
       double childCrossPosition;
       switch (crossAxisAlignment) {
@@ -485,13 +482,13 @@ class Flex extends MultiChildWidget implements SpanningWidget {
   void paint(Context context) {
     super.paint(context);
 
-    final Matrix4 mat = Matrix4.identity();
+    final mat = Matrix4.identity();
     mat.translate(box.x, box.y);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
 
-    for (Widget child
+    for (final child
         in children.sublist(_context.firstChild, _context.lastChild)) {
       child.paint(context);
     }
@@ -652,17 +649,17 @@ class ListView extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    final List<Widget> _children = <Widget>[];
+    final _children = <Widget>[];
 
     if (reverse) {
-      for (int index = itemCount - 1; index >= 0; index--) {
+      for (var index = itemCount - 1; index >= 0; index--) {
         _children.add(_getItem(context, index));
         if (spacing != 0 && index > 0) {
           _children.add(_getSeparator(context, index));
         }
       }
     } else {
-      for (int index = 0; index < itemCount; index++) {
+      for (var index = 0; index < itemCount; index++) {
         _children.add(_getItem(context, index));
         if (spacing != 0 && index < itemCount - 1) {
           _children.add(_getSeparator(context, index));

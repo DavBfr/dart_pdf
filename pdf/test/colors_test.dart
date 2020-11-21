@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -31,11 +29,10 @@ class Color extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    final TextStyle style = Theme.of(context).defaultTextStyle.copyWith(
+    final style = Theme.of(context).defaultTextStyle.copyWith(
         color: color.luminance < 0.2 ? PdfColors.white : PdfColors.black,
         fontSize: 14);
-    final TextStyle hexStyle =
-        style.copyWith(font: Font.courier(), fontSize: 10);
+    final hexStyle = style.copyWith(font: Font.courier(), fontSize: 10);
     return Container(
         color: color,
         padding: const EdgeInsets.all(2 * PdfPageFormat.mm),
@@ -85,19 +82,19 @@ class ColorWheel extends Widget {
       double angleStart, double angleEnd, double radius1, double radius2) {
     assert(radius1 > radius2);
 
-    final PdfPoint startTop = PdfPoint(
+    final startTop = PdfPoint(
       box.x + centerX + math.cos(angleStart) * radius1,
       box.y + centerY + math.sin(angleStart) * radius1,
     );
-    final PdfPoint endTop = PdfPoint(
+    final endTop = PdfPoint(
       box.x + centerX + math.cos(angleEnd) * radius1,
       box.y + centerY + math.sin(angleEnd) * radius1,
     );
-    final PdfPoint startBottom = PdfPoint(
+    final startBottom = PdfPoint(
       box.x + centerX + math.cos(angleStart) * radius2,
       box.y + centerY + math.sin(angleStart) * radius2,
     );
-    final PdfPoint endBottom = PdfPoint(
+    final endBottom = PdfPoint(
       box.x + centerX + math.cos(angleEnd) * radius2,
       box.y + centerY + math.sin(angleEnd) * radius2,
     );
@@ -126,19 +123,19 @@ class ColorWheel extends Widget {
   void paint(Context context) {
     super.paint(context);
 
-    final double centerX = box.width / 2;
-    final double centerY = box.height / 2;
-    final double step = math.pi * 2 / divisions;
-    final double angleStart = math.pi / 2 - step;
+    final centerX = box.width / 2;
+    final centerY = box.height / 2;
+    final step = math.pi * 2 / divisions;
+    final angleStart = math.pi / 2 - step;
 
-    final double ringStep = math.min(centerX, centerY) / rings;
+    final ringStep = math.min(centerX, centerY) / rings;
 
     context.canvas.setStrokeColor(PdfColors.black);
 
-    for (int ring = 0; ring <= rings; ring++) {
-      final double radius1 = ringStep * ring;
-      final double radius2 = ringStep * (ring - 1);
-      for (double angle = 0; angle < math.pi * 2; angle += step) {
+    for (var ring = 0; ring <= rings; ring++) {
+      final radius1 = ringStep * ring;
+      final radius2 = ringStep * (ring - 1);
+      for (var angle = 0.0; angle < math.pi * 2; angle += step) {
         final PdfColor ic =
             PdfColorHsl(angle / math.pi * 180, ring / rings, brightness);
 
@@ -667,7 +664,7 @@ void main() {
   });
 
   test('Pdf Colors Wheel', () {
-    const Map<ColorSpace, String> wheels = <ColorSpace, String>{
+    const wheels = <ColorSpace, String>{
       ColorSpace.rgb: 'Red Green Blue',
       ColorSpace.ryb: 'Red Yellow Blue',
       ColorSpace.cmy: 'Cyan Magenta Yellow',
@@ -690,10 +687,10 @@ void main() {
   });
 
   test('Pdf Colors Generator', () {
-    const double widthCount = 26;
-    const PdfPageFormat format = PdfPageFormat(400, 400);
-    final double w = (format.width - 1) / widthCount;
-    final int count = widthCount * (format.height - 1) ~/ w;
+    const widthCount = 26;
+    const format = PdfPageFormat(400, 400);
+    final w = (format.width - 1) / widthCount;
+    final count = widthCount * (format.height - 1) ~/ w;
 
     pdf.addPage(MultiPage(
         pageFormat: format,
@@ -711,7 +708,7 @@ void main() {
 
   group('Pdf Colors Conversions', () {
     test('fromHex #RRGGBBAA', () {
-      final PdfColor c = PdfColor.fromHex('#12345678');
+      final c = PdfColor.fromHex('#12345678');
       expect(c.red, 0x12 / 255);
       expect(c.green, 0x34 / 255);
       expect(c.blue, 0x56 / 255);
@@ -719,7 +716,7 @@ void main() {
     });
 
     test('fromHex RRGGBBAA', () {
-      final PdfColor c = PdfColor.fromHex('12345678');
+      final c = PdfColor.fromHex('12345678');
       expect(c.red, 0x12 / 255);
       expect(c.green, 0x34 / 255);
       expect(c.blue, 0x56 / 255);
@@ -727,7 +724,7 @@ void main() {
     });
 
     test('fromHex RRGGBB', () {
-      final PdfColor c = PdfColor.fromHex('123456');
+      final c = PdfColor.fromHex('123456');
       expect(c.red, 0x12 / 255);
       expect(c.green, 0x34 / 255);
       expect(c.blue, 0x56 / 255);
@@ -735,7 +732,7 @@ void main() {
     });
 
     test('fromHex RGB', () {
-      final PdfColor c = PdfColor.fromHex('18f');
+      final c = PdfColor.fromHex('18f');
       expect(c.red, 0x11 / 255);
       expect(c.green, 0x88 / 255);
       expect(c.blue, 0xff / 255);
@@ -748,7 +745,7 @@ void main() {
   });
 
   tearDownAll(() {
-    final File file = File('colors.pdf');
+    final file = File('colors.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

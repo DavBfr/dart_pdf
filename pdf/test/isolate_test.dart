@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
@@ -35,9 +33,9 @@ class Message {
 }
 
 void compute(Message message) {
-  final Document pdf = Document();
+  final pdf = Document();
 
-  final PdfImage image = PdfImage.jpeg(
+  final image = PdfImage.jpeg(
     pdf.document,
     image: message.image,
   );
@@ -49,13 +47,13 @@ void compute(Message message) {
 
 void main() {
   test('Pdf Isolate', () async {
-    final Completer<void> completer = Completer<void>();
-    final ReceivePort receivePort = ReceivePort();
+    final completer = Completer<void>();
+    final receivePort = ReceivePort();
 
     receivePort.listen((dynamic data) async {
       if (data is Uint8List) {
         print('Received a ${data.length} bytes PDF');
-        final File file = File('isolate.pdf');
+        final file = File('isolate.pdf');
         await file.writeAsBytes(data);
         print('File saved');
       }
@@ -63,8 +61,7 @@ void main() {
     });
 
     print('Download image');
-    final Uint8List imageBytes =
-        await download('https://www.nfet.net/nfet.jpg');
+    final imageBytes = await download('https://www.nfet.net/nfet.jpg');
 
     print('Generate PDF');
     await Isolate.spawn<Message>(

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
 // ignore_for_file: avoid_unused_constructor_parameters
 
 part of pdf;
@@ -25,7 +24,7 @@ abstract class PdfDataType {
   void output(PdfStream s);
 
   PdfStream _toStream() {
-    final PdfStream s = PdfStream();
+    final s = PdfStream();
     output(s);
     return s;
   }
@@ -80,7 +79,7 @@ class PdfNumList extends PdfDataType {
 
   @override
   void output(PdfStream s) {
-    for (int n = 0; n < values.length; n++) {
+    for (var n = 0; n < values.length; n++) {
       if (n > 0) {
         s.putByte(0x20);
       }
@@ -120,20 +119,20 @@ class PdfString extends PdfDataType {
   }
 
   static Uint8List _date(DateTime date) {
-    final DateTime utcDate = date.toUtc();
-    final String year = utcDate.year.toString().padLeft(4, '0');
-    final String month = utcDate.month.toString().padLeft(2, '0');
-    final String day = utcDate.day.toString().padLeft(2, '0');
-    final String hour = utcDate.hour.toString().padLeft(2, '0');
-    final String minute = utcDate.minute.toString().padLeft(2, '0');
-    final String second = utcDate.second.toString().padLeft(2, '0');
+    final utcDate = date.toUtc();
+    final year = utcDate.year.toString().padLeft(4, '0');
+    final month = utcDate.month.toString().padLeft(2, '0');
+    final day = utcDate.day.toString().padLeft(2, '0');
+    final hour = utcDate.hour.toString().padLeft(2, '0');
+    final minute = utcDate.minute.toString().padLeft(2, '0');
+    final second = utcDate.second.toString().padLeft(2, '0');
     return _string('D:$year$month$day$hour$minute${second}Z');
   }
 
   /// Escape special characters
   /// \ddd Character code ddd (octal)
   void _putTextBytes(PdfStream s, List<int> b) {
-    for (int c in b) {
+    for (var c in b) {
       switch (c) {
         case 0x0a: // \n Line feed (LF)
           s.putByte(0x5c);
@@ -247,7 +246,7 @@ class PdfSecString extends PdfString {
       return super.output(s);
     }
 
-    final Uint8List enc = object.pdfDocument.encryption.encrypt(value, object);
+    final enc = object.pdfDocument.encryption.encrypt(value, object);
     _output(s, enc);
   }
 }
@@ -312,8 +311,8 @@ class PdfArray extends PdfDataType {
   void output(PdfStream s) {
     s.putString('[');
     if (values.isNotEmpty) {
-      for (int n = 0; n < values.length; n++) {
-        final PdfDataType val = values[n];
+      for (var n = 0; n < values.length; n++) {
+        final val = values[n];
         if (n > 0 &&
             !(val is PdfName ||
                 val is PdfString ||

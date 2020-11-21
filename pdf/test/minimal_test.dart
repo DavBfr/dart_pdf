@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 
 import 'package:pdf/pdf.dart';
@@ -23,15 +21,15 @@ import 'package:test/test.dart';
 
 void main() {
   test('Pdf Minimal', () {
-    final PdfDocument pdf = PdfDocument(compress: false);
-    final PdfPage page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
+    final pdf = PdfDocument(compress: false);
+    final page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
 
-    final PdfGraphics g = page.getGraphics();
+    final g = page.getGraphics();
     g.drawLine(
         30, page.pageFormat.height - 30.0, 200, page.pageFormat.height - 200.0);
     g.strokePath();
 
-    final File file = File('minimal.pdf');
+    final file = File('minimal.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

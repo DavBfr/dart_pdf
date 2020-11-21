@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 class PdfStream {
@@ -30,8 +28,8 @@ class PdfStream {
       return;
     }
 
-    final int newSize = _offset + size + _grow;
-    final Uint8List newBuffer = Uint8List(newSize);
+    final newSize = _offset + size + _grow;
+    final newBuffer = Uint8List(newSize);
     newBuffer.setAll(0, _stream);
     _stream = newBuffer;
   }
@@ -61,7 +59,7 @@ class PdfStream {
 
   void putString(String s) {
     assert(() {
-      for (final int codeUnit in s.codeUnits) {
+      for (final codeUnit in s.codeUnits) {
         if (codeUnit > 0x7f) {
           return false;
         }

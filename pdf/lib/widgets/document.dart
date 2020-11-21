@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 class Document {
@@ -68,7 +66,7 @@ class Document {
 
   Uint8List save() {
     if (!_paint) {
-      for (Page page in _pages) {
+      for (var page in _pages) {
         page.postProcess(this);
       }
       _paint = true;

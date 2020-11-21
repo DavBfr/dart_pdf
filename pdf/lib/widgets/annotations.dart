@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 class Anchor extends SingleChildWidget {
@@ -42,8 +40,8 @@ class Anchor extends SingleChildWidget {
     super.paint(context);
     paintChild(context);
 
-    final Matrix4 mat = context.canvas.getTransform();
-    final Vector3 lt = mat.transform3(Vector3(box.left, box.top, 0));
+    final mat = context.canvas.getTransform();
+    final lt = mat.transform3(Vector3(box.left, box.top, 0));
     context.document.pdfNames.addDest(
       name,
       context.page,
@@ -53,8 +51,8 @@ class Anchor extends SingleChildWidget {
     );
 
     if (description != null) {
-      final Vector3 rb = mat.transform3(Vector3(box.right, box.top, 0));
-      final PdfRect ibox = PdfRect.fromLTRB(lt.x, lt.y, rb.x, rb.y);
+      final rb = mat.transform3(Vector3(box.right, box.top, 0));
+      final ibox = PdfRect.fromLTRB(lt.x, lt.y, rb.x, rb.y);
       PdfAnnot(context.page, PdfAnnotText(rect: ibox, content: description));
     }
   }
@@ -197,8 +195,7 @@ class AnnotationTextField extends AnnotationBuilder {
 
   @override
   void build(Context context, PdfRect box) {
-    final TextStyle _textStyle =
-        Theme.of(context).defaultTextStyle.merge(textStyle);
+    final _textStyle = Theme.of(context).defaultTextStyle.merge(textStyle);
 
     PdfAnnot(
       context.page,
@@ -375,8 +372,8 @@ class Outline extends Anchor {
       style: style,
     );
 
-    PdfOutline parent = context.document.outline;
-    int l = level;
+    var parent = context.document.outline;
+    var l = level;
 
     while (l > 0) {
       if (parent.effectiveLevel == l) {

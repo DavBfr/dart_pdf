@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 enum Type1Fonts {
@@ -83,7 +81,7 @@ class Font {
 
   @protected
   PdfFont buildFont(PdfDocument pdfDocument) {
-    final PdfFont existing = pdfDocument.fonts.firstWhere(
+    final existing = pdfDocument.fonts.firstWhere(
       (PdfFont font) => font.subtype == '/Type1' && font.fontName == fontName,
       orElse: () => null,
     );
@@ -129,7 +127,7 @@ class Font {
 
   PdfFont getFont(Context context) {
     if (_pdfFont == null) {
-      final PdfDocument pdfDocument = context.document;
+      final pdfDocument = context.document;
       _pdfFont = buildFont(pdfDocument);
     }
 
@@ -161,13 +159,13 @@ class TtfFont extends Font {
       return _pdfFont.fontName;
     }
 
-    final TtfParser font = TtfParser(data);
+    final font = TtfParser(data);
     return font.fontName;
   }
 
   @override
   String toString() {
-    final TtfParser font = TtfParser(data);
+    final font = TtfParser(data);
     return '<TrueType Font "${font.fontName}">';
   }
 }

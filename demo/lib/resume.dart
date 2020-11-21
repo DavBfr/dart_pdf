@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: always_specify_types
-
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -29,15 +27,14 @@ const PdfColor lightGreen = PdfColor.fromInt(0xffcdf1e7);
 const sep = 120.0;
 
 Future<Uint8List> generateResume(PdfPageFormat format) async {
-  final pw.Document doc =
-      pw.Document(title: 'My Résumé', author: 'David PHAM-VAN');
+  final doc = pw.Document(title: 'My Résumé', author: 'David PHAM-VAN');
 
-  final PdfImage profileImage = PdfImage.file(
+  final profileImage = PdfImage.file(
     doc.document,
     bytes: (await rootBundle.load('assets/profile.jpg')).buffer.asUint8List(),
   );
 
-  final pw.PageTheme pageTheme = await _myPageTheme(format);
+  final pageTheme = await _myPageTheme(format);
 
   doc.addPage(
     pw.MultiPage(
@@ -299,7 +296,7 @@ class _Percent extends pw.StatelessWidget {
 
   @override
   pw.Widget build(pw.Context context) {
-    final List<pw.Widget> widgets = <pw.Widget>[
+    final widgets = <pw.Widget>[
       pw.Container(
         width: size,
         height: size,

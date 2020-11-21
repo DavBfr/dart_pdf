@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 class DecoratedBox extends SingleChildWidget {
@@ -94,7 +92,7 @@ class Container extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    Widget current = child;
+    var current = child;
 
     if (child == null && (constraints == null || !constraints.isTight)) {
       current = LimitedBox(

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 class PdfFormXObject extends PdfXObject {
@@ -32,7 +30,7 @@ class PdfFormXObject extends PdfXObject {
 
   /// set matrix
   void setMatrix(Matrix4 t) {
-    final Float64List s = t.storage;
+    final s = t.storage;
     params['/Matrix'] =
         PdfArray.fromNum(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]);
   }
@@ -43,7 +41,7 @@ class PdfFormXObject extends PdfXObject {
 
     // Now the resources
     /// This holds any resources for this FormXObject
-    final PdfDict resources = PdfDict();
+    final resources = PdfDict();
 
     // fonts
     if (fonts.isNotEmpty) {

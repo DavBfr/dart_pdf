@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: always_specify_types
-
 import 'dart:typed_data';
 
 import 'package:intl/intl.dart';
@@ -74,9 +72,9 @@ class Calendar extends StatelessWidget {
     bool currentMonth,
     bool currentDay,
   ) {
-    String text = '${date.day}';
-    TextStyle style = const TextStyle();
-    PdfColor color = PdfColors.grey300;
+    var text = '${date.day}';
+    var style = const TextStyle();
+    var color = PdfColors.grey300;
 
     if (currentDay) {
       style = const TextStyle(color: PdfColors.red);
@@ -105,22 +103,22 @@ class Calendar extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    final DateTime _date = date ?? DateTime.now();
-    final int _year = year ?? _date.year;
-    final int _month = month ?? _date.month;
+    final _date = date ?? DateTime.now();
+    final _year = year ?? _date.year;
+    final _month = month ?? _date.month;
 
-    final DateTime start = DateTime(_year, _month, 1, 12);
-    final DateTime end = DateTime(_year, _month + 1, 1, 12).subtract(
+    final start = DateTime(_year, _month, 1, 12);
+    final end = DateTime(_year, _month + 1, 1, 12).subtract(
       const Duration(days: 1),
     );
 
-    final int startId = start.weekday - 1;
-    final int endId = end.difference(start).inDays + startId + 1;
+    final startId = start.weekday - 1;
+    final endId = end.difference(start).inDays + startId + 1;
 
-    final Row head = Row(
+    final head = Row(
       mainAxisSize: MainAxisSize.max,
       children: List<Widget>.generate(7, (int index) {
-        final DateTime d = start.add(Duration(days: index - startId));
+        final d = start.add(Duration(days: index - startId));
         return Expanded(
           child: Container(
             foregroundDecoration: BoxDecoration(
@@ -138,12 +136,12 @@ class Calendar extends StatelessWidget {
       }),
     );
 
-    final GridView body = GridView(
+    final body = GridView(
       crossAxisCount: 7,
       children: List<Widget>.generate(42, (int index) {
-        final DateTime d = start.add(Duration(days: index - startId));
-        final bool currentMonth = index >= startId && index < endId;
-        final bool currentDay = d.year == _date.year &&
+        final d = start.add(Duration(days: index - startId));
+        final currentMonth = index >= startId && index < endId;
+        final currentDay = d.year == _date.year &&
             d.month == _date.month &&
             d.day == _date.day;
         return Container(

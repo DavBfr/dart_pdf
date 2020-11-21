@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 class Header extends StatelessWidget {
@@ -57,10 +55,10 @@ class Header extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    BoxDecoration _decoration = decoration;
-    EdgeInsets _margin = margin;
-    EdgeInsets _padding = padding;
-    TextStyle _textStyle = textStyle;
+    var _decoration = decoration;
+    var _margin = margin;
+    var _padding = padding;
+    var _textStyle = textStyle;
     switch (level) {
       case 0:
         _margin ??= const EdgeInsets.only(bottom: 5.0 * PdfPageFormat.mm);

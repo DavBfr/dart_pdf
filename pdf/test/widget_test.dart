@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
@@ -32,9 +29,8 @@ void main() {
   setUpAll(() {
     Document.debug = true;
 
-    final Uint8List defaultFont = File('open-sans.ttf').readAsBytesSync();
-    final Uint8List defaultFontBold =
-        File('open-sans-bold.ttf').readAsBytesSync();
+    final defaultFont = File('open-sans.ttf').readAsBytesSync();
+    final defaultFontBold = File('open-sans-bold.ttf').readAsBytesSync();
 
     pdf = Document(
         title: 'Widgets Test',
@@ -45,7 +41,7 @@ void main() {
 
     symbol = TextStyle(font: Font.zapfDingbats());
 
-    final List<int> imData = zlib.decode(base64.decode(
+    final imData = zlib.decode(base64.decode(
         'eJz7//8/w388uOTCT6a4Ez96Q47++I+OI479mEVALyNU7z9seuNP/mAm196Ekz8YR+0dWHtBmJC9S+7/Zog89iMIKLYaHQPVJGLTD7MXpDfq+I9goNhPdPPDjv3YlnH6Jye6+2H21l/6yeB/4HsSDr1bQXrRwq8HqHcGyF6QXp9933N0tn/7Y7vn+/9gLPaih0PDlV9MIAzVm6ez7dsfzW3f/oMwzAx0e7FhoJutdbcj9MKw9frnL2J2POfBpxeEg478YLba/X0Wsl6lBXf+s0bP/s8ePXeWePJCvPEJNYMRZIYWSO/cq/9Z/Nv+M4bO+M8YDjFDJGkhzvSE7A6jRTdnsQR2wfXCMLHuMC5byyidvGgWE5JeZDOIcYdR+TpmkBno+mFmAAC+DGhl'));
     im = PdfImage(pdf.document, image: imData, width: 16, height: 20);
   });
@@ -288,7 +284,7 @@ void main() {
   );
 
   tearDownAll(() {
-    final File file = File('widgets.pdf');
+    final file = File('widgets.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

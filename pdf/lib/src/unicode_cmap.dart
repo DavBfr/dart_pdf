@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 class PdfUnicodeCmap extends PdfObjectStream {
@@ -46,8 +44,8 @@ class PdfUnicodeCmap extends PdfObjectStream {
         'endcodespacerange\n'
         '${cmap.length} beginbfchar\n');
 
-    for (int key = 0; key < cmap.length; key++) {
-      final int value = cmap[key];
+    for (var key = 0; key < cmap.length; key++) {
+      final value = cmap[key];
       buf.putString('<' +
           key.toRadixString(16).toUpperCase().padLeft(4, '0') +
           '> <' +

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
 // https://github.com/agawish/Better-Arabic-Reshaper/tree/master/src/org/amr/arabic
 // http://mpcabd.xyz/python-arabic-text-reshaper/
 // https://github.com/Georeactor/alif-toolkit/tree/master/src
@@ -229,17 +228,17 @@ class PdfArabic {
   }
 
   static List<int> _resolveLigatures(List<int> lettersq) {
-    final List<int> result = <int>[];
+    final result = <int>[];
     dynamic tmpLigatures = _ligatures;
     dynamic tmpDiacritic = _diacriticLigatures;
-    final List<int> letters = lettersq.reversed.toList();
+    final letters = lettersq.reversed.toList();
 
-    final List<int> effectedLetters = <int>[];
-    final List<int> effectedDiacritics = <int>[];
+    final effectedLetters = <int>[];
+    final effectedDiacritics = <int>[];
 
-    final List<int> finalDiacritics = <int>[];
+    final finalDiacritics = <int>[];
 
-    for (int i = 0; i < letters.length; i++) {
+    for (var i = 0; i < letters.length; i++) {
       if (_isArabicDiacriticValue(letters[i])) {
         effectedDiacritics.insert(0, letters[i]);
         if (tmpDiacritic.containsKey(letters[i])) {
@@ -326,25 +325,25 @@ class PdfArabic {
   }
 
   static Iterable<String> _parse(String text) sync* {
-    final List<String> words = text.split(' ');
+    final words = text.split(' ');
 
-    final List<List<int>> notArabicWords = <List<int>>[];
+    final notArabicWords = <List<int>>[];
 
-    bool first = true;
-    for (String word in words) {
-      final List<int> newWord = <int>[];
-      bool isNewWordArabic = false;
+    var first = true;
+    for (var word in words) {
+      final newWord = <int>[];
+      var isNewWordArabic = false;
 
-      int prevLetter = 0;
+      var prevLetter = 0;
 
-      for (int j = 0; j < word.length; j += 1) {
-        final int currentLetter = word.codeUnitAt(j);
+      for (var j = 0; j < word.length; j += 1) {
+        final currentLetter = word.codeUnitAt(j);
 
         if (_isArabicDiacritic(currentLetter)) {
           newWord.insert(0, _arabicDiacritics[currentLetter]);
           continue;
         }
-        final int nextLetter = word
+        final nextLetter = word
             .split('')
             .skip(j + 1)
             .map((String e) => e.codeUnitAt(0))
@@ -356,7 +355,7 @@ class PdfArabic {
         if (_isArabicLetter(currentLetter)) {
           isNewWordArabic = true;
 
-          final int position =
+          final position =
               _getCorrectForm(currentLetter, prevLetter, nextLetter);
           prevLetter = currentLetter;
           if (position != -1) {
@@ -381,7 +380,7 @@ class PdfArabic {
 
       if (isNewWordArabic) {
         isNewWordArabic = false;
-        for (List<int> notArabicNewWord in notArabicWords) {
+        for (var notArabicNewWord in notArabicWords) {
           yield '${String.fromCharCodes(notArabicNewWord)} ';
         }
         notArabicWords.clear();
@@ -391,7 +390,7 @@ class PdfArabic {
       }
     }
     // if notArabicWords.length != 0, that means all sentence doesn't contain Arabic.
-    for (int i = 0; i < notArabicWords.length; i++) {
+    for (var i = 0; i < notArabicWords.length; i++) {
       yield String.fromCharCodes(notArabicWords[i]);
       if (i != notArabicWords.length - 1) {
         yield ' ';

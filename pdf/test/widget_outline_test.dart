@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 import 'dart:math';
 
@@ -28,10 +26,10 @@ Document pdf;
 final LoremText lorem = LoremText(random: Random(42));
 
 Iterable<Widget> level(int i) sync* {
-  final String text = lorem.sentence(5);
-  int p = 0;
+  final text = lorem.sentence(5);
+  var p = 0;
   PdfColor color;
-  PdfOutlineStyle style = PdfOutlineStyle.normal;
+  var style = PdfOutlineStyle.normal;
 
   if (i >= 3 && i <= 6) {
     p++;
@@ -86,7 +84,7 @@ void main() {
   });
 
   tearDownAll(() {
-    final File file = File('widgets-outline.pdf');
+    final file = File('widgets-outline.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

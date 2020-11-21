@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 @immutable
@@ -96,15 +94,13 @@ class BoxConstraints {
   bool get isTight => hasTightWidth && hasTightHeight;
 
   PdfPoint constrain(PdfPoint size) {
-    final PdfPoint result =
-        PdfPoint(constrainWidth(size.x), constrainHeight(size.y));
+    final result = PdfPoint(constrainWidth(size.x), constrainHeight(size.y));
     return result;
   }
 
   PdfRect constrainRect(
       {double width = double.infinity, double height = double.infinity}) {
-    final PdfPoint result =
-        PdfPoint(constrainWidth(width), constrainHeight(height));
+    final result = PdfPoint(constrainWidth(width), constrainHeight(height));
     return PdfRect.fromPoints(PdfPoint.zero, result);
   }
 
@@ -119,15 +115,15 @@ class BoxConstraints {
   /// Returns a size that attempts to meet the conditions
   PdfPoint constrainSizeAndAttemptToPreserveAspectRatio(PdfPoint size) {
     if (isTight) {
-      final PdfPoint result = smallest;
+      final result = smallest;
       return result;
     }
 
-    double width = size.x;
-    double height = size.y;
+    var width = size.x;
+    var height = size.y;
     assert(width > 0.0);
     assert(height > 0.0);
-    final double aspectRatio = width / height;
+    final aspectRatio = width / height;
 
     if (width > maxWidth) {
       width = maxWidth;
@@ -149,8 +145,7 @@ class BoxConstraints {
       width = height * aspectRatio;
     }
 
-    final PdfPoint result =
-        PdfPoint(constrainWidth(width), constrainHeight(height));
+    final result = PdfPoint(constrainWidth(width), constrainHeight(height));
     return result;
   }
 
@@ -170,10 +165,10 @@ class BoxConstraints {
   /// Returns new box constraints that are smaller by the given edge dimensions.
   BoxConstraints deflate(EdgeInsets edges) {
     assert(edges != null);
-    final double horizontal = edges.horizontal;
-    final double vertical = edges.vertical;
-    final double deflatedMinWidth = math.max(0, minWidth - horizontal);
-    final double deflatedMinHeight = math.max(0, minHeight - vertical);
+    final horizontal = edges.horizontal;
+    final vertical = edges.vertical;
+    final deflatedMinWidth = math.max(0.0, minWidth - horizontal);
+    final deflatedMinHeight = math.max(0.0, minHeight - vertical);
     return BoxConstraints(
         minWidth: deflatedMinWidth,
         maxWidth: math.max(deflatedMinWidth, maxWidth - horizontal),
@@ -321,15 +316,15 @@ class Alignment {
 
   /// Returns the offset that is this fraction within the given size.
   PdfPoint alongSize(PdfPoint other) {
-    final double centerX = other.x / 2.0;
-    final double centerY = other.y / 2.0;
+    final centerX = other.x / 2.0;
+    final centerY = other.y / 2.0;
     return PdfPoint(centerX + x * centerX, centerY + y * centerY);
   }
 
   /// Returns the point that is this fraction within the given rect.
   PdfPoint withinRect(PdfRect rect) {
-    final double halfWidth = rect.width / 2.0;
-    final double halfHeight = rect.height / 2.0;
+    final halfWidth = rect.width / 2.0;
+    final halfHeight = rect.height / 2.0;
     return PdfPoint(
       rect.left + halfWidth + x * halfWidth,
       rect.bottom + halfHeight + y * halfHeight,
@@ -339,8 +334,8 @@ class Alignment {
   /// Returns a rect of the given size, aligned within given rect as specified
   /// by this alignment.
   PdfRect inscribe(PdfPoint size, PdfRect rect) {
-    final double halfWidthDelta = (rect.width - size.x) / 2.0;
-    final double halfHeightDelta = (rect.height - size.y) / 2.0;
+    final halfWidthDelta = (rect.width - size.x) / 2.0;
+    final halfHeightDelta = (rect.height - size.y) / 2.0;
     return PdfRect(
       rect.x + halfWidthDelta + x * halfWidthDelta,
       rect.y + halfHeightDelta + y * halfHeightDelta,
@@ -429,7 +424,7 @@ FittedSizes applyBoxFit(BoxFit fit, PdfPoint inputSize, PdfPoint outputSize) {
     case BoxFit.scaleDown:
       sourceSize = inputSize;
       destinationSize = inputSize;
-      final double aspectRatio = inputSize.x / inputSize.y;
+      final aspectRatio = inputSize.x / inputSize.y;
       if (destinationSize.y > outputSize.y) {
         destinationSize = PdfPoint(outputSize.y * aspectRatio, outputSize.y);
       }
@@ -442,16 +437,16 @@ FittedSizes applyBoxFit(BoxFit fit, PdfPoint inputSize, PdfPoint outputSize) {
 }
 
 PdfPoint transformPoint(Matrix4 transform, PdfPoint point) {
-  final Vector3 position3 = Vector3(point.x, point.y, 0);
-  final Vector3 transformed3 = transform.perspectiveTransform(position3);
+  final position3 = Vector3(point.x, point.y, 0);
+  final transformed3 = transform.perspectiveTransform(position3);
   return PdfPoint(transformed3.x, transformed3.y);
 }
 
 PdfRect transformRect(Matrix4 transform, PdfRect rect) {
-  final PdfPoint point1 = transformPoint(transform, rect.topLeft);
-  final PdfPoint point2 = transformPoint(transform, rect.topRight);
-  final PdfPoint point3 = transformPoint(transform, rect.bottomLeft);
-  final PdfPoint point4 = transformPoint(transform, rect.bottomRight);
+  final point1 = transformPoint(transform, rect.topLeft);
+  final point2 = transformPoint(transform, rect.topRight);
+  final point3 = transformPoint(transform, rect.bottomLeft);
+  final point4 = transformPoint(transform, rect.bottomRight);
   return PdfRect.fromLTRB(
       math.min(point1.x, math.min(point2.x, math.min(point3.x, point4.x))),
       math.min(point1.y, math.min(point2.y, math.min(point3.y, point4.y))),

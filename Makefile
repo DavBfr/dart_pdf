@@ -139,33 +139,23 @@ publish-printing: format clean
 
 analyze-pdf: .pana
 	@find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	@dart pub global run pana --no-warning --source path pdf 2> /dev/null | python test/pana_report.py
+	@dart pub global run pana --no-warning --source path pdf
 	@find pdf -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 analyze-printing: .pana
 	@find printing -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	@dart pub global run pana --no-warning --source path printing 2> /dev/null | python test/pana_report.py
+	@dart pub global run pana --no-warning --source path printing
 	@find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 analyze: analyze-pdf analyze-printing
-
-analyze-ci-pdf: .pana
-	@find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	@dart pub global run pana --no-warning --source path pdf
-	@find pdf -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
-
-analyze-ci-printing: .pana
-	@find printing -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	@dart pub global run pana --no-warning --source path printing
-	@find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 .dartfix:
 	which dartfix || dart pub global activate dartfix
 	touch $@
 
 fix: get .dartfix
-	cd pdf; dart pub global run dartfix:fix --overwrite .
-	cd printing; dart pub global run dartfix:fix --overwrite .
+	cd pdf; dart pub global run dartfix --pedantic --overwrite .
+	cd printing; dart pub global run dartfix --pedantic --overwrite .
 
 ref:
 	mkdir -p ref

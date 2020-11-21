@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 class PdfColor {
@@ -49,7 +47,7 @@ class PdfColor {
     double red;
     double green;
     double blue;
-    double alpha = 1;
+    var alpha = 1.0;
 
     if (color.length == 3) {
       red = int.parse(color.substring(0, 1) * 2, radix: 16) / 255;
@@ -78,7 +76,7 @@ class PdfColor {
     assert(blue >= 0 && blue <= 1);
     assert(alpha >= 0 && alpha <= 1);
 
-    const List<List<double>> magic = <List<double>>[
+    const magic = <List<double>>[
       <double>[1, 1, 1],
       <double>[1, 1, 0],
       <double>[1, 0, 0],
@@ -90,43 +88,43 @@ class PdfColor {
     ];
 
     double cubicInt(double t, double A, double B) {
-      final double weight = t * t * (3 - 2 * t);
+      final weight = t * t * (3 - 2 * t);
       return A + weight * (B - A);
     }
 
     double getRed(double iR, double iY, double iB) {
-      final double x0 = cubicInt(iB, magic[0][0], magic[4][0]);
-      final double x1 = cubicInt(iB, magic[1][0], magic[5][0]);
-      final double x2 = cubicInt(iB, magic[2][0], magic[6][0]);
-      final double x3 = cubicInt(iB, magic[3][0], magic[7][0]);
-      final double y0 = cubicInt(iY, x0, x1);
-      final double y1 = cubicInt(iY, x2, x3);
+      final x0 = cubicInt(iB, magic[0][0], magic[4][0]);
+      final x1 = cubicInt(iB, magic[1][0], magic[5][0]);
+      final x2 = cubicInt(iB, magic[2][0], magic[6][0]);
+      final x3 = cubicInt(iB, magic[3][0], magic[7][0]);
+      final y0 = cubicInt(iY, x0, x1);
+      final y1 = cubicInt(iY, x2, x3);
       return cubicInt(iR, y0, y1);
     }
 
     double getGreen(double iR, double iY, double iB) {
-      final double x0 = cubicInt(iB, magic[0][1], magic[4][1]);
-      final double x1 = cubicInt(iB, magic[1][1], magic[5][1]);
-      final double x2 = cubicInt(iB, magic[2][1], magic[6][1]);
-      final double x3 = cubicInt(iB, magic[3][1], magic[7][1]);
-      final double y0 = cubicInt(iY, x0, x1);
-      final double y1 = cubicInt(iY, x2, x3);
+      final x0 = cubicInt(iB, magic[0][1], magic[4][1]);
+      final x1 = cubicInt(iB, magic[1][1], magic[5][1]);
+      final x2 = cubicInt(iB, magic[2][1], magic[6][1]);
+      final x3 = cubicInt(iB, magic[3][1], magic[7][1]);
+      final y0 = cubicInt(iY, x0, x1);
+      final y1 = cubicInt(iY, x2, x3);
       return cubicInt(iR, y0, y1);
     }
 
     double getBlue(double iR, double iY, double iB) {
-      final double x0 = cubicInt(iB, magic[0][2], magic[4][2]);
-      final double x1 = cubicInt(iB, magic[1][2], magic[5][2]);
-      final double x2 = cubicInt(iB, magic[2][2], magic[6][2]);
-      final double x3 = cubicInt(iB, magic[3][2], magic[7][2]);
-      final double y0 = cubicInt(iY, x0, x1);
-      final double y1 = cubicInt(iY, x2, x3);
+      final x0 = cubicInt(iB, magic[0][2], magic[4][2]);
+      final x1 = cubicInt(iB, magic[1][2], magic[5][2]);
+      final x2 = cubicInt(iB, magic[2][2], magic[6][2]);
+      final x3 = cubicInt(iB, magic[3][2], magic[7][2]);
+      final y0 = cubicInt(iY, x0, x1);
+      final y1 = cubicInt(iY, x2, x3);
       return cubicInt(iR, y0, y1);
     }
 
-    final double redValue = getRed(red, yellow, blue);
-    final double greenValue = getGreen(red, yellow, blue);
-    final double blueValue = getBlue(red, yellow, blue);
+    final redValue = getRed(red, yellow, blue);
+    final greenValue = getGreen(red, yellow, blue);
+    final blueValue = getBlue(red, yellow, blue);
     return PdfColor(redValue, greenValue, blueValue, alpha);
   }
 
@@ -143,9 +141,9 @@ class PdfColor {
       0xFFFFFFFF;
 
   String toHex() {
-    final int i = toInt();
-    final String rgb = (i & 0xffffff).toRadixString(16);
-    final String a = ((i & 0xff000000) >> 24).toRadixString(16);
+    final i = toInt();
+    final rgb = (i & 0xffffff).toRadixString(16);
+    final a = ((i & 0xff000000) >> 24).toRadixString(16);
     return '#$rgb$a';
   }
 
@@ -169,9 +167,9 @@ class PdfColor {
   }
 
   double get luminance {
-    final double R = _linearizeColorComponent(red);
-    final double G = _linearizeColorComponent(green);
-    final double B = _linearizeColorComponent(blue);
+    final R = _linearizeColorComponent(red);
+    final G = _linearizeColorComponent(green);
+    final B = _linearizeColorComponent(blue);
     return 0.2126 * R + 0.7152 * G + 0.0722 * B;
   }
 
@@ -180,8 +178,8 @@ class PdfColor {
   /// To lighten a color, set the [strength] value to < .5
   /// To darken a color, set the [strength] value to > .5
   PdfColor shade(double strength) {
-    final double ds = 1.5 - strength;
-    final PdfColorHsl hsl = toHsl();
+    final ds = 1.5 - strength;
+    final hsl = toHsl();
 
     return PdfColorHsl(
         hsl.hue, hsl.saturation, (hsl.lightness * ds).clamp(0.0, 1.0));
@@ -310,10 +308,9 @@ double _getHue(
 class PdfColorHsv extends PdfColor {
   factory PdfColorHsv(double hue, double saturation, double value,
       [double alpha = 1.0]) {
-    final double chroma = saturation * value;
-    final double secondary =
-        chroma * (1.0 - (((hue / 60.0) % 2.0) - 1.0).abs());
-    final double match = value - chroma;
+    final chroma = saturation * value;
+    final secondary = chroma * (1.0 - (((hue / 60.0) % 2.0) - 1.0).abs());
+    final match = value - chroma;
 
     double red;
     double green;
@@ -357,12 +354,12 @@ class PdfColorHsv extends PdfColor {
 
   factory PdfColorHsv.fromRgb(double red, double green, double blue,
       [double alpha = 1.0]) {
-    final double max = math.max(red, math.max(green, blue));
-    final double min = math.min(red, math.min(green, blue));
-    final double delta = max - min;
+    final max = math.max(red, math.max(green, blue));
+    final min = math.min(red, math.min(green, blue));
+    final delta = max - min;
 
-    final double hue = _getHue(red, green, blue, max, delta);
-    final double saturation = max == 0.0 ? 0.0 : delta / max;
+    final hue = _getHue(red, green, blue, max, delta);
+    final saturation = max == 0.0 ? 0.0 : delta / max;
 
     return PdfColorHsv._(hue, saturation, max, red, green, blue, alpha);
   }
@@ -439,10 +436,9 @@ class PdfColorHsv extends PdfColor {
 class PdfColorHsl extends PdfColor {
   factory PdfColorHsl(double hue, double saturation, double lightness,
       [double alpha = 1.0]) {
-    final double chroma = (1.0 - (2.0 * lightness - 1.0).abs()) * saturation;
-    final double secondary =
-        chroma * (1.0 - (((hue / 60.0) % 2.0) - 1.0).abs());
-    final double match = lightness - chroma / 2.0;
+    final chroma = (1.0 - (2.0 * lightness - 1.0).abs()) * saturation;
+    final secondary = chroma * (1.0 - (((hue / 60.0) % 2.0) - 1.0).abs());
+    final match = lightness - chroma / 2.0;
 
     double red;
     double green;
@@ -491,12 +487,12 @@ class PdfColorHsl extends PdfColor {
 
   factory PdfColorHsl.fromRgb(double red, double green, double blue,
       [double alpha = 1.0]) {
-    final double max = math.max(red, math.max(green, blue));
-    final double min = math.min(red, math.min(green, blue));
-    final double delta = max - min;
+    final max = math.max(red, math.max(green, blue));
+    final min = math.min(red, math.min(green, blue));
+    final delta = max - min;
 
-    final double hue = _getHue(red, green, blue, max, delta);
-    final double lightness = (max + min) / 2.0;
+    final hue = _getHue(red, green, blue, max, delta);
+    final lightness = (max + min) / 2.0;
     // Saturation can exceed 1.0 with rounding errors, so clamp it.
     final double saturation = lightness == 1.0
         ? 0.0

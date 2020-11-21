@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 /// This widget is in preview and the API is subject to change
@@ -58,10 +56,10 @@ class Chart extends Widget implements Inherited {
       return constraints.smallest;
     }
 
-    double width = constraints.maxWidth;
-    double height = constraints.maxHeight;
+    var width = constraints.maxWidth;
+    var height = constraints.maxHeight;
 
-    const double aspectRatio = 1;
+    const aspectRatio = 1;
 
     if (!width.isFinite) {
       width = height * aspectRatio;
@@ -112,7 +110,7 @@ class Chart extends Widget implements Inherited {
   void paint(Context context) {
     super.paint(_context);
 
-    final Matrix4 mat = Matrix4.identity();
+    final mat = Matrix4.identity();
     mat.translate(box.x, box.y);
     _context.canvas
       ..saveContext()

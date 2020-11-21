@@ -16,8 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 @immutable
@@ -28,7 +26,7 @@ class PdfGraphicState {
 
   @protected
   PdfDict _output() {
-    final PdfDict params = PdfDict();
+    final params = PdfDict();
 
     if (opacity != null) {
       params['/CA'] = PdfNum(opacity);
@@ -58,7 +56,7 @@ class PdfGraphicStates extends PdfObject {
   static const String _prefix = '/a';
 
   String stateName(PdfGraphicState state) {
-    int index = _states.indexOf(state);
+    var index = _states.indexOf(state);
     if (index < 0) {
       index = _states.length;
       _states.add(state);
@@ -70,7 +68,7 @@ class PdfGraphicStates extends PdfObject {
   void _prepare() {
     super._prepare();
 
-    for (int index = 0; index < _states.length; index++) {
+    for (var index = 0; index < _states.length; index++) {
       params['$_prefix$index'] = _states[index]._output();
     }
   }

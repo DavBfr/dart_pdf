@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-// ignore_for_file: always_specify_types
-
 import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 Future<Uint8List> generateDocument(PdfPageFormat format) async {
-  final pw.Document doc = pw.Document(pageMode: PdfPageMode.outlines);
+  final doc = pw.Document(pageMode: PdfPageMode.outlines);
 
   doc.addPage(pw.MultiPage(
       pageFormat:

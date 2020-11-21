@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 typedef GridAxisFormat = String Function(num value);
@@ -161,8 +159,8 @@ class FixedAxis<T extends num> extends GridAxis {
   final List<T> values;
 
   static bool _isSortedAscending(List<num> list) {
-    num prev = list.first;
-    for (final num elem in list) {
+    var prev = list.first;
+    for (final elem in list) {
       if (prev > elem) {
         return false;
       }
@@ -173,9 +171,9 @@ class FixedAxis<T extends num> extends GridAxis {
 
   @override
   double toChart(num input) {
-    final double offset = transfer(values.first);
-    final double total = transfer(values.last) - offset;
-    final double start = _crossAxisPosition + _marginStart;
+    final offset = transfer(values.first);
+    final total = transfer(values.last) - offset;
+    final start = _crossAxisPosition + _marginStart;
     switch (direction) {
       case Axis.horizontal:
         return box.left +
@@ -200,15 +198,15 @@ class FixedAxis<T extends num> extends GridAxis {
     assert(Chart.of(context) != null,
         '$runtimeType cannot be used without a Chart widget');
 
-    final PdfPoint size = constraints.biggest;
-    final TextStyle style = Theme.of(context).defaultTextStyle.merge(textStyle);
-    final PdfFont font = style.font.getFont(context);
+    final size = constraints.biggest;
+    final style = Theme.of(context).defaultTextStyle.merge(textStyle);
+    final font = style.font.getFont(context);
 
-    double maxWidth = 0;
-    double maxHeight = 0;
+    var maxWidth = 0.0;
+    var maxHeight = 0.0;
     PdfFontMetrics metricsFirst;
     PdfFontMetrics metrics;
-    for (final T value in values) {
+    for (final value in values) {
       metrics = font.stringMetrics(format(value)) * style.fontSize;
       metricsFirst ??= metrics;
       maxWidth = math.max(maxWidth, metrics.maxWidth);
@@ -219,7 +217,7 @@ class FixedAxis<T extends num> extends GridAxis {
       case Axis.horizontal:
         _textMargin = margin ?? 2;
         _axisTick ??= false;
-        final double minStart = metricsFirst.maxWidth / 2;
+        final minStart = metricsFirst.maxWidth / 2;
         _marginEnd = math.max(_marginEnd, metrics.maxWidth / 2);
         _crossAxisPosition = math.max(_crossAxisPosition, minStart);
         axisPosition = math.max(axisPosition, maxHeight + _textMargin);
@@ -229,7 +227,7 @@ class FixedAxis<T extends num> extends GridAxis {
         _textMargin = margin ?? 10;
         _axisTick ??= true;
         _marginEnd = math.max(_marginEnd, metrics.maxHeight / 2);
-        final double minStart = metricsFirst.maxHeight / 2;
+        final minStart = metricsFirst.maxHeight / 2;
         _marginEnd = math.max(_marginEnd, metrics.maxWidth / 2);
         _crossAxisPosition = math.max(_crossAxisPosition, minStart);
         axisPosition = math.max(axisPosition, maxWidth + _textMargin);
@@ -252,7 +250,7 @@ class FixedAxis<T extends num> extends GridAxis {
 
     if (ticks && _textMargin > 0) {
       for (final num x in values) {
-        final double p = toChart(x);
+        final p = toChart(x);
         context.canvas
           ..moveTo(axisPosition, p)
           ..lineTo(axisPosition - _textMargin / 2, p);
@@ -265,13 +263,12 @@ class FixedAxis<T extends num> extends GridAxis {
       ..setLineCap(PdfLineCap.joinBevel)
       ..strokePath();
 
-    for (final T y in values) {
-      final String v = format(y);
-      final TextStyle style =
-          Theme.of(context).defaultTextStyle.merge(textStyle);
-      final PdfFont font = style.font.getFont(context);
-      final PdfFontMetrics metrics = font.stringMetrics(v) * style.fontSize;
-      final double p = toChart(y);
+    for (final y in values) {
+      final v = format(y);
+      final style = Theme.of(context).defaultTextStyle.merge(textStyle);
+      final font = style.font.getFont(context);
+      final metrics = font.stringMetrics(v) * style.fontSize;
+      final p = toChart(y);
 
       context.canvas
         ..setColor(style.color)
@@ -298,7 +295,7 @@ class FixedAxis<T extends num> extends GridAxis {
 
     if (ticks && _textMargin > 0) {
       for (final num x in values) {
-        final double p = toChart(x);
+        final p = toChart(x);
         context.canvas
           ..moveTo(p, axisPosition)
           ..lineTo(p, axisPosition - _textMargin);
@@ -312,12 +309,11 @@ class FixedAxis<T extends num> extends GridAxis {
       ..strokePath();
 
     for (final num x in values) {
-      final String v = format(x);
-      final TextStyle style =
-          Theme.of(context).defaultTextStyle.merge(textStyle);
-      final PdfFont font = style.font.getFont(context);
-      final PdfFontMetrics metrics = font.stringMetrics(v) * style.fontSize;
-      final double p = toChart(x);
+      final v = format(x);
+      final style = Theme.of(context).defaultTextStyle.merge(textStyle);
+      final font = style.font.getFont(context);
+      final metrics = font.stringMetrics(v) * style.fontSize;
+      final p = toChart(x);
 
       context.canvas
         ..setColor(style.color)
@@ -342,14 +338,14 @@ class FixedAxis<T extends num> extends GridAxis {
     switch (direction) {
       case Axis.horizontal:
         for (final num x in values.sublist(_marginStart > 0 ? 0 : 1)) {
-          final double p = toChart(x);
+          final p = toChart(x);
           context.canvas.drawLine(p, grid.gridBox.top, p, grid.gridBox.bottom);
         }
         break;
 
       case Axis.vertical:
         for (final num y in values.sublist(_marginStart > 0 ? 0 : 1)) {
-          final double p = toChart(y);
+          final p = toChart(y);
           context.canvas.drawLine(grid.gridBox.left, p, grid.gridBox.right, p);
         }
 

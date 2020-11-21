@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of pdf;
 
 class PdfOutput {
@@ -71,7 +69,7 @@ class PdfOutput {
 
   /// This closes the Stream, writing the xref table
   void close() {
-    final int xref = os.offset;
+    final xref = os.offset;
 
     os.putString('xref\n');
 
@@ -80,14 +78,14 @@ class PdfOutput {
 
     // Now scan through the offsets list. The should be in sequence,
     // but just in case:
-    int firstid = 0; // First id in block
-    int lastid = -1; // The last id used
-    final List<PdfXref> block = <PdfXref>[]; // xrefs in this block
+    var firstid = 0; // First id in block
+    var lastid = -1; // The last id used
+    final block = <PdfXref>[]; // xrefs in this block
 
     // We need block 0 to exist
     block.add(PdfXref(0, 0, generation: 65535));
 
-    for (PdfXref x in offsets) {
+    for (var x in offsets) {
       if (firstid == -1) {
         firstid = x.id;
       }
@@ -113,7 +111,7 @@ class PdfOutput {
     // now the trailer object
     os.putString('trailer\n');
 
-    final PdfDict params = PdfDict();
+    final params = PdfDict();
 
     // the number of entries (REQUIRED)
     params['/Size'] = PdfNum(offsets.length + 1);
@@ -121,7 +119,7 @@ class PdfOutput {
     // the /Root catalog indirect reference (REQUIRED)
     if (rootID != null) {
       params['/Root'] = rootID.ref();
-      final PdfString id =
+      final id =
           PdfString(rootID.pdfDocument.documentID, PdfStringFormat.binary);
       params['/ID'] = PdfArray(<PdfDataType>[id, id]);
     } else {
@@ -153,7 +151,7 @@ class PdfOutput {
   void writeblock(int firstid, List<PdfXref> block) {
     os.putString('$firstid ${block.length}\n');
 
-    for (PdfXref x in block) {
+    for (var x in block) {
       os.putString(x.ref());
       os.putString('\n');
     }

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 
 import 'package:pdf/pdf.dart';
@@ -74,7 +72,7 @@ void main() {
   });
 
   test('Pdf Widgets Watermark Page Count', () async {
-    final PageTheme pageTheme = PageTheme(
+    final pageTheme = PageTheme(
       buildBackground: (Context context) =>
           (context.pageNumber == context.pagesCount)
               ? Align(
@@ -103,7 +101,7 @@ void main() {
   });
 
   tearDownAll(() {
-    final File file = File('widgets-watermark.pdf');
+    final file = File('widgets-watermark.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

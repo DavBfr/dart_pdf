@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 /// How [Wrap] should align objects.
@@ -207,7 +205,7 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
 
   double _getChildCrossAxisOffset(bool flipCrossAxis, double runCrossAxisExtent,
       double childCrossAxisExtent) {
-    final double freeSpace = runCrossAxisExtent - childCrossAxisExtent;
+    final freeSpace = runCrossAxisExtent - childCrossAxisExtent;
     switch (crossAxisAlignment) {
       case WrapCrossAlignment.start:
         return flipCrossAxis ? freeSpace : 0.0;
@@ -230,9 +228,9 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
     }
 
     BoxConstraints childConstraints;
-    double mainAxisLimit = 0.0;
-    bool flipMainAxis = false;
-    bool flipCrossAxis = false;
+    var mainAxisLimit = 0.0;
+    var flipMainAxis = false;
+    var flipCrossAxis = false;
 
     switch (direction) {
       case Axis.horizontal:
@@ -254,19 +252,19 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
     assert(childConstraints != null);
     assert(mainAxisLimit != null);
 
-    final List<_RunMetrics> runMetrics = <_RunMetrics>[];
-    final Map<Widget, int> childRunMetrics = <Widget, int>{};
-    double mainAxisExtent = 0.0;
-    double crossAxisExtent = 0.0;
-    double runMainAxisExtent = 0.0;
-    double runCrossAxisExtent = 0.0;
-    int childCount = 0;
+    final runMetrics = <_RunMetrics>[];
+    final childRunMetrics = <Widget, int>{};
+    var mainAxisExtent = 0.0;
+    var crossAxisExtent = 0.0;
+    var runMainAxisExtent = 0.0;
+    var runCrossAxisExtent = 0.0;
+    var childCount = 0;
 
-    for (Widget child in children.sublist(_context.firstChild)) {
+    for (var child in children.sublist(_context.firstChild)) {
       child.layout(context, childConstraints, parentUsesSize: true);
 
-      final double childMainAxisExtent = _getMainAxisExtent(child);
-      final double childCrossAxisExtent = _getCrossAxisExtent(child);
+      final childMainAxisExtent = _getMainAxisExtent(child);
+      final childCrossAxisExtent = _getCrossAxisExtent(child);
 
       if (childCount > 0 &&
           runMainAxisExtent + spacing + childMainAxisExtent > mainAxisLimit) {
@@ -304,11 +302,11 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
           .add(_RunMetrics(runMainAxisExtent, runCrossAxisExtent, childCount));
     }
 
-    final int runCount = runMetrics.length;
+    final runCount = runMetrics.length;
     assert(runCount > 0);
 
-    double containerMainAxisExtent = 0.0;
-    double containerCrossAxisExtent = 0.0;
+    var containerMainAxisExtent = 0.0;
+    var containerCrossAxisExtent = 0.0;
 
     switch (direction) {
       case Axis.horizontal:
@@ -325,10 +323,10 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
         break;
     }
 
-    final double crossAxisFreeSpace =
+    final crossAxisFreeSpace =
         math.max(0.0, containerCrossAxisExtent - crossAxisExtent);
-    double runLeadingSpace = 0.0;
-    double runBetweenSpace = 0.0;
+    var runLeadingSpace = 0.0;
+    var runBetweenSpace = 0.0;
 
     switch (runAlignment) {
       case WrapAlignment.start:
@@ -354,21 +352,21 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
     }
 
     runBetweenSpace += runSpacing;
-    double crossAxisOffset = flipCrossAxis
+    var crossAxisOffset = flipCrossAxis
         ? containerCrossAxisExtent - runLeadingSpace
         : runLeadingSpace;
 
     _context.lastChild = _context.firstChild;
-    for (int i = 0; i < runCount; ++i) {
-      final _RunMetrics metrics = runMetrics[i];
-      final double runMainAxisExtent = metrics.mainAxisExtent;
-      final double runCrossAxisExtent = metrics.crossAxisExtent;
-      final int childCount = metrics.childCount;
+    for (var i = 0; i < runCount; ++i) {
+      final metrics = runMetrics[i];
+      final runMainAxisExtent = metrics.mainAxisExtent;
+      final runCrossAxisExtent = metrics.crossAxisExtent;
+      final childCount = metrics.childCount;
 
-      final double mainAxisFreeSpace =
+      final mainAxisFreeSpace =
           math.max(0.0, containerMainAxisExtent - runMainAxisExtent);
-      double childLeadingSpace = 0.0;
-      double childBetweenSpace = 0.0;
+      var childLeadingSpace = 0.0;
+      var childBetweenSpace = 0.0;
 
       switch (alignment) {
         case WrapAlignment.start:
@@ -394,7 +392,7 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
       }
 
       childBetweenSpace += spacing;
-      double childMainPosition = flipMainAxis
+      var childMainPosition = flipMainAxis
           ? containerMainAxisExtent - childLeadingSpace
           : childLeadingSpace;
 
@@ -408,17 +406,17 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
         break;
       }
 
-      int currentWidget = _context.lastChild;
-      for (Widget child in children.sublist(currentWidget)) {
-        final int runIndex = childRunMetrics[child];
+      var currentWidget = _context.lastChild;
+      for (var child in children.sublist(currentWidget)) {
+        final runIndex = childRunMetrics[child];
         if (runIndex != i) {
           break;
         }
 
         currentWidget++;
-        final double childMainAxisExtent = _getMainAxisExtent(child);
-        final double childCrossAxisExtent = _getCrossAxisExtent(child);
-        final double childCrossAxisOffset = _getChildCrossAxisOffset(
+        final childMainAxisExtent = _getMainAxisExtent(child);
+        final childCrossAxisExtent = _getCrossAxisExtent(child);
+        final childCrossAxisOffset = _getChildCrossAxisOffset(
             flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
         if (flipMainAxis) {
           childMainPosition -= childMainAxisExtent;
@@ -450,10 +448,10 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
 
     context.canvas.saveContext();
 
-    final Matrix4 mat = Matrix4.identity();
+    final mat = Matrix4.identity();
     mat.translate(box.x, box.y);
     context.canvas.setTransform(mat);
-    for (Widget child
+    for (var child
         in children.sublist(_context.firstChild, _context.lastChild)) {
       child.paint(context);
     }

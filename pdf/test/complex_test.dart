@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -26,22 +24,21 @@ import 'package:vector_math/vector_math_64.dart';
 
 void main() {
   test('Pdf Complex', () {
-    final Uint32List img = Uint32List(10 * 10);
+    final img = Uint32List(10 * 10);
     img.fillRange(0, img.length - 1, 0x12345678);
 
-    final PdfDocument pdf = PdfDocument();
+    final pdf = PdfDocument();
     pdf.info = PdfInfo(pdf,
         author: 'David PHAM-VAN',
         creator: 'David PHAM-VAN',
         title: 'My Title',
         subject: 'My Subject');
-    final PdfPage page =
-        PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
+    final page = PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
 
-    final PdfGraphics g = page.getGraphics();
+    final g = page.getGraphics();
 
     g.saveContext();
-    Matrix4 tm = Matrix4.identity();
+    var tm = Matrix4.identity();
     tm.translate(10.0, 290);
     tm.scale(1.0, -1);
     g.setTransform(tm);
@@ -62,13 +59,13 @@ void main() {
         'M300,200 h-150 a150,150 0 1,0 150,-150 z M275,175 v-150 a150,150 0 0,0 -150,150 z');
     g.restoreContext();
 
-    final PdfFont font1 = g.defaultFont;
+    final font1 = g.defaultFont;
 
-    final Uint8List data = File('open-sans.ttf').readAsBytesSync();
-    final PdfTtfFont font2 = PdfTtfFont(pdf, data.buffer.asByteData());
-    const String s = 'Hello World!';
-    final PdfFontMetrics r = font2.stringMetrics(s);
-    const double FS = 20;
+    final data = File('open-sans.ttf').readAsBytesSync();
+    final font2 = PdfTtfFont(pdf, data.buffer.asByteData());
+    const s = 'Hello World!';
+    final r = font2.stringMetrics(s);
+    const FS = 20.0;
     g.setColor(const PdfColor(0, 1, 1));
     g.drawRect(
         50.0 + r.left * FS, 30.0 + r.top * FS, r.width * FS, r.height * FS);
@@ -84,11 +81,11 @@ void main() {
     g.drawRect(300, 150, 50, 50);
     g.fillPath();
     g.setColor(const PdfColor(0, 0.5, 0));
-    final PdfImage image =
+    final image =
         PdfImage(pdf, image: img.buffer.asUint8List(), width: 10, height: 10);
-    for (double i = 10; i < 90.0; i += 5.0) {
+    for (var i = 10.0; i < 90.0; i += 5.0) {
       g.saveContext();
-      final Matrix4 tm = Matrix4.identity();
+      final tm = Matrix4.identity();
       tm.rotateZ(i * pi / 360.0);
       tm.translate(300.0, -100);
       g.setTransform(tm);
@@ -97,7 +94,7 @@ void main() {
       g.restoreContext();
     }
 
-    final File file = File('complex.pdf');
+    final file = File('complex.pdf');
     file.writeAsBytesSync(pdf.save());
   });
 }

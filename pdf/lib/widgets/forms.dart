@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// ignore_for_file: omit_local_variable_types
-
 part of widget;
 
 class Checkbox extends SingleChildWidget {
@@ -62,7 +60,7 @@ class Checkbox extends SingleChildWidget {
     super.paint(context);
     paintChild(context);
 
-    final PdfButtonField bf = PdfButtonField(
+    final bf = PdfButtonField(
       rect: context.localToGlobal(box),
       fieldName: name,
       value: value,
@@ -70,7 +68,7 @@ class Checkbox extends SingleChildWidget {
       flags: <PdfAnnotFlags>{PdfAnnotFlags.print},
     );
 
-    final PdfGraphics g =
+    final g =
         bf.appearance(context.document, PdfAnnotApparence.normal, name: '/Yes');
     g.drawRect(0, 0, bf.rect.width, bf.rect.height);
     g.setFillColor(activeColor);
@@ -156,37 +154,37 @@ class FlatButton extends SingleChildWidget {
   void paint(Context context) {
     super.paint(context);
 
-    final PdfButtonField bf = PdfButtonField(
+    final bf = PdfButtonField(
       rect: context.localToGlobal(box),
       fieldName: name,
       flags: <PdfAnnotFlags>{PdfAnnotFlags.print},
       fieldFlags: <PdfFieldFlags>{PdfFieldFlags.pushButton},
     );
 
-    final Matrix4 mat = context.canvas.getTransform();
-    final Vector3 translation = Vector3(0, 0, 0);
-    final Quaternion rotation = Quaternion(0, 0, 0, 0);
-    final Vector3 scale = Vector3(0, 0, 0);
+    final mat = context.canvas.getTransform();
+    final translation = Vector3(0, 0, 0);
+    final rotation = Quaternion(0, 0, 0, 0);
+    final scale = Vector3(0, 0, 0);
     mat
       ..decompose(translation, rotation, scale)
       ..leftTranslate(-translation.x, -translation.y)
       ..translate(box.x, box.y);
 
-    final Context cn = context.copyWith(
+    final cn = context.copyWith(
         canvas: bf.appearance(context.document, PdfAnnotApparence.normal,
             matrix: mat, boundingBox: box));
     child.layout(
         cn, BoxConstraints.tightFor(width: box.width, height: box.height));
     child.paint(cn);
 
-    final Context cd = context.copyWith(
+    final cd = context.copyWith(
         canvas: bf.appearance(context.document, PdfAnnotApparence.down,
             matrix: mat, boundingBox: box));
     _childDown.layout(
         cd, BoxConstraints.tightFor(width: box.width, height: box.height));
     _childDown.paint(cd);
 
-    final Context cr = context.copyWith(
+    final cr = context.copyWith(
         canvas: bf.appearance(context.document, PdfAnnotApparence.rollover,
             matrix: mat, boundingBox: box));
     _childRollover.layout(
