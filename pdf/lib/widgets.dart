@@ -50,6 +50,7 @@ part 'widgets/geometry.dart';
 part 'widgets/grid_view.dart';
 part 'widgets/icon.dart';
 part 'widgets/image.dart';
+part 'widgets/image_provider.dart';
 part 'widgets/multi_page.dart';
 part 'widgets/page.dart';
 part 'widgets/page_theme.dart';

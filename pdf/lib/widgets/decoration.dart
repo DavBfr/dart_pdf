@@ -144,20 +144,36 @@ class BoxBorder {
 
 @immutable
 class DecorationImage {
-  const DecorationImage(
-      {@required this.image,
-      this.fit = BoxFit.cover,
-      this.alignment = Alignment.center})
-      : assert(image != null),
+  @Deprecated('Use DecorationImage.provider()')
+  DecorationImage({
+    @required PdfImage image,
+    this.fit = BoxFit.cover,
+    this.alignment = Alignment.center,
+  })  : assert(image != null),
+        assert(fit != null),
+        assert(alignment != null),
+        image = ImageProxy(image),
+        dpi = null;
+
+  const DecorationImage.provider({
+    @required this.image,
+    this.fit = BoxFit.cover,
+    this.alignment = Alignment.center,
+    this.dpi,
+  })  : assert(image != null),
         assert(fit != null),
         assert(alignment != null);
 
-  final PdfImage image;
+  final ImageProvider image;
   final BoxFit fit;
   final Alignment alignment;
+  final double dpi;
 
   void paint(Context context, PdfRect box) {
-    final imageSize = PdfPoint(image.width.toDouble(), image.height.toDouble());
+    final _image = image.resolve(context, box.size, dpi: dpi);
+
+    final imageSize =
+        PdfPoint(_image.width.toDouble(), _image.height.toDouble());
     final sizes = applyBoxFit(fit, imageSize, box.size);
     final scaleX = sizes.destination.x / sizes.source.x;
     final scaleY = sizes.destination.y / sizes.source.y;
@@ -174,7 +190,7 @@ class DecorationImage {
       ..drawRect(box.x, box.y, box.width, box.height)
       ..clipPath()
       ..setTransform(mat)
-      ..drawImage(image, 0, 0, imageSize.x, imageSize.y)
+      ..drawImage(_image, 0, 0, imageSize.x, imageSize.y)
       ..restoreContext();
   }
 }

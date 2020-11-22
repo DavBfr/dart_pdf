@@ -37,7 +37,7 @@ void main() {
       MultiPage(
         theme: ThemeData.withFont(icons: icons),
         build: (Context context) {
-          final iconList = List<IconData>();
+          final iconList = <IconData>[];
           final pdfFont = icons.getFont(context);
           if (pdfFont is PdfTtfFont) {
             iconList.addAll(

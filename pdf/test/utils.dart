@@ -19,7 +19,6 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 
 Future<Uint8List> download(
@@ -56,7 +55,7 @@ Future<Uint8List> download(
   return Uint8List.fromList(data);
 }
 
-PdfImage generateBitmap(PdfDocument pdf, int w, int h) {
+ImageProvider generateBitmap(int w, int h) {
   final bm = Uint32List(w * h);
   final dw = w.toDouble();
   final dh = h.toDouble();
@@ -69,9 +68,8 @@ PdfImage generateBitmap(PdfDocument pdf, int w, int h) {
     }
   }
 
-  return PdfImage(
-    pdf,
-    image: bm.buffer.asUint8List(),
+  return RawImage(
+    bytes: bm.buffer.asUint8List(),
     width: w,
     height: h,
   );

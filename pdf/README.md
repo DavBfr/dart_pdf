@@ -56,17 +56,15 @@ pdf.addPage(pw.Page(
 To load an image from a file:
 
 ```dart
-final image = PdfImage.file(
-  pdf.document,
-  bytes: File('test.webp').readAsBytesSync(),
+final image = pw.MemoryImage(
+  File('test.webp').readAsBytesSync(),
 );
 
-pdf.addPage(pw.Page(
-    build: (pw.Context context) {
-      return pw.Center(
-        child: pw.Image(image),
-      ); // Center
-    })); // Page
+pdf.addPage(pw.Page(build: (pw.Context context) {
+  return pw.Center(
+    child: pw.Image.provider(image),
+  ); // Center
+})); // Page
 ```
 
 To use a TrueType font:

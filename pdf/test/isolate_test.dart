@@ -19,7 +19,6 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
@@ -35,12 +34,12 @@ class Message {
 void compute(Message message) {
   final pdf = Document();
 
-  final image = PdfImage.jpeg(
-    pdf.document,
-    image: message.image,
+  final image = MemoryImage(
+    message.image,
   );
 
-  pdf.addPage(Page(build: (Context context) => Center(child: Image(image))));
+  pdf.addPage(
+      Page(build: (Context context) => Center(child: Image.provider(image))));
 
   message.sendPort.send(pdf.save());
 }

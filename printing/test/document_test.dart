@@ -45,15 +45,15 @@ void main() {
     // expect(await Printing.platformVersion, '42');
   });
 
-  test('pdfImageFromImageProvider(FileImage)', () async {
-    final image = await pdfImageFromImageProvider(
-        pdf: doc.document, image: FileImage(File('$path/example.png')));
+  test('flutterImageProvider(FileImage)', () async {
+    final image =
+        await flutterImageProvider(FileImage(File('$path/example.png')));
 
     doc.addPage(
       pw.Page(
         build: (pw.Context context) => pw.Center(
           child: pw.Container(
-            child: pw.Image(image),
+            child: pw.Image.provider(image),
           ),
         ),
       ),

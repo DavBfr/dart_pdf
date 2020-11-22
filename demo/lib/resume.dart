@@ -29,9 +29,8 @@ const sep = 120.0;
 Future<Uint8List> generateResume(PdfPageFormat format) async {
   final doc = pw.Document(title: 'My Résumé', author: 'David PHAM-VAN');
 
-  final profileImage = PdfImage.file(
-    doc.document,
-    bytes: (await rootBundle.load('assets/profile.jpg')).buffer.asUint8List(),
+  final profileImage = pw.MemoryImage(
+    (await rootBundle.load('assets/profile.jpg')).buffer.asUint8List(),
   );
 
   final pageTheme = await _myPageTheme(format);
@@ -121,7 +120,7 @@ Future<Uint8List> generateResume(PdfPageFormat format) async {
                             width: 100,
                             height: 100,
                             color: lightGreen,
-                            child: pw.Image(profileImage),
+                            child: pw.Image.provider(profileImage),
                           ),
                         ),
                         pw.Column(children: <pw.Widget>[

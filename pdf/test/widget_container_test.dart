@@ -55,7 +55,7 @@ void main() {
   });
 
   test('Container Widgets Image', () {
-    final image = generateBitmap(pdf.document, 100, 200);
+    final image = generateBitmap(100, 200);
 
     final widgets = <Widget>[];
     for (var shape in BoxShape.values) {
@@ -66,7 +66,7 @@ void main() {
             decoration: BoxDecoration(
               shape: shape,
               borderRadiusEx: const BorderRadius.all(Radius.circular(10)),
-              image: DecorationImage(image: image, fit: fit),
+              image: DecorationImage.provider(image: image, fit: fit),
             ),
             width: 100,
             height: 100,

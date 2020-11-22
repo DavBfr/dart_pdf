@@ -79,6 +79,7 @@
 - Add Chart Widget [Marco Papula]
 - Add Divider and VerticalDivider Widget
 - Replace Theme with ThemeData
+- Implement ImageProvider
 
 ## 1.6.2
 

@@ -17,29 +17,27 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
 import 'utils.dart';
 
 Document pdf;
-PdfImage image;
+MemoryImage image;
 
 void main() {
   setUpAll(() async {
     Document.debug = true;
     pdf = Document();
 
-    image = PdfImage.jpeg(
-      pdf.document,
-      image: await download('https://www.nfet.net/nfet.jpg'),
+    image = MemoryImage(
+      await download('https://www.nfet.net/nfet.jpg'),
     );
   });
 
   test('Pdf Jpeg Download', () async {
     pdf.addPage(Page(
-      build: (Context context) => Center(child: Image(image)),
+      build: (Context context) => Center(child: Image.provider(image)),
     ));
   });
 
@@ -51,10 +49,9 @@ void main() {
           crossAxisSpacing: 10,
           children: List<Widget>.generate(
             images.length,
-            (int index) => Image(
-              PdfImage.jpeg(
-                pdf.document,
-                image: base64.decode(images[index]),
+            (int index) => Image.provider(
+              MemoryImage(
+                base64.decode(images[index]),
               ),
             ),
           ),
@@ -72,7 +69,7 @@ void main() {
           return SizedBox(
             width: 200,
             height: 100,
-            child: Image(
+            child: Image.provider(
               image,
               fit: fit,
             ),
@@ -85,10 +82,9 @@ void main() {
   test('Pdf Image decode', () {
     final imageWidgets = imageFiles.map<Widget>(
       (String image) => SizedBox(
-        child: Image(
-          PdfImage.file(
-            pdf.document,
-            bytes: gzip.decode(base64.decode(image)),
+        child: Image.provider(
+          MemoryImage(
+            gzip.decode(base64.decode(image)),
           ),
         ),
         width: 200,

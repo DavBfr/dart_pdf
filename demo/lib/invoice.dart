@@ -91,7 +91,7 @@ class Invoice {
 
   double get _grandTotal => _total * (1 + tax);
 
-  PdfImage _logo;
+  pw.MemoryImage _logo;
 
   Future<Uint8List> buildPdf(PdfPageFormat pageFormat) async {
     // Create a PDF document.
@@ -101,9 +101,8 @@ class Invoice {
     final font2 = await rootBundle.load('assets/roboto2.ttf');
     final font3 = await rootBundle.load('assets/roboto3.ttf');
 
-    _logo = PdfImage.file(
-      doc.document,
-      bytes: (await rootBundle.load('assets/logo.png')).buffer.asUint8List(),
+    _logo = pw.MemoryImage(
+      (await rootBundle.load('assets/logo.png')).buffer.asUint8List(),
     );
 
     // Add page to the PDF
@@ -191,7 +190,8 @@ class Invoice {
                     alignment: pw.Alignment.topRight,
                     padding: const pw.EdgeInsets.only(bottom: 8, left: 30),
                     height: 72,
-                    child: _logo != null ? pw.Image(_logo) : pw.PdfLogo(),
+                    child:
+                        _logo != null ? pw.Image.provider(_logo) : pw.PdfLogo(),
                   ),
                   // pw.Container(
                   //   color: baseColor,

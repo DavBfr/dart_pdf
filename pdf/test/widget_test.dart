@@ -24,7 +24,7 @@ import 'package:test/test.dart';
 void main() {
   Document pdf;
   TextStyle symbol;
-  PdfImage im;
+  ImageProvider im;
 
   setUpAll(() {
     Document.debug = true;
@@ -43,7 +43,7 @@ void main() {
 
     final imData = zlib.decode(base64.decode(
         'eJz7//8/w388uOTCT6a4Ez96Q47++I+OI479mEVALyNU7z9seuNP/mAm196Ekz8YR+0dWHtBmJC9S+7/Zog89iMIKLYaHQPVJGLTD7MXpDfq+I9goNhPdPPDjv3YlnH6Jye6+2H21l/6yeB/4HsSDr1bQXrRwq8HqHcGyF6QXp9933N0tn/7Y7vn+/9gLPaih0PDlV9MIAzVm6ez7dsfzW3f/oMwzAx0e7FhoJutdbcj9MKw9frnL2J2POfBpxeEg478YLba/X0Wsl6lBXf+s0bP/s8ePXeWePJCvPEJNYMRZIYWSO/cq/9Z/Nv+M4bO+M8YDjFDJGkhzvSE7A6jRTdnsQR2wfXCMLHuMC5byyidvGgWE5JeZDOIcYdR+TpmkBno+mFmAAC+DGhl'));
-    im = PdfImage(pdf.document, image: imData, width: 16, height: 20);
+    im = RawImage(bytes: imData, width: 16, height: 20);
   });
 
   test('Pdf Widgets page 1', () {
@@ -85,7 +85,7 @@ void main() {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  Image(im),
+                  Image.provider(im),
                   PdfLogo(),
                   Column(
                     children: <Widget>[

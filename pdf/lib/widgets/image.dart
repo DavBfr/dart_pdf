@@ -75,18 +75,27 @@ void _drawImageRect(PdfGraphics canvas, PdfImage image, PdfRect sourceRect,
 }
 
 class Image extends Widget {
+  @Deprecated('Use Image.provider instead')
   Image(
-    this.image, {
+    PdfImage image, {
     this.fit = BoxFit.contain,
     this.alignment = Alignment.center,
     this.width,
     this.height,
   })  : assert(image != null),
-        aspectRatio = image.height.toDouble() / image.width.toDouble();
+        image = ImageProxy(image),
+        dpi = null;
 
-  final PdfImage image;
+  Image.provider(
+    this.image, {
+    this.fit = BoxFit.contain,
+    this.alignment = Alignment.center,
+    this.width,
+    this.height,
+    this.dpi,
+  }) : assert(image != null);
 
-  final double aspectRatio;
+  final ImageProvider image;
 
   final BoxFit fit;
 
@@ -95,6 +104,8 @@ class Image extends Widget {
   final double width;
 
   final double height;
+
+  final double dpi;
 
   @override
   void layout(Context context, BoxConstraints constraints,
@@ -119,9 +130,11 @@ class Image extends Widget {
   void paint(Context context) {
     super.paint(context);
 
+    final rect = context.localToGlobal(box);
+
     _paintImage(
       canvas: context.canvas,
-      image: image,
+      image: image.resolve(context, rect.size, dpi: dpi),
       rect: box,
       alignment: alignment,
       fit: fit,

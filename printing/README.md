@@ -55,12 +55,12 @@ To load an image from an ImageProvider:
 
 ```dart
 const imageProvider = const AssetImage('assets/image.png');
-final PdfImage image = await pdfImageFromImageProvider(pdf: doc.document, image: imageProvider);
+final image = await flutterImageProvider(imageProvider);
 
 doc.addPage(pw.Page(
     build: (pw.Context context) {
       return pw.Center(
-        child: pw.Image(image),
+        child: pw.Image.provider(image),
       ); // Center
     })); // Page
 ```
