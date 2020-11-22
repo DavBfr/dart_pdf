@@ -18,10 +18,10 @@ part of pdf;
 
 enum PdfOutlineMode {
   /// When jumping to the destination, display the whole page
-  fitpage,
+  fitPage,
 
   /// When jumping to the destination, display the specified region
-  fitrect
+  fitRect
 }
 
 enum PdfOutlineStyle {
@@ -48,7 +48,7 @@ class PdfOutline extends PdfObject {
     this.rect,
     this.anchor,
     this.color,
-    this.destMode = PdfOutlineMode.fitpage,
+    this.destMode = PdfOutlineMode.fitPage,
     this.style = PdfOutlineStyle.normal,
   })  : assert(anchor == null || (dest == null && rect == null)),
         assert(destMode != null),
@@ -114,7 +114,7 @@ class PdfOutline extends PdfObject {
         final dests = PdfArray();
         dests.add(dest.ref());
 
-        if (destMode == PdfOutlineMode.fitpage) {
+        if (destMode == PdfOutlineMode.fitPage) {
           dests.add(const PdfName('/Fit'));
         } else {
           dests.add(const PdfName('/FitR'));

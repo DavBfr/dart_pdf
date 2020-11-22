@@ -7,6 +7,7 @@
 - Add document outline support
 - Update analysis options
 - Fix the line cap and joint enums
+- Fix PdfOutlineMode enum
 
 ## 1.12.0
 
