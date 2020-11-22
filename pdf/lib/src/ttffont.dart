@@ -50,6 +50,9 @@ class PdfTtfFont extends PdfFont {
   double get descent => font.descent.toDouble() / font.unitsPerEm;
 
   @override
+  int get unitsPerEm => font.unitsPerEm;
+
+  @override
   PdfFontMetrics glyphMetrics(int charCode) {
     final g = font.charToGlyphIndexMap[charCode];
 

@@ -20,17 +20,19 @@ part of pdf;
 @immutable
 class PdfFontMetrics {
   /// Create a PdfFontMetrics object
-  const PdfFontMetrics(
-      {@required this.left,
-      @required this.top,
-      @required this.right,
-      @required this.bottom,
-      double ascent,
-      double descent,
-      double advanceWidth})
-      : ascent = ascent ?? bottom,
+  const PdfFontMetrics({
+    @required this.left,
+    @required this.top,
+    @required this.right,
+    @required this.bottom,
+    double ascent,
+    double descent,
+    double advanceWidth,
+    double leftBearing,
+  })  : ascent = ascent ?? bottom,
         descent = descent ?? top,
         advanceWidth = advanceWidth ?? right - left,
+        leftBearing = leftBearing ?? left,
         assert(left != null),
         assert(top != null),
         assert(right != null),
@@ -55,9 +57,11 @@ class PdfFontMetrics {
     double ascent;
     double descent;
     double lastBearing;
+    double firstBearing;
     double spacing;
 
     for (var metric in metrics) {
+      firstBearing ??= metric.leftBearing;
       left ??= metric.left;
       spacing = metric.advanceWidth > 0 ? letterSpacing : 0.0;
       right += metric.advanceWidth + spacing;
@@ -70,13 +74,15 @@ class PdfFontMetrics {
     }
 
     return PdfFontMetrics(
-        left: left,
-        top: top,
-        right: right - lastBearing - spacing,
-        bottom: bottom,
-        ascent: ascent,
-        descent: descent,
-        advanceWidth: right - spacing);
+      left: left,
+      top: top,
+      right: right - lastBearing - spacing,
+      bottom: bottom,
+      ascent: ascent,
+      descent: descent,
+      advanceWidth: right - spacing,
+      leftBearing: firstBearing,
+    );
   }
 
   /// Zero-sized dimensions
@@ -122,32 +128,36 @@ class PdfFontMetrics {
   double get effectiveLeft => math.min(leftBearing, 0);
 
   /// Starting point
-  double get leftBearing => left;
+  final double leftBearing;
 
   /// Ending point
   double get rightBearing => advanceWidth - right;
 
   @override
   String toString() =>
-      'PdfFontMetrics(left:$left, top:$top, right:$right, bottom:$bottom, ascent:$ascent, descent:$descent, advanceWidth:$advanceWidth)';
+      'PdfFontMetrics(left:$left, top:$top, right:$right, bottom:$bottom, ascent:$ascent, descent:$descent, advanceWidth:$advanceWidth, leftBearing:$leftBearing, rightBearing:$rightBearing)';
 
   /// Make a copy of this object
-  PdfFontMetrics copyWith(
-      {double left,
-      double top,
-      double right,
-      double bottom,
-      double ascent,
-      double descent,
-      double advanceWidth}) {
+  PdfFontMetrics copyWith({
+    double left,
+    double top,
+    double right,
+    double bottom,
+    double ascent,
+    double descent,
+    double advanceWidth,
+    double leftBearing,
+  }) {
     return PdfFontMetrics(
-        left: left ?? this.left,
-        top: top ?? this.top,
-        right: right ?? this.right,
-        bottom: bottom ?? this.bottom,
-        ascent: ascent ?? this.ascent,
-        descent: descent ?? this.descent,
-        advanceWidth: advanceWidth ?? this.advanceWidth);
+      left: left ?? this.left,
+      top: top ?? this.top,
+      right: right ?? this.right,
+      bottom: bottom ?? this.bottom,
+      ascent: ascent ?? this.ascent,
+      descent: descent ?? this.descent,
+      advanceWidth: advanceWidth ?? this.advanceWidth,
+      leftBearing: leftBearing ?? this.leftBearing,
+    );
   }
 
   /// Multiply this metrics object with a font size
@@ -160,6 +170,7 @@ class PdfFontMetrics {
       ascent: ascent * factor,
       descent: descent * factor,
       advanceWidth: advanceWidth * factor,
+      leftBearing: leftBearing * factor,
     );
   }
 

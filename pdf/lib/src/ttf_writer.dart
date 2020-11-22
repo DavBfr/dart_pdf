@@ -187,10 +187,21 @@ class TtfWriter {
       final hmtx = Uint8List(_wordAlign(len, 4));
       final hmtxOffset = ttf.tableOffsets[TtfParser.hmtx_table];
       final hmtxData = hmtx.buffer.asByteData();
+      final numOfLongHorMetrics = ttf.numOfLongHorMetrics;
+      final defaultadvanceWidth =
+          ttf.bytes.getUint16(hmtxOffset + (numOfLongHorMetrics - 1) * 4);
       var index = 0;
       for (var glyph in glyphsInfo) {
-        hmtxData.setUint32(
-            index, ttf.bytes.getInt32(hmtxOffset + glyph.index * 4));
+        final advanceWidth = glyph.index < numOfLongHorMetrics
+            ? ttf.bytes.getUint16(hmtxOffset + glyph.index * 4)
+            : defaultadvanceWidth;
+        final leftBearing = glyph.index < numOfLongHorMetrics
+            ? ttf.bytes.getInt16(hmtxOffset + glyph.index * 4 + 2)
+            : ttf.bytes.getInt16(hmtxOffset +
+                numOfLongHorMetrics * 4 +
+                (glyph.index - numOfLongHorMetrics) * 2);
+        hmtxData.setUint16(index, advanceWidth);
+        hmtxData.setInt16(index + 2, leftBearing);
         index += 4;
       }
       tables[TtfParser.hmtx_table] = hmtx;

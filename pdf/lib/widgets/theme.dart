@@ -33,6 +33,7 @@ class ThemeData extends Inherited {
     bool softWrap,
     TextAlign textAlign,
     int maxLines,
+    IconThemeData iconTheme,
   }) {
     final base = ThemeData.base();
     return base.copyWith(
@@ -50,6 +51,7 @@ class ThemeData extends Inherited {
       softWrap: softWrap,
       textAlign: textAlign,
       maxLines: maxLines,
+      iconTheme: iconTheme,
     );
   }
 
@@ -67,6 +69,7 @@ class ThemeData extends Inherited {
     @required this.tableCell,
     @required this.softWrap,
     @required this.textAlign,
+    @required this.iconTheme,
     this.maxLines,
   })  : assert(defaultTextStyle.inherit == false),
         assert(paragraphStyle.inherit == false),
@@ -80,16 +83,23 @@ class ThemeData extends Inherited {
         assert(tableHeader.inherit == false),
         assert(tableCell.inherit == false),
         assert(softWrap != null),
-        assert(maxLines == null || maxLines > 0);
+        assert(maxLines == null || maxLines > 0),
+        assert(iconTheme != null);
 
-  factory ThemeData.withFont(
-      {Font base, Font bold, Font italic, Font boldItalic}) {
+  factory ThemeData.withFont({
+    Font base,
+    Font bold,
+    Font italic,
+    Font boldItalic,
+    Font icons,
+  }) {
     final defaultStyle = TextStyle.defaultStyle().copyWith(
-        font: base,
-        fontNormal: base,
-        fontBold: bold,
-        fontItalic: italic,
-        fontBoldItalic: boldItalic);
+      font: base,
+      fontNormal: base,
+      fontBold: bold,
+      fontItalic: italic,
+      fontBoldItalic: boldItalic,
+    );
     final fontSize = defaultStyle.fontSize;
 
     return ThemeData._(
@@ -107,6 +117,7 @@ class ThemeData extends Inherited {
       tableCell: defaultStyle.copyWith(fontSize: fontSize * 0.8),
       softWrap: true,
       textAlign: TextAlign.left,
+      iconTheme: IconThemeData.fallback(icons),
     );
   }
 
@@ -127,6 +138,7 @@ class ThemeData extends Inherited {
     bool softWrap,
     TextAlign textAlign,
     int maxLines,
+    IconThemeData iconTheme,
   }) =>
       ThemeData._(
         defaultTextStyle: this.defaultTextStyle.merge(defaultTextStyle),
@@ -143,6 +155,7 @@ class ThemeData extends Inherited {
         softWrap: softWrap ?? this.softWrap,
         textAlign: textAlign ?? this.textAlign,
         maxLines: maxLines ?? this.maxLines,
+        iconTheme: iconTheme ?? this.iconTheme,
       );
 
   final TextStyle defaultTextStyle;
@@ -165,6 +178,8 @@ class ThemeData extends Inherited {
   final TextAlign textAlign;
   final bool softWrap;
   final int maxLines;
+
+  final IconThemeData iconTheme;
 }
 
 class Theme extends StatelessWidget {

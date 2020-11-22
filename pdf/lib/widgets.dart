@@ -20,9 +20,9 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'package:image/image.dart' as im;
 
 import 'package:barcode/barcode.dart';
+import 'package:image/image.dart' as im;
 import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -48,6 +48,7 @@ part 'widgets/font.dart';
 part 'widgets/forms.dart';
 part 'widgets/geometry.dart';
 part 'widgets/grid_view.dart';
+part 'widgets/icon.dart';
 part 'widgets/image.dart';
 part 'widgets/multi_page.dart';
 part 'widgets/page.dart';

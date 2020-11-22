@@ -81,3 +81,55 @@ Font loadFont(String filename) {
   final data = File(filename).readAsBytesSync();
   return Font.ttf(data.buffer.asByteData());
 }
+
+void hexDump(
+  ByteData bytes,
+  int offset,
+  int length, [
+  int highlight,
+  int highlightLength,
+]) {
+  const reset = '\x1B[0m';
+  const red = '\x1B[1;31m';
+  var s = '';
+  var t = '';
+  var n = 0;
+  var hl = false;
+  for (var i = 0; i < length; i++) {
+    final b = bytes.getUint8(offset + i);
+    if (highlight != null && highlightLength != null) {
+      if (offset + i >= highlight && offset + i < highlight + highlightLength) {
+        if (!hl) {
+          hl = true;
+          s += red;
+          t += red;
+        }
+      } else {
+        if (hl) {
+          hl = false;
+          s += reset;
+          t += reset;
+        }
+      }
+    }
+    s += b.toRadixString(16).padLeft(2, '0') + ' ';
+    if (b > 31 && b < 128) {
+      t += String.fromCharCode(b);
+    } else {
+      t += '.';
+    }
+
+    n++;
+    if (n % 16 == 0) {
+      if (hl) {
+        s += reset;
+        t += reset;
+        hl = false;
+      }
+      print('$s   $t');
+      s = '';
+      t = '';
+    }
+  }
+  print('$s   $t');
+}

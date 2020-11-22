@@ -9,6 +9,7 @@
 - Fix the line cap and joint enums
 - Fix PdfOutlineMode enum
 - Improve API documentation
+- Add support for Icon Fonts (MaterialIcons)
 
 ## 1.12.0
 

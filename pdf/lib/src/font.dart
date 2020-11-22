@@ -138,6 +138,9 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
   /// Default width of a glyph
   static const double defaultGlyphWidth = 0.600;
 
+  /// Internal units per
+  int get unitsPerEm;
+
   @override
   void _prepare() {
     super._prepare();

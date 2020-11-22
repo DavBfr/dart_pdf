@@ -565,12 +565,12 @@ class AspectRatio extends SingleChildWidget {
 typedef CustomPainter = Function(PdfGraphics canvas, PdfPoint size);
 
 class CustomPaint extends SingleChildWidget {
-  CustomPaint(
-      {this.painter,
-      this.foregroundPainter,
-      this.size = PdfPoint.zero,
-      Widget child})
-      : super(child: child);
+  CustomPaint({
+    this.painter,
+    this.foregroundPainter,
+    this.size = PdfPoint.zero,
+    Widget child,
+  }) : super(child: child);
 
   final CustomPainter painter;
   final CustomPainter foregroundPainter;

@@ -253,6 +253,9 @@ class TtfParser {
     final baseOffset = tableOffsets[glyf_table];
     final hmtxOffset = tableOffsets[hmtx_table];
     final unitsPerEm = this.unitsPerEm;
+    final numOfLongHorMetrics = this.numOfLongHorMetrics;
+    final defaultadvanceWidth =
+        bytes.getUint16(hmtxOffset + (numOfLongHorMetrics - 1) * 4);
     var glyphIndex = 0;
     for (var offset in glyphOffsets) {
       final xMin = bytes.getInt16(baseOffset + offset + 2); // 2
@@ -260,16 +263,23 @@ class TtfParser {
       final xMax = bytes.getInt16(baseOffset + offset + 6); // 6
       final yMax = bytes.getInt16(baseOffset + offset + 8); // 8
       final advanceWidth = glyphIndex < numOfLongHorMetrics
-          ? bytes.getInt16(hmtxOffset + glyphIndex * 4).toDouble() / unitsPerEm
-          : null;
+          ? bytes.getUint16(hmtxOffset + glyphIndex * 4)
+          : defaultadvanceWidth;
+      final leftBearing = glyphIndex < numOfLongHorMetrics
+          ? bytes.getInt16(hmtxOffset + glyphIndex * 4 + 2)
+          : bytes.getInt16(hmtxOffset +
+              numOfLongHorMetrics * 4 +
+              (glyphIndex - numOfLongHorMetrics) * 2);
       glyphInfoMap[glyphIndex] = PdfFontMetrics(
-          left: xMin.toDouble() / unitsPerEm,
-          top: yMin.toDouble() / unitsPerEm,
-          right: xMax.toDouble() / unitsPerEm,
-          bottom: yMax.toDouble() / unitsPerEm,
-          ascent: ascent.toDouble() / unitsPerEm,
-          descent: descent.toDouble() / unitsPerEm,
-          advanceWidth: advanceWidth);
+        left: xMin.toDouble() / unitsPerEm,
+        top: yMin.toDouble() / unitsPerEm,
+        right: xMax.toDouble() / unitsPerEm,
+        bottom: yMax.toDouble() / unitsPerEm,
+        ascent: ascent.toDouble() / unitsPerEm,
+        descent: descent.toDouble() / unitsPerEm,
+        advanceWidth: advanceWidth.toDouble() / unitsPerEm,
+        leftBearing: leftBearing.toDouble() / unitsPerEm,
+      );
       glyphIndex++;
     }
   }

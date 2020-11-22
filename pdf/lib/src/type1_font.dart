@@ -44,6 +44,9 @@ class PdfType1Font extends PdfFont {
   @override
   final double descent;
 
+  @override
+  int get unitsPerEm => 1000;
+
   /// Width of each glyph
   final List<double> widths;
 

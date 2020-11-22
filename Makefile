@@ -15,7 +15,7 @@
  DART_SRC=$(shell find . -name '*.dart')
  CLNG_SRC=$(shell find printing/ios printing/macos printing/windows printing/android -name '*.cpp' -o -name '*.m' -o -name '*.h' -o -name '*.java')
  SWFT_SRC=$(shell find printing/ios printing/macos -name '*.swift')
- FONTS=pdf/open-sans.ttf pdf/open-sans-bold.ttf pdf/roboto.ttf pdf/noto-sans.ttf pdf/genyomintw.ttf demo/assets/roboto1.ttf demo/assets/roboto2.ttf demo/assets/roboto3.ttf demo/assets/open-sans.ttf demo/assets/open-sans-bold.ttf pdf/hacen-tunisia.ttf
+ FONTS=pdf/open-sans.ttf pdf/open-sans-bold.ttf pdf/roboto.ttf pdf/noto-sans.ttf pdf/genyomintw.ttf demo/assets/roboto1.ttf demo/assets/roboto2.ttf demo/assets/roboto3.ttf demo/assets/open-sans.ttf demo/assets/open-sans-bold.ttf pdf/hacen-tunisia.ttf pdf/material.ttf
  COV_PORT=9292
 
 all: $(FONTS) demo/assets/logo.png demo/assets/profile.jpg format printing/example/.metadata get
@@ -41,6 +41,9 @@ pdf/noto-sans.ttf:
 
 pdf/genyomintw.ttf:
 	curl -L "https://github.com/ButTaiwan/genyo-font/raw/bc2fa246196fefc1ef9e9843bc8cdba22523a39d/TW/GenYoMinTW-Heavy.ttf" > $@
+
+pdf/material.ttf:
+	curl -L "https://github.com/google/material-design-icons/raw/master/font/MaterialIcons-Regular.ttf" > $@
 
 demo/assets/roboto1.ttf:
 	curl -L "https://fonts.gstatic.com/s/roboto/v20/KFOlCnqEu92Fr1MmSU5vAw.ttf" > $@
