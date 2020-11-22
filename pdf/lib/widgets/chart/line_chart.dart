@@ -170,8 +170,8 @@ class LineDataSet extends Dataset {
       context.canvas
         ..setStrokeColor(color)
         ..setLineWidth(lineWidth)
-        ..setLineCap(PdfLineCap.joinRound)
-        ..setLineJoin(PdfLineCap.joinRound)
+        ..setLineCap(PdfLineCap.round)
+        ..setLineJoin(PdfLineJoin.round)
         ..strokePath();
     }
 

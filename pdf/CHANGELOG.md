@@ -6,6 +6,7 @@
 - Add AcroForm widgets
 - Add document outline support
 - Update analysis options
+- Fix the line cap and joint enums
 
 ## 1.12.0
 

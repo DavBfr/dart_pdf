@@ -16,8 +16,32 @@
 
 part of pdf;
 
-enum PdfLineCap { joinMiter, joinRound, joinBevel }
+/// Shape to be used at the corners of paths that are stroked
+enum PdfLineJoin {
+  /// The outer edges of the strokes for the two segments shall beextended until they meet at an angle, as in a picture frame. If the segments meet at too sharp an angle (as defined by the miter limit parameter, a bevel join shall be used instead.
+  miter,
 
+  /// An arc of a circle with a diameter equal to the line width shall be drawn around the point where the two segments meet, connecting the outer edges of the strokes for the two segments. This pieslice-shaped figure shall be filled in, producing a rounded corner.
+  round,
+
+  /// The two segments shall be finished with butt caps and the resulting notch beyond the ends of the segments shall be filled with a triangle.
+  bevel
+}
+
+/// Specify the shape that shall be used at the ends of open subpaths
+/// and dashes, when they are stroked.
+enum PdfLineCap {
+  /// The stroke shall be squared off at the endpoint of the path. There shall be no projection beyond the end of the path.
+  butt,
+
+  /// A semicircular arc with a diameter equal to the line width shall be drawn around the endpoint and shall be filled in.
+  round,
+
+  /// The stroke shall continue beyond the endpoint of the path for a distance equal to half the line width and shall besquared off.
+  square
+}
+
+/// Text rendering mode
 enum PdfTextRenderingMode {
   /// Fill text
   fill,
@@ -531,7 +555,8 @@ class PdfGraphics {
     buf.putString('${cap.index} J\n');
   }
 
-  void setLineJoin(PdfLineCap join) {
+  /// Set line join type
+  void setLineJoin(PdfLineJoin join) {
     buf.putString('${join.index} j\n');
   }
 

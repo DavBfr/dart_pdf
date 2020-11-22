@@ -260,7 +260,7 @@ class FixedAxis<T extends num> extends GridAxis {
     context.canvas
       ..setStrokeColor(color)
       ..setLineWidth(width)
-      ..setLineCap(PdfLineCap.joinBevel)
+      ..setLineJoin(PdfLineJoin.bevel)
       ..strokePath();
 
     for (final y in values) {
@@ -305,7 +305,7 @@ class FixedAxis<T extends num> extends GridAxis {
     context.canvas
       ..setStrokeColor(color)
       ..setLineWidth(width)
-      ..setLineCap(PdfLineCap.joinBevel)
+      ..setLineJoin(PdfLineJoin.bevel)
       ..strokePath();
 
     for (final num x in values) {
@@ -359,7 +359,7 @@ class FixedAxis<T extends num> extends GridAxis {
     context.canvas
       ..setStrokeColor(divisionsColor)
       ..setLineWidth(divisionsWidth)
-      ..setLineCap(PdfLineCap.joinMiter)
+      ..setLineJoin(PdfLineJoin.miter)
       ..strokePath();
 
     if (divisionsDashed) {
