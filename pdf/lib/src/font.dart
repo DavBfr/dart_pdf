@@ -16,84 +16,96 @@
 
 part of pdf;
 
+/// Pdf font object
 abstract class PdfFont extends PdfObject {
   /// Constructs a [PdfFont]. This will attempt to map the font from a known
   /// font name to that in Pdf, defaulting to Helvetica if not possible.
-  ///
-  /// @param name The document name, ie /F1
-  /// @param subtype The pdf type, ie /Type1
-  /// @param baseFont The font name, ie /Helvetica
   PdfFont._create(PdfDocument pdfDocument, {@required this.subtype})
       : assert(subtype != null),
         super(pdfDocument, '/Font') {
     pdfDocument.fonts.add(this);
   }
 
+  /// Monospaced slab serif typeface.
   factory PdfFont.courier(PdfDocument pdfDocument) {
     return PdfType1Font._create(
         pdfDocument, 'Courier', 0.910, -0.220, const <double>[]);
   }
 
+  /// Bold monospaced slab serif typeface.
   factory PdfFont.courierBold(PdfDocument pdfDocument) {
     return PdfType1Font._create(
         pdfDocument, 'Courier-Bold', 0.910, -0.220, const <double>[]);
   }
 
+  /// Bold and Italic monospaced slab serif typeface.
   factory PdfFont.courierBoldOblique(PdfDocument pdfDocument) {
     return PdfType1Font._create(
         pdfDocument, 'Courier-BoldOblique', 0.910, -0.220, const <double>[]);
   }
 
+  /// Italic monospaced slab serif typeface.
   factory PdfFont.courierOblique(PdfDocument pdfDocument) {
     return PdfType1Font._create(
         pdfDocument, 'Courier-Oblique', 0.910, -0.220, const <double>[]);
   }
 
+  /// Neo-grotesque design sans-serif typeface
   factory PdfFont.helvetica(PdfDocument pdfDocument) {
     return PdfType1Font._create(
         pdfDocument, 'Helvetica', 0.931, -0.225, _helveticaWidths);
   }
 
+  /// Bold Neo-grotesque design sans-serif typeface
   factory PdfFont.helveticaBold(PdfDocument pdfDocument) {
     return PdfType1Font._create(
         pdfDocument, 'Helvetica-Bold', 0.962, -0.228, _helveticaBoldWidths);
   }
 
+  /// Bold and Italic Neo-grotesque design sans-serif typeface
   factory PdfFont.helveticaBoldOblique(PdfDocument pdfDocument) {
     return PdfType1Font._create(pdfDocument, 'Helvetica-BoldOblique', 0.962,
         -0.228, _helveticaBoldObliqueWidths);
   }
 
+  /// Italic Neo-grotesque design sans-serif typeface
   factory PdfFont.helveticaOblique(PdfDocument pdfDocument) {
     return PdfType1Font._create(pdfDocument, 'Helvetica-Oblique', 0.931, -0.225,
         _helveticaObliqueWidths);
   }
 
+  /// Serif typeface commissioned by the British newspaper The Times
   factory PdfFont.times(PdfDocument pdfDocument) {
     return PdfType1Font._create(
         pdfDocument, 'Times-Roman', 0.898, -0.218, _timesWidths);
   }
 
+  /// Bold serif typeface commissioned by the British newspaper The Times
   factory PdfFont.timesBold(PdfDocument pdfDocument) {
     return PdfType1Font._create(
         pdfDocument, 'Times-Bold', 0.935, -0.218, _timesBoldWidths);
   }
 
+  /// Bold and Italic serif typeface commissioned by the British newspaper The Times
   factory PdfFont.timesBoldItalic(PdfDocument pdfDocument) {
     return PdfType1Font._create(
         pdfDocument, 'Times-BoldItalic', 0.921, -0.218, _timesBoldItalicWidths);
   }
 
+  /// Italic serif typeface commissioned by the British newspaper The Times
   factory PdfFont.timesItalic(PdfDocument pdfDocument) {
     return PdfType1Font._create(
         pdfDocument, 'Times-Italic', 0.883, -0.217, _timesItalicWidths);
   }
 
+  /// Complete unaccented serif Greek alphabet (upper and lower case) and a
+  /// selection of commonly used mathematical symbols.
   factory PdfFont.symbol(PdfDocument pdfDocument) {
     return PdfType1Font._create(
         pdfDocument, 'Symbol', 1.010, -0.293, _symbolWidths);
   }
 
+  /// Hermann Zapf ornament glyphs or spacers, often employed to create box frames
   factory PdfFont.zapfDingbats(PdfDocument pdfDocument) {
     return PdfType1Font._create(
         pdfDocument, 'ZapfDingbats', 0.820, -0.143, _zapfDingbatsWidths);
@@ -110,17 +122,22 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
   /// The df type of the font, usually /Type1
   final String subtype;
 
+  /// Internal name
   String get name => '/F$objser';
 
+  /// The font's real name
   String get fontName => null;
 
+  /// Spans the distance between the baseline and the top of the glyph that
+  /// reaches farthest from the baseline
   double get ascent => null;
 
+  /// Spans the distance between the baseline and the lowest descending glyph
   double get descent => null;
 
+  /// Default width of a glyph
   static const double defaultGlyphWidth = 0.600;
 
-  /// @param os OutputStream to send the object to
   @override
   void _prepare() {
     super._prepare();
@@ -130,14 +147,18 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
     params['/Encoding'] = const PdfName('/WinAnsiEncoding');
   }
 
+  /// How many units to move for the next glyph
   @Deprecated('Use `glyphMetrics` instead')
   double glyphAdvance(int charCode) => glyphMetrics(charCode).advanceWidth;
 
+  /// Calculate the [PdfFontMetrics] for this glyph
   PdfFontMetrics glyphMetrics(int charCode);
 
+  ///  Calculate the dimensions of this glyph
   @Deprecated('Use `glyphMetrics` instead')
   PdfRect glyphBounds(int charCode) => glyphMetrics(charCode).toPdfRect();
 
+  /// Calculate the [PdfFontMetrics] for this string
   PdfFontMetrics stringMetrics(String s, {double letterSpacing = 0}) {
     if (s.isEmpty) {
       return PdfFontMetrics.zero;
@@ -157,9 +178,11 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
     }
   }
 
+  /// Calculage the bounding box for this string
   @Deprecated('Use `stringMetrics` instead')
   PdfRect stringBounds(String s) => stringMetrics(s).toPdfRect();
 
+  /// Calculage the unit size of this string
   PdfPoint stringSize(String s) {
     final metrics = stringMetrics(s);
     return PdfPoint(metrics.width, metrics.height);
@@ -168,6 +191,7 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
   @override
   String toString() => 'Font($fontName)';
 
+  /// Draw some text
   void putText(PdfStream stream, String text) {
     try {
       PdfString(latin1.encode(text), PdfStringFormat.litteral).output(stream);

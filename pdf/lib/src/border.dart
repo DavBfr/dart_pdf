@@ -16,6 +16,7 @@
 
 part of pdf;
 
+/// Border style
 enum PdfBorderStyle {
   /// Solid border. The border is drawn as a solid line.
   solid,
@@ -35,15 +36,9 @@ enum PdfBorderStyle {
   underlined
 }
 
+/// Defines a border object
 class PdfBorder extends PdfObject {
   /// Creates a border using the predefined styles in [PdfAnnot].
-  /// Note: Do not use [PdfAnnot.dashed] with this method.
-  /// Use the other constructor.
-  ///
-  /// @param width The width of the border
-  /// @param style The style of the border
-  /// @param dash The line pattern definition
-  /// @see [PdfAnnot]
   PdfBorder(
     PdfDocument pdfDocument,
     this.width, {
@@ -62,7 +57,6 @@ class PdfBorder extends PdfObject {
   /// This array allows the definition of a dotted line for the border
   final List<double> dash;
 
-  /// @param os OutputStream to send the object to
   @override
   void _prepare() {
     super._prepare();

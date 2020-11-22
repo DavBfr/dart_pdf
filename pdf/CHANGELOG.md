@@ -8,6 +8,7 @@
 - Update analysis options
 - Fix the line cap and joint enums
 - Fix PdfOutlineMode enum
+- Improve API documentation
 
 ## 1.12.0
 

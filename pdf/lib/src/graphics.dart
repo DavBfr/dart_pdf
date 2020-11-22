@@ -76,7 +76,9 @@ class _PdfGraphicsContext {
   _PdfGraphicsContext copy() => _PdfGraphicsContext(ctm: ctm.clone());
 }
 
+/// Pdf drawing operations
 class PdfGraphics {
+  /// Create a new graphic canvas
   PdfGraphics(this._page, this.buf) {
     _context = _PdfGraphicsContext(ctm: Matrix4.identity());
   }
@@ -90,22 +92,29 @@ class PdfGraphics {
 
   final PdfGraphicStream _page;
 
+  /// Buffer where to write the graphic operations
   final PdfStream buf;
 
+  /// Default font if none selected
   PdfFont get defaultFont => _page.getDefaultFont();
 
+  /// Draw a surface on the previously defined shape
   void fillPath() {
     buf.putString('f\n');
   }
 
+  /// Draw the contour of the previously defined shape
   void strokePath() {
     buf.putString('S\n');
   }
 
+  /// Close the path with a line
   void closePath() {
     buf.putString('s\n');
   }
 
+  /// Create a clipping surface from the previously defined shape,
+  /// to prevent any further drawing outside
   void clipPath() {
     buf.putString('W n\n');
   }
@@ -130,26 +139,13 @@ class PdfGraphics {
     }
   }
 
+  /// Save the graphc context
   void saveContext() {
-    // save graphics context
     buf.putString('q\n');
     _contextQueue.addLast(_context.copy());
   }
 
   /// Draws an image onto the page.
-  ///
-  /// This method is implemented with [Ascii85Encoder] encoding and the
-  /// zip stream deflater.  It results in a stream that is anywhere
-  /// from 3 to 10 times as big as the image.  This obviously needs some
-  /// improvement, but it works well for small images
-  ///
-  /// @param img The Image
-  /// @param x   coordinate on page
-  /// @param y   coordinate on page
-  /// @param w   Width on page
-  /// @param h   height on page
-  /// @param bgcolor Background colour
-  /// @return true if drawn
   void drawImage(PdfImage img, double x, double y, [double w, double h]) {
     w ??= img.width.toDouble();
     h ??= img.height.toDouble() * w / img.width.toDouble();
@@ -190,19 +186,12 @@ class PdfGraphics {
   }
 
   /// Draws a line between two coordinates.
-  ///
-  /// If the first coordinate is the same as the last one drawn
-  /// (i.e. a previous drawLine, moveto, etc) it is ignored.
-  ///
-  /// @param x1 coordinate
-  /// @param y1 coordinate
-  /// @param x2 coordinate
-  /// @param y2 coordinate
   void drawLine(double x1, double y1, double x2, double y2) {
     moveTo(x1, y1);
     lineTo(x2, y2);
   }
 
+  /// Draws an ellipse
   void drawEllipse(double x, double y, double r1, double r2) {
     moveTo(x, y - r2);
     curveTo(x + _m4 * r1, y - r2, x + r1, y - _m4 * r2, x + r1, y);
@@ -212,11 +201,6 @@ class PdfGraphics {
   }
 
   /// Draws a Rectangle
-  ///
-  /// @param x coordinate
-  /// @param y coordinate
-  /// @param w width
-  /// @param h height
   void drawRect(
     double x,
     double y,
@@ -228,13 +212,6 @@ class PdfGraphics {
   }
 
   /// Draws a Rounded Rectangle
-  ///
-  /// @param x coordinate
-  /// @param y coordinate
-  /// @param w width
-  /// @param h height
-  /// @param rh horizontal radius
-  /// @param rv vertical radius
   void drawRRect(double x, double y, double w, double h, double rv, double rh) {
     moveTo(x, y + rv);
     curveTo(x, y - _m4 * rv + rv, x - _m4 * rh + rh, y, x + rh, y);
@@ -283,10 +260,6 @@ class PdfGraphics {
   }
 
   /// This draws a string.
-  ///
-  /// @param x coordinate
-  /// @param y coordinate
-  /// @param s String to draw
   void drawString(
     PdfFont font,
     double size,
@@ -316,16 +289,12 @@ class PdfGraphics {
   }
 
   /// Sets the color for drawing
-  ///
-  /// @param c Color to use
   void setColor(PdfColor color) {
     setFillColor(color);
     setStrokeColor(color);
   }
 
   /// Sets the fill color for drawing
-  ///
-  /// @param c Color to use
   void setFillColor(PdfColor color) {
     if (color is PdfColorCmyk) {
       PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
@@ -338,8 +307,6 @@ class PdfGraphics {
   }
 
   /// Sets the stroke color for drawing
-  ///
-  /// @param c Color to use
   void setStrokeColor(PdfColor color) {
     if (color is PdfColorCmyk) {
       PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
@@ -371,18 +338,12 @@ class PdfGraphics {
   }
 
   /// This adds a line segment to the current path
-  ///
-  /// @param x coordinate
-  /// @param y coordinate
   void lineTo(double x, double y) {
     PdfNumList(<double>[x, y]).output(buf);
     buf.putString(' l\n');
   }
 
   /// This moves the current drawing point.
-  ///
-  /// @param x coordinate
-  /// @param y coordinate
   void moveTo(double x, double y) {
     PdfNumList(<double>[x, y]).output(buf);
     buf.putString(' m\n');
@@ -391,13 +352,6 @@ class PdfGraphics {
   /// Draw a cubic bézier curve from the current point to (x3,y3)
   /// using (x1,y1) as the control point at the beginning of the curve
   /// and (x2,y2) as the control point at the end of the curve.
-  ///
-  /// @param x1 first control point
-  /// @param y1 first control point
-  /// @param x2 second control point
-  /// @param y2 second control point
-  /// @param x3 end point
-  /// @param y3 end point
   void curveTo(
       double x1, double y1, double x2, double y2, double x3, double y3) {
     PdfNumList(<double>[x1, y1, x2, y2, x3, y3]).output(buf);
@@ -546,11 +500,13 @@ class PdfGraphics {
     }
   }
 
+  /// Draw an SVG path
   void drawShape(String d, {bool stroke = true}) {
     final proxy = _PathProxy(this, stroke);
     writeSvgPathDataToPath(d, proxy);
   }
 
+  /// Set line starting and ending cap type
   void setLineCap(PdfLineCap cap) {
     buf.putString('${cap.index} J\n');
   }
@@ -560,16 +516,22 @@ class PdfGraphics {
     buf.putString('${join.index} j\n');
   }
 
+  /// Set line width
   void setLineWidth(double width) {
     PdfNum(width).output(buf);
     buf.putString(' w\n');
   }
 
+  /// Set line joint miter limit, applies if the
   void setMiterLimit(double limit) {
     PdfNum(limit).output(buf);
     buf.putString(' M\n');
   }
 
+  /// The dash array shall be cycled through, adding up the lengths of dashes and gaps.
+  /// When the accumulated length equals the value specified by the dash phase
+  ///
+  /// Example: [2 1] will create a dash pattern with 2 on, 1 off, 2 on, 1 off, ...
   void setLineDashPattern([List<int> array = const <int>[], int phase = 0]) {
     PdfArray.fromNum(array).output(buf);
     buf.putString(' $phase d\n');

@@ -16,6 +16,7 @@
 
 part of pdf;
 
+/// Outline mode
 enum PdfOutlineMode {
   /// When jumping to the destination, display the whole page
   fitPage,
@@ -24,6 +25,7 @@ enum PdfOutlineMode {
   fitRect
 }
 
+/// Outline style
 enum PdfOutlineStyle {
   /// Normal
   normal,
@@ -31,16 +33,17 @@ enum PdfOutlineStyle {
   /// Italic
   italic,
 
-  // Bold
+  /// Bold
   bold,
 
   /// Italic and Bold
   italicBold,
 }
 
+/// Pdf Outline object
 class PdfOutline extends PdfObject {
-  /// Constructs a Pdf Outline object. When selected, the specified region
-  /// is displayed.
+  /// Constructs a Pdf Outline object.
+  /// When selected, the specified region is displayed.
   PdfOutline(
     PdfDocument pdfDocument, {
     this.title,
@@ -82,6 +85,7 @@ class PdfOutline extends PdfObject {
   /// How to display the outline text
   final PdfOutlineStyle style;
 
+  /// External level for this outline
   int effectiveLevel;
 
   /// This method creates an outline, and attaches it to this one.
@@ -91,7 +95,6 @@ class PdfOutline extends PdfObject {
     outlines.add(outline);
   }
 
-  /// @param os OutputStream to send the object to
   @override
   void _prepare() {
     super._prepare();
@@ -162,22 +165,15 @@ class PdfOutline extends PdfObject {
 
   /// This is called by children to find their position in this outlines
   /// tree.
-  ///
-  /// @param outline [PdfOutline] to search for
-  /// @return index within Vector
   int getIndex(PdfOutline outline) => outlines.indexOf(outline);
 
   /// Returns the last index in this outline
-  /// @return last index in outline
   int getLast() => outlines.length - 1;
 
   /// Returns the outline at a specified position.
-  /// @param i index
-  /// @return the node at index i
   PdfOutline getNode(int i) => outlines[i];
 
   /// Returns the total number of descendants below this one.
-  /// @return the number of descendants below this one
   int descendants() {
     var c = outlines.length; // initially the number of kids
 

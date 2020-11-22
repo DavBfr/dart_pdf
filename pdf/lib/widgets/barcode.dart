@@ -149,8 +149,9 @@ class _BarcodeWidget extends Widget {
   }
 }
 
+/// Draw a barcode using String data
 class BarcodeWidget extends StatelessWidget {
-  /// Draw a barcode using String data
+  /// Create a BarcodeWidget
   factory BarcodeWidget({
     @required String data,
     @required Barcode barcode,

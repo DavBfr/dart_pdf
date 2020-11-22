@@ -16,6 +16,7 @@
 
 part of pdf;
 
+/// Represents an RGB color
 class PdfColor {
   /// Create a color with red, green, blue and alpha components
   /// values between 0 and 1
@@ -69,6 +70,7 @@ class PdfColor {
     return PdfColor(red, green, blue, alpha);
   }
 
+  /// Load an RGB color from a RYB color
   factory PdfColor.fromRYB(double red, double yellow, double blue,
       [double alpha = 1.0]) {
     assert(red >= 0 && red <= 1);
@@ -128,11 +130,19 @@ class PdfColor {
     return PdfColor(redValue, greenValue, blueValue, alpha);
   }
 
+  /// Opacity
   final double alpha;
+
+  /// Red component
   final double red;
+
+  /// Green component
   final double green;
+
+  /// Blue component
   final double blue;
 
+  /// Get the int32 representation of this color
   int toInt() =>
       ((((alpha * 255.0).round() & 0xff) << 24) |
           (((red * 255.0).round() & 0xff) << 16) |
@@ -140,6 +150,7 @@ class PdfColor {
           (((blue * 255.0).round() & 0xff) << 0)) &
       0xFFFFFFFF;
 
+  /// Get an Hexadecimal representation of this color
   String toHex() {
     final i = toInt();
     final rgb = (i & 0xffffff).toRadixString(16);
@@ -147,14 +158,17 @@ class PdfColor {
     return '#$rgb$a';
   }
 
+  /// Convert this color to CMYK
   PdfColorCmyk toCmyk() {
     return PdfColorCmyk.fromRgb(red, green, blue, alpha);
   }
 
+  /// Convert this color to HSV
   PdfColorHsv toHsv() {
     return PdfColorHsv.fromRgb(red, green, blue, alpha);
   }
 
+  /// Convert this color to HSL
   PdfColorHsl toHsl() {
     return PdfColorHsl.fromRgb(red, green, blue, alpha);
   }
@@ -166,6 +180,7 @@ class PdfColor {
     return math.pow((component + 0.055) / 1.055, 2.4);
   }
 
+  /// Get the luminance
   double get luminance {
     final R = _linearizeColorComponent(red);
     final G = _linearizeColorComponent(green);
@@ -191,24 +206,31 @@ class PdfColor {
   /// Get some similar colors
   List<PdfColor> get monochromatic => toHsv().monochromatic;
 
+  /// Returns a list of complementary colors
   List<PdfColor> get splitcomplementary => toHsv().splitcomplementary;
 
+  /// Returns a list of tetradic colors
   List<PdfColor> get tetradic => toHsv().tetradic;
 
+  /// Returns a list of triadic colors
   List<PdfColor> get triadic => toHsv().triadic;
 
+  /// Returns a list of analagous colors
   List<PdfColor> get analagous => toHsv().analagous;
 
   @override
   String toString() => '$runtimeType($red, $green, $blue, $alpha)';
 }
 
+/// Represents an CMYK color
 class PdfColorCmyk extends PdfColor {
+  /// Creates a CMYK color
   const PdfColorCmyk(this.cyan, this.magenta, this.yellow, this.black,
       [double a = 1.0])
       : super((1.0 - cyan) * (1.0 - black), (1.0 - magenta) * (1.0 - black),
             (1.0 - yellow) * (1.0 - black), a);
 
+  /// Create a CMYK color from red ,green and blue components
   const PdfColorCmyk.fromRgb(double r, double g, double b, [double a = 1.0])
       : black = 1.0 - r > g
             ? r
@@ -270,9 +292,16 @@ class PdfColorCmyk extends PdfColor {
                         : b)),
         super(r, g, b, a);
 
+  /// Cyan component
   final double cyan;
+
+  /// Magenta component
   final double magenta;
+
+  /// Yellow component
   final double yellow;
+
+  /// Black component
   final double black;
 
   @override
@@ -306,6 +335,7 @@ double _getHue(
 /// starting at the red primary at 0°, passing through the green primary
 /// at 120° and the blue primary at 240°, and then wrapping back to red at 360°
 class PdfColorHsv extends PdfColor {
+  /// Creates an HSV color
   factory PdfColorHsv(double hue, double saturation, double value,
       [double alpha = 1.0]) {
     final chroma = saturation * value;
@@ -352,6 +382,7 @@ class PdfColorHsv extends PdfColor {
         assert(value >= 0 && value <= 1),
         super(red, green, blue, alpha);
 
+  /// Creates an HSV color from red, green, blue components
   factory PdfColorHsv.fromRgb(double red, double green, double blue,
       [double alpha = 1.0]) {
     final max = math.max(red, math.max(green, blue));
@@ -433,7 +464,9 @@ class PdfColorHsv extends PdfColor {
   String toString() => '$runtimeType($hue, $saturation, $value, $alpha)';
 }
 
+/// Represents an HSL color
 class PdfColorHsl extends PdfColor {
+  /// Creates an HSL color
   factory PdfColorHsl(double hue, double saturation, double lightness,
       [double alpha = 1.0]) {
     final chroma = (1.0 - (2.0 * lightness - 1.0).abs()) * saturation;
@@ -485,6 +518,7 @@ class PdfColorHsl extends PdfColor {
         assert(lightness >= 0 && lightness <= 1),
         super(red, green, blue, alpha);
 
+  /// Creates an HSL color from red, green, and blue components
   factory PdfColorHsl.fromRgb(double red, double green, double blue,
       [double alpha = 1.0]) {
     final max = math.max(red, math.max(green, blue));
@@ -500,8 +534,13 @@ class PdfColorHsl extends PdfColor {
     return PdfColorHsl._(hue, saturation, lightness, alpha, red, green, blue);
   }
 
+  /// Hue component
   final double hue;
+
+  /// Saturation component
   final double saturation;
+
+  /// Lightness component
   final double lightness;
 
   @override

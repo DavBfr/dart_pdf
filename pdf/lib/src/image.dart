@@ -19,16 +19,32 @@ part of pdf;
 /// Represents the position of the first pixel in the data stream
 /// This corresponds to the exif orientations
 enum PdfImageOrientation {
+  /// Rotated 0°
   topLeft,
+
+  /// Rotated 90°
   topRight,
+
+  /// Rotated 180°
   bottomRight,
+
+  /// Rotated 270°
   bottomLeft,
+
+  /// Rotated 0° mirror
   leftTop,
+
+  /// Rotated 90° mirror
   rightTop,
+
+  /// Rotated 180° mirror
   rightBottom,
+
+  /// Rotated 270° mirror
   leftBottom,
 }
 
+/// Image object stored in the Pdf document
 class PdfImage extends PdfXObject {
   /// Creates a new [PdfImage] instance.
   factory PdfImage(
@@ -77,6 +93,7 @@ class PdfImage extends PdfXObject {
     return im;
   }
 
+  /// Create an image from a jpeg file
   factory PdfImage.jpeg(
     PdfDocument pdfDocument, {
     @required Uint8List image,
@@ -107,6 +124,7 @@ class PdfImage extends PdfXObject {
     return im;
   }
 
+  /// Create an image from an [im.Image] object
   factory PdfImage.fromImage(
     PdfDocument pdfDocument, {
     @required im.Image image,
@@ -124,6 +142,7 @@ class PdfImage extends PdfXObject {
     );
   }
 
+  /// Create an image from an image file
   factory PdfImage.file(
     PdfDocument pdfDocument, {
     @required Uint8List bytes,
@@ -185,12 +204,14 @@ class PdfImage extends PdfXObject {
     params['/Height'] = PdfNum(_height);
   }
 
-  /// Image width
   final int _width;
+
+  /// Image width
   int get width => orientation.index >= 4 ? _height : _width;
 
-  /// Image height
   final int _height;
+
+  /// Image height
   int get height => orientation.index < 4 ? _height : _width;
 
   /// The internal orientation of the image

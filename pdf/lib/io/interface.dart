@@ -16,4 +16,5 @@
 
 import 'package:pdf/pdf.dart';
 
+/// Zip compression function
 DeflateCallback defaultDeflate;

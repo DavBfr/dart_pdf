@@ -16,8 +16,9 @@
 
 part of pdf;
 
+/// Information object
 class PdfInfo extends PdfObject {
-  /// @param title Title of this document
+  /// Create an information object
   PdfInfo(PdfDocument pdfDocument,
       {this.title,
       this.author,
@@ -53,15 +54,21 @@ class PdfInfo extends PdfObject {
 
   static const String _libraryName = 'https://github.com/DavBfr/dart_pdf';
 
+  /// Author of this document
   final String author;
 
+  /// Creator of this document
   final String creator;
 
+  /// Title of this document
   final String title;
 
+  /// Subject of this document
   final String subject;
 
+  /// Keywords of this document
   final String keywords;
 
+  /// Application that created this document
   final String producer;
 }

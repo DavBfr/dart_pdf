@@ -16,12 +16,9 @@
 
 part of pdf;
 
+/// Pdf Catalog object
 class PdfCatalog extends PdfObject {
   /// This constructs a Pdf Catalog object
-  ///
-  /// @param pdfPageList The [PdfPageList] object that's the root of the documents page tree
-  /// @param pagemode How the document should appear when opened.
-  /// Allowed values are usenone, useoutlines, usethumbs or fullscreen.
   PdfCatalog(
     PdfDocument pdfDocument,
     this.pdfPageList,
@@ -44,7 +41,6 @@ class PdfCatalog extends PdfObject {
   /// The initial page mode
   final PdfNames names;
 
-  /// @param os OutputStream to send the object to
   @override
   void _prepare() {
     super._prepare();

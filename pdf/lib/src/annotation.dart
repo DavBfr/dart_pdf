@@ -30,8 +30,6 @@ class PdfAnnot extends PdfObject {
   final PdfPage pdfPage;
 
   /// Output the annotation
-  ///
-  /// @param os OutputStream to send the object to
   @override
   void _prepare() {
     super._prepare();

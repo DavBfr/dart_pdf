@@ -16,8 +16,11 @@
 
 part of pdf;
 
+/// Encryption object
 abstract class PdfEncryption extends PdfObject {
+  /// Creates an encryption object
   PdfEncryption(PdfDocument pdfDocument) : super(pdfDocument, null);
 
+  /// Encrypt some data
   Uint8List encrypt(Uint8List input, PdfObject object);
 }

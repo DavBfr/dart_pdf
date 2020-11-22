@@ -9,24 +9,24 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  printing:
-  path_provider:
-  open_file:
-  url_launcher:
   intl:
+  open_file:
+  path_provider:
+  printing:
+  url_launcher:
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
   flutter_driver:
+    sdk: flutter
+  flutter_test:
     sdk: flutter
   test:
 
 dependency_overrides:
-  printing:
-    path: ../printing
   pdf:
     path: ../pdf
+  printing:
+    path: ../printing
 
 flutter:
   uses-material-design: true

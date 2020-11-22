@@ -16,8 +16,10 @@
 
 part of pdf;
 
+/// Describe dimensions for glyphs in a font
 @immutable
 class PdfFontMetrics {
+  /// Create a PdfFontMetrics object
   const PdfFontMetrics(
       {@required this.left,
       @required this.top,
@@ -37,6 +39,7 @@ class PdfFontMetrics {
         assert(top <= bottom),
         assert((descent ?? top) <= (ascent ?? bottom));
 
+  /// Add another metric
   factory PdfFontMetrics.append(
     Iterable<PdfFontMetrics> metrics, {
     double letterSpacing = 0,
@@ -76,42 +79,59 @@ class PdfFontMetrics {
         advanceWidth: right - spacing);
   }
 
+  /// Zero-sized dimensions
   static const PdfFontMetrics zero =
       PdfFontMetrics(left: 0, top: 0, right: 0, bottom: 0);
 
+  /// Left most of the bounding box
   final double left;
 
+  /// Top most of the bounding box
   final double top;
 
+  /// Bottom most of the bounding box
   final double bottom;
 
+  /// Right most of the bounding box
   final double right;
 
+  /// Spans the distance between the baseline and the top of the glyph that
+  /// reaches farthest from the baseline
   final double ascent;
 
+  /// Spans the distance between the baseline and the lowest descending glyph
   final double descent;
 
+  /// distance to move right to draw the next glyph
   final double advanceWidth;
 
+  /// Width of the glyph
   double get width => right - left;
 
+  /// Height of the glyph
   double get height => bottom - top;
 
-  double get maxHeight => ascent - descent;
-
+  /// Maximum Width any glyph from this font can have
   double get maxWidth =>
       math.max(advanceWidth, right) + math.max(-leftBearing, 0.0);
 
+  /// Maximum Height any glyph from this font can have
+  double get maxHeight => ascent - descent;
+
+  /// Real left position. The glyph may overflow on the left
   double get effectiveLeft => math.min(leftBearing, 0);
 
+  /// Starting point
   double get leftBearing => left;
 
+  /// Ending point
   double get rightBearing => advanceWidth - right;
 
   @override
   String toString() =>
       'PdfFontMetrics(left:$left, top:$top, right:$right, bottom:$bottom, ascent:$ascent, descent:$descent, advanceWidth:$advanceWidth)';
 
+  /// Make a copy of this object
   PdfFontMetrics copyWith(
       {double left,
       double top,
@@ -130,6 +150,7 @@ class PdfFontMetrics {
         advanceWidth: advanceWidth ?? this.advanceWidth);
   }
 
+  /// Multiply this metrics object with a font size
   PdfFontMetrics operator *(double factor) {
     return copyWith(
       left: left * factor,
@@ -142,5 +163,6 @@ class PdfFontMetrics {
     );
   }
 
+  /// Get the bounding box
   PdfRect toPdfRect() => PdfRect.fromLTRB(left, top, right, bottom);
 }

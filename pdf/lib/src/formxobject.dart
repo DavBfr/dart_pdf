@@ -16,7 +16,9 @@
 
 part of pdf;
 
+/// Form XObject
 class PdfFormXObject extends PdfXObject {
+  /// Create a Form XObject
   PdfFormXObject(PdfDocument pdfDocument) : super(pdfDocument, '/Form') {
     params['/FormType'] = const PdfNum(1);
     params['/BBox'] = PdfArray.fromNum(const <int>[0, 0, 1000, 1000]);
@@ -28,7 +30,7 @@ class PdfFormXObject extends PdfXObject {
   /// The xobjects or other images in the pdf
   final Map<String, PdfXObject> xobjects = <String, PdfXObject>{};
 
-  /// set matrix
+  /// Transformation matrix
   void setMatrix(Matrix4 t) {
     final s = t.storage;
     params['/Matrix'] =
@@ -39,8 +41,7 @@ class PdfFormXObject extends PdfXObject {
   void _prepare() {
     super._prepare();
 
-    // Now the resources
-    /// This holds any resources for this FormXObject
+    // This holds any resources for this FormXObject
     final resources = PdfDict();
 
     // fonts

@@ -16,6 +16,7 @@
 
 part of pdf;
 
+/// Ascii 85 encoder
 class Ascii85Encoder extends Converter<Uint8List, Uint8List> {
   @override
   Uint8List convert(Uint8List input) {

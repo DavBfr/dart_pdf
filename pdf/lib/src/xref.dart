@@ -16,11 +16,9 @@
 
 part of pdf;
 
+/// Cross-reference for a Pdf Object
 class PdfXref {
   /// Creates a cross-reference for a Pdf Object
-  /// @param id The object's ID
-  /// @param offset The object's position in the file
-  /// @param generation The object's generation, usually 0
   PdfXref(this.id, this.offset, {this.generation = 0});
 
   /// The id of a Pdf Object
@@ -32,7 +30,7 @@ class PdfXref {
   /// The generation of the object, usually 0
   int generation = 0;
 
-  /// @return The xref in the format of the xref section in the Pdf file
+  /// The xref in the format of the xref section in the Pdf file
   String ref() {
     final rs = offset.toString().padLeft(10, '0') +
         ' ' +

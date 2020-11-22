@@ -16,6 +16,7 @@
 
 part of pdf;
 
+/// Helper functions for graphic objects
 mixin PdfGraphicStream on PdfObject {
   /// Isolated transparency: If this flag is true, objects within the group
   /// shall be composited against a fully transparent initial backdrop;
@@ -38,24 +39,28 @@ mixin PdfGraphicStream on PdfObject {
   /// The xobjects or other images in the pdf
   final Map<String, PdfXObject> xObjects = <String, PdfXObject>{};
 
+  /// Add a font to this graphic object
   void addFont(PdfFont font) {
     if (!fonts.containsKey(font.name)) {
       fonts[font.name] = font;
     }
   }
 
+  /// Add a shader to this graphic object
   void addShader(PdfShading shader) {
     if (!shading.containsKey(shader.name)) {
       shading[shader.name] = shader;
     }
   }
 
+  /// Add an XObject to this graphic object
   void addXObject(PdfXObject object) {
     if (!xObjects.containsKey(object.name)) {
       xObjects[object.name] = object;
     }
   }
 
+  /// Get the default font of this graphic object
   PdfFont getDefaultFont() {
     if (pdfDocument.fonts.isEmpty) {
       PdfFont.helvetica(pdfDocument);
@@ -64,6 +69,7 @@ mixin PdfGraphicStream on PdfObject {
     return pdfDocument.fonts.elementAt(0);
   }
 
+  /// Generate a name for the graphic state object
   String stateName(PdfGraphicState state) {
     return pdfDocument.graphicStates.stateName(state);
   }
@@ -114,7 +120,9 @@ mixin PdfGraphicStream on PdfObject {
   }
 }
 
+/// Graphic XObject
 class PdfGraphicXObject extends PdfXObject with PdfGraphicStream {
+  /// Creates a Graphic XObject
   PdfGraphicXObject(
     PdfDocument pdfDocument, [
     String subtype,

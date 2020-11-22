@@ -20,6 +20,7 @@
 
 part of pdf;
 
+/// Arabic shape substitutions functions
 class PdfArabic {
   /// Arabic shape substitutions: char code => (isolated, final, initial, medial).
   /// Arabic Substition A
@@ -398,6 +399,7 @@ class PdfArabic {
     }
   }
 
+  /// Apply Arabic shape substitutions
   static String convert(String input) {
     return List<String>.from(_parse(input)).join('');
   }

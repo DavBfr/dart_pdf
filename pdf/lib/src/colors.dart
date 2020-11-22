@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+// ignore_for_file: public_member_api_docs
+
 part of pdf;
 
+/// Material design colors
 class PdfColors {
   PdfColors._();
 
@@ -393,6 +396,7 @@ class PdfColors {
     deepOrangeAccent,
   ];
 
+  /// Get a pseudo-random color
   static PdfColor getColor(int index) {
     final hue = index * 137.508;
     final PdfColor color = PdfColorHsv(hue % 360, 1, 1);

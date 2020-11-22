@@ -16,13 +16,16 @@
 
 part of pdf;
 
+/// An array object
 class PdfArrayObject extends PdfObject {
+  /// Creates an array object
   PdfArrayObject(
     PdfDocument pdfDocument,
     this.array,
   )   : assert(array != null),
         super(pdfDocument);
 
+  /// The array
   final PdfArray array;
 
   @override

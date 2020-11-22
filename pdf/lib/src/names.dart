@@ -16,12 +16,14 @@
 
 part of pdf;
 
+/// Pdf Name object
 class PdfNames extends PdfObject {
   /// This constructs a Pdf Name object
   PdfNames(PdfDocument pdfDocument) : super(pdfDocument);
 
   final Map<String, PdfDataType> _dests = <String, PdfDataType>{};
 
+  /// Add a named destination
   void addDest(
     String name,
     PdfPage page, {

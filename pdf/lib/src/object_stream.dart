@@ -16,16 +16,14 @@
 
 part of pdf;
 
+/// Stream Object
 class PdfObjectStream extends PdfObject {
-  /// Constructs a stream. The supplied type is stored in the stream's header
-  /// and is used by other objects that extend the [PdfStream] class (like
-  /// [PdfImage]).
-  /// By default, the stream will be compressed.
-  ///
-  /// @param type type for the stream
-  /// @see [PdfImage]
-  PdfObjectStream(PdfDocument pdfDocument, {String type, this.isBinary = false})
-      : super(pdfDocument, type);
+  /// Constructs a stream object to store some data
+  PdfObjectStream(
+    PdfDocument pdfDocument, {
+    String type,
+    this.isBinary = false,
+  }) : super(pdfDocument, type);
 
   /// This holds the stream's content.
   final PdfStream buf = PdfStream();

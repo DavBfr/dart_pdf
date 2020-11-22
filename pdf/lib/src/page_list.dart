@@ -16,6 +16,7 @@
 
 part of pdf;
 
+/// PdfPageList object
 class PdfPageList extends PdfObject {
   /// This constructs a [PdfPageList] object.
   PdfPageList(PdfDocument pdfDocument) : super(pdfDocument, '/Pages');
@@ -24,8 +25,6 @@ class PdfPageList extends PdfObject {
   final List<PdfPage> pages = <PdfPage>[];
 
   /// This returns a specific page. Used by the Pdf class.
-  /// @param page page number to return
-  /// @return [PdfPage] at that position
   PdfPage getPage(int page) => pages[page];
 
   @override

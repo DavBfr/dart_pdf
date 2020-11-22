@@ -16,10 +16,9 @@
 
 part of pdf;
 
+/// PDF document writer
 class PdfOutput {
   /// This creates a Pdf [PdfStream]
-  ///
-  /// @param os The output stream to write the Pdf file to.
   PdfOutput(this.os) {
     os.putString('%PDF-1.4\n');
     os.putBytes(const <int>[0x25, 0xC2, 0xA5, 0xC2, 0xB1, 0xC3, 0xAB, 0x0A]);
@@ -44,8 +43,6 @@ class PdfOutput {
   PdfSignature signatureID;
 
   /// This method writes a [PdfObject] to the stream.
-  ///
-  /// @param ob [PdfObject] Object to write
   void write(PdfObject ob) {
     // Check the object to see if it's one that is needed in the trailer
     // object
@@ -146,8 +143,6 @@ class PdfOutput {
   }
 
   /// Writes a block of references to the Pdf file
-  /// @param firstid ID of the first reference in this block
-  /// @param block Vector containing the references in this block
   void writeblock(int firstid, List<PdfXref> block) {
     os.putString('$firstid ${block.length}\n');
 

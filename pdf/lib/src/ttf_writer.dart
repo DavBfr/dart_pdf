@@ -16,10 +16,15 @@
 
 part of pdf;
 
+/// Generate a TTF font copy with the minimal number of glyph to embedd
+/// into the PDF document
+///
 /// https://opentype.js.org/
 class TtfWriter {
+  /// Create a Truetype Writer object
   TtfWriter(this.ttf);
 
+  /// original truetype file
   final TtfParser ttf;
 
   int _calcTableChecksum(ByteData table) {
@@ -52,6 +57,7 @@ class TtfWriter {
     return offset + ((align - (offset % align)) % align);
   }
 
+  /// Write this list of glyphs
   Uint8List withChars(List<int> chars) {
     final tables = <String, Uint8List>{};
     final tablesLength = <String, int>{};

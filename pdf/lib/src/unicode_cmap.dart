@@ -16,11 +16,15 @@
 
 part of pdf;
 
+/// Unicode character map object
 class PdfUnicodeCmap extends PdfObjectStream {
+  /// Create a Unicode character map object
   PdfUnicodeCmap(PdfDocument pdfDocument, this.protect) : super(pdfDocument);
 
+  /// List of characters
   final List<int> cmap = <int>[0];
 
+  /// Protects the text from being "seen" by the PDF reader.
   final bool protect;
 
   @override

@@ -16,7 +16,9 @@
 
 part of pdf;
 
+/// Jpeg metadata extraction
 class PdfJpegInfo {
+  /// Load a Jpeg image's metadata
   factory PdfJpegInfo(Uint8List image) {
     assert(image != null);
 
@@ -73,14 +75,18 @@ class PdfJpegInfo {
 
   PdfJpegInfo._(this.width, this.height, this._color, this.tags);
 
+  /// Width of the image
   final int width;
 
+  /// Height of the image
   final int height;
 
   final int _color;
 
+  /// Is the image color or greyscale
   bool get isRGB => _color == 3;
 
+  /// Exif tags discovered
   final Map<PdfExifTag, dynamic> tags;
 
   /// EXIF version
@@ -94,6 +100,7 @@ class PdfJpegInfo {
           ? null
           : utf8.decode(tags[PdfExifTag.FlashpixVersion]);
 
+  /// Rotation angle of this image
   PdfImageOrientation get orientation {
     if (tags == null || tags[PdfExifTag.Orientation] == null) {
       return PdfImageOrientation.topLeft;
@@ -106,21 +113,25 @@ class PdfJpegInfo {
     }
   }
 
+  /// Exif horizontal resolution
   double get xResolution => tags == null || tags[PdfExifTag.XResolution] == null
       ? null
       : tags[PdfExifTag.XResolution][0].toDouble() /
           tags[PdfExifTag.XResolution][1].toDouble();
 
+  /// Exif vertical resolution
   double get yResolution => tags == null || tags[PdfExifTag.YResolution] == null
       ? null
       : tags[PdfExifTag.YResolution][0].toDouble() /
           tags[PdfExifTag.YResolution][1].toDouble();
 
+  /// Exif horizontal pixel dimension
   int get pixelXDimension =>
       tags == null || tags[PdfExifTag.PixelXDimension] == null
           ? width
           : tags[PdfExifTag.PixelXDimension];
 
+  /// Exif vertical pixel dimension
   int get pixelYDimension =>
       tags == null || tags[PdfExifTag.PixelYDimension] == null
           ? height
@@ -440,111 +451,280 @@ orientation: $orientation''';
   };
 }
 
+/// Possible Exif tags
 enum PdfExifTag {
   // version tags
-  ExifVersion, // EXIF version
-  FlashpixVersion, // Flashpix format version
+  /// EXIF version
+  ExifVersion,
+
+  /// Flashpix format version
+  FlashpixVersion,
 
   // colorspace tags
-  ColorSpace, // Color space information tag
+  /// Color space information tag
+  ColorSpace,
 
   // image configuration
-  PixelXDimension, // Valid width of meaningful image
-  PixelYDimension, // Valid height of meaningful image
-  ComponentsConfiguration, // Information about channels
-  CompressedBitsPerPixel, // Compressed bits per pixel
+  /// Valid width of meaningful image
+  PixelXDimension,
+
+  /// Valid height of meaningful image
+  PixelYDimension,
+
+  /// Information about channels
+  ComponentsConfiguration,
+
+  /// Compressed bits per pixel
+  CompressedBitsPerPixel,
 
   // user information
-  MakerNote, // Any desired information written by the manufacturer
-  UserComment, // Comments by user
+  /// Any desired information written by the manufacturer
+  MakerNote,
+
+  /// Comments by user
+  UserComment,
 
   // related file
-  RelatedSoundFile, // Name of related sound file
+  /// Name of related sound file
+  RelatedSoundFile,
 
   // date and time
-  DateTimeOriginal, // Date and time when the original image was generated
-  DateTimeDigitized, // Date and time when the image was stored digitally
-  SubsecTime, // Fractions of seconds for DateTime
-  SubsecTimeOriginal, // Fractions of seconds for DateTimeOriginal
-  SubsecTimeDigitized, // Fractions of seconds for DateTimeDigitized
+  /// Date and time when the original image was generated
+  DateTimeOriginal,
+
+  /// Date and time when the image was stored digitally
+  DateTimeDigitized,
+
+  /// Fractions of seconds for DateTime
+  SubsecTime,
+
+  /// Fractions of seconds for DateTimeOriginal
+  SubsecTimeOriginal,
+
+  /// Fractions of seconds for DateTimeDigitized
+  SubsecTimeDigitized,
 
   // picture-taking conditions
-  ExposureTime, // Exposure time (in seconds)
-  FNumber, // F number
-  ExposureProgram, // Exposure program
-  SpectralSensitivity, // Spectral sensitivity
-  ISOSpeedRatings, // ISO speed rating
-  OECF, // Optoelectric conversion factor
-  ShutterSpeedValue, // Shutter speed
-  ApertureValue, // Lens aperture
-  BrightnessValue, // Value of brightness
-  ExposureBias, // Exposure bias
-  MaxApertureValue, // Smallest F number of lens
-  SubjectDistance, // Distance to subject in meters
-  MeteringMode, // Metering mode
-  LightSource, // Kind of light source
-  Flash, // Flash status
-  SubjectArea, // Location and area of main subject
-  FocalLength, // Focal length of the lens in mm
-  FlashEnergy, // Strobe energy in BCPS
-  SpatialFrequencyResponse, //
-  FocalPlaneXResolution, // Number of pixels in width direction per FocalPlaneResolutionUnit
-  FocalPlaneYResolution, // Number of pixels in height direction per FocalPlaneResolutionUnit
-  FocalPlaneResolutionUnit, // Unit for measuring FocalPlaneXResolution and FocalPlaneYResolution
-  SubjectLocation, // Location of subject in image
-  ExposureIndex, // Exposure index selected on camera
-  SensingMethod, // Image sensor type
-  FileSource, // Image source (3 == DSC)
-  SceneType, // Scene type (1 == directly photographed)
-  CFAPattern, // Color filter array geometric pattern
-  CustomRendered, // Special processing
-  ExposureMode, // Exposure mode
-  WhiteBalance, // 1 = auto white balance, 2 = manual
-  DigitalZoomRation, // Digital zoom ratio
-  FocalLengthIn35mmFilm, // Equivalent foacl length assuming 35mm film camera (in mm)
-  SceneCaptureType, // Type of scene
-  GainControl, // Degree of overall image gain adjustment
-  Contrast, // Direction of contrast processing applied by camera
-  Saturation, // Direction of saturation processing applied by camera
-  Sharpness, // Direction of sharpness processing applied by camera
-  DeviceSettingDescription, //
-  SubjectDistanceRange, // Distance to subject
+  /// Exposure time (in seconds)
+  ExposureTime,
+
+  /// F number
+  FNumber,
+
+  /// Exposure program
+  ExposureProgram,
+
+  /// Spectral sensitivity
+  SpectralSensitivity,
+
+  /// ISO speed rating
+  ISOSpeedRatings,
+
+  /// Optoelectric conversion factor
+  OECF,
+
+  /// Shutter speed
+  ShutterSpeedValue,
+
+  /// Lens aperture
+  ApertureValue,
+
+  /// Value of brightness
+  BrightnessValue,
+
+  /// Exposure bias
+  ExposureBias,
+
+  /// Smallest F number of lens
+  MaxApertureValue,
+
+  /// Distance to subject in meters
+  SubjectDistance,
+
+  /// Metering mode
+  MeteringMode,
+
+  /// Kind of light source
+  LightSource,
+
+  /// Flash status
+  Flash,
+
+  /// Location and area of main subject
+  SubjectArea,
+
+  /// Focal length of the lens in mm
+  FocalLength,
+
+  /// Strobe energy in BCPS
+  FlashEnergy,
+
+  /// Spatial Frequency Response
+  SpatialFrequencyResponse,
+
+  /// Number of pixels in width direction per FocalPlaneResolutionUnit
+  FocalPlaneXResolution,
+
+  /// Number of pixels in height direction per FocalPlaneResolutionUnit
+  FocalPlaneYResolution,
+
+  /// Unit for measuring FocalPlaneXResolution and FocalPlaneYResolution
+  FocalPlaneResolutionUnit,
+
+  /// Location of subject in image
+  SubjectLocation,
+
+  /// Exposure index selected on camera
+  ExposureIndex,
+
+  /// Image sensor type
+  SensingMethod,
+
+  /// Image source (3 == DSC)
+  FileSource,
+
+  /// Scene type (1 == directly photographed)
+  SceneType,
+
+  /// Color filter array geometric pattern
+  CFAPattern,
+
+  /// Special processing
+  CustomRendered,
+
+  /// Exposure mode
+  ExposureMode,
+
+  /// 1 = auto white balance, 2 = manual
+  WhiteBalance,
+
+  /// Digital zoom ratio
+  DigitalZoomRation,
+
+  /// Equivalent foacl length assuming 35mm film camera (in mm)
+  FocalLengthIn35mmFilm,
+
+  /// Type of scene
+  SceneCaptureType,
+
+  /// Degree of overall image gain adjustment
+  GainControl,
+
+  /// Direction of contrast processing applied by camera
+  Contrast,
+
+  /// Direction of saturation processing applied by camera
+  Saturation,
+
+  /// Direction of sharpness processing applied by camera
+  Sharpness,
+
+  /// Device Setting Description
+  DeviceSettingDescription,
+
+  /// Distance to subject
+  SubjectDistanceRange,
 
   // other tags
+  /// Interoperability IFD Pointer
   InteroperabilityIFDPointer,
-  ImageUniqueID, // Identifier assigned uniquely to each image
+  //// Identifier assigned uniquely to each image
+  ImageUniqueID,
 
   // tiff Tags
+  /// ImageWidth
   ImageWidth,
+
+  /// ImageHeight
   ImageHeight,
+
+  /// ExifIFDPointer
   ExifIFDPointer,
+
+  /// GPSInfoIFDPointer
   GPSInfoIFDPointer,
+
+  /// BitsPerSample
   BitsPerSample,
+
+  /// Compression
   Compression,
+
+  /// PhotometricInterpretation
   PhotometricInterpretation,
+
+  /// Orientation
   Orientation,
+
+  /// SamplesPerPixel
   SamplesPerPixel,
+
+  /// PlanarConfiguration
   PlanarConfiguration,
+
+  /// YCbCrSubSampling
   YCbCrSubSampling,
+
+  /// YCbCrPositioning
   YCbCrPositioning,
+
+  /// XResolution
   XResolution,
+
+  /// YResolution
   YResolution,
+
+  /// ResolutionUnit
   ResolutionUnit,
+
+  /// StripOffsets
   StripOffsets,
+
+  /// RowsPerStrip
   RowsPerStrip,
+
+  /// StripByteCounts
   StripByteCounts,
+
+  /// JPEGInterchangeFormat
   JPEGInterchangeFormat,
+
+  /// JPEGInterchangeFormatLength
   JPEGInterchangeFormatLength,
+
+  /// TransferFunction
   TransferFunction,
+
+  /// WhitePoint
   WhitePoint,
+
+  /// PrimaryChromaticities
   PrimaryChromaticities,
+
+  /// YCbCrCoefficients
   YCbCrCoefficients,
+
+  /// ReferenceBlackWhite
   ReferenceBlackWhite,
+
+  /// DateTime
   DateTime,
+
+  /// ImageDescription
   ImageDescription,
+
+  /// Make
   Make,
+
+  /// Model
   Model,
+
+  /// Software
   Software,
+
+  /// Artist
   Artist,
+
+  /// Copyright
   Copyright,
 }

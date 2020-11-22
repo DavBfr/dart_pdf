@@ -16,6 +16,7 @@
 
 part of pdf;
 
+/// Display hint for the PDF viewer
 enum PdfPageMode {
   /// This page mode indicates that the document
   /// should be opened just with the page visible.  This is the default
@@ -35,6 +36,7 @@ enum PdfPageMode {
   fullscreen
 }
 
+/// Callback used to compress the data
 typedef DeflateCallback = List<int> Function(List<int> data);
 
 /// This class is the base of the Pdf generator. A [PdfDocument] class is
@@ -44,8 +46,6 @@ typedef DeflateCallback = List<int> Function(List<int> data);
 /// document's internal structures are kept in sync.
 class PdfDocument {
   /// This creates a Pdf document
-  /// @param pagemode an int, determines how the document will present itself to
-  /// the viewer when it first opens.
   PdfDocument({
     PdfPageMode pageMode = PdfPageMode.none,
     DeflateCallback deflate,
@@ -113,8 +113,9 @@ class PdfDocument {
   /// This holds the current fonts
   final Set<PdfFont> fonts = <PdfFont>{};
 
-  /// Generates the document ID
   Uint8List _documentID;
+
+  /// Generates the document ID
   Uint8List get documentID {
     if (_documentID == null) {
       final rnd = math.Random();
@@ -132,16 +133,11 @@ class PdfDocument {
 
   /// This returns a specific page. It's used mainly when using a
   /// Serialized template file.
-  ///
-  /// ?? How does a serialized template file work ???
-  ///
-  /// @param page page number to return
-  /// @return [PdfPage] at that position
   PdfPage page(int page) {
     return pdfPageList.getPage(page);
   }
 
-  /// @return the root outline
+  /// The root outline
   PdfOutline get outline {
     if (_outline == null) {
       _outline = PdfOutline(this);
@@ -156,19 +152,10 @@ class PdfDocument {
     return _graphicStates;
   }
 
+  /// This document has at least one graphic state
   bool get hasGraphicStates => _graphicStates != null;
 
   /// This writes the document to an OutputStream.
-  ///
-  /// Note: You can call this as many times as you wish, as long as
-  /// the calls are not running at the same time.
-  ///
-  /// Also, objects can be added or amended between these calls.
-  ///
-  /// Also, the OutputStream is not closed, but will be flushed on
-  /// completion. It is up to the caller to close the stream.
-  ///
-  /// @param os OutputStream to write the document to
   void _write(PdfStream os) {
     final pos = PdfOutput(os);
 
@@ -180,6 +167,7 @@ class PdfDocument {
     pos.close();
   }
 
+  /// Generate the PDF document as a memory file
   Uint8List save() {
     final os = PdfStream();
     _write(os);

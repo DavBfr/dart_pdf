@@ -16,6 +16,14 @@
 
 part of pdf;
 
+/// Type 1 font object.
+/// this font is a default PDF font available in all PDF readers,
+/// but it's only compatible with western latin languages.
+///
+/// To use other languages, use a [PdfTtfFont] that contains the
+/// glyph for the language you will use.
+///
+/// see https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
 class PdfType1Font extends PdfFont {
   /// Constructs a [PdfTtfFont]
   PdfType1Font._create(PdfDocument pdfDocument, this.fontName, this.ascent,
@@ -27,7 +35,6 @@ class PdfType1Font extends PdfFont {
         }()),
         super._create(pdfDocument, subtype: '/Type1');
 
-  /// The font's real name
   @override
   final String fontName;
 
@@ -37,9 +44,9 @@ class PdfType1Font extends PdfFont {
   @override
   final double descent;
 
+  /// Width of each glyph
   final List<double> widths;
 
-  /// @param os OutputStream to send the object to
   @override
   void _prepare() {
     super._prepare();

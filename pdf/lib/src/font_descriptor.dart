@@ -16,7 +16,9 @@
 
 part of pdf;
 
+/// Font descriptor object
 class PdfFontDescriptor extends PdfObject {
+  /// Create a Font descriptor object
   PdfFontDescriptor(
     this.ttfFont,
     this.file,
@@ -24,8 +26,10 @@ class PdfFontDescriptor extends PdfObject {
         assert(file != null),
         super(ttfFont.pdfDocument, '/FontDescriptor');
 
+  /// File data
   final PdfObjectStream file;
 
+  /// Truetype font
   final PdfTtfFont ttfFont;
 
   @override

@@ -16,14 +16,10 @@
 
 part of pdf;
 
+/// Page object, which will hold any contents for this page.
 class PdfPage extends PdfObject with PdfGraphicStream {
   /// This constructs a Page object, which will hold any contents for this
   /// page.
-  ///
-  /// Once created, it is added to the document via the [PdfDocument.add()] method.
-  ///
-  /// @param pdfDocument Document
-  /// @param pageFormat [PdfPageFormat] describing the page size
   PdfPage(PdfDocument pdfDocument, {this.pageFormat = PdfPageFormat.standard})
       : super(pdfDocument, '/Page') {
     pdfDocument.pdfPageList.pages.add(this);
@@ -46,8 +42,6 @@ class PdfPage extends PdfObject with PdfGraphicStream {
   /// on to this page. If a previous [PdfGraphics] object was used, this object
   /// is appended to the page, and will be drawn over the top of any previous
   /// objects.
-  ///
-  /// @return a new [PdfGraphics] object to be used to draw this page.
   PdfGraphics getGraphics() {
     final stream = PdfObjectStream(pdfDocument);
     final g = PdfGraphics(this, stream.buf);
@@ -56,11 +50,6 @@ class PdfPage extends PdfObject with PdfGraphicStream {
   }
 
   /// This adds an Annotation to the page.
-  ///
-  /// As with other objects, the annotation must be added to the pdf
-  /// document using [PdfDocument.add()] before adding to the page.
-  ///
-  /// @param ob Annotation to add.
   void addAnnotation(PdfObject ob) {
     annotations.add(ob);
   }

@@ -18,10 +18,13 @@
 
 part of pdf;
 
+/// Graphic state
 @immutable
 class PdfGraphicState {
+  /// Create a new graphic state
   const PdfGraphicState({this.opacity});
 
+  /// The opacity to apply to this graphic state
   final double opacity;
 
   @protected
@@ -48,13 +51,16 @@ class PdfGraphicState {
   int get hashCode => opacity.hashCode;
 }
 
+/// Stores all the graphic states used in the document
 class PdfGraphicStates extends PdfObject {
+  /// Create a new Graphic States object
   PdfGraphicStates(PdfDocument pdfDocument) : super(pdfDocument);
 
   final List<PdfGraphicState> _states = <PdfGraphicState>[];
 
   static const String _prefix = '/a';
 
+  /// Generate a name for a state object
   String stateName(PdfGraphicState state) {
     var index = _states.indexOf(state);
     if (index < 0) {
