@@ -16,6 +16,7 @@
 
 export 'package:barcode/barcode.dart';
 
+export 'svg.dart';
 export 'widgets/annotations.dart';
 export 'widgets/barcode.dart';
 export 'widgets/basic.dart';

@@ -20,6 +20,7 @@
 - Fix RichText.maxLines with multiple TextSpan
 - Fix Exif parsing
 - Add Border and BorderSide objects
+- Add basic support for SVG images
 
 ## 1.12.0
 

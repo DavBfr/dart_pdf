@@ -43,6 +43,7 @@ import 'widget_multipage_test.dart' as widget_multipage;
 import 'widget_opacity_test.dart' as widget_opacity;
 import 'widget_outline_test.dart' as widget_outline;
 import 'widget_partitions_test.dart' as widget_partitions;
+import 'widget_svg_test.dart' as widget_svg;
 import 'widget_table_test.dart' as widget_table;
 import 'widget_test.dart' as widget;
 import 'widget_text_test.dart' as widget_text;
@@ -78,6 +79,7 @@ void main() {
   widget_opacity.main();
   widget_outline.main();
   widget_partitions.main();
+  widget_svg.main();
   widget_table.main();
   widget_text.main();
   widget_theme.main();

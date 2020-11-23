@@ -17,6 +17,7 @@
 import 'dart:math' as math;
 
 import 'package:pdf/pdf.dart';
+import 'package:pdf/svg.dart';
 
 import 'basic.dart';
 import 'geometry.dart';
@@ -84,7 +85,20 @@ class PdfLogo extends StatelessWidget {
   }
 }
 
-class FlutterLogo extends PdfLogo {}
+class FlutterLogo extends StatelessWidget {
+  FlutterLogo({this.fit = BoxFit.contain});
+
+  final BoxFit fit;
+
+  @override
+  Widget build(Context context) {
+    return SvgImage(
+      svg:
+          '<?xml version="1.0" encoding="UTF-8"?><svg version="1.1" viewBox="0 0 256 317" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="a" x1="10%" x2="67%" y1="40%" y2="35%"><stop stop-color="#1a237e" stop-opacity=".4" offset="0"/><stop stop-color="#1a237e" stop-opacity="0" offset="1"/></linearGradient></defs><polygon points="157.67 0 0 157.67 48.801 206.47 255.27 0" fill="#54c5f8"/><polygon points="156.57 145.4 72.149 229.82 121.13 279.53 169.84 230.82 255.27 145.4" fill="#54c5f8"/><polygon points="121.13 279.53 158.21 316.61 255.27 316.61 169.84 230.82" fill="#01579b"/><polygon points="71.6 230.36 120.4 181.56 169.84 230.82 121.13 279.53" fill="#29b6f6"/><polygon points="121.13 279.53 189.44 253.83 167.85 233.75" fill="url(#a)" fill-opacity=".8"/></svg>',
+      fit: fit,
+    );
+  }
+}
 
 class LoremText {
   LoremText({math.Random random}) : random = random ?? math.Random(978);
