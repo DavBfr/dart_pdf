@@ -49,10 +49,6 @@ class PdfNames extends PdfObject {
   void _prepare() {
     super._prepare();
 
-    if (_dests.isEmpty) {
-      return;
-    }
-
     final dests = PdfArray();
 
     final keys = _dests.keys.toList()..sort();
@@ -62,12 +58,14 @@ class PdfNames extends PdfObject {
       dests.add(_dests[name]);
     }
 
-    params['/Dests'] = PdfDict(<String, PdfDataType>{
-      '/Names': dests,
-      '/Limits': PdfArray(<PdfDataType>[
+    final dict = PdfDict();
+    if (dests.values.isNotEmpty) {
+      dict['/Names'] = dests;
+      dict['/Limits'] = PdfArray(<PdfDataType>[
         PdfSecString.fromString(this, keys.first),
         PdfSecString.fromString(this, keys.last),
-      ])
-    });
+      ]);
+    }
+    params['/Dests'] = dict;
   }
 }
