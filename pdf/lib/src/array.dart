@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'data_types.dart';
+import 'document.dart';
+import 'object.dart';
+import 'stream.dart';
 
 /// An array object
 class PdfArrayObject extends PdfObject {
@@ -29,8 +32,8 @@ class PdfArrayObject extends PdfObject {
   final PdfArray array;
 
   @override
-  void _writeContent(PdfStream os) {
-    super._writeContent(os);
+  void writeContent(PdfStream os) {
+    super.writeContent(os);
 
     array.output(os);
     os.putBytes(<int>[0x0a]);

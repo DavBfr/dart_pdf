@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'catalog.dart';
+import 'data_types.dart';
+import 'encryption.dart';
+import 'info.dart';
+import 'object.dart';
+import 'signature.dart';
+import 'stream.dart';
+import 'xref.dart';
 
 /// PDF document writer
 class PdfOutput {
@@ -61,7 +68,7 @@ class PdfOutput {
     }
 
     offsets.add(PdfXref(ob.objser, os.offset));
-    ob._write(os);
+    ob.write(os);
   }
 
   /// This closes the Stream, writing the xref table
@@ -138,7 +145,7 @@ class PdfOutput {
     os.putString('\nstartxref\n$xref\n%%EOF\n');
 
     if (signatureID != null) {
-      signatureID._writeSignature(os);
+      signatureID.writeSignature(os);
     }
   }
 

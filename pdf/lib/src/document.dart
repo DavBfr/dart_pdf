@@ -14,7 +14,27 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'package:crypto/crypto.dart';
+
+import '../io/interface.dart'
+    if (dart.library.io) '../io/vm.dart'
+    if (dart.library.js) '../io/js.dart';
+import 'catalog.dart';
+import 'encryption.dart';
+import 'font.dart';
+import 'graphic_state.dart';
+import 'info.dart';
+import 'names.dart';
+import 'object.dart';
+import 'outline.dart';
+import 'output.dart';
+import 'page.dart';
+import 'page_list.dart';
+import 'signature.dart';
+import 'stream.dart';
 
 /// Display hint for the PDF viewer
 enum PdfPageMode {
@@ -102,14 +122,6 @@ class PdfDocument {
   /// The PDF specification version
   final String version = '1.7';
 
-  /// These map the page modes just defined to the pagemodes setting of Pdf.
-  static const List<String> _PdfPageModes = <String>[
-    '/UseNone',
-    '/UseOutlines',
-    '/UseThumbs',
-    '/FullScreen'
-  ];
-
   /// This holds the current fonts
   final Set<PdfFont> fonts = <PdfFont>{};
 
@@ -129,7 +141,7 @@ class PdfDocument {
   }
 
   /// Creates a new serial number
-  int _genSerial() => _objser++;
+  int genSerial() => _objser++;
 
   /// This returns a specific page. It's used mainly when using a
   /// Serialized template file.

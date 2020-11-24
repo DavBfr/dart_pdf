@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'annotation.dart';
+import 'data_types.dart';
+import 'document.dart';
+import 'object.dart';
 
 /// Border style
 enum PdfBorderStyle {
@@ -58,8 +61,8 @@ class PdfBorder extends PdfObject {
   final List<double> dash;
 
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     params['/S'] =
         PdfName('/' + 'SDBIU'.substring(style.index, style.index + 1));

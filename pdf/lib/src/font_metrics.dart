@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'dart:math' as math;
+
+import 'package:meta/meta.dart';
+
+import 'rect.dart';
 
 /// Describe dimensions for glyphs in a font
 @immutable

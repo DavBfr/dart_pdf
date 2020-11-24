@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:math' as math;
+
+import 'package:image/image.dart' as im;
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+import 'package:vector_math/vector_math_64.dart';
+
+import 'basic.dart';
+import 'geometry.dart';
+import 'image_provider.dart';
+import 'widget.dart';
 
 enum DecorationPosition { background, foreground }
 

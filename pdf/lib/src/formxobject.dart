@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'package:vector_math/vector_math_64.dart';
+
+import 'data_types.dart';
+import 'document.dart';
+import 'font.dart';
+import 'xobject.dart';
 
 /// Form XObject
 class PdfFormXObject extends PdfXObject {
@@ -38,8 +43,8 @@ class PdfFormXObject extends PdfXObject {
   }
 
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     // This holds any resources for this FormXObject
     final resources = PdfDict();

@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:math' as math;
+
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+import 'package:vector_math/vector_math_64.dart';
+
+import 'geometry.dart';
+import 'widget.dart';
 
 /// How to size the non-positioned children of a [Stack].
 enum StackFit { loose, expand, passthrough }

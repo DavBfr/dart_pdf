@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:typed_data';
+
+import 'package:image/image.dart' as im;
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+
+import 'widget.dart';
 
 /// Identifies an image without committing to the precise final asset
 abstract class ImageProvider {

@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'package:meta/meta.dart';
+
+import 'basic.dart';
+import 'font.dart';
+import 'icon.dart';
+import 'text.dart';
+import 'text_style.dart';
+import 'widget.dart';
 
 @immutable
 class ThemeData extends Inherited {

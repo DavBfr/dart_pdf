@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'dart:math' as math;
+
+import 'point.dart';
 
 class PdfPageFormat {
   const PdfPageFormat(this.width, this.height,

@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+import 'package:vector_math/vector_math_64.dart';
+
+import '../container.dart';
+import '../decoration.dart';
+import '../flex.dart';
+import '../geometry.dart';
+import '../stack.dart';
+import '../widget.dart';
 
 /// This widget is in preview and the API is subject to change
 class Chart extends Widget implements Inherited {

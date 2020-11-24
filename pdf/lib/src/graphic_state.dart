@@ -16,7 +16,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-part of pdf;
+import 'package:meta/meta.dart';
+
+import 'data_types.dart';
+import 'document.dart';
+import 'object.dart';
 
 /// Graphic state
 @immutable
@@ -71,8 +75,8 @@ class PdfGraphicStates extends PdfObject {
   }
 
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     for (var index = 0; index < _states.length; index++) {
       params['$_prefix$index'] = _states[index]._output();

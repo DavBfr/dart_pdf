@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'package:meta/meta.dart';
+
+import 'color.dart';
+import 'data_types.dart';
+import 'document.dart';
+import 'object.dart';
+import 'object_stream.dart';
 
 abstract class PdfBaseFunction extends PdfObject {
   PdfBaseFunction(PdfDocument pdfDocument) : super(pdfDocument);
@@ -29,7 +35,7 @@ class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
   final List<PdfColor> colors;
 
   @override
-  void _prepare() {
+  void prepare() {
     for (final color in colors) {
       buf.putBytes(<int>[
         (color.red * 255.0).round() & 0xff,
@@ -38,7 +44,7 @@ class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
       ]);
     }
 
-    super._prepare();
+    super.prepare();
 
     params['/FunctionType'] = const PdfNum(0);
     params['/BitsPerSample'] = const PdfNum(8);
@@ -69,8 +75,8 @@ class PdfStitchingFunction extends PdfBaseFunction {
   final double domainEnd;
 
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     params['/FunctionType'] = const PdfNum(3);
     params['/Functions'] = PdfArray.fromObjects(functions);

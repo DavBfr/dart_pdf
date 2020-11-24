@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'dart:typed_data';
+
+import 'package:image/image.dart' as im;
+import 'package:meta/meta.dart';
+
+import 'data_types.dart';
+import 'document.dart';
+import 'exif.dart';
+import 'xobject.dart';
 
 /// Represents the position of the first pixel in the data stream
 /// This corresponds to the exif orientations

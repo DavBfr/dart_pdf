@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'dart:typed_data';
 
 class PdfStream {
   static const int _grow = 65536;

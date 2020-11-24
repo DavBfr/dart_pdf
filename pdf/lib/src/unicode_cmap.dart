@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'document.dart';
+import 'object_stream.dart';
 
 /// Unicode character map object
 class PdfUnicodeCmap extends PdfObjectStream {
@@ -28,7 +29,7 @@ class PdfUnicodeCmap extends PdfObjectStream {
   final bool protect;
 
   @override
-  void _prepare() {
+  void prepare() {
     if (protect) {
       cmap.fillRange(1, cmap.length, 0x20);
     }
@@ -62,6 +63,6 @@ class PdfUnicodeCmap extends PdfObjectStream {
         'CMapName currentdict /CMap defineresource pop\n'
         'end\n'
         'end');
-    super._prepare();
+    super.prepare();
   }
 }

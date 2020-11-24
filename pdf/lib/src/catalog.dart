@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'annotation.dart';
+import 'data_types.dart';
+import 'document.dart';
+import 'names.dart';
+import 'object.dart';
+import 'outline.dart';
+import 'page_list.dart';
 
 /// Pdf Catalog object
 class PdfCatalog extends PdfObject {
@@ -41,9 +47,17 @@ class PdfCatalog extends PdfObject {
   /// The initial page mode
   final PdfNames names;
 
+  /// These map the page modes just defined to the pagemodes setting of Pdf.
+  static const List<String> _PdfPageModes = <String>[
+    '/UseNone',
+    '/UseOutlines',
+    '/UseThumbs',
+    '/FullScreen'
+  ];
+
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     /// the PDF specification version, overrides the header version starting from 1.4
     params['/Version'] = PdfName('/${pdfDocument.version}');
@@ -59,7 +73,7 @@ class PdfCatalog extends PdfObject {
     params['/Names'] = names.ref();
 
     // the /PageMode setting
-    params['/PageMode'] = PdfName(PdfDocument._PdfPageModes[pageMode.index]);
+    params['/PageMode'] = PdfName(_PdfPageModes[pageMode.index]);
 
     if (pdfDocument.sign != null) {
       params['/Perms'] = PdfDict(<String, PdfDataType>{

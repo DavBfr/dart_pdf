@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+
+import 'geometry.dart';
+import 'page.dart';
+import 'text.dart';
+import 'theme.dart';
 
 @immutable
 class PageTheme {

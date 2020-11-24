@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'data_types.dart';
+import 'document.dart';
+import 'object_stream.dart';
 
 class PdfXObject extends PdfObjectStream {
   PdfXObject(PdfDocument pdfDocument, String subtype, {bool isBinary = false})

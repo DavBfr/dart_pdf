@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:math' as math;
+
+import 'package:pdf/pdf.dart';
+import 'package:vector_math/vector_math_64.dart';
+
+import 'flex.dart';
+import 'geometry.dart';
+import 'multi_page.dart';
+import 'widget.dart';
 
 /// How [Wrap] should align objects.
 enum WrapAlignment {

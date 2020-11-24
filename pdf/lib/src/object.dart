@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'package:meta/meta.dart';
+
+import 'data_types.dart';
+import 'document.dart';
+import 'stream.dart';
 
 /// Base Object used in the PDF file
 class PdfObject {
@@ -24,7 +28,7 @@ class PdfObject {
     this.pdfDocument, [
     String type,
   ])  : assert(pdfDocument != null),
-        objser = pdfDocument._genSerial() {
+        objser = pdfDocument.genSerial() {
     if (type != null) {
       params['/Type'] = PdfName(type);
     }
@@ -45,16 +49,16 @@ class PdfObject {
   final PdfDocument pdfDocument;
 
   /// Writes the object to the output stream.
-  void _write(PdfStream os) {
-    _prepare();
+  void write(PdfStream os) {
+    prepare();
     _writeStart(os);
-    _writeContent(os);
+    writeContent(os);
     _writeEnd(os);
   }
 
   /// Prepare the object to be written to the stream
   @mustCallSuper
-  void _prepare() {}
+  void prepare() {}
 
   /// The write method should call this before writing anything to the
   /// OutputStream. This will send the standard header for each object.
@@ -62,7 +66,7 @@ class PdfObject {
     os.putString('$objser $objgen obj\n');
   }
 
-  void _writeContent(PdfStream os) {
+  void writeContent(PdfStream os) {
     if (params.isNotEmpty) {
       params.output(os);
       os.putString('\n');

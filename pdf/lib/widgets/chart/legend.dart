@@ -14,7 +14,19 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'package:pdf/pdf.dart';
+
+import '../basic.dart';
+import '../container.dart';
+import '../decoration.dart';
+import '../flex.dart';
+import '../geometry.dart';
+import '../text.dart';
+import '../text_style.dart';
+import '../theme.dart';
+import '../widget.dart';
+import '../wrap.dart';
+import 'chart.dart';
 
 class ChartLegend extends StatelessWidget {
   ChartLegend({

@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'dart:convert';
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'package:meta/meta.dart';
+import 'package:utf/utf.dart';
+
+import 'font_metrics.dart';
 
 @immutable
 class TtfGlyphInfo {

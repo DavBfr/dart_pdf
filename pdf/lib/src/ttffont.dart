@@ -14,13 +14,27 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'arabic.dart';
+import 'array.dart';
+import 'data_types.dart';
+import 'document.dart';
+import 'font.dart';
+import 'font_descriptor.dart';
+import 'font_metrics.dart';
+import 'object_stream.dart';
+import 'stream.dart';
+import 'ttf_parser.dart';
+import 'ttf_writer.dart';
+import 'unicode_cmap.dart';
 
 class PdfTtfFont extends PdfFont {
   /// Constructs a [PdfTtfFont]
   PdfTtfFont(PdfDocument pdfDocument, ByteData bytes, {bool protect = false})
       : font = TtfParser(bytes),
-        super._create(pdfDocument, subtype: '/TrueType') {
+        super.create(pdfDocument, subtype: '/TrueType') {
     file = PdfObjectStream(pdfDocument, isBinary: true);
     unicodeCMap = PdfUnicodeCmap(pdfDocument, protect);
     descriptor = PdfFontDescriptor(this, file);
@@ -60,7 +74,7 @@ class PdfTtfFont extends PdfFont {
       return PdfFontMetrics.zero;
     }
 
-    if (PdfArabic._isArabicDiacriticValue(charCode)) {
+    if (PdfArabic.isArabicDiacriticValue(charCode)) {
       final metric = font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
       return metric.copyWith(advanceWidth: 0);
     }
@@ -130,8 +144,8 @@ class PdfTtfFont extends PdfFont {
   }
 
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     if (font.unicode) {
       _buildType0(params);

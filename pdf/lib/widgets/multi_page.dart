@@ -14,7 +14,21 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:math' as math;
+
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+import 'package:vector_math/vector_math_64.dart';
+
+import 'document.dart';
+import 'flex.dart';
+import 'geometry.dart';
+import 'page.dart';
+import 'page_theme.dart';
+import 'text.dart';
+import 'text_style.dart';
+import 'theme.dart';
+import 'widget.dart';
 
 abstract class WidgetContext {
   WidgetContext clone();

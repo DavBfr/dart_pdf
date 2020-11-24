@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'data_types.dart';
+import 'document.dart';
+import 'font.dart';
+import 'font_metrics.dart';
+import 'ttffont.dart';
 
 /// Type 1 font object.
 /// this font is a default PDF font available in all PDF readers,
@@ -26,14 +30,14 @@ part of pdf;
 /// see https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
 class PdfType1Font extends PdfFont {
   /// Constructs a [PdfTtfFont]
-  PdfType1Font._create(PdfDocument pdfDocument, this.fontName, this.ascent,
+  PdfType1Font.create(PdfDocument pdfDocument, this.fontName, this.ascent,
       this.descent, this.widths)
       : assert(() {
           print(
               '$fontName has no Unicode support see https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management');
           return true;
         }()),
-        super._create(pdfDocument, subtype: '/Type1');
+        super.create(pdfDocument, subtype: '/Type1');
 
   @override
   final String fontName;
@@ -51,8 +55,8 @@ class PdfType1Font extends PdfFont {
   final List<double> widths;
 
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     params['/BaseFont'] = PdfName('/' + fontName);
   }

@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:math' as math;
+
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+import 'package:vector_math/vector_math_64.dart';
+
+import 'container.dart';
+import 'decoration.dart';
+import 'geometry.dart';
+import 'widget.dart';
 
 enum BoxFit { fill, contain, cover, fitWidth, fitHeight, none, scaleDown }
 

@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'dart:typed_data';
+
+import 'ascii85.dart';
+import 'data_types.dart';
+import 'document.dart';
+import 'object.dart';
+import 'stream.dart';
 
 /// Stream Object
 class PdfObjectStream extends PdfObject {
@@ -34,8 +40,8 @@ class PdfObjectStream extends PdfObject {
   Uint8List _data;
 
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     if (params.containsKey('/Filter') && _data == null) {
       // The data is already in the right format
@@ -67,8 +73,8 @@ class PdfObjectStream extends PdfObject {
   }
 
   @override
-  void _writeContent(PdfStream os) {
-    super._writeContent(os);
+  void writeContent(PdfStream os) {
+    super.writeContent(os);
 
     os.putString('stream\n');
     os.putBytes(_data);

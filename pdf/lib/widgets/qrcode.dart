@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'package:barcode/barcode.dart';
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+
+import 'barcode.dart';
+import 'decoration.dart';
+import 'geometry.dart';
+import 'widget.dart';
 
 typedef QrError = void Function(dynamic error);
 

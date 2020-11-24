@@ -14,7 +14,19 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:math' as math;
+
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+import 'package:vector_math/vector_math_64.dart';
+
+import 'document.dart';
+import 'geometry.dart';
+import 'page_theme.dart';
+import 'text.dart';
+import 'text_style.dart';
+import 'theme.dart';
+import 'widget.dart';
 
 typedef BuildCallback = Widget Function(Context context);
 typedef BuildListCallback = List<Widget> Function(Context context);
@@ -84,12 +96,10 @@ class Page {
       ..fillPath();
   }
 
-  @protected
   void generate(Document document) {
     _pdfPage = PdfPage(document.document, pageFormat: pageFormat);
   }
 
-  @protected
   void postProcess(Document document) {
     final canvas = _pdfPage.getGraphics();
     final _margin = margin;

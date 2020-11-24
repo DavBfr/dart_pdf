@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'package:meta/meta.dart';
+
+import 'data_types.dart';
+import 'document.dart';
+import 'object.dart';
+import 'stream.dart';
 
 enum PdfSigFlags { signaturesExist, appendOnly }
 
@@ -39,15 +44,15 @@ class PdfSignature extends PdfObject {
   int _offsetEnd;
 
   @override
-  void _write(PdfStream os) {
+  void write(PdfStream os) {
     crypto.preSign(this, params);
 
     _offsetStart = os.offset + '$objser $objgen obj\n'.length;
-    super._write(os);
+    super.write(os);
     _offsetEnd = os.offset;
   }
 
-  void _writeSignature(PdfStream os) {
+  void writeSignature(PdfStream os) {
     assert(_offsetStart != null && _offsetEnd != null,
         'Must reserve the object space before signing the document');
 

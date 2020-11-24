@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-// ignore_for_file: avoid_unused_constructor_parameters
+import 'dart:convert';
+import 'dart:typed_data';
 
-part of pdf;
+import 'package:meta/meta.dart';
+import 'package:utf/utf.dart';
+
+import 'color.dart';
+import 'object.dart';
+import 'stream.dart';
 
 abstract class PdfDataType {
   const PdfDataType();
@@ -97,7 +103,7 @@ class PdfString extends PdfDataType {
     return PdfString(_string(value), PdfStringFormat.litteral);
   }
 
-  factory PdfString.fromStream(PdfObject object, PdfStream value,
+  factory PdfString.fromStream(PdfStream value,
       [PdfStringFormat format = PdfStringFormat.litteral]) {
     return PdfString(value.output(), format);
   }

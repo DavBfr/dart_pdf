@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'dart:convert';
+import 'dart:typed_data';
 
 /// Ascii 85 encoder
 class Ascii85Encoder extends Converter<Uint8List, Uint8List> {

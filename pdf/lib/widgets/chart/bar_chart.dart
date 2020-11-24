@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+
+import '../flex.dart';
+import '../geometry.dart';
+import '../widget.dart';
+import 'chart.dart';
+import 'grid_cartesian.dart';
+import 'line_chart.dart';
 
 class BarDataSet extends Dataset {
   BarDataSet({

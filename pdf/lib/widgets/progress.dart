@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:math' as math;
+
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+
+import 'geometry.dart';
+import 'widget.dart';
 
 class CircularProgressIndicator extends Widget {
   CircularProgressIndicator(

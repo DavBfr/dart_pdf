@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:typed_data';
+
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+
+import 'widget.dart';
 
 enum Type1Fonts {
   courier,

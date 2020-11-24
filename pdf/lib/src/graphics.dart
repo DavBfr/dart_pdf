@@ -14,7 +14,22 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'dart:collection';
+import 'dart:math' as math;
+
+import 'package:meta/meta.dart';
+import 'package:path_parsing/path_parsing.dart';
+import 'package:vector_math/vector_math_64.dart';
+
+import 'color.dart';
+import 'data_types.dart';
+import 'font.dart';
+import 'graphic_state.dart';
+import 'graphic_stream.dart';
+import 'image.dart';
+import 'page.dart';
+import 'shading.dart';
+import 'stream.dart';
 
 /// Shape to be used at the corners of paths that are stroked
 enum PdfLineJoin {

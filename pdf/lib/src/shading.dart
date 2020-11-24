@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'package:meta/meta.dart';
+
+import 'data_types.dart';
+import 'document.dart';
+import 'function.dart';
+import 'object.dart';
+import 'point.dart';
+import 'rect.dart';
 
 enum PdfShadingType { axial, radial }
 
@@ -60,8 +67,8 @@ class PdfShading extends PdfObject {
   final double radius1;
 
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     params['/ShadingType'] = PdfNum(shadingType.index + 2);
     if (boundingBox != null) {

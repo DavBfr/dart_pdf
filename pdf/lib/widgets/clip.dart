@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'package:pdf/pdf.dart';
+import 'package:vector_math/vector_math_64.dart';
+
+import 'widget.dart';
 
 class ClipRect extends SingleChildWidget {
   ClipRect({Widget child}) : super(child: child);

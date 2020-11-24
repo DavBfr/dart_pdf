@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'dart:math' as math;
 
 /// Represents an RGB color
 class PdfColor {

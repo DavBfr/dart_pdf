@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'data_types.dart';
+import 'document.dart';
+import 'object.dart';
+import 'page.dart';
 
 /// PdfPageList object
 class PdfPageList extends PdfObject {
@@ -28,8 +31,8 @@ class PdfPageList extends PdfObject {
   PdfPage getPage(int page) => pages[page];
 
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     params['/Kids'] = PdfArray.fromObjects(pages);
     params['/Count'] = PdfNum(pages.length);

@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'color.dart';
+import 'data_types.dart';
+import 'document.dart';
+import 'object.dart';
+import 'page.dart';
+import 'rect.dart';
 
 /// Outline mode
 enum PdfOutlineMode {
@@ -96,8 +101,8 @@ class PdfOutline extends PdfObject {
   }
 
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     // These are for kids only
     if (parent != null) {

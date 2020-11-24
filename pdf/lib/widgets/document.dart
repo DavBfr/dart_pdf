@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:typed_data';
+
+import 'package:pdf/pdf.dart';
+
+import 'page.dart';
+import 'theme.dart';
 
 class Document {
   Document(

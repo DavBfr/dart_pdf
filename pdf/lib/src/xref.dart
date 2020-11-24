@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-part of pdf;
-
 /// Cross-reference for a Pdf Object
 class PdfXref {
   /// Creates a cross-reference for a Pdf Object

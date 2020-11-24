@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:math' as math;
+
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+
+import '../flex.dart';
+import '../geometry.dart';
+import '../widget.dart';
+import 'chart.dart';
+import 'grid_axis.dart';
 
 class CartesianGrid extends ChartGrid {
   CartesianGrid({
@@ -41,18 +50,18 @@ class CartesianGrid extends ChartGrid {
     // In simple conditions, this loop will run only 2 times.
     var count = 5;
     while (count-- > 0) {
-      _xAxis._crossAxisPosition = _yAxis.axisPosition;
+      _xAxis.crossAxisPosition = _yAxis.axisPosition;
       _xAxis.axisPosition =
-          math.max(_xAxis.axisPosition, _yAxis._crossAxisPosition);
+          math.max(_xAxis.axisPosition, _yAxis.crossAxisPosition);
       _xAxis.layout(context, constraints);
       assert(_xAxis.box != null);
-      _yAxis._crossAxisPosition = _xAxis.axisPosition;
+      _yAxis.crossAxisPosition = _xAxis.axisPosition;
       _yAxis.axisPosition =
-          math.max(_yAxis.axisPosition, _xAxis._crossAxisPosition);
+          math.max(_yAxis.axisPosition, _xAxis.crossAxisPosition);
       _yAxis.layout(context, constraints);
       assert(_yAxis.box != null);
-      if (_yAxis._crossAxisPosition == _xAxis.axisPosition &&
-          _xAxis._crossAxisPosition == _yAxis.axisPosition) {
+      if (_yAxis.crossAxisPosition == _xAxis.axisPosition &&
+          _xAxis.crossAxisPosition == _yAxis.axisPosition) {
         break;
       }
     }

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'data_types.dart';
+import 'document.dart';
+import 'object.dart';
+import 'page.dart';
 
 /// Pdf Name object
 class PdfNames extends PdfObject {
@@ -46,8 +49,8 @@ class PdfNames extends PdfObject {
   }
 
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     final dests = PdfArray();
 

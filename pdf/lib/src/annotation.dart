@@ -14,7 +14,21 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'package:meta/meta.dart';
+import 'package:vector_math/vector_math_64.dart';
+
+import 'border.dart';
+import 'color.dart';
+import 'data_types.dart';
+import 'document.dart';
+import 'font.dart';
+import 'graphic_stream.dart';
+import 'graphics.dart';
+import 'object.dart';
+import 'page.dart';
+import 'point.dart';
+import 'rect.dart';
+import 'stream.dart';
 
 class PdfAnnot extends PdfObject {
   PdfAnnot(this.pdfPage, this.annot)
@@ -31,8 +45,8 @@ class PdfAnnot extends PdfObject {
 
   /// Output the annotation
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
     annot.build(pdfPage, this, params);
   }
 }

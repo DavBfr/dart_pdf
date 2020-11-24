@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'dart:convert';
+
+import 'package:meta/meta.dart';
+
+import 'data_types.dart';
+import 'document.dart';
+import 'font_metrics.dart';
+import 'object.dart';
+import 'point.dart';
+import 'rect.dart';
+import 'stream.dart';
+import 'type1_font.dart';
+import 'type1_fonts.dart';
 
 /// Pdf font object
 abstract class PdfFont extends PdfObject {
   /// Constructs a [PdfFont]. This will attempt to map the font from a known
   /// font name to that in Pdf, defaulting to Helvetica if not possible.
-  PdfFont._create(PdfDocument pdfDocument, {@required this.subtype})
+  PdfFont.create(PdfDocument pdfDocument, {@required this.subtype})
       : assert(subtype != null),
         super(pdfDocument, '/Font') {
     pdfDocument.fonts.add(this);
@@ -28,87 +40,87 @@ abstract class PdfFont extends PdfObject {
 
   /// Monospaced slab serif typeface.
   factory PdfFont.courier(PdfDocument pdfDocument) {
-    return PdfType1Font._create(
+    return PdfType1Font.create(
         pdfDocument, 'Courier', 0.910, -0.220, const <double>[]);
   }
 
   /// Bold monospaced slab serif typeface.
   factory PdfFont.courierBold(PdfDocument pdfDocument) {
-    return PdfType1Font._create(
+    return PdfType1Font.create(
         pdfDocument, 'Courier-Bold', 0.910, -0.220, const <double>[]);
   }
 
   /// Bold and Italic monospaced slab serif typeface.
   factory PdfFont.courierBoldOblique(PdfDocument pdfDocument) {
-    return PdfType1Font._create(
+    return PdfType1Font.create(
         pdfDocument, 'Courier-BoldOblique', 0.910, -0.220, const <double>[]);
   }
 
   /// Italic monospaced slab serif typeface.
   factory PdfFont.courierOblique(PdfDocument pdfDocument) {
-    return PdfType1Font._create(
+    return PdfType1Font.create(
         pdfDocument, 'Courier-Oblique', 0.910, -0.220, const <double>[]);
   }
 
   /// Neo-grotesque design sans-serif typeface
   factory PdfFont.helvetica(PdfDocument pdfDocument) {
-    return PdfType1Font._create(
-        pdfDocument, 'Helvetica', 0.931, -0.225, _helveticaWidths);
+    return PdfType1Font.create(
+        pdfDocument, 'Helvetica', 0.931, -0.225, helveticaWidths);
   }
 
   /// Bold Neo-grotesque design sans-serif typeface
   factory PdfFont.helveticaBold(PdfDocument pdfDocument) {
-    return PdfType1Font._create(
-        pdfDocument, 'Helvetica-Bold', 0.962, -0.228, _helveticaBoldWidths);
+    return PdfType1Font.create(
+        pdfDocument, 'Helvetica-Bold', 0.962, -0.228, helveticaBoldWidths);
   }
 
   /// Bold and Italic Neo-grotesque design sans-serif typeface
   factory PdfFont.helveticaBoldOblique(PdfDocument pdfDocument) {
-    return PdfType1Font._create(pdfDocument, 'Helvetica-BoldOblique', 0.962,
-        -0.228, _helveticaBoldObliqueWidths);
+    return PdfType1Font.create(pdfDocument, 'Helvetica-BoldOblique', 0.962,
+        -0.228, helveticaBoldObliqueWidths);
   }
 
   /// Italic Neo-grotesque design sans-serif typeface
   factory PdfFont.helveticaOblique(PdfDocument pdfDocument) {
-    return PdfType1Font._create(pdfDocument, 'Helvetica-Oblique', 0.931, -0.225,
-        _helveticaObliqueWidths);
+    return PdfType1Font.create(pdfDocument, 'Helvetica-Oblique', 0.931, -0.225,
+        helveticaObliqueWidths);
   }
 
   /// Serif typeface commissioned by the British newspaper The Times
   factory PdfFont.times(PdfDocument pdfDocument) {
-    return PdfType1Font._create(
-        pdfDocument, 'Times-Roman', 0.898, -0.218, _timesWidths);
+    return PdfType1Font.create(
+        pdfDocument, 'Times-Roman', 0.898, -0.218, timesWidths);
   }
 
   /// Bold serif typeface commissioned by the British newspaper The Times
   factory PdfFont.timesBold(PdfDocument pdfDocument) {
-    return PdfType1Font._create(
-        pdfDocument, 'Times-Bold', 0.935, -0.218, _timesBoldWidths);
+    return PdfType1Font.create(
+        pdfDocument, 'Times-Bold', 0.935, -0.218, timesBoldWidths);
   }
 
   /// Bold and Italic serif typeface commissioned by the British newspaper The Times
   factory PdfFont.timesBoldItalic(PdfDocument pdfDocument) {
-    return PdfType1Font._create(
-        pdfDocument, 'Times-BoldItalic', 0.921, -0.218, _timesBoldItalicWidths);
+    return PdfType1Font.create(
+        pdfDocument, 'Times-BoldItalic', 0.921, -0.218, timesBoldItalicWidths);
   }
 
   /// Italic serif typeface commissioned by the British newspaper The Times
   factory PdfFont.timesItalic(PdfDocument pdfDocument) {
-    return PdfType1Font._create(
-        pdfDocument, 'Times-Italic', 0.883, -0.217, _timesItalicWidths);
+    return PdfType1Font.create(
+        pdfDocument, 'Times-Italic', 0.883, -0.217, timesItalicWidths);
   }
 
   /// Complete unaccented serif Greek alphabet (upper and lower case) and a
   /// selection of commonly used mathematical symbols.
   factory PdfFont.symbol(PdfDocument pdfDocument) {
-    return PdfType1Font._create(
-        pdfDocument, 'Symbol', 1.010, -0.293, _symbolWidths);
+    return PdfType1Font.create(
+        pdfDocument, 'Symbol', 1.010, -0.293, symbolWidths);
   }
 
   /// Hermann Zapf ornament glyphs or spacers, often employed to create box frames
   factory PdfFont.zapfDingbats(PdfDocument pdfDocument) {
-    return PdfType1Font._create(
-        pdfDocument, 'ZapfDingbats', 0.820, -0.143, _zapfDingbatsWidths);
+    return PdfType1Font.create(
+        pdfDocument, 'ZapfDingbats', 0.820, -0.143, zapfDingbatsWidths);
   }
 
   static const String _cannotDecodeMessage =
@@ -142,8 +154,8 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
   int get unitsPerEm;
 
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     params['/Subtype'] = PdfName(subtype);
     params['/Name'] = PdfName(name);

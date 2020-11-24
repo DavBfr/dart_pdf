@@ -14,64 +14,27 @@
  * limitations under the License.
  */
 
-library pdf;
-
-import 'dart:collection';
-import 'dart:convert';
-import 'dart:math' as math;
-import 'dart:typed_data';
-
-import 'package:crypto/crypto.dart';
-import 'package:image/image.dart' as im;
-import 'package:meta/meta.dart';
-import 'package:path_parsing/path_parsing.dart';
-import 'package:utf/utf.dart';
-import 'package:vector_math/vector_math_64.dart';
-
-import 'io/interface.dart'
-    if (dart.library.io) 'io/vm.dart'
-    if (dart.library.js) 'io/js.dart';
-
-part 'src/annotation.dart';
-part 'src/arabic.dart';
-part 'src/array.dart';
-part 'src/ascii85.dart';
-part 'src/border.dart';
-part 'src/catalog.dart';
-part 'src/color.dart';
-part 'src/colors.dart';
-part 'src/data_types.dart';
-part 'src/document.dart';
-part 'src/encryption.dart';
-part 'src/exif.dart';
-part 'src/font.dart';
-part 'src/font_descriptor.dart';
-part 'src/font_metrics.dart';
-part 'src/formxobject.dart';
-part 'src/function.dart';
-part 'src/graphic_state.dart';
-part 'src/graphic_stream.dart';
-part 'src/graphics.dart';
-part 'src/image.dart';
-part 'src/info.dart';
-part 'src/names.dart';
-part 'src/object.dart';
-part 'src/object_stream.dart';
-part 'src/outline.dart';
-part 'src/output.dart';
-part 'src/page.dart';
-part 'src/page_format.dart';
-part 'src/page_list.dart';
-part 'src/point.dart';
-part 'src/rect.dart';
-part 'src/shading.dart';
-part 'src/signature.dart';
-part 'src/stream.dart';
-part 'src/ttf_parser.dart';
-part 'src/ttf_writer.dart';
-part 'src/ttffont.dart';
-part 'src/type1_font.dart';
-part 'src/type1_fonts.dart';
-part 'src/unicode_cmap.dart';
-part 'src/xobject.dart';
-part 'src/xref.dart';
+export 'src/annotation.dart';
+export 'src/arabic.dart';
+export 'src/border.dart';
+export 'src/color.dart';
+export 'src/colors.dart';
+export 'src/document.dart';
+export 'src/encryption.dart';
+export 'src/exif.dart';
+export 'src/font.dart';
+export 'src/font_metrics.dart';
+export 'src/function.dart';
+export 'src/graphic_state.dart';
+export 'src/graphics.dart';
+export 'src/image.dart';
+export 'src/info.dart';
+export 'src/outline.dart';
+export 'src/page.dart';
+export 'src/page_format.dart';
+export 'src/point.dart';
+export 'src/rect.dart';
+export 'src/shading.dart';
+export 'src/signature.dart';
+export 'src/ttf_parser.dart';
+export 'src/ttffont.dart';

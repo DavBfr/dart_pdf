@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+
+import '../geometry.dart';
+import '../widget.dart';
+import 'chart.dart';
+import 'grid_cartesian.dart';
 
 class LineChartValue extends ChartValue {
   const LineChartValue(this.x, this.y);

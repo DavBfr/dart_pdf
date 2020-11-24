@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-// https://github.com/agawish/Better-Arabic-Reshaper/tree/master/src/org/amr/arabic
-// http://mpcabd.xyz/python-arabic-text-reshaper/
-// https://github.com/Georeactor/alif-toolkit/tree/master/src
-
-part of pdf;
-
 /// Arabic shape substitutions functions
 class PdfArabic {
   /// Arabic shape substitutions: char code => (isolated, final, initial, medial).
@@ -224,7 +218,7 @@ class PdfArabic {
     return _arabicDiacritics.containsKey(letter);
   }
 
-  static bool _isArabicDiacriticValue(int letter) {
+  static bool isArabicDiacriticValue(int letter) {
     return _arabicDiacritics.containsValue(letter);
   }
 
@@ -240,7 +234,7 @@ class PdfArabic {
     final finalDiacritics = <int>[];
 
     for (var i = 0; i < letters.length; i++) {
-      if (_isArabicDiacriticValue(letters[i])) {
+      if (isArabicDiacriticValue(letters[i])) {
         effectedDiacritics.insert(0, letters[i]);
         if (tmpDiacritic.containsKey(letters[i])) {
           tmpDiacritic = tmpDiacritic[letters[i]];

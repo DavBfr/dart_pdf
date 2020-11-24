@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'package:meta/meta.dart';
+
+import 'point.dart';
 
 @immutable
 class PdfRect {

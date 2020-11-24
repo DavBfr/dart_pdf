@@ -14,7 +14,21 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:barcode/barcode.dart';
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+
+import 'basic.dart';
+import 'container.dart';
+import 'decoration.dart';
+import 'font.dart';
+import 'geometry.dart';
+import 'text_style.dart';
+import 'theme.dart';
+import 'widget.dart';
 
 class _BarcodeWidget extends Widget {
   _BarcodeWidget({

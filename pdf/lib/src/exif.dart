@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'image.dart';
 
 /// Jpeg metadata extraction
 class PdfJpegInfo {

@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-// ignore_for_file: public_member_api_docs
-
-part of pdf;
+import 'color.dart';
 
 /// Material design colors
 class PdfColors {

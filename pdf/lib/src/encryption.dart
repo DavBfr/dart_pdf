@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'dart:typed_data';
+
+import 'document.dart';
+import 'object.dart';
 
 /// Encryption object
 abstract class PdfEncryption extends PdfObject {

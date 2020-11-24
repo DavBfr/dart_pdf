@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'annotation.dart';
+import 'data_types.dart';
+import 'document.dart';
+import 'graphic_stream.dart';
+import 'graphics.dart';
+import 'object.dart';
+import 'object_stream.dart';
+import 'page_format.dart';
 
 /// Page object, which will hold any contents for this page.
 class PdfPage extends PdfObject with PdfGraphicStream {
@@ -55,8 +62,8 @@ class PdfPage extends PdfObject with PdfGraphicStream {
   }
 
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     // the /Parent pages object
     params['/Parent'] = pdfDocument.pdfPageList.ref();

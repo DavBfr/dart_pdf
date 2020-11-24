@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:collection';
+import 'dart:math' as math;
+
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+import 'package:vector_math/vector_math_64.dart';
+
+import 'document.dart';
+import 'geometry.dart';
+import 'page.dart';
 
 @immutable
 class Context {
@@ -106,13 +115,11 @@ abstract class Widget {
 
   /// First widget pass to calculate the children layout and
   /// bounding [box]
-  @protected
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false});
 
   /// Draw itself and its children, according to the calculated
   /// [box.offset]
-  @protected
   @mustCallSuper
   void paint(Context context) {
     assert(() {

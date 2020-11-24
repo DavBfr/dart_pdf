@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+import 'ttf_parser.dart';
 
 /// Generate a TTF font copy with the minimal number of glyph to embedd
 /// into the PDF document

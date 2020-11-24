@@ -10,6 +10,7 @@
 - Fix PdfOutlineMode enum
 - Improve API documentation
 - Add support for Icon Fonts (MaterialIcons)
+- Opt-out from dart library
 
 ## 1.12.0
 

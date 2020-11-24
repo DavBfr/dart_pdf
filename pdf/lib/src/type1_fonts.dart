@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-part of pdf;
-
-const List<double> _helveticaWidths = <double>[
+const List<double> helveticaWidths = <double>[
   0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, //
   0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, //
   0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, //
@@ -45,7 +43,7 @@ const List<double> _helveticaWidths = <double>[
   0.500
 ];
 
-const List<double> _helveticaBoldWidths = <double>[
+const List<double> helveticaBoldWidths = <double>[
   0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, //
   0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, //
   0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, //
@@ -74,7 +72,7 @@ const List<double> _helveticaBoldWidths = <double>[
   0.556
 ];
 
-const List<double> _helveticaBoldObliqueWidths = <double>[
+const List<double> helveticaBoldObliqueWidths = <double>[
   0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, //
   0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, //
   0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, //
@@ -103,7 +101,7 @@ const List<double> _helveticaBoldObliqueWidths = <double>[
   0.556
 ];
 
-const List<double> _helveticaObliqueWidths = <double>[
+const List<double> helveticaObliqueWidths = <double>[
   0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, //
   0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, //
   0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, 0.278, //
@@ -132,7 +130,7 @@ const List<double> _helveticaObliqueWidths = <double>[
   0.500
 ];
 
-const List<double> _timesWidths = <double>[
+const List<double> timesWidths = <double>[
   0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, //
   0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, //
   0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, //
@@ -161,7 +159,7 @@ const List<double> _timesWidths = <double>[
   0.500, 0.500, 0.500, 0.500
 ];
 
-const List<double> _timesBoldWidths = <double>[
+const List<double> timesBoldWidths = <double>[
   0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, //
   0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, //
   0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, //
@@ -189,7 +187,7 @@ const List<double> _timesBoldWidths = <double>[
   0.500, 0.570, 0.500, 0.556, 0.556, 0.556, 0.556, 0.500, 0.556, 0.500
 ];
 
-const List<double> _timesBoldItalicWidths = <double>[
+const List<double> timesBoldItalicWidths = <double>[
   0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, //
   0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, //
   0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, //
@@ -218,7 +216,7 @@ const List<double> _timesBoldItalicWidths = <double>[
   0.556, 0.444, 0.500, 0.444
 ];
 
-const List<double> _timesItalicWidths = <double>[
+const List<double> timesItalicWidths = <double>[
   0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, //
   0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, //
   0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, 0.250, //
@@ -247,7 +245,7 @@ const List<double> _timesItalicWidths = <double>[
   0.500, 0.500, 0.444, 0.500, 0.444
 ];
 
-const List<double> _symbolWidths = <double>[
+const List<double> symbolWidths = <double>[
   0.587, 0.587, 0.587, 0.587, 0.587, 0.587, 0.587, 0.587, 0.587, 0.587, //
   0.587, 0.587, 0.587, 0.587, 0.587, 0.587, 0.587, 0.587, 0.587, 0.587, //
   0.587, 0.587, 0.587, 0.587, 0.587, 0.587, 0.587, 0.587, 0.587, 0.587, //
@@ -276,7 +274,7 @@ const List<double> _symbolWidths = <double>[
   0.384, 0.494, 0.494, 0.494, 0.587
 ];
 
-const List<double> _zapfDingbatsWidths = <double>[
+const List<double> zapfDingbatsWidths = <double>[
   0.746, 0.746, 0.746, 0.746, 0.746, 0.746, 0.746, 0.746, 0.746, 0.746, //
   0.746, 0.746, 0.746, 0.746, 0.746, 0.746, 0.746, 0.746, 0.746, 0.746, //
   0.746, 0.746, 0.746, 0.746, 0.746, 0.746, 0.746, 0.746, 0.746, 0.746, //

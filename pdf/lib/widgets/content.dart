@@ -14,7 +14,21 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:math' as math;
+
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+
+import 'annotations.dart';
+import 'basic.dart';
+import 'container.dart';
+import 'decoration.dart';
+import 'flex.dart';
+import 'geometry.dart';
+import 'text.dart';
+import 'text_style.dart';
+import 'theme.dart';
+import 'widget.dart';
 
 class Header extends StatelessWidget {
   Header({

@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+import 'package:vector_math/vector_math_64.dart';
+
+import 'basic.dart';
+import 'geometry.dart';
+import 'text_style.dart';
+import 'theme.dart';
+import 'widget.dart';
 
 class Anchor extends SingleChildWidget {
   Anchor({

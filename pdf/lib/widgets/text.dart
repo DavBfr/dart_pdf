@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:math' as math;
+
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+
+import 'annotations.dart';
+import 'document.dart';
+import 'geometry.dart';
+import 'text_style.dart';
+import 'theme.dart';
+import 'widget.dart';
 
 enum TextAlign { left, right, center, justify }
 

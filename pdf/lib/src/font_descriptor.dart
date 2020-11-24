@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'data_types.dart';
+import 'object.dart';
+import 'object_stream.dart';
+import 'ttffont.dart';
 
 /// Font descriptor object
 class PdfFontDescriptor extends PdfObject {
@@ -33,8 +36,8 @@ class PdfFontDescriptor extends PdfObject {
   final PdfTtfFont ttfFont;
 
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     params['/FontName'] = PdfName('/' + ttfFont.fontName);
     params['/FontFile2'] = file.ref();

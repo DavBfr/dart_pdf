@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'dart:math' as math;
+
+import 'package:pdf/pdf.dart';
+
+import 'basic.dart';
+import 'geometry.dart';
+import 'image.dart';
+import 'text.dart';
+import 'text_style.dart';
+import 'widget.dart';
 
 class Placeholder extends Widget {
   Placeholder(

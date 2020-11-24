@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-part of pdf;
+import 'data_types.dart';
+import 'document.dart';
+import 'font.dart';
+import 'graphic_state.dart';
+import 'object.dart';
+import 'shading.dart';
+import 'xobject.dart';
 
 /// Helper functions for graphic objects
 mixin PdfGraphicStream on PdfObject {
@@ -75,8 +81,8 @@ mixin PdfGraphicStream on PdfObject {
   }
 
   @override
-  void _prepare() {
-    super._prepare();
+  void prepare() {
+    super.prepare();
 
     // This holds any resources for this page
     final resources = PdfDict();

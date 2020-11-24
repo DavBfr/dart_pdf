@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-part of widget;
+import 'package:meta/meta.dart';
+import 'package:pdf/pdf.dart';
+
+import 'decoration.dart';
+import 'font.dart';
+import 'text.dart';
+import 'widget.dart';
 
 enum FontWeight { normal, bold }
 
