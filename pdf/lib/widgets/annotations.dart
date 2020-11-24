@@ -250,8 +250,11 @@ class Link extends Annotation {
 }
 
 class UrlLink extends Annotation {
-  UrlLink({@required Widget child, String destination})
-      : assert(child != null),
+  UrlLink({
+    @required Widget child,
+    @required String destination,
+  })  : assert(child != null),
+        assert(destination != null),
         super(child: child, builder: AnnotationUrl(destination));
 }
 
@@ -268,6 +271,7 @@ class Signature extends Annotation {
     PdfAnnotHighlighting highlighting,
   })  : assert(child != null),
         assert(crypto != null),
+        assert(name != null),
         super(
             child: child,
             builder: AnnotationSignature(

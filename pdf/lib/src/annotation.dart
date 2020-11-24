@@ -227,7 +227,9 @@ class PdfAnnotText extends PdfAnnotBase {
     Set<PdfAnnotFlags> flags,
     DateTime date,
     PdfColor color,
-  }) : super(
+  })  : assert(rect != null),
+        assert(content != null),
+        super(
           subtype: '/Text',
           rect: rect,
           border: border,
@@ -280,7 +282,9 @@ class PdfAnnotUrlLink extends PdfAnnotBase {
     Set<PdfAnnotFlags> flags,
     DateTime date,
     PdfColor color,
-  }) : super(
+  })  : assert(rect != null),
+        assert(url != null),
+        super(
           subtype: '/Link',
           rect: rect,
           border: border,
@@ -317,7 +321,9 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
     PdfColor color,
     this.backgroundColor,
     this.highlighting,
-  }) : super(
+  })  : assert(rect != null),
+        assert(fieldType != null),
+        super(
           subtype: '/Widget',
           rect: rect,
           border: border,
@@ -388,7 +394,8 @@ class PdfAnnotSign extends PdfAnnotWidget {
     DateTime date,
     PdfColor color,
     PdfAnnotHighlighting highlighting,
-  }) : super(
+  })  : assert(rect != null),
+        super(
           rect: rect,
           fieldType: '/Sig',
           fieldName: fieldName,
@@ -519,7 +526,9 @@ class PdfFormField extends PdfAnnotWidget {
     PdfColor backgroundColor,
     PdfAnnotHighlighting highlighting,
     this.fieldFlags,
-  }) : super(
+  })  : assert(rect != null),
+        assert(fieldType != null),
+        super(
           rect: rect,
           fieldType: fieldType,
           fieldName: fieldName,
@@ -583,7 +592,8 @@ class PdfTextField extends PdfFormField {
     @required this.fontSize,
     @required this.textColor,
     this.textAlign,
-  })  : assert(fontSize != null),
+  })  : assert(rect != null),
+        assert(fontSize != null),
         assert(textColor != null),
         assert(font != null),
         super(
@@ -655,7 +665,8 @@ class PdfButtonField extends PdfFormField {
     Set<PdfFieldFlags> fieldFlags,
     this.value,
     this.defaultValue,
-  }) : super(
+  })  : assert(rect != null),
+        super(
           rect: rect,
           fieldType: '/Btn',
           fieldName: fieldName,
