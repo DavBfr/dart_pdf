@@ -81,6 +81,7 @@
 - Add Divider and VerticalDivider Widget
 - Replace Theme with ThemeData
 - Implement ImageProvider
+- Improve path operations
 
 ## 1.6.2
 

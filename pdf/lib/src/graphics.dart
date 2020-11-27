@@ -114,24 +114,31 @@ class PdfGraphics {
   PdfFont get defaultFont => _page.getDefaultFont();
 
   /// Draw a surface on the previously defined shape
-  void fillPath() {
-    buf.putString('f\n');
+  /// set evenOdd to false to use the nonzero winding number rule to determine the region to fill and to true to use the even-odd rule to determine the region to fill
+  void fillPath({bool evenOdd = false}) {
+    buf.putString('f${evenOdd ? '*' : ''}\n');
   }
 
   /// Draw the contour of the previously defined shape
-  void strokePath() {
-    buf.putString('S\n');
+  void strokePath({bool close = false}) {
+    buf.putString('${close ? 's' : 'S'}\n');
   }
 
   /// Close the path with a line
   void closePath() {
-    buf.putString('s\n');
+    buf.putString('h\n');
   }
 
   /// Create a clipping surface from the previously defined shape,
   /// to prevent any further drawing outside
-  void clipPath() {
-    buf.putString('W n\n');
+  void clipPath({bool evenOdd = false, bool end = true}) {
+    buf.putString('W${evenOdd ? '*' : ''}${end ? ' n' : ''}\n');
+  }
+
+  /// Draw a surface on the previously defined shape and then draw the contour
+  /// set evenOdd to false to use the nonzero winding number rule to determine the region to fill and to true to use the even-odd rule to determine the region to fill
+  void fillAndStrokePath({bool evenOdd = false, bool close = false}) {
+    buf.putString('${close ? 'b' : 'B'}${evenOdd ? '*' : ''}\n');
   }
 
   /// Apply a shader
@@ -516,8 +523,8 @@ class PdfGraphics {
   }
 
   /// Draw an SVG path
-  void drawShape(String d, {bool stroke = true}) {
-    final proxy = _PathProxy(this, stroke);
+  void drawShape(String d) {
+    final proxy = _PathProxy(this);
     writeSvgPathDataToPath(d, proxy);
   }
 
@@ -554,16 +561,13 @@ class PdfGraphics {
 }
 
 class _PathProxy extends PathProxy {
-  _PathProxy(this.canvas, this.stroke);
+  _PathProxy(this.canvas);
 
   final PdfGraphics canvas;
-  final bool stroke;
 
   @override
   void close() {
-    if (stroke) {
-      canvas.closePath();
-    }
+    canvas.closePath();
   }
 
   @override

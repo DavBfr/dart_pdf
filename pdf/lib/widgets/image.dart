@@ -203,14 +203,15 @@ class Shape extends Widget {
     if (fillColor != null) {
       context.canvas
         ..setFillColor(fillColor)
-        ..drawShape(shape, stroke: false)
+        ..drawShape(shape)
         ..fillPath();
     }
 
     if (strokeColor != null) {
       context.canvas
         ..setStrokeColor(strokeColor)
-        ..drawShape(shape, stroke: true);
+        ..drawShape(shape)
+        ..strokePath();
     }
 
     context.canvas.restoreContext();

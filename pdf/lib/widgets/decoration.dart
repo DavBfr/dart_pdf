@@ -112,7 +112,7 @@ class BoxBorder {
         context.canvas.moveTo(box.x, box.y);
         context.canvas.lineTo(box.x, box.top);
       } else if (right && top) {
-        context.canvas.closePath();
+        context.canvas.strokePath(close: true);
       } else {
         context.canvas.lineTo(box.x, box.top);
       }
