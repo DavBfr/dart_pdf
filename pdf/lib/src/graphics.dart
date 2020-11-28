@@ -554,7 +554,7 @@ class PdfGraphics {
   /// When the accumulated length equals the value specified by the dash phase
   ///
   /// Example: [2 1] will create a dash pattern with 2 on, 1 off, 2 on, 1 off, ...
-  void setLineDashPattern([List<int> array = const <int>[], int phase = 0]) {
+  void setLineDashPattern([List<num> array = const <num>[], int phase = 0]) {
     PdfArray.fromNum(array).output(buf);
     buf.putString(' $phase d\n');
   }

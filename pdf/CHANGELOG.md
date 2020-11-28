@@ -11,6 +11,7 @@
 - Improve API documentation
 - Add support for Icon Fonts (MaterialIcons)
 - Opt-out from dart library
+- Improve graphic operations
 
 ## 1.12.0
 
