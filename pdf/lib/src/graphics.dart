@@ -28,6 +28,7 @@ import 'graphic_state.dart';
 import 'graphic_stream.dart';
 import 'image.dart';
 import 'page.dart';
+import 'rect.dart';
 import 'shading.dart';
 import 'stream.dart';
 
@@ -528,6 +529,13 @@ class PdfGraphics {
     writeSvgPathDataToPath(d, proxy);
   }
 
+  /// Calculates the bounding box of an SVG path
+  static PdfRect shapeBoundingBox(String d) {
+    final proxy = _PathBBProxy();
+    writeSvgPathDataToPath(d, proxy);
+    return proxy.box;
+  }
+
   /// Set line starting and ending cap type
   void setLineCap(PdfLineCap cap) {
     buf.putString('${cap.index} J\n');
@@ -584,5 +592,114 @@ class _PathProxy extends PathProxy {
   @override
   void moveTo(double x, double y) {
     canvas.moveTo(x, y);
+  }
+}
+
+class _PathBBProxy extends PathProxy {
+  _PathBBProxy();
+
+  var _xMin = double.infinity;
+  var _yMin = double.infinity;
+  var _xMax = double.negativeInfinity;
+  var _yMax = double.negativeInfinity;
+
+  var _pX = 0.0;
+  var _pY = 0.0;
+
+  PdfRect get box {
+    if (_xMin > _xMax || _yMin > _yMax) {
+      return PdfRect.zero;
+    }
+    return PdfRect.fromLTRB(_xMin, _yMin, _xMax, _yMax);
+  }
+
+  @override
+  void close() {}
+
+  @override
+  void cubicTo(
+      double x1, double y1, double x2, double y2, double x3, double y3) {
+    final tvalues = <double>[];
+    double a, b, c, t, t1, t2, b2ac, sqrtb2ac;
+
+    for (var i = 0; i < 2; ++i) {
+      if (i == 0) {
+        b = 6 * _pX - 12 * x1 + 6 * x2;
+        a = -3 * _pX + 9 * x1 - 9 * x2 + 3 * x3;
+        c = 3 * x1 - 3 * _pX;
+      } else {
+        b = 6 * _pY - 12 * y1 + 6 * y2;
+        a = -3 * _pY + 9 * y1 - 9 * y2 + 3 * y3;
+        c = 3 * y1 - 3 * _pY;
+      }
+      if (a.abs() < 1e-12) {
+        if (b.abs() < 1e-12) {
+          continue;
+        }
+        t = -c / b;
+        if (0 < t && t < 1) {
+          tvalues.add(t);
+        }
+        continue;
+      }
+      b2ac = b * b - 4 * c * a;
+      if (b2ac < 0) {
+        if (b2ac.abs() < 1e-12) {
+          t = -b / (2 * a);
+          if (0 < t && t < 1) {
+            tvalues.add(t);
+          }
+        }
+        continue;
+      }
+      sqrtb2ac = math.sqrt(b2ac);
+      t1 = (-b + sqrtb2ac) / (2 * a);
+      if (0 < t1 && t1 < 1) {
+        tvalues.add(t1);
+      }
+      t2 = (-b - sqrtb2ac) / (2 * a);
+      if (0 < t2 && t2 < 1) {
+        tvalues.add(t2);
+      }
+    }
+
+    for (final t in tvalues) {
+      final mt = 1 - t;
+      _updateMinMax(
+          (mt * mt * mt * _pX) +
+              (3 * mt * mt * t * x1) +
+              (3 * mt * t * t * x2) +
+              (t * t * t * x3),
+          (mt * mt * mt * _pY) +
+              (3 * mt * mt * t * y1) +
+              (3 * mt * t * t * y2) +
+              (t * t * t * y3));
+    }
+    _updateMinMax(_pX, _pY);
+    _updateMinMax(x3, y3);
+
+    _pX = x3;
+    _pY = y3;
+  }
+
+  @override
+  void lineTo(double x, double y) {
+    _pX = x;
+    _pY = y;
+    _updateMinMax(x, y);
+  }
+
+  @override
+  void moveTo(double x, double y) {
+    _pX = x;
+    _pY = y;
+    _updateMinMax(x, y);
+  }
+
+  void _updateMinMax(double x, double y) {
+    _xMin = math.min(_xMin, x);
+    _yMin = math.min(_yMin, y);
+    _xMax = math.max(_xMax, x);
+    _yMax = math.max(_yMax, y);
   }
 }

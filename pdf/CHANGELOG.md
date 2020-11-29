@@ -12,6 +12,7 @@
 - Add support for Icon Fonts (MaterialIcons)
 - Opt-out from dart library
 - Improve graphic operations
+- Automatically calculate Shape() bounding box
 
 ## 1.12.0
 

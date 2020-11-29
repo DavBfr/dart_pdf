@@ -154,12 +154,11 @@ class Shape extends Widget {
     this.shape, {
     this.strokeColor,
     this.fillColor,
-    this.width = 1.0,
-    this.height = 1.0,
+    this.width,
+    this.height,
     this.fit = BoxFit.contain,
-  })  : assert(width != null && width > 0.0),
-        assert(height != null && height > 0.0),
-        aspectRatio = height / width;
+  })  : assert(width == null || width > 0.0),
+        assert(height == null || height > 0.0);
 
   final String shape;
 
@@ -171,34 +170,49 @@ class Shape extends Widget {
 
   final double height;
 
-  final double aspectRatio;
-
   final BoxFit fit;
+
+  PdfRect _boundingBox;
 
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
+    if (width == null || height == null) {
+      // Compute the bounding box
+      _boundingBox = PdfGraphics.shapeBoundingBox(shape);
+    } else {
+      _boundingBox = PdfRect(0, 0, width, height);
+    }
+
     final w = constraints.hasBoundedWidth
         ? constraints.maxWidth
-        : constraints.constrainWidth(width);
+        : constraints.constrainWidth(_boundingBox.width);
     final h = constraints.hasBoundedHeight
         ? constraints.maxHeight
-        : constraints.constrainHeight(height);
+        : constraints.constrainHeight(_boundingBox.height);
 
-    final sizes = applyBoxFit(fit, PdfPoint(width, height), PdfPoint(w, h));
-    box = PdfRect.fromPoints(PdfPoint.zero, sizes.destination);
+    final sizes = applyBoxFit(fit, _boundingBox.size, PdfPoint(w, h));
+    box = PdfRect.fromPoints(
+      PdfPoint.zero,
+      sizes.destination,
+    );
   }
 
   @override
   void paint(Context context) {
     super.paint(context);
 
-    final mat = Matrix4.identity();
-    mat.translate(box.x, box.y + box.height);
-    mat.scale(box.width / width, -box.height / height);
     context.canvas
       ..saveContext()
-      ..setTransform(mat);
+      ..setTransform(
+        Matrix4.identity()
+          ..translate(box.x, box.y + box.height)
+          ..scale(
+            box.width / _boundingBox.width,
+            -box.height / _boundingBox.height,
+          )
+          ..translate(-_boundingBox.x, -_boundingBox.y),
+      );
 
     if (fillColor != null) {
       context.canvas
