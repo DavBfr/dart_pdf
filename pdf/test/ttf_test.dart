@@ -60,7 +60,7 @@ void printTextTtf(
 
 void main() {
   test('Pdf TrueType', () {
-    final pdf = PdfDocument(compress: false);
+    final pdf = PdfDocument();
     final page = PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
 
     final g = page.getGraphics();

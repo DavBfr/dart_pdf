@@ -24,35 +24,103 @@ import 'object_stream.dart';
 
 abstract class PdfBaseFunction extends PdfObject {
   PdfBaseFunction(PdfDocument pdfDocument) : super(pdfDocument);
+
+  factory PdfBaseFunction.colorsAndStops(
+    PdfDocument pdfDocument,
+    List<PdfColor> colors, [
+    List<double> stops,
+  ]) {
+    if (stops == null || stops.isEmpty) {
+      return PdfFunction.fromColors(pdfDocument, colors);
+    }
+
+    final _colors = List<PdfColor>.from(colors);
+    final _stops = List<double>.from(stops);
+
+    final fn = <PdfFunction>[];
+    var lc = _colors.first;
+
+    if (_stops[0] > 0) {
+      _colors.insert(0, lc);
+      _stops.insert(0, 0);
+    }
+
+    if (_stops.last < 1) {
+      _colors.add(_colors.last);
+      _stops.add(1);
+    }
+
+    if (_stops.length != _colors.length) {
+      throw Exception(
+          'The number of colors in a gradient must match the number of stops');
+    }
+
+    for (final c in _colors.sublist(1)) {
+      fn.add(PdfFunction.fromColors(pdfDocument, <PdfColor>[lc, c]));
+      lc = c;
+    }
+
+    return PdfStitchingFunction(
+      pdfDocument,
+      functions: fn,
+      bounds: _stops.sublist(1, _stops.length - 1),
+      domainStart: 0,
+      domainEnd: 1,
+    );
+  }
 }
 
 class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
   PdfFunction(
     PdfDocument pdfDocument, {
-    this.colors,
+    this.data,
+    this.bitsPerSample = 8,
+    this.order = 1,
+    this.domain = const <num>[0, 1],
+    this.range = const <num>[0, 1],
   }) : super(pdfDocument);
 
-  final List<PdfColor> colors;
+  factory PdfFunction.fromColors(
+      PdfDocument pdfDocument, List<PdfColor> colors) {
+    final data = <int>[];
+    for (final color in colors) {
+      data.add((color.red * 255.0).round() & 0xff);
+      data.add((color.green * 255.0).round() & 0xff);
+      data.add((color.blue * 255.0).round() & 0xff);
+    }
+    return PdfFunction(
+      pdfDocument,
+      order: 3,
+      data: data,
+      range: const <num>[0, 1, 0, 1, 0, 1],
+    );
+  }
+
+  final List<int> data;
+
+  final int bitsPerSample;
+
+  final int order;
+
+  final List<num> domain;
+
+  final List<num> range;
 
   @override
   void prepare() {
-    for (final color in colors) {
-      buf.putBytes(<int>[
-        (color.red * 255.0).round() & 0xff,
-        (color.green * 255.0).round() & 0xff,
-        (color.blue * 255.0).round() & 0xff,
-      ]);
-    }
-
+    buf.putBytes(data);
     super.prepare();
 
     params['/FunctionType'] = const PdfNum(0);
-    params['/BitsPerSample'] = const PdfNum(8);
-    params['/Order'] = const PdfNum(3);
-    params['/Domain'] = PdfArray.fromNum(const <num>[0, 1]);
-    params['/Range'] = PdfArray.fromNum(const <num>[0, 1, 0, 1, 0, 1]);
-    params['/Size'] = PdfArray.fromNum(<int>[colors.length]);
+    params['/BitsPerSample'] = PdfNum(bitsPerSample);
+    params['/Order'] = PdfNum(order);
+    params['/Domain'] = PdfArray.fromNum(domain);
+    params['/Range'] = PdfArray.fromNum(range);
+    params['/Size'] = PdfArray.fromNum(<int>[data.length ~/ order]);
   }
+
+  @override
+  String toString() => '$runtimeType $bitsPerSample $order $data';
 }
 
 class PdfStitchingFunction extends PdfBaseFunction {
@@ -86,4 +154,8 @@ class PdfStitchingFunction extends PdfBaseFunction {
     params['/Encode'] = PdfArray.fromNum(
         List<int>.generate(functions.length * 2, (int i) => i % 2));
   }
+
+  @override
+  String toString() =>
+      '$runtimeType $domainStart $bounds $domainEnd $functions';
 }

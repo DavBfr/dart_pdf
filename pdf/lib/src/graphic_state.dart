@@ -31,8 +31,7 @@ class PdfGraphicState {
   /// The opacity to apply to this graphic state
   final double opacity;
 
-  @protected
-  PdfDict _output() {
+  PdfDict output() {
     final params = PdfDict();
 
     if (opacity != null) {
@@ -79,7 +78,7 @@ class PdfGraphicStates extends PdfObject {
     super.prepare();
 
     for (var index = 0; index < _states.length; index++) {
-      params['$_prefix$index'] = _states[index]._output();
+      params['$_prefix$index'] = _states[index].output();
     }
   }
 }

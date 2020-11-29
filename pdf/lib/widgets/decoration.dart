@@ -231,38 +231,6 @@ abstract class Gradient {
   /// A list of values from 0.0 to 1.0 that denote fractions along the gradient.
   final List<double> stops;
 
-  PdfBaseFunction _buildFunction(
-    Context context,
-    List<PdfColor> colors,
-    List<double> stops,
-  ) {
-    if (stops == null) {
-      return PdfFunction(
-        context.document,
-        colors: colors,
-      );
-    }
-
-    final fn = <PdfFunction>[];
-
-    var lc = colors.first;
-    for (final c in colors.sublist(1)) {
-      fn.add(PdfFunction(
-        context.document,
-        colors: <PdfColor>[lc, c],
-      ));
-      lc = c;
-    }
-
-    return PdfStitchingFunction(
-      context.document,
-      functions: fn,
-      bounds: stops.sublist(1, stops.length - 1),
-      domainStart: stops.first,
-      domainEnd: stops.last,
-    );
-  }
-
   void paint(Context context, PdfRect box);
 }
 
@@ -311,7 +279,11 @@ class LinearGradient extends Gradient {
           context.document,
           shadingType: PdfShadingType.axial,
           boundingBox: box,
-          function: _buildFunction(context, colors, stops),
+          function: PdfBaseFunction.colorsAndStops(
+            context.document,
+            colors,
+            stops,
+          ),
           start: begin.withinRect(box),
           end: end.withinRect(box),
           extendStart: true,
@@ -384,7 +356,11 @@ class RadialGradient extends Gradient {
           context.document,
           shadingType: PdfShadingType.radial,
           boundingBox: box,
-          function: _buildFunction(context, colors, stops),
+          function: PdfBaseFunction.colorsAndStops(
+            context.document,
+            colors,
+            stops,
+          ),
           start: _focal.withinRect(box),
           end: center.withinRect(box),
           radius0: focalRadius * _radius,

@@ -32,6 +32,7 @@ export 'src/info.dart';
 export 'src/outline.dart';
 export 'src/page.dart';
 export 'src/page_format.dart';
+export 'src/pattern.dart';
 export 'src/point.dart';
 export 'src/rect.dart';
 export 'src/shading.dart';

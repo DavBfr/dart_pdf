@@ -19,6 +19,7 @@ import 'document.dart';
 import 'font.dart';
 import 'graphic_state.dart';
 import 'object.dart';
+import 'pattern.dart';
 import 'shading.dart';
 import 'xobject.dart';
 
@@ -37,13 +38,16 @@ mixin PdfGraphicStream on PdfObject {
   bool knockoutTransparency = false;
 
   /// The fonts associated with this page
-  final Map<String, PdfFont> fonts = <String, PdfFont>{};
+  final fonts = <String, PdfFont>{};
 
-  /// The fonts associated with this page
-  final Map<String, PdfShading> shading = <String, PdfShading>{};
+  /// The shaders associated with this page
+  final shading = <String, PdfShading>{};
+
+  /// The shaders associated with this page
+  final patterns = <String, PdfPattern>{};
 
   /// The xobjects or other images in the pdf
-  final Map<String, PdfXObject> xObjects = <String, PdfXObject>{};
+  final xObjects = <String, PdfXObject>{};
 
   /// Add a font to this graphic object
   void addFont(PdfFont font) {
@@ -56,6 +60,13 @@ mixin PdfGraphicStream on PdfObject {
   void addShader(PdfShading shader) {
     if (!shading.containsKey(shader.name)) {
       shading[shader.name] = shader;
+    }
+  }
+
+  /// Add a pattern to this graphic object
+  void addPattern(PdfPattern pattern) {
+    if (!patterns.containsKey(pattern.name)) {
+      patterns[pattern.name] = pattern;
     }
   }
 
@@ -99,9 +110,14 @@ mixin PdfGraphicStream on PdfObject {
       resources['/Font'] = PdfDict.fromObjectMap(fonts);
     }
 
-    // shading
+    // shaders
     if (shading.isNotEmpty) {
       resources['/Shading'] = PdfDict.fromObjectMap(shading);
+    }
+
+    // patterns
+    if (patterns.isNotEmpty) {
+      resources['/Pattern'] = PdfDict.fromObjectMap(patterns);
     }
 
     // Now the XObjects

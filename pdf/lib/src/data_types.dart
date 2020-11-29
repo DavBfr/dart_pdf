@@ -258,7 +258,7 @@ class PdfSecString extends PdfString {
 }
 
 class PdfName extends PdfDataType {
-  const PdfName(this.value);
+  const PdfName(this.value) : assert(value != null);
 
   final String value;
 

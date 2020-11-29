@@ -13,6 +13,7 @@
 - Opt-out from dart library
 - Improve graphic operations
 - Automatically calculate Shape() bounding box
+- Improve gradient functions
 
 ## 1.12.0
 

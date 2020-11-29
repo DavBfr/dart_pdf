@@ -28,6 +28,7 @@ import 'graphic_state.dart';
 import 'graphic_stream.dart';
 import 'image.dart';
 import 'page.dart';
+import 'pattern.dart';
 import 'rect.dart';
 import 'shading.dart';
 import 'stream.dart';
@@ -86,10 +87,14 @@ enum PdfTextRenderingMode {
 
 @immutable
 class _PdfGraphicsContext {
-  const _PdfGraphicsContext({@required this.ctm}) : assert(ctm != null);
+  const _PdfGraphicsContext({
+    @required this.ctm,
+  }) : assert(ctm != null);
   final Matrix4 ctm;
 
-  _PdfGraphicsContext copy() => _PdfGraphicsContext(ctm: ctm.clone());
+  _PdfGraphicsContext copy() => _PdfGraphicsContext(
+        ctm: ctm.clone(),
+      );
 }
 
 /// Pdf drawing operations
@@ -344,6 +349,20 @@ class PdfGraphics {
       PdfNumList(<double>[color.red, color.green, color.blue]).output(buf);
       buf.putString(' RG\n');
     }
+  }
+
+  /// Sets the fill pattern for drawing
+  void setFillPattern(PdfPattern pattern) {
+    // The shader needs to be registered in the page resources
+    _page.addPattern(pattern);
+    buf.putString('/Pattern cs${pattern.name} scn\n');
+  }
+
+  /// Sets the stroke pattern for drawing
+  void setStrokePattern(PdfPattern pattern) {
+    // The shader needs to be registered in the page resources
+    _page.addPattern(pattern);
+    buf.putString('/Pattern CS${pattern.name} SCN\n');
   }
 
   /// Set the graphic state for drawing
