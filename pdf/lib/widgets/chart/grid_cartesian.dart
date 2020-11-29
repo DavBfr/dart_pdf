@@ -97,12 +97,7 @@ class CartesianGrid extends ChartGrid {
   void clip(Context context, PdfPoint size) {
     context.canvas
       ..saveContext()
-      ..drawRect(
-        gridBox.left,
-        gridBox.bottom,
-        gridBox.width,
-        gridBox.height,
-      )
+      ..drawBox(gridBox)
       ..clipPath();
   }
 

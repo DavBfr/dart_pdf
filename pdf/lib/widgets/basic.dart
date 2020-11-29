@@ -333,7 +333,7 @@ class Align extends SingleChildWidget {
     context.canvas
       ..setStrokeColor(PdfColors.green)
       ..setLineWidth(1)
-      ..drawRect(box.x, box.y, box.width, box.height);
+      ..drawBox(box);
 
     if (child == null) {
       context.canvas.strokePath();
@@ -498,7 +498,7 @@ class FittedBox extends SingleChildWidget {
 
       context.canvas
         ..saveContext()
-        ..drawRect(box.x, box.y, box.width, box.height)
+        ..drawBox(box)
         ..clipPath()
         ..setTransform(mat);
       child.paint(context);

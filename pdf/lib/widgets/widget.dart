@@ -135,7 +135,7 @@ abstract class Widget {
     context.canvas
       ..setStrokeColor(PdfColors.purple)
       ..setLineWidth(1)
-      ..drawRect(box.x, box.y, box.width, box.height)
+      ..drawBox(box)
       ..strokePath();
   }
 }

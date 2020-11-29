@@ -63,7 +63,7 @@ class Placeholder extends Widget {
       ..lineTo(box.right, box.top)
       ..moveTo(box.x, box.top)
       ..lineTo(box.right, box.y)
-      ..drawRect(box.x, box.y, box.width, box.height)
+      ..drawBox(box)
       ..setLineWidth(strokeWidth)
       ..strokePath();
   }

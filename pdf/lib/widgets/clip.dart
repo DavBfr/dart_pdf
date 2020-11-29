@@ -27,7 +27,7 @@ class ClipRect extends SingleChildWidget {
     context.canvas
       ..setStrokeColor(PdfColors.deepPurple)
       ..setLineWidth(1)
-      ..drawRect(box.x, box.y, box.width, box.height)
+      ..drawBox(box)
       ..strokePath();
   }
 
@@ -40,7 +40,7 @@ class ClipRect extends SingleChildWidget {
       mat.translate(box.x, box.y);
       context.canvas
         ..saveContext()
-        ..drawRect(box.x, box.y, box.width, box.height)
+        ..drawBox(box)
         ..clipPath()
         ..setTransform(mat);
       child.paint(context);

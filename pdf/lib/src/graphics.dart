@@ -234,6 +234,11 @@ class PdfGraphics {
     buf.putString(' re\n');
   }
 
+  /// Draws a Rectangle
+  void drawBox(PdfRect box) {
+    drawRect(box.x, box.y, box.width, box.height);
+  }
+
   /// Draws a Rounded Rectangle
   void drawRRect(double x, double y, double w, double h, double rv, double rh) {
     moveTo(x, y + rv);

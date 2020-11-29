@@ -383,7 +383,7 @@ class FixedAxis<T extends num> extends GridAxis {
       case Axis.horizontal:
         context.canvas
           ..setFillColor(PdfColors.grey300)
-          ..drawRect(box.x, box.y, box.width, box.height)
+          ..drawBox(box)
           ..fillPath();
         break;
       case Axis.vertical:

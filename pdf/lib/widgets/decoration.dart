@@ -197,7 +197,7 @@ class DecorationImage {
 
     context.canvas
       ..saveContext()
-      ..drawRect(box.x, box.y, box.width, box.height)
+      ..drawBox(box)
       ..clipPath()
       ..setTransform(mat)
       ..drawImage(_image, 0, 0, imageSize.x, imageSize.y)
@@ -645,7 +645,7 @@ class BoxDecoration {
                   );
                 }
               }
-              context.canvas.drawRect(box.x, box.y, box.width, box.height);
+              context.canvas.drawBox(box);
             } else {
               if (boxShadow != null) {
                 for (final s in boxShadow) {
@@ -686,7 +686,7 @@ class BoxDecoration {
         switch (shape) {
           case BoxShape.rectangle:
             if (borderRadius == null) {
-              context.canvas.drawRect(box.x, box.y, box.width, box.height);
+              context.canvas.drawBox(box);
             } else {
               borderRadius.paint(context, box);
             }

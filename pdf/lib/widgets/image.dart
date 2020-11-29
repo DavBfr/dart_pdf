@@ -64,12 +64,7 @@ void _drawImageRect(PdfGraphics canvas, PdfImage image, PdfRect sourceRect,
 
   canvas.saveContext();
   canvas
-    ..drawRect(
-      destinationRect.x,
-      destinationRect.y,
-      destinationRect.width,
-      destinationRect.height,
-    )
+    ..drawBox(destinationRect)
     ..clipPath()
     ..drawImage(
       image,

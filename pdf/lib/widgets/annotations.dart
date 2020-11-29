@@ -239,7 +239,7 @@ class Annotation extends SingleChildWidget {
   void debugPaint(Context context) {
     context.canvas
       ..setFillColor(PdfColors.pink)
-      ..drawRect(box.x, box.y, box.width, box.height)
+      ..drawBox(box)
       ..fillPath();
   }
 
@@ -367,7 +367,7 @@ class Outline extends Anchor {
   void debugPaint(Context context) {
     context.canvas
       ..setFillColor(PdfColors.pink100)
-      ..drawRect(box.x, box.y, box.width, box.height)
+      ..drawBox(box)
       ..fillPath();
   }
 
