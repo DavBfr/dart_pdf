@@ -137,7 +137,6 @@ class MemoryImage extends ImageProvider {
     }
 
     final image = im.decodeImage(bytes);
-    print(width);
     final resized = im.copyResize(image, width: width);
     return PdfImage.fromImage(context.document, image: resized);
   }
