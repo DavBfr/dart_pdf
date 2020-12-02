@@ -15,6 +15,7 @@
 - Automatically calculate Shape() bounding box
 - Improve gradient functions
 - Add blend mode
+- Add soft mask
 
 ## 1.12.0
 

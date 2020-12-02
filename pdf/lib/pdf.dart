@@ -37,5 +37,6 @@ export 'src/point.dart';
 export 'src/rect.dart';
 export 'src/shading.dart';
 export 'src/signature.dart';
+export 'src/smask.dart';
 export 'src/ttf_parser.dart';
 export 'src/ttffont.dart';

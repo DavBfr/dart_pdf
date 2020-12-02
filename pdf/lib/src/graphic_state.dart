@@ -21,6 +21,8 @@ import 'package:meta/meta.dart';
 import 'data_types.dart';
 import 'document.dart';
 import 'object.dart';
+import 'smask.dart';
+
 enum PdfBlendMode {
   /// Selects the source colour, ignoring the backdrop
   normal,
@@ -81,13 +83,15 @@ enum PdfBlendMode {
 @immutable
 class PdfGraphicState {
   /// Create a new graphic state
-  const PdfGraphicState({this.opacity, this.blendMode});
+  const PdfGraphicState({this.opacity, this.blendMode, this.softMask});
 
   /// The opacity to apply to this graphic state
   final double opacity;
 
   /// The current blend mode to be used
   final PdfBlendMode blendMode;
+
+  final PdfSoftMask softMask;
 
   PdfDict output() {
     final params = PdfDict();
@@ -99,9 +103,12 @@ class PdfGraphicState {
 
     if (blendMode != null) {
       final bm = blendMode.toString();
-      print(bm);
       params['/BM'] =
           PdfName('/' + bm.substring(13, 14).toUpperCase() + bm.substring(14));
+    }
+
+    if (softMask != null) {
+      params['/SMask'] = softMask.output();
     }
 
     return params;
@@ -112,7 +119,9 @@ class PdfGraphicState {
     if (!(other is PdfGraphicState)) {
       return false;
     }
-    return other.opacity == opacity;
+    return other.opacity == opacity &&
+        other.blendMode == blendMode &&
+        other.softMask == softMask;
   }
 
   @override

@@ -21,7 +21,9 @@ import 'object_stream.dart';
 class PdfXObject extends PdfObjectStream {
   PdfXObject(PdfDocument pdfDocument, String subtype, {bool isBinary = false})
       : super(pdfDocument, type: '/XObject', isBinary: isBinary) {
-    params['/Subtype'] = PdfName(subtype);
+    if (subtype != null) {
+      params['/Subtype'] = PdfName(subtype);
+    }
   }
 
   String get name => 'X$objser';
