@@ -21,15 +21,73 @@ import 'package:meta/meta.dart';
 import 'data_types.dart';
 import 'document.dart';
 import 'object.dart';
+enum PdfBlendMode {
+  /// Selects the source colour, ignoring the backdrop
+  normal,
+
+  /// Multiplies the backdrop and source colour values
+  multiply,
+
+  /// Multiplies the complements of the backdrop and source colour values,
+  /// then complements the result
+  screen,
+
+  /// Multiplies or screens the colours, depending on the backdrop colour value
+  overlay,
+
+  /// Selects the darker of the backdrop and source colours
+  darken,
+
+  /// Selects the lighter of the backdrop and source colours
+  lighten,
+
+  /// Brightens the backdrop colour to reflect the source colour.
+  /// Painting with black produces no changes.
+  colorDodge,
+
+  /// Darkens the backdrop colour to reflect the source colour
+  colorBurn,
+
+  /// Multiplies or screens the colours, depending on the source colour value
+  hardLight,
+
+  /// Darkens or lightens the colours, depending on the source colour value
+  softLight,
+
+  /// Subtracts the darker of the two constituent colours from the lighter colour
+  difference,
+
+  /// Produces an effect similar to that of the Difference mode but lower in contrast
+  exclusion,
+
+  /// Creates a colour with the hue of the source colour and the saturation and
+  /// luminosity of the backdrop colour
+  hue,
+
+  /// Creates a colour with the saturation of the source colour and the hue and
+  /// luminosity of the backdrop colour
+  saturation,
+
+  /// Creates a colour with the hue and saturation of the source colour and the
+  /// luminosity of the backdrop colour
+  color,
+
+  /// Creates a colour with the luminosity of the source colour and the hue and
+  /// saturation of the backdrop colour
+  luminosity,
+}
 
 /// Graphic state
 @immutable
 class PdfGraphicState {
   /// Create a new graphic state
-  const PdfGraphicState({this.opacity});
+  const PdfGraphicState({this.opacity, this.blendMode});
 
   /// The opacity to apply to this graphic state
   final double opacity;
+
+  /// The current blend mode to be used
+  final PdfBlendMode blendMode;
 
   PdfDict output() {
     final params = PdfDict();
@@ -37,6 +95,13 @@ class PdfGraphicState {
     if (opacity != null) {
       params['/CA'] = PdfNum(opacity);
       params['/ca'] = PdfNum(opacity);
+    }
+
+    if (blendMode != null) {
+      final bm = blendMode.toString();
+      print(bm);
+      params['/BM'] =
+          PdfName('/' + bm.substring(13, 14).toUpperCase() + bm.substring(14));
     }
 
     return params;

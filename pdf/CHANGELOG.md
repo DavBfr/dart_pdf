@@ -14,6 +14,7 @@
 - Improve graphic operations
 - Automatically calculate Shape() bounding box
 - Improve gradient functions
+- Add blend mode
 
 ## 1.12.0
 
