@@ -1,0 +1,28 @@
+name: Dart CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: subosito/flutter-action@v1
+    - name: Install utils
+      run: sudo apt install poppler-utils imagemagick
+    - name: Run analysis
+      run: make analyze
+    - name: Run tests
+      run: make test
+    - name: Run readme tests
+      run: make test-readme
+    - name: Verify that nothing changed
+      run: test -z "$(git status --porcelain)"
+    - name: Push to codecov
+      run: bash <(curl -s https://codecov.io/bash)

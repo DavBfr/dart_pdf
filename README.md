@@ -1,6 +1,6 @@
 # Pdf for Dart and Flutter
 
-[![Build Status](https://travis-ci.org/DavBfr/dart_pdf.svg?branch=master)](https://travis-ci.org/DavBfr/dart_pdf)
+![Dart CI](https://github.com/DavBfr/dart_pdf/workflows/Dart%20CI/badge.svg)
 [![pub package](https://img.shields.io/pub/v/pdf.svg)](https://pub.dartlang.org/packages/pdf)
 [![pub package](https://img.shields.io/pub/v/printing.svg)](https://pub.dartlang.org/packages/printing)
 [![codecov](https://codecov.io/gh/DavBfr/dart_pdf/branch/master/graph/badge.svg)](https://codecov.io/gh/DavBfr/dart_pdf)
