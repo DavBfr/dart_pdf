@@ -91,7 +91,9 @@ class Invoice {
 
   double get _grandTotal => _total * (1 + tax);
 
-  pw.MemoryImage _logo;
+  String _logo;
+
+  String _bgShape;
 
   Future<Uint8List> buildPdf(PdfPageFormat pageFormat) async {
     // Create a PDF document.
@@ -101,9 +103,8 @@ class Invoice {
     final font2 = await rootBundle.load('assets/roboto2.ttf');
     final font3 = await rootBundle.load('assets/roboto3.ttf');
 
-    _logo = pw.MemoryImage(
-      (await rootBundle.load('assets/logo.png')).buffer.asUint8List(),
-    );
+    _logo = await rootBundle.loadString('assets/logo.svg');
+    _bgShape = await rootBundle.loadString('assets/invoice.svg');
 
     // Add page to the PDF
     doc.addPage(
@@ -191,7 +192,7 @@ class Invoice {
                     padding: const pw.EdgeInsets.only(bottom: 8, left: 30),
                     height: 72,
                     child:
-                        _logo != null ? pw.Image.provider(_logo) : pw.PdfLogo(),
+                        _logo != null ? pw.SvgImage(svg: _logo) : pw.PdfLogo(),
                   ),
                   // pw.Container(
                   //   color: baseColor,
@@ -224,7 +225,7 @@ class Invoice {
           'Page ${context.pageNumber}/${context.pagesCount}',
           style: const pw.TextStyle(
             fontSize: 12,
-            color: PdfColors.grey,
+            color: PdfColors.white,
           ),
         ),
       ],
@@ -242,45 +243,7 @@ class Invoice {
       ),
       buildBackground: (context) => pw.FullPage(
         ignoreMargins: true,
-        child: pw.Stack(
-          children: [
-            pw.Positioned(
-              bottom: 0,
-              left: 0,
-              child: pw.Container(
-                height: 20,
-                width: pageFormat.width / 2,
-                decoration: pw.BoxDecoration(
-                  gradient: pw.LinearGradient(
-                    colors: [baseColor, PdfColors.white],
-                  ),
-                ),
-              ),
-            ),
-            pw.Positioned(
-              bottom: 20,
-              left: 0,
-              child: pw.Container(
-                height: 20,
-                width: pageFormat.width / 4,
-                decoration: pw.BoxDecoration(
-                  gradient: pw.LinearGradient(
-                    colors: [accentColor, PdfColors.white],
-                  ),
-                ),
-              ),
-            ),
-            pw.Positioned(
-              top: pageFormat.marginTop + 72,
-              left: 0,
-              right: 0,
-              child: pw.Container(
-                height: 3,
-                color: baseColor,
-              ),
-            ),
-          ],
-        ),
+        child: pw.SvgImage(svg: _bgShape),
       ),
     );
   }

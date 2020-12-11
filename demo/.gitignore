@@ -38,3 +38,4 @@ lib/generated_plugin_registrant.dart
 macos/Podfile.lock
 assets/*.png
 assets/*.jpg
+assets/logo.svg

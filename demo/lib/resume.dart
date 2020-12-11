@@ -15,8 +15,10 @@
  */
 
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
@@ -93,11 +95,18 @@ Future<Uint8List> generateResume(PdfPageFormat format) async {
                     ),
                   ),
                   _Category(title: 'Work Experience'),
-                  _Block(title: 'Tour bus driver'),
-                  _Block(title: 'Logging equipment operator'),
-                  _Block(title: 'Foot doctor'),
-                  _Block(title: 'Unicorn trainer'),
-                  _Block(title: 'Chief chatter'),
+                  _Block(
+                      title: 'Tour bus driver',
+                      icon: const pw.IconData(0xe530)),
+                  _Block(
+                      title: 'Logging equipment operator',
+                      icon: const pw.IconData(0xe30d)),
+                  _Block(title: 'Foot doctor', icon: const pw.IconData(0xe3f3)),
+                  _Block(
+                      title: 'Unicorn trainer',
+                      icon: const pw.IconData(0xf0cf)),
+                  _Block(
+                      title: 'Chief chatter', icon: const pw.IconData(0xe0ca)),
                   pw.SizedBox(height: 20),
                   _Category(title: 'Education'),
                   _Block(title: 'Bachelor Of Commerce'),
@@ -149,6 +158,8 @@ Future<Uint8List> generateResume(PdfPageFormat format) async {
 }
 
 Future<pw.PageTheme> _myPageTheme(PdfPageFormat format) async {
+  final bgShape = await rootBundle.loadString('assets/resume.svg');
+
   format = format.applyMargin(
       left: 2.0 * PdfPageFormat.cm,
       top: 4.0 * PdfPageFormat.cm,
@@ -159,51 +170,25 @@ Future<pw.PageTheme> _myPageTheme(PdfPageFormat format) async {
     theme: pw.ThemeData.withFont(
       base: pw.Font.ttf(await rootBundle.load('assets/open-sans.ttf')),
       bold: pw.Font.ttf(await rootBundle.load('assets/open-sans-bold.ttf')),
+      icons: pw.Font.ttf(await rootBundle.load('assets/material.ttf')),
     ),
     buildBackground: (pw.Context context) {
       return pw.FullPage(
         ignoreMargins: true,
-        child: pw.CustomPaint(
-          size: PdfPoint(format.width, format.height),
-          painter: (PdfGraphics canvas, PdfPoint size) {
-            context.canvas
-              ..setColor(lightGreen)
-              ..moveTo(0, size.y)
-              ..lineTo(0, size.y - 230)
-              ..lineTo(60, size.y)
-              ..fillPath()
-              ..setColor(green)
-              ..moveTo(0, size.y)
-              ..lineTo(0, size.y - 100)
-              ..lineTo(100, size.y)
-              ..fillPath()
-              ..setColor(lightGreen)
-              ..moveTo(30, size.y)
-              ..lineTo(110, size.y - 50)
-              ..lineTo(150, size.y)
-              ..fillPath()
-              ..moveTo(size.x, 0)
-              ..lineTo(size.x, 230)
-              ..lineTo(size.x - 60, 0)
-              ..fillPath()
-              ..setColor(green)
-              ..moveTo(size.x, 0)
-              ..lineTo(size.x, 100)
-              ..lineTo(size.x - 100, 0)
-              ..fillPath()
-              ..setColor(lightGreen)
-              ..moveTo(size.x - 30, 0)
-              ..lineTo(size.x - 110, 50)
-              ..lineTo(size.x - 150, 0)
-              ..fillPath()
-              ..setColor(green)
-              ..setLineWidth(2)
-              ..moveTo(
-                  size.x - sep - format.marginRight + 4, format.marginBottom)
-              ..lineTo(size.x - sep - format.marginRight + 4,
-                  size.y - format.marginTop)
-              ..strokePath();
-          },
+        child: pw.Stack(
+          children: [
+            pw.Positioned(
+              child: pw.SvgImage(svg: bgShape),
+              left: 0,
+              top: 0,
+            ),
+            pw.Positioned(
+              child: pw.Transform.rotate(
+                  angle: pi, child: pw.SvgImage(svg: bgShape)),
+              right: 0,
+              bottom: 0,
+            ),
+          ],
         ),
       );
     },
@@ -211,9 +196,11 @@ Future<pw.PageTheme> _myPageTheme(PdfPageFormat format) async {
 }
 
 class _Block extends pw.StatelessWidget {
-  _Block({this.title});
+  _Block({this.title, this.icon});
 
   final String title;
+
+  final pw.IconData icon;
 
   @override
   pw.Widget build(pw.Context context) {
@@ -234,6 +221,8 @@ class _Block extends pw.StatelessWidget {
                     style: pw.Theme.of(context)
                         .defaultTextStyle
                         .copyWith(fontWeight: pw.FontWeight.bold)),
+                pw.Spacer(),
+                if (icon != null) pw.Icon(icon, color: lightGreen, size: 18),
               ]),
           pw.Container(
             decoration: const pw.BoxDecoration(

@@ -16,6 +16,7 @@
 
 import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
@@ -176,13 +177,34 @@ class Calendar extends StatelessWidget {
 Future<Uint8List> generateCalendar(PdfPageFormat pageFormat) async {
   //Create a PDF document.
   final document = Document();
+  final date = DateTime.now();
+  String bg;
+
+  switch (date.month) {
+    case 12:
+      bg = await rootBundle.loadString('assets/calendar.svg');
+      break;
+  }
 
   document.addPage(
     Page(
-      pageFormat: pageFormat,
-      orientation: PageOrientation.landscape,
-      build: (context) => Calendar(
-        date: DateTime.now(),
+      pageTheme: PageTheme(
+        pageFormat: pageFormat,
+        orientation: PageOrientation.landscape,
+        theme: ThemeData.withFont(
+          base: Font.ttf(await rootBundle.load('assets/open-sans.ttf')),
+          bold: Font.ttf(await rootBundle.load('assets/open-sans-bold.ttf')),
+        ),
+        buildForeground: bg == null
+            ? null
+            : (context) =>
+                FullPage(ignoreMargins: true, child: SvgImage(svg: bg)),
+      ),
+      build: (context) => Padding(
+        padding: const EdgeInsets.only(right: 20),
+        child: Calendar(
+          date: date,
+        ),
       ),
     ),
   );
