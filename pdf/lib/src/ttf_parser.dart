@@ -19,7 +19,6 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
-import 'package:utf/utf.dart';
 
 import 'font_metrics.dart';
 
@@ -125,7 +124,7 @@ class TtfParser {
       }
       if (platformID == 3 && nameID == 6) {
         try {
-          _fontName = decodeUtf16(bytes.buffer
+          _fontName = _decodeUtf16(bytes.buffer
               .asUint8List(basePosition + stringOffset + offset, length));
           return;
         } catch (a) {
@@ -402,5 +401,13 @@ class TtfParser {
       Uint8List.view(bytes.buffer, start, offset - start),
       components,
     );
+  }
+
+  String _decodeUtf16(Uint8List bytes) {
+    final charCodes = <int>[];
+    for (var i = 0; i < bytes.length; i += 2) {
+      charCodes.add((bytes[i] << 8) | bytes[i + 1]);
+    }
+    return String.fromCharCodes(charCodes);
   }
 }

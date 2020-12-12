@@ -18,7 +18,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
-import 'package:utf/utf.dart';
 
 import 'color.dart';
 import 'object.dart';
@@ -120,7 +119,7 @@ class PdfString extends PdfDataType {
     try {
       return latin1.encode(value);
     } catch (e) {
-      return Uint8List.fromList(<int>[0xfe, 0xff] + encodeUtf16be(value));
+      return Uint8List.fromList(<int>[0xfe, 0xff] + _encodeUtf16be(value));
     }
   }
 
@@ -133,6 +132,46 @@ class PdfString extends PdfDataType {
     final minute = utcDate.minute.toString().padLeft(2, '0');
     final second = utcDate.second.toString().padLeft(2, '0');
     return _string('D:$year$month$day$hour$minute${second}Z');
+  }
+
+  /// Produce a list of UTF-16BE encoded bytes.
+  static List<int> _encodeUtf16be(String str) {
+    const UNICODE_REPLACEMENT_CHARACTER_CODEPOINT = 0xfffd;
+    const UNICODE_BYTE_ZERO_MASK = 0xff;
+    const UNICODE_BYTE_ONE_MASK = 0xff00;
+    const UNICODE_VALID_RANGE_MAX = 0x10ffff;
+    const UNICODE_PLANE_ONE_MAX = 0xffff;
+    const UNICODE_UTF16_RESERVED_LO = 0xd800;
+    const UNICODE_UTF16_RESERVED_HI = 0xdfff;
+    const UNICODE_UTF16_OFFSET = 0x10000;
+    const UNICODE_UTF16_SURROGATE_UNIT_0_BASE = 0xd800;
+    const UNICODE_UTF16_SURROGATE_UNIT_1_BASE = 0xdc00;
+    const UNICODE_UTF16_HI_MASK = 0xffc00;
+    const UNICODE_UTF16_LO_MASK = 0x3ff;
+
+    final encoding = <int>[];
+
+    final add = (int unit) {
+      encoding.add((unit & UNICODE_BYTE_ONE_MASK) >> 8);
+      encoding.add(unit & UNICODE_BYTE_ZERO_MASK);
+    };
+
+    for (var unit in str.codeUnits) {
+      if ((unit >= 0 && unit < UNICODE_UTF16_RESERVED_LO) ||
+          (unit > UNICODE_UTF16_RESERVED_HI && unit <= UNICODE_PLANE_ONE_MAX)) {
+        add(unit);
+      } else if (unit > UNICODE_PLANE_ONE_MAX &&
+          unit <= UNICODE_VALID_RANGE_MAX) {
+        final base = unit - UNICODE_UTF16_OFFSET;
+        add(UNICODE_UTF16_SURROGATE_UNIT_0_BASE +
+            ((base & UNICODE_UTF16_HI_MASK) >> 10));
+        add(UNICODE_UTF16_SURROGATE_UNIT_1_BASE +
+            (base & UNICODE_UTF16_LO_MASK));
+      } else {
+        add(UNICODE_REPLACEMENT_CHARACTER_CODEPOINT);
+      }
+    }
+    return encoding;
   }
 
   /// Escape special characters

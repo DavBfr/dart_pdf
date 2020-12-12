@@ -16,6 +16,7 @@
 - Improve gradient functions
 - Add blend mode
 - Add soft mask
+- Remove dependency to the deprecated utf library
 
 ## 1.12.0
 
