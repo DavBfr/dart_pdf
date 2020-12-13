@@ -30,6 +30,7 @@ class PdfPreview extends StatefulWidget {
     this.pdfPreviewPageDecoration,
     this.pdfFileName,
     this.useActions = true,
+    this.pages,
   }) : super(key: key);
 
   /// Called when a pdf document is needed
@@ -77,6 +78,9 @@ class PdfPreview extends StatefulWidget {
   /// Name of the PDF when sharing. It must include the extension.
   final String pdfFileName;
 
+  /// Pages to display. Default will display all the pages.
+  final List<int> pages;
+
   @override
   _PdfPreviewState createState() => _PdfPreviewState();
 }
@@ -123,7 +127,11 @@ class _PdfPreviewState extends State<PdfPreview> {
     }
 
     var pageNum = 0;
-    await for (final PdfRaster page in Printing.raster(_doc, dpi: dpi)) {
+    await for (final PdfRaster page in Printing.raster(
+      _doc,
+      dpi: dpi,
+      pages: widget.pages,
+    )) {
       if (!mounted) {
         return;
       }

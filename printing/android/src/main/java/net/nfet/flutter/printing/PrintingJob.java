@@ -53,6 +53,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -302,7 +303,7 @@ public class PrintingJob extends PrintDocumentAdapter {
         callback.onLayoutFinished(info, true);
     }
 
-    void rasterPdf(final byte[] data, final int[] pages, final Double scale) {
+    void rasterPdf(final byte[] data, final ArrayList<Integer> pages, final Double scale) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
             Log.e("PDF", "PDF Raster available since Android 5.0 Lollipop (API 21)");
             printing.onPageRasterEnd(this);
@@ -327,9 +328,9 @@ public class PrintingJob extends PrintDocumentAdapter {
                         Log.e("PDF", "Unable to delete temporary file");
                     }
 
-                    final int pageCount = pages != null ? pages.length : renderer.getPageCount();
+                    final int pageCount = pages != null ? pages.size() : renderer.getPageCount();
                     for (int i = 0; i < pageCount; i++) {
-                        PdfRenderer.Page page = renderer.openPage(pages == null ? i : pages[i]);
+                        PdfRenderer.Page page = renderer.openPage(pages == null ? i : pages.get(i));
 
                         final int width = Double.valueOf(page.getWidth() * scale).intValue();
                         final int height = Double.valueOf(page.getHeight() * scale).intValue();

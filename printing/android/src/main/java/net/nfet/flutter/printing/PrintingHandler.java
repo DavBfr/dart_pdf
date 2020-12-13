@@ -7,6 +7,7 @@ import android.print.PrintAttributes;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import io.flutter.plugin.common.MethodCall;
@@ -89,7 +90,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                 }
                 case "rasterPdf": {
                     final byte[] document = call.argument("doc");
-                    final int[] pages = call.argument("pages");
+                    final ArrayList<Integer> pages = call.argument("pages");
                     Double scale = call.argument("scale");
                     final PrintingJob printJob =
                             new PrintingJob(activity, this, (int) call.argument("job"));

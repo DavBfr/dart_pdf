@@ -194,8 +194,9 @@ class PrintingPlugin extends PrintingPlatform {
     final html.CanvasElement canvas =
         js.context['document'].createElement('canvas');
     final html.CanvasRenderingContext2D context = canvas.getContext('2d');
+    final _pages = pages ?? Iterable<int>.generate(numPages, (index) => index);
 
-    for (var i = 0; i < numPages; i++) {
+    for (final i in _pages) {
       final page = await promiseToFuture<PdfJsPage>(d.getPage(i + 1));
       final viewport = page.getViewport(Settings()..scale = 1.5);
 

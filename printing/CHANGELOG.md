@@ -3,6 +3,7 @@
 ## 3.7.2
 
 - Fix Printing on WEB
+- Fix raster pages on Android and Web
 
 ## 3.7.1
 
