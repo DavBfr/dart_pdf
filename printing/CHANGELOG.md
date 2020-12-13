@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.7.2
+
+- Fix Printing on WEB
+
 ## 3.7.1
 
 - Fix Pdf Raster on WEB

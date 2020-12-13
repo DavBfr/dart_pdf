@@ -70,51 +70,63 @@ class PrintingPlugin extends PrintingPlatform {
       return false;
     }
 
+    final String userAgent = js.context['navigator']['userAgent'];
     final isChrome = js.context['chrome'] != null;
     final isSafari = js.context['safari'] != null;
-    // Maybe Firefox 75 will support iframe printing
+    final isMobile = userAgent.contains('Mobile');
+    // Maybe Firefox will support iframe printing
     // https://bugzilla.mozilla.org/show_bug.cgi?id=911444
+    // final isFirefox = userAgent.contains('Firefox');
 
-    if (!isChrome && !isSafari) {
-      final pr = 'data:application/pdf;base64,${base64.encode(result)}';
-      final html.Window win = js.context['window'];
-      win.open(pr, name);
+    // Chrome and Safari on a desktop computer
+    if ((isChrome || isSafari) && !isMobile) {
+      final completer = Completer<bool>();
+      final pdfFile = html.Blob(
+        <Uint8List>[Uint8List.fromList(result)],
+        'application/pdf',
+      );
+      final pdfUrl = html.Url.createObjectUrl(pdfFile);
+      final html.HtmlDocument doc = js.context['document'];
 
-      return true;
+      final frame = doc.getElementById(_frameId) ?? doc.createElement('iframe');
+      frame.setAttribute(
+        'style',
+        'visibility: hidden; height: 0; width: 0; position: absolute;',
+        // 'height: 400px; width: 600px; position: absolute; z-index: 1000',
+      );
+
+      frame.setAttribute('id', _frameId);
+      frame.setAttribute('src', pdfUrl);
+
+      html.EventListener load;
+      load = (html.Event event) {
+        frame.removeEventListener('load', load);
+        final js.JsObject win =
+            js.JsObject.fromBrowserObject(frame)['contentWindow'];
+        frame.focus();
+        win.callMethod('print');
+        completer.complete(true);
+      };
+
+      frame.addEventListener('load', load);
+
+      doc.body.append(frame);
+      return completer.future;
     }
 
-    final completer = Completer<bool>();
+    // All the others
     final pdfFile = html.Blob(
       <Uint8List>[Uint8List.fromList(result)],
       'application/pdf',
     );
     final pdfUrl = html.Url.createObjectUrl(pdfFile);
     final html.HtmlDocument doc = js.context['document'];
-
-    final frame = doc.getElementById(_frameId) ?? doc.createElement('iframe');
-    frame.setAttribute(
-      'style',
-      'visibility: hidden; height: 0; width: 0; position: absolute;',
-      // 'height: 400px; width: 600px; position: absolute; z-index: 1000',
-    );
-
-    frame.setAttribute('id', _frameId);
-    frame.setAttribute('src', pdfUrl);
-
-    html.EventListener load;
-    load = (html.Event event) {
-      frame.removeEventListener('load', load);
-      final js.JsObject win =
-          js.JsObject.fromBrowserObject(frame)['contentWindow'];
-      frame.focus();
-      win.callMethod('print');
-      completer.complete(true);
-    };
-
-    frame.addEventListener('load', load);
-
-    doc.body.append(frame);
-    return completer.future;
+    final html.AnchorElement link = doc.createElement('a');
+    link.href = pdfUrl;
+    link.target = '_blank';
+    link.click();
+    link.remove();
+    return true;
   }
 
   @override
@@ -133,6 +145,7 @@ class PrintingPlugin extends PrintingPlatform {
     link.href = pdfUrl;
     link.download = filename;
     link.click();
+    link.remove();
     return true;
   }
 
