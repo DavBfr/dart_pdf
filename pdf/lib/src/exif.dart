@@ -257,11 +257,11 @@ orientation: $orientation''';
           return <int>[numerator, denominator];
         }
         final offset = valueOffset;
-        final result = List<List<int>>(numValues);
+        final result = <List<int>>[];
         for (var i = 0; i < result.length; ++i) {
           final numerator = file.getUint32(offset + i * 8, bigEnd);
           final denominator = file.getUint32(offset + i * 8 + 4, bigEnd);
-          result[i] = <int>[numerator, denominator];
+          result.add(<int>[numerator, denominator]);
         }
         return result;
       case 9: // slong, 32 bit signed int
@@ -281,11 +281,11 @@ orientation: $orientation''';
           return <int>[numerator, denominator];
         }
         final offset = valueOffset;
-        final result = List<List<int>>(numValues);
+        final result = <List<int>>[];
         for (var i = 0; i < result.length; ++i) {
           final numerator = file.getInt32(offset + i * 8, bigEnd);
           final denominator = file.getInt32(offset + i * 8 + 4, bigEnd);
-          result[i] = <int>[numerator, denominator];
+          result.add(<int>[numerator, denominator]);
         }
         return result;
       case 11: // single float, 32 bit float

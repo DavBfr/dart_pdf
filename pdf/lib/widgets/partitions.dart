@@ -80,7 +80,8 @@ class Partition implements SpanningWidget {
 }
 
 class _PartitionsContext extends WidgetContext {
-  _PartitionsContext(int count) : partitionContext = List<WidgetContext>(count);
+  _PartitionsContext(int count)
+      : partitionContext = List<WidgetContext>.filled(count, null);
 
   final List<WidgetContext> partitionContext;
 

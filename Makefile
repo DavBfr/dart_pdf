@@ -83,7 +83,7 @@ node_modules:
 
 printing/example/.metadata:
 	cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
-	rm -rf printing/example/test
+	rm -rf printing/example/test printing/example/integration_test
 
 pdf/pubspec.lock: pdf/pubspec.yaml
 	cd pdf; dart pub get
