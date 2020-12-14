@@ -105,6 +105,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   void _showPrintedToast(BuildContext context) {
     final scaffold = Scaffold.of(context);
 
+    // ignore: deprecated_member_use
     scaffold.showSnackBar(
       const SnackBar(
         content: Text('Document printed successfully'),
@@ -115,6 +116,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   void _showSharedToast(BuildContext context) {
     final scaffold = Scaffold.of(context);
 
+    // ignore: deprecated_member_use
     scaffold.showSnackBar(
       const SnackBar(
         content: Text('Document shared successfully'),

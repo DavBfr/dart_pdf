@@ -15,7 +15,7 @@
  */
 
 import 'package:flutter_driver/driver_extension.dart';
-import 'package:printing_example/main.dart' as app;
+import 'package:printing_demo/main.dart' as app;
 
 void main() {
   // Enables flutter_driver extension
