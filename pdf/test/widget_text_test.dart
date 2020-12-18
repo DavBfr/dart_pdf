@@ -270,6 +270,26 @@ void main() {
     ));
   });
 
+  test('Text Widgets RichText maxLines', () {
+    final rnd = math.Random(42);
+    final para = LoremText(random: rnd).paragraph(30);
+
+    pdf.addPage(
+      Page(
+        build: (Context context) => RichText(
+          maxLines: 3,
+          text: TextSpan(
+            text: para,
+            children: List<TextSpan>.generate(
+              4,
+              (index) => TextSpan(text: para),
+            ),
+          ),
+        ),
+      ),
+    );
+  });
+
   tearDownAll(() {
     final file = File('widgets-text.pdf');
     file.writeAsBytesSync(pdf.save());

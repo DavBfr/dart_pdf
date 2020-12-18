@@ -629,7 +629,7 @@ class RichText extends Widget {
 
               lines++;
               if (maxLines != null && lines > maxLines) {
-                break;
+                return false;
               }
 
               offsetX = 0.0;
@@ -693,7 +693,7 @@ class RichText extends Widget {
 
             lines++;
             if (maxLines != null && lines > maxLines) {
-              break;
+              return false;
             }
 
             offsetX = 0.0;

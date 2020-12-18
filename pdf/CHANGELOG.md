@@ -17,6 +17,7 @@
 - Add blend mode
 - Add soft mask
 - Remove dependency to the deprecated utf library
+- Fix RichText.maxLines with multiple TextSpan
 
 ## 1.12.0
 
