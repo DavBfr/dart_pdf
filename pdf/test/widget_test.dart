@@ -54,14 +54,10 @@ void main() {
               Container(
                 padding: const EdgeInsets.all(5),
                 margin: const EdgeInsets.only(bottom: 10),
-                decoration: const BoxDecoration(
-                    color: PdfColors.amber,
-                    border: BoxBorder(
-                        top: true,
-                        bottom: true,
-                        left: true,
-                        right: true,
-                        width: 2)),
+                decoration: BoxDecoration(
+                  color: PdfColors.amber,
+                  border: Border.all(width: 2),
+                ),
                 child: Text(
                   'Hello World',
                   textScaleFactor: 2,

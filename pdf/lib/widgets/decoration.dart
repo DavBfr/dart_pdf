@@ -152,6 +152,74 @@ class BoxBorder {
   }
 }
 
+/// A side of a border of a box.
+class BorderSide {
+  /// Creates the side of a border.
+  const BorderSide({
+    this.color = PdfColors.black,
+    this.width = 1.0,
+    this.style = BorderStyle.solid,
+  });
+
+  /// The color of this side of the border.
+  final PdfColor color;
+
+  /// The width of this side of the border.
+  final double width;
+
+  /// The style of this side of the border.
+  final BorderStyle style;
+
+  BorderSide copyWith({
+    PdfColor color,
+    double width,
+    BorderStyle style,
+  }) =>
+      BorderSide(
+        color: color,
+        width: width,
+        style: style,
+      );
+}
+
+/// A border of a box, comprised of four sides: top, right, bottom, left.
+class Border extends BoxBorder {
+  const Border._(bool left, bool top, bool right, bool bottom, PdfColor color,
+      double width, BorderStyle style)
+      : super(
+          left: left,
+          top: top,
+          right: right,
+          bottom: bottom,
+          color: color,
+          width: width,
+          style: style,
+        );
+
+  /// A uniform border with all sides the same color and width.
+  factory Border.all({
+    PdfColor color = PdfColors.black,
+    double width = 1.0,
+    BorderStyle style = BorderStyle.solid,
+  }) =>
+      Border._(
+        true,
+        true,
+        true,
+        true,
+        color,
+        width,
+        style,
+      );
+
+  /// Creates a border whose sides are all the same.
+  factory Border.fromBorderSide(BorderSide side) => Border.all(
+        color: side.color,
+        width: side.width,
+        style: side.style,
+      );
+}
+
 @immutable
 class DecorationImage {
   @Deprecated('Use DecorationImage.provider()')

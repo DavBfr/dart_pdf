@@ -36,15 +36,11 @@ void main() {
         alignment: Alignment.center,
         margin: const EdgeInsets.all(30),
         padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
             color: PdfColors.blue,
-            borderRadiusEx: BorderRadius.all(Radius.circular(20)),
-            border: BoxBorder(
+            borderRadiusEx: const BorderRadius.all(Radius.circular(20)),
+            border: Border.all(
               color: PdfColors.blue800,
-              top: true,
-              left: true,
-              right: true,
-              bottom: true,
               width: 2,
             )),
         width: 200,
@@ -103,30 +99,18 @@ void main() {
             Container(
               height: 200.0,
               width: 200.0,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: BoxBorder(
-                    bottom: true,
-                    top: true,
-                    left: true,
-                    right: true,
-                    color: PdfColors.blue,
-                    width: 3),
+                border: Border.all(color: PdfColors.blue, width: 3),
               ),
             ),
             Container(
               height: 200.0,
               width: 200.0,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.rectangle,
-                borderRadiusEx: BorderRadius.all(Radius.circular(40)),
-                border: BoxBorder(
-                    bottom: true,
-                    top: true,
-                    left: true,
-                    right: true,
-                    color: PdfColors.blue,
-                    width: 3),
+                borderRadiusEx: const BorderRadius.all(Radius.circular(40)),
+                border: Border.all(color: PdfColors.blue, width: 3),
               ),
             ),
           ],
@@ -141,9 +125,9 @@ void main() {
         alignment: Alignment.center,
         margin: const EdgeInsets.all(30),
         padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-            borderRadiusEx: BorderRadius.all(Radius.circular(20)),
-            gradient: LinearGradient(
+        decoration: BoxDecoration(
+            borderRadiusEx: const BorderRadius.all(Radius.circular(20)),
+            gradient: const LinearGradient(
               colors: <PdfColor>[
                 PdfColors.blue,
                 PdfColors.red,
@@ -154,12 +138,8 @@ void main() {
               stops: <double>[0, .8, 1.0],
               tileMode: TileMode.clamp,
             ),
-            border: BoxBorder(
+            border: Border.all(
               color: PdfColors.blue800,
-              top: true,
-              left: true,
-              right: true,
-              bottom: true,
               width: 2,
             )),
         width: 200,
@@ -174,9 +154,9 @@ void main() {
         alignment: Alignment.center,
         margin: const EdgeInsets.all(30),
         padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-            borderRadiusEx: BorderRadius.all(Radius.circular(20)),
-            gradient: RadialGradient(
+        decoration: BoxDecoration(
+            borderRadiusEx: const BorderRadius.all(Radius.circular(20)),
+            gradient: const RadialGradient(
               colors: <PdfColor>[
                 PdfColors.blue,
                 PdfColors.red,
@@ -187,12 +167,8 @@ void main() {
               focal: FractionalOffset(.7, .45),
               focalRadius: 1,
             ),
-            border: BoxBorder(
+            border: Border.all(
               color: PdfColors.blue800,
-              top: true,
-              left: true,
-              right: true,
-              bottom: true,
               width: 2,
             )),
         width: 200,

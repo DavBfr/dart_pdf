@@ -59,13 +59,9 @@ Future<Uint8List> generateReport(PdfPageFormat pageFormat) async {
           ),
           overlay: pw.ChartLegend(
             position: const pw.Alignment(-.7, 1),
-            decoration: const pw.BoxDecoration(
+            decoration: pw.BoxDecoration(
               color: PdfColors.white,
-              border: pw.BoxBorder(
-                bottom: true,
-                top: true,
-                left: true,
-                right: true,
+              border: pw.Border.all(
                 color: PdfColors.black,
                 width: .5,
               ),

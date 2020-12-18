@@ -42,12 +42,8 @@ class Checkbox extends SingleChildWidget {
                 height: height,
                 margin: const EdgeInsets.all(1),
                 decoration: decoration ??
-                    const BoxDecoration(
-                        border: BoxBorder(
-                      left: true,
-                      top: true,
-                      bottom: true,
-                      right: true,
+                    BoxDecoration(
+                        border: Border.all(
                       color: PdfColors.grey600,
                       width: 2,
                     ))));

@@ -19,6 +19,7 @@
 - Remove dependency to the deprecated utf library
 - Fix RichText.maxLines with multiple TextSpan
 - Fix Exif parsing
+- Add Border and BorderSide objects
 
 ## 1.12.0
 

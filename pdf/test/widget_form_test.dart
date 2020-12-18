@@ -54,11 +54,7 @@ class Decorated extends StatelessWidget {
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: color ?? PdfColors.yellow100,
-        border: const BoxBorder(
-          left: true,
-          top: true,
-          right: true,
-          bottom: true,
+        border: Border.all(
           color: PdfColors.grey,
           width: .5,
         ),

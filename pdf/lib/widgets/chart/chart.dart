@@ -162,11 +162,7 @@ abstract class Dataset extends Widget {
     return Container(
       decoration: BoxDecoration(
         color: color,
-        border: const BoxBorder(
-          left: true,
-          top: true,
-          bottom: true,
-          right: true,
+        border: Border.all(
           color: PdfColors.black,
           width: .5,
         ),
