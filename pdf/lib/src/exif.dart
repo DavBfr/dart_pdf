@@ -258,7 +258,7 @@ orientation: $orientation''';
         }
         final offset = valueOffset;
         final result = <List<int>>[];
-        for (var i = 0; i < result.length; ++i) {
+        for (var i = 0; i < numValues; ++i) {
           final numerator = file.getUint32(offset + i * 8, bigEnd);
           final denominator = file.getUint32(offset + i * 8 + 4, bigEnd);
           result.add(<int>[numerator, denominator]);
@@ -282,7 +282,7 @@ orientation: $orientation''';
         }
         final offset = valueOffset;
         final result = <List<int>>[];
-        for (var i = 0; i < result.length; ++i) {
+        for (var i = 0; i < numValues; ++i) {
           final numerator = file.getInt32(offset + i * 8, bigEnd);
           final denominator = file.getInt32(offset + i * 8 + 4, bigEnd);
           result.add(<int>[numerator, denominator]);
