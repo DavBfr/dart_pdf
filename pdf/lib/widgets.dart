@@ -19,6 +19,8 @@ export 'package:barcode/barcode.dart';
 export 'widgets/annotations.dart';
 export 'widgets/barcode.dart';
 export 'widgets/basic.dart';
+export 'widgets/border_radius.dart';
+export 'widgets/box_border.dart';
 export 'widgets/chart/bar_chart.dart';
 export 'widgets/chart/chart.dart';
 export 'widgets/chart/grid_axis.dart';

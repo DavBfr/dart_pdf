@@ -18,6 +18,8 @@ import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'border_radius.dart';
+import 'box_border.dart';
 import 'container.dart';
 import 'decoration.dart';
 import 'geometry.dart';

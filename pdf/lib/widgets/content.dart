@@ -21,6 +21,7 @@ import 'package:pdf/pdf.dart';
 
 import 'annotations.dart';
 import 'basic.dart';
+import 'box_border.dart';
 import 'container.dart';
 import 'decoration.dart';
 import 'flex.dart';
@@ -78,14 +79,14 @@ class Header extends StatelessWidget {
         _margin ??= const EdgeInsets.only(bottom: 5.0 * PdfPageFormat.mm);
         _padding ??= const EdgeInsets.only(bottom: 1.0 * PdfPageFormat.mm);
         _decoration ??=
-            const BoxDecoration(border: BoxBorder(bottom: true, width: 1));
+            const BoxDecoration(border: Border(bottom: BorderSide()));
         _textStyle ??= Theme.of(context).header0;
         break;
       case 1:
         _margin ??= const EdgeInsets.only(
             top: 3.0 * PdfPageFormat.mm, bottom: 5.0 * PdfPageFormat.mm);
         _decoration ??=
-            const BoxDecoration(border: BoxBorder(bottom: true, width: 0.2));
+            const BoxDecoration(border: Border(bottom: BorderSide(width: 0.2)));
         _textStyle ??= Theme.of(context).header1;
         break;
       case 2:

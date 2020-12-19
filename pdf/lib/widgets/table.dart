@@ -20,6 +20,7 @@ import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'box_border.dart';
 import 'container.dart';
 import 'decoration.dart';
 import 'flex.dart';
@@ -55,32 +56,93 @@ enum TableCellVerticalAlignment { bottom, middle, top, full }
 
 enum TableWidth { min, max }
 
-class TableBorder extends BoxBorder {
-  const TableBorder(
+class TableBorder extends Border {
+  /// Creates a border for a table.
+  @Deprecated('Use TableBorder.ex instead')
+  TableBorder(
       {bool left = true,
       bool top = true,
       bool right = true,
       bool bottom = true,
-      this.horizontalInside = true,
-      this.verticalInside = true,
+      bool horizontalInside = true,
+      bool verticalInside = true,
       PdfColor color = PdfColors.black,
       double width = 1.0})
-      : super(
-            left: left,
-            top: top,
-            right: right,
-            bottom: bottom,
+      : horizontalInside = BorderSide(
             color: color,
-            width: width);
+            width: width,
+            style: horizontalInside ? BorderStyle.solid : BorderStyle.none),
+        verticalInside = BorderSide(
+            color: color,
+            width: width,
+            style: verticalInside ? BorderStyle.solid : BorderStyle.none),
+        super(
+            top: BorderSide(
+                color: color,
+                width: width,
+                style: top ? BorderStyle.solid : BorderStyle.none),
+            bottom: BorderSide(
+                color: color,
+                width: width,
+                style: bottom ? BorderStyle.solid : BorderStyle.none),
+            left: BorderSide(
+                color: color,
+                width: width,
+                style: left ? BorderStyle.solid : BorderStyle.none),
+            right: BorderSide(
+                color: color,
+                width: width,
+                style: right ? BorderStyle.solid : BorderStyle.none));
 
-  final bool horizontalInside;
-  final bool verticalInside;
+  /// Creates a border for a table.
+  const TableBorder.ex({
+    BorderSide left = BorderSide.none,
+    BorderSide top = BorderSide.none,
+    BorderSide right = BorderSide.none,
+    BorderSide bottom = BorderSide.none,
+    this.horizontalInside = BorderSide.none,
+    this.verticalInside = BorderSide.none,
+  }) : super(top: top, bottom: bottom, left: left, right: right);
 
-  void paint(Context context, PdfRect box,
+  /// A uniform border with all sides the same color and width.
+  factory TableBorder.all({
+    PdfColor color = PdfColors.black,
+    double width = 1.0,
+    BorderStyle style = BorderStyle.solid,
+  }) {
+    final side = BorderSide(color: color, width: width, style: style);
+    return TableBorder.ex(
+        top: side,
+        right: side,
+        bottom: side,
+        left: side,
+        horizontalInside: side,
+        verticalInside: side);
+  }
+
+  /// Creates a border for a table where all the interior sides use the same styling and all the exterior sides use the same styling.
+  factory TableBorder.symmetric({
+    BorderSide inside = BorderSide.none,
+    BorderSide outside = BorderSide.none,
+  }) {
+    return TableBorder.ex(
+      top: outside,
+      right: outside,
+      bottom: outside,
+      left: outside,
+      horizontalInside: inside,
+      verticalInside: inside,
+    );
+  }
+
+  final BorderSide horizontalInside;
+  final BorderSide verticalInside;
+
+  void paintTable(Context context, PdfRect box,
       [List<double> widths, List<double> heights]) {
-    super.paintRect(context, box);
+    super.paint(context, box);
 
-    if (verticalInside) {
+    if (verticalInside.style != BorderStyle.none) {
       var offset = box.x;
       for (var width in widths.sublist(0, widths.length - 1)) {
         offset += width;
@@ -90,7 +152,7 @@ class TableBorder extends BoxBorder {
       context.canvas.strokePath();
     }
 
-    if (horizontalInside) {
+    if (horizontalInside.style != BorderStyle.none) {
       var offset = box.top;
       for (var height in heights.sublist(0, heights.length - 1)) {
         offset -= height;
@@ -234,7 +296,14 @@ class Table extends Widget implements SpanningWidget {
     Map<int, Alignment> headerAlignments,
     TextStyle headerStyle,
     OnCellFormat headerFormat,
-    TableBorder border = const TableBorder(),
+    TableBorder border = const TableBorder.ex(
+      left: BorderSide(),
+      right: BorderSide(),
+      top: BorderSide(),
+      bottom: BorderSide(),
+      horizontalInside: BorderSide(),
+      verticalInside: BorderSide(),
+    ),
     Map<int, TableColumnWidth> columnWidths,
     TableColumnWidth defaultColumnWidth = const IntrinsicColumnWidth(),
     TableWidth tableWidth = TableWidth.max,
@@ -617,7 +686,7 @@ class Table extends Widget implements SpanningWidget {
     context.canvas.restoreContext();
 
     if (border != null) {
-      border.paint(context, box, _widths, _heights);
+      border.paintTable(context, box, _widths, _heights);
     }
   }
 

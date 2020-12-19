@@ -122,12 +122,13 @@ class Calendar extends StatelessWidget {
         return Expanded(
           child: Container(
             foregroundDecoration: BoxDecoration(
-              border: BoxBorder(
-                color: PdfColors.grey,
-                top: true,
-                left: true,
-                right: index % 7 == 6,
-                bottom: true,
+              border: Border(
+                top: const BorderSide(color: PdfColors.grey),
+                left: const BorderSide(color: PdfColors.grey),
+                right: index % 7 == 6
+                    ? const BorderSide(color: PdfColors.grey)
+                    : BorderSide.none,
+                bottom: const BorderSide(color: PdfColors.grey),
               ),
             ),
             child: header(context, d),
@@ -146,13 +147,13 @@ class Calendar extends StatelessWidget {
             d.day == _date.day;
         return Container(
           foregroundDecoration: BoxDecoration(
-            border: BoxBorder(
-              color: PdfColors.grey,
-              left: true,
-              right: index % 7 == 6,
-              bottom: true,
-            ),
-          ),
+              border: Border(
+            left: const BorderSide(color: PdfColors.grey),
+            right: index % 7 == 6
+                ? const BorderSide(color: PdfColors.grey)
+                : BorderSide.none,
+            bottom: const BorderSide(color: PdfColors.grey),
+          )),
           child: day(context, d, currentMonth, currentDay),
         );
       }),

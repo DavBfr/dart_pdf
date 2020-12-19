@@ -20,6 +20,7 @@ import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'box_border.dart';
 import 'container.dart';
 import 'decoration.dart';
 import 'geometry.dart';
@@ -815,10 +816,11 @@ class Divider extends StatelessWidget {
           height: thickness,
           margin: EdgeInsets.only(left: indent, right: endIndent),
           decoration: BoxDecoration(
-            border: BoxBorder(
-              bottom: true,
-              color: color,
-              width: thickness,
+            border: Border(
+              bottom: BorderSide(
+                color: color,
+                width: thickness,
+              ),
             ),
           ),
         ),
@@ -869,10 +871,11 @@ class VerticalDivider extends StatelessWidget {
           width: thickness,
           margin: EdgeInsets.only(top: indent, bottom: endIndent),
           decoration: BoxDecoration(
-            border: BoxBorder(
-              left: true,
-              color: color,
-              width: thickness,
+            border: Border(
+              left: BorderSide(
+                color: color,
+                width: thickness,
+              ),
             ),
           ),
         ),

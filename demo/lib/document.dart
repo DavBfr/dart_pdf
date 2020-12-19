@@ -35,8 +35,8 @@ Future<Uint8List> generateDocument(PdfPageFormat format) async {
             margin: const pw.EdgeInsets.only(bottom: 3.0 * PdfPageFormat.mm),
             padding: const pw.EdgeInsets.only(bottom: 3.0 * PdfPageFormat.mm),
             decoration: const pw.BoxDecoration(
-                border: pw.BoxBorder(
-                    bottom: true, width: 0.5, color: PdfColors.grey)),
+                border: pw.Border(
+                    bottom: pw.BorderSide(width: 0.5, color: PdfColors.grey))),
             child: pw.Text('Portable Document Format',
                 style: pw.Theme.of(context)
                     .defaultTextStyle

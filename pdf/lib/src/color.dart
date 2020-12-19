@@ -220,6 +220,24 @@ class PdfColor {
 
   @override
   String toString() => '$runtimeType($red, $green, $blue, $alpha)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is PdfColor &&
+        other.red == red &&
+        other.green == green &&
+        other.blue == blue &&
+        other.alpha == alpha;
+  }
+
+  @override
+  int get hashCode => toInt();
 }
 
 /// Represents an CMYK color

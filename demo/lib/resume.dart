@@ -237,7 +237,7 @@ class _Block extends pw.StatelessWidget {
               ]),
           pw.Container(
             decoration: const pw.BoxDecoration(
-                border: pw.BoxBorder(left: true, color: green, width: 2)),
+                border: pw.Border(left: pw.BorderSide(color: green, width: 2))),
             padding: const pw.EdgeInsets.only(left: 10, top: 5, bottom: 5),
             margin: const pw.EdgeInsets.only(left: 5),
             child: pw.Column(

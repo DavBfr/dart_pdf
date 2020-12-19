@@ -449,10 +449,7 @@ class Invoice {
             children: [
               pw.Container(
                 decoration: pw.BoxDecoration(
-                  border: pw.BoxBorder(
-                    top: true,
-                    color: accentColor,
-                  ),
+                  border: pw.Border(top: pw.BorderSide(color: accentColor)),
                 ),
                 padding: const pw.EdgeInsets.only(top: 10, bottom: 4),
                 child: pw.Text(
@@ -518,10 +515,11 @@ class Invoice {
         fontSize: 10,
       ),
       rowDecoration: pw.BoxDecoration(
-        border: pw.BoxBorder(
-          bottom: true,
-          color: accentColor,
-          width: .5,
+        border: pw.Border(
+          bottom: pw.BorderSide(
+            color: accentColor,
+            width: .5,
+          ),
         ),
       ),
       headers: List<String>.generate(

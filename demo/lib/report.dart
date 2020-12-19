@@ -150,10 +150,11 @@ Future<Uint8List> generateReport(PdfPageFormat pageFormat) async {
             color: baseColor,
           ),
           rowDecoration: pw.BoxDecoration(
-            border: pw.BoxBorder(
-              bottom: true,
-              color: baseColor,
-              width: .5,
+            border: pw.Border(
+              bottom: pw.BorderSide(
+                color: baseColor,
+                width: .5,
+              ),
             ),
           ),
         );

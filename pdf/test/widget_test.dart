@@ -108,7 +108,7 @@ void main() {
               ),
               Container(
                 decoration:
-                    const BoxDecoration(border: BoxBorder(top: true, width: 1)),
+                    const BoxDecoration(border: Border(top: BorderSide())),
                 child: Text(
                   "That's all Folks!",
                   tightBounds: true,

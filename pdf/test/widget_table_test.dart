@@ -80,7 +80,7 @@ void main() {
     pdf.addPage(Page(
       build: (Context context) => Table(
         children: buildTable(context: context, count: 20),
-        border: const TableBorder(),
+        border: TableBorder.all(),
         tableWidth: TableWidth.max,
       ),
     ));
@@ -91,7 +91,7 @@ void main() {
         build: (Context context) => <Widget>[
               Table(
                 children: buildTable(context: context, count: 200),
-                border: const TableBorder(),
+                border: TableBorder.all(),
                 tableWidth: TableWidth.max,
               ),
             ]));
@@ -103,7 +103,7 @@ void main() {
               Table(
                 children: buildTable(
                     context: context, count: 200, repeatHeader: true),
-                border: const TableBorder(),
+                border: TableBorder.all(),
                 tableWidth: TableWidth.max,
               ),
             ]));
@@ -115,7 +115,7 @@ void main() {
               SizedBox(height: 710),
               Table(
                 children: buildTable(context: context, count: 4),
-                border: const TableBorder(),
+                border: TableBorder.all(),
                 tableWidth: TableWidth.max,
               ),
             ]));
@@ -128,7 +128,7 @@ void main() {
               Table(
                 children:
                     buildTable(context: context, count: 4, repeatHeader: true),
-                border: const TableBorder(),
+                border: TableBorder.all(),
                 tableWidth: TableWidth.max,
               ),
             ]));
@@ -138,7 +138,7 @@ void main() {
     pdf.addPage(Page(
       build: (Context context) => Table(
         children: buildTable(context: context, count: 20),
-        border: const TableBorder(),
+        border: TableBorder.all(),
         columnWidths: <int, TableColumnWidth>{
           0: const FixedColumnWidth(80),
           1: const FlexColumnWidth(2),
@@ -218,10 +218,11 @@ void main() {
           fontWeight: FontWeight.bold,
         ),
         rowDecoration: const BoxDecoration(
-          border: BoxBorder(
-            bottom: true,
-            color: PdfColors.indigo,
-            width: .5,
+          border: Border(
+            bottom: BorderSide(
+              color: PdfColors.indigo,
+              width: .5,
+            ),
           ),
         ),
         headers: <dynamic>['One', 'Two', 'Three'],
