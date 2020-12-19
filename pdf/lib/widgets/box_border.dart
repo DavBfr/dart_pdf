@@ -281,7 +281,7 @@ class Border extends BoxBorder {
       return;
     }
 
-    context.canvas..setLineCap(PdfLineCap.square);
+    context.canvas.setLineCap(PdfLineCap.square);
 
     if (top.style != BorderStyle.none) {
       BoxBorder._setStyle(context, top.style);
