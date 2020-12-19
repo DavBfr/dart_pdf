@@ -256,10 +256,11 @@ ref: svg
 	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/pdf/adobe_supplement_iso32000.pdf'
 	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_reference_1-7.pdf'
 
-gh-pages:
+gh-pages: all
 	cd demo; flutter build web
 	git checkout gh-pages
 	rm -rf assets icons
 	mv -fv demo/build/web/* .
+	sed -e 's|<base href="/">|<base href="/dart_pdf/">|' -i index.html
 
 .PHONY: test format format-dart format-clang clean publish-pdf publish-printing analyze ref
