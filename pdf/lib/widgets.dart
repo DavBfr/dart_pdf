@@ -37,6 +37,7 @@ export 'widgets/flex.dart';
 export 'widgets/font.dart';
 export 'widgets/forms.dart';
 export 'widgets/geometry.dart';
+export 'widgets/grid_paper.dart';
 export 'widgets/grid_view.dart';
 export 'widgets/icon.dart';
 export 'widgets/image.dart';

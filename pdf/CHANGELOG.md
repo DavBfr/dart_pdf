@@ -4,6 +4,7 @@
 
 - A borderRadius can only be given for a uniform Border
 - Add LayoutWidgetBuilder
+- Add GridPaper widget
 
 ## 1.13.0
 
