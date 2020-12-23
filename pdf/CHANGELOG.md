@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.14.0
+
+- A borderRadius can only be given for a uniform Border
+
 ## 1.13.0
 
 - Implement different border radius on all corners

@@ -281,6 +281,9 @@ class Border extends BoxBorder {
       return;
     }
 
+    assert(borderRadius == null,
+        'A borderRadius can only be given for a uniform Border.');
+
     context.canvas.setLineCap(PdfLineCap.square);
 
     if (top.style != BorderStyle.none) {
