@@ -675,6 +675,33 @@ class Builder extends StatelessWidget {
   Widget build(Context context) => builder(context);
 }
 
+/// The signature of the [LayoutBuilder] builder function.
+typedef LayoutWidgetBuilder = Widget Function(
+    Context context, BoxConstraints constraints);
+
+/// Builds a widget tree that can depend on the parent widget's size.
+class LayoutBuilder extends StatelessWidget {
+  /// Creates a widget that defers its building until layout.
+  LayoutBuilder({
+    @required this.builder,
+  }) : assert(builder != null);
+
+  /// Called at layout time to construct the widget tree.
+  final LayoutWidgetBuilder builder;
+
+  BoxConstraints _constraints;
+
+  @override
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    _constraints = constraints;
+    super.layout(context, constraints);
+  }
+
+  @override
+  Widget build(Context context) => builder(context, _constraints);
+}
+
 class FullPage extends SingleChildWidget {
   FullPage({
     @required this.ignoreMargins,

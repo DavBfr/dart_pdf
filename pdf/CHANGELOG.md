@@ -3,6 +3,7 @@
 ## 1.14.0
 
 - A borderRadius can only be given for a uniform Border
+- Add LayoutWidgetBuilder
 
 ## 1.13.0
 
