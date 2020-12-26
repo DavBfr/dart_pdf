@@ -39,4 +39,7 @@ class PdfXref {
     }
     return rs + ' n ';
   }
+
+  @override
+  String toString() => '$runtimeType $id $generation $offset';
 }

@@ -20,6 +20,7 @@ export 'src/border.dart';
 export 'src/color.dart';
 export 'src/colors.dart';
 export 'src/document.dart';
+export 'src/document_parser.dart';
 export 'src/encryption.dart';
 export 'src/exif.dart';
 export 'src/font.dart';

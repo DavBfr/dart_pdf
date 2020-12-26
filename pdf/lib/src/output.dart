@@ -72,26 +72,23 @@ class PdfOutput {
     final xref = os.offset;
     os.putString('xref\n');
 
-    // Now scan through the offsets list. The should be in sequence,
-    // but just in case:
+    // Now scan through the offsets list. They should be in sequence.
+    offsets.sort((a, b) => a.id.compareTo(b.id));
+
     var firstid = 0; // First id in block
-    var lastid = -1; // The last id used
+    var lastid = 0; // The last id used
     final block = <PdfXref>[]; // xrefs in this block
 
     // We need block 0 to exist
     block.add(PdfXref(0, 0, generation: 65535));
 
     for (var x in offsets) {
-      if (firstid == -1) {
-        firstid = x.id;
-      }
-
-      // check to see if block is in range (-1 means empty)
-      if (lastid > -1 && x.id != (lastid + 1)) {
+      // check to see if block is in range
+      if (lastid != null && x.id != (lastid + 1)) {
         // no, so write this block, and reset
         writeblock(firstid, block);
         block.clear();
-        firstid = -1;
+        firstid = x.id;
       }
 
       // now add to block
@@ -100,9 +97,7 @@ class PdfOutput {
     }
 
     // now write the last block
-    if (firstid > -1) {
-      writeblock(firstid, block);
-    }
+    writeblock(firstid, block);
 
     // now the trailer object
     os.putString('trailer\n');
@@ -110,7 +105,7 @@ class PdfOutput {
     final params = PdfDict();
 
     // the number of entries (REQUIRED)
-    params['/Size'] = PdfNum(offsets.length + 1);
+    params['/Size'] = PdfNum(rootID.pdfDocument.objser);
 
     // the /Root catalog indirect reference (REQUIRED)
     if (rootID != null) {
@@ -130,6 +125,10 @@ class PdfOutput {
     // the /Encrypt reference (OPTIONAL)
     if (encryptID != null) {
       params['/Encrypt'] = encryptID.ref();
+    }
+
+    if (rootID.pdfDocument.prev != null) {
+      params['/Prev'] = PdfNum(rootID.pdfDocument.prev.xrefOffset);
     }
 
     // end the trailer object

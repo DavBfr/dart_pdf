@@ -96,8 +96,17 @@ class Page {
       ..fillPath();
   }
 
-  void generate(Document document) {
-    _pdfPage = PdfPage(document.document, pageFormat: pageFormat);
+  void generate(Document document, {bool insert = true, int index}) {
+    if (index != null) {
+      if (insert) {
+        _pdfPage =
+            PdfPage(document.document, pageFormat: pageFormat, index: index);
+      } else {
+        _pdfPage = document.document.page(index);
+      }
+    } else {
+      _pdfPage = PdfPage(document.document, pageFormat: pageFormat);
+    }
   }
 
   void postProcess(Document document) {

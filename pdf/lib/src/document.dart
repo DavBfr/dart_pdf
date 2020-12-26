@@ -23,6 +23,7 @@ import '../io/interface.dart'
     if (dart.library.io) '../io/vm.dart'
     if (dart.library.js) '../io/js.dart';
 import 'catalog.dart';
+import 'document_parser.dart';
 import 'encryption.dart';
 import 'font.dart';
 import 'graphic_state.dart';
@@ -70,7 +71,8 @@ class PdfDocument {
     PdfPageMode pageMode = PdfPageMode.none,
     DeflateCallback deflate,
     bool compress = true,
-  }) : deflate = compress ? (deflate ?? defaultDeflate) : null {
+  })  : deflate = compress ? (deflate ?? defaultDeflate) : null,
+        prev = null {
     _objser = 1;
 
     // Now create some standard objects
@@ -79,8 +81,29 @@ class PdfDocument {
     catalog = PdfCatalog(this, pdfPageList, pageMode, pdfNames);
   }
 
+  PdfDocument.load(
+    this.prev, {
+    PdfPageMode pageMode = PdfPageMode.none,
+    DeflateCallback deflate,
+    bool compress = true,
+  }) : deflate = compress ? (deflate ?? defaultDeflate) : null {
+    _objser = prev.size;
+
+    // Now create some standard objects
+    pdfPageList = PdfPageList(this);
+    pdfNames = PdfNames(this);
+    catalog = PdfCatalog(this, pdfPageList, pageMode, pdfNames);
+
+    // Import the existing document
+    prev.mergeDocument(this);
+  }
+
+  final PdfDocumentParserBase prev;
+
   /// This is used to allocate objects a unique serial number in the document.
   int _objser;
+
+  int get objser => _objser;
 
   /// This vector contains each indirect object within the document.
   final Set<PdfObject> objects = <PdfObject>{};
@@ -146,7 +169,7 @@ class PdfDocument {
   /// This returns a specific page. It's used mainly when using a
   /// Serialized template file.
   PdfPage page(int page) {
-    return pdfPageList.getPage(page);
+    return pdfPageList.pages[page];
   }
 
   /// The root outline
@@ -182,6 +205,9 @@ class PdfDocument {
   /// Generate the PDF document as a memory file
   Uint8List save() {
     final os = PdfStream();
+    if (prev != null) {
+      os.putBytes(prev.bytes);
+    }
     _write(os);
     return os.output();
   }

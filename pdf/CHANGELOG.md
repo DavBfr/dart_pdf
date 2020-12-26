@@ -7,6 +7,7 @@
 - Add GridPaper widget
 - Improve internal sructure
 - Add some asserts on the TtfParser
+- Add document loading
 
 ## 1.13.0
 

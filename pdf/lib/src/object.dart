@@ -83,4 +83,7 @@ class PdfObject {
 
   /// Returns the unique serial number in Pdf format
   PdfIndirect ref() => PdfIndirect(objser, objgen);
+
+  @override
+  String toString() => '$runtimeType $params';
 }

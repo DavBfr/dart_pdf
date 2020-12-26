@@ -22,18 +22,18 @@ import 'page.dart';
 import 'theme.dart';
 
 class Document {
-  Document(
-      {PdfPageMode pageMode = PdfPageMode.none,
-      DeflateCallback deflate,
-      bool compress = true,
-      this.theme,
-      String title,
-      String author,
-      String creator,
-      String subject,
-      String keywords,
-      String producer})
-      : document = PdfDocument(
+  Document({
+    PdfPageMode pageMode = PdfPageMode.none,
+    DeflateCallback deflate,
+    bool compress = true,
+    this.theme,
+    String title,
+    String author,
+    String creator,
+    String subject,
+    String keywords,
+    String producer,
+  }) : document = PdfDocument(
           pageMode: pageMode,
           deflate: deflate,
           compress: compress,
@@ -44,13 +44,51 @@ class Document {
         subject != null ||
         keywords != null ||
         producer != null) {
-      document.info = PdfInfo(document,
-          title: title,
-          author: author,
-          creator: creator,
-          subject: subject,
-          keywords: keywords,
-          producer: producer);
+      document.info = PdfInfo(
+        document,
+        title: title,
+        author: author,
+        creator: creator,
+        subject: subject,
+        keywords: keywords,
+        producer: producer,
+      );
+    }
+  }
+
+  Document.load(
+    PdfDocumentParserBase parser, {
+    PdfPageMode pageMode = PdfPageMode.none,
+    DeflateCallback deflate,
+    bool compress = true,
+    this.theme,
+    String title,
+    String author,
+    String creator,
+    String subject,
+    String keywords,
+    String producer,
+  }) : document = PdfDocument.load(
+          parser,
+          pageMode: pageMode,
+          deflate: deflate,
+          compress: compress,
+        ) {
+    if (title != null ||
+        author != null ||
+        creator != null ||
+        subject != null ||
+        keywords != null ||
+        producer != null) {
+      document.info = PdfInfo(
+        document,
+        title: title,
+        author: author,
+        creator: creator,
+        subject: subject,
+        keywords: keywords,
+        producer: producer,
+      );
     }
   }
 
@@ -64,8 +102,13 @@ class Document {
 
   bool _paint = false;
 
-  void addPage(Page page) {
-    page.generate(this);
+  void addPage(Page page, {int index}) {
+    page.generate(this, index: index);
+    _pages.add(page);
+  }
+
+  void editPage(int index, Page page) {
+    page.generate(this, index: index, insert: false);
     _pages.add(page);
   }
 

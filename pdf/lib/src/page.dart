@@ -27,9 +27,16 @@ import 'page_format.dart';
 class PdfPage extends PdfObject with PdfGraphicStream {
   /// This constructs a Page object, which will hold any contents for this
   /// page.
-  PdfPage(PdfDocument pdfDocument, {this.pageFormat = PdfPageFormat.standard})
-      : super(pdfDocument, type: '/Page') {
-    pdfDocument.pdfPageList.pages.add(this);
+  PdfPage(
+    PdfDocument pdfDocument, {
+    this.pageFormat = PdfPageFormat.standard,
+    int index,
+  }) : super(pdfDocument, type: '/Page') {
+    if (index != null) {
+      pdfDocument.pdfPageList.pages.insert(index, this);
+    } else {
+      pdfDocument.pdfPageList.pages.add(this);
+    }
   }
 
   /// This is this page format, ie the size of the page, margins, and rotation
@@ -37,10 +44,6 @@ class PdfPage extends PdfObject with PdfGraphicStream {
 
   /// This holds the contents of the page.
   List<PdfObjectStream> contents = <PdfObjectStream>[];
-
-  /// Object ID that contains a thumbnail sketch of the page.
-  /// -1 indicates no thumbnail.
-  PdfObject thumbnail;
 
   /// This holds any Annotations contained within this page.
   List<PdfAnnot> annotations = <PdfAnnot>[];
@@ -72,30 +75,38 @@ class PdfPage extends PdfObject with PdfGraphicStream {
     params['/MediaBox'] =
         PdfArray.fromNum(<double>[0, 0, pageFormat.width, pageFormat.height]);
 
-    // Rotation (if not zero)
-//        if(rotate!=0) {
-//            os.write("/Rotate ");
-//            os.write(Integer.toString(rotate).getBytes());
-//            os.write("\n");
-//        }
-
-    // the /Contents pages object
+    // The graphic operations to draw the page
     if (contents.isNotEmpty) {
-      if (contents.length == 1) {
-        params['/Contents'] = contents.first.ref();
-      } else {
-        params['/Contents'] = PdfArray.fromObjects(contents);
-      }
-    }
+      final contentList = PdfArray.fromObjects(contents);
 
-    // The thumbnail
-    if (thumbnail != null) {
-      params['/Thumb'] = thumbnail.ref();
+      if (params.containsKey('/Contents')) {
+        final prevContent = params['/Contents'];
+        if (prevContent is PdfArray) {
+          contentList.values.insertAll(0, prevContent.values);
+        } else {
+          contentList.values.insert(0, prevContent);
+        }
+      }
+
+      contentList.uniq();
+
+      if (contentList.values.length == 1) {
+        params['/Contents'] = contentList.values.first;
+      } else {
+        params['/Contents'] = contentList;
+      }
     }
 
     // The /Annots object
     if (annotations.isNotEmpty) {
-      params['/Annots'] = PdfArray.fromObjects(annotations);
+      if (params.containsKey('/Annots')) {
+        final annotsList = params['/Annots'];
+        if (annotsList is PdfArray) {
+          annotsList.values.addAll(PdfArray.fromObjects(annotations).values);
+        }
+      } else {
+        params['/Annots'] = PdfArray.fromObjects(annotations);
+      }
     }
   }
 }

@@ -17,10 +17,10 @@
  */
 
 import 'package:meta/meta.dart';
-import 'package:pdf/pdf.dart';
 
 import 'data_types.dart';
 import 'document.dart';
+import 'function.dart';
 import 'graphic_stream.dart';
 import 'graphics.dart';
 import 'rect.dart';

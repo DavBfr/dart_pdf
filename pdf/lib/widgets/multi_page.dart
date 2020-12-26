@@ -150,7 +150,7 @@ class MultiPage extends Page {
   }
 
   @override
-  void generate(Document document) {
+  void generate(Document document, {bool insert = true, int index}) {
     if (_buildList == null) {
       return;
     }
@@ -178,7 +178,7 @@ class MultiPage extends Page {
     Context context;
     double offsetEnd;
     double offsetStart;
-    var index = 0;
+    var _index = 0;
     var sameCount = 0;
     final baseContext =
         Context(document: document.document).inheritFromAll(<Inherited>[
@@ -189,8 +189,8 @@ class MultiPage extends Page {
     final children = _buildList(baseContext);
     WidgetContext widgetContext;
 
-    while (index < children.length) {
-      final child = children[index];
+    while (_index < children.length) {
+      final child = children[_index];
       var canSpan = false;
       if (child is SpanningWidget) {
         canSpan = child.canSpan;
@@ -207,7 +207,11 @@ class MultiPage extends Page {
 
       // Create a new page if we don't already have one
       if (context == null || child is NewPage) {
-        final pdfPage = PdfPage(document.document, pageFormat: pageFormat);
+        final pdfPage = PdfPage(
+          document.document,
+          pageFormat: pageFormat,
+          index: index == null ? null : (index++),
+        );
         context =
             baseContext.copyWith(page: pdfPage, canvas: pdfPage.getGraphics());
 
@@ -293,7 +297,7 @@ class MultiPage extends Page {
         // Has it finished spanning?
         if (!span.hasMoreWidgets) {
           sameCount = 0;
-          index++;
+          _index++;
         }
 
         // Schedule a new page
@@ -313,7 +317,7 @@ class MultiPage extends Page {
 
       offsetStart -= child.box.height;
       sameCount = 0;
-      index++;
+      _index++;
     }
   }
 

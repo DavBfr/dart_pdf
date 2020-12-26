@@ -138,6 +138,14 @@ mixin PdfGraphicStream on PdfObject {
       resources['/ExtGState'] = pdfDocument.graphicStates.ref();
     }
 
+    if (params.containsKey('/Resources')) {
+      final res = params['/Resources'];
+      if (res is PdfDict) {
+        res.merge(resources);
+        return;
+      }
+    }
+
     params['/Resources'] = resources;
   }
 }

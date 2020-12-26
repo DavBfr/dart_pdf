@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -54,6 +55,18 @@ class PdfBool extends PdfDataType {
   void output(PdfStream s) {
     s.putString(value ? 'true' : 'false');
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is PdfBool) {
+      return value == other.value;
+    }
+
+    return false;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
 }
 
 class PdfNum extends PdfDataType {
@@ -86,6 +99,18 @@ class PdfNum extends PdfDataType {
       s.putString(r);
     }
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is PdfNum) {
+      return value == other.value;
+    }
+
+    return false;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
 }
 
 class PdfNumList extends PdfDataType {
@@ -102,6 +127,18 @@ class PdfNumList extends PdfDataType {
       PdfNum(values[n]).output(s);
     }
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is PdfNumList) {
+      return values == other.values;
+    }
+
+    return false;
+  }
+
+  @override
+  int get hashCode => values.hashCode;
 }
 
 enum PdfStringFormat { binary, litteral }
@@ -255,6 +292,18 @@ class PdfString extends PdfDataType {
   void output(PdfStream s) {
     _output(s, value);
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is PdfString) {
+      return value == other.value;
+    }
+
+    return false;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
 }
 
 class PdfSecString extends PdfString {
@@ -337,6 +386,18 @@ class PdfName extends PdfDataType {
     }
     s.putBytes(bytes);
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is PdfName) {
+      return value == other.value;
+    }
+
+    return false;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
 }
 
 class PdfNull extends PdfDataType {
@@ -346,6 +407,14 @@ class PdfNull extends PdfDataType {
   void output(PdfStream s) {
     s.putString('null');
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PdfNull;
+  }
+
+  @override
+  int get hashCode => null.hashCode;
 }
 
 class PdfIndirect extends PdfDataType {
@@ -359,6 +428,18 @@ class PdfIndirect extends PdfDataType {
   void output(PdfStream s) {
     s.putString('$ser $gen R');
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is PdfIndirect) {
+      return ser == other.ser && gen == other.gen;
+    }
+
+    return false;
+  }
+
+  @override
+  int get hashCode => ser.hashCode + gen.hashCode;
 }
 
 class PdfArray extends PdfDataType {
@@ -401,6 +482,33 @@ class PdfArray extends PdfDataType {
     }
     s.putString(']');
   }
+
+  /// Make all values unique, preserving the order
+  void uniq() {
+    if (values.length <= 1) {
+      return;
+    }
+
+    // ignore: prefer_collection_literals
+    final uniques = LinkedHashMap<PdfDataType, bool>();
+    for (final s in values) {
+      uniques[s] = true;
+    }
+    values.clear();
+    values.addAll(uniques.keys);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is PdfArray) {
+      return values == other.values;
+    }
+
+    return false;
+  }
+
+  @override
+  int get hashCode => values.hashCode;
 }
 
 class PdfDict extends PdfDataType {
@@ -427,6 +535,10 @@ class PdfDict extends PdfDataType {
     values[k] = v;
   }
 
+  PdfDataType operator [](String k) {
+    return values[k];
+  }
+
   @override
   void output(PdfStream s) {
     s.putBytes(const <int>[0x3c, 0x3c]);
@@ -443,6 +555,39 @@ class PdfDict extends PdfDataType {
   bool containsKey(String key) {
     return values.containsKey(key);
   }
+
+  void merge(PdfDict other) {
+    for (final key in other.values.keys) {
+      final value = other[key];
+      final current = values[key];
+      if (current == null) {
+        values[key] = value;
+      } else if (value is PdfArray && current is PdfArray) {
+        current.values.addAll(value.values);
+        current.uniq();
+      } else if (value is PdfDict && current is PdfDict) {
+        current.merge(value);
+      } else {
+        values[key] = value;
+      }
+    }
+  }
+
+  void addAll(PdfDict other) {
+    values.addAll(other.values);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is PdfDict) {
+      return values == other.values;
+    }
+
+    return false;
+  }
+
+  @override
+  int get hashCode => values.hashCode;
 }
 
 class PdfColorType extends PdfDataType {
@@ -468,4 +613,16 @@ class PdfColorType extends PdfDataType {
       ]).output(s);
     }
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is PdfColorType) {
+      return color == other.color;
+    }
+
+    return false;
+  }
+
+  @override
+  int get hashCode => color.hashCode;
 }
