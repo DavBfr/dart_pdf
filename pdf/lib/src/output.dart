@@ -51,18 +51,14 @@ class PdfOutput {
 
   /// This method writes a [PdfObject] to the stream.
   void write(PdfObject ob) {
-    // Check the object to see if it's one that is needed in the trailer
-    // object
+    // Check the object to see if it's one that is needed later
     if (ob is PdfCatalog) {
       rootID = ob;
-    }
-    if (ob is PdfInfo) {
+    } else if (ob is PdfInfo) {
       infoID = ob;
-    }
-    if (ob is PdfEncryption) {
+    } else if (ob is PdfEncryption) {
       encryptID = ob;
-    }
-    if (ob is PdfSignature) {
+    } else if (ob is PdfSignature) {
       assert(signatureID == null, 'Only one document signature is allowed');
       signatureID = ob;
     }
@@ -74,11 +70,7 @@ class PdfOutput {
   /// This closes the Stream, writing the xref table
   void close() {
     final xref = os.offset;
-
     os.putString('xref\n');
-
-    // Now a single subsection for object 0
-    //os.write("0 1\n0000000000 65535 f \n");
 
     // Now scan through the offsets list. The should be in sequence,
     // but just in case:
