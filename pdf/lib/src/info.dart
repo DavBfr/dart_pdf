@@ -28,7 +28,7 @@ class PdfInfo extends PdfObject {
       this.subject,
       this.keywords,
       this.producer})
-      : super(pdfDocument, null) {
+      : super(pdfDocument) {
     if (author != null) {
       params['/Author'] = PdfSecString.fromString(this, author);
     }

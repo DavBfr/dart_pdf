@@ -29,7 +29,7 @@ class PdfObjectStream extends PdfObject {
     PdfDocument pdfDocument, {
     String type,
     this.isBinary = false,
-  }) : super(pdfDocument, type);
+  }) : super(pdfDocument, type: type);
 
   /// This holds the stream's content.
   final PdfStream buf = PdfStream();

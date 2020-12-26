@@ -33,7 +33,7 @@ import 'stream.dart';
 class PdfAnnot extends PdfObject {
   PdfAnnot(this.pdfPage, this.annot)
       : assert(annot != null),
-        super(pdfPage.pdfDocument, '/Annot') {
+        super(pdfPage.pdfDocument, type: '/Annot') {
     pdfPage.annotations.add(this);
   }
 

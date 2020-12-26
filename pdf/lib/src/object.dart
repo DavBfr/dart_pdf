@@ -25,10 +25,12 @@ class PdfObject {
   /// This is usually called by extensors to this class, and sets the
   /// Pdf Object Type
   PdfObject(
-    this.pdfDocument, [
+    this.pdfDocument, {
     String type,
-  ])  : assert(pdfDocument != null),
-        objser = pdfDocument.genSerial() {
+    this.objgen = 0,
+    int objser,
+  })  : assert(pdfDocument != null),
+        objser = objser ?? pdfDocument.genSerial() {
     if (type != null) {
       params['/Type'] = PdfName(type);
     }
@@ -43,7 +45,7 @@ class PdfObject {
   final int objser;
 
   /// This is the generation number for this object.
-  final int objgen = 0;
+  final int objgen;
 
   /// This allows any Pdf object to refer to the document being constructed.
   final PdfDocument pdfDocument;

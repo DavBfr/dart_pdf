@@ -34,7 +34,7 @@ abstract class PdfFont extends PdfObject {
   /// font name to that in Pdf, defaulting to Helvetica if not possible.
   PdfFont.create(PdfDocument pdfDocument, {@required this.subtype})
       : assert(subtype != null),
-        super(pdfDocument, '/Font') {
+        super(pdfDocument, type: '/Font') {
     pdfDocument.fonts.add(this);
   }
 

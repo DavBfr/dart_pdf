@@ -30,7 +30,7 @@ class PdfSignature extends PdfObject {
     Set<PdfSigFlags> flags,
   })  : assert(crypto != null),
         flags = flags ?? const <PdfSigFlags>{PdfSigFlags.signaturesExist},
-        super(pdfDocument, '/Sig');
+        super(pdfDocument, type: '/Sig');
 
   final Set<PdfSigFlags> flags;
 

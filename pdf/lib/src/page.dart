@@ -28,7 +28,7 @@ class PdfPage extends PdfObject with PdfGraphicStream {
   /// This constructs a Page object, which will hold any contents for this
   /// page.
   PdfPage(PdfDocument pdfDocument, {this.pageFormat = PdfPageFormat.standard})
-      : super(pdfDocument, '/Page') {
+      : super(pdfDocument, type: '/Page') {
     pdfDocument.pdfPageList.pages.add(this);
   }
 

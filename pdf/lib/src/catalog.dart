@@ -33,7 +33,7 @@ class PdfCatalog extends PdfObject {
   )   : assert(pdfPageList != null),
         assert(pageMode != null),
         assert(names != null),
-        super(pdfDocument, '/Catalog');
+        super(pdfDocument, type: '/Catalog');
 
   /// The pages of the document
   final PdfPageList pdfPageList;
