@@ -315,7 +315,27 @@ class PdfName extends PdfDataType {
   @override
   void output(PdfStream s) {
     assert(value[0] == '/');
-    s.putString(value);
+    final bytes = <int>[];
+    for (final c in value.codeUnits) {
+      assert(c < 0xff && c > 0x00);
+
+      if (c < 0x21 ||
+          c > 0x7E ||
+          c == 0x23 ||
+          (c == 0x2f && bytes.isNotEmpty) ||
+          c == 0x5b ||
+          c == 0x5d ||
+          c == 0x28 ||
+          c == 0x3c ||
+          c == 0x3e) {
+        bytes.add(0x23);
+        final x = c.toRadixString(16).padLeft(2, '0');
+        bytes.addAll(x.codeUnits);
+      } else {
+        bytes.add(c);
+      }
+    }
+    s.putBytes(bytes);
   }
 }
 

@@ -25,6 +25,12 @@ void main() {
     expect(const PdfBool(false).toString(), 'false');
   });
 
+  test('PdfDataTypes Name ', () {
+    expect(const PdfName('/Test').toString(), '/Test');
+    expect(const PdfName('/Type 1').toString(), '/Type#201');
+    expect(const PdfName('/Num#1').toString(), '/Num#231');
+  });
+
   test('PdfDataTypes Num', () {
     expect(const PdfNum(0).toString(), '0');
     expect(const PdfNum(.5).toString(), '0.5');
