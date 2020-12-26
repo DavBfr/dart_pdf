@@ -72,7 +72,18 @@ class PdfNum extends PdfDataType {
     if (value is int) {
       s.putString(value.toInt().toString());
     } else {
-      s.putString(value.toStringAsFixed(precision));
+      var r = value.toStringAsFixed(precision);
+      if (r.contains('.')) {
+        var n = r.length - 1;
+        while (r[n] == '0') {
+          n--;
+        }
+        if (r[n] == '.') {
+          n--;
+        }
+        r = r.substring(0, n + 1);
+      }
+      s.putString(r);
     }
   }
 }

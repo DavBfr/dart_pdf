@@ -27,9 +27,9 @@ void main() {
 
   test('PdfDataTypes Num', () {
     expect(const PdfNum(0).toString(), '0');
-    expect(const PdfNum(.5).toString(), '0.50000');
+    expect(const PdfNum(.5).toString(), '0.5');
     expect(const PdfNum(50).toString(), '50');
-    expect(const PdfNum(50.1).toString(), '50.10000');
+    expect(const PdfNum(50.1).toString(), '50.1');
   });
 
   test('PdfDataTypes String', () {
@@ -84,7 +84,7 @@ void main() {
         PdfArray(),
         PdfDict(),
       ]).toString(),
-      '[/Name/Other false 2.50000 null(þÿ\x00h\x00e\x00l\x01B\x00o)[]<<>>]',
+      '[/Name/Other false 2.5 null(þÿ\x00h\x00e\x00l\x01B\x00o)[]<<>>]',
     );
   });
 
