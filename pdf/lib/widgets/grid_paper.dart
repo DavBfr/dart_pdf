@@ -228,7 +228,7 @@ class GridPaper extends SingleChildWidget {
     paintChild(context);
 
     context.canvas.saveContext();
-    context.canvas.setGraphicState(PdfGraphicState(opacity: 0.5));
+    context.canvas.setGraphicState(PdfGraphicState(opacity: opacity));
     context.canvas.setStrokeColor(horizontalColor);
     final l = scale;
     final m = l / 2;
