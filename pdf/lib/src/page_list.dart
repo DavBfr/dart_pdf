@@ -28,6 +28,7 @@ class PdfPageList extends PdfObject {
   final List<PdfPage> pages = <PdfPage>[];
 
   /// This returns a specific page. Used by the Pdf class.
+  @Deprecated('Use pages[index] instead')
   PdfPage getPage(int page) => pages[page];
 
   @override
