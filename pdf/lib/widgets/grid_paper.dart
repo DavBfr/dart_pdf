@@ -301,5 +301,7 @@ class GridPaper extends SingleChildWidget {
             box.bottom + margin.bottom)
         ..strokePath();
     }
+
+    context.canvas.restoreContext();
   }
 }
