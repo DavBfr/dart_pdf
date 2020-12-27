@@ -6,6 +6,7 @@
 - Add LayoutWidgetBuilder
 - Add GridPaper widget
 - Improve internal sructure
+- Add some asserts on the TtfParser
 
 ## 1.13.0
 

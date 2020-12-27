@@ -54,6 +54,23 @@ class TtfParser {
       tableSize[name] = size;
     }
 
+    assert(tableOffsets.containsKey(head_table),
+        'Unable to find the `head` table. This file is not a supported TTF font');
+    assert(tableOffsets.containsKey(name_table),
+        'Unable to find the `name` table. This file is not a supported TTF font');
+    assert(tableOffsets.containsKey(hmtx_table),
+        'Unable to find the `hmtx` table. This file is not a supported TTF font');
+    assert(tableOffsets.containsKey(hhea_table),
+        'Unable to find the `hhea` table. This file is not a supported TTF font');
+    assert(tableOffsets.containsKey(cmap_table),
+        'Unable to find the `cmap` table. This file is not a supported TTF font');
+    assert(tableOffsets.containsKey(maxp_table),
+        'Unable to find the `maxp` table. This file is not a supported TTF font');
+    assert(tableOffsets.containsKey(loca_table),
+        'Unable to find the `loca` table. This file is not a supported TTF font');
+    assert(tableOffsets.containsKey(glyf_table),
+        'Unable to find the `glyf` table. This file is not a supported TTF font');
+
     _parseFontName();
     _parseCMap();
     _parseIndexes();
