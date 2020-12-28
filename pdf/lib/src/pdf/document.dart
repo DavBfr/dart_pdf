@@ -26,8 +26,8 @@ import 'font.dart';
 import 'graphic_state.dart';
 import 'info.dart';
 import 'io/interface.dart'
-    if (dart.library.io) '../io/vm.dart'
-    if (dart.library.js) '../io/js.dart';
+    if (dart.library.io) 'io/vm.dart'
+    if (dart.library.js) 'io/js.dart';
 import 'names.dart';
 import 'object.dart';
 import 'outline.dart';
