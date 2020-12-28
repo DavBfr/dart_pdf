@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import 'package:pdf/svg/parser.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:xml/xml.dart';
+
+import 'parser.dart';
 
 class SvgTransform {
   const SvgTransform(this.matrix);

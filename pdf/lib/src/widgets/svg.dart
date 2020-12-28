@@ -20,8 +20,8 @@ import 'package:pdf/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:xml/xml.dart';
 
-import 'svg/painter.dart';
-import 'svg/parser.dart';
+import '../svg/painter.dart';
+import '../svg/parser.dart';
 
 class SvgImage extends Widget {
   factory SvgImage({

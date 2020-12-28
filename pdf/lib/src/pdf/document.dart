@@ -19,15 +19,15 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 
-import '../io/interface.dart'
-    if (dart.library.io) '../io/vm.dart'
-    if (dart.library.js) '../io/js.dart';
 import 'catalog.dart';
 import 'document_parser.dart';
 import 'encryption.dart';
 import 'font.dart';
 import 'graphic_state.dart';
 import 'info.dart';
+import 'io/interface.dart'
+    if (dart.library.io) '../io/vm.dart'
+    if (dart.library.js) '../io/js.dart';
 import 'names.dart';
 import 'object.dart';
 import 'outline.dart';

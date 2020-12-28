@@ -15,11 +15,11 @@
  */
 
 import 'package:pdf/pdf.dart';
-import 'package:pdf/svg/parser.dart';
 import 'package:pdf/widgets.dart';
 
 import 'brush.dart';
 import 'group.dart';
+import 'parser.dart';
 
 class SvgPainter {
   SvgPainter(

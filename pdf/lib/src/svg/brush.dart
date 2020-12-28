@@ -16,11 +16,11 @@
 
 import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
-import 'package:pdf/svg/painter.dart';
 import 'package:xml/xml.dart';
 
 import 'color.dart';
 import 'mask_path.dart';
+import 'painter.dart';
 import 'parser.dart';
 
 enum SvgTextAnchor { start, middle, end }

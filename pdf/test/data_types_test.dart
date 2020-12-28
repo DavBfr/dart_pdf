@@ -16,7 +16,7 @@
 
 import 'dart:typed_data';
 
-import 'package:pdf/src/data_types.dart';
+import 'package:pdf/src/pdf/data_types.dart';
 import 'package:test/test.dart';
 
 void main() {

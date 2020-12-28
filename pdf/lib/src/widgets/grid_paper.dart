@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import '../pdf.dart';
+import 'package:pdf/pdf.dart';
+
 import 'box_border.dart';
 import 'geometry.dart';
 
