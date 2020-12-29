@@ -60,7 +60,7 @@ final image = await flutterImageProvider(imageProvider);
 doc.addPage(pw.Page(
     build: (pw.Context context) {
       return pw.Center(
-        child: pw.Image.provider(image),
+        child: pw.Image(image),
       ); // Center
     })); // Page
 ```
