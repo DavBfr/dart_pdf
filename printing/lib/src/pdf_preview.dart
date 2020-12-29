@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -100,6 +101,16 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   Object error;
 
+  int preview;
+
+  double updatePosition;
+
+  final scrollController = ScrollController();
+
+  final transformationController = TransformationController();
+
+  Timer previewUpdate;
+
   static const Map<String, PdfPageFormat> defaultPageFormats =
       <String, PdfPageFormat>{
     'A4': PdfPageFormat.a4,
@@ -178,6 +189,8 @@ class _PdfPreviewState extends State<PdfPreview> {
   @override
   void didUpdateWidget(covariant PdfPreview oldWidget) {
     if (oldWidget.build != widget.build) {
+      preview = null;
+      updatePosition = null;
       pages.clear();
       _raster();
     }
@@ -196,13 +209,16 @@ class _PdfPreviewState extends State<PdfPreview> {
       });
     }
 
-    final mq = MediaQuery.of(context);
-    dpi = (min(mq.size.width - 16, widget.maxPageWidth ?? double.infinity)) *
-        mq.devicePixelRatio /
-        pageFormat.width *
-        72;
+    previewUpdate?.cancel();
+    previewUpdate = Timer(const Duration(seconds: 1), () {
+      final mq = MediaQuery.of(context);
+      dpi = (min(mq.size.width - 16, widget.maxPageWidth ?? double.infinity)) *
+          mq.devicePixelRatio /
+          pageFormat.width *
+          72;
 
-    _raster();
+      _raster();
+    });
     super.didChangeDependencies();
   }
 
@@ -242,8 +258,33 @@ class _PdfPreviewState extends State<PdfPreview> {
 
     return Scrollbar(
       child: ListView.builder(
+        controller: scrollController,
         itemCount: pages.length,
-        itemBuilder: (BuildContext context, int index) => pages[index],
+        itemBuilder: (BuildContext context, int index) => GestureDetector(
+          onDoubleTap: () {
+            setState(() {
+              updatePosition = scrollController.position.pixels;
+              preview = index;
+              transformationController.value.setIdentity();
+            });
+          },
+          child: pages[index],
+        ),
+      ),
+    );
+  }
+
+  Widget _zoomPreview() {
+    return GestureDetector(
+      onDoubleTap: () {
+        setState(() {
+          preview = null;
+        });
+      },
+      child: InteractiveViewer(
+        transformationController: transformationController,
+        maxScale: 5,
+        child: Center(child: pages[preview]),
       ),
     );
   }
@@ -251,6 +292,26 @@ class _PdfPreviewState extends State<PdfPreview> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    Widget page;
+
+    if (preview != null) {
+      page = _zoomPreview();
+    } else {
+      page = Container(
+        constraints: widget.maxPageWidth != null
+            ? BoxConstraints(maxWidth: widget.maxPageWidth)
+            : null,
+        child: _createPreview(),
+      );
+
+      if (updatePosition != null) {
+        Timer.run(() {
+          scrollController.jumpTo(updatePosition);
+          updatePosition = null;
+        });
+      }
+    }
 
     final Widget scrollView = Container(
       decoration: widget.scrollViewDecoration ??
@@ -263,12 +324,7 @@ class _PdfPreviewState extends State<PdfPreview> {
           ),
       width: double.infinity,
       alignment: Alignment.center,
-      child: Container(
-        constraints: widget.maxPageWidth != null
-            ? BoxConstraints(maxWidth: widget.maxPageWidth)
-            : null,
-        child: _createPreview(),
-      ),
+      child: page,
     );
 
     final actions = <Widget>[];
