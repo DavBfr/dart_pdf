@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.0.0
+
+- Remove deprecated methods
+- Document.save() now returns a Future
+
 ## 3.7.2
 
 - Fix Printing on WEB

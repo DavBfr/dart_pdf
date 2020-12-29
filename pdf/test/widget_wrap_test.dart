@@ -315,8 +315,8 @@ void main() {
     );
   });
 
-  tearDownAll(() {
+  tearDownAll(() async {
     final file = File('widgets-wrap.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
   });
 }

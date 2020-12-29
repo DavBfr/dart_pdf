@@ -486,8 +486,8 @@ void main() {
     ));
   });
 
-  tearDownAll(() {
+  tearDownAll(() async {
     final file = File('arabic.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
   });
 }

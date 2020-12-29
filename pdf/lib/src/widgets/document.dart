@@ -112,13 +112,13 @@ class Document {
     _pages.add(page);
   }
 
-  Uint8List save() {
+  Future<Uint8List> save() async {
     if (!_paint) {
       for (var page in _pages) {
         page.postProcess(this);
       }
       _paint = true;
     }
-    return document.save();
+    return await document.save();
   }
 }

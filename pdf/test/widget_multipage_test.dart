@@ -28,7 +28,7 @@ void main() {
     }
   });
 
-  test('Pdf Widgets MultiPage', () {
+  test('Pdf Widgets MultiPage', () async {
     Document.debug = true;
 
     final pdf = Document();
@@ -36,13 +36,13 @@ void main() {
     pdf.addPage(MultiPage(build: (Context context) => lines));
 
     final file = File('widgets-multipage.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
 
     final file1 = File('widgets-multipage-1.pdf');
-    file1.writeAsBytesSync(pdf.save());
+    await file1.writeAsBytes(await pdf.save());
   });
 
-  test('Pdf Widgets MonoPage', () {
+  test('Pdf Widgets MonoPage', () async {
     Document.debug = true;
 
     final pdf = Document();
@@ -50,9 +50,9 @@ void main() {
     pdf.addPage(Page(build: (Context context) => Column(children: lines)));
 
     final file = File('widgets-monopage.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
 
     final file1 = File('widgets-monopage-1.pdf');
-    file1.writeAsBytesSync(pdf.save());
+    await file1.writeAsBytes(await pdf.save());
   });
 }

@@ -23,7 +23,7 @@ import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 void main() {
-  test('Pdf Complex', () {
+  test('Pdf Complex', () async {
     final img = Uint32List(10 * 10);
     img.fillRange(0, img.length - 1, 0x12345678);
 
@@ -96,6 +96,6 @@ void main() {
     }
 
     final file = File('complex.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
   });
 }

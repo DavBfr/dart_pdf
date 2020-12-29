@@ -84,7 +84,7 @@ To save the pdf file using the [path_provider](https://pub.dev/packages/path_pro
 ```dart
 final output = await getTemporaryDirectory();
 final file = File("${output.path}/example.pdf");
-await file.writeAsBytes(doc.save());
+await file.writeAsBytes(await doc.save());
 ```
 
 You can also print the document using the iOS or Android print service:
@@ -97,7 +97,7 @@ await Printing.layoutPdf(
 Or share the document to other applications:
 
 ```dart
-await Printing.sharePdf(bytes: doc.save(), filename: 'my-document.pdf');
+await Printing.sharePdf(bytes: await doc.save(), filename: 'my-document.pdf');
 ```
 
 To print an HTML document:
@@ -113,7 +113,7 @@ await Printing.layoutPdf(
 Convert a Pdf to images, one image per page, get only pages 1 and 2 at 72 dpi:
 
 ```dart
-await for (var page in Printing.raster(doc.save(), pages: [0, 1], dpi: 72)) {
+await for (var page in Printing.raster(await doc.save(), pages: [0, 1], dpi: 72)) {
   final image = page.toImage(); // ...or page.toPng()
   print(image);
 }

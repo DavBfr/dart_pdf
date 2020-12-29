@@ -89,7 +89,7 @@ To save the pdf file:
 //   final output = await getTemporaryDirectory();
 //   final file = File("${output.path}/example.pdf");
 final file = File("example.pdf");
-await file.writeAsBytes(pdf.save());
+await file.writeAsBytes(await pdf.save());
 ```
 
 ## Encryption, Digital Signature, and loading a PDF Document

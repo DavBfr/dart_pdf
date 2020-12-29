@@ -126,18 +126,12 @@ mixin Printing {
 
   /// Displays a platform popup to share the Pdf document to another application
   static Future<bool> sharePdf({
-    @Deprecated('use bytes with document.save()') PdfDocument document,
-    Uint8List bytes,
+    @required Uint8List bytes,
     String filename = 'document.pdf',
     Rect bounds,
   }) {
-    assert(document != null || bytes != null);
-    assert(!(document == null && bytes == null));
+    assert(bytes != null);
     assert(filename != null);
-
-    if (document != null) {
-      bytes = document.save();
-    }
 
     bounds ??= Rect.fromCircle(center: Offset.zero, radius: 10);
 

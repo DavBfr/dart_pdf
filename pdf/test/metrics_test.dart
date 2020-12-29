@@ -99,7 +99,7 @@ void printMetrics(
 }
 
 void main() {
-  test('Pdf Font Metrics', () {
+  test('Pdf Font Metrics', () async {
     final pdf = Document();
 
     PdfFont.courier(pdf.document);
@@ -126,6 +126,6 @@ void main() {
     }
 
     final file = File('metrics.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
   });
 }

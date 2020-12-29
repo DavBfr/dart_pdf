@@ -83,8 +83,8 @@ void main() {
     );
   });
 
-  tearDownAll(() {
+  tearDownAll(() async {
     final file = File('widgets-outline.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
   });
 }

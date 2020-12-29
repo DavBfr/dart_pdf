@@ -59,7 +59,7 @@ void printTextTtf(
 }
 
 void main() {
-  test('Pdf TrueType', () {
+  test('Pdf TrueType', () async {
     final pdf = PdfDocument();
     final page = PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
 
@@ -75,7 +75,7 @@ void main() {
         page, g, '你好 檯號 ', File('genyomintw.ttf'), 30.0 + 30.0 * top++);
 
     final file = File('ttf.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
   });
 
   test('Font SubSetting', () {

@@ -20,7 +20,7 @@ import 'package:pdf/pdf.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Pdf Minimal', () {
+  test('Pdf Minimal', () async {
     final pdf = PdfDocument(compress: false);
     final page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
 
@@ -30,6 +30,6 @@ void main() {
     g.strokePath();
 
     final file = File('minimal.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
   });
 }

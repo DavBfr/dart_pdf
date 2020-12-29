@@ -50,7 +50,7 @@ void printText(
 }
 
 void main() {
-  test('Pdf Type1 Embedded Fonts', () {
+  test('Pdf Type1 Embedded Fonts', () async {
     final pdf = PdfDocument();
     final page = PdfPage(pdf, pageFormat: const PdfPageFormat(500, 430));
 
@@ -78,6 +78,6 @@ void main() {
     printText(page, g, s, PdfFont.zapfDingbats(pdf), 20.0 + 30.0 * top++);
 
     final file = File('type1.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
   });
 }

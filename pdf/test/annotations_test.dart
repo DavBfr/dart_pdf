@@ -20,7 +20,7 @@ import 'package:pdf/pdf.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Pdf Annotations', () {
+  test('Pdf Annotations', () async {
     final pdf = PdfDocument();
     final page = PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
     final page1 = PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
@@ -71,6 +71,6 @@ void main() {
     g.strokePath();
 
     final file = File('annotations.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
   });
 }

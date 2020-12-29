@@ -199,8 +199,8 @@ void main() {
     ));
   });
 
-  tearDownAll(() {
+  tearDownAll(() async {
     final file = File('widgets-container.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
   });
 }

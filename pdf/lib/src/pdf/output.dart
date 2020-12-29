@@ -68,7 +68,7 @@ class PdfOutput {
   }
 
   /// This closes the Stream, writing the xref table
-  void close() {
+  Future<void> close() async {
     final xref = os.offset;
     os.putString('xref\n');
 
@@ -136,7 +136,7 @@ class PdfOutput {
     os.putString('\nstartxref\n$xref\n%%EOF\n');
 
     if (signatureID != null) {
-      signatureID.writeSignature(os);
+      await signatureID.writeSignature(os);
     }
   }
 

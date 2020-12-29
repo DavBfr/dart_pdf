@@ -68,8 +68,8 @@ void main() {
     doc = pw.Document();
   });
 
-  tearDownAll(() {
+  tearDownAll(() async {
     final file = File('printing.pdf');
-    file.writeAsBytesSync(doc.save());
+    await file.writeAsBytes(await doc.save());
   });
 }

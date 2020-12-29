@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:pdf/widgets.dart' as pw;
 
-void main() {
-  final doc = pw.Document();
+Future<void> main() async {
+  final pdf = pw.Document();
 
-  doc.addPage(
+  pdf.addPage(
     pw.Page(
       build: (pw.Context context) => pw.Center(
         child: pw.Text('Hello World!'),
@@ -14,5 +14,5 @@ void main() {
   );
 
   final file = File('example.pdf');
-  file.writeAsBytesSync(doc.save());
+  await file.writeAsBytes(await pdf.save());
 }

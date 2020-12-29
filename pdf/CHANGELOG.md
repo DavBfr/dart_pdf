@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.14.0
+## 2.0.0
 
 - A borderRadius can only be given for a uniform Border
 - Add LayoutWidgetBuilder
@@ -8,6 +8,8 @@
 - Improve internal sructure
 - Add some asserts on the TtfParser
 - Add document loading
+- Remove deprecated methods
+- Document.save() now returns a Future
 
 ## 1.13.0
 

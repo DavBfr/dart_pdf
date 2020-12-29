@@ -106,9 +106,9 @@ void main() {
     );
   });
 
-  tearDownAll(() {
+  tearDownAll(() async {
     final file = File('jpeg.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
   });
 }
 

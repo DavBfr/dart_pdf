@@ -191,7 +191,7 @@ class PdfDocument {
   bool get hasGraphicStates => _graphicStates != null;
 
   /// This writes the document to an OutputStream.
-  void _write(PdfStream os) {
+  Future<void> _write(PdfStream os) async {
     final pos = PdfOutput(os);
 
     // Write each object to the [PdfStream]. We call via the output
@@ -199,16 +199,16 @@ class PdfDocument {
     objects.forEach(pos.write);
 
     // Finally close the output, which writes the xref table.
-    pos.close();
+    await pos.close();
   }
 
   /// Generate the PDF document as a memory file
-  Uint8List save() {
+  Future<Uint8List> save() async {
     final os = PdfStream();
     if (prev != null) {
       os.putBytes(prev.bytes);
     }
-    _write(os);
+    await _write(os);
     return os.output();
   }
 }

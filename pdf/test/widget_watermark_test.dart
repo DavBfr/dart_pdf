@@ -100,8 +100,8 @@ void main() {
     );
   });
 
-  tearDownAll(() {
+  tearDownAll(() async {
     final file = File('widgets-watermark.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
   });
 }

@@ -46,8 +46,8 @@ void main() {
         build: (Context context) => Text('Hello World!')));
   });
 
-  tearDownAll(() {
+  tearDownAll(() async {
     final file = File('roll-paper.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
   });
 }

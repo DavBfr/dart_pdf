@@ -7,7 +7,7 @@ import 'package:string_scanner/string_scanner.dart';
 const dpi = 72.0;
 const px = dpi / PdfPageFormat.inch * PdfPageFormat.point;
 
-void main() {
+Future<void> main() async {
   // Open self
   final source = File('../test/github_social_preview.dart').readAsStringSync();
   final code = DartSyntaxHighlighter(
@@ -74,7 +74,7 @@ void main() {
   // END
 
   // Save the file
-  File('social_preview.pdf').writeAsBytesSync(pdf.save());
+  await File('social_preview.pdf').writeAsBytes(await pdf.save());
 
   // Convert to png
   Process.runSync('pdftocairo',
