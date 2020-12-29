@@ -321,6 +321,10 @@ class PdfGraphics {
     buf.putString(']TJ ET\n');
   }
 
+  void reset() {
+    buf.putString('0 Tr\n');
+  }
+
   /// Sets the color for drawing
   void setColor(PdfColor color) {
     setFillColor(color);

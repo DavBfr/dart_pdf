@@ -212,8 +212,9 @@ class MultiPage extends Page {
           pageFormat: pageFormat,
           index: index == null ? null : (index++),
         );
-        context =
-            baseContext.copyWith(page: pdfPage, canvas: pdfPage.getGraphics());
+        final canvas = pdfPage.getGraphics();
+        canvas.reset();
+        context = baseContext.copyWith(page: pdfPage, canvas: canvas);
 
         assert(() {
           if (Document.debug) {

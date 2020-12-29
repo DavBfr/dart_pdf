@@ -111,6 +111,7 @@ class Page {
 
   void postProcess(Document document) {
     final canvas = _pdfPage.getGraphics();
+    canvas.reset();
     final _margin = margin;
     var constraints = mustRotate
         ? BoxConstraints(
