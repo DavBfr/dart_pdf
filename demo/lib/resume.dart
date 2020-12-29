@@ -129,7 +129,7 @@ Future<Uint8List> generateResume(PdfPageFormat format) async {
                             width: 100,
                             height: 100,
                             color: lightGreen,
-                            child: pw.Image.provider(profileImage),
+                            child: pw.Image(profileImage),
                           ),
                         ),
                         pw.Column(children: <pw.Widget>[
@@ -249,7 +249,7 @@ class _Category extends pw.StatelessWidget {
     return pw.Container(
         decoration: const pw.BoxDecoration(
           color: lightGreen,
-          borderRadiusEx: pw.BorderRadius.all(pw.Radius.circular(6)),
+          borderRadius: pw.BorderRadius.all(pw.Radius.circular(6)),
         ),
         margin: const pw.EdgeInsets.only(bottom: 10, top: 20),
         padding: const pw.EdgeInsets.fromLTRB(10, 7, 10, 4),

@@ -81,7 +81,7 @@ void main() {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  Image.provider(im),
+                  Image(im),
                   PdfLogo(),
                   Column(
                     children: <Widget>[

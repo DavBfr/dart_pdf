@@ -51,7 +51,7 @@ List<TableRow> buildTable(
           margin: const EdgeInsets.all(5),
           decoration: BoxDecoration(
             color: color,
-            borderRadiusEx: const BorderRadius.all(Radius.circular(5)),
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
           ),
           height: Theme.of(context).tableCell.fontSize),
       Container(
@@ -208,7 +208,7 @@ void main() {
         border: null,
         cellAlignment: Alignment.center,
         headerDecoration: const BoxDecoration(
-          borderRadiusEx: BorderRadius.all(Radius.circular(2)),
+          borderRadius: BorderRadius.all(Radius.circular(2)),
           color: PdfColors.indigo,
         ),
         headerHeight: 25,

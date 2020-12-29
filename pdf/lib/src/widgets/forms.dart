@@ -111,7 +111,7 @@ class FlatButton extends SingleChildWidget {
           decoration: decoration ??
               BoxDecoration(
                 color: colorDown,
-                borderRadiusEx: const BorderRadius.all(Radius.circular(2)),
+                borderRadius: const BorderRadius.all(Radius.circular(2)),
               ),
           padding: padding ??
               const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
@@ -124,7 +124,7 @@ class FlatButton extends SingleChildWidget {
           decoration: decoration ??
               BoxDecoration(
                 color: colorRollover,
-                borderRadiusEx: const BorderRadius.all(Radius.circular(2)),
+                borderRadius: const BorderRadius.all(Radius.circular(2)),
               ),
           padding: padding ??
               const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
@@ -138,7 +138,7 @@ class FlatButton extends SingleChildWidget {
             decoration: decoration ??
                 BoxDecoration(
                   color: color,
-                  borderRadiusEx: const BorderRadius.all(Radius.circular(2)),
+                  borderRadius: const BorderRadius.all(Radius.circular(2)),
                 ),
             padding: padding ??
                 const EdgeInsets.symmetric(horizontal: 20, vertical: 5),

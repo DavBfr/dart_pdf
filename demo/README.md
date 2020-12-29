@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
   }
 
   /// This method takes a page format and generates the Pdf file data
-  List<int> buildPdf(PdfPageFormat format) {
+  Future<Uint8List> buildPdf(PdfPageFormat format) async {
     // Create the Pdf document
     final pw.Document doc = pw.Document();
 
@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
     );
 
     // Build and return the final Pdf file data
-    return doc.save();
+    return await doc.save();
   }
 }
 ```

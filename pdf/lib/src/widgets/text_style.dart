@@ -357,9 +357,6 @@ class TextStyle {
     );
   }
 
-  @Deprecated('use `font` instead')
-  Font get paintFont => font;
-
   Font get font {
     if (fontWeight != FontWeight.bold) {
       if (fontStyle != FontStyle.italic) {

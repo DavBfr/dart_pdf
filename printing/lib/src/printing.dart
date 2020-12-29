@@ -167,13 +167,6 @@ mixin Printing {
     return PrintingPlatform.instance.info();
   }
 
-  /// Returns a [PrintingInfo] object representing the capabilities
-  /// supported for the current platform as a map
-  @Deprecated('Use Printing.info()')
-  static Future<Map<dynamic, dynamic>> printingInfo() async {
-    return (await info()).asMap();
-  }
-
   /// Convert a PDF to a list of images.
   /// ```dart
   /// await for (final page in Printing.raster(content)) {
@@ -193,20 +186,5 @@ mixin Printing {
     assert(dpi > 0);
 
     return PrintingPlatform.instance.raster(document, pages, dpi);
-  }
-
-  /// Prints a [PdfDocument] or a pdf stream to a local printer
-  /// using the platform UI
-  @Deprecated('use Printing.layoutPdf(onLayout: (_) => document.save());')
-  static Future<void> printPdf({
-    @Deprecated('use bytes with document.save()') PdfDocument document,
-    Uint8List bytes,
-  }) async {
-    assert(document != null || bytes != null);
-    assert(!(document == null && bytes == null));
-
-    await layoutPdf(
-        onLayout: (PdfPageFormat format) =>
-            document != null ? document.save() : bytes);
   }
 }

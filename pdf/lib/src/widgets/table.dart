@@ -58,44 +58,7 @@ enum TableWidth { min, max }
 
 class TableBorder extends Border {
   /// Creates a border for a table.
-  @Deprecated('Use TableBorder.ex instead')
-  TableBorder(
-      {bool left = true,
-      bool top = true,
-      bool right = true,
-      bool bottom = true,
-      bool horizontalInside = true,
-      bool verticalInside = true,
-      PdfColor color = PdfColors.black,
-      double width = 1.0})
-      : horizontalInside = BorderSide(
-            color: color,
-            width: width,
-            style: horizontalInside ? BorderStyle.solid : BorderStyle.none),
-        verticalInside = BorderSide(
-            color: color,
-            width: width,
-            style: verticalInside ? BorderStyle.solid : BorderStyle.none),
-        super(
-            top: BorderSide(
-                color: color,
-                width: width,
-                style: top ? BorderStyle.solid : BorderStyle.none),
-            bottom: BorderSide(
-                color: color,
-                width: width,
-                style: bottom ? BorderStyle.solid : BorderStyle.none),
-            left: BorderSide(
-                color: color,
-                width: width,
-                style: left ? BorderStyle.solid : BorderStyle.none),
-            right: BorderSide(
-                color: color,
-                width: width,
-                style: right ? BorderStyle.solid : BorderStyle.none));
-
-  /// Creates a border for a table.
-  const TableBorder.ex({
+  const TableBorder({
     BorderSide left = BorderSide.none,
     BorderSide top = BorderSide.none,
     BorderSide right = BorderSide.none,
@@ -111,7 +74,7 @@ class TableBorder extends Border {
     BorderStyle style = BorderStyle.solid,
   }) {
     final side = BorderSide(color: color, width: width, style: style);
-    return TableBorder.ex(
+    return TableBorder(
         top: side,
         right: side,
         bottom: side,
@@ -125,7 +88,7 @@ class TableBorder extends Border {
     BorderSide inside = BorderSide.none,
     BorderSide outside = BorderSide.none,
   }) {
-    return TableBorder.ex(
+    return TableBorder(
       top: outside,
       right: outside,
       bottom: outside,
@@ -280,7 +243,6 @@ class Table extends Widget implements SpanningWidget {
   factory Table.fromTextArray({
     Context context,
     @required List<List<dynamic>> data,
-    @deprecated EdgeInsets margin,
     EdgeInsets cellPadding = const EdgeInsets.all(5),
     double cellHeight = 0,
     Alignment cellAlignment = Alignment.topLeft,
@@ -296,7 +258,7 @@ class Table extends Widget implements SpanningWidget {
     Map<int, Alignment> headerAlignments,
     TextStyle headerStyle,
     OnCellFormat headerFormat,
-    TableBorder border = const TableBorder.ex(
+    TableBorder border = const TableBorder(
       left: BorderSide(),
       right: BorderSide(),
       top: BorderSide(),
@@ -314,10 +276,6 @@ class Table extends Widget implements SpanningWidget {
     assert(data != null);
     assert(headerCount != null && headerCount >= 0);
     assert(cellHeight != null);
-
-    if (margin != null) {
-      cellPadding = margin;
-    }
 
     if (context != null) {
       final theme = Theme.of(context);

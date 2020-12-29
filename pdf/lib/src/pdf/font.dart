@@ -23,7 +23,6 @@ import 'document.dart';
 import 'font_metrics.dart';
 import 'object.dart';
 import 'point.dart';
-import 'rect.dart';
 import 'stream.dart';
 import 'type1_font.dart';
 import 'type1_fonts.dart';
@@ -162,16 +161,8 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
     params['/Encoding'] = const PdfName('/WinAnsiEncoding');
   }
 
-  /// How many units to move for the next glyph
-  @Deprecated('Use `glyphMetrics` instead')
-  double glyphAdvance(int charCode) => glyphMetrics(charCode).advanceWidth;
-
   /// Calculate the [PdfFontMetrics] for this glyph
   PdfFontMetrics glyphMetrics(int charCode);
-
-  ///  Calculate the dimensions of this glyph
-  @Deprecated('Use `glyphMetrics` instead')
-  PdfRect glyphBounds(int charCode) => glyphMetrics(charCode).toPdfRect();
 
   /// Calculate the [PdfFontMetrics] for this string
   PdfFontMetrics stringMetrics(String s, {double letterSpacing = 0}) {
@@ -192,10 +183,6 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
       rethrow;
     }
   }
-
-  /// Calculage the bounding box for this string
-  @Deprecated('Use `stringMetrics` instead')
-  PdfRect stringBounds(String s) => stringMetrics(s).toPdfRect();
 
   /// Calculage the unit size of this string
   PdfPoint stringSize(String s) {

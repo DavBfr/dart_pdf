@@ -165,5 +165,5 @@ Future<Uint8List> generateDocument(PdfPageFormat format) async {
                     'Text is available under the Creative Commons Attribution Share Alike License.')
           ]));
 
-  return doc.save();
+  return await doc.save();
 }

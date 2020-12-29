@@ -43,24 +43,6 @@ class PdfRect {
   double get horizondalCenter => x + width / 2;
   double get verticalCenter => y + height / 2;
 
-  @Deprecated('Use `left` instead')
-  double get l => left;
-
-  @Deprecated('Use `bottom` instead')
-  double get b => bottom;
-
-  @Deprecated('Use `right` instead')
-  double get r => right;
-
-  @Deprecated('Use `top` instead')
-  double get t => top;
-
-  @Deprecated('Use `width` instead')
-  double get w => width;
-
-  @Deprecated('Use `height` instead')
-  double get h => height;
-
   @override
   String toString() => 'PdfRect($x, $y, $width, $height)';
 

@@ -38,7 +38,7 @@ void main() {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
             color: PdfColors.blue,
-            borderRadiusEx: const BorderRadius.all(Radius.circular(20)),
+            borderRadius: const BorderRadius.all(Radius.circular(20)),
             border: Border.all(
               color: PdfColors.blue800,
               width: 2,
@@ -61,8 +61,8 @@ void main() {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: shape,
-              borderRadiusEx: const BorderRadius.all(Radius.circular(10)),
-              image: DecorationImage.provider(image: image, fit: fit),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
+              image: DecorationImage(image: image, fit: fit),
             ),
             width: 100,
             height: 100,
@@ -109,7 +109,7 @@ void main() {
               width: 200.0,
               decoration: BoxDecoration(
                 shape: BoxShape.rectangle,
-                borderRadiusEx: const BorderRadius.all(Radius.circular(40)),
+                borderRadius: const BorderRadius.all(Radius.circular(40)),
                 border: Border.all(color: PdfColors.blue, width: 3),
               ),
             ),
@@ -126,7 +126,7 @@ void main() {
         margin: const EdgeInsets.all(30),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-            borderRadiusEx: const BorderRadius.all(Radius.circular(20)),
+            borderRadius: const BorderRadius.all(Radius.circular(20)),
             gradient: const LinearGradient(
               colors: <PdfColor>[
                 PdfColors.blue,
@@ -155,7 +155,7 @@ void main() {
         margin: const EdgeInsets.all(30),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-            borderRadiusEx: const BorderRadius.all(Radius.circular(20)),
+            borderRadius: const BorderRadius.all(Radius.circular(20)),
             gradient: const RadialGradient(
               colors: <PdfColor>[
                 PdfColors.blue,

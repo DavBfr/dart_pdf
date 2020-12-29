@@ -77,18 +77,7 @@ void _drawImageRect(PdfGraphics canvas, PdfImage image, PdfRect sourceRect,
 }
 
 class Image extends Widget {
-  @Deprecated('Use Image.provider instead')
   Image(
-    PdfImage image, {
-    this.fit = BoxFit.contain,
-    this.alignment = Alignment.center,
-    this.width,
-    this.height,
-  })  : assert(image != null),
-        image = ImageProxy(image),
-        dpi = null;
-
-  Image.provider(
     this.image, {
     this.fit = BoxFit.contain,
     this.alignment = Alignment.center,

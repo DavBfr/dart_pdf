@@ -25,37 +25,7 @@ enum BorderStyle { none, solid, dashed, dotted }
 
 @immutable
 abstract class BoxBorder {
-  @Deprecated('Use Border instead')
-  factory BoxBorder({
-    bool left = false,
-    bool top = false,
-    bool right = false,
-    bool bottom = false,
-    PdfColor color = PdfColors.black,
-    double width = 1.0,
-    BorderStyle style = BorderStyle.solid,
-  }) {
-    assert(color != null);
-    assert(width != null);
-    assert(width >= 0.0);
-    assert(style != null);
-
-    return Border(
-        top: BorderSide(
-            color: color, width: width, style: top ? style : BorderStyle.none),
-        bottom: BorderSide(
-            color: color,
-            width: width,
-            style: bottom ? style : BorderStyle.none),
-        left: BorderSide(
-            color: color, width: width, style: left ? style : BorderStyle.none),
-        right: BorderSide(
-            color: color,
-            width: width,
-            style: right ? style : BorderStyle.none));
-  }
-
-  const BoxBorder.P();
+  const BoxBorder();
 
   BorderSide get top;
   BorderSide get bottom;
@@ -198,7 +168,7 @@ class Border extends BoxBorder {
         assert(right != null),
         assert(bottom != null),
         assert(left != null),
-        super.P();
+        super();
 
   /// A uniform border with all sides the same color and width.
   factory Border.all({
@@ -217,7 +187,7 @@ class Border extends BoxBorder {
         right = side,
         bottom = side,
         left = side,
-        super.P();
+        super();
 
   /// Creates a border with symmetrical vertical and horizontal sides.
   const Border.symmetric({
@@ -229,7 +199,7 @@ class Border extends BoxBorder {
         top = horizontal,
         right = vertical,
         bottom = horizontal,
-        super.P();
+        super();
 
   @override
   final BorderSide top;

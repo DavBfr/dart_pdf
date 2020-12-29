@@ -204,15 +204,6 @@ class Theme extends StatelessWidget {
     return context.inherited[ThemeData];
   }
 
-  @Deprecated('Use ThemeData.base()')
-  static ThemeData base() => ThemeData.base();
-
-  @Deprecated('Use ThemeData.withFont()')
-  static ThemeData withFont(
-          {Font base, Font bold, Font italic, Font boldItalic}) =>
-      ThemeData.withFont(
-          base: base, bold: bold, italic: italic, boldItalic: boldItalic);
-
   @override
   Widget build(Context context) {
     return InheritedWidget(

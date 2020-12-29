@@ -19,56 +19,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart' as rdr;
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
-
-/// Loads an image from a Flutter [ui.Image]
-/// into a [PdfImage] instance
-@Deprecated('Use flutterImageProvider')
-Future<PdfImage> pdfImageFromImage(
-    {@required PdfDocument pdf, @required ui.Image image}) async {
-  final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-
-  return PdfImage(pdf,
-      image: bytes.buffer.asUint8List(),
-      width: image.width,
-      height: image.height);
-}
-
-/// Loads an image from a Flutter [ImageProvider]
-/// into a [PdfImage] instance
-@Deprecated('Use flutterImageProvider')
-Future<PdfImage> pdfImageFromImageProvider(
-    {@required PdfDocument pdf,
-    @required rdr.ImageProvider image,
-    rdr.ImageConfiguration configuration,
-    rdr.ImageErrorListener onError}) async {
-  final completer = Completer<PdfImage>();
-  final stream = image.resolve(configuration ?? rdr.ImageConfiguration.empty);
-
-  rdr.ImageStreamListener listener;
-  listener = rdr.ImageStreamListener((rdr.ImageInfo image, bool sync) async {
-    final result = await pdfImageFromImage(pdf: pdf, image: image.image);
-    if (!completer.isCompleted) {
-      completer.complete(result);
-    }
-    stream.removeListener(listener);
-  }, onError: (dynamic exception, StackTrace stackTrace) {
-    if (!completer.isCompleted) {
-      completer.complete(null);
-    }
-    if (onError != null) {
-      onError(exception, stackTrace);
-    } else {
-      // https://groups.google.com/forum/#!topic/flutter-announce/hp1RNIgej38
-      assert(false, 'image failed to load');
-    }
-  });
-
-  stream.addListener(listener);
-  return completer.future;
-}
 
 /// Loads an image from a Flutter [ImageProvider]
 /// into an [ImageProvider] instance

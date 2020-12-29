@@ -53,7 +53,7 @@ void main() {
       pw.Page(
         build: (pw.Context context) => pw.Center(
           child: pw.Container(
-            child: pw.Image.provider(image),
+            child: pw.Image(image),
           ),
         ),
       ),

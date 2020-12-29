@@ -37,7 +37,7 @@ void main() {
 
   test('Pdf Jpeg Download', () async {
     pdf.addPage(Page(
-      build: (Context context) => Center(child: Image.provider(image)),
+      build: (Context context) => Center(child: Image(image)),
     ));
   });
 
@@ -49,7 +49,7 @@ void main() {
           crossAxisSpacing: 10,
           children: List<Widget>.generate(
             images.length,
-            (int index) => Image.provider(
+            (int index) => Image(
               MemoryImage(
                 base64.decode(images[index]),
               ),
@@ -69,7 +69,7 @@ void main() {
           return SizedBox(
             width: 200,
             height: 100,
-            child: Image.provider(
+            child: Image(
               image,
               fit: fit,
             ),
@@ -82,7 +82,7 @@ void main() {
   test('Pdf Image decode', () {
     final imageWidgets = imageFiles.map<Widget>(
       (String image) => SizedBox(
-        child: Image.provider(
+        child: Image(
           MemoryImage(
             gzip.decode(base64.decode(image)),
           ),

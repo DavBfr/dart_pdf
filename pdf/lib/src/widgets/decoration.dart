@@ -32,18 +32,7 @@ enum DecorationPosition { background, foreground }
 
 @immutable
 class DecorationImage {
-  @Deprecated('Use DecorationImage.provider()')
-  DecorationImage({
-    @required PdfImage image,
-    this.fit = BoxFit.cover,
-    this.alignment = Alignment.center,
-  })  : assert(image != null),
-        assert(fit != null),
-        assert(alignment != null),
-        image = ImageProxy(image),
-        dpi = null;
-
-  const DecorationImage.provider({
+  const DecorationImage({
     @required this.image,
     this.fit = BoxFit.cover,
     this.alignment = Alignment.center,
@@ -313,32 +302,21 @@ class BoxDecoration {
   const BoxDecoration({
     this.color,
     this.border,
-    @Deprecated('Use borderRadiusEx with `BorderRadius.all(Radius.circular(20))`')
-        double borderRadius,
-    BorderRadius borderRadiusEx,
+    this.borderRadius,
     this.boxShadow,
     this.gradient,
     this.image,
     this.shape = BoxShape.rectangle,
-  })  : assert(shape != null),
-        assert(!(borderRadius != null && borderRadiusEx != null),
-            'Don\'t set both borderRadius and borderRadiusEx'),
-        _borderRadius = borderRadiusEx,
-        _radius = borderRadius;
+  }) : assert(shape != null);
 
   /// The color to fill in the background of the box.
   final PdfColor color;
   final BoxBorder border;
-  final BorderRadius _borderRadius;
-  final double _radius;
+  final BorderRadius borderRadius;
   final BoxShape shape;
   final DecorationImage image;
   final Gradient gradient;
   final List<BoxShadow> boxShadow;
-
-  BorderRadius get borderRadius =>
-      _borderRadius ??
-      (_radius == null ? null : BorderRadius.all(Radius.circular(_radius)));
 
   void paint(
     Context context,
