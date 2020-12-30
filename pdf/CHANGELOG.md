@@ -10,6 +10,7 @@
 - Add document loading
 - Remove deprecated methods
 - Document.save() now returns a Future
+- Add Widget.draw() to paint any widget on a canvas
 
 ## 1.13.0
 

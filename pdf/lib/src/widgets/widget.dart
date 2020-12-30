@@ -24,6 +24,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'document.dart';
 import 'geometry.dart';
 import 'page.dart';
+import 'theme.dart';
 
 @immutable
 class Context {
@@ -112,6 +113,68 @@ abstract class Widget {
 
   /// The bounding box of this widget, calculated at layout time
   PdfRect box;
+
+  /// Draw a widget to a page canvas.
+  static void draw(
+    Widget widget, {
+    PdfPage page,
+    PdfGraphics canvas,
+    BoxConstraints constraints,
+    @required PdfPoint offset,
+    Alignment alignment,
+    Context context,
+  }) {
+    assert(offset != null);
+
+    context ??= Context(
+      document: page?.pdfDocument,
+      page: page,
+      canvas: canvas,
+    ).inheritFromAll(<Inherited>[
+      ThemeData.base(),
+    ]);
+
+    widget.layout(
+      context,
+      constraints ?? const BoxConstraints(),
+    );
+
+    assert(widget.box != null);
+
+    if (alignment != null) {
+      final d = alignment.withinRect(widget.box);
+      offset = PdfPoint(offset.x - d.x, offset.y - d.y);
+    }
+
+    widget.box = PdfRect.fromPoints(offset, widget.box.size);
+
+    widget.paint(context);
+  }
+
+  /// Measure the size of a widget to a page canvas.
+  static PdfPoint measure(
+    Widget widget, {
+    PdfPage page,
+    PdfGraphics canvas,
+    BoxConstraints constraints,
+    Context context,
+  }) {
+    context ??= Context(
+      document: page?.pdfDocument,
+      page: page,
+      canvas: canvas,
+    ).inheritFromAll(<Inherited>[
+      ThemeData.base(),
+    ]);
+
+    widget.layout(
+      context,
+      constraints ?? const BoxConstraints(),
+    );
+
+    assert(widget.box != null);
+    return widget.box.size;
+  }
 
   /// First widget pass to calculate the children layout and
   /// bounding [box]
