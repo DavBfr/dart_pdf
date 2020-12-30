@@ -92,6 +92,7 @@ class Chart extends Widget implements Inherited {
               if (left != null) left,
               Expanded(
                 child: Stack(
+                  overflow: Overflow.visible,
                   children: <Widget>[
                     grid,
                     if (overlay != null) overlay,

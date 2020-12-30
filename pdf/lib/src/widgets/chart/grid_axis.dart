@@ -18,15 +18,17 @@ import 'dart:math' as math;
 
 import 'package:pdf/pdf.dart';
 
+import '../basic.dart';
 import '../flex.dart';
 import '../geometry.dart';
+import '../text.dart';
 import '../text_style.dart';
-import '../theme.dart';
 import '../widget.dart';
 import 'chart.dart';
 import 'grid_cartesian.dart';
 
 typedef GridAxisFormat = String Function(num value);
+typedef GridAxisBuildLabel = Widget Function(num value);
 
 abstract class GridAxis extends Widget {
   GridAxis({
@@ -43,6 +45,8 @@ abstract class GridAxis extends Widget {
     bool divisionsDashed,
     bool ticks,
     bool axisTick,
+    this.angle = 0,
+    this.buildLabel,
   })  : format = format ?? _defaultFormat,
         color = color ?? PdfColors.black,
         width = width ?? 1,
@@ -58,6 +62,8 @@ abstract class GridAxis extends Widget {
   Axis direction;
 
   final GridAxisFormat format;
+
+  final GridAxisBuildLabel buildLabel;
 
   final TextStyle textStyle;
 
@@ -89,6 +95,8 @@ abstract class GridAxis extends Widget {
 
   double axisPosition = 0;
 
+  final double angle;
+
   static String _defaultFormat(num v) => v.toString();
 
   double transfer(num input) {
@@ -116,6 +124,8 @@ class FixedAxis<T extends num> extends GridAxis {
     bool divisionsDashed,
     bool ticks,
     bool axisTick,
+    double angle = 0,
+    GridAxisBuildLabel buildLabel,
   })  : assert(_isSortedAscending(values)),
         super(
           format: format,
@@ -131,6 +141,8 @@ class FixedAxis<T extends num> extends GridAxis {
           divisionsDashed: divisionsDashed,
           ticks: ticks,
           axisTick: axisTick,
+          angle: angle,
+          buildLabel: buildLabel,
         );
 
   static FixedAxis<int> fromStrings(
@@ -147,6 +159,8 @@ class FixedAxis<T extends num> extends GridAxis {
     bool divisionsDashed,
     bool ticks,
     bool axisTick,
+    double angle = 0,
+    GridAxisBuildLabel buildLabel,
   }) {
     return FixedAxis<int>(
       List<int>.generate(values.length, (int index) => index),
@@ -163,6 +177,8 @@ class FixedAxis<T extends num> extends GridAxis {
       divisionsDashed: divisionsDashed,
       ticks: ticks,
       axisTick: axisTick,
+      angle: angle,
+      buildLabel: buildLabel,
     );
   }
 
@@ -202,6 +218,30 @@ class FixedAxis<T extends num> extends GridAxis {
     return null;
   }
 
+  Widget _text(num value) {
+    final t = buildLabel == null
+        ? Text(format(value), style: textStyle)
+        : buildLabel(value);
+    if (angle == 0.0) {
+      return t;
+    }
+
+    return Transform.rotateBox(
+      angle: angle,
+      child: t,
+    );
+  }
+
+  int _angleDirection() {
+    if (angle == 0.0) {
+      return 0;
+    }
+    if (angle % math.pi > math.pi / 2) {
+      return -1;
+    }
+    return 1;
+  }
+
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
@@ -209,26 +249,28 @@ class FixedAxis<T extends num> extends GridAxis {
         '$runtimeType cannot be used without a Chart widget');
 
     final size = constraints.biggest;
-    final style = Theme.of(context).defaultTextStyle.merge(textStyle);
-    final font = style.font.getFont(context);
 
     var maxWidth = 0.0;
     var maxHeight = 0.0;
-    PdfFontMetrics metricsFirst;
-    PdfFontMetrics metrics;
+    PdfPoint first;
+    PdfPoint last;
+
     for (final value in values) {
-      metrics = font.stringMetrics(format(value)) * style.fontSize;
-      metricsFirst ??= metrics;
-      maxWidth = math.max(maxWidth, metrics.maxWidth);
-      maxHeight = math.max(maxHeight, metrics.maxHeight);
+      last = Widget.measure(_text(value), context: context);
+      maxWidth = math.max(maxWidth, last.x);
+      maxHeight = math.max(maxHeight, last.y);
+      first ??= last;
     }
+
+    final ad = _angleDirection();
 
     switch (direction) {
       case Axis.horizontal:
         _textMargin = margin ?? 2;
         _axisTick ??= false;
-        final minStart = metricsFirst.maxWidth / 2;
-        _marginEnd = math.max(_marginEnd, metrics.maxWidth / 2);
+        final minStart = ad == 0 ? first.x / 2 : (ad > 0 ? first.x : 0.0);
+        _marginEnd = math.max(
+            _marginEnd, ad == 0 ? last.x / 2 : (ad > 0 ? 0.0 : last.x));
         crossAxisPosition = math.max(crossAxisPosition, minStart);
         axisPosition = math.max(axisPosition, maxHeight + _textMargin);
         box = PdfRect(0, 0, size.x, axisPosition);
@@ -236,9 +278,9 @@ class FixedAxis<T extends num> extends GridAxis {
       case Axis.vertical:
         _textMargin = margin ?? 10;
         _axisTick ??= true;
-        _marginEnd = math.max(_marginEnd, metrics.maxHeight / 2);
-        final minStart = metricsFirst.maxHeight / 2;
-        _marginEnd = math.max(_marginEnd, metrics.maxWidth / 2);
+        _marginEnd = math.max(
+            _marginEnd, ad == 0 ? last.x / 2 : (ad < 0 ? last.x : 0.0));
+        final minStart = ad == 0 ? first.y / 2 : (ad > 0 ? first.x : 0.0);
         crossAxisPosition = math.max(crossAxisPosition, minStart);
         axisPosition = math.max(axisPosition, maxWidth + _textMargin);
         box = PdfRect(0, 0, axisPosition, size.y);
@@ -273,22 +315,19 @@ class FixedAxis<T extends num> extends GridAxis {
       ..setLineJoin(PdfLineJoin.bevel)
       ..strokePath();
 
+    final ad = _angleDirection();
+
     for (final y in values) {
-      final v = format(y);
-      final style = Theme.of(context).defaultTextStyle.merge(textStyle);
-      final font = style.font.getFont(context);
-      final metrics = font.stringMetrics(v) * style.fontSize;
       final p = toChart(y);
 
-      context.canvas
-        ..setColor(style.color)
-        ..drawString(
-          style.font.getFont(context),
-          style.fontSize,
-          v,
-          axisPosition - _textMargin - metrics.maxWidth,
-          p - (metrics.ascent + metrics.descent) / 2,
-        );
+      Widget.draw(
+        _text(y),
+        offset: PdfPoint(axisPosition - _textMargin, p),
+        context: context,
+        alignment: ad == 0
+            ? Alignment.centerRight
+            : (ad > 0 ? Alignment.topRight : Alignment.bottomRight),
+      );
     }
   }
 
@@ -318,22 +357,19 @@ class FixedAxis<T extends num> extends GridAxis {
       ..setLineJoin(PdfLineJoin.bevel)
       ..strokePath();
 
+    final ad = _angleDirection();
+
     for (final num x in values) {
-      final v = format(x);
-      final style = Theme.of(context).defaultTextStyle.merge(textStyle);
-      final font = style.font.getFont(context);
-      final metrics = font.stringMetrics(v) * style.fontSize;
       final p = toChart(x);
 
-      context.canvas
-        ..setColor(style.color)
-        ..drawString(
-          style.font.getFont(context),
-          style.fontSize,
-          v,
-          p - metrics.maxWidth / 2,
-          axisPosition - metrics.ascent - _textMargin,
-        );
+      Widget.draw(
+        _text(x),
+        offset: PdfPoint(p, axisPosition - _textMargin),
+        context: context,
+        alignment: ad == 0
+            ? Alignment.topCenter
+            : (ad > 0 ? Alignment.topRight : Alignment.topLeft),
+      );
     }
   }
 

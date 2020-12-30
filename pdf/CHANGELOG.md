@@ -11,6 +11,7 @@
 - Remove deprecated methods
 - Document.save() now returns a Future
 - Add Widget.draw() to paint any widget on a canvas
+- Improve Chart labels
 
 ## 1.13.0
 
