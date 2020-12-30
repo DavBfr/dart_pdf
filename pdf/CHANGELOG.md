@@ -12,6 +12,7 @@
 - Document.save() now returns a Future
 - Add Widget.draw() to paint any widget on a canvas
 - Improve Chart labels
+- Improve BoxBorder correctness
 
 ## 1.13.0
 

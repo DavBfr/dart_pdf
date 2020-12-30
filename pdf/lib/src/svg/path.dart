@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import 'dart:math' as math;
+
 import 'package:pdf/pdf.dart';
 import 'package:xml/xml.dart';
 
@@ -225,7 +227,7 @@ class SvgPath extends SvgOperation {
         ..drawShape(d)
         ..setLineCap(brush.strokeLineCap)
         ..setLineJoin(brush.strokeLineJoin)
-        ..setMiterLimit(brush.strokeMiterLimit)
+        ..setMiterLimit(math.max(1.0, brush.strokeMiterLimit))
         ..setLineDashPattern(
             brush.strokeDashArray, brush.strokeDashOffset.toInt())
         ..setLineWidth(brush.strokeWidth.sizeValue)

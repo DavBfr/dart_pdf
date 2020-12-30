@@ -582,6 +582,7 @@ class PdfGraphics {
 
   /// Set line joint miter limit, applies if the
   void setMiterLimit(double limit) {
+    assert(limit >= 1.0);
     PdfNum(limit).output(buf);
     buf.putString(' M\n');
   }

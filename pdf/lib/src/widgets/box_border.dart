@@ -87,6 +87,8 @@ abstract class BoxBorder {
       BorderSide side, BorderRadius borderRadius) {
     _setStyle(context, side.style);
     context.canvas
+      ..setLineJoin(PdfLineJoin.miter)
+      ..setMiterLimit(4)
       ..setStrokeColor(side.color)
       ..setLineWidth(side.width);
     borderRadius.paint(context, box);
@@ -98,6 +100,8 @@ abstract class BoxBorder {
       Context context, PdfRect box, BorderSide side) {
     _setStyle(context, side.style);
     context.canvas
+      ..setLineJoin(PdfLineJoin.miter)
+      ..setMiterLimit(4)
       ..setStrokeColor(side.color)
       ..setLineWidth(side.width)
       ..drawBox(box)
@@ -254,7 +258,10 @@ class Border extends BoxBorder {
     assert(borderRadius == null,
         'A borderRadius can only be given for a uniform Border.');
 
-    context.canvas.setLineCap(PdfLineCap.square);
+    context.canvas
+      ..setLineCap(PdfLineCap.square)
+      ..setMiterLimit(4)
+      ..setLineJoin(PdfLineJoin.miter);
 
     if (top.style != BorderStyle.none) {
       BoxBorder._setStyle(context, top.style);
