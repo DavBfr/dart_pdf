@@ -160,7 +160,7 @@ abstract class Dataset extends Widget {
 
   void paintBackground(Context context) {}
 
-  Widget legendeShape() {
+  Widget legendShape() {
     return Container(
       decoration: BoxDecoration(
         color: color,
