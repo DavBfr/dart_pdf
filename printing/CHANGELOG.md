@@ -5,6 +5,7 @@
 - Remove deprecated methods
 - Document.save() now returns a Future
 - Implement pan and zoom on PdfPreview widget
+- Improve orientation handling
 
 ## 3.7.2
 

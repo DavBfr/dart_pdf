@@ -27,6 +27,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     private var pdfDocument: CGPDFDocument?
     private var urlObservation: NSKeyValueObservation?
     private var jobName: String?
+    private var orientation: UIPrintInfo.Orientation?
 
     public init(printing: PrintingPlugin, index: Int) {
         self.printing = printing
@@ -62,6 +63,10 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         let printInfo = UIPrintInfo.printInfo()
         printInfo.jobName = jobName!
         printInfo.outputType = .general
+        if orientation != nil {
+            printInfo.orientation = orientation!
+            orientation = nil
+        }
         controller.printInfo = printInfo
         controller.printPageRenderer = self
         controller.present(animated: true, completionHandler: completionHandler)
@@ -110,6 +115,10 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         if !printing {
             self.printing.onCompleted(printJob: self, completed: false, error: "Printing not available")
             return
+        }
+
+        if size.width > size.height {
+            orientation = UIPrintInfo.Orientation.landscape
         }
 
         jobName = name

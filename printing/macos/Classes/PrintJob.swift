@@ -80,11 +80,15 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
 
     public func directPrintPdf(name _: String, data _: Data, withPrinter _: String) {}
 
-    public func printPdf(name: String, withPageSize _: CGSize, andMargin _: CGRect) {
+    public func printPdf(name: String, withPageSize size: CGSize, andMargin _: CGRect) {
         let sharedInfo = NSPrintInfo.shared
         let sharedDict = sharedInfo.dictionary()
         let printInfoDict = NSMutableDictionary(dictionary: sharedDict)
         let printInfo = NSPrintInfo(dictionary: printInfoDict as! [NSPrintInfo.AttributeKey: Any])
+
+        if size.width > size.height {
+            printInfo.orientation = NSPrintInfo.PaperOrientation.landscape
+        }
 
         // Print the custom view
         printOperation = NSPrintOperation(view: self, printInfo: printInfo)
