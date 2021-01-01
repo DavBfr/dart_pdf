@@ -71,7 +71,7 @@ mixin Printing {
     if (_info != null && _info.canListPrinters) {
       assert(
         context != null,
-        'Pass a BuildCOntext to pickPrinter to display a selection list',
+        'Pass a BuildContext to pickPrinter to display a selection list',
       );
       final printers = await listPrinters();
       return await showDialog<Printer>(
