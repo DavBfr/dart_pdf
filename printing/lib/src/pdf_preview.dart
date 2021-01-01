@@ -441,10 +441,20 @@ class _PdfPreviewState extends State<PdfPreview> {
   }
 
   Future<void> _print() async {
+    var format = pageFormat;
+
+    if (!widget.canChangePageFormat && pages.isNotEmpty) {
+      format = PdfPageFormat(
+        pages.first.page.width * 72 / dpi,
+        pages.first.page.height * 72 / dpi,
+        marginAll: 5 * PdfPageFormat.mm,
+      );
+    }
+
     final result = await Printing.layoutPdf(
       onLayout: widget.build,
       name: widget.pdfFileName ?? 'Document',
-      format: pageFormat,
+      format: format,
     );
 
     if (result && widget.onPrinted != null) {
