@@ -190,9 +190,15 @@ public class PrintingJob extends PrintDocumentAdapter {
         thread.start();
     }
 
-    void printPdf(@NonNull String name) {
+    void printPdf(@NonNull String name, @NonNull Double width, @NonNull Double height) {
         jobName = name;
-        printJob = printManager.print(name, this, null);
+
+        PrintAttributes.Builder attrBuilder = new PrintAttributes.Builder();
+        if (width > height) {
+            attrBuilder.setMediaSize(PrintAttributes.MediaSize.UNKNOWN_LANDSCAPE);
+        }
+        PrintAttributes attrib = attrBuilder.build();
+        printJob = printManager.print(name, this, attrib);
     }
 
     void cancelJob(String message) {
