@@ -130,6 +130,10 @@ bool PrintJob::directPrintPdf(std::string name,
 
 bool PrintJob::printPdf(std::string name) {
   PRINTDLG pd;
+  DEVMODE* dm = static_cast<DEVMODE*>(GlobalAlloc(0, sizeof(DEVMODE)));
+  ZeroMemory(dm, sizeof(DEVMODE));
+  dm->dmFields = DM_ORIENTATION;
+  dm->dmOrientation = 2;
 
   // Initialize PRINTDLG
   ZeroMemory(&pd, sizeof(pd));
@@ -137,10 +141,11 @@ bool PrintJob::printPdf(std::string name) {
 
   // Initialize PRINTDLG
   pd.hwndOwner = nullptr;
-  pd.hDevMode = nullptr;   // Don't forget to free or store hDevMode.
+  pd.hDevMode = dm;
   pd.hDevNames = nullptr;  // Don't forget to free or store hDevNames.
   pd.hDC = nullptr;
-  pd.Flags = 0x0004014C;
+  pd.Flags = PD_USEDEVMODECOPIES | PD_RETURNDC | PD_PRINTSETUP |
+             PD_NOSELECTION | PD_NOPAGENUMS;
   pd.nCopies = 1;
   pd.nFromPage = 0xFFFF;
   pd.nToPage = 0xFFFF;
