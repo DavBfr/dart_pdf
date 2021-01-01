@@ -111,8 +111,7 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   Timer previewUpdate;
 
-  static const Map<String, PdfPageFormat> defaultPageFormats =
-      <String, PdfPageFormat>{
+  static const defaultPageFormats = <String, PdfPageFormat>{
     'A4': PdfPageFormat.a4,
     'Letter': PdfPageFormat.letter,
   };
