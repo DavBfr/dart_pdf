@@ -7,6 +7,7 @@
 - Implement pan and zoom on PdfPreview widget
 - Improve orientation handling
 - Improve directPrint
+- Remove the windows DLL
 
 ## 3.7.2
 
