@@ -125,8 +125,14 @@ class PrintingPlugin : public flutter::Plugin {
             flutter::EncodableValue(printer.url);
         mp[flutter::EncodableValue("model")] =
             flutter::EncodableValue(printer.model);
-        mp[flutter::EncodableValue("description")] =
-            flutter::EncodableValue(printer.description);
+        mp[flutter::EncodableValue("location")] =
+            flutter::EncodableValue(printer.location);
+        mp[flutter::EncodableValue("comment")] =
+            flutter::EncodableValue(printer.comment);
+        mp[flutter::EncodableValue("default")] =
+            flutter::EncodableValue(printer.default);
+        mp[flutter::EncodableValue("available")] =
+            flutter::EncodableValue(printer.available);
         pl.push_back(mp);
       }
       result->Success(pl);

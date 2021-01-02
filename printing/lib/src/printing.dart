@@ -65,6 +65,7 @@ mixin Printing {
   static Future<Printer> pickPrinter({
     @required BuildContext context,
     Rect bounds,
+    String title,
   }) async {
     final _info = await info();
 
@@ -74,17 +75,35 @@ mixin Printing {
         'Pass a BuildContext to pickPrinter to display a selection list',
       );
       final printers = await listPrinters();
+      printers.sort((a, b) {
+        if (a.isDefault) {
+          return -1;
+        }
+        if (b.isDefault) {
+          return 1;
+        }
+        return a.name.compareTo(b.name);
+      });
+
       return await showDialog<Printer>(
         context: context,
         builder: (context) => SimpleDialog(
-          children: printers
-              .map<Widget>(
-                (e) => SimpleDialogOption(
-                  child: Text(e.name),
-                  onPressed: () => Navigator.of(context).pop(e),
+          title: Text(title ?? 'Select Printer'),
+          children: [
+            for (final printer in printers)
+              if (printer.available)
+                SimpleDialogOption(
+                  child: Text(
+                    printer.name,
+                    style: TextStyle(
+                      fontStyle: printer.isDefault
+                          ? FontStyle.italic
+                          : FontStyle.normal,
+                    ),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(printer),
                 ),
-              )
-              .toList(),
+          ],
         ),
       );
     }

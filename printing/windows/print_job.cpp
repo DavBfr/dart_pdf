@@ -134,6 +134,7 @@ bool PrintJob::printPdf(std::string name) {
   ZeroMemory(dm, sizeof(DEVMODE));
   dm->dmFields = DM_ORIENTATION;
   dm->dmOrientation = 2;
+  printf("Printing ... \n");
 
   // Initialize PRINTDLG
   ZeroMemory(&pd, sizeof(pd));
@@ -186,19 +187,28 @@ bool PrintJob::printPdf(std::string name) {
 }
 
 std::vector<Printer> PrintJob::listPrinters() {
+  LPTSTR defaultPrinter;
+  DWORD size = 0;
+  GetDefaultPrinter(nullptr, &size);
+
+  defaultPrinter = static_cast<LPTSTR>(malloc(size * sizeof(TCHAR)));
+  if (!GetDefaultPrinter(defaultPrinter, &size)) {
+    size = 0;
+  }
+
   auto printers = std::vector<Printer>{};
   DWORD needed = 0;
   DWORD returned = 0;
   const auto flags = PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS;
 
-  EnumPrinters(flags, nullptr, 1, nullptr, 0, &needed, &returned);
+  EnumPrinters(flags, nullptr, 2, nullptr, 0, &needed, &returned);
 
-  auto buffer = (PRINTER_INFO_1*)malloc(needed);
+  auto buffer = (PRINTER_INFO_2*)malloc(needed);
   if (!buffer) {
     return printers;
   }
 
-  auto result = EnumPrinters(flags, nullptr, 1, (LPBYTE)buffer, needed, &needed,
+  auto result = EnumPrinters(flags, nullptr, 2, (LPBYTE)buffer, needed, &needed,
                              &returned);
 
   if (result == 0) {
@@ -208,14 +218,17 @@ std::vector<Printer> PrintJob::listPrinters() {
 
   for (DWORD i = 0; i < returned; i++) {
     printers.push_back(Printer{
-        toUtf8(buffer[i].pName),
-        toUtf8(buffer[i].pName),
-        toUtf8(buffer[i].pDescription),
+        toUtf8(buffer[i].pPrinterName), toUtf8(buffer[i].pPrinterName),
+        toUtf8(buffer[i].pDriverName), toUtf8(buffer[i].pLocation),
         toUtf8(buffer[i].pComment),
-    });
+        size > 0 && _tcsncmp(buffer[i].pPrinterName, defaultPrinter, size) == 0,
+        (buffer[i].Status &
+         (PRINTER_STATUS_NOT_AVAILABLE | PRINTER_STATUS_ERROR |
+          PRINTER_STATUS_OFFLINE | PRINTER_STATUS_PAUSED)) == 0});
   }
 
   free(buffer);
+  free(defaultPrinter);
   return printers;
 }
 

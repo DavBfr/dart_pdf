@@ -25,6 +25,9 @@ class Printer {
     this.name,
     this.model,
     this.location,
+    this.comment,
+    this.isDefault = false,
+    this.available = true,
   }) : assert(url != null);
 
   /// The platform specific printer identification
@@ -38,6 +41,15 @@ class Printer {
 
   /// The physical location of the printer
   final String location;
+
+  /// A user comment about the printer
+  final String comment;
+
+  /// Is this the default printer on the system
+  final bool isDefault;
+
+  /// The printer is available for printing
+  final bool available;
 
   @override
   String toString() => name ?? url;

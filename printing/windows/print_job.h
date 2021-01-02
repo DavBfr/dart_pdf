@@ -34,13 +34,25 @@ struct Printer {
   const std::string name;
   const std::string url;
   const std::string model;
-  const std::string description;
+  const std::string location;
+  const std::string comment;
+  const bool default;
+  const bool available;
 
   Printer(std::string name,
           std::string url,
           std::string model,
-          std::string description)
-      : name(name), url(url), model(model), description(description) {}
+          std::string location,
+          std::string comment,
+          bool default,
+          bool available)
+      : name(name),
+        url(url),
+        model(model),
+        location(location),
+        comment(comment),
+        default(default),
+        available(available) {}
 };
 
 class PrintJob {

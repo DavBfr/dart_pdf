@@ -6,6 +6,7 @@
 - Document.save() now returns a Future
 - Implement pan and zoom on PdfPreview widget
 - Improve orientation handling
+- Improve directPrint
 
 ## 3.7.2
 

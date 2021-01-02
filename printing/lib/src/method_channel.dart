@@ -165,6 +165,9 @@ class MethodChannelPrinting extends PrintingPlatform {
         name: printer['name'],
         model: printer['model'],
         location: printer['location'],
+        comment: printer['comment'],
+        isDefault: printer['default'],
+        available: printer['available'],
       ));
     }
 
