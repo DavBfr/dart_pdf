@@ -43,8 +43,10 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
 
     // Return the number of pages available for printing
     override public func knowsPageRange(_ range: NSRangePointer) -> Bool {
-        setFrameSize(printOperation!.printPanel.printInfo.paperSize)
-        setBoundsSize(printOperation!.printPanel.printInfo.paperSize)
+        let size = printOperation!.showsPrintPanel ? printOperation!.printPanel.printInfo.paperSize : printOperation!.printInfo.paperSize
+
+        setFrameSize(size)
+        setBoundsSize(size)
         range.pointee.length = pdfDocument?.numberOfPages ?? 0
         return true
     }
@@ -78,7 +80,47 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         }
     }
 
-    public func directPrintPdf(name _: String, data _: Data, withPrinter _: String) {}
+    public func listPrinters() -> [NSDictionary] {
+        var printers: Array = [NSDictionary]()
+
+        for name in NSPrinter.printerNames {
+            let printer = NSPrinter(name: name)
+            let pr: NSDictionary = [
+                "url": name,
+                "name": name,
+                "model": printer!.type,
+            ]
+            printers.append(pr)
+        }
+
+        return printers
+    }
+
+    public func directPrintPdf(name: String, data: Data, withPrinter printer: String, width: CGFloat, height: CGFloat) {
+        let sharedInfo = NSPrintInfo.shared
+        let sharedDict = sharedInfo.dictionary()
+        let printInfoDict = NSMutableDictionary(dictionary: sharedDict)
+        let printInfo = NSPrintInfo(dictionary: printInfoDict as! [NSPrintInfo.AttributeKey: Any])
+        printInfo.printer = NSPrinter(name: printer)!
+
+        let bytesPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: data.count)
+        data.copyBytes(to: bytesPointer, count: data.count)
+        let dataProvider = CGDataProvider(dataInfo: nil, data: bytesPointer, size: data.count, releaseData: dataProviderReleaseDataCallback)
+        pdfDocument = CGPDFDocument(dataProvider!)
+        printInfo.paperSize = NSSize(width: width, height: height)
+        if width > height {
+            printInfo.orientation = NSPrintInfo.PaperOrientation.landscape
+        }
+
+        // Print the custom view
+        printOperation = NSPrintOperation(view: self, printInfo: printInfo)
+        printOperation!.jobTitle = name
+        printOperation!.showsPrintPanel = false
+        printOperation!.showsProgressPanel = false
+
+        let window = NSApplication.shared.mainWindow!
+        printOperation!.runModal(for: window, delegate: self, didRun: #selector(printOperationDidRun(printOperation:success:contextInfo:)), contextInfo: nil)
+    }
 
     public func printPdf(name: String, withPageSize size: CGSize, andMargin _: CGRect) {
         let sharedInfo = NSPrintInfo.shared
@@ -86,6 +128,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         let printInfoDict = NSMutableDictionary(dictionary: sharedDict)
         let printInfo = NSPrintInfo(dictionary: printInfoDict as! [NSPrintInfo.AttributeKey: Any])
 
+        printInfo.paperSize = size
         if size.width > size.height {
             printInfo.orientation = NSPrintInfo.PaperOrientation.landscape
         }
@@ -171,10 +214,6 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         }
     }
 
-    public static func pickPrinter(result: @escaping FlutterResult, withSourceRect _: CGRect) {
-        result(NSNumber(value: 1))
-    }
-
     public func rasterPdf(data: Data, pages: [Int]?, scale: CGFloat) {
         let provider = CGDataProvider(data: data as CFData)!
         let document = CGPDFDocument(provider)!
@@ -220,12 +259,13 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
 
     public static func printingInfo() -> NSDictionary {
         let data: NSDictionary = [
-            "directPrint": false,
+            "directPrint": true,
             "dynamicLayout": false,
             "canPrint": true,
             "canConvertHtml": true,
             "canShare": true,
             "canRaster": true,
+            "canListPrinters": true,
         ]
         return data
     }

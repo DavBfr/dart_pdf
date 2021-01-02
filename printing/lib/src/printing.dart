@@ -91,7 +91,7 @@ mixin Printing {
           title: Text(title ?? 'Select Printer'),
           children: [
             for (final printer in printers)
-              if (printer.available)
+              if (printer.isAvailable)
                 SimpleDialogOption(
                   child: Text(
                     printer.name,

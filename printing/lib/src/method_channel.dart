@@ -160,15 +160,7 @@ class MethodChannelPrinting extends PrintingPlatform {
     final printers = <Printer>[];
 
     for (final printer in list) {
-      printers.add(Printer(
-        url: printer['url'],
-        name: printer['name'],
-        model: printer['model'],
-        location: printer['location'],
-        comment: printer['comment'],
-        isDefault: printer['default'],
-        available: printer['available'],
-      ));
+      printers.add(Printer.fromMap(printer));
     }
 
     return printers;
@@ -187,12 +179,7 @@ class MethodChannelPrinting extends PrintingPlatform {
     if (printer == null) {
       return null;
     }
-    return Printer(
-      url: printer['url'],
-      name: printer['name'],
-      model: printer['model'],
-      location: printer['location'],
-    );
+    return Printer.fromMap(printer);
   }
 
   @override
@@ -215,6 +202,12 @@ class MethodChannelPrinting extends PrintingPlatform {
       'name': name,
       'printer': printer.url,
       'doc': bytes,
+      'width': format.width,
+      'height': format.height,
+      'marginLeft': format.marginLeft,
+      'marginTop': format.marginTop,
+      'marginRight': format.marginRight,
+      'marginBottom': format.marginBottom,
       'job': job.index,
     };
     await _channel.invokeMethod<int>('directPrintPdf', params);

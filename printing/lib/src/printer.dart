@@ -22,13 +22,27 @@ class Printer {
   /// Create a printer information
   const Printer({
     @required this.url,
-    this.name,
+    String name,
     this.model,
     this.location,
     this.comment,
-    this.isDefault = false,
-    this.available = true,
-  }) : assert(url != null);
+    bool isDefault,
+    bool isAvailable,
+  })  : assert(url != null),
+        name = name ?? url,
+        isDefault = isDefault ?? false,
+        isAvailable = isAvailable ?? true;
+
+  /// Create an information object from a dictionnary
+  factory Printer.fromMap(Map<dynamic, dynamic> map) => Printer(
+        url: map['url'],
+        name: map['name'],
+        model: map['model'],
+        location: map['location'],
+        comment: map['comment'],
+        isDefault: map['default'],
+        isAvailable: map['available'],
+      );
 
   /// The platform specific printer identification
   final String url;
@@ -49,8 +63,14 @@ class Printer {
   final bool isDefault;
 
   /// The printer is available for printing
-  final bool available;
+  final bool isAvailable;
 
   @override
-  String toString() => name ?? url;
+  String toString() => '''$runtimeType $name
+  url:$url
+  location:$location
+  model:$model
+  comment:$comment
+  isDefault:$isDefault
+  isAvailable: $isAvailable''';
 }

@@ -72,7 +72,7 @@ class PrintingInfo {
   final bool canRaster;
 
   @override
-  String toString() => '''PrintingInfo:
+  String toString() => '''$runtimeType:
   canPrint: $canPrint
   directPrint: $directPrint
   dynamicLayout: $dynamicLayout
@@ -80,17 +80,4 @@ class PrintingInfo {
   canListPrinters: $canListPrinters
   canShare: $canShare
   canRaster: $canRaster''';
-
-  /// Returns a map representation of this object
-  Map<dynamic, dynamic> asMap() {
-    return <dynamic, dynamic>{
-      'canPrint': canPrint,
-      'directPrint': directPrint,
-      'dynamicLayout': dynamicLayout,
-      'canConvertHtml': canConvertHtml,
-      'canListPrinters': canListPrinters,
-      'canShare': canShare,
-      'canRaster': canRaster,
-    };
-  }
 }

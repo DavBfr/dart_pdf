@@ -56,13 +56,19 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
                                   height: height - marginBottom - marginTop
                               ))
             result(NSNumber(value: 1))
-//        } else if call.method == "directPrintPdf" {
-//            let name = args["name"] as! String
-//            let printer = args["printer"] as! String
-//            let object = args["doc"] as! FlutterStandardTypedData
-//            let printJob = PrintJob(printing: self, index: args["job"] as! Int)
-//            printJob.directPrintPdf(name: name, data: object.data, withPrinter: printer)
-//            result(NSNumber(value: 1))
+        } else if call.method == "listPrinters" {
+            let printJob = PrintJob(printing: self, index: -1)
+            let r = printJob.listPrinters()
+            result(r)
+        } else if call.method == "directPrintPdf" {
+            let name = args["name"] as! String
+            let printer = args["printer"] as! String
+            let object = args["doc"] as! FlutterStandardTypedData
+            let width = CGFloat((args["width"] as? NSNumber)?.floatValue ?? 0.0)
+            let height = CGFloat((args["height"] as? NSNumber)?.floatValue ?? 0.0)
+            let printJob = PrintJob(printing: self, index: args["job"] as! Int)
+            printJob.directPrintPdf(name: name, data: object.data, withPrinter: printer, width: width, height: height)
+            result(NSNumber(1))
         } else if call.method == "sharePdf" {
             let object = args["doc"] as! FlutterStandardTypedData
             PrintJob.sharePdf(
