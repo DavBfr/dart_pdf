@@ -13,6 +13,7 @@
 - Add Widget.draw() to paint any widget on a canvas
 - Improve Chart labels
 - Improve BoxBorder correctness
+- Fix Exif parsing with an offset
 
 ## 1.13.0
 

@@ -30,7 +30,7 @@ class PdfJpegInfo {
     int width;
     int height;
     int color;
-    var offset = 0;
+    var offset = image.offsetInBytes;
     while (offset < buffer.lengthInBytes) {
       while (buffer.getUint8(offset) == 0xff) {
         offset++;
