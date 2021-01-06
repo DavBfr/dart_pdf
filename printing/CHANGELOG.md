@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.1
+
+- Remove useless files
+
 ## 4.0.0
 
 - Remove deprecated methods

@@ -53,3 +53,5 @@ cache_*
 
 .vscode
 package.json
+
+GeneratedPluginRegistrant.*
