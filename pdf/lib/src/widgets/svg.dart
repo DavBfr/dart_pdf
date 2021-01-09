@@ -27,42 +27,51 @@ class SvgImage extends Widget {
   factory SvgImage({
     @required String svg,
     BoxFit fit = BoxFit.contain,
+    Alignment alignment = Alignment.center,
     bool clip = true,
     double width,
     double height,
   }) {
     assert(clip != null);
+    assert(alignment != null);
 
     final xml = XmlDocument.parse(svg);
     final parser = SvgParser(xml: xml);
 
-    return SvgImage._fromPainter(
+    return SvgImage._fromParser(
       parser,
       fit,
+      alignment,
       clip,
       width,
       height,
     );
   }
 
-  SvgImage._fromPainter(
+  SvgImage._fromParser(
     this._svgParser,
     this.fit,
+    this.alignment,
     this.clip,
     this.width,
     this.height,
   )   : assert(_svgParser != null),
-        assert(fit != null);
+        assert(fit != null),
+        assert(alignment != null);
 
   final SvgParser _svgParser;
 
   final BoxFit fit;
+
+  final Alignment alignment;
 
   final bool clip;
 
   final double width;
 
   final double height;
+
+  FittedSizes sizes;
 
   @override
   void layout(Context context, BoxConstraints constraints,
@@ -78,10 +87,7 @@ class SvgImage extends Widget {
             ? constraints.maxHeight
             : constraints.constrainHeight(_svgParser.viewBox.height);
 
-    final sizes = applyBoxFit(
-        fit,
-        PdfPoint(_svgParser.viewBox.width, _svgParser.viewBox.height),
-        PdfPoint(w, h));
+    sizes = applyBoxFit(fit, _svgParser.viewBox.size, PdfPoint(w, h));
     box = PdfRect.fromPoints(PdfPoint.zero, sizes.destination);
   }
 
@@ -89,19 +95,20 @@ class SvgImage extends Widget {
   void paint(Context context) {
     super.paint(context);
 
-    final mat = Matrix4.identity();
-    mat.translate(
-      box.x,
-      box.y + box.height,
-    );
-    mat.scale(
-      box.width / _svgParser.viewBox.width,
-      -box.height / _svgParser.viewBox.height,
-    );
-    mat.translate(
-      -_svgParser.viewBox.x,
-      -_svgParser.viewBox.y,
-    );
+    final _alignment = Alignment(alignment.x, -alignment.y);
+    final sourceRect = _alignment.inscribe(sizes.source, _svgParser.viewBox);
+    final sx = sizes.destination.x / sizes.source.x;
+    final sy = sizes.destination.y / sizes.source.y;
+    final dx = sourceRect.x * sx;
+    final dy = sourceRect.y * sy;
+
+    final mat = Matrix4.identity()
+      ..translate(
+        box.x - dx,
+        box.y + dy + box.height,
+      )
+      ..scale(sx, -sy);
+
     context.canvas.saveContext();
     if (clip) {
       context.canvas

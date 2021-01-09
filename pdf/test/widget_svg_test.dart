@@ -110,6 +110,72 @@ void main() {
     );
   });
 
+  test('SVG Widgets BoxFit.cover and alignment', () {
+    const svg =
+        '<?xml version="1.0" encoding="utf-8"?><svg version="1.1" viewBox="10 20 200 200" xmlns="http://www.w3.org/2000/svg"><circle style="fill-opacity: 0.19; fill: rgb(0, 94, 255);" cx="110" cy="120" r="90"/><rect x="10" y="20" width="200" height="200" stroke="blue" fill="none"/><line style="stroke: black;" x1="110" y1="110" x2="110" y2="130"/><line style="stroke: black" x1="100" y1="120" x2="120" y2="120"/></svg>';
+
+    pdf.addPage(
+      Page(
+        build: (context) => Column(
+          children: [
+            GridView(
+              crossAxisCount: 3,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: 0.3,
+              children: [
+                for (final align in <Alignment>[
+                  Alignment.topLeft,
+                  Alignment.topCenter,
+                  Alignment.topRight,
+                  Alignment.centerLeft,
+                  Alignment.center,
+                  Alignment.centerRight,
+                  Alignment.bottomLeft,
+                  Alignment.bottomCenter,
+                  Alignment.bottomRight,
+                ])
+                  SvgImage(
+                    svg: svg,
+                    fit: BoxFit.cover,
+                    alignment: align,
+                  ),
+              ],
+            ),
+            SizedBox(height: 10),
+            SizedBox(
+              width: 180,
+              child: GridView(
+                crossAxisCount: 3,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 3.3,
+                children: [
+                  for (final align in <Alignment>[
+                    Alignment.topLeft,
+                    Alignment.topCenter,
+                    Alignment.topRight,
+                    Alignment.centerLeft,
+                    Alignment.center,
+                    Alignment.centerRight,
+                    Alignment.bottomLeft,
+                    Alignment.bottomCenter,
+                    Alignment.bottomRight,
+                  ])
+                    SvgImage(
+                      svg: svg,
+                      fit: BoxFit.cover,
+                      alignment: align,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  });
+
   tearDownAll(() async {
     final file = File('widgets-svg.pdf');
     await file.writeAsBytes(await pdf.save());

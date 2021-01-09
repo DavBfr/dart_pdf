@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0
+
+- Fix SVG fit alignment
+
 ## 2.0.0
 
 - A borderRadius can only be given for a uniform Border

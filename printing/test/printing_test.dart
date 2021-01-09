@@ -16,9 +16,11 @@
 
 import 'dart:typed_data';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pdf/pdf.dart';
+
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:printing/printing.dart';
 import 'package:printing/src/interface.dart';
@@ -111,6 +113,19 @@ void main() {
       Printing.raster(Uint8List(0)),
       null,
     );
+  });
+
+  test('test image', () async {
+    final bytes = Uint8List.fromList([
+      137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 1, //
+      0, 0, 0, 1, 0, 1, 3, 0, 0, 0, 102, 188, 58, 37, 0, 0, 0, 3, 80, 76, 84,
+      69, 181, 208, 208, 99, 4, 22, 234, 0, 0, 0, 31, 73, 68, 65, 84, 104,
+      129, 237, 193, 1, 13, 0, 0, 0, 194, 160, 247, 79, 109, 14, 55, 160, 0, 0,
+      0, 0, 0, 0, 0, 0, 190, 13, 33, 0, 0, 1, 154, 96, 225, 213, 0, 0, 0, 0, 73,
+      69, 78, 68, 174, 66, 96, 130
+    ]);
+    final imageProvider = Image.memory(bytes).image;
+    expect(await flutterImageProvider(imageProvider), isNotNull);
   });
 }
 
