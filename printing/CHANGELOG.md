@@ -1,8 +1,9 @@
 # Changelog
 
-## 4.0.1
+## 4.1.0
 
 - Remove useless files
+- Add WidgetWraper ImageProvider and deprecate wrapWidget()
 
 ## 4.0.0
 
