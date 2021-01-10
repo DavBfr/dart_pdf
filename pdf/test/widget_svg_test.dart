@@ -176,6 +176,25 @@ void main() {
     );
   });
 
+  test('SVG Decoration', () {
+    const svg =
+        '<?xml version="1.0" encoding="UTF-8"?><svg version="1.1" viewBox="10 20 200 200" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="c" x1="104.74" x2="124.51" y1="139.75" y2="207.77" gradientUnits="userSpaceOnUse"><stop stop-color="#00b11f" offset="0"/><stop stop-color="#b7feb2" offset="1"/></linearGradient><radialGradient id="b" cx="111.9" cy="-15.337" r="109.52" gradientTransform="matrix(-1.3031 .011643 -.009978 -1.1168 257.57 3.3384)" gradientUnits="userSpaceOnUse"><stop stop-color="#2b005f" offset="0"/><stop stop-color="#000d2f" stop-opacity=".96863" offset="1"/></radialGradient><radialGradient id="a" cx="44.694" cy="60.573" r="18.367" gradientTransform="matrix(1.3554 -.02668 .025662 1.3036 -17.437 -17.229)" gradientUnits="userSpaceOnUse"><stop stop-color="#fff" offset="0"/><stop stop-color="#fff" offset=".26769"/><stop offset="1"/></radialGradient></defs><rect x="1.0204" y="15.918" width="219.05" height="137.96" fill="url(#b)"/><path d="m7.3366 145.63c18.171-6.1454 39.144-16.294 58.552-17.914 9.8733-0.82444 17.181 2.9663 26.609 3.7683 6.6883 0.5689 13.518-1.197 20.165-1.628 6.1933-0.40163 12.496 0.51633 18.68 0 14.232-1.1883 28.257-5.7867 41.947-9.5924 4.7147-1.3106 9.3415-3.1133 14.216-3.7037 9.5303-1.1544 17.923 2.038 26.533 2.038l-1.0187 108.26-206.51-4.6042z" fill="url(#c)"/><ellipse cx="49.864" cy="56.735" rx="18.367" ry="18.231" fill="url(#a)"/></svg> ';
+
+    pdf.addPage(
+      Page(
+        build: (context) => Container(
+          decoration: const BoxDecoration(
+            color: PdfColors.blue100,
+            image: DecorationSvgImage(svg: svg),
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.all(20),
+          child: PdfLogo(),
+        ),
+      ),
+    );
+  });
+
   tearDownAll(() async {
     final file = File('widgets-svg.pdf');
     await file.writeAsBytes(await pdf.save());

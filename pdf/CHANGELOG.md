@@ -3,6 +3,7 @@
 ## 2.1.0
 
 - Fix SVG fit alignment
+- Add DecorationSvgImage
 
 ## 2.0.0
 

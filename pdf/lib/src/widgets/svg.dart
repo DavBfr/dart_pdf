@@ -132,3 +132,28 @@ class SvgImage extends Widget {
     context.canvas.restoreContext();
   }
 }
+
+@immutable
+class DecorationSvgImage extends DecorationGraphic {
+  const DecorationSvgImage({
+    @required this.svg,
+    this.fit = BoxFit.cover,
+    this.alignment = Alignment.center,
+  })  : assert(svg != null),
+        assert(fit != null),
+        assert(alignment != null);
+
+  final String svg;
+  final BoxFit fit;
+  final Alignment alignment;
+
+  @override
+  void paint(Context context, PdfRect box) {
+    Widget.draw(
+      SvgImage(svg: svg, fit: fit, alignment: alignment),
+      offset: box.offset,
+      context: context,
+      constraints: BoxConstraints.tight(box.size),
+    );
+  }
+}

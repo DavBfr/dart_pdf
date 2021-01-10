@@ -31,7 +31,14 @@ import 'widget.dart';
 enum DecorationPosition { background, foreground }
 
 @immutable
-class DecorationImage {
+abstract class DecorationGraphic {
+  const DecorationGraphic();
+
+  void paint(Context context, PdfRect box);
+}
+
+@immutable
+class DecorationImage extends DecorationGraphic {
   const DecorationImage({
     @required this.image,
     this.fit = BoxFit.cover,
@@ -46,6 +53,7 @@ class DecorationImage {
   final Alignment alignment;
   final double dpi;
 
+  @override
   void paint(Context context, PdfRect box) {
     final _image = image.resolve(context, box.size, dpi: dpi);
 
@@ -314,7 +322,7 @@ class BoxDecoration {
   final BoxBorder border;
   final BorderRadius borderRadius;
   final BoxShape shape;
-  final DecorationImage image;
+  final DecorationGraphic image;
   final Gradient gradient;
   final List<BoxShadow> boxShadow;
 
