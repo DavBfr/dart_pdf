@@ -88,8 +88,8 @@ enum PdfTextRenderingMode {
 @immutable
 class _PdfGraphicsContext {
   const _PdfGraphicsContext({
-    @required this.ctm,
-  }) : assert(ctm != null);
+    required this.ctm,
+  });
   final Matrix4 ctm;
 
   _PdfGraphicsContext copy() => _PdfGraphicsContext(
@@ -108,16 +108,16 @@ class PdfGraphics {
   static const double _m4 = 0.551784;
 
   /// Graphic context
-  _PdfGraphicsContext _context;
+  late _PdfGraphicsContext _context;
   final Queue<_PdfGraphicsContext> _contextQueue = Queue<_PdfGraphicsContext>();
 
-  final PdfGraphicStream _page;
+  final PdfGraphicStream? _page;
 
   /// Buffer where to write the graphic operations
   final PdfStream buf;
 
   /// Default font if none selected
-  PdfFont get defaultFont => _page.getDefaultFont();
+  PdfFont? get defaultFont => _page!.getDefaultFont();
 
   /// Draw a surface on the previously defined shape
   /// set evenOdd to false to use the nonzero winding number rule to determine the region to fill and to true to use the even-odd rule to determine the region to fill
@@ -150,7 +150,7 @@ class PdfGraphics {
   /// Apply a shader
   void applyShader(PdfShading shader) {
     // The shader needs to be registered in the page resources
-    _page.addShader(shader);
+    _page!.addShader(shader);
     buf.putString('${shader.name} sh\n');
   }
 
@@ -174,12 +174,12 @@ class PdfGraphics {
   }
 
   /// Draws an image onto the page.
-  void drawImage(PdfImage img, double x, double y, [double w, double h]) {
+  void drawImage(PdfImage img, double x, double y, [double? w, double? h]) {
     w ??= img.width.toDouble();
     h ??= img.height.toDouble() * w / img.width.toDouble();
 
     // The image needs to be registered in the page resources
-    _page.addXObject(img);
+    _page!.addXObject(img);
 
     // q w 0 0 h x y cm % the coordinate matrix
     buf.putString('q ');
@@ -214,7 +214,7 @@ class PdfGraphics {
   }
 
   /// Draws a line between two coordinates.
-  void drawLine(double x1, double y1, double x2, double y2) {
+  void drawLine(double? x1, double? y1, double? x2, double? y2) {
     moveTo(x1, y1);
     lineTo(x2, y2);
   }
@@ -230,12 +230,12 @@ class PdfGraphics {
 
   /// Draws a Rectangle
   void drawRect(
-    double x,
-    double y,
-    double w,
-    double h,
+    double? x,
+    double? y,
+    double? w,
+    double? h,
   ) {
-    PdfNumList(<double>[x, y, w, h]).output(buf);
+    PdfNumList(<double?>[x, y, w, h]).output(buf);
     buf.putString(' re\n');
   }
 
@@ -262,17 +262,17 @@ class PdfGraphics {
   void setFont(
     PdfFont font,
     double size, {
-    double charSpace = 0,
+    double? charSpace = 0,
     double wordSpace = 0,
     double scale = 1,
-    PdfTextRenderingMode mode = PdfTextRenderingMode.fill,
+    PdfTextRenderingMode? mode = PdfTextRenderingMode.fill,
     double rise = 0,
   }) {
     buf.putString('${font.name} ');
     PdfNum(size).output(buf);
     buf.putString(' Tf\n');
     if (charSpace != 0) {
-      PdfNum(charSpace).output(buf);
+      PdfNum(charSpace!).output(buf);
       buf.putString(' Tc\n');
     }
     if (wordSpace != 0) {
@@ -288,7 +288,7 @@ class PdfGraphics {
       buf.putString(' Ts\n');
     }
     if (mode != PdfTextRenderingMode.fill) {
-      buf.putString('${mode.index} Tr\n');
+      buf.putString('${mode!.index} Tr\n');
     }
   }
 
@@ -297,18 +297,18 @@ class PdfGraphics {
     PdfFont font,
     double size,
     String s,
-    double x,
+    double? x,
     double y, {
-    double charSpace = 0,
+    double? charSpace = 0,
     double wordSpace = 0,
     double scale = 1,
-    PdfTextRenderingMode mode = PdfTextRenderingMode.fill,
+    PdfTextRenderingMode? mode = PdfTextRenderingMode.fill,
     double rise = 0,
   }) {
-    _page.addFont(font);
+    _page!.addFont(font);
 
     buf.putString('BT ');
-    PdfNumList(<double>[x, y]).output(buf);
+    PdfNumList(<double?>[x, y]).output(buf);
     buf.putString(' Td ');
     setFont(font, size,
         charSpace: charSpace,
@@ -326,31 +326,31 @@ class PdfGraphics {
   }
 
   /// Sets the color for drawing
-  void setColor(PdfColor color) {
+  void setColor(PdfColor? color) {
     setFillColor(color);
     setStrokeColor(color);
   }
 
   /// Sets the fill color for drawing
-  void setFillColor(PdfColor color) {
+  void setFillColor(PdfColor? color) {
     if (color is PdfColorCmyk) {
       PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
           .output(buf);
       buf.putString(' k\n');
     } else {
-      PdfNumList(<double>[color.red, color.green, color.blue]).output(buf);
+      PdfNumList(<double>[color!.red, color.green, color.blue]).output(buf);
       buf.putString(' rg\n');
     }
   }
 
   /// Sets the stroke color for drawing
-  void setStrokeColor(PdfColor color) {
+  void setStrokeColor(PdfColor? color) {
     if (color is PdfColorCmyk) {
       PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
           .output(buf);
       buf.putString(' K\n');
     } else {
-      PdfNumList(<double>[color.red, color.green, color.blue]).output(buf);
+      PdfNumList(<double>[color!.red, color.green, color.blue]).output(buf);
       buf.putString(' RG\n');
     }
   }
@@ -358,20 +358,20 @@ class PdfGraphics {
   /// Sets the fill pattern for drawing
   void setFillPattern(PdfPattern pattern) {
     // The shader needs to be registered in the page resources
-    _page.addPattern(pattern);
+    _page!.addPattern(pattern);
     buf.putString('/Pattern cs${pattern.name} scn\n');
   }
 
   /// Sets the stroke pattern for drawing
   void setStrokePattern(PdfPattern pattern) {
     // The shader needs to be registered in the page resources
-    _page.addPattern(pattern);
+    _page!.addPattern(pattern);
     buf.putString('/Pattern CS${pattern.name} SCN\n');
   }
 
   /// Set the graphic state for drawing
   void setGraphicState(PdfGraphicState state) {
-    final name = _page.stateName(state);
+    final name = _page!.stateName(state);
     buf.putString('$name gs\n');
   }
 
@@ -389,14 +389,14 @@ class PdfGraphics {
   }
 
   /// This adds a line segment to the current path
-  void lineTo(double x, double y) {
-    PdfNumList(<double>[x, y]).output(buf);
+  void lineTo(double? x, double? y) {
+    PdfNumList(<double?>[x, y]).output(buf);
     buf.putString(' l\n');
   }
 
   /// This moves the current drawing point.
-  void moveTo(double x, double y) {
-    PdfNumList(<double>[x, y]).output(buf);
+  void moveTo(double? x, double? y) {
+    PdfNumList(<double?>[x, y]).output(buf);
     buf.putString(' m\n');
   }
 
@@ -404,8 +404,8 @@ class PdfGraphics {
   /// using (x1,y1) as the control point at the beginning of the curve
   /// and (x2,y2) as the control point at the end of the curve.
   void curveTo(
-      double x1, double y1, double x2, double y2, double x3, double y3) {
-    PdfNumList(<double>[x1, y1, x2, y2, x3, y3]).output(buf);
+      double? x1, double? y1, double? x2, double? y2, double? x3, double? y3) {
+    PdfNumList(<double?>[x1, y1, x2, y2, x3, y3]).output(buf);
     buf.putString(' c\n');
   }
 
@@ -524,7 +524,7 @@ class PdfGraphics {
   /// the constraints imposed by the other parameters. large and sweep flags
   /// contribute to the automatic calculations and help determine how the arc is drawn.
   void bezierArc(
-      double x1, double y1, double rx, double ry, double x2, double y2,
+      double? x1, double? y1, double rx, double ry, double? x2, double? y2,
       {bool large = false, bool sweep = false, double phi = 0.0}) {
     if (x1 == x2 && y1 == y2) {
       // From https://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes:
@@ -542,12 +542,12 @@ class PdfGraphics {
       // Our box bézier arcs can't handle rotations directly
       // move to a well known point, eliminate phi and transform the other point
       final mat = Matrix4.identity();
-      mat.translate(-x1, -y1);
+      mat.translate(-x1!, -y1!);
       mat.rotateZ(-phi);
-      final tr = mat.transform3(Vector3(x2, y2, 0));
+      final tr = mat.transform3(Vector3(x2!, y2!, 0));
       _endToCenterParameters(0, 0, tr[0], tr[1], large, sweep, rx, ry);
     } else {
-      _endToCenterParameters(x1, y1, x2, y2, large, sweep, rx, ry);
+      _endToCenterParameters(x1!, y1!, x2!, y2!, large, sweep, rx, ry);
     }
   }
 

@@ -25,12 +25,12 @@ import 'theme.dart';
 @immutable
 class PageTheme {
   const PageTheme({
-    PdfPageFormat pageFormat,
+    PdfPageFormat? pageFormat,
     this.buildBackground,
     this.buildForeground,
     this.theme,
-    PageOrientation orientation,
-    EdgeInsets margin,
+    PageOrientation? orientation,
+    EdgeInsets? margin,
     this.clip = false,
     this.textDirection,
   })  : pageFormat = pageFormat ?? PdfPageFormat.standard,
@@ -41,17 +41,17 @@ class PageTheme {
 
   final PageOrientation orientation;
 
-  final EdgeInsets _margin;
+  final EdgeInsets? _margin;
 
-  final BuildCallback buildBackground;
+  final BuildCallback? buildBackground;
 
-  final BuildCallback buildForeground;
+  final BuildCallback? buildForeground;
 
-  final ThemeData theme;
+  final ThemeData? theme;
 
   final bool clip;
 
-  final TextDirection textDirection;
+  final TextDirection? textDirection;
 
   bool get mustRotate =>
       (orientation == PageOrientation.landscape &&
@@ -59,11 +59,11 @@ class PageTheme {
       (orientation == PageOrientation.portrait &&
           pageFormat.width > pageFormat.height);
 
-  EdgeInsets get margin {
+  EdgeInsets? get margin {
     if (_margin != null) {
       if (mustRotate) {
         return EdgeInsets.fromLTRB(
-            _margin.bottom, _margin.left, _margin.top, _margin.right);
+            _margin!.bottom, _margin!.left, _margin!.top, _margin!.right);
       } else {
         return _margin;
       }
@@ -79,14 +79,14 @@ class PageTheme {
   }
 
   PageTheme copyWith({
-    PdfPageFormat pageFormat,
-    BuildCallback buildBackground,
-    BuildCallback buildForeground,
-    Theme theme,
-    PageOrientation orientation,
-    EdgeInsets margin,
-    bool clip,
-    TextDirection textDirection,
+    PdfPageFormat? pageFormat,
+    BuildCallback? buildBackground,
+    BuildCallback? buildForeground,
+    ThemeData? theme,
+    PageOrientation? orientation,
+    EdgeInsets? margin,
+    bool? clip,
+    TextDirection? textDirection,
   }) =>
       PageTheme(
         pageFormat: pageFormat ?? this.pageFormat,

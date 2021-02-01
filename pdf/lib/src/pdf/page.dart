@@ -30,7 +30,7 @@ class PdfPage extends PdfObject with PdfGraphicStream {
   PdfPage(
     PdfDocument pdfDocument, {
     this.pageFormat = PdfPageFormat.standard,
-    int index,
+    int? index,
   }) : super(pdfDocument, type: '/Page') {
     if (index != null) {
       pdfDocument.pdfPageList.pages.insert(index, this);
@@ -60,7 +60,7 @@ class PdfPage extends PdfObject with PdfGraphicStream {
   }
 
   /// This adds an Annotation to the page.
-  void addAnnotation(PdfObject ob) {
+  void addAnnotation(PdfAnnot ob) {
     annotations.add(ob);
   }
 

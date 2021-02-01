@@ -22,8 +22,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
-pw.Document doc;
-pw.Font ttf;
+late pw.Document doc;
+pw.Font? ttf;
 
 void main() {
   final path = Directory.current.path.split('/').last == 'test' ? '..' : '.';

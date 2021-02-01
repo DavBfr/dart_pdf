@@ -335,7 +335,7 @@ class PdfArabic {
         final currentLetter = word.codeUnitAt(j);
 
         if (_isArabicDiacritic(currentLetter)) {
-          newWord.insert(0, _arabicDiacritics[currentLetter]);
+          newWord.insert(0, _arabicDiacritics[currentLetter]!);
           continue;
         }
         final nextLetter = word

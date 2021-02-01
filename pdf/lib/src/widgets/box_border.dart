@@ -38,11 +38,11 @@ abstract class BoxBorder {
     Context context,
     PdfRect box, {
     BoxShape shape = BoxShape.rectangle,
-    BorderRadius borderRadius,
+    BorderRadius? borderRadius,
   });
 
-  static void _setStyle(Context context, BorderStyle style) {
-    switch (style) {
+  static void _setStyle(Context context, BorderStyle? style) {
+    switch (style!) {
       case BorderStyle.none:
       case BorderStyle.solid:
         break;
@@ -59,8 +59,8 @@ abstract class BoxBorder {
     }
   }
 
-  static void _unsetStyle(Context context, BorderStyle style) {
-    switch (style) {
+  static void _unsetStyle(Context context, BorderStyle? style) {
+    switch (style!) {
       case BorderStyle.none:
       case BorderStyle.solid:
         break;
@@ -76,7 +76,7 @@ abstract class BoxBorder {
     _setStyle(context, side.style);
     context.canvas
       ..setStrokeColor(side.color)
-      ..setLineWidth(side.width)
+      ..setLineWidth(side.width!)
       ..drawEllipse(box.x + box.width / 2.0, box.y + box.height / 2.0,
           box.width / 2.0, box.height / 2.0)
       ..strokePath();
@@ -90,7 +90,7 @@ abstract class BoxBorder {
       ..setLineJoin(PdfLineJoin.miter)
       ..setMiterLimit(4)
       ..setStrokeColor(side.color)
-      ..setLineWidth(side.width);
+      ..setLineWidth(side.width!);
     borderRadius.paint(context, box);
     context.canvas.strokePath();
     _unsetStyle(context, side.style);
@@ -103,7 +103,7 @@ abstract class BoxBorder {
       ..setLineJoin(PdfLineJoin.miter)
       ..setMiterLimit(4)
       ..setStrokeColor(side.color)
-      ..setLineWidth(side.width)
+      ..setLineWidth(side.width!)
       ..drawBox(box)
       ..strokePath();
     _unsetStyle(context, side.style);
@@ -124,18 +124,18 @@ class BorderSide {
       BorderSide(width: 0.0, style: BorderStyle.none);
 
   /// The color of this side of the border.
-  final PdfColor color;
+  final PdfColor? color;
 
   /// The width of this side of the border.
-  final double width;
+  final double? width;
 
   /// The style of this side of the border.
-  final BorderStyle style;
+  final BorderStyle? style;
 
   BorderSide copyWith({
-    PdfColor color,
-    double width,
-    BorderStyle style,
+    PdfColor? color,
+    double? width,
+    BorderStyle? style,
   }) =>
       BorderSide(
         color: color,
@@ -168,11 +168,7 @@ class Border extends BoxBorder {
     this.right = BorderSide.none,
     this.bottom = BorderSide.none,
     this.left = BorderSide.none,
-  })  : assert(top != null),
-        assert(right != null),
-        assert(bottom != null),
-        assert(left != null),
-        super();
+  }) : super();
 
   /// A uniform border with all sides the same color and width.
   factory Border.all({
@@ -186,8 +182,7 @@ class Border extends BoxBorder {
 
   /// Creates a border whose sides are all the same.
   const Border.fromBorderSide(BorderSide side)
-      : assert(side != null),
-        top = side,
+      : top = side,
         right = side,
         bottom = side,
         left = side,
@@ -197,9 +192,7 @@ class Border extends BoxBorder {
   const Border.symmetric({
     BorderSide vertical = BorderSide.none,
     BorderSide horizontal = BorderSide.none,
-  })  : assert(vertical != null),
-        assert(horizontal != null),
-        left = vertical,
+  })  : left = vertical,
         top = horizontal,
         right = vertical,
         bottom = horizontal,
@@ -225,13 +218,8 @@ class Border extends BoxBorder {
     Context context,
     PdfRect box, {
     BoxShape shape = BoxShape.rectangle,
-    BorderRadius borderRadius,
+    BorderRadius? borderRadius,
   }) {
-    assert(box.x != null);
-    assert(box.y != null);
-    assert(box.width != null);
-    assert(box.height != null);
-
     if (isUniform) {
       if (top.style == BorderStyle.none) {
         return;
@@ -267,7 +255,7 @@ class Border extends BoxBorder {
       BoxBorder._setStyle(context, top.style);
       context.canvas
         ..setStrokeColor(top.color)
-        ..setLineWidth(top.width)
+        ..setLineWidth(top.width!)
         ..drawLine(box.left, box.top, box.right, box.top)
         ..strokePath();
       BoxBorder._unsetStyle(context, top.style);
@@ -277,7 +265,7 @@ class Border extends BoxBorder {
       BoxBorder._setStyle(context, right.style);
       context.canvas
         ..setStrokeColor(right.color)
-        ..setLineWidth(right.width)
+        ..setLineWidth(right.width!)
         ..drawLine(box.right, box.top, box.right, box.bottom)
         ..strokePath();
       BoxBorder._unsetStyle(context, right.style);
@@ -287,7 +275,7 @@ class Border extends BoxBorder {
       BoxBorder._setStyle(context, bottom.style);
       context.canvas
         ..setStrokeColor(bottom.color)
-        ..setLineWidth(bottom.width)
+        ..setLineWidth(bottom.width!)
         ..drawLine(box.right, box.bottom, box.left, box.bottom)
         ..strokePath();
       BoxBorder._unsetStyle(context, bottom.style);
@@ -297,7 +285,7 @@ class Border extends BoxBorder {
       BoxBorder._setStyle(context, left.style);
       context.canvas
         ..setStrokeColor(left.color)
-        ..setLineWidth(left.width)
+        ..setLineWidth(left.width!)
         ..drawLine(box.left, box.top, box.left, box.bottom)
         ..strokePath();
       BoxBorder._unsetStyle(context, left.style);

@@ -26,21 +26,21 @@ import 'widget.dart';
 @immutable
 class ThemeData extends Inherited {
   factory ThemeData({
-    TextStyle defaultTextStyle,
-    TextStyle paragraphStyle,
-    TextStyle header0,
-    TextStyle header1,
-    TextStyle header2,
-    TextStyle header3,
-    TextStyle header4,
-    TextStyle header5,
-    TextStyle bulletStyle,
-    TextStyle tableHeader,
-    TextStyle tableCell,
-    bool softWrap,
-    TextAlign textAlign,
-    int maxLines,
-    IconThemeData iconTheme,
+    TextStyle? defaultTextStyle,
+    TextStyle? paragraphStyle,
+    TextStyle? header0,
+    TextStyle? header1,
+    TextStyle? header2,
+    TextStyle? header3,
+    TextStyle? header4,
+    TextStyle? header5,
+    TextStyle? bulletStyle,
+    TextStyle? tableHeader,
+    TextStyle? tableCell,
+    bool? softWrap,
+    TextAlign? textAlign,
+    int? maxLines,
+    IconThemeData? iconTheme,
   }) {
     final base = ThemeData.base();
     return base.copyWith(
@@ -63,20 +63,20 @@ class ThemeData extends Inherited {
   }
 
   ThemeData._({
-    @required this.defaultTextStyle,
-    @required this.paragraphStyle,
-    @required this.header0,
-    @required this.header1,
-    @required this.header2,
-    @required this.header3,
-    @required this.header4,
-    @required this.header5,
-    @required this.bulletStyle,
-    @required this.tableHeader,
-    @required this.tableCell,
-    @required this.softWrap,
-    @required this.textAlign,
-    @required this.iconTheme,
+    required this.defaultTextStyle,
+    required this.paragraphStyle,
+    required this.header0,
+    required this.header1,
+    required this.header2,
+    required this.header3,
+    required this.header4,
+    required this.header5,
+    required this.bulletStyle,
+    required this.tableHeader,
+    required this.tableCell,
+    required this.softWrap,
+    required this.textAlign,
+    required this.iconTheme,
     this.maxLines,
   })  : assert(defaultTextStyle.inherit == false),
         assert(paragraphStyle.inherit == false),
@@ -89,16 +89,14 @@ class ThemeData extends Inherited {
         assert(bulletStyle.inherit == false),
         assert(tableHeader.inherit == false),
         assert(tableCell.inherit == false),
-        assert(softWrap != null),
-        assert(maxLines == null || maxLines > 0),
-        assert(iconTheme != null);
+        assert(maxLines == null || maxLines > 0);
 
   factory ThemeData.withFont({
-    Font base,
-    Font bold,
-    Font italic,
-    Font boldItalic,
-    Font icons,
+    Font? base,
+    Font? bold,
+    Font? italic,
+    Font? boldItalic,
+    Font? icons,
   }) {
     final defaultStyle = TextStyle.defaultStyle().copyWith(
       font: base,
@@ -107,7 +105,7 @@ class ThemeData extends Inherited {
       fontItalic: italic,
       fontBoldItalic: boldItalic,
     );
-    final fontSize = defaultStyle.fontSize;
+    final fontSize = defaultStyle.fontSize!;
 
     return ThemeData._(
       defaultTextStyle: defaultStyle,
@@ -131,21 +129,21 @@ class ThemeData extends Inherited {
   factory ThemeData.base() => ThemeData.withFont();
 
   ThemeData copyWith({
-    TextStyle defaultTextStyle,
-    TextStyle paragraphStyle,
-    TextStyle header0,
-    TextStyle header1,
-    TextStyle header2,
-    TextStyle header3,
-    TextStyle header4,
-    TextStyle header5,
-    TextStyle bulletStyle,
-    TextStyle tableHeader,
-    TextStyle tableCell,
-    bool softWrap,
-    TextAlign textAlign,
-    int maxLines,
-    IconThemeData iconTheme,
+    TextStyle? defaultTextStyle,
+    TextStyle? paragraphStyle,
+    TextStyle? header0,
+    TextStyle? header1,
+    TextStyle? header2,
+    TextStyle? header3,
+    TextStyle? header4,
+    TextStyle? header5,
+    TextStyle? bulletStyle,
+    TextStyle? tableHeader,
+    TextStyle? tableCell,
+    bool? softWrap,
+    TextAlign? textAlign,
+    int? maxLines,
+    IconThemeData? iconTheme,
   }) =>
       ThemeData._(
         defaultTextStyle: this.defaultTextStyle.merge(defaultTextStyle),
@@ -184,24 +182,23 @@ class ThemeData extends Inherited {
 
   final TextAlign textAlign;
   final bool softWrap;
-  final int maxLines;
+  final int? maxLines;
 
   final IconThemeData iconTheme;
 }
 
 class Theme extends StatelessWidget {
   Theme({
-    @required this.data,
-    @required this.child,
-  })  : assert(data != null),
-        assert(child != null);
+    required this.data,
+    required this.child,
+  });
 
   final ThemeData data;
 
   final Widget child;
 
   static ThemeData of(Context context) {
-    return context.inherited[ThemeData];
+    return context.dependsOn<ThemeData>()!;
   }
 
   @override
@@ -215,24 +212,20 @@ class Theme extends StatelessWidget {
 
 class DefaultTextStyle extends StatelessWidget implements Inherited {
   DefaultTextStyle({
-    @required this.style,
-    @required this.child,
+    required this.style,
+    required this.child,
     this.textAlign,
     this.softWrap = true,
     this.maxLines,
-  })  : assert(style != null),
-        assert(child != null),
-        assert(softWrap != null),
-        assert(maxLines == null || maxLines > 0);
+  }) : assert(maxLines == null || maxLines > 0);
 
   static Widget merge({
-    TextStyle style,
-    TextAlign textAlign,
-    bool softWrap,
-    int maxLines,
-    @required Widget child,
+    TextStyle? style,
+    TextAlign? textAlign,
+    bool? softWrap,
+    int? maxLines,
+    required Widget child,
   }) {
-    assert(child != null);
     return Builder(
       builder: (Context context) {
         final parent = Theme.of(context);
@@ -252,11 +245,11 @@ class DefaultTextStyle extends StatelessWidget implements Inherited {
 
   final Widget child;
 
-  final TextAlign textAlign;
+  final TextAlign? textAlign;
 
   final bool softWrap;
 
-  final int maxLines;
+  final int? maxLines;
 
   @override
   Widget build(Context context) {

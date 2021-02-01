@@ -27,7 +27,7 @@ class PdfObjectStream extends PdfObject {
   /// Constructs a stream object to store some data
   PdfObjectStream(
     PdfDocument pdfDocument, {
-    String type,
+    String? type,
     this.isBinary = false,
   }) : super(pdfDocument, type: type);
 
@@ -37,7 +37,7 @@ class PdfObjectStream extends PdfObject {
   /// defines if the stream needs to be converted to ascii85
   final bool isBinary;
 
-  Uint8List _data;
+  Uint8List? _data;
 
   @override
   void prepare() {
@@ -48,7 +48,7 @@ class PdfObjectStream extends PdfObject {
       _data = buf.output();
     } else if (pdfDocument.deflate != null) {
       final original = buf.output();
-      final Uint8List newData = pdfDocument.deflate(original);
+      final newData = Uint8List.fromList(pdfDocument.deflate!(original));
       if (newData.lengthInBytes < original.lengthInBytes) {
         params['/Filter'] = const PdfName('/FlateDecode');
         _data = newData;
@@ -67,9 +67,9 @@ class PdfObjectStream extends PdfObject {
       }
     }
     if (pdfDocument.encryption != null) {
-      _data = pdfDocument.encryption.encrypt(_data, this);
+      _data = pdfDocument.encryption!.encrypt(_data!, this);
     }
-    params['/Length'] = PdfNum(_data.length);
+    params['/Length'] = PdfNum(_data!.length);
   }
 
   @override
@@ -77,7 +77,7 @@ class PdfObjectStream extends PdfObject {
     super.writeContent(os);
 
     os.putString('stream\n');
-    os.putBytes(_data);
+    os.putBytes(_data!);
     os.putString('\nendstream\n');
   }
 }

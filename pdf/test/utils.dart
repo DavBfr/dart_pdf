@@ -25,9 +25,9 @@ Future<Uint8List> download(
   String url, {
   bool cache = true,
   String prefix = 'cache_',
-  String suffix,
+  String? suffix,
 }) async {
-  File file;
+  late File file;
   if (cache) {
     if (suffix == null) {
       final l = url.lastIndexOf('.');
@@ -84,8 +84,8 @@ void hexDump(
   ByteData bytes,
   int offset,
   int length, [
-  int highlight,
-  int highlightLength,
+  int? highlight,
+  int? highlightLength,
 ]) {
   const reset = '\x1B[0m';
   const red = '\x1B[1;31m';

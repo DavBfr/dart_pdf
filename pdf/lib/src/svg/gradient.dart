@@ -39,11 +39,11 @@ abstract class SvgGradient extends SvgColor {
         assert(stops.length == opacityList.length),
         super();
 
-  final GradientUnits gradientUnits;
+  final GradientUnits? gradientUnits;
 
   final SvgTransform transform;
 
-  final List<PdfColor> colors;
+  final List<PdfColor?> colors;
 
   final List<double> stops;
 
@@ -53,7 +53,7 @@ abstract class SvgGradient extends SvgColor {
   bool get isEmpty => colors.isEmpty;
 
   PdfPattern buildGradient(
-      SvgOperation op, PdfGraphics canvas, List<PdfColor> colors);
+      SvgOperation op, PdfGraphics canvas, List<PdfColor?> colors);
 
   @override
   void setFillColor(SvgOperation op, PdfGraphics canvas) {
@@ -73,7 +73,7 @@ abstract class SvgGradient extends SvgColor {
           softMask: mask,
         ),
       );
-      final maskCanvas = mask.getGraphics();
+      final maskCanvas = mask.getGraphics()!;
       maskCanvas.drawBox(op.boundingBox());
       maskCanvas.setFillPattern(
         buildGradient(
@@ -99,13 +99,13 @@ abstract class SvgGradient extends SvgColor {
 
 class SvgLinearGradient extends SvgGradient {
   const SvgLinearGradient(
-      GradientUnits gradientUnits,
+      GradientUnits? gradientUnits,
       this.x1,
       this.y1,
       this.x2,
       this.y2,
       SvgTransform transform,
-      List<PdfColor> colors,
+      List<PdfColor?> colors,
       List<double> stops,
       List<double> opacityList)
       : super(gradientUnits, transform, colors, stops, opacityList);
@@ -116,7 +116,7 @@ class SvgLinearGradient extends SvgGradient {
     final x2 = SvgParser.getNumeric(element, 'x2', null)?.sizeValue;
     final y2 = SvgParser.getNumeric(element, 'y2', null)?.sizeValue;
 
-    final colors = <PdfColor>[];
+    final colors = <PdfColor?>[];
     final stops = <double>[];
     final opacityList = <double>[];
 
@@ -127,15 +127,15 @@ class SvgLinearGradient extends SvgGradient {
       final color = SvgColor.fromXml(
           child.getAttribute('stop-color') ?? 'black', painter);
       final opacity =
-          SvgParser.getDouble(child, 'stop-opacity', defaultValue: 1);
-      final stop = SvgParser.getNumeric(child, 'offset', null, defaultValue: 0)
+          SvgParser.getDouble(child, 'stop-opacity', defaultValue: 1)!;
+      final stop = SvgParser.getNumeric(child, 'offset', null, defaultValue: 0)!
           .sizeValue;
       colors.add(color.color);
       stops.add(stop);
       opacityList.add(opacity);
     }
 
-    GradientUnits gradientUnits;
+    GradientUnits? gradientUnits;
     switch (element.getAttribute('gradientUnits')) {
       case 'userSpaceOnUse':
         gradientUnits = GradientUnits.userSpaceOnUse;
@@ -172,10 +172,10 @@ class SvgLinearGradient extends SvgGradient {
     return result;
   }
 
-  final double x1;
-  final double y1;
-  final double x2;
-  final double y2;
+  final double? x1;
+  final double? y1;
+  final double? x2;
+  final double? y2;
 
   SvgLinearGradient mergeWith(SvgLinearGradient other) {
     return SvgLinearGradient(
@@ -193,7 +193,7 @@ class SvgLinearGradient extends SvgGradient {
 
   @override
   PdfPattern buildGradient(
-      SvgOperation op, PdfGraphics canvas, List<PdfColor> colors) {
+      SvgOperation op, PdfGraphics canvas, List<PdfColor?> colors) {
     final mat = canvas.getTransform();
 
     if (gradientUnits != GradientUnits.userSpaceOnUse) {
@@ -204,7 +204,7 @@ class SvgLinearGradient extends SvgGradient {
     }
 
     if (transform.isNotEmpty) {
-      mat.multiply(transform.matrix);
+      mat.multiply(transform.matrix!);
     }
 
     return PdfShadingPattern(
@@ -233,7 +233,7 @@ class SvgLinearGradient extends SvgGradient {
 
 class SvgRadialGradient extends SvgGradient {
   const SvgRadialGradient(
-    GradientUnits gradientUnits,
+    GradientUnits? gradientUnits,
     this.r,
     this.cx,
     this.cy,
@@ -241,26 +241,26 @@ class SvgRadialGradient extends SvgGradient {
     this.fx,
     this.fy,
     SvgTransform transform,
-    List<PdfColor> colors,
+    List<PdfColor?> colors,
     List<double> stops,
     List<double> opacityList,
   ) : super(gradientUnits, transform, colors, stops, opacityList);
 
   factory SvgRadialGradient.fromXml(XmlElement element, SvgPainter painter) {
     final r =
-        SvgParser.getNumeric(element, 'r', null, defaultValue: .5).sizeValue;
+        SvgParser.getNumeric(element, 'r', null, defaultValue: .5)!.sizeValue;
     final cx =
-        SvgParser.getNumeric(element, 'cx', null, defaultValue: .5).sizeValue;
+        SvgParser.getNumeric(element, 'cx', null, defaultValue: .5)!.sizeValue;
     final cy =
-        SvgParser.getNumeric(element, 'cy', null, defaultValue: .5).sizeValue;
+        SvgParser.getNumeric(element, 'cy', null, defaultValue: .5)!.sizeValue;
     final fr =
-        SvgParser.getNumeric(element, 'fr', null, defaultValue: 0).sizeValue;
+        SvgParser.getNumeric(element, 'fr', null, defaultValue: 0)!.sizeValue;
     final fx =
-        SvgParser.getNumeric(element, 'fx', null, defaultValue: cx).sizeValue;
+        SvgParser.getNumeric(element, 'fx', null, defaultValue: cx)!.sizeValue;
     final fy =
-        SvgParser.getNumeric(element, 'fy', null, defaultValue: cy).sizeValue;
+        SvgParser.getNumeric(element, 'fy', null, defaultValue: cy)!.sizeValue;
 
-    final colors = <PdfColor>[];
+    final colors = <PdfColor?>[];
     final stops = <double>[];
     final opacityList = <double>[];
 
@@ -272,14 +272,14 @@ class SvgRadialGradient extends SvgGradient {
           child.getAttribute('stop-color') ?? 'black', painter);
       final opacity =
           SvgParser.getDouble(child, 'stop-opacity', defaultValue: 1);
-      final stop = SvgParser.getNumeric(child, 'offset', null, defaultValue: 0)
+      final stop = SvgParser.getNumeric(child, 'offset', null, defaultValue: 0)!
           .sizeValue;
       colors.add(color.color);
       stops.add(stop);
-      opacityList.add(opacity);
+      opacityList.add(opacity!);
     }
 
-    GradientUnits gradientUnits;
+    GradientUnits? gradientUnits;
     switch (element.getAttribute('gradientUnits')) {
       case 'userSpaceOnUse':
         gradientUnits = GradientUnits.userSpaceOnUse;
@@ -317,12 +317,12 @@ class SvgRadialGradient extends SvgGradient {
     return result;
   }
 
-  final double r;
-  final double cx;
-  final double cy;
-  final double fr;
-  final double fx;
-  final double fy;
+  final double? r;
+  final double? cx;
+  final double? cy;
+  final double? fr;
+  final double? fx;
+  final double? fy;
 
   SvgRadialGradient mergeWith(SvgRadialGradient other) {
     return SvgRadialGradient(
@@ -342,7 +342,7 @@ class SvgRadialGradient extends SvgGradient {
 
   @override
   PdfPattern buildGradient(
-      SvgOperation op, PdfGraphics canvas, List<PdfColor> colors) {
+      SvgOperation op, PdfGraphics canvas, List<PdfColor?> colors) {
     final mat = canvas.getTransform();
 
     if (gradientUnits != GradientUnits.userSpaceOnUse) {
@@ -353,7 +353,7 @@ class SvgRadialGradient extends SvgGradient {
     }
 
     if (transform.isNotEmpty) {
-      mat.multiply(transform.matrix);
+      mat.multiply(transform.matrix!);
     }
 
     return PdfShadingPattern(

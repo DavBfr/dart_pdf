@@ -43,7 +43,7 @@ enum Type1Fonts {
 class Font {
   Font() : font = null;
 
-  Font.type1(this.font) : assert(font != null);
+  Font.type1(Type1Fonts this.font);
 
   factory Font.courier() => Font.type1(Type1Fonts.courier);
   factory Font.courierBold() => Font.type1(Type1Fonts.courierBold);
@@ -63,7 +63,7 @@ class Font {
   factory Font.zapfDingbats() => Font.type1(Type1Fonts.zapfDingbats);
   factory Font.ttf(ByteData data) => TtfFont(data);
 
-  final Type1Fonts font;
+  final Type1Fonts? font;
 
   static const Map<Type1Fonts, String> _type1Map = <Type1Fonts, String>{
     Type1Fonts.courier: 'Courier',
@@ -82,61 +82,58 @@ class Font {
     Type1Fonts.zapfDingbats: 'ZapfDingbats'
   };
 
-  String get fontName => _type1Map[font];
+  String? get fontName => _type1Map[font];
 
   @protected
   PdfFont buildFont(PdfDocument pdfDocument) {
-    final existing = pdfDocument.fonts.firstWhere(
+    return pdfDocument.fonts.firstWhere(
       (PdfFont font) => font.subtype == '/Type1' && font.fontName == fontName,
-      orElse: () => null,
+      orElse: () {
+        switch (font) {
+          case Type1Fonts.courier:
+            return PdfFont.courier(pdfDocument);
+          case Type1Fonts.courierBold:
+            return PdfFont.courierBold(pdfDocument);
+          case Type1Fonts.courierBoldOblique:
+            return PdfFont.courierBoldOblique(pdfDocument);
+          case Type1Fonts.courierOblique:
+            return PdfFont.courierOblique(pdfDocument);
+          case Type1Fonts.helvetica:
+            return PdfFont.helvetica(pdfDocument);
+          case Type1Fonts.helveticaBold:
+            return PdfFont.helveticaBold(pdfDocument);
+          case Type1Fonts.helveticaBoldOblique:
+            return PdfFont.helveticaBoldOblique(pdfDocument);
+          case Type1Fonts.helveticaOblique:
+            return PdfFont.helveticaOblique(pdfDocument);
+          case Type1Fonts.times:
+            return PdfFont.times(pdfDocument);
+          case Type1Fonts.timesBold:
+            return PdfFont.timesBold(pdfDocument);
+          case Type1Fonts.timesBoldItalic:
+            return PdfFont.timesBoldItalic(pdfDocument);
+          case Type1Fonts.timesItalic:
+            return PdfFont.timesItalic(pdfDocument);
+          case Type1Fonts.symbol:
+            return PdfFont.symbol(pdfDocument);
+          case Type1Fonts.zapfDingbats:
+            return PdfFont.zapfDingbats(pdfDocument);
+          case null:
+            return PdfFont.helvetica(pdfDocument);
+        }
+      },
     );
-
-    if (existing != null) {
-      return existing;
-    }
-
-    switch (font) {
-      case Type1Fonts.courier:
-        return PdfFont.courier(pdfDocument);
-      case Type1Fonts.courierBold:
-        return PdfFont.courierBold(pdfDocument);
-      case Type1Fonts.courierBoldOblique:
-        return PdfFont.courierBoldOblique(pdfDocument);
-      case Type1Fonts.courierOblique:
-        return PdfFont.courierOblique(pdfDocument);
-      case Type1Fonts.helvetica:
-        return PdfFont.helvetica(pdfDocument);
-      case Type1Fonts.helveticaBold:
-        return PdfFont.helveticaBold(pdfDocument);
-      case Type1Fonts.helveticaBoldOblique:
-        return PdfFont.helveticaBoldOblique(pdfDocument);
-      case Type1Fonts.helveticaOblique:
-        return PdfFont.helveticaOblique(pdfDocument);
-      case Type1Fonts.times:
-        return PdfFont.times(pdfDocument);
-      case Type1Fonts.timesBold:
-        return PdfFont.timesBold(pdfDocument);
-      case Type1Fonts.timesBoldItalic:
-        return PdfFont.timesBoldItalic(pdfDocument);
-      case Type1Fonts.timesItalic:
-        return PdfFont.timesItalic(pdfDocument);
-      case Type1Fonts.symbol:
-        return PdfFont.symbol(pdfDocument);
-      case Type1Fonts.zapfDingbats:
-        return PdfFont.zapfDingbats(pdfDocument);
-    }
-    return PdfFont.helvetica(pdfDocument);
   }
 
-  PdfFont _pdfFont;
+  PdfFont? _pdfFont;
 
-  PdfFont getFont(Context context) {
+  PdfFont? getFont(Context context) {
     if (_pdfFont == null) {
       final pdfDocument = context.document;
       _pdfFont = buildFont(pdfDocument);
     }
 
-    assert(_pdfFont.pdfDocument == context.document,
+    assert(_pdfFont!.pdfDocument == context.document,
         'Do not reuse a Font object across multiple documents');
 
     return _pdfFont;
@@ -159,9 +156,9 @@ class TtfFont extends Font {
   }
 
   @override
-  String get fontName {
+  String? get fontName {
     if (_pdfFont != null) {
-      return _pdfFont.fontName;
+      return _pdfFont!.fontName;
     }
 
     final font = TtfParser(data);

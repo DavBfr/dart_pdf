@@ -20,14 +20,14 @@ import 'package:vector_math/vector_math_64.dart';
 import 'widget.dart';
 
 class ClipRect extends SingleChildWidget {
-  ClipRect({Widget child}) : super(child: child);
+  ClipRect({Widget? child}) : super(child: child);
 
   @override
   void debugPaint(Context context) {
     context.canvas
       ..setStrokeColor(PdfColors.deepPurple)
       ..setLineWidth(1)
-      ..drawBox(box)
+      ..drawBox(box!)
       ..strokePath();
   }
 
@@ -37,13 +37,13 @@ class ClipRect extends SingleChildWidget {
 
     if (child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box.x, box.y);
+      mat.translate(box!.x, box!.y);
       context.canvas
         ..saveContext()
-        ..drawBox(box)
+        ..drawBox(box!)
         ..clipPath()
         ..setTransform(mat);
-      child.paint(context);
+      child!.paint(context);
       context.canvas.restoreContext();
     }
   }
@@ -51,12 +51,10 @@ class ClipRect extends SingleChildWidget {
 
 class ClipRRect extends SingleChildWidget {
   ClipRRect({
-    Widget child,
+    Widget? child,
     this.horizontalRadius = 0,
     this.verticalRadius = 0,
-  })  : assert(horizontalRadius != null),
-        assert(verticalRadius != null),
-        super(child: child);
+  }) : super(child: child);
 
   final double horizontalRadius;
   final double verticalRadius;
@@ -66,8 +64,8 @@ class ClipRRect extends SingleChildWidget {
     context.canvas
       ..setStrokeColor(PdfColors.deepPurple)
       ..setLineWidth(1)
-      ..drawRRect(
-          box.x, box.y, box.width, box.height, horizontalRadius, verticalRadius)
+      ..drawRRect(box!.x, box!.y, box!.width, box!.height, horizontalRadius,
+          verticalRadius)
       ..strokePath();
   }
 
@@ -77,31 +75,31 @@ class ClipRRect extends SingleChildWidget {
 
     if (child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box.x, box.y);
+      mat.translate(box!.x, box!.y);
       context.canvas
         ..saveContext()
-        ..drawRRect(box.x, box.y, box.width, box.height, horizontalRadius,
+        ..drawRRect(box!.x, box!.y, box!.width, box!.height, horizontalRadius,
             verticalRadius)
         ..clipPath()
         ..setTransform(mat);
-      child.paint(context);
+      child!.paint(context);
       context.canvas.restoreContext();
     }
   }
 }
 
 class ClipOval extends SingleChildWidget {
-  ClipOval({Widget child}) : super(child: child);
+  ClipOval({Widget? child}) : super(child: child);
 
   @override
   void debugPaint(Context context) {
-    final rx = box.width / 2.0;
-    final ry = box.height / 2.0;
+    final rx = box!.width / 2.0;
+    final ry = box!.height / 2.0;
 
     context.canvas
       ..setStrokeColor(PdfColors.deepPurple)
       ..setLineWidth(1)
-      ..drawEllipse(box.x + rx, box.y + ry, rx, ry)
+      ..drawEllipse(box!.x + rx, box!.y + ry, rx, ry)
       ..strokePath();
   }
 
@@ -109,18 +107,18 @@ class ClipOval extends SingleChildWidget {
   void paint(Context context) {
     super.paint(context);
 
-    final rx = box.width / 2.0;
-    final ry = box.height / 2.0;
+    final rx = box!.width / 2.0;
+    final ry = box!.height / 2.0;
 
     if (child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box.x, box.y);
+      mat.translate(box!.x, box!.y);
       context.canvas
         ..saveContext()
-        ..drawEllipse(box.x + rx, box.y + ry, rx, ry)
+        ..drawEllipse(box!.x + rx, box!.y + ry, rx, ry)
         ..clipPath()
         ..setTransform(mat);
-      child.paint(context);
+      child!.paint(context);
       context.canvas.restoreContext();
     }
   }

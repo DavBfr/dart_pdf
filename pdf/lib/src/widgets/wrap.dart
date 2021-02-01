@@ -81,13 +81,7 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
     this.crossAxisAlignment = WrapCrossAlignment.start,
     this.verticalDirection = VerticalDirection.down,
     List<Widget> children = const <Widget>[],
-  })  : assert(direction != null),
-        assert(alignment != null),
-        assert(spacing != null),
-        assert(runAlignment != null),
-        assert(runSpacing != null),
-        assert(crossAxisAlignment != null),
-        super(children: children);
+  }) : super(children: children);
 
   /// The direction to use as the main axis.
   final Axis direction;
@@ -122,83 +116,22 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
 
   final _WrapContext _context = _WrapContext();
 
-  bool get _debugHasNecessaryDirections {
-    assert(direction != null);
-    assert(alignment != null);
-    assert(runAlignment != null);
-    assert(crossAxisAlignment != null);
-    if (children.length > 1) {
-      // i.e. there's more than one child
-      switch (direction) {
-        case Axis.horizontal:
-          assert(textDirection != null,
-              'Horizontal $runtimeType with multiple children has a null textDirection, so the layout order is undefined.');
-          break;
-        case Axis.vertical:
-          assert(verticalDirection != null,
-              'Vertical $runtimeType with multiple children has a null verticalDirection, so the layout order is undefined.');
-          break;
-      }
-    }
-    if (alignment == WrapAlignment.start || alignment == WrapAlignment.end) {
-      switch (direction) {
-        case Axis.horizontal:
-          assert(textDirection != null,
-              'Horizontal $runtimeType with alignment $alignment has a null textDirection, so the alignment cannot be resolved.');
-          break;
-        case Axis.vertical:
-          assert(verticalDirection != null,
-              'Vertical $runtimeType with alignment $alignment has a null verticalDirection, so the alignment cannot be resolved.');
-          break;
-      }
-    }
-    if (runAlignment == WrapAlignment.start ||
-        runAlignment == WrapAlignment.end) {
-      switch (direction) {
-        case Axis.horizontal:
-          assert(verticalDirection != null,
-              'Horizontal $runtimeType with runAlignment $runAlignment has a null verticalDirection, so the alignment cannot be resolved.');
-          break;
-        case Axis.vertical:
-          assert(textDirection != null,
-              'Vertical $runtimeType with runAlignment $runAlignment has a null textDirection, so the alignment cannot be resolved.');
-          break;
-      }
-    }
-    if (crossAxisAlignment == WrapCrossAlignment.start ||
-        crossAxisAlignment == WrapCrossAlignment.end) {
-      switch (direction) {
-        case Axis.horizontal:
-          assert(verticalDirection != null,
-              'Horizontal $runtimeType with crossAxisAlignment $crossAxisAlignment has a null verticalDirection, so the alignment cannot be resolved.');
-          break;
-        case Axis.vertical:
-          assert(textDirection != null,
-              'Vertical $runtimeType with crossAxisAlignment $crossAxisAlignment has a null textDirection, so the alignment cannot be resolved.');
-          break;
-      }
-    }
-    return true;
-  }
-
-  double _getMainAxisExtent(Widget child) {
+  double? _getMainAxisExtent(Widget child) {
     switch (direction) {
       case Axis.horizontal:
-        return child.box.width;
+        return child.box!.width;
       case Axis.vertical:
-        return child.box.height;
+        return child.box!.height;
     }
-    return 0.0;
   }
 
-  double _getCrossAxisExtent(Widget child) {
+  double? _getCrossAxisExtent(Widget child) {
     switch (direction) {
       case Axis.horizontal:
-        return child.box.height;
+        return child.box!.height;
       case Axis.vertical:
-        return child.box.width;
+        return child.box!.width;
     }
-    return 0.0;
   }
 
   PdfPoint _getOffset(double mainAxisOffset, double crossAxisOffset) {
@@ -208,7 +141,6 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
       case Axis.vertical:
         return PdfPoint(crossAxisOffset, mainAxisOffset);
     }
-    return PdfPoint.zero;
   }
 
   double _getChildCrossAxisOffset(bool flipCrossAxis, double runCrossAxisExtent,
@@ -222,21 +154,18 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
       case WrapCrossAlignment.center:
         return freeSpace / 2.0;
     }
-    return 0.0;
   }
 
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    assert(_debugHasNecessaryDirections);
-
     if (children.isEmpty || _context.firstChild >= children.length) {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
       return;
     }
 
-    BoxConstraints childConstraints;
-    var mainAxisLimit = 0.0;
+    BoxConstraints? childConstraints;
+    double? mainAxisLimit = 0.0;
     var flipMainAxis = false;
     var flipCrossAxis = false;
 
@@ -257,9 +186,6 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
         break;
     }
 
-    assert(childConstraints != null);
-    assert(mainAxisLimit != null);
-
     final runMetrics = <_RunMetrics>[];
     final childRunMetrics = <Widget, int>{};
     var mainAxisExtent = 0.0;
@@ -271,8 +197,8 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
     for (var child in children.sublist(_context.firstChild)) {
       child.layout(context, childConstraints, parentUsesSize: true);
 
-      final childMainAxisExtent = _getMainAxisExtent(child);
-      final childCrossAxisExtent = _getCrossAxisExtent(child);
+      final childMainAxisExtent = _getMainAxisExtent(child)!;
+      final childCrossAxisExtent = _getCrossAxisExtent(child)!;
 
       if (childCount > 0 &&
           runMainAxisExtent + spacing + childMainAxisExtent > mainAxisLimit) {
@@ -313,21 +239,21 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
     final runCount = runMetrics.length;
     assert(runCount > 0);
 
-    var containerMainAxisExtent = 0.0;
-    var containerCrossAxisExtent = 0.0;
+    double? containerMainAxisExtent = 0.0;
+    double? containerCrossAxisExtent = 0.0;
 
     switch (direction) {
       case Axis.horizontal:
         box = PdfRect.fromPoints(PdfPoint.zero,
             constraints.constrain(PdfPoint(mainAxisExtent, crossAxisExtent)));
-        containerMainAxisExtent = box.width;
-        containerCrossAxisExtent = box.height;
+        containerMainAxisExtent = box!.width;
+        containerCrossAxisExtent = box!.height;
         break;
       case Axis.vertical:
         box = PdfRect.fromPoints(PdfPoint.zero,
             constraints.constrain(PdfPoint(crossAxisExtent, mainAxisExtent)));
-        containerMainAxisExtent = box.height;
-        containerCrossAxisExtent = box.width;
+        containerMainAxisExtent = box!.height;
+        containerCrossAxisExtent = box!.width;
         break;
     }
 
@@ -423,20 +349,20 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
 
         currentWidget++;
         final childMainAxisExtent = _getMainAxisExtent(child);
-        final childCrossAxisExtent = _getCrossAxisExtent(child);
+        final childCrossAxisExtent = _getCrossAxisExtent(child)!;
         final childCrossAxisOffset = _getChildCrossAxisOffset(
             flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
         if (flipMainAxis) {
-          childMainPosition -= childMainAxisExtent;
+          childMainPosition -= childMainAxisExtent!;
         }
         child.box = PdfRect.fromPoints(
             _getOffset(
                 childMainPosition, crossAxisOffset + childCrossAxisOffset),
-            child.box.size);
+            child.box!.size);
         if (flipMainAxis) {
           childMainPosition -= childBetweenSpace;
         } else {
-          childMainPosition += childMainAxisExtent + childBetweenSpace;
+          childMainPosition += childMainAxisExtent! + childBetweenSpace;
         }
       }
 
@@ -457,7 +383,7 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
     context.canvas.saveContext();
 
     final mat = Matrix4.identity();
-    mat.translate(box.x, box.y);
+    mat.translate(box!.x, box!.y);
     context.canvas.setTransform(mat);
     for (var child
         in children.sublist(_context.firstChild, _context.lastChild)) {

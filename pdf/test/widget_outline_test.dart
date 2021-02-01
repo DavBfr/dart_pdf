@@ -21,14 +21,14 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
-Document pdf;
+late Document pdf;
 
 final LoremText lorem = LoremText(random: Random(42));
 
 Iterable<Widget> level(int i) sync* {
   final text = lorem.sentence(5);
   var p = 0;
-  PdfColor color;
+  PdfColor? color;
   var style = PdfOutlineStyle.normal;
 
   if (i >= 3 && i <= 6) {

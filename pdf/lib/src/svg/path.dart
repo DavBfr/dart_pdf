@@ -64,20 +64,20 @@ class SvgPath extends SvgOperation {
     final _brush = SvgBrush.fromXml(element, brush, painter);
 
     final x =
-        SvgParser.getNumeric(element, 'x', _brush, defaultValue: 0).sizeValue;
+        SvgParser.getNumeric(element, 'x', _brush, defaultValue: 0)!.sizeValue;
     final y =
-        SvgParser.getNumeric(element, 'y', _brush, defaultValue: 0).sizeValue;
+        SvgParser.getNumeric(element, 'y', _brush, defaultValue: 0)!.sizeValue;
     final width =
-        SvgParser.getNumeric(element, 'width', _brush, defaultValue: 0)
+        SvgParser.getNumeric(element, 'width', _brush, defaultValue: 0)!
             .sizeValue;
     final height =
-        SvgParser.getNumeric(element, 'height', _brush, defaultValue: 0)
+        SvgParser.getNumeric(element, 'height', _brush, defaultValue: 0)!
             .sizeValue;
     var rx = SvgParser.getNumeric(element, 'rx', _brush)?.sizeValue;
     var ry = SvgParser.getNumeric(element, 'ry', _brush)?.sizeValue;
 
     ry ??= rx ?? 0;
-    rx ??= ry ?? 0;
+    rx ??= ry;
     final topRight = rx != 0 || ry != 0 ? 'a $rx $ry 0 0 1 $rx $ry' : '';
     final bottomRight = rx != 0 || ry != 0 ? 'a $rx $ry 0 0 1 ${-rx} $ry' : '';
     final bottomLeft =
@@ -102,9 +102,9 @@ class SvgPath extends SvgOperation {
   ) {
     final _brush = SvgBrush.fromXml(element, brush, painter);
 
-    final cx = SvgParser.getNumeric(element, 'cx', _brush).sizeValue;
-    final cy = SvgParser.getNumeric(element, 'cy', _brush).sizeValue;
-    final r = SvgParser.getNumeric(element, 'r', _brush).sizeValue;
+    final cx = SvgParser.getNumeric(element, 'cx', _brush)!.sizeValue;
+    final cy = SvgParser.getNumeric(element, 'cy', _brush)!.sizeValue;
+    final r = SvgParser.getNumeric(element, 'r', _brush)!.sizeValue;
     final d =
         'M${cx - r},${cy}A$r,$r 0,0,0 ${cx + r},${cy}A$r,$r 0,0,0 ${cx - r},${cy}z';
 
@@ -124,10 +124,10 @@ class SvgPath extends SvgOperation {
   ) {
     final _brush = SvgBrush.fromXml(element, brush, painter);
 
-    final cx = SvgParser.getNumeric(element, 'cx', _brush).sizeValue;
-    final cy = SvgParser.getNumeric(element, 'cy', _brush).sizeValue;
-    final rx = SvgParser.getNumeric(element, 'rx', _brush).sizeValue;
-    final ry = SvgParser.getNumeric(element, 'ry', _brush).sizeValue;
+    final cx = SvgParser.getNumeric(element, 'cx', _brush)!.sizeValue;
+    final cy = SvgParser.getNumeric(element, 'cy', _brush)!.sizeValue;
+    final rx = SvgParser.getNumeric(element, 'rx', _brush)!.sizeValue;
+    final ry = SvgParser.getNumeric(element, 'ry', _brush)!.sizeValue;
     final d =
         'M${cx - rx},${cy}A$rx,$ry 0,0,0 ${cx + rx},${cy}A$rx,$ry 0,0,0 ${cx - rx},${cy}z';
 
@@ -184,10 +184,10 @@ class SvgPath extends SvgOperation {
   ) {
     final _brush = SvgBrush.fromXml(element, brush, painter);
 
-    final x1 = SvgParser.getNumeric(element, 'x1', _brush).sizeValue;
-    final y1 = SvgParser.getNumeric(element, 'y1', _brush).sizeValue;
-    final x2 = SvgParser.getNumeric(element, 'x2', _brush).sizeValue;
-    final y2 = SvgParser.getNumeric(element, 'y2', _brush).sizeValue;
+    final x1 = SvgParser.getNumeric(element, 'x1', _brush)!.sizeValue;
+    final y1 = SvgParser.getNumeric(element, 'y1', _brush)!.sizeValue;
+    final x2 = SvgParser.getNumeric(element, 'x2', _brush)!.sizeValue;
+    final y2 = SvgParser.getNumeric(element, 'y2', _brush)!.sizeValue;
     final d = 'M$x1 $y1 $x2 $y2';
 
     return SvgPath(
@@ -203,34 +203,34 @@ class SvgPath extends SvgOperation {
 
   @override
   void paintShape(PdfGraphics canvas) {
-    if (brush.fill.isNotEmpty) {
-      brush.fill.setFillColor(this, canvas);
-      if (brush.fillOpacity < 1) {
+    if (brush.fill!.isNotEmpty) {
+      brush.fill!.setFillColor(this, canvas);
+      if (brush.fillOpacity! < 1) {
         canvas
           ..saveContext()
           ..setGraphicState(PdfGraphicState(opacity: brush.fillOpacity));
       }
       canvas
         ..drawShape(d)
-        ..fillPath(evenOdd: brush.fillEvenOdd);
-      if (brush.fillOpacity < 1) {
+        ..fillPath(evenOdd: brush.fillEvenOdd!);
+      if (brush.fillOpacity! < 1) {
         canvas.restoreContext();
       }
     }
 
-    if (brush.stroke.isNotEmpty) {
-      brush.stroke.setStrokeColor(this, canvas);
-      if (brush.strokeOpacity < 1) {
+    if (brush.stroke!.isNotEmpty) {
+      brush.stroke!.setStrokeColor(this, canvas);
+      if (brush.strokeOpacity! < 1) {
         canvas.setGraphicState(PdfGraphicState(opacity: brush.strokeOpacity));
       }
       canvas
         ..drawShape(d)
-        ..setLineCap(brush.strokeLineCap)
-        ..setLineJoin(brush.strokeLineJoin)
-        ..setMiterLimit(math.max(1.0, brush.strokeMiterLimit))
+        ..setLineCap(brush.strokeLineCap!)
+        ..setLineJoin(brush.strokeLineJoin!)
+        ..setMiterLimit(math.max(1.0, brush.strokeMiterLimit!))
         ..setLineDashPattern(
-            brush.strokeDashArray, brush.strokeDashOffset.toInt())
-        ..setLineWidth(brush.strokeWidth.sizeValue)
+            brush.strokeDashArray!, brush.strokeDashOffset!.toInt())
+        ..setLineWidth(brush.strokeWidth!.sizeValue)
         ..strokePath();
     }
   }

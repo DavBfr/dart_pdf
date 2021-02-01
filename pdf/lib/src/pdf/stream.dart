@@ -57,15 +57,15 @@ class PdfStream {
 
   Uint8List output() => _stream.sublist(0, _offset);
 
-  void putString(String s) {
+  void putString(String? s) {
     assert(() {
-      for (final codeUnit in s.codeUnits) {
+      for (final codeUnit in s!.codeUnits) {
         if (codeUnit > 0x7f) {
           return false;
         }
       }
       return true;
     }());
-    putBytes(s.codeUnits);
+    putBytes(s!.codeUnits);
   }
 }

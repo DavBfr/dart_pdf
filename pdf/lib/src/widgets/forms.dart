@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -29,15 +28,15 @@ import 'widget.dart';
 
 class Checkbox extends SingleChildWidget {
   Checkbox({
-    @required this.value,
+    required this.value,
     this.defaultValue,
     this.tristate = false,
     this.activeColor = PdfColors.blue,
     this.checkColor = PdfColors.white,
-    @required this.name,
+    required this.name,
     double width = 13,
     double height = 13,
-    BoxDecoration decoration,
+    BoxDecoration? decoration,
   }) : super(
             child: Container(
                 width: width,
@@ -52,7 +51,7 @@ class Checkbox extends SingleChildWidget {
 
   final bool value;
 
-  final bool defaultValue;
+  final bool? defaultValue;
 
   final bool tristate;
 
@@ -68,7 +67,7 @@ class Checkbox extends SingleChildWidget {
     paintChild(context);
 
     final bf = PdfButtonField(
-      rect: context.localToGlobal(box),
+      rect: context.localToGlobal(box!),
       fieldName: name,
       value: value,
       defaultValue: value,
@@ -99,11 +98,11 @@ class FlatButton extends SingleChildWidget {
     PdfColor color = PdfColors.blue,
     PdfColor colorDown = PdfColors.red,
     PdfColor colorRollover = PdfColors.blueAccent,
-    EdgeInsets padding,
-    BoxDecoration decoration,
-    Widget child,
-    @required this.name,
-  })  : _childDown = Container(
+    EdgeInsets? padding,
+    BoxDecoration? decoration,
+    required Widget child,
+    required this.name,
+  })   : _childDown = Container(
           child: DefaultTextStyle(
             style: TextStyle(color: textColor),
             child: child,
@@ -162,7 +161,7 @@ class FlatButton extends SingleChildWidget {
     super.paint(context);
 
     final bf = PdfButtonField(
-      rect: context.localToGlobal(box),
+      rect: context.localToGlobal(box!),
       fieldName: name,
       flags: <PdfAnnotFlags>{PdfAnnotFlags.print},
       fieldFlags: <PdfFieldFlags>{PdfFieldFlags.pushButton},
@@ -175,27 +174,27 @@ class FlatButton extends SingleChildWidget {
     mat
       ..decompose(translation, rotation, scale)
       ..leftTranslate(-translation.x, -translation.y)
-      ..translate(box.x, box.y);
+      ..translate(box!.x, box!.y);
 
     final cn = context.copyWith(
         canvas: bf.appearance(context.document, PdfAnnotApparence.normal,
             matrix: mat, boundingBox: box));
-    child.layout(
-        cn, BoxConstraints.tightFor(width: box.width, height: box.height));
-    child.paint(cn);
+    child!.layout(
+        cn, BoxConstraints.tightFor(width: box!.width, height: box!.height));
+    child!.paint(cn);
 
     final cd = context.copyWith(
         canvas: bf.appearance(context.document, PdfAnnotApparence.down,
             matrix: mat, boundingBox: box));
     _childDown.layout(
-        cd, BoxConstraints.tightFor(width: box.width, height: box.height));
+        cd, BoxConstraints.tightFor(width: box!.width, height: box!.height));
     _childDown.paint(cd);
 
     final cr = context.copyWith(
         canvas: bf.appearance(context.document, PdfAnnotApparence.rollover,
             matrix: mat, boundingBox: box));
     _childRollover.layout(
-        cr, BoxConstraints.tightFor(width: box.width, height: box.height));
+        cr, BoxConstraints.tightFor(width: box!.width, height: box!.height));
     _childRollover.paint(cr);
 
     PdfAnnot(context.page, bf);

@@ -65,7 +65,7 @@ class TextDecoration {
     if (other is! TextDecoration) {
       return false;
     }
-    final TextDecoration typedOther = other;
+    final typedOther = other;
     return _mask == typedOther._mask;
   }
 
@@ -99,11 +99,11 @@ class TextStyle {
   const TextStyle({
     this.inherit = true,
     this.color,
-    Font font,
-    Font fontNormal,
-    Font fontBold,
-    Font fontItalic,
-    Font fontBoldItalic,
+    Font? font,
+    Font? fontNormal,
+    Font? fontBold,
+    Font? fontItalic,
+    Font? fontBoldItalic,
     this.fontSize,
     this.fontWeight,
     this.fontStyle,
@@ -175,70 +175,70 @@ class TextStyle {
 
   final bool inherit;
 
-  final PdfColor color;
+  final PdfColor? color;
 
-  final Font fontNormal;
+  final Font? fontNormal;
 
-  final Font fontBold;
+  final Font? fontBold;
 
-  final Font fontItalic;
+  final Font? fontItalic;
 
-  final Font fontBoldItalic;
+  final Font? fontBoldItalic;
 
   // font height, in pdf unit
-  final double fontSize;
+  final double? fontSize;
 
   /// The typeface thickness to use when painting the text (e.g., bold).
-  final FontWeight fontWeight;
+  final FontWeight? fontWeight;
 
   /// The typeface variant to use when drawing the letters (e.g., italics).
-  final FontStyle fontStyle;
+  final FontStyle? fontStyle;
 
   static const double _defaultFontSize = 12.0 * PdfPageFormat.point;
 
   // spacing between letters, 1.0 being natural spacing
-  final double letterSpacing;
+  final double? letterSpacing;
 
   // spacing between lines, in pdf unit
-  final double lineSpacing;
+  final double? lineSpacing;
 
   // spacing between words, 1.0 being natural spacing
-  final double wordSpacing;
+  final double? wordSpacing;
 
-  final double height;
+  final double? height;
 
-  final BoxDecoration background;
+  final BoxDecoration? background;
 
-  final TextDecoration decoration;
+  final TextDecoration? decoration;
 
-  final PdfColor decorationColor;
+  final PdfColor? decorationColor;
 
-  final TextDecorationStyle decorationStyle;
+  final TextDecorationStyle? decorationStyle;
 
-  final double decorationThickness;
+  final double? decorationThickness;
 
-  final PdfTextRenderingMode renderingMode;
+  final PdfTextRenderingMode? renderingMode;
 
   TextStyle copyWith({
-    PdfColor color,
-    Font font,
-    Font fontNormal,
-    Font fontBold,
-    Font fontItalic,
-    Font fontBoldItalic,
-    double fontSize,
-    FontWeight fontWeight,
-    FontStyle fontStyle,
-    double letterSpacing,
-    double wordSpacing,
-    double lineSpacing,
-    double height,
-    BoxDecoration background,
-    TextDecoration decoration,
-    PdfColor decorationColor,
-    TextDecorationStyle decorationStyle,
-    double decorationThickness,
-    PdfTextRenderingMode renderingMode,
+    PdfColor? color,
+    Font? font,
+    Font? fontNormal,
+    Font? fontBold,
+    Font? fontItalic,
+    Font? fontBoldItalic,
+    double? fontSize,
+    FontWeight? fontWeight,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? wordSpacing,
+    double? lineSpacing,
+    double? height,
+    BoxDecoration? background,
+    TextDecoration? decoration,
+    PdfColor? decorationColor,
+    TextDecorationStyle? decorationStyle,
+    double? decorationThickness,
+    PdfTextRenderingMode? renderingMode,
   }) {
     return TextStyle(
       inherit: inherit,
@@ -267,12 +267,12 @@ class TextStyle {
   /// Creates a copy of this text style replacing or altering the specified
   /// properties.
   TextStyle apply({
-    PdfColor color,
-    Font font,
-    Font fontNormal,
-    Font fontBold,
-    Font fontItalic,
-    Font fontBoldItalic,
+    PdfColor? color,
+    Font? font,
+    Font? fontNormal,
+    Font? fontBold,
+    Font? fontItalic,
+    Font? fontBoldItalic,
     double fontSizeFactor = 1.0,
     double fontSizeDelta = 0.0,
     double letterSpacingFactor = 1.0,
@@ -283,21 +283,12 @@ class TextStyle {
     double heightDelta = 0.0,
     TextDecoration decoration = TextDecoration.none,
   }) {
-    assert(fontSizeFactor != null);
-    assert(fontSizeDelta != null);
     assert(fontSize != null || (fontSizeFactor == 1.0 && fontSizeDelta == 0.0));
-    assert(letterSpacingFactor != null);
-    assert(letterSpacingDelta != null);
     assert(letterSpacing != null ||
         (letterSpacingFactor == 1.0 && letterSpacingDelta == 0.0));
-    assert(wordSpacingFactor != null);
-    assert(wordSpacingDelta != null);
     assert(wordSpacing != null ||
         (wordSpacingFactor == 1.0 && wordSpacingDelta == 0.0));
-    assert(heightFactor != null);
-    assert(heightDelta != null);
-    assert(heightFactor != null || (heightFactor == 1.0 && heightDelta == 0.0));
-    assert(decoration != null);
+    assert(heightFactor == 1.0 && heightDelta == 0.0);
 
     return TextStyle(
       inherit: inherit,
@@ -308,16 +299,16 @@ class TextStyle {
       fontItalic: fontItalic ?? this.fontItalic,
       fontBoldItalic: fontBoldItalic ?? this.fontBoldItalic,
       fontSize:
-          fontSize == null ? null : fontSize * fontSizeFactor + fontSizeDelta,
+          fontSize == null ? null : fontSize! * fontSizeFactor + fontSizeDelta,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       letterSpacing: letterSpacing == null
           ? null
-          : letterSpacing * letterSpacingFactor + letterSpacingDelta,
+          : letterSpacing! * letterSpacingFactor + letterSpacingDelta,
       wordSpacing: wordSpacing == null
           ? null
-          : wordSpacing * wordSpacingFactor + wordSpacingDelta,
-      height: height == null ? null : height * heightFactor + heightDelta,
+          : wordSpacing! * wordSpacingFactor + wordSpacingDelta,
+      height: height == null ? null : height! * heightFactor + heightDelta,
       background: background,
       decoration: decoration,
     );
@@ -325,7 +316,7 @@ class TextStyle {
 
   /// Returns a new text style that is a combination of this style and the given
   /// [other] style.
-  TextStyle merge(TextStyle other) {
+  TextStyle merge(TextStyle? other) {
     if (other == null) {
       return this;
     }
@@ -357,7 +348,7 @@ class TextStyle {
     );
   }
 
-  Font get font {
+  Font? get font {
     if (fontWeight != FontWeight.bold) {
       if (fontStyle != FontStyle.italic) {
         // normal
@@ -386,7 +377,7 @@ class InheritedDirectionality extends Inherited {
   const InheritedDirectionality(this.textDirection);
 
   /// The text direction for this subtree.
-  final TextDirection textDirection;
+  final TextDirection? textDirection;
 }
 
 class Directionality extends StatelessWidget {
@@ -395,10 +386,9 @@ class Directionality extends StatelessWidget {
   ///
   /// The [textDirection] and [child] arguments must not be null.
   Directionality({
-    @required this.textDirection,
-    @required this.child,
-  })  : assert(textDirection != null),
-        assert(child != null);
+    required this.textDirection,
+    required this.child,
+  });
 
   /// The subtree
   final Widget child;
@@ -418,8 +408,7 @@ class Directionality extends StatelessWidget {
   /// TextDirection textDirection = Directionality.of(context);
   /// ```
   static TextDirection of(Context context) {
-    final InheritedDirectionality inherited =
-        context.inherited[InheritedDirectionality];
+    final inherited = context.dependsOn<InheritedDirectionality>();
     return inherited?.textDirection ?? TextDirection.ltr;
   }
 

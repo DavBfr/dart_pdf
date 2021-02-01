@@ -16,7 +16,6 @@
 
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 
 import 'geometry.dart';
@@ -24,18 +23,16 @@ import 'widget.dart';
 
 class CircularProgressIndicator extends Widget {
   CircularProgressIndicator(
-      {@required this.value,
+      {required this.value,
       this.color,
       this.strokeWidth = 4.0,
-      this.backgroundColor})
-      : assert(value != null),
-        assert(strokeWidth != null);
+      this.backgroundColor});
 
   final double value;
 
-  final PdfColor color;
+  final PdfColor? color;
 
-  final PdfColor backgroundColor;
+  final PdfColor? backgroundColor;
 
   final double strokeWidth;
 
@@ -49,26 +46,26 @@ class CircularProgressIndicator extends Widget {
   void paint(Context context) {
     super.paint(context);
 
-    final double adjustedValue = value.clamp(0.00001, .99999);
-    final rx = box.width / 2;
-    final ry = box.height / 2;
+    final adjustedValue = value.clamp(0.00001, .99999);
+    final rx = box!.width / 2;
+    final ry = box!.height / 2;
     const angleStart = math.pi / 2;
     final angleEnd = angleStart - math.pi * 2 * adjustedValue;
     final startTop = PdfPoint(
-      box.x + rx + math.cos(angleStart) * rx,
-      box.y + ry + math.sin(angleStart) * ry,
+      box!.x + rx + math.cos(angleStart) * rx,
+      box!.y + ry + math.sin(angleStart) * ry,
     );
     final endTop = PdfPoint(
-      box.x + rx + math.cos(angleEnd) * rx,
-      box.y + ry + math.sin(angleEnd) * ry,
+      box!.x + rx + math.cos(angleEnd) * rx,
+      box!.y + ry + math.sin(angleEnd) * ry,
     );
     final startBottom = PdfPoint(
-      box.x + rx + math.cos(angleStart) * (rx - strokeWidth),
-      box.y + ry + math.sin(angleStart) * (ry - strokeWidth),
+      box!.x + rx + math.cos(angleStart) * (rx - strokeWidth),
+      box!.y + ry + math.sin(angleStart) * (ry - strokeWidth),
     );
     final endBottom = PdfPoint(
-      box.x + rx + math.cos(angleEnd) * (rx - strokeWidth),
-      box.y + ry + math.sin(angleEnd) * (ry - strokeWidth),
+      box!.x + rx + math.cos(angleEnd) * (rx - strokeWidth),
+      box!.y + ry + math.sin(angleEnd) * (ry - strokeWidth),
     );
 
     if (backgroundColor != null && value < 1) {

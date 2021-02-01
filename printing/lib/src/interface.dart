@@ -69,7 +69,7 @@ abstract class PrintingPlatform extends PlatformInterface {
   Future<List<Printer>> listPrinters();
 
   /// Opens the native printer picker interface, and returns the URL of the selected printer.
-  Future<Printer> pickPrinter(Rect bounds);
+  Future<Printer?> pickPrinter(Rect bounds);
 
   /// Prints a Pdf document to a specific local printer with no UI
   ///
@@ -93,14 +93,14 @@ abstract class PrintingPlatform extends PlatformInterface {
   /// Convert an html document to a pdf data
   Future<Uint8List> convertHtml(
     String html,
-    String baseUrl,
+    String? baseUrl,
     PdfPageFormat format,
   );
 
   /// Convert a Pdf document to bitmap images
   Stream<PdfRaster> raster(
     Uint8List document,
-    List<int> pages,
+    List<int>? pages,
     double dpi,
   );
 }

@@ -40,7 +40,7 @@ void printMetrics(
   final x = (size.x - metrics.maxWidth) / 2.0;
   final y = (size.y - metrics.maxHeight) / 2.0 - metrics.descent;
 
-  int index;
+  int? index;
   if (font is PdfTtfFont) {
     index = font.font.charToGlyphIndexMap[codeUnit];
   }
@@ -80,22 +80,22 @@ void printMetrics(
     ..drawString(font, fontSize, String.fromCharCode(codeUnit), x, y)
     // Metrics information
     ..setFillColor(PdfColors.black)
-    ..drawString(canvas.defaultFont, s,
+    ..drawString(canvas.defaultFont!, s,
         'unicode: 0x${codeUnit.toRadixString(16)}', 10, size.y - 20 - s * 0)
-    ..drawString(canvas.defaultFont, s, 'index: 0x${index.toRadixString(16)}',
+    ..drawString(canvas.defaultFont!, s, 'index: 0x${index!.toRadixString(16)}',
         10, size.y - 20 - s * 1)
-    ..drawString(canvas.defaultFont, s, 'left: ${m.left.toInt()}', 10,
+    ..drawString(canvas.defaultFont!, s, 'left: ${m.left.toInt()}', 10,
         size.y - 20 - s * 2)
-    ..drawString(canvas.defaultFont, s, 'right: ${m.right.toInt()}', 10,
+    ..drawString(canvas.defaultFont!, s, 'right: ${m.right.toInt()}', 10,
         size.y - 20 - s * 3)
-    ..drawString(
-        canvas.defaultFont, s, 'top: ${m.top.toInt()}', 10, size.y - 20 - s * 4)
-    ..drawString(canvas.defaultFont, s, 'bottom: ${m.bottom.toInt()}', 10,
+    ..drawString(canvas.defaultFont!, s, 'top: ${m.top.toInt()}', 10,
+        size.y - 20 - s * 4)
+    ..drawString(canvas.defaultFont!, s, 'bottom: ${m.bottom.toInt()}', 10,
         size.y - 20 - s * 5)
-    ..drawString(canvas.defaultFont, s,
+    ..drawString(canvas.defaultFont!, s,
         'advanceWidth: ${m.advanceWidth.toInt()}', 10, size.y - 20 - s * 6)
-    ..drawString(canvas.defaultFont, s, 'leftBearing: ${m.leftBearing.toInt()}',
-        10, size.y - 20 - s * 7);
+    ..drawString(canvas.defaultFont!, s,
+        'leftBearing: ${m.leftBearing.toInt()}', 10, size.y - 20 - s * 7);
 }
 
 void main() {
@@ -113,7 +113,7 @@ void main() {
             .codeUnits) {
       pdf.addPage(Page(
           pageFormat: const PdfPageFormat(500, 500, marginAll: 20),
-          build: (Context context) {
+          build: (Context? context) {
             return ConstrainedBox(
                 constraints: const BoxConstraints.expand(),
                 child: FittedBox(

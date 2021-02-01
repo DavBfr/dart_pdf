@@ -22,8 +22,8 @@ import 'package:test/test.dart';
 
 import 'utils.dart';
 
-Document pdf;
-Font icons;
+late Document pdf;
+Font? icons;
 
 void main() {
   setUpAll(() {
@@ -38,7 +38,7 @@ void main() {
         theme: ThemeData.withFont(icons: icons),
         build: (Context context) {
           final iconList = <IconData>[];
-          final pdfFont = icons.getFont(context);
+          final pdfFont = icons!.getFont(context);
           if (pdfFont is PdfTtfFont) {
             iconList.addAll(
               pdfFont.font.charToGlyphIndexMap.keys

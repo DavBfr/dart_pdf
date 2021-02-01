@@ -16,7 +16,6 @@
 
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -29,8 +28,8 @@ class _GridViewContext extends WidgetContext {
   int firstChild = 0;
   int lastChild = 0;
 
-  double childCrossAxis;
-  double childMainAxis;
+  double? childCrossAxis;
+  double? childMainAxis;
 
   @override
   void apply(WidgetContext other) {
@@ -60,14 +59,12 @@ class GridView extends MultiChildWidget implements SpanningWidget {
   GridView(
       {this.direction = Axis.vertical,
       this.padding = EdgeInsets.zero,
-      @required this.crossAxisCount,
+      required this.crossAxisCount,
       this.mainAxisSpacing = 0.0,
       this.crossAxisSpacing = 0.0,
       this.childAspectRatio = double.infinity,
       List<Widget> children = const <Widget>[]})
-      : assert(padding != null),
-        assert(crossAxisCount != null),
-        super(children: children);
+      : super(children: children);
 
   final Axis direction;
   final EdgeInsets padding;
@@ -78,7 +75,7 @@ class GridView extends MultiChildWidget implements SpanningWidget {
 
   final _GridViewContext _context = _GridViewContext();
 
-  int _mainAxisCount;
+  int? _mainAxisCount;
 
   @override
   void layout(Context context, BoxConstraints constraints,
@@ -97,8 +94,8 @@ class GridView extends MultiChildWidget implements SpanningWidget {
       return true;
     }());
 
-    double mainAxisExtent;
-    double crossAxisExtent;
+    late double mainAxisExtent;
+    late double crossAxisExtent;
     switch (direction) {
       case Axis.vertical:
         mainAxisExtent = constraints.maxHeight - padding.vertical;
@@ -118,37 +115,37 @@ class GridView extends MultiChildWidget implements SpanningWidget {
           (crossAxisSpacing * (crossAxisCount - 1) / crossAxisCount);
 
       _context.childMainAxis = math.min(
-          _context.childCrossAxis * childAspectRatio,
-          mainAxisExtent / _mainAxisCount -
-              (mainAxisSpacing * (_mainAxisCount - 1) / _mainAxisCount));
+          _context.childCrossAxis! * childAspectRatio,
+          mainAxisExtent / _mainAxisCount! -
+              (mainAxisSpacing * (_mainAxisCount! - 1) / _mainAxisCount!));
 
-      if (_context.childCrossAxis.isInfinite) {
+      if (_context.childCrossAxis!.isInfinite) {
         throw Exception(
             'Unable to calculate child height as the height constraint is infinite.');
       }
     } else {
       _mainAxisCount = ((mainAxisExtent + mainAxisSpacing) /
-              (mainAxisSpacing + _context.childMainAxis))
+              (mainAxisSpacing + _context.childMainAxis!))
           .floor();
 
-      if (_mainAxisCount < 0) {
+      if (_mainAxisCount! < 0) {
         // Not enough space to put one line, try to ask for more space.
         _mainAxisCount = 0;
       }
     }
 
     final totalMain =
-        (_context.childMainAxis + mainAxisSpacing) * _mainAxisCount -
+        (_context.childMainAxis! + mainAxisSpacing) * _mainAxisCount! -
             mainAxisSpacing;
     final totalCross =
-        (_context.childCrossAxis + crossAxisSpacing) * crossAxisCount -
+        (_context.childCrossAxis! + crossAxisSpacing) * crossAxisCount -
             crossAxisSpacing;
 
     final startX = padding.left;
     const startY = 0.0;
-    double mainAxis;
-    double crossAxis;
-    BoxConstraints innerConstraints;
+    late double mainAxis;
+    late double crossAxis;
+    BoxConstraints? innerConstraints;
     switch (direction) {
       case Axis.vertical:
         innerConstraints = BoxConstraints.tightFor(
@@ -170,7 +167,7 @@ class GridView extends MultiChildWidget implements SpanningWidget {
     for (var child in children.sublist(
         _context.firstChild,
         math.min(children.length,
-            _context.firstChild + crossAxisCount * _mainAxisCount))) {
+            _context.firstChild + crossAxisCount * _mainAxisCount!))) {
       child.layout(context, innerConstraints);
       assert(child.box != null);
 
@@ -178,29 +175,30 @@ class GridView extends MultiChildWidget implements SpanningWidget {
         case Axis.vertical:
           child.box = PdfRect.fromPoints(
               PdfPoint(
-                  (_context.childCrossAxis - child.box.width) / 2.0 + crossAxis,
+                  (_context.childCrossAxis! - child.box!.width) / 2.0 +
+                      crossAxis,
                   totalMain +
                       padding.bottom -
-                      (_context.childMainAxis - child.box.height) / 2.0 -
+                      (_context.childMainAxis! - child.box!.height) / 2.0 -
                       mainAxis -
-                      child.box.height),
-              child.box.size);
+                      child.box!.height),
+              child.box!.size);
           break;
         case Axis.horizontal:
           child.box = PdfRect.fromPoints(
               PdfPoint(
-                  (_context.childMainAxis - child.box.width) / 2.0 + mainAxis,
+                  (_context.childMainAxis! - child.box!.width) / 2.0 + mainAxis,
                   totalCross +
                       padding.bottom -
-                      (_context.childCrossAxis - child.box.height) / 2.0 -
+                      (_context.childCrossAxis! - child.box!.height) / 2.0 -
                       crossAxis -
-                      child.box.height),
-              child.box.size);
+                      child.box!.height),
+              child.box!.size);
           break;
       }
 
       if (++c >= crossAxisCount) {
-        mainAxis += _context.childMainAxis + mainAxisSpacing;
+        mainAxis += _context.childMainAxis! + mainAxisSpacing;
         switch (direction) {
           case Axis.vertical:
             crossAxis = startX;
@@ -217,7 +215,7 @@ class GridView extends MultiChildWidget implements SpanningWidget {
           break;
         }
       } else {
-        crossAxis += _context.childCrossAxis + crossAxisSpacing;
+        crossAxis += _context.childCrossAxis! + crossAxisSpacing;
       }
       _context.lastChild++;
     }
@@ -246,14 +244,14 @@ class GridView extends MultiChildWidget implements SpanningWidget {
 
     context.canvas
       ..setFillColor(PdfColors.lime)
-      ..moveTo(box.left, box.bottom)
-      ..lineTo(box.right, box.bottom)
-      ..lineTo(box.right, box.top)
-      ..lineTo(box.left, box.top)
-      ..moveTo(box.left + padding.left, box.bottom + padding.bottom)
-      ..lineTo(box.left + padding.left, box.top - padding.top)
-      ..lineTo(box.right - padding.right, box.top - padding.top)
-      ..lineTo(box.right - padding.right, box.bottom + padding.bottom)
+      ..moveTo(box!.left, box!.bottom)
+      ..lineTo(box!.right, box!.bottom)
+      ..lineTo(box!.right, box!.top)
+      ..lineTo(box!.left, box!.top)
+      ..moveTo(box!.left + padding.left, box!.bottom + padding.bottom)
+      ..lineTo(box!.left + padding.left, box!.top - padding.top)
+      ..lineTo(box!.right - padding.right, box!.top - padding.top)
+      ..lineTo(box!.right - padding.right, box!.bottom + padding.bottom)
       ..fillPath();
 
     for (var c = 1; c < crossAxisCount; c++) {
@@ -261,54 +259,54 @@ class GridView extends MultiChildWidget implements SpanningWidget {
         case Axis.vertical:
           context.canvas
             ..drawRect(
-                box.left +
+                box!.left +
                     padding.left +
-                    (_context.childCrossAxis + crossAxisSpacing) * c -
+                    (_context.childCrossAxis! + crossAxisSpacing) * c -
                     crossAxisSpacing,
-                box.bottom + padding.bottom,
+                box!.bottom + padding.bottom,
                 math.max(crossAxisSpacing, 1),
-                box.height - padding.vertical)
+                box!.height - padding.vertical)
             ..fillPath();
           break;
         case Axis.horizontal:
           context.canvas
             ..drawRect(
-                box.left + padding.left,
-                box.bottom +
+                box!.left + padding.left,
+                box!.bottom +
                     padding.bottom +
-                    (_context.childCrossAxis + crossAxisSpacing) * c -
+                    (_context.childCrossAxis! + crossAxisSpacing) * c -
                     crossAxisSpacing,
-                box.width - padding.horizontal,
+                box!.width - padding.horizontal,
                 math.max(crossAxisSpacing, 1))
             ..fillPath();
           break;
       }
     }
 
-    for (var c = 1; c < _mainAxisCount; c++) {
+    for (var c = 1; c < _mainAxisCount!; c++) {
       switch (direction) {
         case Axis.vertical:
           context.canvas
             ..drawRect(
-                box.left + padding.left,
-                box.bottom +
+                box!.left + padding.left,
+                box!.bottom +
                     padding.bottom +
-                    (_context.childMainAxis + mainAxisSpacing) * c -
+                    (_context.childMainAxis! + mainAxisSpacing) * c -
                     mainAxisSpacing,
-                box.width - padding.horizontal,
+                box!.width - padding.horizontal,
                 math.max(mainAxisSpacing, 1))
             ..fillPath();
           break;
         case Axis.horizontal:
           context.canvas
             ..drawRect(
-                box.left +
+                box!.left +
                     padding.left +
-                    (_context.childMainAxis + mainAxisSpacing) * c -
+                    (_context.childMainAxis! + mainAxisSpacing) * c -
                     mainAxisSpacing,
-                box.bottom + padding.bottom,
+                box!.bottom + padding.bottom,
                 math.max(mainAxisSpacing, 1),
-                box.height - padding.vertical)
+                box!.height - padding.vertical)
             ..fillPath();
           break;
       }
@@ -320,7 +318,7 @@ class GridView extends MultiChildWidget implements SpanningWidget {
     super.paint(context);
 
     final mat = Matrix4.identity();
-    mat.translate(box.x, box.y);
+    mat.translate(box!.x, box!.y);
     context.canvas
       ..saveContext()
       ..setTransform(mat);

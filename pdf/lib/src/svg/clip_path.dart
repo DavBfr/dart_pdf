@@ -33,7 +33,7 @@ class SvgClipPath {
       return const SvgClipPath(null, true, null);
     }
 
-    Iterable<SvgOperation> children;
+    Iterable<SvgOperation?> children;
 
     if (clipPathAttr.startsWith('url(#')) {
       final id = clipPathAttr.substring(5, clipPathAttr.lastIndexOf(')'));
@@ -41,7 +41,7 @@ class SvgClipPath {
       if (clipPath != null) {
         children = clipPath.children
             .whereType<XmlElement>()
-            .map<SvgOperation>((c) => SvgOperation.fromXml(c, painter, brush));
+            .map<SvgOperation?>((c) => SvgOperation.fromXml(c, painter, brush));
         return SvgClipPath(children, false, painter);
       }
     }
@@ -49,11 +49,11 @@ class SvgClipPath {
     return const SvgClipPath(null, true, null);
   }
 
-  final Iterable<SvgOperation> children;
+  final Iterable<SvgOperation?>? children;
 
   final bool isEmpty;
 
-  final SvgPainter painter;
+  final SvgPainter? painter;
 
   bool get isNotEmpty => !isEmpty;
 
@@ -62,8 +62,8 @@ class SvgClipPath {
       return;
     }
 
-    for (final child in children) {
-      child.draw(canvas);
+    for (final child in children!) {
+      child!.draw(canvas);
     }
     canvas.clipPath();
   }

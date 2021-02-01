@@ -16,7 +16,6 @@
 
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -61,7 +60,7 @@ enum VerticalDirection {
   down,
 }
 
-typedef _ChildSizingFunction = double Function(Widget child, double extent);
+typedef _ChildSizingFunction = double? Function(Widget child, double? extent);
 
 class _FlexContext extends WidgetContext {
   int firstChild = 0;
@@ -86,17 +85,13 @@ class _FlexContext extends WidgetContext {
 
 class Flex extends MultiChildWidget implements SpanningWidget {
   Flex({
-    @required this.direction,
+    required this.direction,
     this.mainAxisAlignment = MainAxisAlignment.start,
     this.mainAxisSize = MainAxisSize.max,
     this.crossAxisAlignment = CrossAxisAlignment.center,
     this.verticalDirection = VerticalDirection.down,
     List<Widget> children = const <Widget>[],
-  })  : assert(direction != null),
-        assert(mainAxisAlignment != null),
-        assert(mainAxisSize != null),
-        assert(crossAxisAlignment != null),
-        super(children: children);
+  }) : super(children: children);
 
   final Axis direction;
 
@@ -111,10 +106,10 @@ class Flex extends MultiChildWidget implements SpanningWidget {
   final _FlexContext _context = _FlexContext();
 
   double _getIntrinsicSize(
-      {Axis sizingDirection,
-      double
+      {Axis? sizingDirection,
+      double?
           extent, // the extent in the direction that isn't the sizing direction
-      _ChildSizingFunction
+      _ChildSizingFunction?
           childSize // a method to find the size in the sizing direction
       }) {
     if (direction == sizingDirection) {
@@ -129,10 +124,10 @@ class Flex extends MultiChildWidget implements SpanningWidget {
         final flex = child is Flexible ? child.flex : 0;
         totalFlex += flex;
         if (flex > 0) {
-          final flexFraction = childSize(child, extent) / flex;
+          final flexFraction = childSize!(child, extent)! / flex;
           maxFlexFractionSoFar = math.max(maxFlexFractionSoFar, flexFraction);
         } else {
-          inflexibleSpace += childSize(child, extent);
+          inflexibleSpace += childSize!(child, extent)!;
         }
       }
       return maxFlexFractionSoFar * totalFlex + inflexibleSpace;
@@ -150,35 +145,35 @@ class Flex extends MultiChildWidget implements SpanningWidget {
       for (var child in children) {
         final flex = child is Flexible ? child.flex : 0;
         totalFlex += flex;
-        double mainSize;
-        double crossSize;
+        double? mainSize;
+        double? crossSize;
         if (flex == 0) {
           switch (direction) {
             case Axis.horizontal:
-              mainSize = child.box.width;
-              crossSize = childSize(child, mainSize);
+              mainSize = child.box!.width;
+              crossSize = childSize!(child, mainSize);
               break;
             case Axis.vertical:
-              mainSize = child.box.height;
-              crossSize = childSize(child, mainSize);
+              mainSize = child.box!.height;
+              crossSize = childSize!(child, mainSize);
               break;
           }
           inflexibleSpace += mainSize;
-          maxCrossSize = math.max(maxCrossSize, crossSize);
+          maxCrossSize = math.max(maxCrossSize, crossSize!);
         }
       }
 
       // Determine the spacePerFlex by allocating the remaining available space.
       // When you're over-constrained spacePerFlex can be negative.
       final spacePerFlex =
-          math.max(0.0, (availableMainSpace - inflexibleSpace) / totalFlex);
+          math.max(0.0, (availableMainSpace! - inflexibleSpace) / totalFlex);
 
       // Size remaining (flexible) items, find the maximum cross size.
       for (var child in children) {
         final flex = child is Flexible ? child.flex : 0;
         if (flex > 0) {
           maxCrossSize =
-              math.max(maxCrossSize, childSize(child, spacePerFlex * flex));
+              math.max(maxCrossSize, childSize!(child, spacePerFlex * flex)!);
         }
       }
 
@@ -190,48 +185,46 @@ class Flex extends MultiChildWidget implements SpanningWidget {
     return _getIntrinsicSize(
         sizingDirection: Axis.horizontal,
         extent: height,
-        childSize: (Widget child, double extent) => child.box.width);
+        childSize: (Widget child, double? extent) => child.box!.width);
   }
 
   double computeMaxIntrinsicWidth(double height) {
     return _getIntrinsicSize(
         sizingDirection: Axis.horizontal,
         extent: height,
-        childSize: (Widget child, double extent) => child.box.width);
+        childSize: (Widget child, double? extent) => child.box!.width);
   }
 
   double computeMinIntrinsicHeight(double width) {
     return _getIntrinsicSize(
         sizingDirection: Axis.vertical,
         extent: width,
-        childSize: (Widget child, double extent) => child.box.height);
+        childSize: (Widget child, double? extent) => child.box!.height);
   }
 
   double computeMaxIntrinsicHeight(double width) {
     return _getIntrinsicSize(
         sizingDirection: Axis.vertical,
         extent: width,
-        childSize: (Widget child, double extent) => child.box.height);
+        childSize: (Widget child, double? extent) => child.box!.height);
   }
 
   double _getCrossSize(Widget child) {
     switch (direction) {
       case Axis.horizontal:
-        return child.box.height;
+        return child.box!.height;
       case Axis.vertical:
-        return child.box.width;
+        return child.box!.width;
     }
-    return null;
   }
 
   double _getMainSize(Widget child) {
     switch (direction) {
       case Axis.horizontal:
-        return child.box.width;
+        return child.box!.width;
       case Axis.vertical:
-        return child.box.height;
+        return child.box!.height;
     }
-    return null;
   }
 
   @override
@@ -239,8 +232,8 @@ class Flex extends MultiChildWidget implements SpanningWidget {
       {bool parentUsesSize = false}) {
     // Determine used flex factor, size inflexible items, calculate free space.
     var totalFlex = 0;
-    Widget lastFlexChild;
-    assert(constraints != null);
+    Widget? lastFlexChild;
+
     final maxMainSize = direction == Axis.horizontal
         ? constraints.maxWidth
         : constraints.maxHeight;
@@ -266,7 +259,7 @@ class Flex extends MultiChildWidget implements SpanningWidget {
         }());
         totalFlex += flex;
       } else {
-        BoxConstraints innerConstraints;
+        BoxConstraints? innerConstraints;
         if (crossAxisAlignment == CrossAxisAlignment.stretch) {
           switch (direction) {
             case Axis.horizontal:
@@ -323,7 +316,7 @@ class Flex extends MultiChildWidget implements SpanningWidget {
                   ? (freeSpace - allocatedFlexSpace)
                   : spacePerFlex * flex)
               : double.infinity;
-          double minChildExtent;
+          double? minChildExtent;
           switch (fit) {
             case FlexFit.tight:
               assert(maxChildExtent < double.infinity);
@@ -333,8 +326,8 @@ class Flex extends MultiChildWidget implements SpanningWidget {
               minChildExtent = 0.0;
               break;
           }
-          assert(minChildExtent != null);
-          BoxConstraints innerConstraints;
+
+          BoxConstraints? innerConstraints;
           if (crossAxisAlignment == CrossAxisAlignment.stretch) {
             switch (direction) {
               case Axis.horizontal:
@@ -383,9 +376,9 @@ class Flex extends MultiChildWidget implements SpanningWidget {
     final idealSize = canFlex && mainAxisSize == MainAxisSize.max
         ? maxMainSize
         : allocatedSize;
-    double actualSize;
+    double? actualSize;
     double actualSizeDelta;
-    PdfPoint size;
+    late PdfPoint size;
     switch (direction) {
       case Axis.horizontal:
         size = constraints.constrain(PdfPoint(idealSize, crossSize));
@@ -403,8 +396,8 @@ class Flex extends MultiChildWidget implements SpanningWidget {
     actualSizeDelta = actualSize - allocatedSize;
 
     final remainingSpace = math.max(0.0, actualSizeDelta);
-    double leadingSpace;
-    double betweenSpace;
+    double? leadingSpace;
+    late double betweenSpace;
     final flipMainAxis = (verticalDirection == VerticalDirection.down &&
             direction == Axis.vertical) ||
         (verticalDirection == VerticalDirection.up &&
@@ -448,7 +441,7 @@ class Flex extends MultiChildWidget implements SpanningWidget {
 
     for (var child
         in children.sublist(_context.firstChild, _context.lastChild)) {
-      double childCrossPosition;
+      double? childCrossPosition;
       switch (crossAxisAlignment) {
         case CrossAxisAlignment.start:
           childCrossPosition =
@@ -471,12 +464,12 @@ class Flex extends MultiChildWidget implements SpanningWidget {
       }
       switch (direction) {
         case Axis.horizontal:
-          child.box = PdfRect(box.x + childMainPosition,
-              box.y + childCrossPosition, child.box.width, child.box.height);
+          child.box = PdfRect(box!.x + childMainPosition,
+              box!.y + childCrossPosition, child.box!.width, child.box!.height);
           break;
         case Axis.vertical:
           child.box = PdfRect(childCrossPosition, childMainPosition,
-              child.box.width, child.box.height);
+              child.box!.width, child.box!.height);
           break;
       }
       if (flipMainAxis) {
@@ -492,7 +485,7 @@ class Flex extends MultiChildWidget implements SpanningWidget {
     super.paint(context);
 
     final mat = Matrix4.identity();
-    mat.translate(box.x, box.y);
+    mat.translate(box!.x, box!.y);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
@@ -562,7 +555,7 @@ class Flexible extends SingleChildWidget {
   Flexible({
     this.flex = 1,
     this.fit = FlexFit.loose,
-    @required Widget child,
+    required Widget child,
   }) : super(child: child);
 
   /// The flex factor to use for this child
@@ -582,7 +575,7 @@ class Expanded extends Flexible {
   Expanded({
     int flex = 1,
     FlexFit fit = FlexFit.tight,
-    @required Widget child,
+    required Widget child,
   }) : super(child: child, flex: flex, fit: fit);
 }
 
@@ -590,8 +583,7 @@ class Expanded extends Flexible {
 /// spacing between widgets in a [Flex] container, like [Row] or [Column].
 class Spacer extends Flexible {
   Spacer({int flex = 1})
-      : assert(flex != null),
-        assert(flex > 0),
+      : assert(flex > 0),
         super(
           flex: flex,
           fit: FlexFit.tight,
@@ -607,7 +599,7 @@ class ListView extends StatelessWidget {
     this.reverse = false,
     this.spacing = 0,
     this.padding,
-    this.children = const <Widget>[],
+    List<Widget> this.children = const <Widget>[],
   })  : itemBuilder = null,
         separatorBuilder = null,
         itemCount = children.length,
@@ -618,9 +610,9 @@ class ListView extends StatelessWidget {
     this.reverse = false,
     this.spacing = 0,
     this.padding,
-    @required this.itemBuilder,
-    @required this.itemCount,
-  })  : children = null,
+    required this.itemBuilder,
+    required this.itemCount,
+  })   : children = null,
         separatorBuilder = null,
         super();
 
@@ -628,29 +620,29 @@ class ListView extends StatelessWidget {
     this.direction = Axis.vertical,
     this.reverse = false,
     this.padding,
-    @required this.itemBuilder,
-    @required this.separatorBuilder,
-    @required this.itemCount,
-  })  : children = null,
+    required this.itemBuilder,
+    required this.separatorBuilder,
+    required this.itemCount,
+  })   : children = null,
         spacing = null,
         super();
 
   final Axis direction;
-  final EdgeInsets padding;
-  final double spacing;
+  final EdgeInsets? padding;
+  final double? spacing;
   final bool reverse;
-  final IndexedWidgetBuilder itemBuilder;
-  final IndexedWidgetBuilder separatorBuilder;
-  final List<Widget> children;
+  final IndexedWidgetBuilder? itemBuilder;
+  final IndexedWidgetBuilder? separatorBuilder;
+  final List<Widget>? children;
   final int itemCount;
 
   Widget _getItem(Context context, int index) {
-    return children == null ? itemBuilder(context, index) : children[index];
+    return children == null ? itemBuilder!(context, index) : children![index];
   }
 
   Widget _getSeparator(Context context, int index) {
     return spacing == null
-        ? separatorBuilder(context, index)
+        ? separatorBuilder!(context, index)
         : direction == Axis.vertical
             ? SizedBox(height: spacing)
             : SizedBox(width: spacing);
@@ -687,7 +679,7 @@ class ListView extends StatelessWidget {
 
     if (padding != null) {
       return Padding(
-        padding: padding,
+        padding: padding!,
         child: widget,
       );
     }

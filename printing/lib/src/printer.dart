@@ -21,15 +21,14 @@ import 'package:meta/meta.dart';
 class Printer {
   /// Create a printer information
   const Printer({
-    @required this.url,
-    String name,
+    required this.url,
+    String? name,
     this.model,
     this.location,
     this.comment,
-    bool isDefault,
-    bool isAvailable,
-  })  : assert(url != null),
-        name = name ?? url,
+    bool? isDefault,
+    bool? isAvailable,
+  })  : name = name ?? url,
         isDefault = isDefault ?? false,
         isAvailable = isAvailable ?? true;
 
@@ -51,13 +50,13 @@ class Printer {
   final String name;
 
   /// The printer model
-  final String model;
+  final String? model;
 
   /// The physical location of the printer
-  final String location;
+  final String? location;
 
   /// A user comment about the printer
-  final String comment;
+  final String? comment;
 
   /// Is this the default printer on the system
   final bool isDefault;

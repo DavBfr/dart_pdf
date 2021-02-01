@@ -32,7 +32,7 @@ import 'use.dart';
 abstract class SvgOperation {
   SvgOperation(this.brush, this.clip, this.transform, this.painter);
 
-  static SvgOperation fromXml(
+  static SvgOperation? fromXml(
       XmlElement element, SvgPainter painter, SvgBrush brush) {
     if (element.getAttribute('visibility') == 'hidden') {
       return null;
@@ -84,16 +84,16 @@ abstract class SvgOperation {
     canvas.saveContext();
     clip.apply(canvas);
     if (transform.isNotEmpty) {
-      canvas.setTransform(transform.matrix);
+      canvas.setTransform(transform.matrix!);
     }
-    if (brush.opacity < 1.0 || brush.blendMode != null) {
+    if (brush.opacity! < 1.0 || brush.blendMode != null) {
       canvas.setGraphicState(PdfGraphicState(
         opacity: brush.opacity == 1 ? null : brush.opacity,
         blendMode: brush.blendMode,
       ));
     }
     if (brush.mask != null) {
-      brush.mask.apply(canvas);
+      brush.mask!.apply(canvas);
     }
     paintShape(canvas);
     canvas.restoreContext();
@@ -105,7 +105,7 @@ abstract class SvgOperation {
   void draw(PdfGraphics canvas) {
     canvas.saveContext();
     if (transform.isNotEmpty) {
-      canvas.setTransform(transform.matrix);
+      canvas.setTransform(transform.matrix!);
     }
     drawShape(canvas);
     canvas.restoreContext();

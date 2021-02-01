@@ -18,7 +18,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:barcode/barcode.dart';
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 
 import 'basic.dart';
@@ -32,7 +31,7 @@ import 'widget.dart';
 
 class _BarcodeWidget extends Widget {
   _BarcodeWidget({
-    @required this.data,
+    required this.data,
     this.barcode,
     this.color = PdfColors.black,
     this.drawText,
@@ -43,15 +42,15 @@ class _BarcodeWidget extends Widget {
   /// the barcode data
   final Uint8List data;
 
-  final Barcode barcode;
+  final Barcode? barcode;
 
   final PdfColor color;
 
-  final bool drawText;
+  final bool? drawText;
 
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
 
-  final double textPadding;
+  final double? textPadding;
 
   @override
   void layout(Context context, BoxConstraints constraints,
@@ -65,19 +64,19 @@ class _BarcodeWidget extends Widget {
 
     final textList = <BarcodeText>[];
 
-    for (var element in barcode.makeBytes(
+    for (var element in barcode!.makeBytes(
       data,
-      width: box.width,
-      height: box.height,
-      drawText: drawText,
-      fontHeight: textStyle.fontSize,
-      textPadding: textPadding,
+      width: box!.width,
+      height: box!.height,
+      drawText: drawText!,
+      fontHeight: textStyle!.fontSize!,
+      textPadding: textPadding!,
     )) {
       if (element is BarcodeBar) {
         if (element.black) {
           context.canvas.drawRect(
-            box.left + element.left,
-            box.top - element.top - element.height,
+            box!.left + element.left,
+            box!.top - element.top - element.height,
             element.width,
             element.height,
           );
@@ -91,36 +90,36 @@ class _BarcodeWidget extends Widget {
       ..setFillColor(color)
       ..fillPath();
 
-    if (drawText) {
-      final font = textStyle.font.getFont(context);
+    if (drawText!) {
+      final font = textStyle!.font!.getFont(context);
 
       for (var text in textList) {
-        final metrics = font.stringMetrics(text.text);
+        final metrics = font!.stringMetrics(text.text);
 
-        final top = box.top -
+        final top = box!.top -
             text.top -
-            metrics.descent * textStyle.fontSize -
+            metrics.descent * textStyle!.fontSize! -
             text.height;
 
-        double left;
+        double? left;
         switch (text.align) {
           case BarcodeTextAlign.left:
-            left = text.left + box.left;
+            left = text.left + box!.left;
             break;
           case BarcodeTextAlign.center:
             left = text.left +
-                box.left +
+                box!.left +
                 (text.width - metrics.width * text.height) / 2;
             break;
           case BarcodeTextAlign.right:
             left = text.left +
-                box.left +
+                box!.left +
                 (text.width - metrics.width * text.height);
             break;
         }
 
         context.canvas
-          ..setFillColor(textStyle.color)
+          ..setFillColor(textStyle!.color)
           ..drawString(
             font,
             text.height,
@@ -136,19 +135,19 @@ class _BarcodeWidget extends Widget {
   void debugPaint(Context context) {
     super.debugPaint(context);
 
-    if (drawText) {
-      for (var element in barcode.makeBytes(
+    if (drawText!) {
+      for (var element in barcode!.makeBytes(
         data,
-        width: box.width,
-        height: box.height,
-        drawText: drawText,
-        fontHeight: textStyle.fontSize,
-        textPadding: textPadding,
+        width: box!.width,
+        height: box!.height,
+        drawText: drawText!,
+        fontHeight: textStyle!.fontSize!,
+        textPadding: textPadding!,
       )) {
         if (element is BarcodeText) {
           context.canvas.drawRect(
-            box.x + element.left,
-            box.y + box.height - element.top - element.height,
+            box!.x + element.left,
+            box!.y + box!.height - element.top - element.height,
             element.width,
             element.height,
           );
@@ -167,17 +166,17 @@ class _BarcodeWidget extends Widget {
 class BarcodeWidget extends StatelessWidget {
   /// Create a BarcodeWidget
   factory BarcodeWidget({
-    @required String data,
-    @required Barcode barcode,
+    required String data,
+    required Barcode barcode,
     PdfColor color = PdfColors.black,
-    PdfColor backgroundColor,
-    BoxDecoration decoration,
-    EdgeInsets margin,
-    EdgeInsets padding,
-    double width,
-    double height,
+    PdfColor? backgroundColor,
+    BoxDecoration? decoration,
+    EdgeInsets? margin,
+    EdgeInsets? padding,
+    double? width,
+    double? height,
     bool drawText = true,
-    TextStyle textStyle,
+    TextStyle? textStyle,
     double textPadding = 0,
   }) =>
       BarcodeWidget.fromBytes(
@@ -197,8 +196,8 @@ class BarcodeWidget extends StatelessWidget {
 
   /// Draw a barcode using Uint8List data
   BarcodeWidget.fromBytes({
-    @required this.data,
-    @required this.barcode,
+    required this.data,
+    required this.barcode,
     this.color = PdfColors.black,
     this.backgroundColor,
     this.decoration,
@@ -209,9 +208,7 @@ class BarcodeWidget extends StatelessWidget {
     this.drawText = true,
     this.textStyle,
     this.textPadding = 0,
-  })  : assert(data != null),
-        assert(barcode != null),
-        assert(textPadding != null);
+  });
 
   /// the barcode data
   final Uint8List data;
@@ -229,31 +226,31 @@ class BarcodeWidget extends StatelessWidget {
 
   /// The background color.
   /// this should be white or really light color
-  final PdfColor backgroundColor;
+  final PdfColor? backgroundColor;
 
   /// Padding to apply
-  final EdgeInsets padding;
+  final EdgeInsets? padding;
 
   /// Margin to apply
-  final EdgeInsets margin;
+  final EdgeInsets? margin;
 
   /// Width of the barcode with padding
-  final double width;
+  final double? width;
 
   /// Height of the barcode with padding
-  final double height;
+  final double? height;
 
   /// Whether to draw the text with the barcode
   final bool drawText;
 
   /// Text style to use to draw the text
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
 
   /// Padding to add between the text and the barcode
   final double textPadding;
 
   /// Decoration to apply to the barcode
-  final BoxDecoration decoration;
+  final BoxDecoration? decoration;
 
   @override
   Widget build(Context context) {
@@ -264,7 +261,7 @@ class BarcodeWidget extends StatelessWidget {
           fontItalic: Font.courierOblique(),
           fontBoldItalic: Font.courierBoldOblique(),
           lineSpacing: 1,
-          fontSize: height != null ? height * 0.2 : null,
+          fontSize: height != null ? height! * 0.2 : null,
         );
     final _textStyle = defaultstyle.merge(textStyle);
 
@@ -278,12 +275,12 @@ class BarcodeWidget extends StatelessWidget {
     );
 
     if (padding != null) {
-      child = Padding(padding: padding, child: child);
+      child = Padding(padding: padding!, child: child);
     }
 
     if (decoration != null) {
       child = DecoratedBox(
-        decoration: decoration,
+        decoration: decoration!,
         child: child,
       );
     } else if (backgroundColor != null) {
@@ -298,7 +295,7 @@ class BarcodeWidget extends StatelessWidget {
     }
 
     if (margin != null) {
-      child = Padding(padding: margin, child: child);
+      child = Padding(padding: margin!, child: child);
     }
 
     return child;

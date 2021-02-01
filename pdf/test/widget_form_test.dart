@@ -20,19 +20,19 @@ import 'package:test/test.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 
-Document pdf;
+late Document pdf;
 
 class Label extends StatelessWidget {
   Label({this.label, this.width});
 
-  final String label;
+  final String? label;
 
-  final double width;
+  final double? width;
 
   @override
-  Widget build(Context context) {
+  Widget build(Context? context) {
     return Container(
-      child: Text(label),
+      child: Text(label!),
       width: width,
       alignment: Alignment.centerRight,
       margin: const EdgeInsets.only(right: 5),
@@ -43,12 +43,12 @@ class Label extends StatelessWidget {
 class Decorated extends StatelessWidget {
   Decorated({this.child, this.color});
 
-  final Widget child;
+  final Widget? child;
 
-  final PdfColor color;
+  final PdfColor? color;
 
   @override
-  Widget build(Context context) {
+  Widget build(Context? context) {
     return Container(
       child: child,
       padding: const EdgeInsets.all(2),
@@ -74,7 +74,7 @@ void main() {
     () {
       pdf.addPage(
         Page(
-          build: (Context context) => Wrap(
+          build: (Context? context) => Wrap(
             crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
               Label(label: 'Given Name:', width: 100),

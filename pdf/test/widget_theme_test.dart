@@ -22,12 +22,12 @@ import 'package:test/test.dart';
 
 import 'utils.dart';
 
-Document pdf;
-Font openSans;
-Font openSansBold;
-Font roboto;
-Font notoSans;
-Font genyomintw;
+late Document pdf;
+Font? openSans;
+Font? openSansBold;
+Font? roboto;
+Font? notoSans;
+Font? genyomintw;
 
 void main() {
   setUpAll(() {
@@ -55,10 +55,10 @@ void main() {
         color: PdfColors.blue);
 
     pdf.addPage(Page(
-      build: (Context context) => ListView(
+      build: (Context? context) => ListView(
         children: <Widget>[
           Text(
-            style.font.fontName,
+            style.font!.fontName!,
             style: style,
           ),
         ],
@@ -71,7 +71,7 @@ void main() {
 
     pdf.addPage(Page(
       theme: theme,
-      build: (Context context) => Center(
+      build: (Context? context) => Center(
         child: Text('Hello'),
       ),
     ));
@@ -85,7 +85,7 @@ void main() {
 
     pdf.addPage(Page(
       theme: theme,
-      build: (Context context) => Center(
+      build: (Context? context) => Center(
         child: Table.fromTextArray(context: context, data: <List<String>>[
           <String>['Header', '123'],
           <String>['Cell', '456']
@@ -96,7 +96,7 @@ void main() {
 
   test('Theme Page 3', () {
     pdf.addPage(Page(
-      build: (Context context) => Center(
+      build: (Context? context) => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
@@ -121,7 +121,7 @@ void main() {
         theme: ThemeData(
           defaultTextStyle: TextStyle(font: Font.courier(), fontSize: 10.0),
         ),
-        build: (Context context) {
+        build: (Context? context) {
           return Center(child: Text('Text'));
         }));
   });

@@ -17,17 +17,16 @@
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
-import 'package:test/test.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
+import 'package:test/test.dart';
 
 import 'utils.dart';
 
-Document pdf;
+late Document pdf;
 
 List<TableRow> buildTable(
-    {@required Context context, int count = 10, bool repeatHeader = false}) {
+    {required Context? context, int count = 10, bool repeatHeader = false}) {
   final rows = <TableRow>[];
   {
     final tableRow = <Widget>[];
@@ -35,7 +34,7 @@ List<TableRow> buildTable(
       tableRow.add(Container(
           alignment: Alignment.center,
           margin: const EdgeInsets.all(5),
-          child: Text(cell, style: Theme.of(context).tableHeader)));
+          child: Text(cell, style: Theme.of(context!).tableHeader)));
     }
     rows.add(TableRow(children: tableRow, repeat: repeatHeader));
   }
@@ -46,7 +45,7 @@ List<TableRow> buildTable(
     final tableRow = <Widget>[
       Container(
           margin: const EdgeInsets.all(5),
-          child: Text('${h.toInt()}°', style: Theme.of(context).tableCell)),
+          child: Text('${h.toInt()}°', style: Theme.of(context!).tableCell)),
       Container(
           margin: const EdgeInsets.all(5),
           decoration: BoxDecoration(
@@ -72,13 +71,13 @@ void main() {
 
   test('Table Widget empty', () {
     pdf.addPage(Page(
-      build: (Context context) => Table(),
+      build: (Context? context) => Table(),
     ));
   });
 
   test('Table Widget filled', () {
     pdf.addPage(Page(
-      build: (Context context) => Table(
+      build: (Context? context) => Table(
         children: buildTable(context: context, count: 20),
         border: TableBorder.all(),
         tableWidth: TableWidth.max,
@@ -136,7 +135,7 @@ void main() {
 
   test('Table Widget Widths', () {
     pdf.addPage(Page(
-      build: (Context context) => Table(
+      build: (Context? context) => Table(
         children: buildTable(context: context, count: 20),
         border: TableBorder.all(),
         columnWidths: <int, TableColumnWidth>{
@@ -190,7 +189,7 @@ void main() {
 
   test('Table fromTextArray', () {
     pdf.addPage(Page(
-      build: (Context context) => Table.fromTextArray(
+      build: (Context? context) => Table.fromTextArray(
         context: context,
         tableWidth: TableWidth.min,
         data: <List<dynamic>>[
@@ -204,7 +203,7 @@ void main() {
 
   test('Table fromTextArray with formatting', () {
     pdf.addPage(Page(
-      build: (Context context) => Table.fromTextArray(
+      build: (Context? context) => Table.fromTextArray(
         border: null,
         cellAlignment: Alignment.center,
         headerDecoration: const BoxDecoration(
@@ -240,7 +239,7 @@ void main() {
       theme: ThemeData.withFont(
         base: loadFont('hacen-tunisia.ttf'),
       ),
-      build: (Context context) => Directionality(
+      build: (Context? context) => Directionality(
         textDirection: TextDirection.rtl,
         child: Table.fromTextArray(
           headers: <dynamic>['ثلاثة', 'اثنان', 'واحد'],
@@ -257,7 +256,7 @@ void main() {
   test('Table fromTextArray with alignment', () {
     pdf.addPage(
       Page(
-        build: (Context context) => Table.fromTextArray(
+        build: (Context? context) => Table.fromTextArray(
           cellAlignment: Alignment.center,
           data: <List<String>>[
             <String>['line 1', 'Text\n\n\ntext'],

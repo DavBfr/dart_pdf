@@ -25,9 +25,7 @@ import 'encryption.dart';
 import 'font.dart';
 import 'graphic_state.dart';
 import 'info.dart';
-import 'io/interface.dart'
-    if (dart.library.io) 'io/vm.dart'
-    if (dart.library.js) 'io/js.dart';
+import 'io/vm.dart' if (dart.library.js) 'io/js.dart';
 import 'names.dart';
 import 'object.dart';
 import 'outline.dart';
@@ -69,12 +67,11 @@ class PdfDocument {
   /// This creates a Pdf document
   PdfDocument({
     PdfPageMode pageMode = PdfPageMode.none,
-    DeflateCallback deflate,
+    DeflateCallback? deflate,
     bool compress = true,
   })  : deflate = compress ? (deflate ?? defaultDeflate) : null,
-        prev = null {
-    _objser = 1;
-
+        prev = null,
+        _objser = 1 {
     // Now create some standard objects
     pdfPageList = PdfPageList(this);
     pdfNames = PdfNames(this);
@@ -84,21 +81,20 @@ class PdfDocument {
   PdfDocument.load(
     this.prev, {
     PdfPageMode pageMode = PdfPageMode.none,
-    DeflateCallback deflate,
+    DeflateCallback? deflate,
     bool compress = true,
-  }) : deflate = compress ? (deflate ?? defaultDeflate) : null {
-    _objser = prev.size;
-
+  })  : deflate = compress ? (deflate ?? defaultDeflate) : null,
+        _objser = prev!.size {
     // Now create some standard objects
     pdfPageList = PdfPageList(this);
     pdfNames = PdfNames(this);
     catalog = PdfCatalog(this, pdfPageList, pageMode, pdfNames);
 
     // Import the existing document
-    prev.mergeDocument(this);
+    prev!.mergeDocument(this);
   }
 
-  final PdfDocumentParserBase prev;
+  final PdfDocumentParserBase? prev;
 
   /// This is used to allocate objects a unique serial number in the document.
   int _objser;
@@ -109,38 +105,38 @@ class PdfDocument {
   final Set<PdfObject> objects = <PdfObject>{};
 
   /// This is the Catalog object, which is required by each Pdf Document
-  PdfCatalog catalog;
+  late PdfCatalog catalog;
 
   /// This is the info object. Although this is an optional object, we
   /// include it.
-  PdfInfo info;
+  PdfInfo? info;
 
   /// This is the Pages object, which is required by each Pdf Document
-  PdfPageList pdfPageList;
+  late PdfPageList pdfPageList;
 
   /// The name dictionary
-  PdfNames pdfNames;
+  late PdfNames pdfNames;
 
   /// This is the Outline object, which is optional
-  PdfOutline _outline;
+  PdfOutline? _outline;
 
   /// This holds a [PdfObject] describing the default border for annotations.
   /// It's only used when the document is being written.
-  PdfObject defaultOutlineBorder;
+  PdfObject? defaultOutlineBorder;
 
   /// Callback to compress the stream in the pdf file.
   /// Use `deflate: zlib.encode` if using dart:io
   /// No compression by default
-  final DeflateCallback deflate;
+  final DeflateCallback? deflate;
 
   /// Object used to encrypt the document
-  PdfEncryption encryption;
+  PdfEncryption? encryption;
 
   /// Object used to sign the document
-  PdfSignature sign;
+  PdfSignature? sign;
 
   /// Graphics state, representing only opacity.
-  PdfGraphicStates _graphicStates;
+  PdfGraphicStates? _graphicStates;
 
   /// The PDF specification version
   final String version = '1.7';
@@ -148,10 +144,10 @@ class PdfDocument {
   /// This holds the current fonts
   final Set<PdfFont> fonts = <PdfFont>{};
 
-  Uint8List _documentID;
+  Uint8List? _documentID;
 
   /// Generates the document ID
-  Uint8List get documentID {
+  Uint8List? get documentID {
     if (_documentID == null) {
       final rnd = math.Random();
       _documentID = Uint8List.fromList(sha256
@@ -168,12 +164,12 @@ class PdfDocument {
 
   /// This returns a specific page. It's used mainly when using a
   /// Serialized template file.
-  PdfPage page(int page) {
+  PdfPage? page(int page) {
     return pdfPageList.pages[page];
   }
 
   /// The root outline
-  PdfOutline get outline {
+  PdfOutline? get outline {
     if (_outline == null) {
       _outline = PdfOutline(this);
       catalog.outlines = _outline;
@@ -182,7 +178,7 @@ class PdfDocument {
   }
 
   /// Graphic states for opacity and transfer modes
-  PdfGraphicStates get graphicStates {
+  PdfGraphicStates? get graphicStates {
     _graphicStates ??= PdfGraphicStates(this);
     return _graphicStates;
   }
@@ -206,7 +202,7 @@ class PdfDocument {
   Future<Uint8List> save() async {
     final os = PdfStream();
     if (prev != null) {
-      os.putBytes(prev.bytes);
+      os.putBytes(prev!.bytes);
     }
     await _write(os);
     return os.output();

@@ -20,8 +20,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
-Document pdf;
-PageTheme pageTheme;
+late Document pdf;
+PageTheme? pageTheme;
 
 void main() {
   setUpAll(() {
@@ -48,7 +48,7 @@ void main() {
     pdf.addPage(
       Page(
         pageTheme: pageTheme,
-        build: (Context context) => Center(
+        build: (Context? context) => Center(
           child: Text(
             'Hello World',
           ),

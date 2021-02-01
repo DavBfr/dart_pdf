@@ -25,9 +25,7 @@ class PdfFontDescriptor extends PdfObject {
   PdfFontDescriptor(
     this.ttfFont,
     this.file,
-  )   : assert(ttfFont != null),
-        assert(file != null),
-        super(ttfFont.pdfDocument, type: '/FontDescriptor');
+  ) : super(ttfFont.pdfDocument, type: '/FontDescriptor');
 
   /// File data
   final PdfObjectStream file;

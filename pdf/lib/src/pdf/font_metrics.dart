@@ -25,22 +25,18 @@ import 'rect.dart';
 class PdfFontMetrics {
   /// Create a PdfFontMetrics object
   const PdfFontMetrics({
-    @required this.left,
-    @required this.top,
-    @required this.right,
-    @required this.bottom,
-    double ascent,
-    double descent,
-    double advanceWidth,
-    double leftBearing,
+    required this.left,
+    required this.top,
+    required this.right,
+    required this.bottom,
+    double? ascent,
+    double? descent,
+    double? advanceWidth,
+    double? leftBearing,
   })  : ascent = ascent ?? bottom,
         descent = descent ?? top,
         advanceWidth = advanceWidth ?? right - left,
         leftBearing = leftBearing ?? left,
-        assert(left != null),
-        assert(top != null),
-        assert(right != null),
-        assert(bottom != null),
         assert(left <= right),
         assert(top <= bottom),
         assert((descent ?? top) <= (ascent ?? bottom));
@@ -54,15 +50,15 @@ class PdfFontMetrics {
       return PdfFontMetrics.zero;
     }
 
-    double left;
-    double top;
+    double? left;
+    double? top;
     var right = 0.0;
-    double bottom;
-    double ascent;
-    double descent;
-    double lastBearing;
-    double firstBearing;
-    double spacing;
+    double? bottom;
+    double? ascent;
+    double? descent;
+    late double lastBearing;
+    double? firstBearing;
+    late double spacing;
 
     for (var metric in metrics) {
       firstBearing ??= metric.leftBearing;
@@ -78,10 +74,10 @@ class PdfFontMetrics {
     }
 
     return PdfFontMetrics(
-      left: left,
-      top: top,
+      left: left!,
+      top: top!,
       right: right - lastBearing - spacing,
-      bottom: bottom,
+      bottom: bottom!,
       ascent: ascent,
       descent: descent,
       advanceWidth: right - spacing,
@@ -143,14 +139,14 @@ class PdfFontMetrics {
 
   /// Make a copy of this object
   PdfFontMetrics copyWith({
-    double left,
-    double top,
-    double right,
-    double bottom,
-    double ascent,
-    double descent,
-    double advanceWidth,
-    double leftBearing,
+    double? left,
+    double? top,
+    double? right,
+    double? bottom,
+    double? ascent,
+    double? descent,
+    double? advanceWidth,
+    double? leftBearing,
   }) {
     return PdfFontMetrics(
       left: left ?? this.left,

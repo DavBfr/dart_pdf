@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -24,24 +23,21 @@ import 'image_provider.dart';
 import 'widget.dart';
 
 void _paintImage({
-  @required PdfGraphics canvas,
-  @required PdfRect rect,
-  @required PdfImage image,
+  required PdfGraphics canvas,
+  required PdfRect rect,
+  required PdfImage image,
   double scale = 1.0,
-  BoxFit fit,
+  BoxFit? fit,
   Alignment alignment = Alignment.center,
 }) {
-  assert(canvas != null);
-  assert(image != null);
-  assert(alignment != null);
   final outputSize = rect.size;
   final inputSize = PdfPoint(image.width.toDouble(), image.height.toDouble());
   fit ??= BoxFit.scaleDown;
   final fittedSizes = applyBoxFit(
       fit, PdfPoint(inputSize.x / scale, inputSize.y / scale), outputSize);
   final sourceSize =
-      PdfPoint(fittedSizes.source.x * scale, fittedSizes.source.y * scale);
-  final destinationSize = fittedSizes.destination;
+      PdfPoint(fittedSizes.source!.x * scale, fittedSizes.source!.y * scale);
+  final destinationSize = fittedSizes.destination!;
   final halfWidthDelta = (outputSize.x - destinationSize.x) / 2.0;
   final halfHeightDelta = (outputSize.y - destinationSize.y) / 2.0;
   final dx = halfWidthDelta + alignment.x * halfWidthDelta;
@@ -84,7 +80,7 @@ class Image extends Widget {
     this.width,
     this.height,
     this.dpi,
-  }) : assert(image != null);
+  });
 
   final ImageProvider image;
 
@@ -92,11 +88,11 @@ class Image extends Widget {
 
   final Alignment alignment;
 
-  final double width;
+  final double? width;
 
-  final double height;
+  final double? height;
 
-  final double dpi;
+  final double? dpi;
 
   @override
   void layout(Context context, BoxConstraints constraints,
@@ -104,29 +100,29 @@ class Image extends Widget {
     final w = width ??
         (constraints.hasBoundedWidth
             ? constraints.maxWidth
-            : constraints.constrainWidth(image.width.toDouble()));
+            : constraints.constrainWidth(image.width!.toDouble()));
     final h = height ??
         (constraints.hasBoundedHeight
             ? constraints.maxHeight
-            : constraints.constrainHeight(image.height.toDouble()));
+            : constraints.constrainHeight(image.height!.toDouble()));
 
     final sizes = applyBoxFit(
         fit,
-        PdfPoint(image.width.toDouble(), image.height.toDouble()),
+        PdfPoint(image.width!.toDouble(), image.height!.toDouble()),
         PdfPoint(w, h));
-    box = PdfRect.fromPoints(PdfPoint.zero, sizes.destination);
+    box = PdfRect.fromPoints(PdfPoint.zero, sizes.destination!);
   }
 
   @override
   void paint(Context context) {
     super.paint(context);
 
-    final rect = context.localToGlobal(box);
+    final rect = context.localToGlobal(box!);
 
     _paintImage(
       canvas: context.canvas,
-      image: image.resolve(context, rect.size, dpi: dpi),
-      rect: box,
+      image: image.resolve(context, rect.size, dpi: dpi)!,
+      rect: box!,
       alignment: alignment,
       fit: fit,
     );
@@ -146,17 +142,17 @@ class Shape extends Widget {
 
   final String shape;
 
-  final PdfColor strokeColor;
+  final PdfColor? strokeColor;
 
-  final PdfColor fillColor;
+  final PdfColor? fillColor;
 
-  final double width;
+  final double? width;
 
-  final double height;
+  final double? height;
 
   final BoxFit fit;
 
-  PdfRect _boundingBox;
+  late PdfRect _boundingBox;
 
   @override
   void layout(Context context, BoxConstraints constraints,
@@ -165,7 +161,7 @@ class Shape extends Widget {
       // Compute the bounding box
       _boundingBox = PdfGraphics.shapeBoundingBox(shape);
     } else {
-      _boundingBox = PdfRect(0, 0, width, height);
+      _boundingBox = PdfRect(0, 0, width!, height!);
     }
 
     final w = constraints.hasBoundedWidth
@@ -178,7 +174,7 @@ class Shape extends Widget {
     final sizes = applyBoxFit(fit, _boundingBox.size, PdfPoint(w, h));
     box = PdfRect.fromPoints(
       PdfPoint.zero,
-      sizes.destination,
+      sizes.destination!,
     );
   }
 
@@ -190,10 +186,10 @@ class Shape extends Widget {
       ..saveContext()
       ..setTransform(
         Matrix4.identity()
-          ..translate(box.x, box.y + box.height)
+          ..translate(box!.x, box!.y + box!.height)
           ..scale(
-            box.width / _boundingBox.width,
-            -box.height / _boundingBox.height,
+            box!.width / _boundingBox.width,
+            -box!.height / _boundingBox.height,
           )
           ..translate(-_boundingBox.x, -_boundingBox.y),
       );

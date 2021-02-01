@@ -28,24 +28,24 @@ enum SvgTextAnchor { start, middle, end }
 @immutable
 class SvgBrush {
   const SvgBrush({
-    @required this.opacity,
-    @required this.fill,
-    @required this.fillEvenOdd,
-    @required this.fillOpacity,
-    @required this.stroke,
-    @required this.strokeOpacity,
-    @required this.strokeWidth,
-    @required this.strokeDashArray,
-    @required this.strokeDashOffset,
-    @required this.strokeLineCap,
-    @required this.strokeLineJoin,
-    @required this.strokeMiterLimit,
-    @required this.fontFamily,
-    @required this.fontSize,
-    @required this.fontStyle,
-    @required this.fontWeight,
-    @required this.textAnchor,
-    @required this.blendMode,
+    required this.opacity,
+    required this.fill,
+    required this.fillEvenOdd,
+    required this.fillOpacity,
+    required this.stroke,
+    required this.strokeOpacity,
+    required this.strokeWidth,
+    required this.strokeDashArray,
+    required this.strokeDashOffset,
+    required this.strokeLineCap,
+    required this.strokeLineJoin,
+    required this.strokeMiterLimit,
+    required this.fontFamily,
+    required this.fontSize,
+    required this.fontStyle,
+    required this.fontWeight,
+    required this.textAnchor,
+    required this.blendMode,
     this.mask,
   });
 
@@ -160,41 +160,41 @@ class SvgBrush {
     'end': SvgTextAnchor.end,
   };
 
-  final double opacity;
-  final SvgColor fill;
-  final bool fillEvenOdd;
-  final double fillOpacity;
-  final SvgColor stroke;
-  final double strokeOpacity;
-  final SvgNumeric strokeWidth;
-  final List<double> strokeDashArray;
-  final double strokeDashOffset;
-  final PdfLineCap strokeLineCap;
-  final PdfLineJoin strokeLineJoin;
-  final double strokeMiterLimit;
-  final SvgNumeric fontSize;
-  final String fontFamily;
-  final String fontStyle;
-  final String fontWeight;
-  final SvgTextAnchor textAnchor;
-  final PdfBlendMode blendMode;
-  final SvgMaskPath mask;
+  final double? opacity;
+  final SvgColor? fill;
+  final bool? fillEvenOdd;
+  final double? fillOpacity;
+  final SvgColor? stroke;
+  final double? strokeOpacity;
+  final SvgNumeric? strokeWidth;
+  final List<double>? strokeDashArray;
+  final double? strokeDashOffset;
+  final PdfLineCap? strokeLineCap;
+  final PdfLineJoin? strokeLineJoin;
+  final double? strokeMiterLimit;
+  final SvgNumeric? fontSize;
+  final String? fontFamily;
+  final String? fontStyle;
+  final String? fontWeight;
+  final SvgTextAnchor? textAnchor;
+  final PdfBlendMode? blendMode;
+  final SvgMaskPath? mask;
 
-  SvgBrush merge(SvgBrush other) {
+  SvgBrush merge(SvgBrush? other) {
     if (other == null) {
       return this;
     }
 
     var _fill = other.fill ?? fill;
 
-    if (_fill.inherit) {
-      _fill = fill.merge(other.fill);
+    if (_fill?.inherit ?? false) {
+      _fill = fill!.merge(other.fill!);
     }
 
     var _stroke = other.stroke ?? stroke;
 
-    if (_stroke.inherit) {
-      _stroke = stroke.merge(other.stroke);
+    if (_stroke?.inherit ?? false) {
+      _stroke = stroke!.merge(other.stroke!);
     }
 
     return SvgBrush(
@@ -221,25 +221,25 @@ class SvgBrush {
   }
 
   SvgBrush copyWith({
-    double opacity,
-    SvgColor fill,
-    bool fillEvenOdd,
-    double fillOpacity,
-    SvgColor stroke,
-    double strokeOpacity,
-    SvgNumeric strokeWidth,
-    List<double> strokeDashArray,
-    double strokeDashOffset,
-    PdfLineCap strokeLineCap,
-    PdfLineJoin strokeLineJoin,
-    double strokeMiterLimit,
-    SvgNumeric fontSize,
-    String fontFamily,
-    String fontStyle,
-    String fontWeight,
-    SvgTextAnchor textAnchor,
-    PdfBlendMode blendMode,
-    SvgMaskPath mask,
+    double? opacity,
+    SvgColor? fill,
+    bool? fillEvenOdd,
+    double? fillOpacity,
+    SvgColor? stroke,
+    double? strokeOpacity,
+    SvgNumeric? strokeWidth,
+    List<double>? strokeDashArray,
+    double? strokeDashOffset,
+    PdfLineCap? strokeLineCap,
+    PdfLineJoin? strokeLineJoin,
+    double? strokeMiterLimit,
+    SvgNumeric? fontSize,
+    String? fontFamily,
+    String? fontStyle,
+    String? fontWeight,
+    SvgTextAnchor? textAnchor,
+    PdfBlendMode? blendMode,
+    SvgMaskPath? mask,
   }) {
     return SvgBrush(
       opacity: opacity ?? this.opacity,

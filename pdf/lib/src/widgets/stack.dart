@@ -16,7 +16,6 @@
 
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -37,20 +36,20 @@ class Positioned extends SingleChildWidget {
     this.top,
     this.right,
     this.bottom,
-    @required Widget child,
+    required Widget child,
   }) : super(child: child);
 
-  final double left;
+  final double? left;
 
-  final double top;
+  final double? top;
 
-  final double right;
+  final double? right;
 
-  final double bottom;
+  final double? bottom;
 
-  double get width => box?.width;
+  double? get width => box?.width;
 
-  double get height => box?.height;
+  double? get height => box?.height;
 
   @override
   void paint(Context context) {
@@ -93,8 +92,8 @@ class Stack extends MultiChildWidget {
     var width = constraints.minWidth;
     var height = constraints.minHeight;
 
-    BoxConstraints nonPositionedConstraints;
-    assert(fit != null);
+    BoxConstraints? nonPositionedConstraints;
+
     switch (fit) {
       case StackFit.loose:
         nonPositionedConstraints = constraints.loosen();
@@ -106,7 +105,6 @@ class Stack extends MultiChildWidget {
         nonPositionedConstraints = constraints;
         break;
     }
-    assert(nonPositionedConstraints != null);
 
     for (var child in children) {
       if (!(child is Positioned)) {
@@ -115,7 +113,7 @@ class Stack extends MultiChildWidget {
         child.layout(context, nonPositionedConstraints, parentUsesSize: true);
         assert(child.box != null);
 
-        final childSize = child.box;
+        final childSize = child.box!;
         width = math.max(width, childSize.width);
         height = math.max(height, childSize.height);
       }
@@ -123,8 +121,8 @@ class Stack extends MultiChildWidget {
 
     if (hasNonPositionedChildren) {
       box = PdfRect.fromPoints(PdfPoint.zero, PdfPoint(width, height));
-      assert(box.width == constraints.constrainWidth(width));
-      assert(box.height == constraints.constrainHeight(height));
+      assert(box!.width == constraints.constrainWidth(width));
+      assert(box!.height == constraints.constrainHeight(height));
     } else {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
     }
@@ -132,21 +130,21 @@ class Stack extends MultiChildWidget {
     for (var child in children) {
       if (!(child is Positioned)) {
         child.box = PdfRect.fromPoints(
-            alignment.inscribe(child.box.size, box).offset, child.box.size);
+            alignment.inscribe(child.box!.size, box!).offset, child.box!.size);
       } else {
-        final Positioned positioned = child;
+        final positioned = child;
         var childConstraints = const BoxConstraints();
 
         if (positioned.left != null && positioned.right != null) {
           childConstraints = childConstraints.tighten(
-              width: box.width - positioned.right - positioned.left);
+              width: box!.width - positioned.right! - positioned.left!);
         } else if (positioned.width != null) {
           childConstraints = childConstraints.tighten(width: positioned.width);
         }
 
         if (positioned.top != null && positioned.bottom != null) {
           childConstraints = childConstraints.tighten(
-              height: box.height - positioned.bottom - positioned.top);
+              height: box!.height - positioned.bottom! - positioned.top!);
         } else if (positioned.height != null) {
           childConstraints =
               childConstraints.tighten(height: positioned.height);
@@ -155,26 +153,26 @@ class Stack extends MultiChildWidget {
         positioned.layout(context, childConstraints, parentUsesSize: true);
         assert(positioned.box != null);
 
-        double x;
+        double? x;
         if (positioned.left != null) {
           x = positioned.left;
         } else if (positioned.right != null) {
-          x = box.width - positioned.right - positioned.width;
+          x = box!.width - positioned.right! - positioned.width!;
         } else {
-          x = alignment.inscribe(positioned.box.size, box).x;
+          x = alignment.inscribe(positioned.box!.size, box!).x;
         }
 
-        double y;
+        double? y;
         if (positioned.bottom != null) {
           y = positioned.bottom;
         } else if (positioned.top != null) {
-          y = box.height - positioned.top - positioned.height;
+          y = box!.height - positioned.top! - positioned.height!;
         } else {
-          y = alignment.inscribe(positioned.box.size, box).y;
+          y = alignment.inscribe(positioned.box!.size, box!).y;
         }
 
         positioned.box =
-            PdfRect.fromPoints(PdfPoint(x, y), positioned.box.size);
+            PdfRect.fromPoints(PdfPoint(x!, y!), positioned.box!.size);
       }
     }
   }
@@ -184,13 +182,13 @@ class Stack extends MultiChildWidget {
     super.paint(context);
 
     final mat = Matrix4.identity();
-    mat.translate(box.x, box.y);
+    mat.translate(box!.x, box!.y);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
     if (overflow == Overflow.clip) {
       context.canvas
-        ..drawRect(0, 0, box.width, box.height)
+        ..drawRect(0, 0, box!.width, box!.height)
         ..clipPath();
     }
     for (var child in children) {

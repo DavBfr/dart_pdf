@@ -25,19 +25,19 @@ import 'package:pdf/widgets.dart';
 /// into an [ImageProvider] instance
 Future<ImageProvider> flutterImageProvider(
   rdr.ImageProvider image, {
-  rdr.ImageConfiguration configuration,
-  rdr.ImageErrorListener onError,
+  rdr.ImageConfiguration? configuration,
+  rdr.ImageErrorListener? onError,
 }) async {
   final completer = Completer<ImageProvider>();
   final stream = image.resolve(configuration ?? rdr.ImageConfiguration.empty);
 
-  rdr.ImageStreamListener listener;
+  late rdr.ImageStreamListener listener;
   listener = rdr.ImageStreamListener((rdr.ImageInfo image, bool sync) async {
     final bytes =
         await image.image.toByteData(format: ui.ImageByteFormat.rawRgba);
 
     final result = RawImage(
-        bytes: bytes.buffer.asUint8List(),
+        bytes: bytes!.buffer.asUint8List(),
         width: image.image.width,
         height: image.image.height);
 
@@ -45,7 +45,7 @@ Future<ImageProvider> flutterImageProvider(
       completer.complete(result);
     }
     stream.removeListener(listener);
-  }, onError: (dynamic exception, StackTrace stackTrace) {
+  }, onError: (dynamic exception, StackTrace? stackTrace) {
     if (!completer.isCompleted) {
       completer.complete(null);
     }

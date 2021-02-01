@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import 'package:meta/meta.dart';
-
 import 'data_types.dart';
 import 'document.dart';
 import 'object.dart';
@@ -26,10 +24,9 @@ enum PdfSigFlags { signaturesExist, appendOnly }
 class PdfSignature extends PdfObject {
   PdfSignature(
     PdfDocument pdfDocument, {
-    @required this.crypto,
-    Set<PdfSigFlags> flags,
-  })  : assert(crypto != null),
-        flags = flags ?? const <PdfSigFlags>{PdfSigFlags.signaturesExist},
+    required this.crypto,
+    Set<PdfSigFlags>? flags,
+  })  : flags = flags ?? const <PdfSigFlags>{PdfSigFlags.signaturesExist},
         super(pdfDocument, type: '/Sig');
 
   final Set<PdfSigFlags> flags;
@@ -40,8 +37,8 @@ class PdfSignature extends PdfObject {
       .map<int>((PdfSigFlags e) => 1 >> e.index)
       .reduce((int a, int b) => a | b);
 
-  int _offsetStart;
-  int _offsetEnd;
+  int? _offsetStart;
+  int? _offsetEnd;
 
   @override
   void write(PdfStream os) {
@@ -64,5 +61,5 @@ abstract class PdfSignatureBase {
   void preSign(PdfObject object, PdfDict params);
 
   Future<void> sign(PdfObject object, PdfStream os, PdfDict params,
-      int offsetStart, int offsetEnd);
+      int? offsetStart, int? offsetEnd);
 }

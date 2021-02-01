@@ -32,8 +32,7 @@ import 'stream.dart';
 
 class PdfAnnot extends PdfObject {
   PdfAnnot(this.pdfPage, this.annot)
-      : assert(annot != null),
-        super(pdfPage.pdfDocument, type: '/Annot') {
+      : super(pdfPage.pdfDocument, type: '/Annot') {
     pdfPage.annotations.add(this);
   }
 
@@ -91,16 +90,15 @@ enum PdfAnnotApparence {
 
 abstract class PdfAnnotBase {
   PdfAnnotBase({
-    @required this.subtype,
-    @required this.rect,
+    required this.subtype,
+    required this.rect,
     this.border,
     this.content,
     this.name,
     this.flags,
     this.date,
     this.color,
-  })  : assert(subtype != null),
-        assert(rect != null);
+  });
 
   /// The subtype of the outline, ie text, note, etc
   final String subtype;
@@ -108,31 +106,31 @@ abstract class PdfAnnotBase {
   final PdfRect rect;
 
   /// the border for this annotation
-  final PdfBorder border;
+  final PdfBorder? border;
 
   /// The text of a text annotation
-  final String content;
+  final String? content;
 
   /// The internal name for a link
-  final String name;
+  final String? name;
 
   /// Flags specifying various characteristics of the annotation
-  final Set<PdfAnnotFlags> flags;
+  final Set<PdfAnnotFlags>? flags;
 
   /// Last modification date
-  final DateTime date;
+  final DateTime? date;
 
   /// Color
-  final PdfColor color;
+  final PdfColor? color;
 
-  final Map<String, PdfDataType> _appearances = <String, PdfDataType>{};
+  final Map<String?, PdfDataType> _appearances = <String?, PdfDataType>{};
 
   int get flagValue {
-    if (flags == null || flags.isEmpty) {
+    if (flags == null || flags!.isEmpty) {
       return 0;
     }
 
-    return flags
+    return flags!
         .map<int>((PdfAnnotFlags e) => 1 << e.index)
         .reduce((int a, int b) => a | b);
   }
@@ -140,12 +138,12 @@ abstract class PdfAnnotBase {
   PdfGraphics appearance(
     PdfDocument pdfDocument,
     PdfAnnotApparence type, {
-    String name,
-    Matrix4 matrix,
-    PdfRect boundingBox,
+    String? name,
+    Matrix4? matrix,
+    PdfRect? boundingBox,
   }) {
     final s = PdfGraphicXObject(pdfDocument, '/Form');
-    String n;
+    String? n;
     switch (type) {
       case PdfAnnotApparence.normal:
         n = '/N';
@@ -163,8 +161,10 @@ abstract class PdfAnnotBase {
       if (_appearances[n] is! PdfDict) {
         _appearances[n] = PdfDict();
       }
-      final PdfDict d = _appearances[n];
-      d[name] = s.ref();
+      final d = _appearances[n];
+      if (d is PdfDict) {
+        d[name] = s.ref();
+      }
     }
 
     if (matrix != null) {
@@ -180,7 +180,7 @@ abstract class PdfAnnotBase {
 
     final bbox = boundingBox ?? PdfRect.fromPoints(PdfPoint.zero, rect.size);
     s.params['/BBox'] =
-        PdfArray.fromNum(<double>[bbox.x, bbox.y, bbox.width, bbox.height]);
+        PdfArray.fromNum(<double?>[bbox.x, bbox.y, bbox.width, bbox.height]);
     final g = PdfGraphics(s, s.buf);
     return g;
   }
@@ -190,7 +190,7 @@ abstract class PdfAnnotBase {
   void build(PdfPage page, PdfObject object, PdfDict params) {
     params['/Subtype'] = PdfName(subtype);
     params['/Rect'] = PdfArray.fromNum(
-        <double>[rect.left, rect.bottom, rect.right, rect.top]);
+        <double?>[rect.left, rect.bottom, rect.right, rect.top]);
 
     params['/P'] = page.ref();
 
@@ -198,34 +198,36 @@ abstract class PdfAnnotBase {
     if (border == null) {
       params['/Border'] = PdfArray.fromNum(const <int>[0, 0, 0]);
     } else {
-      params['/BS'] = border.ref();
+      params['/BS'] = border!.ref();
     }
 
     if (content != null) {
-      params['/Contents'] = PdfSecString.fromString(object, content);
+      params['/Contents'] = PdfSecString.fromString(object, content!);
     }
 
     if (name != null) {
-      params['/NM'] = PdfSecString.fromString(object, name);
+      params['/NM'] = PdfSecString.fromString(object, name!);
     }
 
-    if (flags != null && flags.isNotEmpty) {
+    if (flags != null && flags!.isNotEmpty) {
       params['/F'] = PdfNum(flagValue);
     }
 
     if (date != null) {
-      params['/M'] = PdfSecString.fromDate(object, date);
+      params['/M'] = PdfSecString.fromDate(object, date!);
     }
 
     if (color != null) {
-      params['/C'] = PdfColorType(color);
+      params['/C'] = PdfColorType(color!);
     }
 
     if (_appearances.isNotEmpty) {
       params['/AP'] = PdfDict(_appearances);
       if (_appearances['/N'] is PdfDict) {
-        final PdfDict n = _appearances['/N'];
-        params['/AS'] = PdfName(n.values.keys.first);
+        final n = _appearances['/N'];
+        if (n is PdfDict) {
+          params['/AS'] = PdfName(n.values.keys.first!);
+        }
       }
     }
   }
@@ -234,16 +236,14 @@ abstract class PdfAnnotBase {
 class PdfAnnotText extends PdfAnnotBase {
   /// Create a text annotation
   PdfAnnotText({
-    @required PdfRect rect,
-    @required String content,
-    PdfBorder border,
-    String name,
-    Set<PdfAnnotFlags> flags,
-    DateTime date,
-    PdfColor color,
-  })  : assert(rect != null),
-        assert(content != null),
-        super(
+    required PdfRect rect,
+    required String content,
+    PdfBorder? border,
+    String? name,
+    Set<PdfAnnotFlags>? flags,
+    DateTime? date,
+    PdfColor? color,
+  }) : super(
           subtype: '/Text',
           rect: rect,
           border: border,
@@ -258,12 +258,12 @@ class PdfAnnotText extends PdfAnnotBase {
 class PdfAnnotNamedLink extends PdfAnnotBase {
   /// Create a named link annotation
   PdfAnnotNamedLink({
-    @required PdfRect rect,
-    @required this.dest,
-    PdfBorder border,
-    Set<PdfAnnotFlags> flags,
-    DateTime date,
-    PdfColor color,
+    required PdfRect rect,
+    required this.dest,
+    PdfBorder? border,
+    Set<PdfAnnotFlags>? flags,
+    DateTime? date,
+    PdfColor? color,
   }) : super(
           subtype: '/Link',
           rect: rect,
@@ -290,15 +290,13 @@ class PdfAnnotNamedLink extends PdfAnnotBase {
 class PdfAnnotUrlLink extends PdfAnnotBase {
   /// Create an url link annotation
   PdfAnnotUrlLink({
-    @required PdfRect rect,
-    @required this.url,
-    PdfBorder border,
-    Set<PdfAnnotFlags> flags,
-    DateTime date,
-    PdfColor color,
-  })  : assert(rect != null),
-        assert(url != null),
-        super(
+    required PdfRect rect,
+    required this.url,
+    PdfBorder? border,
+    Set<PdfAnnotFlags>? flags,
+    DateTime? date,
+    PdfColor? color,
+  }) : super(
           subtype: '/Link',
           rect: rect,
           border: border,
@@ -326,18 +324,16 @@ enum PdfAnnotHighlighting { none, invert, outline, push, toggle }
 abstract class PdfAnnotWidget extends PdfAnnotBase {
   /// Create a widget annotation
   PdfAnnotWidget({
-    @required PdfRect rect,
-    @required this.fieldType,
+    required PdfRect rect,
+    required this.fieldType,
     this.fieldName,
-    PdfBorder border,
-    Set<PdfAnnotFlags> flags,
-    DateTime date,
-    PdfColor color,
+    PdfBorder? border,
+    Set<PdfAnnotFlags>? flags,
+    DateTime? date,
+    PdfColor? color,
     this.backgroundColor,
     this.highlighting,
-  })  : assert(rect != null),
-        assert(fieldType != null),
-        super(
+  }) : super(
           subtype: '/Widget',
           rect: rect,
           border: border,
@@ -348,11 +344,11 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
 
   final String fieldType;
 
-  final String fieldName;
+  final String? fieldName;
 
-  final PdfAnnotHighlighting highlighting;
+  final PdfAnnotHighlighting? highlighting;
 
-  final PdfColor backgroundColor;
+  final PdfColor? backgroundColor;
 
   @override
   void build(PdfPage page, PdfObject object, PdfDict params) {
@@ -361,16 +357,16 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
     params['/FT'] = PdfName(fieldType);
 
     if (fieldName != null) {
-      params['/T'] = PdfSecString.fromString(object, fieldName);
+      params['/T'] = PdfSecString.fromString(object, fieldName!);
     }
 
     final mk = PdfDict();
     if (color != null) {
-      mk.values['/BC'] = PdfColorType(color);
+      mk.values['/BC'] = PdfColorType(color!);
     }
 
     if (backgroundColor != null) {
-      mk.values['/BG'] = PdfColorType(backgroundColor);
+      mk.values['/BG'] = PdfColorType(backgroundColor!);
     }
 
     if (mk.values.isNotEmpty) {
@@ -378,7 +374,7 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
     }
 
     if (highlighting != null) {
-      switch (highlighting) {
+      switch (highlighting!) {
         case PdfAnnotHighlighting.none:
           params['/H'] = const PdfName('/N');
           break;
@@ -401,15 +397,14 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
 
 class PdfAnnotSign extends PdfAnnotWidget {
   PdfAnnotSign({
-    @required PdfRect rect,
-    String fieldName,
-    PdfBorder border,
-    Set<PdfAnnotFlags> flags,
-    DateTime date,
-    PdfColor color,
-    PdfAnnotHighlighting highlighting,
-  })  : assert(rect != null),
-        super(
+    required PdfRect rect,
+    String? fieldName,
+    PdfBorder? border,
+    Set<PdfAnnotFlags>? flags,
+    DateTime? date,
+    PdfColor? color,
+    PdfAnnotHighlighting? highlighting,
+  }) : super(
           rect: rect,
           fieldType: '/Sig',
           fieldName: fieldName,
@@ -424,7 +419,7 @@ class PdfAnnotSign extends PdfAnnotWidget {
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
     assert(page.pdfDocument.sign != null);
-    params['/V'] = page.pdfDocument.sign.ref();
+    params['/V'] = page.pdfDocument.sign!.ref();
   }
 }
 
@@ -528,21 +523,19 @@ enum PdfFieldFlags {
 
 class PdfFormField extends PdfAnnotWidget {
   PdfFormField({
-    @required String fieldType,
-    @required PdfRect rect,
-    String fieldName,
+    required String fieldType,
+    required PdfRect rect,
+    String? fieldName,
     this.alternateName,
     this.mappingName,
-    PdfBorder border,
-    Set<PdfAnnotFlags> flags,
-    DateTime date,
-    PdfColor color,
-    PdfColor backgroundColor,
-    PdfAnnotHighlighting highlighting,
+    PdfBorder? border,
+    Set<PdfAnnotFlags>? flags,
+    DateTime? date,
+    PdfColor? color,
+    PdfColor? backgroundColor,
+    PdfAnnotHighlighting? highlighting,
     this.fieldFlags,
-  })  : assert(rect != null),
-        assert(fieldType != null),
-        super(
+  }) : super(
           rect: rect,
           fieldType: fieldType,
           fieldName: fieldName,
@@ -554,18 +547,18 @@ class PdfFormField extends PdfAnnotWidget {
           highlighting: highlighting,
         );
 
-  final String alternateName;
+  final String? alternateName;
 
-  final String mappingName;
+  final String? mappingName;
 
-  final Set<PdfFieldFlags> fieldFlags;
+  final Set<PdfFieldFlags>? fieldFlags;
 
   int get fieldFlagsValue {
-    if (fieldFlags == null || fieldFlags.isEmpty) {
+    if (fieldFlags == null || fieldFlags!.isEmpty) {
       return 0;
     }
 
-    return fieldFlags
+    return fieldFlags!
         .map<int>((PdfFieldFlags e) => 1 << e.index)
         .reduce((int a, int b) => a | b);
   }
@@ -574,10 +567,10 @@ class PdfFormField extends PdfAnnotWidget {
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
     if (alternateName != null) {
-      params['/TU'] = PdfSecString.fromString(object, alternateName);
+      params['/TU'] = PdfSecString.fromString(object, alternateName!);
     }
     if (mappingName != null) {
-      params['/TM'] = PdfSecString.fromString(object, mappingName);
+      params['/TM'] = PdfSecString.fromString(object, mappingName!);
     }
 
     params['/Ff'] = PdfNum(fieldFlagsValue);
@@ -588,29 +581,25 @@ enum PdfTextFieldAlign { left, center, right }
 
 class PdfTextField extends PdfFormField {
   PdfTextField({
-    @required PdfRect rect,
-    String fieldName,
-    String alternateName,
-    String mappingName,
-    PdfBorder border,
-    Set<PdfAnnotFlags> flags,
-    DateTime date,
-    PdfColor color,
-    PdfColor backgroundColor,
-    PdfAnnotHighlighting highlighting,
-    Set<PdfFieldFlags> fieldFlags,
+    required PdfRect rect,
+    String? fieldName,
+    String? alternateName,
+    String? mappingName,
+    PdfBorder? border,
+    Set<PdfAnnotFlags>? flags,
+    DateTime? date,
+    PdfColor? color,
+    PdfColor? backgroundColor,
+    PdfAnnotHighlighting? highlighting,
+    Set<PdfFieldFlags>? fieldFlags,
     this.value,
     this.defaultValue,
     this.maxLength,
-    @required this.font,
-    @required this.fontSize,
-    @required this.textColor,
+    required this.font,
+    required this.fontSize,
+    required this.textColor,
     this.textAlign,
-  })  : assert(rect != null),
-        assert(fontSize != null),
-        assert(textColor != null),
-        assert(font != null),
-        super(
+  }) : super(
           rect: rect,
           fieldType: '/Tx',
           fieldName: fieldName,
@@ -625,11 +614,11 @@ class PdfTextField extends PdfFormField {
           fieldFlags: fieldFlags,
         );
 
-  final int maxLength;
+  final int? maxLength;
 
-  final String value;
+  final String? value;
 
-  final String defaultValue;
+  final String? defaultValue;
 
   final PdfFont font;
 
@@ -637,13 +626,13 @@ class PdfTextField extends PdfFormField {
 
   final PdfColor textColor;
 
-  final PdfTextFieldAlign textAlign;
+  final PdfTextFieldAlign? textAlign;
 
   @override
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
     if (maxLength != null) {
-      params['/MaxLen'] = PdfNum(maxLength);
+      params['/MaxLen'] = PdfNum(maxLength!);
     }
 
     final buf = PdfStream();
@@ -653,34 +642,33 @@ class PdfTextField extends PdfFormField {
     params['/DA'] = PdfSecString.fromStream(object, buf);
 
     if (value != null) {
-      params['/V'] = PdfSecString.fromString(object, value);
+      params['/V'] = PdfSecString.fromString(object, value!);
     }
     if (defaultValue != null) {
-      params['/DV'] = PdfSecString.fromString(object, defaultValue);
+      params['/DV'] = PdfSecString.fromString(object, defaultValue!);
     }
     if (textAlign != null) {
-      params['/Q'] = PdfNum(textAlign.index);
+      params['/Q'] = PdfNum(textAlign!.index);
     }
   }
 }
 
 class PdfButtonField extends PdfFormField {
   PdfButtonField({
-    @required PdfRect rect,
-    String fieldName,
-    String alternateName,
-    String mappingName,
-    PdfBorder border,
-    Set<PdfAnnotFlags> flags,
-    DateTime date,
-    PdfColor color,
-    PdfColor backgroundColor,
-    PdfAnnotHighlighting highlighting,
-    Set<PdfFieldFlags> fieldFlags,
+    required PdfRect rect,
+    String? fieldName,
+    String? alternateName,
+    String? mappingName,
+    PdfBorder? border,
+    Set<PdfAnnotFlags>? flags,
+    DateTime? date,
+    PdfColor? color,
+    PdfColor? backgroundColor,
+    PdfAnnotHighlighting? highlighting,
+    Set<PdfFieldFlags>? fieldFlags,
     this.value,
     this.defaultValue,
-  })  : assert(rect != null),
-        super(
+  }) : super(
           rect: rect,
           fieldType: '/Btn',
           fieldName: fieldName,
@@ -695,20 +683,20 @@ class PdfButtonField extends PdfFormField {
           fieldFlags: fieldFlags,
         );
 
-  final bool value;
+  final bool? value;
 
-  final bool defaultValue;
+  final bool? defaultValue;
 
   @override
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
 
     if (value != null) {
-      params['/V'] = value ? const PdfName('/Yes') : const PdfName('/Off');
+      params['/V'] = value! ? const PdfName('/Yes') : const PdfName('/Off');
     }
     if (defaultValue != null) {
       params['/DV'] =
-          defaultValue ? const PdfName('/Yes') : const PdfName('/Off');
+          defaultValue! ? const PdfName('/Yes') : const PdfName('/Off');
     }
   }
 }

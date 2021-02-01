@@ -26,11 +26,10 @@ class PdfObject {
   /// Pdf Object Type
   PdfObject(
     this.pdfDocument, {
-    String type,
+    String? type,
     this.objgen = 0,
-    int objser,
-  })  : assert(pdfDocument != null),
-        objser = objser ?? pdfDocument.genSerial() {
+    int? objser,
+  }) : objser = objser ?? pdfDocument.genSerial() {
     if (type != null) {
       params['/Type'] = PdfName(type);
     }

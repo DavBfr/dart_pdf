@@ -46,17 +46,17 @@ class SvgUse extends SvgOperation {
     final _brush = SvgBrush.fromXml(element, brush, painter);
 
     final width =
-        SvgParser.getNumeric(element, 'width', _brush, defaultValue: 0)
+        SvgParser.getNumeric(element, 'width', _brush, defaultValue: 0)!
             .sizeValue;
     final height =
-        SvgParser.getNumeric(element, 'height', _brush, defaultValue: 0)
+        SvgParser.getNumeric(element, 'height', _brush, defaultValue: 0)!
             .sizeValue;
     final x =
-        SvgParser.getNumeric(element, 'x', _brush, defaultValue: 0).sizeValue;
+        SvgParser.getNumeric(element, 'x', _brush, defaultValue: 0)!.sizeValue;
     final y =
-        SvgParser.getNumeric(element, 'y', _brush, defaultValue: 0).sizeValue;
+        SvgParser.getNumeric(element, 'y', _brush, defaultValue: 0)!.sizeValue;
 
-    SvgOperation href;
+    SvgOperation? href;
     final hrefAttr = element.getAttribute('href') ??
         element.getAttribute('href', namespace: 'http://www.w3.org/1999/xlink');
 
@@ -88,7 +88,7 @@ class SvgUse extends SvgOperation {
 
   final double height;
 
-  final SvgOperation href;
+  final SvgOperation? href;
 
   @override
   void paintShape(PdfGraphics canvas) {
@@ -107,5 +107,5 @@ class SvgUse extends SvgOperation {
   }
 
   @override
-  PdfRect boundingBox() => href.boundingBox();
+  PdfRect boundingBox() => href!.boundingBox();
 }

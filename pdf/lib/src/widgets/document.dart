@@ -24,15 +24,15 @@ import 'theme.dart';
 class Document {
   Document({
     PdfPageMode pageMode = PdfPageMode.none,
-    DeflateCallback deflate,
+    DeflateCallback? deflate,
     bool compress = true,
     this.theme,
-    String title,
-    String author,
-    String creator,
-    String subject,
-    String keywords,
-    String producer,
+    String? title,
+    String? author,
+    String? creator,
+    String? subject,
+    String? keywords,
+    String? producer,
   }) : document = PdfDocument(
           pageMode: pageMode,
           deflate: deflate,
@@ -59,15 +59,15 @@ class Document {
   Document.load(
     PdfDocumentParserBase parser, {
     PdfPageMode pageMode = PdfPageMode.none,
-    DeflateCallback deflate,
+    DeflateCallback? deflate,
     bool compress = true,
     this.theme,
-    String title,
-    String author,
-    String creator,
-    String subject,
-    String keywords,
-    String producer,
+    String? title,
+    String? author,
+    String? creator,
+    String? subject,
+    String? keywords,
+    String? producer,
   }) : document = PdfDocument.load(
           parser,
           pageMode: pageMode,
@@ -96,13 +96,13 @@ class Document {
 
   final PdfDocument document;
 
-  final ThemeData theme;
+  final ThemeData? theme;
 
   final List<Page> _pages = <Page>[];
 
   bool _paint = false;
 
-  void addPage(Page page, {int index}) {
+  void addPage(Page page, {int? index}) {
     page.generate(this, index: index);
     _pages.add(page);
   }

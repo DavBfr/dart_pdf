@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// @dart=2.9
+
 import 'dart:io';
 
 import 'package:markdown/markdown.dart' as md;

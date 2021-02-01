@@ -26,21 +26,21 @@ import 'painter.dart';
 class SvgMaskPath {
   const SvgMaskPath(this.children, this.painter);
 
-  static SvgMaskPath fromXml(
+  static SvgMaskPath? fromXml(
       XmlElement element, SvgPainter painter, SvgBrush brush) {
     final maskPathAttr = element.getAttribute('mask');
     if (maskPathAttr == null) {
       return null;
     }
 
-    Iterable<SvgOperation> children;
+    Iterable<SvgOperation?> children;
 
     if (maskPathAttr.startsWith('url(#')) {
       final id = maskPathAttr.substring(5, maskPathAttr.lastIndexOf(')'));
       final maskPath = painter.parser.findById(id);
       if (maskPath != null) {
         final maskBrush = SvgBrush.fromXml(maskPath, brush, painter);
-        children = maskPath.children.whereType<XmlElement>().map<SvgOperation>(
+        children = maskPath.children.whereType<XmlElement>().map<SvgOperation?>(
             (c) => SvgOperation.fromXml(c, painter, maskBrush));
         return SvgMaskPath(children, painter);
       }
@@ -49,7 +49,7 @@ class SvgMaskPath {
     return null;
   }
 
-  final Iterable<SvgOperation> children;
+  final Iterable<SvgOperation?> children;
 
   final SvgPainter painter;
 
@@ -63,7 +63,7 @@ class SvgMaskPath {
     // maskCanvas.setTransform(canvas.getTransform());
 
     for (final child in children) {
-      child.paint(maskCanvas);
+      child!.paint(maskCanvas!);
     }
 
     canvas.setGraphicState(PdfGraphicState(softMask: mask));

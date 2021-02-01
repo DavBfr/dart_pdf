@@ -20,7 +20,7 @@ import 'package:test/test.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 
-Document pdf;
+late Document pdf;
 
 void main() {
   setUpAll(() {
@@ -30,7 +30,7 @@ void main() {
 
   test('Clip Widgets ClipRect', () {
     pdf.addPage(Page(
-      build: (Context context) => ClipRect(
+      build: (Context? context) => ClipRect(
         child: Transform.rotate(
           angle: 0.1,
           child: Container(
@@ -45,7 +45,7 @@ void main() {
 
   test('Clip Widgets ClipRRect', () {
     pdf.addPage(Page(
-      build: (Context context) => ClipRRect(
+      build: (Context? context) => ClipRRect(
         horizontalRadius: 30,
         verticalRadius: 30,
         child: Container(
@@ -59,7 +59,7 @@ void main() {
 
   test('Clip Widgets ClipOval', () {
     pdf.addPage(Page(
-      build: (Context context) => ClipOval(
+      build: (Context? context) => ClipOval(
         child: Container(
           decoration: const BoxDecoration(
             color: PdfColors.blue,

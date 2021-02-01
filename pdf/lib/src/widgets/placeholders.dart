@@ -60,11 +60,11 @@ class Placeholder extends Widget {
 
     context.canvas
       ..setStrokeColor(color)
-      ..moveTo(box.x, box.y)
-      ..lineTo(box.right, box.top)
-      ..moveTo(box.x, box.top)
-      ..lineTo(box.right, box.y)
-      ..drawBox(box)
+      ..moveTo(box!.x, box!.y)
+      ..lineTo(box!.right, box!.top)
+      ..moveTo(box!.x, box!.top)
+      ..lineTo(box!.right, box!.y)
+      ..drawBox(box!)
       ..setLineWidth(strokeWidth)
       ..strokePath();
   }
@@ -101,7 +101,7 @@ class FlutterLogo extends StatelessWidget {
 }
 
 class LoremText {
-  LoremText({math.Random random}) : random = random ?? math.Random(978);
+  LoremText({math.Random? random}) : random = random ?? math.Random(978);
 
   final math.Random random;
 
@@ -155,12 +155,12 @@ class Lorem extends StatelessWidget {
       this.maxLines});
 
   final int length;
-  final math.Random random;
-  final TextStyle style;
+  final math.Random? random;
+  final TextStyle? style;
   final TextAlign textAlign;
   final bool softWrap;
   final double textScaleFactor;
-  final int maxLines;
+  final int? maxLines;
 
   @override
   Widget build(Context context) {

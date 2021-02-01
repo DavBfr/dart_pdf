@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'data_types.dart';
@@ -32,7 +31,7 @@ abstract class PdfPattern extends PdfObject {
 
   final int patternType;
 
-  final Matrix4 matrix;
+  final Matrix4? matrix;
 
   @override
   void prepare() {
@@ -41,7 +40,7 @@ abstract class PdfPattern extends PdfObject {
     params['/PatternType'] = PdfNum(patternType);
 
     if (matrix != null) {
-      final s = matrix.storage;
+      final s = matrix!.storage;
       params['/Matrix'] =
           PdfArray.fromNum(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]);
     }
@@ -51,15 +50,14 @@ abstract class PdfPattern extends PdfObject {
 class PdfShadingPattern extends PdfPattern {
   PdfShadingPattern(
     PdfDocument pdfDocument, {
-    @required this.shading,
-    Matrix4 matrix,
+    required this.shading,
+    Matrix4? matrix,
     this.graphicState,
-  })  : assert(shading != null),
-        super(pdfDocument, 2, matrix);
+  }) : super(pdfDocument, 2, matrix);
 
   final PdfShading shading;
 
-  final PdfGraphicState graphicState;
+  final PdfGraphicState? graphicState;
 
   @override
   void prepare() {
@@ -68,7 +66,7 @@ class PdfShadingPattern extends PdfPattern {
     params['/Shading'] = shading.ref();
 
     if (graphicState != null) {
-      params['/ExtGState'] = graphicState.output();
+      params['/ExtGState'] = graphicState!.output();
     }
   }
 }

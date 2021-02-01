@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -26,20 +25,18 @@ import 'widget.dart';
 
 class Anchor extends SingleChildWidget {
   Anchor({
-    Widget child,
-    @required this.name,
+    Widget? child,
+    required this.name,
     this.description,
     this.zoom,
     this.setX = false,
-  })  : assert(name != null),
-        assert(setX != null),
-        super(child: child);
+  }) : super(child: child);
 
   final String name;
 
-  final String description;
+  final String? description;
 
-  final double zoom;
+  final double? zoom;
 
   final bool setX;
 
@@ -49,7 +46,7 @@ class Anchor extends SingleChildWidget {
     paintChild(context);
 
     final mat = context.canvas.getTransform();
-    final lt = mat.transform3(Vector3(box.left, box.top, 0));
+    final lt = mat.transform3(Vector3(box!.left, box!.top, 0));
     context.document.pdfNames.addDest(
       name,
       context.page,
@@ -59,28 +56,28 @@ class Anchor extends SingleChildWidget {
     );
 
     if (description != null) {
-      final rb = mat.transform3(Vector3(box.right, box.top, 0));
+      final rb = mat.transform3(Vector3(box!.right, box!.top, 0));
       final ibox = PdfRect.fromLTRB(lt.x, lt.y, rb.x, rb.y);
-      PdfAnnot(context.page, PdfAnnotText(rect: ibox, content: description));
+      PdfAnnot(context.page, PdfAnnotText(rect: ibox, content: description!));
     }
   }
 }
 
 abstract class AnnotationBuilder {
-  void build(Context context, PdfRect box);
+  void build(Context context, PdfRect? box);
 }
 
 class AnnotationLink extends AnnotationBuilder {
-  AnnotationLink(this.destination) : assert(destination != null);
+  AnnotationLink(this.destination);
 
   final String destination;
 
   @override
-  void build(Context context, PdfRect box) {
+  void build(Context context, PdfRect? box) {
     PdfAnnot(
       context.page,
       PdfAnnotNamedLink(
-        rect: context.localToGlobal(box),
+        rect: context.localToGlobal(box!),
         dest: destination,
       ),
     );
@@ -88,16 +85,16 @@ class AnnotationLink extends AnnotationBuilder {
 }
 
 class AnnotationUrl extends AnnotationBuilder {
-  AnnotationUrl(this.destination) : assert(destination != null);
+  AnnotationUrl(this.destination);
 
   final String destination;
 
   @override
-  void build(Context context, PdfRect box) {
+  void build(Context context, PdfRect? box) {
     PdfAnnot(
       context.page,
       PdfAnnotUrlLink(
-        rect: context.localToGlobal(box),
+        rect: context.localToGlobal(box!),
         url: destination,
       ),
     );
@@ -114,26 +111,26 @@ class AnnotationSignature extends AnnotationBuilder {
     this.date,
     this.color,
     this.highlighting,
-  }) : assert(crypto != null);
+  });
 
-  final Set<PdfSigFlags> signFlags;
+  final Set<PdfSigFlags>? signFlags;
 
   final PdfSignatureBase crypto;
 
-  final String name;
+  final String? name;
 
-  final PdfBorder border;
+  final PdfBorder? border;
 
-  final Set<PdfAnnotFlags> flags;
+  final Set<PdfAnnotFlags>? flags;
 
-  final DateTime date;
+  final DateTime? date;
 
-  final PdfColor color;
+  final PdfColor? color;
 
-  final PdfAnnotHighlighting highlighting;
+  final PdfAnnotHighlighting? highlighting;
 
   @override
-  void build(Context context, PdfRect box) {
+  void build(Context context, PdfRect? box) {
     context.document.sign ??= PdfSignature(
       context.document,
       crypto: crypto,
@@ -143,7 +140,7 @@ class AnnotationSignature extends AnnotationBuilder {
     PdfAnnot(
       context.page,
       PdfAnnotSign(
-        rect: context.localToGlobal(box),
+        rect: context.localToGlobal(box!),
         fieldName: name,
         border: border,
         flags: flags,
@@ -173,42 +170,42 @@ class AnnotationTextField extends AnnotationBuilder {
     this.textStyle,
   });
 
-  final String name;
+  final String? name;
 
-  final PdfBorder border;
+  final PdfBorder? border;
 
-  final Set<PdfAnnotFlags> flags;
+  final Set<PdfAnnotFlags>? flags;
 
-  final DateTime date;
+  final DateTime? date;
 
-  final PdfColor color;
+  final PdfColor? color;
 
-  final PdfColor backgroundColor;
+  final PdfColor? backgroundColor;
 
-  final PdfAnnotHighlighting highlighting;
+  final PdfAnnotHighlighting? highlighting;
 
-  final int maxLength;
+  final int? maxLength;
 
-  final String value;
+  final String? value;
 
-  final String defaultValue;
+  final String? defaultValue;
 
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
 
-  final String alternateName;
+  final String? alternateName;
 
-  final String mappingName;
+  final String? mappingName;
 
-  final Set<PdfFieldFlags> fieldFlags;
+  final Set<PdfFieldFlags>? fieldFlags;
 
   @override
-  void build(Context context, PdfRect box) {
+  void build(Context context, PdfRect? box) {
     final _textStyle = Theme.of(context).defaultTextStyle.merge(textStyle);
 
     PdfAnnot(
       context.page,
       PdfTextField(
-        rect: context.localToGlobal(box),
+        rect: context.localToGlobal(box!),
         fieldName: name,
         border: border,
         flags: flags,
@@ -222,24 +219,24 @@ class AnnotationTextField extends AnnotationBuilder {
         fieldFlags: fieldFlags,
         value: value,
         defaultValue: defaultValue,
-        font: _textStyle.font.getFont(context),
-        fontSize: _textStyle.fontSize,
-        textColor: _textStyle.color,
+        font: _textStyle.font!.getFont(context)!,
+        fontSize: _textStyle.fontSize!,
+        textColor: _textStyle.color!,
       ),
     );
   }
 }
 
 class Annotation extends SingleChildWidget {
-  Annotation({Widget child, this.builder}) : super(child: child);
+  Annotation({Widget? child, this.builder}) : super(child: child);
 
-  final AnnotationBuilder builder;
+  final AnnotationBuilder? builder;
 
   @override
   void debugPaint(Context context) {
     context.canvas
       ..setFillColor(PdfColors.pink)
-      ..drawBox(box)
+      ..drawBox(box!)
       ..fillPath();
   }
 
@@ -252,35 +249,29 @@ class Annotation extends SingleChildWidget {
 }
 
 class Link extends Annotation {
-  Link({@required Widget child, String destination})
-      : assert(child != null),
-        super(child: child, builder: AnnotationLink(destination));
+  Link({required Widget child, required String destination})
+      : super(child: child, builder: AnnotationLink(destination));
 }
 
 class UrlLink extends Annotation {
   UrlLink({
-    @required Widget child,
-    @required String destination,
-  })  : assert(child != null),
-        assert(destination != null),
-        super(child: child, builder: AnnotationUrl(destination));
+    required Widget child,
+    required String destination,
+  }) : super(child: child, builder: AnnotationUrl(destination));
 }
 
 class Signature extends Annotation {
   Signature({
-    @required Widget child,
-    @required PdfSignatureBase crypto,
-    @required String name,
-    Set<PdfSigFlags> signFlags,
-    PdfBorder border,
-    Set<PdfAnnotFlags> flags,
-    DateTime date,
-    PdfColor color,
-    PdfAnnotHighlighting highlighting,
-  })  : assert(child != null),
-        assert(crypto != null),
-        assert(name != null),
-        super(
+    required Widget child,
+    required PdfSignatureBase crypto,
+    required String name,
+    Set<PdfSigFlags>? signFlags,
+    PdfBorder? border,
+    Set<PdfAnnotFlags>? flags,
+    DateTime? date,
+    PdfColor? color,
+    PdfAnnotHighlighting? highlighting,
+  }) : super(
             child: child,
             builder: AnnotationSignature(
               crypto,
@@ -296,23 +287,23 @@ class Signature extends Annotation {
 
 class TextField extends Annotation {
   TextField({
-    Widget child,
+    Widget? child,
     double width = 120,
     double height = 13,
-    String name,
-    PdfBorder border,
-    Set<PdfAnnotFlags> flags,
-    DateTime date,
-    PdfColor color,
-    PdfColor backgroundColor,
-    PdfAnnotHighlighting highlighting,
-    int maxLength,
-    String alternateName,
-    String mappingName,
-    Set<PdfFieldFlags> fieldFlags,
-    String value,
-    String defaultValue,
-    TextStyle textStyle,
+    String? name,
+    PdfBorder? border,
+    Set<PdfAnnotFlags>? flags,
+    DateTime? date,
+    PdfColor? color,
+    PdfColor? backgroundColor,
+    PdfAnnotHighlighting? highlighting,
+    int? maxLength,
+    String? alternateName,
+    String? mappingName,
+    Set<PdfFieldFlags>? fieldFlags,
+    String? value,
+    String? defaultValue,
+    TextStyle? textStyle,
   }) : super(
             child: child ?? SizedBox(width: width, height: height),
             builder: AnnotationTextField(
@@ -335,26 +326,24 @@ class TextField extends Annotation {
 
 class Outline extends Anchor {
   Outline({
-    Widget child,
-    @required String name,
-    @required this.title,
+    Widget? child,
+    required String name,
+    required this.title,
     this.level = 0,
     this.color,
     this.style = PdfOutlineStyle.normal,
-  })  : assert(title != null),
-        assert(level != null && level >= 0),
-        assert(style != null),
+  })  : assert(level >= 0),
         super(child: child, name: name, setX: true);
 
   final String title;
 
   final int level;
 
-  final PdfColor color;
+  final PdfColor? color;
 
   final PdfOutlineStyle style;
 
-  PdfOutline _outline;
+  PdfOutline? _outline;
 
   @override
   void layout(Context context, BoxConstraints constraints,
@@ -367,7 +356,7 @@ class Outline extends Anchor {
   void debugPaint(Context context) {
     context.canvas
       ..setFillColor(PdfColors.pink100)
-      ..drawBox(box)
+      ..drawBox(box!)
       ..fillPath();
   }
 
@@ -388,7 +377,7 @@ class Outline extends Anchor {
     var l = level;
 
     while (l > 0) {
-      if (parent.effectiveLevel == l) {
+      if (parent!.effectiveLevel == l) {
         break;
       }
 
@@ -400,6 +389,6 @@ class Outline extends Anchor {
       l--;
     }
 
-    parent.add(_outline);
+    parent!.add(_outline!);
   }
 }

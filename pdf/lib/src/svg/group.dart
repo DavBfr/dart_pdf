@@ -41,9 +41,9 @@ class SvgGroup extends SvgOperation {
     final children = element.children
         .whereType<XmlElement>()
         .where((element) => element.name.local != 'symbol')
-        .map<SvgOperation>(
+        .map<SvgOperation?>(
             (child) => SvgOperation.fromXml(child, painter, _brush))
-        .where((element) => element != null);
+        .whereType<SvgOperation>();
 
     return SvgGroup(
       children,

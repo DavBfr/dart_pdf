@@ -35,14 +35,14 @@ enum PageOrientation { natural, landscape, portrait }
 
 class Page {
   Page({
-    PageTheme pageTheme,
-    PdfPageFormat pageFormat,
-    BuildCallback build,
-    ThemeData theme,
-    PageOrientation orientation,
-    EdgeInsets margin,
+    PageTheme? pageTheme,
+    PdfPageFormat? pageFormat,
+    BuildCallback? build,
+    ThemeData? theme,
+    PageOrientation? orientation,
+    EdgeInsets? margin,
     bool clip = false,
-    TextDirection textDirection,
+    TextDirection? textDirection,
   })  : assert(
             pageTheme == null ||
                 (pageFormat == null &&
@@ -69,19 +69,19 @@ class Page {
 
   PageOrientation get orientation => pageTheme.orientation;
 
-  final BuildCallback _build;
+  final BuildCallback? _build;
 
-  ThemeData get theme => pageTheme.theme;
+  ThemeData? get theme => pageTheme.theme;
 
   bool get mustRotate => pageTheme.mustRotate;
 
-  PdfPage _pdfPage;
+  PdfPage? _pdfPage;
 
-  EdgeInsets get margin => pageTheme.margin;
+  EdgeInsets? get margin => pageTheme.margin;
 
   @protected
   void debugPaint(Context context) {
-    final _margin = margin;
+    final _margin = margin!;
     context.canvas
       ..setFillColor(PdfColors.lightGreen)
       ..moveTo(0, 0)
@@ -96,7 +96,7 @@ class Page {
       ..fillPath();
   }
 
-  void generate(Document document, {bool insert = true, int index}) {
+  void generate(Document document, {bool insert = true, int? index}) {
     if (index != null) {
       if (insert) {
         _pdfPage =
@@ -110,21 +110,21 @@ class Page {
   }
 
   void postProcess(Document document) {
-    final canvas = _pdfPage.getGraphics();
+    final canvas = _pdfPage!.getGraphics();
     canvas.reset();
     final _margin = margin;
     var constraints = mustRotate
         ? BoxConstraints(
-            maxWidth: pageFormat.height - _margin.vertical,
+            maxWidth: pageFormat.height - _margin!.vertical,
             maxHeight: pageFormat.width - _margin.horizontal)
         : BoxConstraints(
-            maxWidth: pageFormat.width - _margin.horizontal,
+            maxWidth: pageFormat.width - _margin!.horizontal,
             maxHeight: pageFormat.height - _margin.vertical);
 
     final calculatedTheme = theme ?? document.theme ?? ThemeData.base();
     final context = Context(
       document: document.document,
-      page: _pdfPage,
+      page: _pdfPage!,
       canvas: canvas,
     ).inheritFromAll(<Inherited>[
       calculatedTheme,
@@ -132,41 +132,36 @@ class Page {
         InheritedDirectionality(pageTheme.textDirection),
     ]);
 
-    Widget background;
-    Widget content;
-    Widget foreground;
+    Widget? background;
+    Widget? content;
+    Widget? foreground;
 
     if (_build != null) {
-      content = _build(context);
-      if (content != null) {
-        final size = layout(content, context, constraints);
+      content = _build!(context);
 
-        if (_pdfPage.pageFormat.height == double.infinity) {
-          _pdfPage.pageFormat =
-              _pdfPage.pageFormat.copyWith(width: size.x, height: size.y);
-          constraints = mustRotate
-              ? BoxConstraints(
-                  maxWidth: _pdfPage.pageFormat.height - _margin.vertical,
-                  maxHeight: _pdfPage.pageFormat.width - _margin.horizontal)
-              : BoxConstraints(
-                  maxWidth: _pdfPage.pageFormat.width - _margin.horizontal,
-                  maxHeight: _pdfPage.pageFormat.height - _margin.vertical);
-        }
+      final size = layout(content, context, constraints);
+
+      if (_pdfPage!.pageFormat.height == double.infinity) {
+        _pdfPage!.pageFormat =
+            _pdfPage!.pageFormat.copyWith(width: size.x, height: size.y);
+        constraints = mustRotate
+            ? BoxConstraints(
+                maxWidth: _pdfPage!.pageFormat.height - _margin.vertical,
+                maxHeight: _pdfPage!.pageFormat.width - _margin.horizontal)
+            : BoxConstraints(
+                maxWidth: _pdfPage!.pageFormat.width - _margin.horizontal,
+                maxHeight: _pdfPage!.pageFormat.height - _margin.vertical);
       }
     }
 
     if (pageTheme.buildBackground != null) {
-      background = pageTheme.buildBackground(context);
-      if (background != null) {
-        layout(background, context, constraints);
-      }
+      background = pageTheme.buildBackground!(context);
+      layout(background, context, constraints);
     }
 
     if (pageTheme.buildForeground != null) {
-      foreground = pageTheme.buildForeground(context);
-      if (foreground != null) {
-        layout(foreground, context, constraints);
-      }
+      foreground = pageTheme.buildForeground!(context);
+      layout(foreground, context, constraints);
     }
 
     assert(() {
@@ -192,36 +187,28 @@ class Page {
   @protected
   PdfPoint layout(Widget child, Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    if (child == null) {
-      return PdfPoint(pageFormat.width, pageFormat.height);
-    }
-
-    final _margin = margin;
+    final _margin = margin!;
     child.layout(context, constraints, parentUsesSize: parentUsesSize);
     assert(child.box != null);
 
     final width = pageFormat.width == double.infinity
-        ? child.box.width + _margin.left + _margin.right
+        ? child.box!.width + _margin.left + _margin.right
         : pageFormat.width;
 
     final height = pageFormat.height == double.infinity
-        ? child.box.height + _margin.top + _margin.bottom
+        ? child.box!.height + _margin.top + _margin.bottom
         : pageFormat.height;
 
-    child.box = PdfRect(_margin.left, height - child.box.height - _margin.top,
-        child.box.width, child.box.height);
+    child.box = PdfRect(_margin.left, height - child.box!.height - _margin.top,
+        child.box!.width, child.box!.height);
 
     return PdfPoint(width, height);
   }
 
   @protected
   void paint(Widget child, Context context) {
-    if (child == null) {
-      return;
-    }
-
     if (pageTheme.clip) {
-      final _margin = margin;
+      final _margin = margin!;
       context.canvas
         ..saveContext()
         ..drawRect(
@@ -234,7 +221,7 @@ class Page {
     }
 
     if (mustRotate) {
-      final _margin = margin;
+      final _margin = margin!;
       context.canvas
         ..saveContext()
         ..setTransform(Matrix4.identity()

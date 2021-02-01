@@ -23,13 +23,11 @@ import 'image.dart';
 class PdfJpegInfo {
   /// Load a Jpeg image's metadata
   factory PdfJpegInfo(Uint8List image) {
-    assert(image != null);
-
     final buffer = image.buffer.asByteData();
 
-    int width;
-    int height;
-    int color;
+    int? width;
+    int? height;
+    int? color;
     var offset = image.offsetInBytes;
     while (offset < buffer.lengthInBytes) {
       while (buffer.getUint8(offset) == 0xff) {
@@ -79,66 +77,69 @@ class PdfJpegInfo {
   PdfJpegInfo._(this.width, this.height, this._color, this.tags);
 
   /// Width of the image
-  final int width;
+  final int? width;
 
   /// Height of the image
   final int height;
 
-  final int _color;
+  final int? _color;
 
   /// Is the image color or greyscale
   bool get isRGB => _color == 3;
 
   /// Exif tags discovered
-  final Map<PdfExifTag, dynamic> tags;
+  final Map<PdfExifTag, dynamic>? tags;
 
   /// EXIF version
-  String get exifVersion => tags == null || tags[PdfExifTag.ExifVersion] == null
-      ? null
-      : utf8.decode(tags[PdfExifTag.ExifVersion]);
+  String? get exifVersion =>
+      tags == null || tags![PdfExifTag.ExifVersion] == null
+          ? null
+          : utf8.decode(tags![PdfExifTag.ExifVersion]);
 
   /// Flashpix format version
-  String get flashpixVersion =>
-      tags == null || tags[PdfExifTag.FlashpixVersion] == null
+  String? get flashpixVersion =>
+      tags == null || tags![PdfExifTag.FlashpixVersion] == null
           ? null
-          : utf8.decode(tags[PdfExifTag.FlashpixVersion]);
+          : utf8.decode(tags![PdfExifTag.FlashpixVersion]);
 
   /// Rotation angle of this image
   PdfImageOrientation get orientation {
-    if (tags == null || tags[PdfExifTag.Orientation] == null) {
+    if (tags == null || tags![PdfExifTag.Orientation] == null) {
       return PdfImageOrientation.topLeft;
     }
 
     try {
-      return PdfImageOrientation.values[tags[PdfExifTag.Orientation] - 1];
+      return PdfImageOrientation.values[tags![PdfExifTag.Orientation] - 1];
     } on RangeError {
       return PdfImageOrientation.topLeft;
     }
   }
 
   /// Exif horizontal resolution
-  double get xResolution => tags == null || tags[PdfExifTag.XResolution] == null
-      ? null
-      : tags[PdfExifTag.XResolution][0].toDouble() /
-          tags[PdfExifTag.XResolution][1].toDouble();
+  double? get xResolution =>
+      tags == null || tags![PdfExifTag.XResolution] == null
+          ? null
+          : tags![PdfExifTag.XResolution][0].toDouble() /
+              tags![PdfExifTag.XResolution][1].toDouble();
 
   /// Exif vertical resolution
-  double get yResolution => tags == null || tags[PdfExifTag.YResolution] == null
-      ? null
-      : tags[PdfExifTag.YResolution][0].toDouble() /
-          tags[PdfExifTag.YResolution][1].toDouble();
+  double? get yResolution =>
+      tags == null || tags![PdfExifTag.YResolution] == null
+          ? null
+          : tags![PdfExifTag.YResolution][0].toDouble() /
+              tags![PdfExifTag.YResolution][1].toDouble();
 
   /// Exif horizontal pixel dimension
-  int get pixelXDimension =>
-      tags == null || tags[PdfExifTag.PixelXDimension] == null
+  int? get pixelXDimension =>
+      tags == null || tags![PdfExifTag.PixelXDimension] == null
           ? width
-          : tags[PdfExifTag.PixelXDimension];
+          : tags![PdfExifTag.PixelXDimension];
 
   /// Exif vertical pixel dimension
-  int get pixelYDimension =>
-      tags == null || tags[PdfExifTag.PixelYDimension] == null
+  int? get pixelYDimension =>
+      tags == null || tags![PdfExifTag.PixelYDimension] == null
           ? height
-          : tags[PdfExifTag.PixelYDimension];
+          : tags![PdfExifTag.PixelYDimension];
 
   @override
   String toString() => '''width: $width height: $height
@@ -147,7 +148,7 @@ xResolution: $xResolution yResolution: $yResolution
 pixelXDimension: $pixelXDimension pixelYDimension: $pixelYDimension
 orientation: $orientation''';
 
-  static Map<PdfExifTag, dynamic> _findExifInJpeg(ByteData buffer) {
+  static Map<PdfExifTag, dynamic>? _findExifInJpeg(ByteData buffer) {
     if ((buffer.getUint8(0) != 0xFF) || (buffer.getUint8(1) != 0xD8)) {
       return <PdfExifTag, dynamic>{}; // Not a valid JPEG
     }
@@ -317,7 +318,7 @@ orientation: $orientation''';
         allowMalformed: true);
   }
 
-  static Map<PdfExifTag, dynamic> _readEXIFData(ByteData buffer, int start) {
+  static Map<PdfExifTag, dynamic>? _readEXIFData(ByteData buffer, int start) {
     final startingString = _getStringFromDB(buffer, start, 4);
     if (startingString != 'Exif') {
       // Not valid EXIF data! $startingString
@@ -353,8 +354,12 @@ orientation: $orientation''';
         _readTags(buffer, tiffOffset, tiffOffset + firstIFDOffset, bigEnd);
 
     if (tags.containsKey(PdfExifTag.ExifIFDPointer)) {
-      final exifData = _readTags(buffer, tiffOffset,
-          tiffOffset + tags[PdfExifTag.ExifIFDPointer], bigEnd);
+      final exifData = _readTags(
+          buffer,
+          tiffOffset,
+          // ignore: avoid_as
+          tiffOffset + tags[PdfExifTag.ExifIFDPointer] as int,
+          bigEnd);
       tags.addAll(exifData);
     }
 

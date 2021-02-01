@@ -24,7 +24,7 @@ class PdfPageFormat {
       double marginBottom = 0.0,
       double marginLeft = 0.0,
       double marginRight = 0.0,
-      double marginAll})
+      double? marginAll})
       : assert(width > 0),
         assert(height > 0),
         marginTop = marginAll ?? marginTop,
@@ -67,12 +67,12 @@ class PdfPageFormat {
   final double marginRight;
 
   PdfPageFormat copyWith(
-      {double width,
-      double height,
-      double marginTop,
-      double marginBottom,
-      double marginLeft,
-      double marginRight}) {
+      {double? width,
+      double? height,
+      double? marginTop,
+      double? marginBottom,
+      double? marginLeft,
+      double? marginRight}) {
     return PdfPageFormat(width ?? this.width, height ?? this.height,
         marginTop: marginTop ?? this.marginTop,
         marginBottom: marginBottom ?? this.marginBottom,
@@ -99,7 +99,10 @@ class PdfPageFormat {
       height >= width ? this : copyWith(width: height, height: width);
 
   PdfPageFormat applyMargin(
-          {double left, double top, double right, double bottom}) =>
+          {required double left,
+          required double top,
+          required double right,
+          required double bottom}) =>
       copyWith(
         marginLeft: math.max(marginLeft, left),
         marginTop: math.max(marginTop, top),

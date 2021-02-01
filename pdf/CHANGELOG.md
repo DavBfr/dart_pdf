@@ -1,9 +1,10 @@
 # Changelog
 
-## 2.1.0
+## 3.0.0-nullsafety.0
 
 - Fix SVG fit alignment
 - Add DecorationSvgImage
+- Opt-In null-safety
 
 ## 2.0.0
 

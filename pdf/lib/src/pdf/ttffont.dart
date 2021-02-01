@@ -44,18 +44,18 @@ class PdfTtfFont extends PdfFont {
   @override
   String get subtype => font.unicode ? '/Type0' : super.subtype;
 
-  PdfUnicodeCmap unicodeCMap;
+  late PdfUnicodeCmap unicodeCMap;
 
-  PdfFontDescriptor descriptor;
+  late PdfFontDescriptor descriptor;
 
-  PdfObjectStream file;
+  late PdfObjectStream file;
 
-  PdfArrayObject widthsObject;
+  late PdfArrayObject widthsObject;
 
   final TtfParser font;
 
   @override
-  String get fontName => font.fontName;
+  String get fontName => font.fontName!;
 
   @override
   double get ascent => font.ascent.toDouble() / font.unitsPerEm;
@@ -163,7 +163,7 @@ class PdfTtfFont extends PdfFont {
     final runes = text.runes;
 
     stream.putByte(0x3c);
-    for (int rune in runes) {
+    for (var rune in runes) {
       var char = unicodeCMap.cmap.indexOf(rune);
       if (char == -1) {
         char = unicodeCMap.cmap.length;

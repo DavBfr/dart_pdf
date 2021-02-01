@@ -25,13 +25,7 @@ class PrintingInfo {
     this.canListPrinters = false,
     this.canShare = false,
     this.canRaster = false,
-  })  : assert(directPrint != null),
-        assert(dynamicLayout != null),
-        assert(canPrint != null),
-        assert(canConvertHtml != null),
-        assert(canListPrinters != null),
-        assert(canShare != null),
-        assert(canRaster != null);
+  });
 
   /// Create an information object from a dictionnary
   factory PrintingInfo.fromMap(Map<dynamic, dynamic> map) => PrintingInfo(

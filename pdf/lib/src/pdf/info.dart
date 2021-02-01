@@ -30,19 +30,19 @@ class PdfInfo extends PdfObject {
       this.producer})
       : super(pdfDocument) {
     if (author != null) {
-      params['/Author'] = PdfSecString.fromString(this, author);
+      params['/Author'] = PdfSecString.fromString(this, author!);
     }
     if (creator != null) {
-      params['/Creator'] = PdfSecString.fromString(this, creator);
+      params['/Creator'] = PdfSecString.fromString(this, creator!);
     }
     if (title != null) {
-      params['/Title'] = PdfSecString.fromString(this, title);
+      params['/Title'] = PdfSecString.fromString(this, title!);
     }
     if (subject != null) {
-      params['/Subject'] = PdfSecString.fromString(this, subject);
+      params['/Subject'] = PdfSecString.fromString(this, subject!);
     }
     if (keywords != null) {
-      params['/Keywords'] = PdfSecString.fromString(this, keywords);
+      params['/Keywords'] = PdfSecString.fromString(this, keywords!);
     }
     if (producer != null) {
       params['/Producer'] =
@@ -57,20 +57,20 @@ class PdfInfo extends PdfObject {
   static const String _libraryName = 'https://github.com/DavBfr/dart_pdf';
 
   /// Author of this document
-  final String author;
+  final String? author;
 
   /// Creator of this document
-  final String creator;
+  final String? creator;
 
   /// Title of this document
-  final String title;
+  final String? title;
 
   /// Subject of this document
-  final String subject;
+  final String? subject;
 
   /// Keywords of this document
-  final String keywords;
+  final String? keywords;
 
   /// Application that created this document
-  final String producer;
+  final String? producer;
 }

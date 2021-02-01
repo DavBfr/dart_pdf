@@ -16,15 +16,16 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {
-  Document pdf;
-  TextStyle symbol;
-  ImageProvider im;
+  late Document pdf;
+  TextStyle? symbol;
+  late ImageProvider im;
 
   setUpAll(() {
     Document.debug = true;
@@ -43,14 +44,14 @@ void main() {
 
     final imData = zlib.decode(base64.decode(
         'eJz7//8/w388uOTCT6a4Ez96Q47++I+OI479mEVALyNU7z9seuNP/mAm196Ekz8YR+0dWHtBmJC9S+7/Zog89iMIKLYaHQPVJGLTD7MXpDfq+I9goNhPdPPDjv3YlnH6Jye6+2H21l/6yeB/4HsSDr1bQXrRwq8HqHcGyF6QXp9933N0tn/7Y7vn+/9gLPaih0PDlV9MIAzVm6ez7dsfzW3f/oMwzAx0e7FhoJutdbcj9MKw9frnL2J2POfBpxeEg478YLba/X0Wsl6lBXf+s0bP/s8ePXeWePJCvPEJNYMRZIYWSO/cq/9Z/Nv+M4bO+M8YDjFDJGkhzvSE7A6jRTdnsQR2wfXCMLHuMC5byyidvGgWE5JeZDOIcYdR+TpmkBno+mFmAAC+DGhl'));
-    im = RawImage(bytes: imData, width: 16, height: 20);
+    im = RawImage(bytes: Uint8List.fromList(imData), width: 16, height: 20);
   });
 
   test('Pdf Widgets page 1', () {
     pdf.addPage(Page(
         pageFormat: const PdfPageFormat(400, 400),
         margin: const EdgeInsets.all(10),
-        build: (Context context) => Column(children: <Widget>[
+        build: (Context? context) => Column(children: <Widget>[
               Container(
                 padding: const EdgeInsets.all(5),
                 margin: const EdgeInsets.only(bottom: 10),
@@ -113,7 +114,7 @@ void main() {
                   "That's all Folks!",
                   tightBounds: true,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).defaultTextStyle.copyWith(
+                  style: Theme.of(context!).defaultTextStyle.copyWith(
                         font: Font.timesBoldItalic(),
                       ),
                   textScaleFactor: 3,
@@ -127,7 +128,7 @@ void main() {
       Page(
         pageFormat: const PdfPageFormat(400, 400),
         margin: const EdgeInsets.all(10),
-        build: (Context context) => Center(
+        build: (Context? context) => Center(
           child: GridView(
             crossAxisCount: 3,
             direction: Axis.vertical,
@@ -204,7 +205,7 @@ void main() {
         Page(
           pageFormat: const PdfPageFormat(400, 200),
           margin: const EdgeInsets.all(10),
-          build: (Context context) => Stack(
+          build: (Context? context) => Stack(
             overflow: Overflow.visible,
             // fit: StackFit.expand,
             // alignment: Alignment.bottomRight,
@@ -226,7 +227,7 @@ void main() {
                   child: RichText(
                     text: TextSpan(
                       text: 'Hello ',
-                      style: Theme.of(context).defaultTextStyle,
+                      style: Theme.of(context!).defaultTextStyle,
                       children: <TextSpan>[
                         TextSpan(
                             text: 'bold',

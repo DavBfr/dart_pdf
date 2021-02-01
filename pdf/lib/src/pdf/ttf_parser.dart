@@ -89,38 +89,39 @@ class TtfParser {
   final UnmodifiableByteDataView bytes;
   final Map<String, int> tableOffsets = <String, int>{};
   final Map<String, int> tableSize = <String, int>{};
-  String _fontName;
+  String? _fontName;
   final Map<int, int> charToGlyphIndexMap = <int, int>{};
   final List<int> glyphOffsets = <int>[];
   final Map<int, PdfFontMetrics> glyphInfoMap = <int, PdfFontMetrics>{};
 
-  int get unitsPerEm => bytes.getUint16(tableOffsets[head_table] + 18);
+  int get unitsPerEm => bytes.getUint16(tableOffsets[head_table]! + 18);
 
-  int get xMin => bytes.getInt16(tableOffsets[head_table] + 36);
+  int get xMin => bytes.getInt16(tableOffsets[head_table]! + 36);
 
-  int get yMin => bytes.getInt16(tableOffsets[head_table] + 38);
+  int get yMin => bytes.getInt16(tableOffsets[head_table]! + 38);
 
-  int get xMax => bytes.getInt16(tableOffsets[head_table] + 40);
+  int get xMax => bytes.getInt16(tableOffsets[head_table]! + 40);
 
-  int get yMax => bytes.getInt16(tableOffsets[head_table] + 42);
+  int get yMax => bytes.getInt16(tableOffsets[head_table]! + 42);
 
-  int get indexToLocFormat => bytes.getInt16(tableOffsets[head_table] + 50);
+  int get indexToLocFormat => bytes.getInt16(tableOffsets[head_table]! + 50);
 
-  int get ascent => bytes.getInt16(tableOffsets[hhea_table] + 4);
+  int get ascent => bytes.getInt16(tableOffsets[hhea_table]! + 4);
 
-  int get descent => bytes.getInt16(tableOffsets[hhea_table] + 6);
+  int get descent => bytes.getInt16(tableOffsets[hhea_table]! + 6);
 
-  int get numOfLongHorMetrics => bytes.getUint16(tableOffsets[hhea_table] + 34);
+  int get numOfLongHorMetrics =>
+      bytes.getUint16(tableOffsets[hhea_table]! + 34);
 
-  int get numGlyphs => bytes.getUint16(tableOffsets[maxp_table] + 4);
+  int get numGlyphs => bytes.getUint16(tableOffsets[maxp_table]! + 4);
 
-  String get fontName => _fontName;
+  String? get fontName => _fontName;
 
   bool get unicode => bytes.getUint32(0) == 0x10000;
 
   // https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6name.html
   void _parseFontName() {
-    final basePosition = tableOffsets[name_table];
+    final basePosition = tableOffsets[name_table]!;
     final count = bytes.getUint16(basePosition + 2);
     final stringOffset = bytes.getUint16(basePosition + 4);
     var pos = basePosition + 6;
@@ -153,7 +154,7 @@ class TtfParser {
   }
 
   void _parseCMap() {
-    final basePosition = tableOffsets[cmap_table];
+    final basePosition = tableOffsets[cmap_table]!;
     final numSubTables = bytes.getUint16(basePosition + 2);
     for (var i = 0; i < numSubTables; i++) {
       final offset = bytes.getUint32(basePosition + i * 8 + 8);
@@ -262,11 +263,11 @@ class TtfParser {
     final numGlyphs = this.numGlyphs;
     if (indexToLocFormat == 0) {
       for (var i = 0; i < numGlyphs; i++) {
-        glyphOffsets.add(bytes.getUint16(basePosition + i * 2) * 2);
+        glyphOffsets.add(bytes.getUint16(basePosition! + i * 2) * 2);
       }
     } else {
       for (var i = 0; i < numGlyphs; i++) {
-        glyphOffsets.add(bytes.getUint32(basePosition + i * 4));
+        glyphOffsets.add(bytes.getUint32(basePosition! + i * 4));
       }
     }
   }
@@ -274,14 +275,14 @@ class TtfParser {
   /// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
   void _parseGlyphs() {
     final baseOffset = tableOffsets[glyf_table];
-    final hmtxOffset = tableOffsets[hmtx_table];
+    final hmtxOffset = tableOffsets[hmtx_table]!;
     final unitsPerEm = this.unitsPerEm;
     final numOfLongHorMetrics = this.numOfLongHorMetrics;
     final defaultadvanceWidth =
         bytes.getUint16(hmtxOffset + (numOfLongHorMetrics - 1) * 4);
     var glyphIndex = 0;
     for (var offset in glyphOffsets) {
-      final xMin = bytes.getInt16(baseOffset + offset + 2); // 2
+      final xMin = bytes.getInt16(baseOffset! + offset + 2); // 2
       final yMin = bytes.getInt16(baseOffset + offset + 4); // 4
       final xMax = bytes.getInt16(baseOffset + offset + 6); // 6
       final yMax = bytes.getInt16(baseOffset + offset + 8); // 8
@@ -309,10 +310,9 @@ class TtfParser {
 
   /// http://stevehanov.ca/blog/?id=143
   TtfGlyphInfo readGlyph(int index) {
-    assert(index != null);
     assert(index < glyphOffsets.length);
 
-    final start = tableOffsets[glyf_table] + glyphOffsets[index];
+    final start = tableOffsets[glyf_table]! + glyphOffsets[index];
 
     final numberOfContours = bytes.getInt16(start);
     assert(numberOfContours >= -1);

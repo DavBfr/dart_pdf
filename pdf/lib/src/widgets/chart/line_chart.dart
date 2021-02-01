@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 
 import '../geometry.dart';
@@ -32,8 +31,8 @@ class LineChartValue extends ChartValue {
 
 class LineDataSet extends Dataset {
   LineDataSet({
-    @required this.data,
-    String legend,
+    required this.data,
+    String? legend,
     this.pointColor,
     this.pointSize = 3,
     PdfColor color = PdfColors.blue,
@@ -58,11 +57,11 @@ class LineDataSet extends Dataset {
   final double lineWidth;
 
   final bool drawPoints;
-  final PdfColor pointColor;
+  final PdfColor? pointColor;
   final double pointSize;
 
   final bool drawSurface;
-  final PdfColor surfaceColor;
+  final PdfColor? surfaceColor;
   final double surfaceOpacity;
 
   final bool isCurved;
@@ -115,7 +114,7 @@ class LineDataSet extends Dataset {
       return;
     }
 
-    final y = (grid is CartesianGrid) ? grid.xAxisOffset : 0;
+    final y = (grid is CartesianGrid) ? grid.xAxisOffset : 0.0;
     _drawLine(context, grid, true);
 
     final pe = grid.toChart(data.last.point);
@@ -137,7 +136,7 @@ class LineDataSet extends Dataset {
       return;
     }
 
-    final grid = Chart.of(context).grid;
+    final grid = Chart.of(context)!.grid;
 
     if (drawSurface) {
       _drawSurface(context, grid);
@@ -168,7 +167,7 @@ class LineDataSet extends Dataset {
       return;
     }
 
-    final grid = Chart.of(context).grid;
+    final grid = Chart.of(context)!.grid;
 
     if (drawLine) {
       _drawLine(context, grid, true);

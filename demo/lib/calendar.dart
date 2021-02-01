@@ -28,11 +28,11 @@ class Calendar extends StatelessWidget {
     this.year,
   });
 
-  final DateTime date;
+  final DateTime? date;
 
-  final int month;
+  final int? month;
 
-  final int year;
+  final int? year;
 
   Widget title(
     Context context,
@@ -178,7 +178,7 @@ Future<Uint8List> generateCalendar(PdfPageFormat pageFormat) async {
   //Create a PDF document.
   final document = Document();
   final date = DateTime.now();
-  String bg;
+  String? bg;
 
   switch (date.month) {
     case 12:
@@ -198,7 +198,7 @@ Future<Uint8List> generateCalendar(PdfPageFormat pageFormat) async {
         buildForeground: bg == null
             ? null
             : (context) =>
-                FullPage(ignoreMargins: true, child: SvgImage(svg: bg)),
+                FullPage(ignoreMargins: true, child: SvgImage(svg: bg!)),
       ),
       build: (context) => Padding(
         padding: const EdgeInsets.only(right: 20),

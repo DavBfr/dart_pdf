@@ -58,7 +58,7 @@ class IconThemeData {
   /// Creates a copy of this icon theme but with the given fields replaced with
   /// the new values.
   IconThemeData copyWith(
-      {PdfColor color, double opacity, double size, Font font}) {
+      {PdfColor? color, double? opacity, double? size, Font? font}) {
     return IconThemeData(
       color: color ?? this.color,
       opacity: opacity ?? this.opacity,
@@ -68,16 +68,16 @@ class IconThemeData {
   }
 
   /// The default color for icons.
-  final PdfColor color;
+  final PdfColor? color;
 
   /// An opacity to apply to both explicit and default icon colors.
-  final double opacity;
+  final double? opacity;
 
   /// The default size for icons.
-  final double size;
+  final double? size;
 
   /// The font to use
-  final Font font;
+  final Font? font;
 }
 
 /// A graphical icon widget drawn with a glyph from a font described in
@@ -90,30 +90,29 @@ class Icon extends StatelessWidget {
     this.color,
     this.textDirection,
     this.font,
-  })  : assert(icon != null),
-        super();
+  }) : super();
 
   /// The icon to display. The available icons are described in [Icons].
   final IconData icon;
 
   /// The size of the icon in logical pixels.
-  final double size;
+  final double? size;
 
   /// The color to use when drawing the icon.
-  final PdfColor color;
+  final PdfColor? color;
 
   /// The text direction to use for rendering the icon.
-  final TextDirection textDirection;
+  final TextDirection? textDirection;
 
   /// Font to use to draw the icon
-  final Font font;
+  final Font? font;
 
   @override
   Widget build(Context context) {
     final textDirection = this.textDirection ?? Directionality.of(context);
     final iconTheme = Theme.of(context).iconTheme;
     final iconSize = size ?? iconTheme.size;
-    final iconColor = color ?? iconTheme.color;
+    final iconColor = color ?? iconTheme.color!;
     final iconOpacity = iconColor.alpha;
     final iconFont = font ?? iconTheme.font;
 

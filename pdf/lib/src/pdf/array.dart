@@ -25,8 +25,7 @@ class PdfArrayObject extends PdfObject {
   PdfArrayObject(
     PdfDocument pdfDocument,
     this.array,
-  )   : assert(array != null),
-        super(pdfDocument);
+  ) : super(pdfDocument);
 
   /// The array
   final PdfArray array;

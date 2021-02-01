@@ -31,9 +31,9 @@ class ArabicText {
   String get originalRev => original.split('').reversed.join('');
 }
 
-Document pdf;
-Font arabicFont;
-TextStyle style;
+late Document pdf;
+Font? arabicFont;
+TextStyle? style;
 
 void main() {
   setUpAll(() {
@@ -464,7 +464,7 @@ void main() {
 
   test('Text Widgets Arabic', () {
     pdf.addPage(Page(
-      build: (Context context) => RichText(
+      build: (Context? context) => RichText(
         textDirection: TextDirection.rtl,
         text: TextSpan(
           text: 'قهوة\n',

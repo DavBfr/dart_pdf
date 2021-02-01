@@ -16,7 +16,6 @@
 
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -27,24 +26,22 @@ import 'widget.dart';
 
 class Partition implements SpanningWidget {
   Partition({
-    @required this.child,
+    required this.child,
     this.width,
     int flex = 1,
-  })  : flex = width == null ? flex : 0,
-        assert(flex != null),
-        assert(child != null);
+  }) : flex = width == null ? flex : 0;
 
-  final double width;
+  final double? width;
 
   final int flex;
 
   final SpanningWidget child;
 
   @override
-  PdfRect get box => child.box;
+  PdfRect? get box => child.box;
 
   @override
-  set box(PdfRect value) => child.box = value;
+  set box(PdfRect? value) => child.box = value;
 
   @override
   bool get canSpan => child.canSpan;
@@ -81,15 +78,15 @@ class Partition implements SpanningWidget {
 
 class _PartitionsContext extends WidgetContext {
   _PartitionsContext(int count)
-      : partitionContext = List<WidgetContext>.filled(count, null);
+      : partitionContext = List<WidgetContext?>.filled(count, null);
 
-  final List<WidgetContext> partitionContext;
+  final List<WidgetContext?> partitionContext;
 
   @override
   void apply(WidgetContext other) {
     if (other is _PartitionsContext) {
       for (var index = 0; index < partitionContext.length; index++) {
-        partitionContext[index]?.apply(other.partitionContext[index]);
+        partitionContext[index]?.apply(other.partitionContext[index]!);
       }
     }
   }
@@ -98,7 +95,7 @@ class _PartitionsContext extends WidgetContext {
   WidgetContext clone() {
     final context = _PartitionsContext(partitionContext.length);
     for (var index = 0; index < partitionContext.length; index++) {
-      context.partitionContext[index] = partitionContext[index].clone();
+      context.partitionContext[index] = partitionContext[index]!.clone();
     }
 
     return context;
@@ -107,7 +104,7 @@ class _PartitionsContext extends WidgetContext {
 
 class Partitions extends Widget implements SpanningWidget {
   Partitions({
-    this.children,
+    required this.children,
     this.mainAxisSize = MainAxisSize.max,
   })  : _context = _PartitionsContext(children.length),
         super();
@@ -128,14 +125,12 @@ class Partitions extends Widget implements SpanningWidget {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    assert(constraints != null);
-
     // Determine used flex factor, size inflexible items, calculate free space.
     final maxMainSize = constraints.maxWidth;
     final canFlex = maxMainSize < double.infinity;
     var allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
     var totalFlex = 0;
-    final widths = List<double>.filled(children.length, 0);
+    final widths = List<double?>.filled(children.length, 0);
 
     // Calculate fixed width columns
     var index = 0;
@@ -151,7 +146,7 @@ class Partitions extends Widget implements SpanningWidget {
         }());
         totalFlex += child.flex;
       } else {
-        allocatedSize += child.width;
+        allocatedSize += child.width!;
         widths[index] = child.width;
       }
       index++;
@@ -178,15 +173,15 @@ class Partitions extends Widget implements SpanningWidget {
     var totalHeight = 0.0;
     index = 0;
     for (var child in children) {
-      if (widths[index] > 0) {
+      if (widths[index]! > 0) {
         final innerConstraints = BoxConstraints(
-            minWidth: widths[index],
-            maxWidth: widths[index],
+            minWidth: widths[index]!,
+            maxWidth: widths[index]!,
             maxHeight: constraints.maxHeight);
 
         child.layout(context, innerConstraints);
         assert(child.box != null);
-        totalHeight = math.max(totalHeight, child.box.height);
+        totalHeight = math.max(totalHeight, child.box!.height);
       }
       index++;
     }
@@ -195,12 +190,12 @@ class Partitions extends Widget implements SpanningWidget {
     index = 0;
     allocatedSize = 0.0;
     for (var child in children) {
-      if (widths[index] > 0) {
-        final offsetY = totalHeight - child.box.height;
+      if (widths[index]! > 0) {
+        final offsetY = totalHeight - child.box!.height;
         child.box = PdfRect.fromPoints(
-            PdfPoint(allocatedSize, offsetY), child.box.size);
-        totalHeight = math.max(totalHeight, child.box.height);
-        allocatedSize += widths[index];
+            PdfPoint(allocatedSize, offsetY), child.box!.size);
+        totalHeight = math.max(totalHeight, child.box!.height);
+        allocatedSize += widths[index]!;
       }
       index++;
     }
@@ -213,7 +208,7 @@ class Partitions extends Widget implements SpanningWidget {
     super.paint(context);
 
     final mat = Matrix4.identity();
-    mat.translate(box.x, box.y);
+    mat.translate(box!.x, box!.y);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
@@ -228,7 +223,7 @@ class Partitions extends Widget implements SpanningWidget {
     _context.apply(context);
     var index = 0;
     for (final child in children) {
-      child.restoreContext(_context.partitionContext[index]);
+      child.restoreContext(_context.partitionContext[index]!);
       index++;
     }
   }

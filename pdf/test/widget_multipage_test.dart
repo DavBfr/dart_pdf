@@ -47,7 +47,7 @@ void main() {
 
     final pdf = Document();
 
-    pdf.addPage(Page(build: (Context context) => Column(children: lines)));
+    pdf.addPage(Page(build: (Context? context) => Column(children: lines)));
 
     final file = File('widgets-monopage.pdf');
     await file.writeAsBytes(await pdf.save());

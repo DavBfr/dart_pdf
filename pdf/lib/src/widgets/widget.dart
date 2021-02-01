@@ -29,9 +29,9 @@ import 'theme.dart';
 @immutable
 class Context {
   factory Context({
-    @required PdfDocument document,
-    PdfPage page,
-    PdfGraphics canvas,
+    required PdfDocument document,
+    PdfPage? page,
+    PdfGraphics? canvas,
   }) =>
       Context._(
         document: document,
@@ -41,18 +41,23 @@ class Context {
       );
 
   const Context._({
-    @required this.document,
-    this.page,
-    this.canvas,
-    @required this.inherited,
-  })  : assert(document != null),
-        assert(inherited != null);
+    required this.document,
+    PdfPage? page,
+    PdfGraphics? canvas,
+    required HashMap<Type, Inherited> inherited,
+  })   : _page = page,
+        _canvas = canvas,
+        _inherited = inherited;
 
-  final PdfPage page;
+  final PdfPage? _page;
 
-  final PdfGraphics canvas;
+  PdfPage get page => _page!;
 
-  final HashMap<Type, Inherited> inherited;
+  final PdfGraphics? _canvas;
+
+  PdfGraphics get canvas => _canvas!;
+
+  final HashMap<Type, Inherited> _inherited;
 
   final PdfDocument document;
 
@@ -64,15 +69,20 @@ class Context {
   int get pagesCount => document.pdfPageList.pages.length;
 
   Context copyWith(
-      {PdfPage page,
-      PdfGraphics canvas,
-      Matrix4 ctm,
-      HashMap<Type, Inherited> inherited}) {
+      {PdfPage? page,
+      PdfGraphics? canvas,
+      Matrix4? ctm,
+      HashMap<Type, Inherited>? inherited}) {
     return Context._(
         document: document,
-        page: page ?? this.page,
-        canvas: canvas ?? this.canvas,
-        inherited: inherited ?? this.inherited);
+        page: page ?? _page,
+        canvas: canvas ?? _canvas,
+        inherited: inherited ?? _inherited);
+  }
+
+  T? dependsOn<T>() {
+    // ignore: avoid_as
+    return _inherited[T] as T?;
   }
 
   Context inheritFrom(Inherited object) {
@@ -80,7 +90,7 @@ class Context {
   }
 
   Context inheritFromAll(Iterable<Inherited> objects) {
-    final inherited = HashMap<Type, Inherited>.of(this.inherited);
+    final inherited = HashMap<Type, Inherited>.of(_inherited);
     for (final object in objects) {
       inherited[object.runtimeType] = object;
     }
@@ -112,24 +122,22 @@ abstract class Widget {
   Widget();
 
   /// The bounding box of this widget, calculated at layout time
-  PdfRect box;
+  PdfRect? box;
 
   /// Draw a widget to a page canvas.
   static void draw(
     Widget widget, {
-    PdfPage page,
-    PdfGraphics canvas,
-    BoxConstraints constraints,
-    @required PdfPoint offset,
-    Alignment alignment,
-    Context context,
+    PdfPage? page,
+    PdfGraphics? canvas,
+    BoxConstraints? constraints,
+    required PdfPoint offset,
+    Alignment? alignment,
+    Context? context,
   }) {
-    assert(offset != null);
-
     context ??= Context(
-      document: page?.pdfDocument,
+      document: page!.pdfDocument,
       page: page,
-      canvas: canvas,
+      canvas: canvas!,
     ).inheritFromAll(<Inherited>[
       ThemeData.base(),
     ]);
@@ -142,11 +150,11 @@ abstract class Widget {
     assert(widget.box != null);
 
     if (alignment != null) {
-      final d = alignment.withinRect(widget.box);
+      final d = alignment.withinRect(widget.box!);
       offset = PdfPoint(offset.x - d.x, offset.y - d.y);
     }
 
-    widget.box = PdfRect.fromPoints(offset, widget.box.size);
+    widget.box = PdfRect.fromPoints(offset, widget.box!.size);
 
     widget.paint(context);
   }
@@ -154,15 +162,15 @@ abstract class Widget {
   /// Measure the size of a widget to a page canvas.
   static PdfPoint measure(
     Widget widget, {
-    PdfPage page,
-    PdfGraphics canvas,
-    BoxConstraints constraints,
-    Context context,
+    PdfPage? page,
+    PdfGraphics? canvas,
+    BoxConstraints? constraints,
+    Context? context,
   }) {
     context ??= Context(
-      document: page?.pdfDocument,
+      document: page!.pdfDocument,
       page: page,
-      canvas: canvas,
+      canvas: canvas!,
     ).inheritFromAll(<Inherited>[
       ThemeData.base(),
     ]);
@@ -173,7 +181,7 @@ abstract class Widget {
     );
 
     assert(widget.box != null);
-    return widget.box.size;
+    return widget.box!.size;
   }
 
   /// First widget pass to calculate the children layout and
@@ -198,7 +206,7 @@ abstract class Widget {
     context.canvas
       ..setStrokeColor(PdfColors.purple)
       ..setLineWidth(1)
-      ..drawBox(box)
+      ..drawBox(box!)
       ..strokePath();
   }
 }
@@ -206,7 +214,7 @@ abstract class Widget {
 abstract class StatelessWidget extends Widget {
   StatelessWidget() : super();
 
-  Widget _child;
+  Widget? _child;
 
   @override
   void layout(Context context, BoxConstraints constraints,
@@ -214,9 +222,9 @@ abstract class StatelessWidget extends Widget {
     _child ??= build(context);
 
     if (_child != null) {
-      _child.layout(context, constraints, parentUsesSize: parentUsesSize);
-      assert(_child.box != null);
-      box = _child.box;
+      _child!.layout(context, constraints, parentUsesSize: parentUsesSize);
+      assert(_child!.box != null);
+      box = _child!.box;
     } else {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
     }
@@ -228,11 +236,11 @@ abstract class StatelessWidget extends Widget {
 
     if (_child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box.x, box.y);
+      mat.translate(box!.x, box!.y);
       context.canvas
         ..saveContext()
         ..setTransform(mat);
-      _child.paint(context);
+      _child!.paint(context);
       context.canvas.restoreContext();
     }
   }
@@ -244,15 +252,15 @@ abstract class StatelessWidget extends Widget {
 abstract class SingleChildWidget extends Widget {
   SingleChildWidget({this.child}) : super();
 
-  final Widget child;
+  final Widget? child;
 
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
     if (child != null) {
-      child.layout(context, constraints, parentUsesSize: parentUsesSize);
-      assert(child.box != null);
-      box = child.box;
+      child!.layout(context, constraints, parentUsesSize: parentUsesSize);
+      assert(child!.box != null);
+      box = child!.box;
     } else {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
     }
@@ -262,11 +270,11 @@ abstract class SingleChildWidget extends Widget {
   void paintChild(Context context) {
     if (child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box.x, box.y);
+      mat.translate(box!.x, box!.y);
       context.canvas
         ..saveContext()
         ..setTransform(mat);
-      child.paint(context);
+      child!.paint(context);
       context.canvas.restoreContext();
     }
   }
@@ -281,24 +289,24 @@ abstract class MultiChildWidget extends Widget {
 class InheritedWidget extends Widget {
   InheritedWidget({this.build, this.inherited});
 
-  final BuildCallback build;
+  final BuildCallback? build;
 
-  final Inherited inherited;
+  final Inherited? inherited;
 
-  Context _context;
+  Context? _context;
 
-  Widget _child;
+  Widget? _child;
 
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    _context = inherited != null ? context.inheritFrom(inherited) : context;
-    _child = build(_context);
+    _context = inherited != null ? context.inheritFrom(inherited!) : context;
+    _child = build!(_context!);
 
     if (_child != null) {
-      _child.layout(_context, constraints, parentUsesSize: parentUsesSize);
-      assert(_child.box != null);
-      box = _child.box;
+      _child!.layout(_context!, constraints, parentUsesSize: parentUsesSize);
+      assert(_child!.box != null);
+      box = _child!.box;
     } else {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
     }
@@ -307,15 +315,15 @@ class InheritedWidget extends Widget {
   @override
   void paint(Context context) {
     assert(_context != null);
-    super.paint(_context);
+    super.paint(_context!);
 
     if (_child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box.x, box.y);
+      mat.translate(box!.x, box!.y);
       context.canvas
         ..saveContext()
         ..setTransform(mat);
-      _child.paint(_context);
+      _child!.paint(_context!);
       context.canvas.restoreContext();
     }
   }

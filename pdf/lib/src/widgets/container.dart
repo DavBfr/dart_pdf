@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -25,12 +24,10 @@ import 'widget.dart';
 
 class DecoratedBox extends SingleChildWidget {
   DecoratedBox(
-      {@required this.decoration,
+      {required this.decoration,
       this.position = DecorationPosition.background,
-      Widget child})
-      : assert(decoration != null),
-        assert(position != null),
-        super(child: child);
+      Widget? child})
+      : super(child: child);
 
   /// What decoration to paint.
   final BoxDecoration decoration;
@@ -42,11 +39,11 @@ class DecoratedBox extends SingleChildWidget {
   void paint(Context context) {
     super.paint(context);
     if (position == DecorationPosition.background) {
-      decoration.paint(context, box);
+      decoration.paint(context, box!);
     }
     paintChild(context);
     if (position == DecorationPosition.foreground) {
-      decoration.paint(context, box);
+      decoration.paint(context, box!);
     }
   }
 }
@@ -55,12 +52,12 @@ class Container extends StatelessWidget {
   Container({
     this.alignment,
     this.padding,
-    PdfColor color,
-    BoxDecoration decoration,
+    PdfColor? color,
+    BoxDecoration? decoration,
     this.foregroundDecoration,
-    double width,
-    double height,
-    BoxConstraints constraints,
+    double? width,
+    double? height,
+    BoxConstraints? constraints,
     this.margin,
     this.transform,
     this.child,
@@ -76,32 +73,32 @@ class Container extends StatelessWidget {
             : constraints,
         super();
 
-  final Widget child;
+  final Widget? child;
 
-  final Alignment alignment;
+  final Alignment? alignment;
 
-  final EdgeInsets padding;
+  final EdgeInsets? padding;
 
   /// The decoration to paint behind the [child].
-  final BoxDecoration decoration;
+  final BoxDecoration? decoration;
 
   /// The decoration to paint in front of the [child].
-  final BoxDecoration foregroundDecoration;
+  final BoxDecoration? foregroundDecoration;
 
   /// Additional constraints to apply to the child.
-  final BoxConstraints constraints;
+  final BoxConstraints? constraints;
 
   /// Empty space to surround the [decoration] and [child].
-  final EdgeInsets margin;
+  final EdgeInsets? margin;
 
   /// The transformation matrix to apply before painting the container.
-  final Matrix4 transform;
+  final Matrix4? transform;
 
   @override
   Widget build(Context context) {
     var current = child;
 
-    if (child == null && (constraints == null || !constraints.isTight)) {
+    if (child == null && (constraints == null || !constraints!.isTight)) {
       current = LimitedBox(
           maxWidth: 0,
           maxHeight: 0,
@@ -109,36 +106,36 @@ class Container extends StatelessWidget {
     }
 
     if (alignment != null) {
-      current = Align(alignment: alignment, child: current);
+      current = Align(alignment: alignment!, child: current);
     }
 
     if (padding != null) {
-      current = Padding(padding: padding, child: current);
+      current = Padding(padding: padding!, child: current);
     }
 
     if (decoration != null) {
-      current = DecoratedBox(decoration: decoration, child: current);
+      current = DecoratedBox(decoration: decoration!, child: current);
     }
 
     if (foregroundDecoration != null) {
       current = DecoratedBox(
-          decoration: foregroundDecoration,
+          decoration: foregroundDecoration!,
           position: DecorationPosition.foreground,
           child: current);
     }
 
     if (constraints != null) {
-      current = ConstrainedBox(constraints: constraints, child: current);
+      current = ConstrainedBox(constraints: constraints!, child: current);
     }
 
     if (margin != null) {
-      current = Padding(padding: margin, child: current);
+      current = Padding(padding: margin!, child: current);
     }
 
     if (transform != null) {
-      current = Transform(transform: transform, child: current);
+      current = Transform(transform: transform!, child: current);
     }
 
-    return current;
+    return current!;
   }
 }

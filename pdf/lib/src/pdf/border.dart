@@ -47,9 +47,7 @@ class PdfBorder extends PdfObject {
     this.width, {
     this.style = PdfBorderStyle.solid,
     this.dash,
-  })  : assert(width != null),
-        assert(style != null),
-        super(pdfDocument);
+  }) : super(pdfDocument);
 
   /// The style of the border
   final PdfBorderStyle style;
@@ -58,7 +56,7 @@ class PdfBorder extends PdfObject {
   final double width;
 
   /// This array allows the definition of a dotted line for the border
-  final List<double> dash;
+  final List<double>? dash;
 
   @override
   void prepare() {
@@ -69,7 +67,7 @@ class PdfBorder extends PdfObject {
     params['/W'] = PdfNum(width);
 
     if (dash != null) {
-      params['/D'] = PdfArray.fromNum(dash);
+      params['/D'] = PdfArray.fromNum(dash!);
     }
   }
 }

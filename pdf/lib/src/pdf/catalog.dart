@@ -30,16 +30,13 @@ class PdfCatalog extends PdfObject {
     this.pdfPageList,
     this.pageMode,
     this.names,
-  )   : assert(pdfPageList != null),
-        assert(pageMode != null),
-        assert(names != null),
-        super(pdfDocument, type: '/Catalog');
+  ) : super(pdfDocument, type: '/Catalog');
 
   /// The pages of the document
   final PdfPageList pdfPageList;
 
   /// The outlines of the document
-  PdfOutline outlines;
+  PdfOutline? outlines;
 
   /// The initial page mode
   final PdfPageMode pageMode;
@@ -65,8 +62,8 @@ class PdfCatalog extends PdfObject {
     params['/Pages'] = pdfPageList.ref();
 
     // the Outlines object
-    if (outlines != null && outlines.outlines.isNotEmpty) {
-      params['/Outlines'] = outlines.ref();
+    if (outlines != null && outlines!.outlines.isNotEmpty) {
+      params['/Outlines'] = outlines!.ref();
     }
 
     // the Names object
@@ -77,13 +74,13 @@ class PdfCatalog extends PdfObject {
 
     if (pdfDocument.sign != null) {
       params['/Perms'] = PdfDict(<String, PdfDataType>{
-        '/DocMDP': pdfDocument.sign.ref(),
+        '/DocMDP': pdfDocument.sign!.ref(),
       });
     }
 
     final widgets = <PdfAnnot>[];
     for (var page in pdfDocument.pdfPageList.pages) {
-      for (var annot in page.annotations) {
+      for (var annot in page!.annotations) {
         if (annot.annot.subtype == '/Widget') {
           widgets.add(annot);
         }

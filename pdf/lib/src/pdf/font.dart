@@ -16,8 +16,6 @@
 
 import 'dart:convert';
 
-import 'package:meta/meta.dart';
-
 import 'data_types.dart';
 import 'document.dart';
 import 'font_metrics.dart';
@@ -31,9 +29,8 @@ import 'type1_fonts.dart';
 abstract class PdfFont extends PdfObject {
   /// Constructs a [PdfFont]. This will attempt to map the font from a known
   /// font name to that in Pdf, defaulting to Helvetica if not possible.
-  PdfFont.create(PdfDocument pdfDocument, {@required this.subtype})
-      : assert(subtype != null),
-        super(pdfDocument, type: '/Font') {
+  PdfFont.create(PdfDocument pdfDocument, {required this.subtype})
+      : super(pdfDocument, type: '/Font') {
     pdfDocument.fonts.add(this);
   }
 
@@ -137,14 +134,14 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
   String get name => '/F$objser';
 
   /// The font's real name
-  String get fontName => null;
+  String get fontName;
 
   /// Spans the distance between the baseline and the top of the glyph that
   /// reaches farthest from the baseline
-  double get ascent => null;
+  double get ascent;
 
   /// Spans the distance between the baseline and the lowest descending glyph
-  double get descent => null;
+  double get descent;
 
   /// Default width of a glyph
   static const double defaultGlyphWidth = 0.600;

@@ -30,7 +30,7 @@ class GridPaper extends SingleChildWidget {
     double interval = 100,
     int divisions = 5,
     int subdivisions = 2,
-    Widget child,
+    Widget? child,
   })  : assert(divisions > 0,
             'The "divisions" property must be greater than zero. If there were no divisions, the grid paper would not paint anything.'),
         assert(subdivisions > 0,
@@ -53,7 +53,7 @@ class GridPaper extends SingleChildWidget {
 
   GridPaper.millimeter({
     PdfColor color = lineColor,
-    Widget child,
+    Widget? child,
   })  : horizontalColor = color,
         verticalColor = color,
         horizontalInterval = 5 * PdfPageFormat.cm,
@@ -77,7 +77,7 @@ class GridPaper extends SingleChildWidget {
       left: 36 * PdfPageFormat.mm,
       right: 0,
     ),
-    Widget child,
+    Widget? child,
   })  : horizontalColor = const PdfColor.fromInt(0xffc8c8de),
         verticalColor = const PdfColor.fromInt(0xffc8c8de),
         horizontalInterval = 8 * PdfPageFormat.mm,
@@ -103,7 +103,7 @@ class GridPaper extends SingleChildWidget {
       left: 1.25 * PdfPageFormat.inch,
       right: 0,
     ),
-    Widget child,
+    Widget? child,
   })  : horizontalColor = lineColor,
         verticalColor = lineColor,
         horizontalInterval = double.infinity,
@@ -124,7 +124,7 @@ class GridPaper extends SingleChildWidget {
 
   GridPaper.quad({
     PdfColor color = lineColor,
-    Widget child,
+    Widget? child,
   })  : horizontalColor = color,
         verticalColor = color,
         horizontalInterval = PdfPageFormat.inch,
@@ -143,7 +143,7 @@ class GridPaper extends SingleChildWidget {
 
   GridPaper.engineering({
     PdfColor color = lineColor,
-    Widget child,
+    Widget? child,
   })  : horizontalColor = color,
         verticalColor = color,
         horizontalInterval = PdfPageFormat.inch,
@@ -211,15 +211,15 @@ class GridPaper extends SingleChildWidget {
           maxWidth: constraints.maxWidth - margin.horizontal,
           maxHeight: constraints.maxHeight - margin.vertical,
         );
-        child.layout(context, childConstraints, parentUsesSize: false);
+        child!.layout(context, childConstraints, parentUsesSize: false);
       } else {
-        child.layout(context, constraints, parentUsesSize: false);
+        child!.layout(context, constraints, parentUsesSize: false);
       }
 
-      assert(child.box != null);
-      child.box = PdfRect.fromPoints(
-          PdfPoint(margin.left, box.top - margin.top - child.box.height),
-          child.box.size);
+      assert(child!.box != null);
+      child!.box = PdfRect.fromPoints(
+          PdfPoint(margin.left, box!.top - margin.top - child!.box!.height),
+          child!.box!.size);
     }
   }
 
@@ -238,8 +238,8 @@ class GridPaper extends SingleChildWidget {
     final allHorizontalDivisions =
         (horizontalDivisions * horizontalSubdivisions).toDouble();
     var n = horizontalOffset;
-    for (var x = box.left + margin.left;
-        x <= box.right - margin.right;
+    for (var x = box!.left + margin.left;
+        x <= box!.right - margin.right;
         x += horizontalInterval / allHorizontalDivisions) {
       context.canvas
         ..setLineWidth((n % (horizontalSubdivisions * horizontalDivisions) == 0)
@@ -247,7 +247,7 @@ class GridPaper extends SingleChildWidget {
             : (n % horizontalSubdivisions == 0)
                 ? m
                 : s)
-        ..drawLine(x, box.top, x, box.bottom)
+        ..drawLine(x, box!.top, x, box!.bottom)
         ..strokePath();
       n++;
     }
@@ -256,8 +256,8 @@ class GridPaper extends SingleChildWidget {
     final allVerticalDivisions =
         (verticalDivisions * verticalSubdivisions).toDouble();
     n = verticalOffset;
-    for (var y = box.top - margin.top;
-        y >= box.bottom + margin.bottom;
+    for (var y = box!.top - margin.top;
+        y >= box!.bottom + margin.bottom;
         y -= verticalInterval / allVerticalDivisions) {
       context.canvas
         ..setLineWidth((n % (verticalSubdivisions * verticalDivisions) == 0)
@@ -265,7 +265,7 @@ class GridPaper extends SingleChildWidget {
             : (n % verticalSubdivisions == 0)
                 ? m
                 : s)
-        ..drawLine(box.left, y, box.right, y)
+        ..drawLine(box!.left, y, box!.right, y)
         ..strokePath();
       n++;
     }
@@ -273,33 +273,33 @@ class GridPaper extends SingleChildWidget {
     if (border.left.style != BorderStyle.none) {
       context.canvas
         ..setStrokeColor(border.left.color)
-        ..setLineWidth(border.left.width)
-        ..drawLine(
-            box.left + margin.left, box.top, box.left + margin.left, box.bottom)
+        ..setLineWidth(border.left.width!)
+        ..drawLine(box!.left + margin.left, box!.top, box!.left + margin.left,
+            box!.bottom)
         ..strokePath();
     }
     if (border.right.style != BorderStyle.none) {
       context.canvas
         ..setStrokeColor(border.right.color)
-        ..setLineWidth(border.right.width)
-        ..drawLine(box.right - margin.right, box.top, box.right - margin.right,
-            box.bottom)
+        ..setLineWidth(border.right.width!)
+        ..drawLine(box!.right - margin.right, box!.top,
+            box!.right - margin.right, box!.bottom)
         ..strokePath();
     }
     if (border.top.style != BorderStyle.none) {
       context.canvas
         ..setStrokeColor(border.top.color)
-        ..setLineWidth(border.top.width)
+        ..setLineWidth(border.top.width!)
         ..drawLine(
-            box.left, box.top - margin.top, box.right, box.top - margin.top)
+            box!.left, box!.top - margin.top, box!.right, box!.top - margin.top)
         ..strokePath();
     }
     if (border.bottom.style != BorderStyle.none) {
       context.canvas
         ..setStrokeColor(border.bottom.color)
-        ..setLineWidth(border.bottom.width)
-        ..drawLine(box.left, box.bottom + margin.bottom, box.right,
-            box.bottom + margin.bottom)
+        ..setLineWidth(border.bottom.width!)
+        ..drawLine(box!.left, box!.bottom + margin.bottom, box!.right,
+            box!.bottom + margin.bottom)
         ..strokePath();
     }
 

@@ -49,17 +49,17 @@ class SvgImg extends SvgOperation {
     final _brush = SvgBrush.fromXml(element, brush, painter);
 
     final width =
-        SvgParser.getNumeric(element, 'width', _brush, defaultValue: 0)
+        SvgParser.getNumeric(element, 'width', _brush, defaultValue: 0)!
             .sizeValue;
     final height =
-        SvgParser.getNumeric(element, 'height', _brush, defaultValue: 0)
+        SvgParser.getNumeric(element, 'height', _brush, defaultValue: 0)!
             .sizeValue;
     final x =
-        SvgParser.getNumeric(element, 'x', _brush, defaultValue: 0).sizeValue;
+        SvgParser.getNumeric(element, 'x', _brush, defaultValue: 0)!.sizeValue;
     final y =
-        SvgParser.getNumeric(element, 'y', _brush, defaultValue: 0).sizeValue;
+        SvgParser.getNumeric(element, 'y', _brush, defaultValue: 0)!.sizeValue;
 
-    PdfImage image;
+    PdfImage? image;
 
     final hrefAttr = element.getAttribute('href') ??
         element.getAttribute('href', namespace: 'http://www.w3.org/1999/xlink');
@@ -71,7 +71,7 @@ class SvgImg extends SvgOperation {
           final b = px.substring(7).replaceAll(RegExp(r'\s'), '');
           final bytes = base64.decode(b);
 
-          final img = im.decodeImage(bytes);
+          final img = im.decodeImage(bytes)!;
           image = PdfImage(
             painter.document,
             image: img.data.buffer.asUint8List(),
@@ -103,7 +103,7 @@ class SvgImg extends SvgOperation {
 
   final double height;
 
-  final PdfImage image;
+  final PdfImage? image;
 
   @override
   void paintShape(PdfGraphics canvas) {
@@ -111,8 +111,8 @@ class SvgImg extends SvgOperation {
       return;
     }
 
-    final sx = width / image.width;
-    final sy = height / image.height;
+    final sx = width / image!.width;
+    final sy = height / image!.height;
 
     canvas
       ..setTransform(
@@ -120,7 +120,7 @@ class SvgImg extends SvgOperation {
           ..translate(x, y + height, 0)
           ..scale(sx, -sy),
       )
-      ..drawImage(image, 0, 0);
+      ..drawImage(image!, 0, 0);
   }
 
   @override

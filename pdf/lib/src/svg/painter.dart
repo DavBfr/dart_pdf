@@ -31,7 +31,7 @@ class SvgPainter {
 
   final SvgParser parser;
 
-  final PdfGraphics _canvas;
+  final PdfGraphics? _canvas;
 
   final PdfDocument document;
 
@@ -42,12 +42,12 @@ class SvgPainter {
       parser.root,
       this,
       SvgBrush.defaultContext,
-    ).paint(_canvas);
+    ).paint(_canvas!);
   }
 
   final _fontCache = <String, Font>{};
 
-  Font getFontCache(String fontFamily, String fontStyle, String fontWeight) {
+  Font? getFontCache(String fontFamily, String fontStyle, String fontWeight) {
     final cache = '$fontFamily-$fontStyle-$fontWeight';
 
     if (!_fontCache.containsKey(cache)) {

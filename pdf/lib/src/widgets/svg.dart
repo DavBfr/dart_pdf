@@ -25,16 +25,13 @@ import '../svg/parser.dart';
 
 class SvgImage extends Widget {
   factory SvgImage({
-    @required String svg,
+    required String svg,
     BoxFit fit = BoxFit.contain,
     Alignment alignment = Alignment.center,
     bool clip = true,
-    double width,
-    double height,
+    double? width,
+    double? height,
   }) {
-    assert(clip != null);
-    assert(alignment != null);
-
     final xml = XmlDocument.parse(svg);
     final parser = SvgParser(xml: xml);
 
@@ -55,9 +52,7 @@ class SvgImage extends Widget {
     this.clip,
     this.width,
     this.height,
-  )   : assert(_svgParser != null),
-        assert(fit != null),
-        assert(alignment != null);
+  );
 
   final SvgParser _svgParser;
 
@@ -67,28 +62,28 @@ class SvgImage extends Widget {
 
   final bool clip;
 
-  final double width;
+  final double? width;
 
-  final double height;
+  final double? height;
 
-  FittedSizes sizes;
+  late FittedSizes sizes;
 
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
     final w = width != null || _svgParser.width != null
-        ? constraints.constrainWidth(width ?? _svgParser.width)
+        ? constraints.constrainWidth(width ?? _svgParser.width!)
         : constraints.hasBoundedWidth
             ? constraints.maxWidth
             : constraints.constrainWidth(_svgParser.viewBox.width);
     final h = height != null || _svgParser.height != null
-        ? constraints.constrainHeight(height ?? _svgParser.height)
+        ? constraints.constrainHeight(height ?? _svgParser.height!)
         : constraints.hasBoundedHeight
             ? constraints.maxHeight
             : constraints.constrainHeight(_svgParser.viewBox.height);
 
     sizes = applyBoxFit(fit, _svgParser.viewBox.size, PdfPoint(w, h));
-    box = PdfRect.fromPoints(PdfPoint.zero, sizes.destination);
+    box = PdfRect.fromPoints(PdfPoint.zero, sizes.destination!);
   }
 
   @override
@@ -96,23 +91,23 @@ class SvgImage extends Widget {
     super.paint(context);
 
     final _alignment = Alignment(alignment.x, -alignment.y);
-    final sourceRect = _alignment.inscribe(sizes.source, _svgParser.viewBox);
-    final sx = sizes.destination.x / sizes.source.x;
-    final sy = sizes.destination.y / sizes.source.y;
+    final sourceRect = _alignment.inscribe(sizes.source!, _svgParser.viewBox);
+    final sx = sizes.destination!.x / sizes.source!.x;
+    final sy = sizes.destination!.y / sizes.source!.y;
     final dx = sourceRect.x * sx;
     final dy = sourceRect.y * sy;
 
     final mat = Matrix4.identity()
       ..translate(
-        box.x - dx,
-        box.y + dy + box.height,
+        box!.x - dx,
+        box!.y + dy + box!.height,
       )
       ..scale(sx, -sy);
 
     context.canvas.saveContext();
     if (clip) {
       context.canvas
-        ..drawBox(box)
+        ..drawBox(box!)
         ..clipPath();
     }
     context.canvas.setTransform(mat);
@@ -136,12 +131,10 @@ class SvgImage extends Widget {
 @immutable
 class DecorationSvgImage extends DecorationGraphic {
   const DecorationSvgImage({
-    @required this.svg,
+    required this.svg,
     this.fit = BoxFit.cover,
     this.alignment = Alignment.center,
-  })  : assert(svg != null),
-        assert(fit != null),
-        assert(alignment != null);
+  });
 
   final String svg;
   final BoxFit fit;

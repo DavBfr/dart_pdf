@@ -86,19 +86,19 @@ class PdfGraphicState {
   const PdfGraphicState({this.opacity, this.blendMode, this.softMask});
 
   /// The opacity to apply to this graphic state
-  final double opacity;
+  final double? opacity;
 
   /// The current blend mode to be used
-  final PdfBlendMode blendMode;
+  final PdfBlendMode? blendMode;
 
-  final PdfSoftMask softMask;
+  final PdfSoftMask? softMask;
 
   PdfDict output() {
     final params = PdfDict();
 
     if (opacity != null) {
-      params['/CA'] = PdfNum(opacity);
-      params['/ca'] = PdfNum(opacity);
+      params['/CA'] = PdfNum(opacity!);
+      params['/ca'] = PdfNum(opacity!);
     }
 
     if (blendMode != null) {
@@ -108,7 +108,7 @@ class PdfGraphicState {
     }
 
     if (softMask != null) {
-      params['/SMask'] = softMask.output();
+      params['/SMask'] = softMask!.output();
     }
 
     return params;

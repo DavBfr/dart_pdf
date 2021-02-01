@@ -40,31 +40,29 @@ abstract class DecorationGraphic {
 @immutable
 class DecorationImage extends DecorationGraphic {
   const DecorationImage({
-    @required this.image,
+    required this.image,
     this.fit = BoxFit.cover,
     this.alignment = Alignment.center,
     this.dpi,
-  })  : assert(image != null),
-        assert(fit != null),
-        assert(alignment != null);
+  });
 
   final ImageProvider image;
   final BoxFit fit;
   final Alignment alignment;
-  final double dpi;
+  final double? dpi;
 
   @override
   void paint(Context context, PdfRect box) {
-    final _image = image.resolve(context, box.size, dpi: dpi);
+    final _image = image.resolve(context, box.size, dpi: dpi)!;
 
     final imageSize =
         PdfPoint(_image.width.toDouble(), _image.height.toDouble());
     final sizes = applyBoxFit(fit, imageSize, box.size);
-    final scaleX = sizes.destination.x / sizes.source.x;
-    final scaleY = sizes.destination.y / sizes.source.y;
+    final scaleX = sizes.destination!.x / sizes.source!.x;
+    final scaleY = sizes.destination!.y / sizes.source!.y;
     final sourceRect = alignment.inscribe(
-        sizes.source, PdfRect.fromPoints(PdfPoint.zero, imageSize));
-    final destinationRect = alignment.inscribe(sizes.destination, box);
+        sizes.source!, PdfRect.fromPoints(PdfPoint.zero, imageSize));
+    final destinationRect = alignment.inscribe(sizes.destination!, box);
     final mat =
         Matrix4.translationValues(destinationRect.x, destinationRect.y, 0)
           ..scale(scaleX, scaleY, 1)
@@ -97,14 +95,14 @@ enum TileMode {
 abstract class Gradient {
   /// Initialize the gradient's colors and stops.
   const Gradient({
-    @required this.colors,
+    required this.colors,
     this.stops,
-  }) : assert(colors != null);
+  });
 
   final List<PdfColor> colors;
 
   /// A list of values from 0.0 to 1.0 that denote fractions along the gradient.
-  final List<double> stops;
+  final List<double>? stops;
 
   void paint(Context context, PdfRect box);
 }
@@ -115,13 +113,10 @@ class LinearGradient extends Gradient {
   const LinearGradient({
     this.begin = Alignment.centerLeft,
     this.end = Alignment.centerRight,
-    @required List<PdfColor> colors,
-    List<double> stops,
+    required List<PdfColor> colors,
+    List<double>? stops,
     this.tileMode = TileMode.clamp,
-  })  : assert(begin != null),
-        assert(end != null),
-        assert(tileMode != null),
-        super(colors: colors, stops: stops);
+  }) : super(colors: colors, stops: stops);
 
   /// The offset at which stop 0.0 of the gradient is placed.
   final Alignment begin;
@@ -144,7 +139,7 @@ class LinearGradient extends Gradient {
         ..fillPath();
     }
 
-    assert(stops == null || stops.length == colors.length);
+    assert(stops == null || stops!.length == colors.length);
 
     context.canvas
       ..saveContext()
@@ -178,16 +173,12 @@ class RadialGradient extends Gradient {
   const RadialGradient({
     this.center = Alignment.center,
     this.radius = 0.5,
-    @required List<PdfColor> colors,
-    List<double> stops,
+    required List<PdfColor> colors,
+    List<double>? stops,
     this.tileMode = TileMode.clamp,
     this.focal,
     this.focalRadius = 0.0,
-  })  : assert(center != null),
-        assert(radius != null),
-        assert(tileMode != null),
-        assert(focalRadius != null),
-        super(colors: colors, stops: stops);
+  }) : super(colors: colors, stops: stops);
 
   /// The center of the gradient
   final Alignment center;
@@ -200,7 +191,7 @@ class RadialGradient extends Gradient {
   final TileMode tileMode;
 
   /// The focal point of the gradient.
-  final Alignment focal;
+  final Alignment? focal;
 
   /// The radius of the focal point of the gradient.
   final double focalRadius;
@@ -217,7 +208,7 @@ class RadialGradient extends Gradient {
         ..fillPath();
     }
 
-    assert(stops == null || stops.length == colors.length);
+    assert(stops == null || stops!.length == colors.length);
 
     final _focal = focal ?? center;
 
@@ -315,34 +306,29 @@ class BoxDecoration {
     this.gradient,
     this.image,
     this.shape = BoxShape.rectangle,
-  }) : assert(shape != null);
+  });
 
   /// The color to fill in the background of the box.
-  final PdfColor color;
-  final BoxBorder border;
-  final BorderRadius borderRadius;
+  final PdfColor? color;
+  final BoxBorder? border;
+  final BorderRadius? borderRadius;
   final BoxShape shape;
-  final DecorationGraphic image;
-  final Gradient gradient;
-  final List<BoxShadow> boxShadow;
+  final DecorationGraphic? image;
+  final Gradient? gradient;
+  final List<BoxShadow>? boxShadow;
 
   void paint(
     Context context,
     PdfRect box, [
     PaintPhase phase = PaintPhase.all,
   ]) {
-    assert(box.x != null);
-    assert(box.y != null);
-    assert(box.width != null);
-    assert(box.height != null);
-
     if (phase == PaintPhase.all || phase == PaintPhase.background) {
       if (color != null) {
         switch (shape) {
           case BoxShape.rectangle:
             if (borderRadius == null) {
               if (boxShadow != null) {
-                for (final s in boxShadow) {
+                for (final s in boxShadow!) {
                   final i = s._rect(box.width, box.height);
                   final m = PdfImage.fromImage(context.document, image: i);
                   context.canvas.drawImage(
@@ -355,7 +341,7 @@ class BoxDecoration {
               context.canvas.drawBox(box);
             } else {
               if (boxShadow != null) {
-                for (final s in boxShadow) {
+                for (final s in boxShadow!) {
                   final i = s._rect(box.width, box.height);
                   final m = PdfImage.fromImage(context.document, image: i);
                   context.canvas.drawImage(
@@ -365,12 +351,12 @@ class BoxDecoration {
                   );
                 }
               }
-              borderRadius.paint(context, box);
+              borderRadius!.paint(context, box);
             }
             break;
           case BoxShape.circle:
             if (boxShadow != null && box.width == box.height) {
-              for (final s in boxShadow) {
+              for (final s in boxShadow!) {
                 final i = s._ellipse(box.width, box.height);
                 final m = PdfImage.fromImage(context.document, image: i);
                 context.canvas.drawImage(
@@ -395,7 +381,7 @@ class BoxDecoration {
             if (borderRadius == null) {
               context.canvas.drawBox(box);
             } else {
-              borderRadius.paint(context, box);
+              borderRadius!.paint(context, box);
             }
             break;
           case BoxShape.circle:
@@ -404,7 +390,7 @@ class BoxDecoration {
             break;
         }
 
-        gradient.paint(context, box);
+        gradient!.paint(context, box);
       }
 
       if (image != null) {
@@ -419,19 +405,19 @@ class BoxDecoration {
             break;
           case BoxShape.rectangle:
             if (borderRadius != null) {
-              borderRadius.paint(context, box);
+              borderRadius!.paint(context, box);
               context.canvas.clipPath();
             }
             break;
         }
-        image.paint(context, box);
+        image!.paint(context, box);
         context.canvas.restoreContext();
       }
     }
 
     if (phase == PaintPhase.all || phase == PaintPhase.foreground) {
       if (border != null) {
-        border.paint(
+        border!.paint(
           context,
           box,
           shape: shape,

@@ -177,7 +177,7 @@ class PdfColor {
     if (component <= 0.03928) {
       return component / 12.92;
     }
-    return math.pow((component + 0.055) / 1.055, 2.4);
+    return math.pow((component + 0.055) / 1.055, 2.4).toDouble();
   }
 
   /// Get the luminance
@@ -333,7 +333,7 @@ class PdfColorCmyk extends PdfColor {
 
 double _getHue(
     double red, double green, double blue, double max, double delta) {
-  double hue;
+  var hue = double.nan;
   if (max == 0.0) {
     hue = 0.0;
   } else if (max == red) {
@@ -546,7 +546,7 @@ class PdfColorHsl extends PdfColor {
     final hue = _getHue(red, green, blue, max, delta);
     final lightness = (max + min) / 2.0;
     // Saturation can exceed 1.0 with rounding errors, so clamp it.
-    final double saturation = lightness == 1.0
+    final saturation = lightness == 1.0
         ? 0.0
         : (delta / (1.0 - (2.0 * lightness - 1.0).abs())).clamp(0.0, 1.0);
     return PdfColorHsl._(hue, saturation, lightness, alpha, red, green, blue);

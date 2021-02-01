@@ -38,16 +38,16 @@ class PdfOutput {
   List<PdfXref> offsets = <PdfXref>[];
 
   /// This is used to track the /Root object (catalog)
-  PdfObject rootID;
+  PdfObject? rootID;
 
   /// This is used to track the /Info object (info)
-  PdfObject infoID;
+  PdfObject? infoID;
 
   /// This is used to track the /Encrypt object (encryption)
-  PdfEncryption encryptID;
+  PdfEncryption? encryptID;
 
   /// This is used to track the /Sign object (signature)
-  PdfSignature signatureID;
+  PdfSignature? signatureID;
 
   /// This method writes a [PdfObject] to the stream.
   void write(PdfObject ob) {
@@ -84,7 +84,7 @@ class PdfOutput {
 
     for (var x in offsets) {
       // check to see if block is in range
-      if (lastid != null && x.id != (lastid + 1)) {
+      if (x.id != (lastid + 1)) {
         // no, so write this block, and reset
         writeblock(firstid, block);
         block.clear();
@@ -105,13 +105,13 @@ class PdfOutput {
     final params = PdfDict();
 
     // the number of entries (REQUIRED)
-    params['/Size'] = PdfNum(rootID.pdfDocument.objser);
+    params['/Size'] = PdfNum(rootID!.pdfDocument.objser);
 
     // the /Root catalog indirect reference (REQUIRED)
     if (rootID != null) {
-      params['/Root'] = rootID.ref();
+      params['/Root'] = rootID!.ref();
       final id =
-          PdfString(rootID.pdfDocument.documentID, PdfStringFormat.binary);
+          PdfString(rootID!.pdfDocument.documentID, PdfStringFormat.binary);
       params['/ID'] = PdfArray(<PdfDataType>[id, id]);
     } else {
       throw Exception('Root object is not present in document');
@@ -119,16 +119,16 @@ class PdfOutput {
 
     // the /Info reference (OPTIONAL)
     if (infoID != null) {
-      params['/Info'] = infoID.ref();
+      params['/Info'] = infoID!.ref();
     }
 
     // the /Encrypt reference (OPTIONAL)
     if (encryptID != null) {
-      params['/Encrypt'] = encryptID.ref();
+      params['/Encrypt'] = encryptID!.ref();
     }
 
-    if (rootID.pdfDocument.prev != null) {
-      params['/Prev'] = PdfNum(rootID.pdfDocument.prev.xrefOffset);
+    if (rootID!.pdfDocument.prev != null) {
+      params['/Prev'] = PdfNum(rootID!.pdfDocument.prev!.xrefOffset);
     }
 
     // end the trailer object
@@ -136,7 +136,7 @@ class PdfOutput {
     os.putString('\nstartxref\n$xref\n%%EOF\n');
 
     if (signatureID != null) {
-      await signatureID.writeSignature(os);
+      await signatureID!.writeSignature(os);
     }
   }
 

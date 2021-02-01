@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:xml/xml.dart';
 
@@ -23,8 +22,7 @@ import 'brush.dart';
 class SvgParser {
   /// Create an SVG parser
 
-  factory SvgParser({@required XmlDocument xml}) {
-    assert(xml != null);
+  factory SvgParser({required XmlDocument xml}) {
     final root = xml.rootElement;
 
     final vbattr = root.getAttribute('viewBox');
@@ -54,15 +52,15 @@ class SvgParser {
 
   final PdfRect viewBox;
 
-  final double width;
+  final double? width;
 
-  final double height;
+  final double? height;
 
   final XmlElement root;
 
   static final _transformParameterRegExp = RegExp(r'[\w.-]+');
 
-  XmlElement findById(String id) {
+  XmlElement? findById(String id) {
     try {
       return root.descendants.whereType<XmlElement>().firstWhere(
             (e) => e.getAttribute('id') == id,
@@ -72,8 +70,8 @@ class SvgParser {
     }
   }
 
-  static double getDouble(XmlElement xml, String name,
-      {String namespace, double defaultValue = 0}) {
+  static double? getDouble(XmlElement xml, String name,
+      {String? namespace, double? defaultValue = 0}) {
     final attr = xml.getAttribute(name, namespace: namespace);
 
     if (attr == null) {
@@ -83,8 +81,8 @@ class SvgParser {
     return double.parse(attr);
   }
 
-  static SvgNumeric getNumeric(XmlElement xml, String name, SvgBrush brush,
-      {String namespace, double defaultValue}) {
+  static SvgNumeric? getNumeric(XmlElement xml, String name, SvgBrush? brush,
+      {String? namespace, double? defaultValue}) {
     final attr = xml.getAttribute(name, namespace: namespace);
 
     if (attr == null) {
@@ -94,21 +92,21 @@ class SvgParser {
     return SvgNumeric(attr, brush);
   }
 
-  static Iterable<SvgNumeric> splitNumeric(String parameters, SvgBrush brush) {
+  static Iterable<SvgNumeric> splitNumeric(String parameters, SvgBrush? brush) {
     final parameterMatches = _transformParameterRegExp.allMatches(parameters);
-    return parameterMatches.map((m) => SvgNumeric(m.group(0), brush));
+    return parameterMatches.map((m) => SvgNumeric(m.group(0)!, brush));
   }
 
   static Iterable<double> splitDoubles(String parameters) {
     final parameterMatches = _transformParameterRegExp.allMatches(parameters);
-    return parameterMatches.map((m) => double.parse(m.group(0)));
+    return parameterMatches.map((m) => double.parse(m.group(0)!));
   }
 
   static Iterable<int> splitIntegers(String parameters) {
     final parameterMatches = _transformParameterRegExp.allMatches(parameters);
 
     return parameterMatches.map((m) {
-      return int.parse(m.group(0));
+      return int.parse(m.group(0)!);
     });
   }
 
@@ -121,8 +119,8 @@ class SvgParser {
           continue;
         }
         final kv = RegExp(r'([\w-]+)\s*:\s*(.*)').allMatches(style).first;
-        final key = kv.group(1);
-        final value = kv.group(2);
+        final key = kv.group(1)!;
+        final value = kv.group(2)!;
 
         element.setAttribute(key, value);
       }
@@ -142,21 +140,20 @@ enum SvgUnit {
 }
 
 class SvgNumeric {
-  factory SvgNumeric(String value, SvgBrush brush) {
+  factory SvgNumeric(String value, SvgBrush? brush) {
     final r = RegExp(r'([-+]?[\d\.]+)\s*(px|pt|em|cm|mm|in|%|)')
         .allMatches(value)
         .first;
 
     return SvgNumeric.value(
-        double.parse(r.group(1)), brush, _svgUnits[r.group(2)]);
+        double.parse(r.group(1)!), brush, _svgUnits[r.group(2)]!);
   }
 
   const SvgNumeric.value(
     this.value,
     this.brush, [
     this.unit = SvgUnit.direct,
-  ])  : assert(value != null),
-        assert(unit != null);
+  ]);
 
   static const _svgUnits = <String, SvgUnit>{
     'px': SvgUnit.pixels,
@@ -173,13 +170,12 @@ class SvgNumeric {
 
   final SvgUnit unit;
 
-  final SvgBrush brush;
+  final SvgBrush? brush;
 
   double get colorValue {
     switch (unit) {
       case SvgUnit.percent:
         return value / 100.0;
-        break;
       case SvgUnit.direct:
         return value / 255.0;
       default:
@@ -191,7 +187,6 @@ class SvgNumeric {
     switch (unit) {
       case SvgUnit.percent:
         return value / 100.0;
-        break;
       case SvgUnit.direct:
       case SvgUnit.pixels:
       case SvgUnit.points:
@@ -203,8 +198,7 @@ class SvgNumeric {
       case SvgUnit.inch:
         return value * PdfPageFormat.inch;
       case SvgUnit.em:
-        return value * brush.fontSize.sizeValue;
+        return value * brush!.fontSize!.sizeValue;
     }
-    throw Exception('Invalid size value $value ($unit)');
   }
 }

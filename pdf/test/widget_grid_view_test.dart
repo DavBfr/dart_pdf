@@ -19,7 +19,7 @@ import 'dart:io';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
-Document pdf;
+late Document pdf;
 
 void main() {
   setUpAll(() {
@@ -51,7 +51,7 @@ void main() {
 
   test('Pdf Widgets GridView Horizontal', () {
     pdf.addPage(Page(
-      build: (Context context) => GridView(
+      build: (Context? context) => GridView(
           crossAxisCount: 5,
           direction: Axis.horizontal,
           childAspectRatio: 1,

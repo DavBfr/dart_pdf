@@ -29,7 +29,7 @@ class SvgColor {
     this.inherit = false,
   });
 
-  factory SvgColor.fromXml(String color, SvgPainter painter) {
+  factory SvgColor.fromXml(String? color, SvgPainter painter) {
     if (color == null) {
       return inherited;
     }
@@ -93,7 +93,7 @@ class SvgColor {
 
     if (color.toLowerCase().startsWith('url(#')) {
       final gradient =
-          painter.parser.findById(color.substring(5, color.indexOf(')')));
+          painter.parser.findById(color.substring(5, color.indexOf(')')))!;
       if (gradient.name.local == 'linearGradient') {
         return SvgLinearGradient.fromXml(gradient, painter);
       }
@@ -116,9 +116,9 @@ class SvgColor {
   static const none = SvgColor();
   static const inherited = SvgColor(inherit: true);
 
-  final PdfColor color;
+  final PdfColor? color;
 
-  final double opacity;
+  final double? opacity;
 
   final bool inherit;
 

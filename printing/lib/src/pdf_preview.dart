@@ -15,8 +15,8 @@ import 'raster.dart';
 class PdfPreview extends StatefulWidget {
   /// Show a pdf document built on demand
   const PdfPreview({
-    Key key,
-    @required this.build,
+    Key? key,
+    required this.build,
     this.initialPageFormat,
     this.allowPrinting = true,
     this.allowSharing = true,
@@ -38,7 +38,7 @@ class PdfPreview extends StatefulWidget {
   final LayoutCallback build;
 
   /// Pdf page format asked for the first display
-  final PdfPageFormat initialPageFormat;
+  final PdfPageFormat? initialPageFormat;
 
   /// Add a button to print the pdf document
   final bool allowPrinting;
@@ -50,37 +50,37 @@ class PdfPreview extends StatefulWidget {
   final bool useActions;
 
   /// Maximum width of the pdf document on screen
-  final double maxPageWidth;
+  final double? maxPageWidth;
 
   /// Add a drop-down menu to choose the page format
   final bool canChangePageFormat;
 
   /// Additionnal actions to add to the widget
-  final List<PdfPreviewAction> actions;
+  final List<PdfPreviewAction>? actions;
 
   /// List of page formats the user can choose
-  final Map<String, PdfPageFormat> pageFormats;
+  final Map<String, PdfPageFormat>? pageFormats;
 
   /// Called if an error creating the Pdf occured
-  final Widget Function(BuildContext context) onError;
+  final Widget Function(BuildContext context)? onError;
 
   /// Called if the user prints the pdf document
-  final void Function(BuildContext context) onPrinted;
+  final void Function(BuildContext context)? onPrinted;
 
   /// Called if the user shares the pdf document
-  final void Function(BuildContext context) onShared;
+  final void Function(BuildContext context)? onShared;
 
   /// Decoration of scrollView
-  final Decoration scrollViewDecoration;
+  final Decoration? scrollViewDecoration;
 
   /// Decoration of _PdfPreviewPage
-  final Decoration pdfPreviewPageDecoration;
+  final Decoration? pdfPreviewPageDecoration;
 
   /// Name of the PDF when sharing. It must include the extension.
-  final String pdfFileName;
+  final String? pdfFileName;
 
   /// Pages to display. Default will display all the pages.
-  final List<int> pages;
+  final List<int>? pages;
 
   @override
   _PdfPreviewState createState() => _PdfPreviewState();
@@ -92,24 +92,24 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   final List<_PdfPreviewPage> pages = <_PdfPreviewPage>[];
 
-  PdfPageFormat pageFormat;
+  PdfPageFormat? pageFormat;
 
   PrintingInfo info = PrintingInfo.unavailable;
   bool infoLoaded = false;
 
   double dpi = 10;
 
-  Object error;
+  Object? error;
 
-  int preview;
+  int? preview;
 
-  double updatePosition;
+  double? updatePosition;
 
   final scrollController = ScrollController();
 
   final transformationController = TransformationController();
 
-  Timer previewUpdate;
+  Timer? previewUpdate;
 
   static const defaultPageFormats = <String, PdfPageFormat>{
     'A4': PdfPageFormat.a4,
@@ -124,7 +124,7 @@ class _PdfPreviewState extends State<PdfPreview> {
     }
 
     try {
-      _doc = await widget.build(pageFormat);
+      _doc = await widget.build(pageFormat!);
     } catch (e) {
       error = e;
       return;
@@ -167,13 +167,23 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   @override
   void initState() {
-    final locale =
-        WidgetsBinding.instance.window.locale ?? const Locale('en', 'US');
-    final cc = locale.countryCode;
-    if (cc == 'US' || cc == 'CA' || cc == 'MX') {
-      pageFormat = widget.initialPageFormat ?? PdfPageFormat.letter;
+    if (widget.initialPageFormat == null) {
+      final locale = WidgetsBinding.instance!.window.locale;
+      // ignore: invalid_null_aware_operator
+      final cc = locale?.countryCode ?? 'US';
+
+      if (cc == 'US' || cc == 'CA' || cc == 'MX') {
+        pageFormat = PdfPageFormat.letter;
+      } else {
+        pageFormat = PdfPageFormat.a4;
+      }
     } else {
-      pageFormat = widget.initialPageFormat ?? PdfPageFormat.a4;
+      pageFormat = widget.initialPageFormat;
+    }
+
+    final _pageFormats = widget.pageFormats ?? defaultPageFormats;
+    if (!_pageFormats.containsValue(pageFormat)) {
+      pageFormat = _pageFormats.values.first;
     }
 
     super.initState();
@@ -213,7 +223,7 @@ class _PdfPreviewState extends State<PdfPreview> {
       final mq = MediaQuery.of(context);
       dpi = (min(mq.size.width - 16, widget.maxPageWidth ?? double.infinity)) *
           mq.devicePixelRatio /
-          pageFormat.width *
+          pageFormat!.width *
           72;
 
       _raster();
@@ -223,7 +233,7 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   Widget _showError() {
     if (widget.onError != null) {
-      return widget.onError(context);
+      return widget.onError!(context);
     }
 
     return const Center(
@@ -241,7 +251,7 @@ class _PdfPreviewState extends State<PdfPreview> {
       var content = _showError();
       assert(() {
         print(error);
-        content = ErrorWidget(error);
+        content = ErrorWidget(error!);
         return true;
       }());
       return content;
@@ -283,7 +293,7 @@ class _PdfPreviewState extends State<PdfPreview> {
       child: InteractiveViewer(
         transformationController: transformationController,
         maxScale: 5,
-        child: Center(child: pages[preview]),
+        child: Center(child: pages[preview!]),
       ),
     );
   }
@@ -299,14 +309,14 @@ class _PdfPreviewState extends State<PdfPreview> {
     } else {
       page = Container(
         constraints: widget.maxPageWidth != null
-            ? BoxConstraints(maxWidth: widget.maxPageWidth)
+            ? BoxConstraints(maxWidth: widget.maxPageWidth!)
             : null,
         child: _createPreview(),
       );
 
       if (updatePosition != null) {
         Timer.run(() {
-          scrollController.jumpTo(updatePosition);
+          scrollController.jumpTo(updatePosition!);
           updatePosition = null;
         });
       }
@@ -372,7 +382,7 @@ class _PdfPreviewState extends State<PdfPreview> {
               );
             },
           ),
-          onChanged: (PdfPageFormat _pageFormat) {
+          onChanged: (PdfPageFormat? _pageFormat) {
             setState(() {
               pageFormat = _pageFormat;
               _raster();
@@ -383,17 +393,17 @@ class _PdfPreviewState extends State<PdfPreview> {
     }
 
     if (widget.actions != null) {
-      for (final action in widget.actions) {
+      for (final action in widget.actions!) {
         actions.add(
           IconButton(
             icon: action.icon,
             color: theme.accentIconTheme.color,
             onPressed: action.onPressed == null
                 ? null
-                : () => action.onPressed(
+                : () => action.onPressed!(
                       context,
                       widget.build,
-                      pageFormat,
+                      pageFormat!,
                     ),
           ),
         );
@@ -445,8 +455,8 @@ class _PdfPreviewState extends State<PdfPreview> {
 
     if (!widget.canChangePageFormat && pages.isNotEmpty) {
       format = PdfPageFormat(
-        pages.first.page.width * 72 / dpi,
-        pages.first.page.height * 72 / dpi,
+        pages.first.page!.width * 72 / dpi,
+        pages.first.page!.height * 72 / dpi,
         marginAll: 5 * PdfPageFormat.mm,
       );
     }
@@ -454,25 +464,26 @@ class _PdfPreviewState extends State<PdfPreview> {
     final result = await Printing.layoutPdf(
       onLayout: widget.build,
       name: widget.pdfFileName ?? 'Document',
-      format: format,
+      format: format!,
     );
 
     if (result && widget.onPrinted != null) {
-      widget.onPrinted(context);
+      widget.onPrinted!(context);
     }
   }
 
   Future<void> _share() async {
     // Calculate the widget center for iPad sharing popup position
-    final RenderBox referenceBox =
-        shareWidget.currentContext.findRenderObject();
+    final referenceBox =
+        // ignore: avoid_as
+        shareWidget.currentContext!.findRenderObject() as RenderBox;
     final topLeft =
         referenceBox.localToGlobal(referenceBox.paintBounds.topLeft);
     final bottomRight =
         referenceBox.localToGlobal(referenceBox.paintBounds.bottomRight);
     final bounds = Rect.fromPoints(topLeft, bottomRight);
 
-    final bytes = await widget.build(pageFormat);
+    final bytes = await widget.build(pageFormat!);
     final result = await Printing.sharePdf(
       bytes: bytes,
       bounds: bounds,
@@ -480,24 +491,24 @@ class _PdfPreviewState extends State<PdfPreview> {
     );
 
     if (result && widget.onShared != null) {
-      widget.onShared(context);
+      widget.onShared!(context);
     }
   }
 }
 
 class _PdfPreviewPage extends StatelessWidget {
   const _PdfPreviewPage({
-    Key key,
+    Key? key,
     this.page,
     this.pdfPreviewPageDecoration,
   }) : super(key: key);
 
-  final PdfRaster page;
-  final Decoration pdfPreviewPageDecoration;
+  final PdfRaster? page;
+  final Decoration? pdfPreviewPageDecoration;
 
   @override
   Widget build(BuildContext context) {
-    final im = PdfRasterImage(page);
+    final im = PdfRasterImage(page!);
 
     return Container(
       margin: const EdgeInsets.only(
@@ -518,7 +529,7 @@ class _PdfPreviewPage extends StatelessWidget {
             ],
           ),
       child: AspectRatio(
-        aspectRatio: page.width / page.height,
+        aspectRatio: page!.width / page!.height,
         child: Image(
           image: im,
           fit: BoxFit.cover,
@@ -539,13 +550,13 @@ typedef OnPdfPreviewActionPressed = void Function(
 class PdfPreviewAction {
   /// Represents an icon to add to [PdfPreview]
   const PdfPreviewAction({
-    @required this.icon,
-    @required this.onPressed,
-  }) : assert(icon != null);
+    required this.icon,
+    required this.onPressed,
+  });
 
   /// The icon to display
   final Icon icon;
 
   /// The callback called when the user tap on the icon
-  final OnPdfPreviewActionPressed onPressed;
+  final OnPdfPreviewActionPressed? onPressed;
 }

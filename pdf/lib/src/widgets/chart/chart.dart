@@ -29,8 +29,8 @@ import '../widget.dart';
 /// This widget is in preview and the API is subject to change
 class Chart extends Widget implements Inherited {
   Chart({
-    @required this.grid,
-    @required this.datasets,
+    required this.grid,
+    required this.datasets,
     this.overlay,
     this.title,
     this.bottom,
@@ -45,21 +45,22 @@ class Chart extends Widget implements Inherited {
   final List<Dataset> datasets;
 
   /// Legend for this chart
-  final Widget overlay;
+  final Widget? overlay;
 
-  final Widget title;
+  final Widget? title;
 
-  final Widget bottom;
+  final Widget? bottom;
 
-  final Widget left;
+  final Widget? left;
 
-  final Widget right;
+  final Widget? right;
 
-  Context _context;
+  Context? _context;
 
-  Widget _child;
+  late Widget _child;
 
-  static Chart of(Context context) => context.inherited[Chart];
+  // ignore: avoid_as
+  static Chart? of(Context context) => context.dependsOn<Chart>();
 
   PdfPoint _computeSize(BoxConstraints constraints) {
     if (constraints.isTight) {
@@ -85,25 +86,25 @@ class Chart extends Widget implements Inherited {
   Widget _build(Context context) {
     return Column(
       children: <Widget>[
-        if (title != null) title,
+        if (title != null) title!,
         Expanded(
           child: Row(
             children: <Widget>[
-              if (left != null) left,
+              if (left != null) left!,
               Expanded(
                 child: Stack(
                   overflow: Overflow.visible,
                   children: <Widget>[
                     grid,
-                    if (overlay != null) overlay,
+                    if (overlay != null) overlay!,
                   ],
                 ),
               ),
-              if (right != null) right,
+              if (right != null) right!,
             ],
           ),
         ),
-        if (bottom != null) bottom,
+        if (bottom != null) bottom!,
       ],
     );
   }
@@ -113,23 +114,23 @@ class Chart extends Widget implements Inherited {
       {bool parentUsesSize = false}) {
     box = PdfRect.fromPoints(PdfPoint.zero, _computeSize(constraints));
     _context = context.inheritFrom(this);
-    _child = _build(_context);
-    _child.layout(_context, BoxConstraints.tight(box.size));
+    _child = _build(_context!);
+    _child.layout(_context!, BoxConstraints.tight(box!.size));
   }
 
   @override
   void paint(Context context) {
-    super.paint(_context);
+    super.paint(_context!);
 
     final mat = Matrix4.identity();
-    mat.translate(box.x, box.y);
-    _context.canvas
+    mat.translate(box!.x, box!.y);
+    _context!.canvas
       ..saveContext()
       ..setTransform(mat);
 
-    _child.paint(_context);
+    _child.paint(_context!);
 
-    _context.canvas.restoreContext();
+    _context!.canvas.restoreContext();
   }
 }
 
@@ -154,9 +155,9 @@ abstract class Dataset extends Widget {
     this.color,
   });
 
-  final String legend;
+  final String? legend;
 
-  final PdfColor color;
+  final PdfColor? color;
 
   void paintBackground(Context context) {}
 

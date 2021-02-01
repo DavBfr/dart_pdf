@@ -17,7 +17,6 @@
 import 'dart:typed_data';
 
 import 'package:image/image.dart' as im;
-import 'package:meta/meta.dart';
 
 import 'data_types.dart';
 import 'document.dart';
@@ -57,14 +56,12 @@ class PdfImage extends PdfXObject {
   /// Creates a new [PdfImage] instance.
   factory PdfImage(
     PdfDocument pdfDocument, {
-    @required Uint8List image,
-    @required int width,
-    @required int height,
+    required Uint8List image,
+    required int width,
+    required int height,
     bool alpha = true,
     PdfImageOrientation orientation = PdfImageOrientation.topLeft,
   }) {
-    assert(image != null);
-
     final im = PdfImage._(
       pdfDocument,
       width,
@@ -104,15 +101,13 @@ class PdfImage extends PdfXObject {
   /// Create an image from a jpeg file
   factory PdfImage.jpeg(
     PdfDocument pdfDocument, {
-    @required Uint8List image,
-    PdfImageOrientation orientation,
+    required Uint8List image,
+    PdfImageOrientation? orientation,
   }) {
-    assert(image != null);
-
     final info = PdfJpegInfo(image);
     final im = PdfImage._(
       pdfDocument,
-      info.width,
+      info.width!,
       info.height,
       orientation ?? info.orientation,
     );
@@ -135,11 +130,9 @@ class PdfImage extends PdfXObject {
   /// Create an image from an [im.Image] object
   factory PdfImage.fromImage(
     PdfDocument pdfDocument, {
-    @required im.Image image,
+    required im.Image image,
     PdfImageOrientation orientation = PdfImageOrientation.topLeft,
   }) {
-    assert(image != null);
-
     return PdfImage(
       pdfDocument,
       image: image.getBytes(format: im.Format.rgba),
@@ -153,16 +146,17 @@ class PdfImage extends PdfXObject {
   /// Create an image from an image file
   factory PdfImage.file(
     PdfDocument pdfDocument, {
-    @required Uint8List bytes,
+    required Uint8List bytes,
     PdfImageOrientation orientation = PdfImageOrientation.topLeft,
   }) {
-    assert(bytes != null);
-
     if (im.JpegDecoder().isValidFile(bytes)) {
       return PdfImage.jpeg(pdfDocument, image: bytes);
     }
 
     final image = im.decodeImage(bytes);
+    if (image == null) {
+      throw 'Unable to decode image';
+    }
     return PdfImage.fromImage(
       pdfDocument,
       image: image,

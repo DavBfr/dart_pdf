@@ -32,7 +32,7 @@ class BoxConstraints {
       this.maxHeight = double.infinity});
 
   /// Creates box constraints that require the given width or height.
-  const BoxConstraints.tightFor({double width, double height})
+  const BoxConstraints.tightFor({double? width, double? height})
       : minWidth = width ?? 0.0,
         maxWidth = width ?? double.infinity,
         minHeight = height ?? 0.0,
@@ -46,7 +46,7 @@ class BoxConstraints {
         maxHeight = size.y;
 
   /// Creates box constraints that expand to fill another box constraints.
-  const BoxConstraints.expand({double width, double height})
+  const BoxConstraints.expand({double? width, double? height})
       : minWidth = width ?? double.infinity,
         maxWidth = width ?? double.infinity,
         minHeight = height ?? double.infinity,
@@ -158,7 +158,7 @@ class BoxConstraints {
   /// Returns new box constraints with a tight width and/or height as close to
   /// the given width and height as possible while still respecting the original
   /// box constraints.
-  BoxConstraints tighten({double width, double height}) {
+  BoxConstraints tighten({double? width, double? height}) {
     return BoxConstraints(
         minWidth: width == null ? minWidth : width.clamp(minWidth, maxWidth),
         maxWidth: width == null ? maxWidth : width.clamp(minWidth, maxWidth),
@@ -170,7 +170,6 @@ class BoxConstraints {
 
   /// Returns new box constraints that are smaller by the given edge dimensions.
   BoxConstraints deflate(EdgeInsets edges) {
-    assert(edges != null);
     final horizontal = edges.horizontal;
     final vertical = edges.vertical;
     final deflatedMinWidth = math.max(0.0, minWidth - horizontal);
@@ -205,7 +204,10 @@ class BoxConstraints {
   }
 
   BoxConstraints copyWith(
-      {double minWidth, double maxWidth, double minHeight, double maxHeight}) {
+      {double? minWidth,
+      double? maxWidth,
+      double? minHeight,
+      double? maxHeight}) {
     return BoxConstraints(
         minWidth: minWidth ?? this.minWidth,
         maxWidth: maxWidth ?? this.maxWidth,
@@ -255,10 +257,10 @@ class EdgeInsets {
   double get vertical => top + bottom;
 
   EdgeInsets copyWith({
-    double left,
-    double top,
-    double right,
-    double bottom,
+    double? left,
+    double? top,
+    double? right,
+    double? bottom,
   }) {
     return EdgeInsets.only(
       left: left ?? this.left,
@@ -283,9 +285,7 @@ class EdgeInsets {
 }
 
 class Alignment {
-  const Alignment(this.x, this.y)
-      : assert(x != null),
-        assert(y != null);
+  const Alignment(this.x, this.y);
 
   /// The distance fraction in the horizontal direction.
   final double x;
@@ -358,10 +358,7 @@ class Alignment {
 @immutable
 class FractionalOffset extends Alignment {
   /// Creates a fractional offset.
-  const FractionalOffset(double dx, double dy)
-      : assert(dx != null),
-        assert(dy != null),
-        super(dx * 2 - 1, 1 - dy * 2);
+  const FractionalOffset(double dx, double dy) : super(dx * 2 - 1, 1 - dy * 2);
 }
 
 /// The pair of sizes returned by [applyBoxFit].
@@ -370,10 +367,10 @@ class FittedSizes {
   const FittedSizes(this.source, this.destination);
 
   /// The size of the part of the input to show on the output.
-  final PdfPoint source;
+  final PdfPoint? source;
 
   /// The size of the part of the output on which to show the input.
-  final PdfPoint destination;
+  final PdfPoint? destination;
 }
 
 FittedSizes applyBoxFit(BoxFit fit, PdfPoint inputSize, PdfPoint outputSize) {
@@ -384,7 +381,7 @@ FittedSizes applyBoxFit(BoxFit fit, PdfPoint inputSize, PdfPoint outputSize) {
     return const FittedSizes(PdfPoint.zero, PdfPoint.zero);
   }
 
-  PdfPoint sourceSize, destinationSize;
+  PdfPoint? sourceSize, destinationSize;
   switch (fit) {
     case BoxFit.fill:
       sourceSize = inputSize;

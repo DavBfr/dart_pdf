@@ -90,7 +90,7 @@ void main() {
       tm.rotateZ(i * pi / 360.0);
       tm.translate(300.0, -100);
       g.setTransform(tm);
-      g.drawString(font1, 12, 'Hello $i', 20, 100);
+      g.drawString(font1!, 12, 'Hello $i', 20, 100);
       g.drawImage(image, 100, 100);
       g.restoreContext();
     }

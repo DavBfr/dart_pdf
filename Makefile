@@ -12,6 +12,9 @@
  # See the License for the specific language governing permissions and
  # limitations under the License.
 
+FLUTTER?=$(realpath $(dir $(realpath $(dir $(shell which flutter)))))
+FLUTTER_BIN=$(FLUTTER)/bin/flutter
+DART_BIN=$(FLUTTER)/bin/dart
 DART_SRC=$(shell find . -name '*.dart')
 CLNG_SRC=$(shell find printing/ios printing/macos printing/windows printing/linux printing/android -name '*.cpp' -o -name '*.cc' -o -name '*.m' -o -name '*.h' -o -name '*.java')
 SWFT_SRC=$(shell find printing/ios printing/macos -name '*.swift')
@@ -70,7 +73,7 @@ pdf/hacen-tunisia.ttf:
 format: format-dart format-clang format-swift
 
 format-dart: $(DART_SRC)
-	dart format --fix $^
+	$(DART_BIN) format --fix $^
 
 format-clang: $(CLNG_SRC)
 	clang-format -style=Chromium -i $^
@@ -86,38 +89,38 @@ node_modules:
 	npm install lcov-summary
 
 printing/example/.metadata:
-	cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
+	cd printing/example; $(FLUTTER_BIN) create -t app --no-overwrite --org net.nfet --project-name example .
 	rm -rf printing/example/test printing/example/integration_test
 
 pdf/pubspec.lock: pdf/pubspec.yaml
-	cd pdf; dart pub get
+	cd pdf; $(DART_BIN) pub get
 
 printing/pubspec.lock: printing/pubspec.yaml
-	cd printing; flutter packages get
+	cd printing; $(FLUTTER_BIN) pub get
 
 demo/pubspec.lock: demo/pubspec.yaml
-	cd demo; flutter packages get
+	cd demo; $(FLUTTER_BIN) pub get
 
 test/pubspec.lock: test/pubspec.yaml
-	cd test; flutter packages get
+	cd test; $(FLUTTER_BIN) pub get
 
 get: $(FONTS) pdf/pubspec.lock printing/pubspec.lock demo/pubspec.lock test/pubspec.lock
 
 test-pdf: svg $(FONTS) pdf/pubspec.lock .coverage
-	cd pdf; pub global run coverage:collect_coverage --port=$(COV_PORT) -o coverage.json --resume-isolates --wait-paused &\
-	dart --enable-asserts --disable-service-auth-codes --enable-vm-service=$(COV_PORT) --pause-isolates-on-exit test/all_tests.dart
-	cd pdf; pub global run coverage:format_coverage --packages=.packages -i coverage.json --report-on lib --lcov --out lcov.info
-	cd pdf; for EXAMPLE in $(shell cd pdf; find example -name '*.dart'); do dart $$EXAMPLE; done
+	cd pdf; $(DART_BIN) pub global run coverage:collect_coverage --port=$(COV_PORT) -o coverage.json --resume-isolates --wait-paused &\
+	$(DART_BIN) --enable-asserts --disable-service-auth-codes --enable-vm-service=$(COV_PORT) --pause-isolates-on-exit test/all_tests.dart
+	cd pdf; $(DART_BIN) pub global run coverage:format_coverage --packages=.packages -i coverage.json --report-on lib --lcov --out lcov.info
+	cd pdf; for EXAMPLE in $(shell cd pdf; find example -name '*.dart'); do $(DART_BIN) $$EXAMPLE; done
 	test/compare-pdf.sh pdf test/golden
 
 test-printing: $(FONTS) printing/pubspec.lock .coverage
-	cd printing; flutter test --coverage --coverage-path lcov.info
+	cd printing; $(FLUTTER_BIN) test --coverage --coverage-path lcov.info
 
 test-demo: $(FONTS) demo/pubspec.lock .coverage
-	cd demo; flutter test --coverage --coverage-path lcov.info
+	cd demo; $(FLUTTER_BIN) test --coverage --coverage-path lcov.info
 
 test-readme: $(FONTS) test/pubspec.lock
-	cd test; dart extract_readme.dart
+	cd test; $(DART_BIN) extract_readme.dart
 	cd test; dartanalyzer readme-*.dart
 
 test: test-pdf test-printing test-demo node_modules
@@ -129,40 +132,40 @@ clean:
 publish-pdf: format clean
 	test -z "$(shell git status --porcelain)"
 	find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	cd pdf; dart pub publish -f
+	cd pdf; $(DART_BIN) pub publish -f
 	find pdf -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 	git tag $(shell grep version pdf/pubspec.yaml | sed 's/version\s*:\s*/pdf-/g')
 
 publish-printing: format clean
 	test -z "$(shell git status --porcelain)"
 	find printing -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	cd printing; dart pub publish -f
+	cd printing; $(DART_BIN) pub publish -f
 	find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 	git tag $(shell grep version printing/pubspec.yaml | sed 's/version\s*:\s*/printing-/g')
 
 .pana:
-	which pana || dart pub global activate pana
+	which pana || $(DART_BIN) pub global activate pana
 	touch $@
 
 analyze-pdf: .pana
-	@find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	@dart pub global run pana --no-warning --source path pdf
-	@find pdf -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
+	find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
+	$(DART_BIN) pub global run pana --no-warning --source path pdf
+	find pdf -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 analyze-printing: .pana
-	@find printing -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	@dart pub global run pana --no-warning --source path printing
-	@find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
+	find printing -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
+	$(DART_BIN) pub global run pana --no-warning --source path printing
+	find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 analyze: analyze-pdf analyze-printing
 
 .dartfix:
-	which dartfix || dart pub global activate dartfix
+	which dartfix || $(DART_BIN) pub global activate dartfix
 	touch $@
 
 fix: get .dartfix
-	cd pdf; dart pub global run dartfix --pedantic --overwrite .
-	cd printing; dart pub global run dartfix --pedantic --overwrite .
+	cd pdf; $(DART_BIN) pub global run dartfix --pedantic --overwrite .
+	cd printing; $(DART_BIN) pub global run dartfix --pedantic --overwrite .
 
 ref/svg/%.svg:
 	mkdir -p ref/svg
@@ -257,7 +260,7 @@ ref: svg
 	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_reference_1-7.pdf'
 
 gh-pages: all
-	cd demo; flutter build web
+	cd demo; $(FLUTTER_BIN) build web
 	git checkout gh-pages
 	rm -rf assets icons
 	mv -fv demo/build/web/* .

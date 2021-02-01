@@ -19,7 +19,7 @@ import 'dart:io';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
-Document pdf;
+late Document pdf;
 
 Widget barcode(
   Barcode barcode,

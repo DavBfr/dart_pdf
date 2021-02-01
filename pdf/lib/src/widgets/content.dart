@@ -16,7 +16,6 @@
 
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 
 import 'annotations.dart';
@@ -40,31 +39,30 @@ class Header extends StatelessWidget {
     this.margin,
     this.padding,
     this.textStyle,
-    String title,
+    String? title,
     this.outlineColor,
     this.outlineStyle = PdfOutlineStyle.normal,
-  })  : assert(level != null, level >= 0 && level <= 5),
-        assert(text != null || child != null),
-        assert(outlineStyle != null),
+  })  : assert(level >= 0 && level <= 5),
+        assert(child != null || text != null),
         title = title ?? text;
 
-  final String title;
+  final String? title;
 
-  final String text;
+  final String? text;
 
-  final Widget child;
+  final Widget? child;
 
   final int level;
 
-  final BoxDecoration decoration;
+  final BoxDecoration? decoration;
 
-  final EdgeInsets margin;
+  final EdgeInsets? margin;
 
-  final EdgeInsets padding;
+  final EdgeInsets? padding;
 
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
 
-  final PdfColor outlineColor;
+  final PdfColor? outlineColor;
 
   final PdfOutlineStyle outlineStyle;
 
@@ -116,7 +114,7 @@ class Header extends StatelessWidget {
       margin: _margin,
       padding: _padding,
       decoration: _decoration,
-      child: child ?? Text(text, style: _textStyle),
+      child: child ?? Text(text!, style: _textStyle),
     );
 
     if (title == null) {
@@ -125,7 +123,7 @@ class Header extends StatelessWidget {
 
     return Outline(
       name: text.hashCode.toString(),
-      title: title,
+      title: title!,
       child: container,
       level: level,
       color: outlineColor,
@@ -142,15 +140,15 @@ class Paragraph extends StatelessWidget {
       this.margin = const EdgeInsets.only(bottom: 5.0 * PdfPageFormat.mm),
       this.padding});
 
-  final String text;
+  final String? text;
 
   final TextAlign textAlign;
 
-  final TextStyle style;
+  final TextStyle? style;
 
   final EdgeInsets margin;
 
-  final EdgeInsets padding;
+  final EdgeInsets? padding;
 
   @override
   Widget build(Context context) {
@@ -158,7 +156,7 @@ class Paragraph extends StatelessWidget {
       margin: margin,
       padding: padding,
       child: Text(
-        text,
+        text!,
         textAlign: textAlign,
         style: style ?? Theme.of(context).paragraphStyle,
       ),
@@ -182,15 +180,15 @@ class Bullet extends StatelessWidget {
       this.bulletShape = BoxShape.circle,
       this.bulletColor = PdfColors.black});
 
-  final String text;
+  final String? text;
 
   final TextAlign textAlign;
 
-  final TextStyle style;
+  final TextStyle? style;
 
   final EdgeInsets margin;
 
-  final EdgeInsets padding;
+  final EdgeInsets? padding;
 
   final EdgeInsets bulletMargin;
 
@@ -216,7 +214,7 @@ class Bullet extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              text,
+              text!,
               textAlign: textAlign,
               style: Theme.of(context).bulletStyle.merge(style),
             ),
@@ -229,21 +227,17 @@ class Bullet extends StatelessWidget {
 
 class Watermark extends StatelessWidget {
   Watermark({
-    @required this.child,
+    required this.child,
     this.fit = BoxFit.contain,
     this.angle = 0,
-  })  : assert(fit != null),
-        assert(child != null),
-        assert(angle != null);
+  });
 
   Watermark.text(
     String text, {
-    TextStyle style,
+    TextStyle? style,
     this.fit = BoxFit.contain,
     this.angle = math.pi / 4,
-  })  : assert(fit != null),
-        assert(angle != null),
-        child = Text(
+  }) : child = Text(
           text,
           style: style ??
               TextStyle(
@@ -282,17 +276,17 @@ class Footer extends StatelessWidget {
     this.decoration,
   });
 
-  final Widget leading;
+  final Widget? leading;
 
-  final Widget title;
+  final Widget? title;
 
-  final Widget trailing;
+  final Widget? trailing;
 
-  final EdgeInsets margin;
+  final EdgeInsets? margin;
 
-  final EdgeInsets padding;
+  final EdgeInsets? padding;
 
-  final BoxDecoration decoration;
+  final BoxDecoration? decoration;
 
   @override
   Widget build(Context context) {

@@ -30,12 +30,11 @@ class PdfNames extends PdfObject {
   void addDest(
     String name,
     PdfPage page, {
-    double posX,
-    double posY,
-    double posZ,
+    double? posX,
+    double? posY,
+    double? posZ,
   }) {
     assert(page.pdfDocument == pdfDocument);
-    assert(name != null);
 
     _dests[name] = PdfDict(<String, PdfDataType>{
       '/D': PdfArray(<PdfDataType>[

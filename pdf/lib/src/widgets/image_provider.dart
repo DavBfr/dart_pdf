@@ -17,7 +17,6 @@
 import 'dart:typed_data';
 
 import 'package:image/image.dart' as im;
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 
 import 'widget.dart';
@@ -31,35 +30,34 @@ abstract class ImageProvider {
     this.dpi,
   );
 
-  final double dpi;
+  final double? dpi;
 
-  final int _width;
+  final int? _width;
 
   /// Image width
-  int get width => orientation.index >= 4 ? _height : _width;
+  int? get width => orientation.index >= 4 ? _height : _width;
 
   final int _height;
 
   /// Image height
-  int get height => orientation.index < 4 ? _height : _width;
+  int? get height => orientation.index < 4 ? _height : _width;
 
   /// The internal orientation of the image
   final PdfImageOrientation orientation;
 
   final _cache = <int, PdfImage>{};
 
-  PdfImage buildImage(Context context, {int width, int height});
+  PdfImage buildImage(Context context, {int? width, int? height});
 
   /// Resolves this image provider using the given context, returning a PdfImage
   /// The image is automatically added to the document
-  PdfImage resolve(Context context, PdfPoint size, {double dpi}) {
-    assert(size != null);
+  PdfImage? resolve(Context context, PdfPoint size, {double? dpi}) {
     final effectiveDpi = dpi ?? this.dpi;
 
     if (effectiveDpi == null || _cache[0] != null) {
       _cache[0] ??= buildImage(context);
 
-      assert(_cache[0].pdfDocument == context.document,
+      assert(_cache[0]!.pdfDocument == context.document,
           'Do not reuse an ImageProvider object across multiple documents');
       return _cache[0];
     }
@@ -71,7 +69,7 @@ abstract class ImageProvider {
       _cache[width] ??= buildImage(context, width: width, height: height);
     }
 
-    assert(_cache[width].pdfDocument == context.document,
+    assert(_cache[width]!.pdfDocument == context.document,
         'Do not reuse an ImageProvider object across multiple documents');
     return _cache[width];
   }
@@ -80,23 +78,23 @@ abstract class ImageProvider {
 class ImageProxy extends ImageProvider {
   ImageProxy(
     this._image, {
-    double dpi,
+    double? dpi,
   }) : super(_image.width, _image.height, _image.orientation, dpi);
 
   /// The proxy image
   final PdfImage _image;
 
   @override
-  PdfImage buildImage(Context context, {int width, int height}) => _image;
+  PdfImage buildImage(Context context, {int? width, int? height}) => _image;
 }
 
 class MemoryImage extends ImageProvider {
   factory MemoryImage(
     Uint8List bytes, {
-    PdfImageOrientation orientation,
-    double dpi,
+    PdfImageOrientation? orientation,
+    double? dpi,
   }) {
-    final decoder = im.findDecoderForData(bytes);
+    final decoder = im.findDecoderForData(bytes)!;
     if (decoder is im.JpegDecoder) {
       final info = PdfJpegInfo(bytes);
 
@@ -109,7 +107,7 @@ class MemoryImage extends ImageProvider {
       );
     }
 
-    final info = decoder.startDecode(bytes);
+    final info = decoder.startDecode(bytes)!;
     return MemoryImage._(
       bytes,
       info.width,
@@ -121,22 +119,22 @@ class MemoryImage extends ImageProvider {
 
   MemoryImage._(
     this.bytes,
-    int width,
+    int? width,
     int height,
     PdfImageOrientation orientation,
-    double dpi,
+    double? dpi,
   ) : super(width, height, orientation, dpi);
 
   /// The image data
   final Uint8List bytes;
 
   @override
-  PdfImage buildImage(Context context, {int width, int height}) {
+  PdfImage buildImage(Context context, {int? width, int? height}) {
     if (width == null) {
       return PdfImage.file(context.document, bytes: bytes);
     }
 
-    final image = im.decodeImage(bytes);
+    final image = im.decodeImage(bytes)!;
     final resized = im.copyResize(image, width: width);
     return PdfImage.fromImage(context.document, image: resized);
   }
@@ -145,8 +143,8 @@ class MemoryImage extends ImageProvider {
 class ImageImage extends ImageProvider {
   ImageImage(
     this._image, {
-    double dpi,
-    PdfImageOrientation orientation,
+    double? dpi,
+    PdfImageOrientation? orientation,
   }) : super(_image.width, _image.height,
             orientation ?? PdfImageOrientation.topLeft, dpi);
 
@@ -154,7 +152,7 @@ class ImageImage extends ImageProvider {
   final im.Image _image;
 
   @override
-  PdfImage buildImage(Context context, {int width, int height}) {
+  PdfImage buildImage(Context context, {int? width, int? height}) {
     if (width == null) {
       return PdfImage.fromImage(context.document, image: _image);
     }
@@ -166,11 +164,11 @@ class ImageImage extends ImageProvider {
 
 class RawImage extends ImageImage {
   RawImage({
-    @required Uint8List bytes,
-    @required int width,
-    @required int height,
-    PdfImageOrientation orientation,
-    double dpi,
+    required Uint8List bytes,
+    required int width,
+    required int height,
+    PdfImageOrientation? orientation,
+    double? dpi,
   }) : super(im.Image.fromBytes(width, height, bytes),
             orientation: orientation, dpi: dpi);
 }

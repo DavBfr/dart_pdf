@@ -7,7 +7,7 @@ Future<void> main() async {
 
   pdf.addPage(
     pw.Page(
-      build: (pw.Context context) => pw.Center(
+      build: (pw.Context? context) => pw.Center(
         child: pw.Text('Hello World!'),
       ),
     ),

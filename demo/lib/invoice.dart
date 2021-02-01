@@ -58,14 +58,14 @@ Future<Uint8List> generateInvoice(PdfPageFormat pageFormat) async {
 
 class Invoice {
   Invoice({
-    this.products,
-    this.customerName,
-    this.customerAddress,
-    this.invoiceNumber,
-    this.tax,
-    this.paymentInfo,
-    this.baseColor,
-    this.accentColor,
+    required this.products,
+    required this.customerName,
+    required this.customerAddress,
+    required this.invoiceNumber,
+    required this.tax,
+    required this.paymentInfo,
+    required this.baseColor,
+    required this.accentColor,
   });
 
   final List<Product> products;
@@ -91,9 +91,9 @@ class Invoice {
 
   double get _grandTotal => _total * (1 + tax);
 
-  String _logo;
+  String? _logo;
 
-  String _bgShape;
+  String? _bgShape;
 
   Future<Uint8List> buildPdf(PdfPageFormat pageFormat) async {
     // Create a PDF document.
@@ -111,9 +111,9 @@ class Invoice {
       pw.MultiPage(
         pageTheme: _buildTheme(
           pageFormat,
-          font1 != null ? pw.Font.ttf(font1) : null,
-          font2 != null ? pw.Font.ttf(font2) : null,
-          font3 != null ? pw.Font.ttf(font3) : null,
+          pw.Font.ttf(font1),
+          pw.Font.ttf(font2),
+          pw.Font.ttf(font3),
         ),
         header: _buildHeader,
         footer: _buildFooter,
@@ -192,7 +192,7 @@ class Invoice {
                     padding: const pw.EdgeInsets.only(bottom: 8, left: 30),
                     height: 72,
                     child:
-                        _logo != null ? pw.SvgImage(svg: _logo) : pw.PdfLogo(),
+                        _logo != null ? pw.SvgImage(svg: _logo!) : pw.PdfLogo(),
                   ),
                   // pw.Container(
                   //   color: baseColor,
@@ -243,7 +243,7 @@ class Invoice {
       ),
       buildBackground: (context) => pw.FullPage(
         ignoreMargins: true,
-        child: pw.SvgImage(svg: _bgShape),
+        child: pw.SvgImage(svg: _bgShape!),
       ),
     );
   }

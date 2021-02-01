@@ -16,14 +16,15 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
 import 'utils.dart';
 
-Document pdf;
-MemoryImage image;
+late Document pdf;
+late MemoryImage image;
 
 void main() {
   setUpAll(() async {
@@ -37,14 +38,14 @@ void main() {
 
   test('Pdf Jpeg Download', () async {
     pdf.addPage(Page(
-      build: (Context context) => Center(child: Image(image)),
+      build: (Context? context) => Center(child: Image(image)),
     ));
   });
 
   test('Pdf Jpeg Orientations', () {
     pdf.addPage(
       Page(
-        build: (Context context) => GridView(
+        build: (Context? context) => GridView(
           crossAxisCount: 4,
           crossAxisSpacing: 10,
           children: List<Widget>.generate(
@@ -84,7 +85,7 @@ void main() {
       (String image) => SizedBox(
         child: Image(
           MemoryImage(
-            gzip.decode(base64.decode(image)),
+            Uint8List.fromList(gzip.decode(base64.decode(image))),
           ),
         ),
         width: 200,
@@ -94,7 +95,7 @@ void main() {
 
     pdf.addPage(
       Page(
-        build: (Context context) => Center(
+        build: (Context? context) => Center(
           child: Wrap(
             spacing: 20,
             runSpacing: 20,

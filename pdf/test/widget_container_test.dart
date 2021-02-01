@@ -22,7 +22,7 @@ import 'package:test/test.dart';
 
 import 'utils.dart';
 
-Document pdf;
+late Document pdf;
 
 void main() {
   setUpAll(() {
@@ -32,7 +32,7 @@ void main() {
 
   test('Container Widgets Flat', () {
     pdf.addPage(Page(
-      build: (Context context) => Container(
+      build: (Context? context) => Container(
         alignment: Alignment.center,
         margin: const EdgeInsets.all(30),
         padding: const EdgeInsets.all(20),
@@ -92,7 +92,7 @@ void main() {
 
   test('Container Widgets BoxShape Border', () {
     pdf.addPage(Page(
-      build: (Context context) => Center(
+      build: (Context? context) => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
@@ -121,7 +121,7 @@ void main() {
 
   test('Container Widgets LinearGradient', () {
     pdf.addPage(Page(
-      build: (Context context) => Container(
+      build: (Context? context) => Container(
         alignment: Alignment.center,
         margin: const EdgeInsets.all(30),
         padding: const EdgeInsets.all(20),
@@ -150,7 +150,7 @@ void main() {
 
   test('Container Widgets RadialGradient', () {
     pdf.addPage(Page(
-      build: (Context context) => Container(
+      build: (Context? context) => Container(
         alignment: Alignment.center,
         margin: const EdgeInsets.all(30),
         padding: const EdgeInsets.all(20),
@@ -180,7 +180,7 @@ void main() {
 
   test('Container Widgets BoxShadow', () {
     pdf.addPage(Page(
-      build: (Context context) => Container(
+      build: (Context? context) => Container(
         margin: const EdgeInsets.all(30),
         padding: const EdgeInsets.all(20),
         decoration: const BoxDecoration(

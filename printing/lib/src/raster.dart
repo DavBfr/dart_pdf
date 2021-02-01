@@ -59,7 +59,7 @@ class PdfRaster {
   Future<Uint8List> toPng() async {
     final image = await toImage();
     final data = await image.toByteData(format: ui.ImageByteFormat.png);
-    return data.buffer.asUint8List();
+    return data!.buffer.asUint8List();
   }
 
   /// Returns the image as an [Image] object from the pub:image library

@@ -31,17 +31,17 @@ class PrintJob {
   });
 
   /// Callback used when calling Printing.layoutPdf()
-  final LayoutCallback onLayout;
+  final LayoutCallback? onLayout;
 
   /// Callback used when calling Printing.convertHtml()
-  final Completer<Uint8List> onHtmlRendered;
+  final Completer<Uint8List>? onHtmlRendered;
 
   /// Future triggered when the job is done
-  final Completer<bool> onCompleted;
+  final Completer<bool>? onCompleted;
 
   /// Stream of rasterized pages
-  final StreamController<PdfRaster> onPageRasterized;
+  final StreamController<PdfRaster>? onPageRasterized;
 
   /// The Job number
-  int index;
+  int? index;
 }

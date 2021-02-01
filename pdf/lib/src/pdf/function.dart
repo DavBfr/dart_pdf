@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import 'package:meta/meta.dart';
-
 import 'color.dart';
 import 'data_types.dart';
 import 'document.dart';
@@ -27,8 +25,8 @@ abstract class PdfBaseFunction extends PdfObject {
 
   factory PdfBaseFunction.colorsAndStops(
     PdfDocument pdfDocument,
-    List<PdfColor> colors, [
-    List<double> stops,
+    List<PdfColor?> colors, [
+    List<double>? stops,
   ]) {
     if (stops == null || stops.isEmpty) {
       return PdfFunction.fromColors(pdfDocument, colors);
@@ -81,10 +79,10 @@ class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
   }) : super(pdfDocument);
 
   factory PdfFunction.fromColors(
-      PdfDocument pdfDocument, List<PdfColor> colors) {
+      PdfDocument pdfDocument, List<PdfColor?> colors) {
     final data = <int>[];
     for (final color in colors) {
-      data.add((color.red * 255.0).round() & 0xff);
+      data.add((color!.red * 255.0).round() & 0xff);
       data.add((color.green * 255.0).round() & 0xff);
       data.add((color.blue * 255.0).round() & 0xff);
     }
@@ -96,7 +94,7 @@ class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
     );
   }
 
-  final List<int> data;
+  final List<int>? data;
 
   final int bitsPerSample;
 
@@ -108,7 +106,7 @@ class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
 
   @override
   void prepare() {
-    buf.putBytes(data);
+    buf.putBytes(data!);
     super.prepare();
 
     params['/FunctionType'] = const PdfNum(0);
@@ -116,7 +114,7 @@ class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
     params['/Order'] = PdfNum(order);
     params['/Domain'] = PdfArray.fromNum(domain);
     params['/Range'] = PdfArray.fromNum(range);
-    params['/Size'] = PdfArray.fromNum(<int>[data.length ~/ order]);
+    params['/Size'] = PdfArray.fromNum(<int>[data!.length ~/ order]);
   }
 
   @override
@@ -126,13 +124,11 @@ class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
 class PdfStitchingFunction extends PdfBaseFunction {
   PdfStitchingFunction(
     PdfDocument pdfDocument, {
-    @required this.functions,
-    @required this.bounds,
+    required this.functions,
+    required this.bounds,
     this.domainStart = 0,
     this.domainEnd = 1,
-  })  : assert(functions != null),
-        assert(bounds != null),
-        super(pdfDocument);
+  }) : super(pdfDocument);
 
   final List<PdfFunction> functions;
 

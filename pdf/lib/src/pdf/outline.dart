@@ -59,30 +59,28 @@ class PdfOutline extends PdfObject {
     this.destMode = PdfOutlineMode.fitPage,
     this.style = PdfOutlineStyle.normal,
   })  : assert(anchor == null || (dest == null && rect == null)),
-        assert(destMode != null),
-        assert(style != null),
         super(pdfDocument);
 
   /// This holds any outlines below us
   List<PdfOutline> outlines = <PdfOutline>[];
 
   /// For subentries, this points to it's parent outline
-  PdfOutline parent;
+  PdfOutline? parent;
 
   /// This is this outlines Title
-  final String title;
+  final String? title;
 
   /// The destination page
-  PdfPage dest;
+  PdfPage? dest;
 
   /// The region on the destination page
-  final PdfRect rect;
+  final PdfRect? rect;
 
   /// Named destination
-  final String anchor;
+  final String? anchor;
 
   /// Color of the outline text
-  final PdfColor color;
+  final PdfColor? color;
 
   /// How the destination is handled
   final PdfOutlineMode destMode;
@@ -91,7 +89,7 @@ class PdfOutline extends PdfObject {
   final PdfOutlineStyle style;
 
   /// External level for this outline
-  int effectiveLevel;
+  int? effectiveLevel;
 
   /// This method creates an outline, and attaches it to this one.
   /// When the outline is selected, the supplied region is displayed.
@@ -106,10 +104,10 @@ class PdfOutline extends PdfObject {
 
     // These are for kids only
     if (parent != null) {
-      params['/Title'] = PdfSecString.fromString(this, title);
+      params['/Title'] = PdfSecString.fromString(this, title!);
 
       if (color != null) {
-        params['/C'] = PdfColorType(color);
+        params['/C'] = PdfColorType(color!);
       }
 
       if (style != PdfOutlineStyle.normal) {
@@ -117,23 +115,23 @@ class PdfOutline extends PdfObject {
       }
 
       if (anchor != null) {
-        params['/Dest'] = PdfSecString.fromString(this, anchor);
+        params['/Dest'] = PdfSecString.fromString(this, anchor!);
       } else {
         final dests = PdfArray();
-        dests.add(dest.ref());
+        dests.add(dest!.ref());
 
         if (destMode == PdfOutlineMode.fitPage) {
           dests.add(const PdfName('/Fit'));
         } else {
           dests.add(const PdfName('/FitR'));
-          dests.add(PdfNum(rect.left));
-          dests.add(PdfNum(rect.bottom));
-          dests.add(PdfNum(rect.right));
-          dests.add(PdfNum(rect.top));
+          dests.add(PdfNum(rect!.left));
+          dests.add(PdfNum(rect!.bottom));
+          dests.add(PdfNum(rect!.right));
+          dests.add(PdfNum(rect!.top));
         }
         params['/Dest'] = dests;
       }
-      params['/Parent'] = parent.ref();
+      params['/Parent'] = parent!.ref();
 
       // were a descendent, so by default we are closed. Find out how many
       // entries are below us
@@ -142,15 +140,15 @@ class PdfOutline extends PdfObject {
         params['/Count'] = PdfNum(-c);
       }
 
-      final index = parent.getIndex(this);
+      final index = parent!.getIndex(this);
       if (index > 0) {
         // Now if were not the first, then we have a /Prev node
-        params['/Prev'] = parent.getNode(index - 1).ref();
+        params['/Prev'] = parent!.getNode(index - 1).ref();
       }
 
-      if (index < parent.getLast()) {
+      if (index < parent!.getLast()) {
         // We have a /Next node
-        params['/Next'] = parent.getNode(index + 1).ref();
+        params['/Next'] = parent!.getNode(index + 1).ref();
       }
     } else {
       // the number of outlines in this document

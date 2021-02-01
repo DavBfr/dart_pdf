@@ -28,7 +28,7 @@ Future<Uint8List> generateDocument(PdfPageFormat format) async {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       header: (pw.Context context) {
         if (context.pageNumber == 1) {
-          return null;
+          return pw.SizedBox();
         }
         return pw.Container(
             alignment: pw.Alignment.centerRight,
@@ -38,8 +38,7 @@ Future<Uint8List> generateDocument(PdfPageFormat format) async {
                 border: pw.Border(
                     bottom: pw.BorderSide(width: 0.5, color: PdfColors.grey))),
             child: pw.Text('Portable Document Format',
-                style: pw.Theme.of(context)
-                    .defaultTextStyle
+                style: pw.Theme.of(context).defaultTextStyle
                     .copyWith(color: PdfColors.grey)));
       },
       footer: (pw.Context context) {
@@ -48,8 +47,7 @@ Future<Uint8List> generateDocument(PdfPageFormat format) async {
             margin: const pw.EdgeInsets.only(top: 1.0 * PdfPageFormat.cm),
             child: pw.Text(
                 'Page ${context.pageNumber} of ${context.pagesCount}',
-                style: pw.Theme.of(context)
-                    .defaultTextStyle
+                style: pw.Theme.of(context).defaultTextStyle
                     .copyWith(color: PdfColors.grey)));
       },
       build: (pw.Context context) => <pw.Widget>[

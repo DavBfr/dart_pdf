@@ -4,20 +4,19 @@ description: Pdf Printing Demo
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: '>=2.12.0-224.0.dev <3.0.0'
+  flutter: ">=1.26.0-17.1.pre <2.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  intl:
+  intl: ^0.17.0-nullsafety
   open_file:
   path_provider:
   printing:
-  url_launcher:
+  url_launcher: ^6.0.0-nullsafety
 
 dev_dependencies:
-  flutter_driver:
-    sdk: flutter
   flutter_test:
     sdk: flutter
   test:

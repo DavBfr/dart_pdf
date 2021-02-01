@@ -20,7 +20,7 @@ import 'package:test/test.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 
-Document pdf;
+late Document pdf;
 
 void main() {
   setUpAll(() {
@@ -30,7 +30,7 @@ void main() {
 
   test('Basic Widgets Align 1', () {
     pdf.addPage(Page(
-        build: (Context context) => Align(
+        build: (Context? context) => Align(
               alignment: Alignment.bottomRight,
               child: SizedBox(width: 100, height: 100, child: PdfLogo()),
             )));
@@ -38,7 +38,7 @@ void main() {
 
   test('Basic Widgets Align 2', () {
     pdf.addPage(Page(
-        build: (Context context) => Align(
+        build: (Context? context) => Align(
               alignment: const Alignment(0.8, 0.2),
               child: SizedBox(width: 100, height: 100, child: PdfLogo()),
             )));
@@ -46,7 +46,7 @@ void main() {
 
   test('Basic Widgets AspectRatio', () {
     pdf.addPage(Page(
-        build: (Context context) => AspectRatio(
+        build: (Context? context) => AspectRatio(
               aspectRatio: 1.618,
               child: Placeholder(),
             )));
@@ -54,14 +54,14 @@ void main() {
 
   test('Basic Widgets Center', () {
     pdf.addPage(Page(
-        build: (Context context) => Center(
+        build: (Context? context) => Center(
               child: SizedBox(width: 100, height: 100, child: PdfLogo()),
             )));
   });
 
   test('Basic Widgets ConstrainedBox', () {
     pdf.addPage(Page(
-      build: (Context context) => ConstrainedBox(
+      build: (Context? context) => ConstrainedBox(
           constraints: const BoxConstraints.tightFor(height: 300),
           child: Placeholder()),
     ));
@@ -69,7 +69,7 @@ void main() {
 
   test('Basic Widgets CustomPaint', () {
     pdf.addPage(Page(
-        build: (Context context) => CustomPaint(
+        build: (Context? context) => CustomPaint(
               size: const PdfPoint(200, 200),
               painter: (PdfGraphics canvas, PdfPoint size) {
                 canvas
@@ -79,7 +79,7 @@ void main() {
               },
             )));
     pdf.addPage(Page(
-        build: (Context context) => CustomPaint(
+        build: (Context? context) => CustomPaint(
               size: const PdfPoint(200, 200),
               painter: (PdfGraphics canvas, PdfPoint size) {
                 canvas
@@ -93,7 +93,7 @@ void main() {
 
   test('Basic Widgets FittedBox', () {
     pdf.addPage(Page(
-        build: (Context context) => Column(
+        build: (Context? context) => Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
@@ -151,7 +151,7 @@ void main() {
 
   test('Basic Widgets LimitedBox', () {
     pdf.addPage(Page(
-        build: (Context context) => ListView(
+        build: (Context? context) => ListView(
               children: <Widget>[
                 LimitedBox(
                   maxHeight: 40,
@@ -163,7 +163,7 @@ void main() {
 
   test('Basic Widgets Padding', () {
     pdf.addPage(Page(
-        build: (Context context) => Center(
+        build: (Context? context) => Center(
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: PdfLogo(),
@@ -173,7 +173,7 @@ void main() {
 
   test('Basic Widgets SizedBox', () {
     pdf.addPage(Page(
-        build: (Context context) => SizedBox(
+        build: (Context? context) => SizedBox(
               width: 200,
               height: 100,
               child: Placeholder(),
@@ -182,7 +182,7 @@ void main() {
 
   test('Basic Widgets Transform', () {
     pdf.addPage(Page(
-        build: (Context context) => Transform.scale(
+        build: (Context? context) => Transform.scale(
               scale: 0.5,
               child: Transform.rotate(
                 angle: 0.1,
@@ -193,7 +193,7 @@ void main() {
 
   test('Basic Widgets Transform rotateBox', () {
     pdf.addPage(Page(
-        build: (Context context) => Center(
+        build: (Context? context) => Center(
               child: Transform.rotateBox(
                 angle: 3.1416 / 2,
                 child: Text('Hello'),

@@ -20,7 +20,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
-Document pdf;
+late Document pdf;
 
 void main() {
   setUpAll(() {
@@ -31,7 +31,7 @@ void main() {
   test('Pdf Roll Paper', () async {
     pdf.addPage(Page(
       pageFormat: PdfPageFormat.roll80,
-      build: (Context context) => Padding(
+      build: (Context? context) => Padding(
         padding: const EdgeInsets.all(30),
         child: Center(
           child: Text('Hello World!'),
@@ -43,7 +43,7 @@ void main() {
   test('Pdf Automatic Paper', () async {
     pdf.addPage(Page(
         pageFormat: PdfPageFormat.undefined,
-        build: (Context context) => Text('Hello World!')));
+        build: (Context? context) => Text('Hello World!')));
   });
 
   tearDownAll(() async {

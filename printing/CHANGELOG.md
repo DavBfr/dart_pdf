@@ -1,9 +1,10 @@
 # Changelog
 
-## 4.1.0
+## 5.0.0-nullsafety.0
 
 - Remove useless files
-- Add WidgetWraper ImageProvider and deprecate wrapWidget()
+- Add WidgetWraper as an ImageProvider insead of wrapWidget()
+- Opt-In null-safety
 
 ## 4.0.0
 

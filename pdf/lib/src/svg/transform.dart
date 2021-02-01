@@ -26,11 +26,7 @@ class SvgTransform {
     return SvgTransform.fromString(element.getAttribute('transform'));
   }
 
-  factory SvgTransform.fromString(String transform) {
-    if (transform == null) {
-      return none;
-    }
-
+  factory SvgTransform.fromString(String? transform) {
     if (transform == null) {
       return none;
     }
@@ -39,7 +35,7 @@ class SvgTransform {
 
     for (final m in _transformRegExp.allMatches(transform)) {
       final name = m.group(1);
-      final parameterList = SvgParser.splitDoubles(m.group(2)).toList();
+      final parameterList = SvgParser.splitDoubles(m.group(2)!).toList();
 
       switch (name) {
         case 'matrix':
@@ -96,7 +92,7 @@ class SvgTransform {
     return SvgTransform(mat);
   }
 
-  final Matrix4 matrix;
+  final Matrix4? matrix;
 
   bool get isEmpty => matrix == null;
 

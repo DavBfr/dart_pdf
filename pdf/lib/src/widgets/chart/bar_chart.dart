@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 
 import '../flex.dart';
@@ -26,12 +25,12 @@ import 'line_chart.dart';
 
 class BarDataSet extends Dataset {
   BarDataSet({
-    @required this.data,
-    String legend,
+    required this.data,
+    String? legend,
     this.borderColor,
     this.borderWidth = 1.5,
     PdfColor color = PdfColors.blue,
-    bool drawBorder,
+    bool? drawBorder,
     this.drawSurface = true,
     this.surfaceOpacity = 1,
     this.width = 10,
@@ -40,7 +39,6 @@ class BarDataSet extends Dataset {
   })  : drawBorder = drawBorder ?? borderColor != null && color != borderColor,
         assert((drawBorder ?? borderColor != null && color != borderColor) ||
             drawSurface),
-        assert(axis != null),
         super(
           legend: legend,
           color: color,
@@ -49,7 +47,7 @@ class BarDataSet extends Dataset {
   final List<LineChartValue> data;
 
   final bool drawBorder;
-  final PdfColor borderColor;
+  final PdfColor? borderColor;
   final double borderWidth;
 
   final bool drawSurface;
@@ -64,7 +62,7 @@ class BarDataSet extends Dataset {
   void _drawSurface(Context context, ChartGrid grid, LineChartValue value) {
     switch (axis) {
       case Axis.horizontal:
-        final y = (grid is CartesianGrid) ? grid.xAxisOffset : 0;
+        final y = (grid is CartesianGrid) ? grid.xAxisOffset : 0.0;
         final p = grid.toChart(value.point);
         final x = p.x + offset - width / 2;
         final height = p.y - y;
@@ -72,7 +70,7 @@ class BarDataSet extends Dataset {
         context.canvas.drawRect(x, y, width, height);
         break;
       case Axis.vertical:
-        final x = (grid is CartesianGrid) ? grid.yAxisOffset : 0;
+        final x = (grid is CartesianGrid) ? grid.yAxisOffset : 0.0;
         final p = grid.toChart(value.point);
         final y = p.y + offset - width / 2;
         final height = p.x - x;
@@ -96,7 +94,7 @@ class BarDataSet extends Dataset {
       return;
     }
 
-    final grid = Chart.of(context).grid;
+    final grid = Chart.of(context)!.grid;
 
     if (drawSurface) {
       for (final value in data) {

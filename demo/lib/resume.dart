@@ -18,9 +18,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -196,11 +194,14 @@ Future<pw.PageTheme> _myPageTheme(PdfPageFormat format) async {
 }
 
 class _Block extends pw.StatelessWidget {
-  _Block({this.title, this.icon});
+  _Block({
+    required this.title,
+    this.icon,
+  });
 
   final String title;
 
-  final pw.IconData icon;
+  final pw.IconData? icon;
 
   @override
   pw.Widget build(pw.Context context) {
@@ -222,7 +223,7 @@ class _Block extends pw.StatelessWidget {
                         .defaultTextStyle
                         .copyWith(fontWeight: pw.FontWeight.bold)),
                 pw.Spacer(),
-                if (icon != null) pw.Icon(icon, color: lightGreen, size: 18),
+                if (icon != null) pw.Icon(icon!, color: lightGreen, size: 18),
               ]),
           pw.Container(
             decoration: const pw.BoxDecoration(
@@ -240,7 +241,7 @@ class _Block extends pw.StatelessWidget {
 }
 
 class _Category extends pw.StatelessWidget {
-  _Category({this.title});
+  _Category({required this.title});
 
   final String title;
 
@@ -259,14 +260,14 @@ class _Category extends pw.StatelessWidget {
 
 class _Percent extends pw.StatelessWidget {
   _Percent({
-    @required this.size,
-    @required this.value,
-    this.title,
+    required this.size,
+    required this.value,
+    required this.title,
     this.fontSize = 1.2,
     this.color = green,
     this.backgroundColor = PdfColors.grey300,
     this.strokeWidth = 5,
-  }) : assert(size != null);
+  });
 
   final double size;
 
@@ -309,9 +310,7 @@ class _Percent extends pw.StatelessWidget {
       )
     ];
 
-    if (title != null) {
-      widgets.add(title);
-    }
+    widgets.add(title);
 
     return pw.Column(children: widgets);
   }

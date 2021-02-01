@@ -78,7 +78,7 @@ mixin PdfGraphicStream on PdfObject {
   }
 
   /// Get the default font of this graphic object
-  PdfFont getDefaultFont() {
+  PdfFont? getDefaultFont() {
     if (pdfDocument.fonts.isEmpty) {
       PdfFont.helvetica(pdfDocument);
     }
@@ -88,7 +88,7 @@ mixin PdfGraphicStream on PdfObject {
 
   /// Generate a name for the graphic state object
   String stateName(PdfGraphicState state) {
-    return pdfDocument.graphicStates.stateName(state);
+    return pdfDocument.graphicStates!.stateName(state);
   }
 
   @override
@@ -135,7 +135,7 @@ mixin PdfGraphicStream on PdfObject {
         '/K': PdfBool(knockoutTransparency),
       });
 
-      resources['/ExtGState'] = pdfDocument.graphicStates.ref();
+      resources['/ExtGState'] = pdfDocument.graphicStates!.ref();
     }
 
     if (params.containsKey('/Resources')) {
@@ -155,6 +155,6 @@ class PdfGraphicXObject extends PdfXObject with PdfGraphicStream {
   /// Creates a Graphic XObject
   PdfGraphicXObject(
     PdfDocument pdfDocument, [
-    String subtype,
+    String? subtype,
   ]) : super(pdfDocument, subtype);
 }

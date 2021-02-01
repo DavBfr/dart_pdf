@@ -34,84 +34,56 @@ void main() {
 
   test('info', () async {
     final info = await Printing.info();
-    expect(info, null);
+    expect(info, isInstanceOf<PrintingInfo>());
   });
 
   test('layoutPdf', () async {
     expect(
-      () async => await Printing.layoutPdf(onLayout: null),
-      throwsAssertionError,
-    );
-
-    expect(
         await Printing.layoutPdf(
-          onLayout: (_) => null,
+          onLayout: (_) => Uint8List(0),
           name: 'doc',
           format: PdfPageFormat.letter,
         ),
-        null);
+        true);
   });
 
   test('sharePdf', () async {
     expect(
-      () async => await Printing.sharePdf(bytes: null),
-      throwsAssertionError,
-    );
-
-    expect(
       await Printing.sharePdf(
         bytes: Uint8List(0),
       ),
-      null,
+      true,
     );
   });
 
   test('pickPrinter', () async {
     expect(
-      await Printing.pickPrinter(context: null),
+      await Printing.pickPrinter(context: MockContext()),
       null,
     );
   });
 
   test('directPrintPdf', () async {
     expect(
-      await Printing.directPrintPdf(onLayout: null, printer: null),
-      false,
-    );
-
-    expect(
-      () async => await Printing.directPrintPdf(
-        onLayout: null,
-        printer: const Printer(url: 'test'),
-      ),
-      throwsAssertionError,
-    );
-
-    expect(
       await Printing.directPrintPdf(
-        onLayout: (_) => null,
+        onLayout: (_) => Uint8List(0),
         printer: const Printer(url: 'test'),
       ),
-      null,
+      true,
     );
   });
 
   test('convertHtml', () async {
     expect(
       await Printing.convertHtml(html: '<html></html>'),
-      null,
+      isInstanceOf<Uint8List>(),
     );
   });
 
   test('raster', () async {
     expect(
-      () => Printing.raster(null),
-      throwsAssertionError,
-    );
-
-    expect(
       Printing.raster(Uint8List(0)),
-      null,
+      isInstanceOf<Stream>(),
     );
   });
 
@@ -131,4 +103,34 @@ void main() {
 
 class MockPrinting extends Mock
     with MockPlatformInterfaceMixin
-    implements PrintingPlatform {}
+    implements PrintingPlatform {
+  @override
+  Future<PrintingInfo> info() async => const PrintingInfo();
+
+  @override
+  Future<bool> layoutPdf(onLayout, String name, PdfPageFormat format) async =>
+      true;
+
+  @override
+  Future<bool> sharePdf(Uint8List bytes, String filename, Rect bounds) async =>
+      true;
+
+  @override
+  Future<Printer?> pickPrinter(Rect bounds) async => null;
+
+  @override
+  Future<bool> directPrintPdf(
+          Printer printer, onLayout, String name, PdfPageFormat format) async =>
+      true;
+
+  @override
+  Stream<PdfRaster> raster(
+      Uint8List document, List<int>? pages, double dpi) async* {}
+
+  @override
+  Future<Uint8List> convertHtml(
+          String html, String? baseUrl, PdfPageFormat format) async =>
+      Uint8List(0);
+}
+
+class MockContext extends Mock implements BuildContext {}

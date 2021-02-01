@@ -39,7 +39,7 @@ class TtfWriter {
     return sum;
   }
 
-  void _updateCompoundGlyph(TtfGlyphInfo glyph, Map<int, int> compoundMap) {
+  void _updateCompoundGlyph(TtfGlyphInfo glyph, Map<int, int?> compoundMap) {
     const ARG_1_AND_2_ARE_WORDS = 1;
     const MORE_COMPONENTS = 32;
 
@@ -51,7 +51,7 @@ class TtfWriter {
     while (flags & MORE_COMPONENTS != 0) {
       flags = bytes.getUint16(offset);
       final glyphIndex = bytes.getUint16(offset + 2);
-      bytes.setUint16(offset + 2, compoundMap[glyphIndex]);
+      bytes.setUint16(offset + 2, compoundMap[glyphIndex]!);
       offset += (flags & ARG_1_AND_2_ARE_WORDS != 0) ? 8 : 6;
     }
   }
@@ -79,7 +79,7 @@ class TtfWriter {
       final glyph =
           ttf.readGlyph(ttf.charToGlyphIndexMap[chars[index]] ?? 0).copy();
       for (var g in glyph.compounds) {
-        compounds[g] = null;
+        compounds[g] = -1;
       }
       glyphsInfo.add(glyph);
     }
@@ -87,17 +87,18 @@ class TtfWriter {
     // Add compound glyphs
     for (var compound in compounds.keys) {
       final index = glyphsInfo.firstWhere(
-          (TtfGlyphInfo glyph) => glyph.index == compound,
-          orElse: () => null);
-      if (index != null) {
-        compounds[compound] = glyphsInfo.indexOf(index);
-        assert(compounds[compound] >= 0, 'Unable to find the glyph');
-      } else {
-        compounds[compound] = glyphsInfo.length;
-        final glyph = ttf.readGlyph(compound);
-        assert(glyph.compounds.isEmpty, 'This is not a simple glyph');
-        glyphsInfo.add(glyph);
-      }
+        (TtfGlyphInfo glyph) => glyph.index == compound,
+        orElse: () {
+          final glyph = ttf.readGlyph(compound);
+          assert(glyph.compounds.isEmpty, 'This is not a simple glyph');
+          glyphsInfo.add(glyph);
+
+          return glyph;
+        },
+      );
+
+      compounds[compound] = glyphsInfo.indexOf(index);
+      assert(compounds[compound]! >= 0, 'Unable to find the glyph');
     }
 
     // Add one last empty glyph
@@ -133,7 +134,7 @@ class TtfWriter {
     }
 
     {
-      final loca = tables[TtfParser.loca_table].buffer.asByteData();
+      final loca = tables[TtfParser.loca_table]!.buffer.asByteData();
       var index = 0;
       for (var glyph in glyphsInfo) {
         if (ttf.indexToLocFormat == 0) {
@@ -150,8 +151,8 @@ class TtfWriter {
 
     {
       // Head table
-      final start = ttf.tableOffsets[TtfParser.head_table];
-      final len = ttf.tableSize[TtfParser.head_table];
+      final start = ttf.tableOffsets[TtfParser.head_table]!;
+      final len = ttf.tableSize[TtfParser.head_table]!;
       final head = Uint8List.fromList(
           ttf.bytes.buffer.asUint8List(start, _wordAlign(len, 4)));
       head.buffer.asByteData().setUint32(8, 0); // checkSumAdjustment
@@ -161,8 +162,8 @@ class TtfWriter {
 
     {
       // MaxP table
-      final start = ttf.tableOffsets[TtfParser.maxp_table];
-      final len = ttf.tableSize[TtfParser.maxp_table];
+      final start = ttf.tableOffsets[TtfParser.maxp_table]!;
+      final len = ttf.tableSize[TtfParser.maxp_table]!;
       final maxp = Uint8List.fromList(
           ttf.bytes.buffer.asUint8List(start, _wordAlign(len, 4)));
       maxp.buffer.asByteData().setUint16(4, glyphsInfo.length);
@@ -172,8 +173,8 @@ class TtfWriter {
 
     {
       // HHEA table
-      final start = ttf.tableOffsets[TtfParser.hhea_table];
-      final len = ttf.tableSize[TtfParser.hhea_table];
+      final start = ttf.tableOffsets[TtfParser.hhea_table]!;
+      final len = ttf.tableSize[TtfParser.hhea_table]!;
       final hhea = Uint8List.fromList(
           ttf.bytes.buffer.asUint8List(start, _wordAlign(len, 4)));
       hhea.buffer
@@ -188,7 +189,7 @@ class TtfWriter {
       // HMTX table
       final len = 4 * glyphsInfo.length;
       final hmtx = Uint8List(_wordAlign(len, 4));
-      final hmtxOffset = ttf.tableOffsets[TtfParser.hmtx_table];
+      final hmtxOffset = ttf.tableOffsets[TtfParser.hmtx_table]!;
       final hmtxData = hmtx.buffer.asByteData();
       final numOfLongHorMetrics = ttf.numOfLongHorMetrics;
       final defaultadvanceWidth =
@@ -262,7 +263,7 @@ class TtfWriter {
         start.setUint32(12 + count * 16 + 4,
             _calcTableChecksum(data.buffer.asByteData())); // checkSum
         start.setUint32(12 + count * 16 + 8, offset); // offset
-        start.setUint32(12 + count * 16 + 12, tablesLength[name]); // length
+        start.setUint32(12 + count * 16 + 12, tablesLength[name]!); // length
         offset += data.lengthInBytes;
         count++;
       });

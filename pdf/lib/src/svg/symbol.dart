@@ -39,9 +39,9 @@ class SvgSymbol extends SvgGroup {
 
     final children = element.children
         .whereType<XmlElement>()
-        .map<SvgOperation>(
+        .map<SvgOperation?>(
             (child) => SvgOperation.fromXml(child, painter, _brush))
-        .where((element) => element != null);
+        .whereType<SvgOperation>();
 
     return SvgSymbol(
       children,
