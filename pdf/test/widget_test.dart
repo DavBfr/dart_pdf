@@ -51,7 +51,7 @@ void main() {
     pdf.addPage(Page(
         pageFormat: const PdfPageFormat(400, 400),
         margin: const EdgeInsets.all(10),
-        build: (Context? context) => Column(children: <Widget>[
+        build: (Context context) => Column(children: <Widget>[
               Container(
                 padding: const EdgeInsets.all(5),
                 margin: const EdgeInsets.only(bottom: 10),
@@ -114,7 +114,7 @@ void main() {
                   "That's all Folks!",
                   tightBounds: true,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context!).defaultTextStyle.copyWith(
+                  style: Theme.of(context).defaultTextStyle.copyWith(
                         font: Font.timesBoldItalic(),
                       ),
                   textScaleFactor: 3,
@@ -128,7 +128,7 @@ void main() {
       Page(
         pageFormat: const PdfPageFormat(400, 400),
         margin: const EdgeInsets.all(10),
-        build: (Context? context) => Center(
+        build: (Context context) => Center(
           child: GridView(
             crossAxisCount: 3,
             direction: Axis.vertical,
@@ -205,7 +205,7 @@ void main() {
         Page(
           pageFormat: const PdfPageFormat(400, 200),
           margin: const EdgeInsets.all(10),
-          build: (Context? context) => Stack(
+          build: (Context context) => Stack(
             overflow: Overflow.visible,
             // fit: StackFit.expand,
             // alignment: Alignment.bottomRight,
@@ -227,7 +227,7 @@ void main() {
                   child: RichText(
                     text: TextSpan(
                       text: 'Hello ',
-                      style: Theme.of(context!).defaultTextStyle,
+                      style: Theme.of(context).defaultTextStyle,
                       children: <TextSpan>[
                         TextSpan(
                             text: 'bold',

@@ -39,11 +39,9 @@ class CartesianGrid extends ChartGrid {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    assert(Chart.of(context) != null,
-        '$runtimeType cannot be used without a Chart widget');
     super.layout(context, constraints, parentUsesSize: parentUsesSize);
 
-    final datasets = Chart.of(context)!.datasets;
+    final datasets = Chart.of(context).datasets;
     final size = constraints.biggest;
 
     // In simple conditions, this loop will run only 2 times.
@@ -104,7 +102,7 @@ class CartesianGrid extends ChartGrid {
   void paint(Context context) {
     super.paint(context);
 
-    final datasets = Chart.of(context)!.datasets;
+    final datasets = Chart.of(context).datasets;
 
     clip(context, box!.size);
     for (var dataSet in datasets) {

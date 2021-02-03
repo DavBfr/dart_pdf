@@ -20,6 +20,7 @@ import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'basic.dart';
 import 'document.dart';
 import 'flex.dart';
 import 'geometry.dart';
@@ -91,7 +92,7 @@ class MultiPage extends Page {
   MultiPage({
     PageTheme? pageTheme,
     PdfPageFormat? pageFormat,
-    BuildListCallback? build,
+    required BuildListCallback build,
     this.mainAxisAlignment = MainAxisAlignment.start,
     this.crossAxisAlignment = CrossAxisAlignment.start,
     this.header,
@@ -106,13 +107,14 @@ class MultiPage extends Page {
         super(
           pageTheme: pageTheme,
           pageFormat: pageFormat,
+          build: (_) => SizedBox(),
           margin: margin,
           theme: theme,
           orientation: orientation,
           textDirection: textDirection,
         );
 
-  final BuildListCallback? _buildList;
+  final BuildListCallback _buildList;
 
   final CrossAxisAlignment crossAxisAlignment;
 
@@ -149,10 +151,6 @@ class MultiPage extends Page {
 
   @override
   void generate(Document document, {bool insert = true, int? index}) {
-    if (_buildList == null) {
-      return;
-    }
-
     assert(pageFormat.width > 0 && pageFormat.width < double.infinity);
     assert(pageFormat.height > 0 && pageFormat.height < double.infinity);
 
@@ -184,7 +182,7 @@ class MultiPage extends Page {
       if (pageTheme.textDirection != null)
         InheritedDirectionality(pageTheme.textDirection),
     ]);
-    final children = _buildList!(baseContext);
+    final children = _buildList(baseContext);
     WidgetContext? widgetContext;
 
     while (_index < children.length) {

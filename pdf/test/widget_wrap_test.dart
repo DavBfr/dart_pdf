@@ -53,7 +53,7 @@ void main() {
       Page(
         pageFormat: const PdfPageFormat(400, 800),
         margin: const EdgeInsets.all(10),
-        build: (Context? context) => Column(
+        build: (Context context) => Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: wraps,
         ),
@@ -85,7 +85,7 @@ void main() {
       Page(
         pageFormat: const PdfPageFormat(800, 400),
         margin: const EdgeInsets.all(10),
-        build: (Context? context) => Row(
+        build: (Context context) => Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: wraps,
         ),
@@ -119,7 +119,7 @@ void main() {
       Page(
         pageFormat: const PdfPageFormat(400, 800),
         margin: const EdgeInsets.all(10),
-        build: (Context? context) => Column(
+        build: (Context context) => Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: wraps,
         ),
@@ -153,7 +153,7 @@ void main() {
       Page(
         pageFormat: const PdfPageFormat(800, 400),
         margin: const EdgeInsets.all(10),
-        build: (Context? context) => Row(
+        build: (Context context) => Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: wraps,
         ),
@@ -189,7 +189,7 @@ void main() {
       Page(
         pageFormat: const PdfPageFormat(400, 800),
         margin: const EdgeInsets.all(10),
-        build: (Context? context) => Column(
+        build: (Context context) => Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: wraps,
         ),
@@ -225,7 +225,7 @@ void main() {
       Page(
         pageFormat: const PdfPageFormat(800, 400),
         margin: const EdgeInsets.all(10),
-        build: (Context? context) => Row(
+        build: (Context context) => Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: wraps,
         ),
@@ -239,7 +239,7 @@ void main() {
       Page(
         pageFormat: const PdfPageFormat(200, 200),
         margin: const EdgeInsets.all(10),
-        build: (Context? context) => Wrap(
+        build: (Context context) => Wrap(
           spacing: 10,
           runSpacing: 10,
           children: List<Widget>.generate(
@@ -285,7 +285,7 @@ void main() {
   });
 
   test('Wrap Widget Empty', () {
-    pdf.addPage(Page(build: (Context? context) => Wrap()));
+    pdf.addPage(Page(build: (Context context) => Wrap()));
   });
 
   test('Wrap Widget Columns', () {

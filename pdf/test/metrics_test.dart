@@ -113,7 +113,7 @@ void main() {
             .codeUnits) {
       pdf.addPage(Page(
           pageFormat: const PdfPageFormat(500, 500, marginAll: 20),
-          build: (Context? context) {
+          build: (Context context) {
             return ConstrainedBox(
                 constraints: const BoxConstraints.expand(),
                 child: FittedBox(

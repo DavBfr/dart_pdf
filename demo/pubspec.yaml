@@ -4,8 +4,8 @@ description: Pdf Printing Demo
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.12.0-224.0.dev <3.0.0'
-  flutter: ">=1.26.0-17.1.pre <2.0.0"
+  sdk: ">=2.12.0-0 <3.0.0"
+  flutter: ">=1.16.0"
 
 dependencies:
   flutter:

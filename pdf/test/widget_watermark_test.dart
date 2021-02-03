@@ -48,7 +48,7 @@ void main() {
     pdf.addPage(
       Page(
         pageTheme: pageTheme,
-        build: (Context? context) => Center(
+        build: (Context context) => Center(
           child: Text(
             'Hello World',
           ),

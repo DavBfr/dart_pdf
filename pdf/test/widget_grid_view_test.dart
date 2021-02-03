@@ -51,7 +51,7 @@ void main() {
 
   test('Pdf Widgets GridView Horizontal', () {
     pdf.addPage(Page(
-      build: (Context? context) => GridView(
+      build: (Context context) => GridView(
           crossAxisCount: 5,
           direction: Axis.horizontal,
           childAspectRatio: 1,

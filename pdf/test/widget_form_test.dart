@@ -74,7 +74,7 @@ void main() {
     () {
       pdf.addPage(
         Page(
-          build: (Context? context) => Wrap(
+          build: (Context context) => Wrap(
             crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
               Label(label: 'Given Name:', width: 100),

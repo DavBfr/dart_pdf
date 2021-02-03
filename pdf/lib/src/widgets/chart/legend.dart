@@ -69,10 +69,7 @@ class ChartLegend extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    assert(Chart.of(context) != null,
-        '$runtimeType cannot be used without a Chart widget');
-
-    final datasets = Chart.of(context)!.datasets;
+    final datasets = Chart.of(context).datasets;
 
     final Widget wrap = Wrap(
       direction: direction,

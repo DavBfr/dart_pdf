@@ -464,7 +464,7 @@ void main() {
 
   test('Text Widgets Arabic', () {
     pdf.addPage(Page(
-      build: (Context? context) => RichText(
+      build: (Context context) => RichText(
         textDirection: TextDirection.rtl,
         text: TextSpan(
           text: 'قهوة\n',

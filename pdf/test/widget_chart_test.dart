@@ -32,7 +32,7 @@ void main() {
     test('Default LineChart', () {
       pdf.addPage(Page(
         pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context? context) => Chart(
+        build: (Context context) => Chart(
           grid: CartesianGrid(
             xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
             yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
@@ -53,7 +53,7 @@ void main() {
     test('Default LineChart without lines connecting points', () {
       pdf.addPage(Page(
         pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context? context) => Chart(
+        build: (Context context) => Chart(
           grid: CartesianGrid(
             xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
             yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
@@ -74,7 +74,7 @@ void main() {
 
     test('Default ScatterChart without dots', () {
       pdf.addPage(Page(
-        build: (Context? context) => Chart(
+        build: (Context context) => Chart(
           grid: CartesianGrid(
             xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
             yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
@@ -96,7 +96,7 @@ void main() {
     test('ScatterChart with custom points and lines', () {
       pdf.addPage(Page(
         pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context? context) => Chart(
+        build: (Context context) => Chart(
           grid: CartesianGrid(
             xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
             yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
@@ -122,7 +122,7 @@ void main() {
     test('ScatterChart with custom size', () {
       pdf.addPage(Page(
         pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context? context) => SizedBox(
+        build: (Context context) => SizedBox(
           width: 200,
           height: 100,
           child: Chart(
@@ -147,7 +147,7 @@ void main() {
     test('LineChart with curved lines', () {
       pdf.addPage(Page(
         pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context? context) => Chart(
+        build: (Context context) => Chart(
           grid: CartesianGrid(
             xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
             yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
@@ -172,7 +172,7 @@ void main() {
     test('Default BarChart', () {
       pdf.addPage(Page(
         pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context? context) => Chart(
+        build: (Context context) => Chart(
           grid: CartesianGrid(
             xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
             yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
@@ -193,7 +193,7 @@ void main() {
     test('Vertical BarChart', () {
       pdf.addPage(Page(
         pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context? context) => Chart(
+        build: (Context context) => Chart(
           grid: CartesianGrid(
             xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
             yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),

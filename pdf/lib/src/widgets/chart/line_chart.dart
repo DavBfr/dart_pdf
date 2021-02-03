@@ -136,7 +136,7 @@ class LineDataSet extends Dataset {
       return;
     }
 
-    final grid = Chart.of(context)!.grid;
+    final grid = Chart.of(context).grid;
 
     if (drawSurface) {
       _drawSurface(context, grid);
@@ -167,7 +167,7 @@ class LineDataSet extends Dataset {
       return;
     }
 
-    final grid = Chart.of(context)!.grid;
+    final grid = Chart.of(context).grid;
 
     if (drawLine) {
       _drawLine(context, grid, true);

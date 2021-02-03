@@ -53,12 +53,12 @@ void main() {
 
   test('Text Widgets Quotes', () {
     pdf.addPage(Page(
-        build: (Context? context) => Text('Text containing \' or " works!')));
+        build: (Context context) => Text('Text containing \' or " works!')));
   });
 
   test('Text Widgets Unicode Quotes', () {
     pdf.addPage(Page(
-        build: (Context? context) => Text('Text containing ’ and ” works!',
+        build: (Context context) => Text('Text containing ’ and ” works!',
             style: TextStyle(font: ttf))));
   });
 
@@ -249,7 +249,7 @@ void main() {
 
   test('Text Widgets RichText Multiple lang', () {
     pdf.addPage(Page(
-      build: (Context? context) => RichText(
+      build: (Context context) => RichText(
         text: TextSpan(
           text: 'Hello ',
           style: TextStyle(
@@ -276,7 +276,7 @@ void main() {
 
     pdf.addPage(
       Page(
-        build: (Context? context) => RichText(
+        build: (Context context) => RichText(
           maxLines: 3,
           text: TextSpan(
             text: para,

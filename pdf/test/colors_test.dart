@@ -28,8 +28,8 @@ class Color extends StatelessWidget {
   final String? varient;
 
   @override
-  Widget build(Context? context) {
-    final style = Theme.of(context!).defaultTextStyle.copyWith(
+  Widget build(Context context) {
+    final style = Theme.of(context).defaultTextStyle.copyWith(
         color: color.luminance < 0.2 ? PdfColors.white : PdfColors.black,
         fontSize: 14);
     final hexStyle = style.copyWith(font: Font.courier(), fontSize: 10);
@@ -73,7 +73,7 @@ class ColorWheel extends Widget {
   final ColorSpace colorSpace;
 
   @override
-  void layout(Context? context, BoxConstraints? constraints,
+  void layout(Context context, BoxConstraints? constraints,
       {bool parentUsesSize = false}) {
     box = PdfRect.fromPoints(PdfPoint.zero, constraints!.biggest);
   }
@@ -672,11 +672,11 @@ void main() {
 
     wheels.forEach((ColorSpace colorSpace, String name) {
       pdf.addPage(Page(
-          build: (Context? context) => Column(
+          build: (Context context) => Column(
                 children: <Widget>[
                   Header(text: name, outlineStyle: PdfOutlineStyle.italic),
                   SizedBox(
-                    height: context!.page.pageFormat.availableWidth,
+                    height: context.page.pageFormat.availableWidth,
                     child: ColorWheel(
                       colorSpace: colorSpace,
                     ),

@@ -38,14 +38,14 @@ void main() {
 
   test('Pdf Jpeg Download', () async {
     pdf.addPage(Page(
-      build: (Context? context) => Center(child: Image(image)),
+      build: (Context context) => Center(child: Image(image)),
     ));
   });
 
   test('Pdf Jpeg Orientations', () {
     pdf.addPage(
       Page(
-        build: (Context? context) => GridView(
+        build: (Context context) => GridView(
           crossAxisCount: 4,
           crossAxisSpacing: 10,
           children: List<Widget>.generate(
@@ -95,7 +95,7 @@ void main() {
 
     pdf.addPage(
       Page(
-        build: (Context? context) => Center(
+        build: (Context context) => Center(
           child: Wrap(
             spacing: 20,
             runSpacing: 20,

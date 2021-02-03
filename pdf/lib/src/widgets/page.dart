@@ -37,7 +37,7 @@ class Page {
   Page({
     PageTheme? pageTheme,
     PdfPageFormat? pageFormat,
-    BuildCallback? build,
+    required BuildCallback build,
     ThemeData? theme,
     PageOrientation? orientation,
     EdgeInsets? margin,
@@ -69,7 +69,7 @@ class Page {
 
   PageOrientation get orientation => pageTheme.orientation;
 
-  final BuildCallback? _build;
+  final BuildCallback _build;
 
   ThemeData? get theme => pageTheme.theme;
 
@@ -136,22 +136,20 @@ class Page {
     Widget? content;
     Widget? foreground;
 
-    if (_build != null) {
-      content = _build!(context);
+    content = _build(context);
 
-      final size = layout(content, context, constraints);
+    final size = layout(content, context, constraints);
 
-      if (_pdfPage!.pageFormat.height == double.infinity) {
-        _pdfPage!.pageFormat =
-            _pdfPage!.pageFormat.copyWith(width: size.x, height: size.y);
-        constraints = mustRotate
-            ? BoxConstraints(
-                maxWidth: _pdfPage!.pageFormat.height - _margin.vertical,
-                maxHeight: _pdfPage!.pageFormat.width - _margin.horizontal)
-            : BoxConstraints(
-                maxWidth: _pdfPage!.pageFormat.width - _margin.horizontal,
-                maxHeight: _pdfPage!.pageFormat.height - _margin.vertical);
-      }
+    if (_pdfPage!.pageFormat.height == double.infinity) {
+      _pdfPage!.pageFormat =
+          _pdfPage!.pageFormat.copyWith(width: size.x, height: size.y);
+      constraints = mustRotate
+          ? BoxConstraints(
+              maxWidth: _pdfPage!.pageFormat.height - _margin.vertical,
+              maxHeight: _pdfPage!.pageFormat.width - _margin.horizontal)
+          : BoxConstraints(
+              maxWidth: _pdfPage!.pageFormat.width - _margin.horizontal,
+              maxHeight: _pdfPage!.pageFormat.height - _margin.vertical);
     }
 
     if (pageTheme.buildBackground != null) {
@@ -175,9 +173,7 @@ class Page {
       paint(background, context);
     }
 
-    if (content != null) {
-      paint(content, context);
-    }
+    paint(content, context);
 
     if (foreground != null) {
       paint(foreground, context);

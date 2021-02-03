@@ -30,7 +30,7 @@ void main() {
   test('Opacity Widgets', () {
     pdf.addPage(
       Page(
-        build: (Context? context) => Stack(
+        build: (Context context) => Stack(
           alignment: Alignment.center,
           children: <Widget>[
             Text('Background', textScaleFactor: 5),

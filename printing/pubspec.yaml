@@ -7,8 +7,8 @@ issue_tracker: https://github.com/DavBfr/dart_pdf/issues
 version: 5.0.0-nullsafety.0
 
 environment:
-  sdk: '>=2.12.0-224.0.dev <3.0.0'
-  flutter: ">=1.12.13+hotfix.5 <2.0.0"
+  sdk: ">=2.12.0-0 <3.0.0"
+  flutter: ">=1.16.0"
 
 dependencies:
   flutter:

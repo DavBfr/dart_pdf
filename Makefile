@@ -121,7 +121,7 @@ test-demo: $(FONTS) demo/pubspec.lock .coverage
 
 test-readme: $(FONTS) test/pubspec.lock
 	cd test; $(DART_BIN) extract_readme.dart
-	cd test; dartanalyzer readme-*.dart
+	cd test; $(DART_BIN) analyze
 
 test: test-pdf test-printing test-demo node_modules
 	cat pdf/lcov.info printing/lcov.info demo/lcov.info | node_modules/.bin/lcov-summary

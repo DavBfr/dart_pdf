@@ -38,7 +38,7 @@ void compute(Message message) {
     message.image,
   );
 
-  pdf.addPage(Page(build: (Context? context) => Center(child: Image(image))));
+  pdf.addPage(Page(build: (Context context) => Center(child: Image(image))));
 
   message.sendPort.send(pdf.save());
 }

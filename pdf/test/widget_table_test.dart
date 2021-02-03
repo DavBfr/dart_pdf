@@ -71,13 +71,13 @@ void main() {
 
   test('Table Widget empty', () {
     pdf.addPage(Page(
-      build: (Context? context) => Table(),
+      build: (Context context) => Table(),
     ));
   });
 
   test('Table Widget filled', () {
     pdf.addPage(Page(
-      build: (Context? context) => Table(
+      build: (Context context) => Table(
         children: buildTable(context: context, count: 20),
         border: TableBorder.all(),
         tableWidth: TableWidth.max,
@@ -135,7 +135,7 @@ void main() {
 
   test('Table Widget Widths', () {
     pdf.addPage(Page(
-      build: (Context? context) => Table(
+      build: (Context context) => Table(
         children: buildTable(context: context, count: 20),
         border: TableBorder.all(),
         columnWidths: <int, TableColumnWidth>{
@@ -189,7 +189,7 @@ void main() {
 
   test('Table fromTextArray', () {
     pdf.addPage(Page(
-      build: (Context? context) => Table.fromTextArray(
+      build: (Context context) => Table.fromTextArray(
         context: context,
         tableWidth: TableWidth.min,
         data: <List<dynamic>>[
@@ -203,7 +203,7 @@ void main() {
 
   test('Table fromTextArray with formatting', () {
     pdf.addPage(Page(
-      build: (Context? context) => Table.fromTextArray(
+      build: (Context context) => Table.fromTextArray(
         border: null,
         cellAlignment: Alignment.center,
         headerDecoration: const BoxDecoration(
@@ -239,7 +239,7 @@ void main() {
       theme: ThemeData.withFont(
         base: loadFont('hacen-tunisia.ttf'),
       ),
-      build: (Context? context) => Directionality(
+      build: (Context context) => Directionality(
         textDirection: TextDirection.rtl,
         child: Table.fromTextArray(
           headers: <dynamic>['ثلاثة', 'اثنان', 'واحد'],
@@ -256,7 +256,7 @@ void main() {
   test('Table fromTextArray with alignment', () {
     pdf.addPage(
       Page(
-        build: (Context? context) => Table.fromTextArray(
+        build: (Context context) => Table.fromTextArray(
           cellAlignment: Alignment.center,
           data: <List<String>>[
             <String>['line 1', 'Text\n\n\ntext'],

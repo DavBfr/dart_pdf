@@ -31,7 +31,7 @@ void main() {
   test('Flex Widgets ListView', () {
     pdf.addPage(
       Page(
-        build: (Context? context) => ListView(
+        build: (Context context) => ListView(
           spacing: 20,
           padding: const EdgeInsets.all(10),
           children: <Widget>[
@@ -47,7 +47,7 @@ void main() {
   test('Flex Widgets ListView.builder', () {
     pdf.addPage(
       Page(
-        build: (Context? context) => ListView.builder(
+        build: (Context context) => ListView.builder(
           itemBuilder: (Context context, int index) => Text('Line $index'),
           itemCount: 30,
           spacing: 2,
@@ -60,7 +60,7 @@ void main() {
   test('Flex Widgets ListView.separated', () {
     pdf.addPage(
       Page(
-        build: (Context? context) => ListView.separated(
+        build: (Context context) => ListView.separated(
           separatorBuilder: (Context context, int index) => Container(
             color: PdfColors.grey,
             height: 0.5,
@@ -76,7 +76,7 @@ void main() {
   test('Flex Widgets Spacer', () {
     pdf.addPage(
       Page(
-        build: (Context? context) => Column(
+        build: (Context context) => Column(
           children: <Widget>[
             Text('Begin'),
             Spacer(), // Defaults to a flex of one.

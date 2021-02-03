@@ -38,7 +38,8 @@ Future<Uint8List> generateDocument(PdfPageFormat format) async {
                 border: pw.Border(
                     bottom: pw.BorderSide(width: 0.5, color: PdfColors.grey))),
             child: pw.Text('Portable Document Format',
-                style: pw.Theme.of(context).defaultTextStyle
+                style: pw.Theme.of(context)
+                    .defaultTextStyle
                     .copyWith(color: PdfColors.grey)));
       },
       footer: (pw.Context context) {
@@ -47,7 +48,8 @@ Future<Uint8List> generateDocument(PdfPageFormat format) async {
             margin: const pw.EdgeInsets.only(top: 1.0 * PdfPageFormat.cm),
             child: pw.Text(
                 'Page ${context.pageNumber} of ${context.pagesCount}',
-                style: pw.Theme.of(context).defaultTextStyle
+                style: pw.Theme.of(context)
+                    .defaultTextStyle
                     .copyWith(color: PdfColors.grey)));
       },
       build: (pw.Context context) => <pw.Widget>[

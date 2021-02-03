@@ -94,7 +94,7 @@ class BarDataSet extends Dataset {
       return;
     }
 
-    final grid = Chart.of(context)!.grid;
+    final grid = Chart.of(context).grid;
 
     if (drawSurface) {
       for (final value in data) {

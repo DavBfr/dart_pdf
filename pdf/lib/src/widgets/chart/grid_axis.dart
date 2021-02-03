@@ -244,9 +244,6 @@ class FixedAxis<T extends num> extends GridAxis {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    assert(Chart.of(context) != null,
-        '$runtimeType cannot be used without a Chart widget');
-
     final size = constraints.biggest;
 
     var maxWidth = 0.0;
@@ -379,7 +376,7 @@ class FixedAxis<T extends num> extends GridAxis {
     }
 
     // ignore: avoid_as
-    final grid = Chart.of(context)!.grid as CartesianGrid;
+    final grid = Chart.of(context).grid as CartesianGrid;
 
     switch (direction) {
       case Axis.horizontal:
