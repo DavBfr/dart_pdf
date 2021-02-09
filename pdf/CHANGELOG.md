@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.0-nullsafety.1
+
+- Fix Table border
+
 ## 3.0.0-nullsafety.0
 
 - Fix SVG fit alignment
