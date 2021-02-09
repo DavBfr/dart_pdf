@@ -106,23 +106,32 @@ class TableBorder extends Border {
     super.paint(context, box);
 
     if (verticalInside.style != BorderStyle.none) {
+      BoxBorder.setStyle(context, verticalInside.style);
       var offset = box.x;
       for (var width in widths.sublist(0, widths.length - 1)) {
         offset += width;
         context.canvas.moveTo(offset, box.y);
         context.canvas.lineTo(offset, box.top);
       }
+      context.canvas.setStrokeColor(verticalInside.color);
+      context.canvas.setLineWidth(verticalInside.width);
       context.canvas.strokePath();
+
+      BoxBorder.unsetStyle(context, verticalInside.style);
     }
 
     if (horizontalInside.style != BorderStyle.none) {
+      BoxBorder.setStyle(context, verticalInside.style);
       var offset = box.top;
       for (var height in heights.sublist(0, heights.length - 1)) {
         offset -= height;
         context.canvas.moveTo(box.x, offset);
         context.canvas.lineTo(box.right, offset);
       }
+      context.canvas.setStrokeColor(verticalInside.color);
+      context.canvas.setLineWidth(verticalInside.width);
       context.canvas.strokePath();
+      BoxBorder.unsetStyle(context, verticalInside.style);
     }
   }
 }

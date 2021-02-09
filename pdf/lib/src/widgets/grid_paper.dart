@@ -271,36 +271,44 @@ class GridPaper extends SingleChildWidget {
     }
 
     if (border.left.style != BorderStyle.none) {
+      BoxBorder.setStyle(context, border.left.style);
       context.canvas
         ..setStrokeColor(border.left.color)
         ..setLineWidth(border.left.width)
         ..drawLine(
             box.left + margin.left, box.top, box.left + margin.left, box.bottom)
         ..strokePath();
+      BoxBorder.unsetStyle(context, border.left.style);
     }
     if (border.right.style != BorderStyle.none) {
+      BoxBorder.setStyle(context, border.right.style);
       context.canvas
         ..setStrokeColor(border.right.color)
         ..setLineWidth(border.right.width)
         ..drawLine(box.right - margin.right, box.top, box.right - margin.right,
             box.bottom)
         ..strokePath();
+      BoxBorder.unsetStyle(context, border.right.style);
     }
     if (border.top.style != BorderStyle.none) {
+      BoxBorder.setStyle(context, border.top.style);
       context.canvas
         ..setStrokeColor(border.top.color)
         ..setLineWidth(border.top.width)
         ..drawLine(
             box.left, box.top - margin.top, box.right, box.top - margin.top)
         ..strokePath();
+      BoxBorder.unsetStyle(context, border.top.style);
     }
     if (border.bottom.style != BorderStyle.none) {
+      BoxBorder.setStyle(context, border.bottom.style);
       context.canvas
         ..setStrokeColor(border.bottom.color)
         ..setLineWidth(border.bottom.width)
         ..drawLine(box.left, box.bottom + margin.bottom, box.right,
             box.bottom + margin.bottom)
         ..strokePath();
+      BoxBorder.unsetStyle(context, border.bottom.style);
     }
 
     context.canvas.restoreContext();

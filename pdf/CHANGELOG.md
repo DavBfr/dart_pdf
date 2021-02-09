@@ -4,6 +4,7 @@
 
 - Fix SVG fit alignment
 - Add DecorationSvgImage
+- Fix Table border
 
 ## 2.0.0
 
