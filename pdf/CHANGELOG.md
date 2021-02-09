@@ -7,6 +7,7 @@
 - Fix Table border
 - Implement dashed Divider
 - Update dependencies
+- Convert BorderStyle to a class
 
 ## 2.0.0
 
