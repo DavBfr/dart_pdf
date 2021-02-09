@@ -21,7 +21,43 @@ import 'border_radius.dart';
 import 'decoration.dart';
 import 'widget.dart';
 
-enum BorderStyle { none, solid, dashed, dotted }
+class BorderStyle {
+  const BorderStyle({
+    this.paint = true,
+    this.pattern,
+    this.phase = 0,
+  });
+
+  static const none = BorderStyle(paint: false);
+  static const solid = BorderStyle();
+  static const dashed = BorderStyle(pattern: <int>[3, 3]);
+  static const dotted = BorderStyle(pattern: <int>[1, 1]);
+
+  /// Paint this line
+  final bool paint;
+
+  /// Lengths of alternating dashes and gaps. The numbers shall be nonnegative
+  /// and not all zero.
+  final List<num>? pattern;
+
+  /// Specify the distance into the dash pattern at which to start the dash.
+  final int phase;
+
+  void setStyle(Context context) {
+    if (paint && pattern != null) {
+      context.canvas
+        ..saveContext()
+        ..setLineCap(PdfLineCap.butt)
+        ..setLineDashPattern(pattern!, phase);
+    }
+  }
+
+  void unsetStyle(Context context) {
+    if (paint && pattern != null) {
+      context.canvas.restoreContext();
+    }
+  }
+}
 
 @immutable
 abstract class BoxBorder {
@@ -41,51 +77,21 @@ abstract class BoxBorder {
     BorderRadius? borderRadius,
   });
 
-  static void setStyle(Context context, BorderStyle style) {
-    switch (style) {
-      case BorderStyle.none:
-      case BorderStyle.solid:
-        break;
-      case BorderStyle.dashed:
-        context.canvas
-          ..saveContext()
-          ..setLineDashPattern(const <int>[3, 3]);
-        break;
-      case BorderStyle.dotted:
-        context.canvas
-          ..saveContext()
-          ..setLineDashPattern(const <int>[1, 1]);
-        break;
-    }
-  }
-
-  static void unsetStyle(Context context, BorderStyle style) {
-    switch (style) {
-      case BorderStyle.none:
-      case BorderStyle.solid:
-        break;
-      case BorderStyle.dashed:
-      case BorderStyle.dotted:
-        context.canvas.restoreContext();
-        break;
-    }
-  }
-
   static void _paintUniformBorderWithCircle(
       Context context, PdfRect box, BorderSide side) {
-    setStyle(context, side.style);
+    side.style.setStyle(context);
     context.canvas
       ..setStrokeColor(side.color)
       ..setLineWidth(side.width)
       ..drawEllipse(box.x + box.width / 2.0, box.y + box.height / 2.0,
           box.width / 2.0, box.height / 2.0)
       ..strokePath();
-    unsetStyle(context, side.style);
+    side.style.unsetStyle(context);
   }
 
   static void _paintUniformBorderWithRadius(Context context, PdfRect box,
       BorderSide side, BorderRadius borderRadius) {
-    setStyle(context, side.style);
+    side.style.setStyle(context);
     context.canvas
       ..setLineJoin(PdfLineJoin.miter)
       ..setMiterLimit(4)
@@ -93,12 +99,12 @@ abstract class BoxBorder {
       ..setLineWidth(side.width);
     borderRadius.paint(context, box);
     context.canvas.strokePath();
-    unsetStyle(context, side.style);
+    side.style.unsetStyle(context);
   }
 
   static void _paintUniformBorderWithRectangle(
       Context context, PdfRect box, BorderSide side) {
-    setStyle(context, side.style);
+    side.style.setStyle(context);
     context.canvas
       ..setLineJoin(PdfLineJoin.miter)
       ..setMiterLimit(4)
@@ -106,7 +112,7 @@ abstract class BoxBorder {
       ..setLineWidth(side.width)
       ..drawBox(box)
       ..strokePath();
-    unsetStyle(context, side.style);
+    side.style.unsetStyle(context);
   }
 }
 
@@ -251,44 +257,44 @@ class Border extends BoxBorder {
       ..setMiterLimit(4)
       ..setLineJoin(PdfLineJoin.miter);
 
-    if (top.style != BorderStyle.none) {
-      BoxBorder.setStyle(context, top.style);
+    if (top.style.paint) {
+      top.style.setStyle(context);
       context.canvas
         ..setStrokeColor(top.color)
         ..setLineWidth(top.width)
         ..drawLine(box.left, box.top, box.right, box.top)
         ..strokePath();
-      BoxBorder.unsetStyle(context, top.style);
+      top.style.unsetStyle(context);
     }
 
-    if (right.style != BorderStyle.none) {
-      BoxBorder.setStyle(context, right.style);
+    if (right.style.paint) {
+      right.style.setStyle(context);
       context.canvas
         ..setStrokeColor(right.color)
         ..setLineWidth(right.width)
         ..drawLine(box.right, box.top, box.right, box.bottom)
         ..strokePath();
-      BoxBorder.unsetStyle(context, right.style);
+      right.style.unsetStyle(context);
     }
 
-    if (bottom.style != BorderStyle.none) {
-      BoxBorder.setStyle(context, bottom.style);
+    if (bottom.style.paint) {
+      bottom.style.setStyle(context);
       context.canvas
         ..setStrokeColor(bottom.color)
         ..setLineWidth(bottom.width)
         ..drawLine(box.right, box.bottom, box.left, box.bottom)
         ..strokePath();
-      BoxBorder.unsetStyle(context, bottom.style);
+      bottom.style.unsetStyle(context);
     }
 
-    if (left.style != BorderStyle.none) {
-      BoxBorder.setStyle(context, left.style);
+    if (left.style.paint) {
+      left.style.setStyle(context);
       context.canvas
         ..setStrokeColor(left.color)
         ..setLineWidth(left.width)
         ..drawLine(box.left, box.top, box.left, box.bottom)
         ..strokePath();
-      BoxBorder.unsetStyle(context, left.style);
+      left.style.unsetStyle(context);
     }
   }
 }

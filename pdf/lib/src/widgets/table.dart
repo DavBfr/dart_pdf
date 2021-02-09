@@ -105,8 +105,8 @@ class TableBorder extends Border {
       [List<double?>? widths, List<double>? heights]) {
     super.paint(context, box);
 
-    if (verticalInside.style != BorderStyle.none) {
-      BoxBorder.setStyle(context, verticalInside.style);
+    if (verticalInside.style.paint) {
+      verticalInside.style.setStyle(context);
       var offset = box.x;
       for (var width in widths!.sublist(0, widths.length - 1)) {
         offset += width!;
@@ -117,11 +117,11 @@ class TableBorder extends Border {
       context.canvas.setLineWidth(verticalInside.width);
       context.canvas.strokePath();
 
-      BoxBorder.unsetStyle(context, verticalInside.style);
+      verticalInside.style.unsetStyle(context);
     }
 
-    if (horizontalInside.style != BorderStyle.none) {
-      BoxBorder.setStyle(context, verticalInside.style);
+    if (horizontalInside.style.paint) {
+      horizontalInside.style.setStyle(context);
       var offset = box.top;
       for (var height in heights!.sublist(0, heights.length - 1)) {
         offset -= height;
@@ -131,7 +131,7 @@ class TableBorder extends Border {
       context.canvas.setStrokeColor(verticalInside.color);
       context.canvas.setLineWidth(verticalInside.width);
       context.canvas.strokePath();
-      BoxBorder.unsetStyle(context, verticalInside.style);
+      horizontalInside.style.unsetStyle(context);
     }
   }
 }

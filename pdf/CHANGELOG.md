@@ -3,6 +3,8 @@
 ## 3.0.0-nullsafety.1
 
 - Fix Table border
+- Convert BorderStyle to a class
+- Implement dashed Divider
 
 ## 3.0.0-nullsafety.0
 
