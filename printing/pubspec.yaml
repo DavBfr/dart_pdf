@@ -15,7 +15,7 @@ dependencies:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
-  image: ^2.1.4
+  image: ">=2.1.10 <4.0.0"
   js: ^0.6.1
   meta: ^1.1.5
   pdf: ^2.0.0

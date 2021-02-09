@@ -6,6 +6,7 @@
 - Add DecorationSvgImage
 - Fix Table border
 - Implement dashed Divider
+- Update dependencies
 
 ## 2.0.0
 

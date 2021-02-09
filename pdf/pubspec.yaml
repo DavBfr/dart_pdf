@@ -10,14 +10,14 @@ environment:
   sdk: ">=2.3.0 <3.0.0"
 
 dependencies:
-  archive: ^2.0.10
+  archive: ">=2.0.10 <4.0.0"
   barcode: ^1.16.0
-  crypto: ^2.0.6
-  image: ^2.1.10
+  crypto: ">=2.0.6 <4.0.0"
+  image: ">=2.1.10 <4.0.0"
   meta: ^1.1.5
   path_parsing: ^0.1.4
   vector_math: ^2.0.0
-  xml: ^4.0.0
+  xml: ">=4.0.0 <6.0.0"
 
 dev_dependencies:
   pedantic: 1.9.2

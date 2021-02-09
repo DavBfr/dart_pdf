@@ -4,6 +4,7 @@
 
 - Remove useless files
 - Add WidgetWraper ImageProvider and deprecate wrapWidget()
+- Update dependencies
 
 ## 4.0.0
 
