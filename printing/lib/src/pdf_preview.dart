@@ -169,8 +169,8 @@ class _PdfPreviewState extends State<PdfPreview> {
   void initState() {
     if (widget.initialPageFormat == null) {
       final locale = WidgetsBinding.instance!.window.locale;
-      // ignore: invalid_null_aware_operator
-      final cc = locale?.countryCode ?? 'US';
+      // ignore: unnecessary_cast, avoid_as
+      final cc = (locale as Locale?)?.countryCode ?? 'US';
 
       if (cc == 'US' || cc == 'CA' || cc == 'MX') {
         pageFormat = PdfPageFormat.letter;

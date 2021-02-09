@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.0.0-nullsafety.1
+
+- Fix PdfPreview default locale
+
 ## 5.0.0-nullsafety.0
 
 - Remove useless files
