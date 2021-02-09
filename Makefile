@@ -82,7 +82,7 @@ format-swift: $(SWFT_SRC)
 	which swiftformat && swiftformat --swiftversion 4.2 $^ || true
 
 .coverage:
-	which coverage || pub global activate coverage
+	which coverage || $(DART_BIN) pub global activate coverage
 	touch $@
 
 node_modules:

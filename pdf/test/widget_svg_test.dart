@@ -39,7 +39,6 @@ void main() {
   });
 
   test('SVG Widgets', () {
-    print('=' * 120);
     final dir = Directory('../ref/svg');
     if (!dir.existsSync()) {
       return;
