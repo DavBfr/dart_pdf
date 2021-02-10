@@ -5,6 +5,7 @@
 - Fix SVG fit alignment
 - Add DecorationSvgImage
 - Fix Table border
+- Implement dashed Divider
 
 ## 2.0.0
 

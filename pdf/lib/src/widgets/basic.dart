@@ -808,6 +808,7 @@ class Divider extends StatelessWidget {
     this.indent,
     this.endIndent,
     this.color,
+    this.borderStyle,
   })  : assert(height == null || height >= 0.0),
         assert(thickness == null || thickness >= 0.0),
         assert(indent == null || indent >= 0.0),
@@ -828,6 +829,9 @@ class Divider extends StatelessWidget {
   /// The thickness of the line drawn within the divider.
   final double thickness;
 
+  /// The border style of the divider
+  final BorderStyle borderStyle;
+
   @override
   Widget build(Context context) {
     final height = this.height ?? 16;
@@ -835,6 +839,7 @@ class Divider extends StatelessWidget {
     final indent = this.indent ?? 0;
     final endIndent = this.endIndent ?? 0;
     final color = this.color ?? PdfColors.black;
+    final borderStyle = this.borderStyle ?? BorderStyle.solid;
 
     return SizedBox(
       height: height,
@@ -847,6 +852,7 @@ class Divider extends StatelessWidget {
               bottom: BorderSide(
                 color: color,
                 width: thickness,
+                style: borderStyle,
               ),
             ),
           ),
@@ -863,6 +869,7 @@ class VerticalDivider extends StatelessWidget {
     this.indent,
     this.endIndent,
     this.color,
+    this.borderStyle,
   })  : assert(width == null || width >= 0.0),
         assert(thickness == null || thickness >= 0.0),
         assert(indent == null || indent >= 0.0),
@@ -883,6 +890,9 @@ class VerticalDivider extends StatelessWidget {
   /// The thickness of the line drawn within the divider.
   final double thickness;
 
+  /// The border style of the divider
+  final BorderStyle borderStyle;
+
   @override
   Widget build(Context context) {
     final width = this.width ?? 16;
@@ -890,6 +900,7 @@ class VerticalDivider extends StatelessWidget {
     final indent = this.indent ?? 0;
     final endIndent = this.endIndent ?? 0;
     final color = this.color ?? PdfColors.black;
+    final borderStyle = this.borderStyle ?? BorderStyle.solid;
 
     return SizedBox(
       width: width,
@@ -902,6 +913,7 @@ class VerticalDivider extends StatelessWidget {
               left: BorderSide(
                 color: color,
                 width: thickness,
+                style: borderStyle,
               ),
             ),
           ),
