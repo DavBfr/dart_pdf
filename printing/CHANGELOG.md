@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.0.0-nullsafety.2
+
+- Add imageFromAssetBundle and networkImage
+
 ## 5.0.0-nullsafety.1
 
 - Fix PdfPreview default locale
