@@ -29,6 +29,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     private var printOperation: NSPrintOperation?
     private var pdfDocument: CGPDFDocument?
     private var page: CGPDFPage?
+    private let semaphore = DispatchSemaphore(value: 0)
 
     public init(printing: PrintingPlugin, index: Int) {
         self.printing = printing
@@ -47,7 +48,29 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
 
         setFrameSize(size)
         setBoundsSize(size)
-        range.pointee.length = pdfDocument?.numberOfPages ?? 0
+
+        printing.onLayout(
+            printJob: self,
+            width: printOperation!.printInfo.paperSize.width,
+            height: printOperation!.printInfo.paperSize.height,
+            marginLeft: printOperation!.printInfo.leftMargin,
+            marginTop: printOperation!.printInfo.topMargin,
+            marginRight: printOperation!.printInfo.rightMargin,
+            marginBottom: printOperation!.printInfo.bottomMargin
+        )
+
+        // Block the main thread, waiting for a document
+        semaphore.wait()
+
+        if pdfDocument != nil {
+            range.pointee.length = pdfDocument!.numberOfPages
+            let page = pdfDocument!.page(at: 1)
+            let size = page?.getBoxRect(CGPDFBox.mediaBox) ?? NSZeroRect
+            setFrameSize(size.size)
+            setBoundsSize(size.size)
+        } else {
+            range.pointee.length = 0
+        }
         return true
     }
 
@@ -67,8 +90,8 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         let dataProvider = CGDataProvider(dataInfo: nil, data: bytesPointer, size: data?.count ?? 0, releaseData: dataProviderReleaseDataCallback)
         pdfDocument = CGPDFDocument(dataProvider!)
 
-        let window = NSApplication.shared.mainWindow!
-        printOperation!.runModal(for: window, delegate: self, didRun: #selector(printOperationDidRun(printOperation:success:contextInfo:)), contextInfo: nil)
+        // Unblock the main thread
+        semaphore.signal()
     }
 
     override public func draw(_: NSRect) {
@@ -136,21 +159,15 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         // Print the custom view
         printOperation = NSPrintOperation(view: self, printInfo: printInfo)
         printOperation!.jobTitle = name
-        printOperation!.printPanel.options = [.showsPreview]
+        printOperation!.printPanel.options = [.showsPreview, .showsPaperSize, .showsOrientation]
 
-        printing.onLayout(
-            printJob: self,
-            width: printOperation!.printInfo.paperSize.width,
-            height: printOperation!.printInfo.paperSize.height,
-            marginLeft: printOperation!.printInfo.leftMargin,
-            marginTop: printOperation!.printInfo.topMargin,
-            marginRight: printOperation!.printInfo.rightMargin,
-            marginBottom: printOperation!.printInfo.bottomMargin
-        )
+        let window = NSApplication.shared.mainWindow!
+        printOperation!.runModal(for: window, delegate: self, didRun: #selector(printOperationDidRun(printOperation:success:contextInfo:)), contextInfo: nil)
     }
 
-    func cancelJob(_ error: String?) {
-        printing.onCompleted(printJob: self, completed: false, error: error as NSString?)
+    func cancelJob(_: String?) {
+        pdfDocument = nil
+        semaphore.signal()
     }
 
     public static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String) {

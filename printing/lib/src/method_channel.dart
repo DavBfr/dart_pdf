@@ -15,11 +15,13 @@
  */
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/rendering.dart' show Rect;
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
+import 'package:printing/src/method_channel_ffi.dart';
 
 import 'callback.dart';
 import 'interface.dart';
@@ -56,7 +58,20 @@ class MethodChannelPrinting extends PrintingPlatform {
           marginBottom: call.arguments['marginBottom'],
         );
 
-        final bytes = await job.onLayout!(format);
+        Uint8List bytes;
+        try {
+          bytes = await job.onLayout!(format);
+        } catch (e) {
+          if (Platform.isMacOS || Platform.isIOS) {
+            return setErrorFfi(job, e.toString());
+          }
+
+          rethrow;
+        }
+
+        if (Platform.isMacOS || Platform.isIOS) {
+          return setDocumentFfi(job, bytes);
+        }
 
         return Uint8List.fromList(bytes);
       case 'onCompleted':
