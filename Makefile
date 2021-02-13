@@ -91,6 +91,10 @@ node_modules:
 printing/example/.metadata:
 	cd printing/example; $(FLUTTER_BIN) create -t app --no-overwrite --org net.nfet --project-name example .
 	rm -rf printing/example/test printing/example/integration_test
+	mkdir -p printing/example/macos/Runner
+	echo '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>com.apple.security.app-sandbox</key><true/><key>com.apple.security.cs.allow-jit</key><true/><key>com.apple.security.network.client</key><true/><key>com.apple.security.network.server</key><true/><key>com.apple.security.print</key><true/></dict></plist>' > printing/example/macos/Runner/DebugProfile.entitlements
+	echo '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>com.apple.security.app-sandbox</key><true/><key>com.apple.security.cs.allow-jit</key><true/><key>com.apple.security.network.client</key><true/><key>com.apple.security.print</key><true/></dict></plist>' > printing/example/macos/Runner/Release.entitlements
+
 
 pdf/pubspec.lock: pdf/pubspec.yaml
 	cd pdf; $(DART_BIN) pub get
