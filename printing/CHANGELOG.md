@@ -3,6 +3,7 @@
 ## 4.2.0
 
 - Add imageFromAssetBundle and networkImage
+- Add Page orientation on PdfPreview
 
 ## 4.1.0
 
