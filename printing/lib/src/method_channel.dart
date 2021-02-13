@@ -37,14 +37,16 @@ class MethodChannelPrinting extends PrintingPlatform {
     _channel.setMethodCallHandler(_handleMethod);
   }
 
-  static final Map<int, PrintJob> _printJobs = <int, PrintJob>{};
-  static int _jobIndex = 0;
+  static final _printJobs = PrintJobs();
 
   /// Callbacks from platform plugin
   static Future<dynamic> _handleMethod(MethodCall call) async {
     switch (call.method) {
       case 'onLayout':
-        final job = _printJobs[call.arguments['job']]!;
+        final job = _printJobs.getJob(call.arguments['job']);
+        if (job == null) {
+          return;
+        }
         final format = PdfPageFormat(
           call.arguments['width'],
           call.arguments['height'],
@@ -60,42 +62,46 @@ class MethodChannelPrinting extends PrintingPlatform {
       case 'onCompleted':
         final bool? completed = call.arguments['completed'];
         final String? error = call.arguments['error'];
-        final job = _printJobs[call.arguments['job']];
-        if (completed == false && error != null) {
-          job!.onCompleted!.completeError(error);
-        } else {
-          job!.onCompleted!.complete(completed);
+        final job = _printJobs.getJob(call.arguments['job']);
+        if (job != null) {
+          if (completed == false && error != null) {
+            job.onCompleted!.completeError(error);
+          } else {
+            job.onCompleted!.complete(completed);
+          }
         }
         break;
       case 'onHtmlRendered':
-        final job = _printJobs[call.arguments['job']]!;
-        job.onHtmlRendered!.complete(call.arguments['doc']);
+        final job = _printJobs.getJob(call.arguments['job']);
+        if (job != null) {
+          job.onHtmlRendered!.complete(call.arguments['doc']);
+        }
         break;
       case 'onHtmlError':
-        final job = _printJobs[call.arguments['job']]!;
-        job.onHtmlRendered!.completeError(call.arguments['error']);
+        final job = _printJobs.getJob(call.arguments['job']);
+        if (job != null) {
+          job.onHtmlRendered!.completeError(call.arguments['error']);
+        }
         break;
       case 'onPageRasterized':
-        final job = _printJobs[call.arguments['job']]!;
-        final raster = PdfRaster(
-          call.arguments['width'],
-          call.arguments['height'],
-          call.arguments['image'],
-        );
-        job.onPageRasterized!.add(raster);
+        final job = _printJobs.getJob(call.arguments['job']);
+        if (job != null) {
+          final raster = PdfRaster(
+            call.arguments['width'],
+            call.arguments['height'],
+            call.arguments['image'],
+          );
+          job.onPageRasterized!.add(raster);
+        }
         break;
       case 'onPageRasterEnd':
-        final job = _printJobs[call.arguments['job']]!;
-        await job.onPageRasterized!.close();
-        _printJobs.remove(job.index);
+        final job = _printJobs.getJob(call.arguments['job']);
+        if (job != null) {
+          await job.onPageRasterized!.close();
+          _printJobs.remove(job.index);
+        }
         break;
     }
-  }
-
-  static PrintJob _newPrintJob(PrintJob job) {
-    job.index = _jobIndex++;
-    _printJobs[job.index!] = job;
-    return job;
   }
 
   @override
@@ -122,10 +128,10 @@ class MethodChannelPrinting extends PrintingPlatform {
     String name,
     PdfPageFormat format,
   ) async {
-    final job = _newPrintJob(PrintJob(
+    final job = _printJobs.add(
       onCompleted: Completer<bool>(),
       onLayout: onLayout,
-    ));
+    );
 
     final params = <String, dynamic>{
       'name': name,
@@ -184,9 +190,9 @@ class MethodChannelPrinting extends PrintingPlatform {
     String name,
     PdfPageFormat format,
   ) async {
-    final job = _newPrintJob(PrintJob(
+    final job = _printJobs.add(
       onCompleted: Completer<bool>(),
-    ));
+    );
 
     final bytes = await onLayout(format);
 
@@ -228,9 +234,9 @@ class MethodChannelPrinting extends PrintingPlatform {
   @override
   Future<Uint8List> convertHtml(
       String html, String? baseUrl, PdfPageFormat format) async {
-    final job = _newPrintJob(PrintJob(
+    final job = _printJobs.add(
       onHtmlRendered: Completer<Uint8List>(),
-    ));
+    );
 
     final params = <String, dynamic>{
       'html': html,
@@ -256,9 +262,9 @@ class MethodChannelPrinting extends PrintingPlatform {
     List<int>? pages,
     double dpi,
   ) {
-    final job = _newPrintJob(PrintJob(
+    final job = _printJobs.add(
       onPageRasterized: StreamController<PdfRaster>(),
-    ));
+    );
 
     final params = <String, dynamic>{
       'doc': Uint8List.fromList(document),
