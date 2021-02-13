@@ -33,9 +33,10 @@ ffi.DynamicLibrary _open() {
 
 /// Set the Pdf document data
 void setDocumentFfi(PrintJob job, Uint8List data) {
-  final nativeBytes = ffi.allocate<ffi.Uint8>(count: data.length);
+  final nativeBytes = ffi.calloc<ffi.Uint8>(data.length);
   nativeBytes.asTypedList(data.length).setAll(0, data);
   _setDocument(job.index, nativeBytes, data.length);
+  ffi.calloc.free(nativeBytes);
 }
 
 final _SetDocument_Dart _setDocument =
@@ -57,7 +58,7 @@ typedef _SetDocument_Dart = void Function(
 
 /// Set the Pdf Error message
 void setErrorFfi(PrintJob job, String message) {
-  _setError(job.index, ffi.Utf8.toUtf8(message));
+  _setError(job.index, ffi.StringUtf8Pointer(message).toNativeUtf8());
 }
 
 final _SetError_Dart _setError =
