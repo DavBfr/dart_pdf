@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.2.0
+
+- Add imageFromAssetBundle and networkImage
+
 ## 4.1.0
 
 - Remove useless files

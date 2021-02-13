@@ -46,16 +46,15 @@ doc.addPage(pw.Page(
       pageFormat: PdfPageFormat.a4,
       build: (pw.Context context) {
         return pw.Center(
-          child: pw.Text("Hello World"),
+          child: pw.Text('Hello World'),
         ); // Center
       })); // Page
 ```
 
-To load an image from an ImageProvider:
+To load an image from a Flutter asset:
 
 ```dart
-const imageProvider = const AssetImage('assets/image.png');
-final image = await flutterImageProvider(imageProvider);
+final image = await imageFromAssetBundle('assets/image.png');
 
 doc.addPage(pw.Page(
     build: (pw.Context context) {
@@ -68,8 +67,7 @@ doc.addPage(pw.Page(
 To use a TrueType font from a flutter bundle:
 
 ```dart
-final font = await rootBundle.load("assets/open-sans.ttf");
-final ttf = pw.Font.ttf(font);
+final ttf = await fontFromAssetBundle('assets/open-sans.ttf');
 
 doc.addPage(pw.Page(
     build: (pw.Context context) {
@@ -83,7 +81,7 @@ To save the pdf file using the [path_provider](https://pub.dev/packages/path_pro
 
 ```dart
 final output = await getTemporaryDirectory();
-final file = File("${output.path}/example.pdf");
+final file = File('${output.path}/example.pdf');
 await file.writeAsBytes(await doc.save());
 ```
 
