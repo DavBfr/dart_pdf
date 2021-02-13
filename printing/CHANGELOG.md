@@ -4,6 +4,7 @@
 
 - Add imageFromAssetBundle and networkImage
 - Add Page orientation on PdfPreview
+- Improve PrintJob object
 
 ## 4.1.0
 
