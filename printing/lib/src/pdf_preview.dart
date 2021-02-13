@@ -22,6 +22,7 @@ class PdfPreview extends StatefulWidget {
     this.allowSharing = true,
     this.maxPageWidth,
     this.canChangePageFormat = true,
+    this.canChangeOrientation = true,
     this.actions,
     this.pageFormats,
     this.onError,
@@ -54,6 +55,9 @@ class PdfPreview extends StatefulWidget {
 
   /// Add a drop-down menu to choose the page format
   final bool canChangePageFormat;
+
+  /// Add a switch to change the page orientation
+  final bool canChangeOrientation;
 
   /// Additionnal actions to add to the widget
   final List<PdfPreviewAction>? actions;
@@ -92,7 +96,9 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   final List<_PdfPreviewPage> pages = <_PdfPreviewPage>[];
 
-  PdfPageFormat? pageFormat;
+  late PdfPageFormat pageFormat;
+
+  bool? horizontal;
 
   PrintingInfo info = PrintingInfo.unavailable;
   bool infoLoaded = false;
@@ -116,6 +122,10 @@ class _PdfPreviewState extends State<PdfPreview> {
     'Letter': PdfPageFormat.letter,
   };
 
+  PdfPageFormat get computedPageFormat => horizontal != null
+      ? (horizontal! ? pageFormat.landscape : pageFormat.portrait)
+      : pageFormat;
+
   Future<void> _raster() async {
     Uint8List _doc;
 
@@ -124,7 +134,7 @@ class _PdfPreviewState extends State<PdfPreview> {
     }
 
     try {
-      _doc = await widget.build(pageFormat!);
+      _doc = await widget.build(computedPageFormat);
     } catch (e) {
       error = e;
       return;
@@ -178,7 +188,7 @@ class _PdfPreviewState extends State<PdfPreview> {
         pageFormat = PdfPageFormat.a4;
       }
     } else {
-      pageFormat = widget.initialPageFormat;
+      pageFormat = widget.initialPageFormat!;
     }
 
     final _pageFormats = widget.pageFormats ?? defaultPageFormats;
@@ -223,7 +233,7 @@ class _PdfPreviewState extends State<PdfPreview> {
       final mq = MediaQuery.of(context);
       dpi = (min(mq.size.width - 16, widget.maxPageWidth ?? double.infinity)) *
           mq.devicePixelRatio /
-          pageFormat!.width *
+          computedPageFormat.width *
           72;
 
       _raster();
@@ -384,12 +394,41 @@ class _PdfPreviewState extends State<PdfPreview> {
           ),
           onChanged: (PdfPageFormat? _pageFormat) {
             setState(() {
-              pageFormat = _pageFormat;
-              _raster();
+              if (_pageFormat != null) {
+                pageFormat = _pageFormat;
+                _raster();
+              }
             });
           },
         ),
       );
+
+      if (widget.canChangeOrientation) {
+        horizontal ??= pageFormat.width > pageFormat.height;
+        final color = theme.accentIconTheme.color!;
+        final disabledColor = color.withAlpha(120);
+        actions.add(
+          ToggleButtons(
+            renderBorder: false,
+            borderColor: disabledColor,
+            color: disabledColor,
+            selectedBorderColor: color,
+            selectedColor: color,
+            children: <Widget>[
+              Transform.rotate(
+                  angle: -pi / 2, child: const Icon(Icons.note_outlined)),
+              const Icon(Icons.note_outlined),
+            ],
+            onPressed: (int index) {
+              setState(() {
+                horizontal = index == 1;
+                _raster();
+              });
+            },
+            isSelected: <bool>[horizontal == false, horizontal == true],
+          ),
+        );
+      }
     }
 
     if (widget.actions != null) {
@@ -403,7 +442,7 @@ class _PdfPreviewState extends State<PdfPreview> {
                 : () => action.onPressed!(
                       context,
                       widget.build,
-                      pageFormat!,
+                      computedPageFormat,
                     ),
           ),
         );
@@ -439,10 +478,13 @@ class _PdfPreviewState extends State<PdfPreview> {
           Material(
             elevation: 4,
             color: theme.primaryColor,
-            child: SafeArea(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: actions,
+            child: SizedBox(
+              width: double.infinity,
+              child: SafeArea(
+                child: Wrap(
+                  alignment: WrapAlignment.spaceAround,
+                  children: actions,
+                ),
               ),
             ),
           )
@@ -451,7 +493,7 @@ class _PdfPreviewState extends State<PdfPreview> {
   }
 
   Future<void> _print() async {
-    var format = pageFormat;
+    var format = computedPageFormat;
 
     if (!widget.canChangePageFormat && pages.isNotEmpty) {
       format = PdfPageFormat(
@@ -461,14 +503,20 @@ class _PdfPreviewState extends State<PdfPreview> {
       );
     }
 
-    final result = await Printing.layoutPdf(
-      onLayout: widget.build,
-      name: widget.pdfFileName ?? 'Document',
-      format: format!,
-    );
+    try {
+      final result = await Printing.layoutPdf(
+        onLayout: widget.build,
+        name: widget.pdfFileName ?? 'Document',
+        format: format,
+      );
 
-    if (result && widget.onPrinted != null) {
-      widget.onPrinted!(context);
+      if (result && widget.onPrinted != null) {
+        widget.onPrinted!(context);
+      }
+    } catch (e) {
+      if (widget.onError != null) {
+        widget.onError!(context);
+      }
     }
   }
 
@@ -483,7 +531,7 @@ class _PdfPreviewState extends State<PdfPreview> {
         referenceBox.localToGlobal(referenceBox.paintBounds.bottomRight);
     final bounds = Rect.fromPoints(topLeft, bottomRight);
 
-    final bytes = await widget.build(pageFormat!);
+    final bytes = await widget.build(computedPageFormat);
     final result = await Printing.sharePdf(
       bytes: bytes,
       bounds: bounds,
