@@ -17,12 +17,29 @@
 import Flutter
 import Foundation
 
+// Dart:ffi API
+private var _printingPlugin: PrintingPlugin?
+
+@_cdecl("net_nfet_printing_set_document")
+func setDocument(job: UInt32, doc: UnsafePointer<UInt8>, size: UInt64) {
+    _printingPlugin!.jobs[job]?.setDocument(Data(bytes: doc, count: Int(size)))
+}
+
+@_cdecl("net_nfet_printing_set_error")
+func setError(job: UInt32, message: UnsafePointer<CChar>) {
+    _printingPlugin!.jobs[job]?.cancelJob(String(cString: message))
+}
+
+// End of Dart:ffi API
+
 public class PrintingPlugin: NSObject, FlutterPlugin {
     private var channel: FlutterMethodChannel
+    public var jobs = [UInt32: PrintJob]()
 
     init(_ channel: FlutterMethodChannel) {
         self.channel = channel
         super.init()
+        _printingPlugin = self
     }
 
     /// Entry point
@@ -44,6 +61,7 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             let marginRight = CGFloat((args["marginRight"] as? NSNumber)?.floatValue ?? 0.0)
             let marginBottom = CGFloat((args["marginBottom"] as? NSNumber)?.floatValue ?? 0.0)
             let printJob = PrintJob(printing: self, index: args["job"] as! Int)
+            jobs[args["job"] as! UInt32] = printJob
             printJob.printPdf(name: name,
                               withPageSize: CGSize(
                                   width: width,
@@ -137,19 +155,7 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             "job": printJob.index,
         ] as [String: Any]
 
-        channel.invokeMethod("onLayout", arguments: arg, result: { (result: Any?) -> Void in
-            if result as? Bool == false {
-                printJob.cancelJob(nil)
-            } else if result is FlutterError {
-                let error = result as! FlutterError
-                printJob.cancelJob(error.message)
-            } else if result is FlutterStandardTypedData {
-                let object = result as! FlutterStandardTypedData
-                printJob.setDocument(object.data)
-            } else {
-                printJob.cancelJob("Unknown data type")
-            }
-        })
+        channel.invokeMethod("onLayout", arguments: arg)
     }
 
     /// send completion status to flutter
@@ -160,6 +166,7 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             "job": printJob.index,
         ]
         channel.invokeMethod("onCompleted", arguments: data)
+        jobs.removeValue(forKey: UInt32(printJob.index))
     }
 
     /// send html to pdf data result to flutter

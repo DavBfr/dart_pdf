@@ -28,6 +28,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     private var urlObservation: NSKeyValueObservation?
     private var jobName: String?
     private var orientation: UIPrintInfo.Orientation?
+    private let semaphore = DispatchSemaphore(value: 0)
 
     public init(printing: PrintingPlugin, index: Int) {
         self.printing = printing
@@ -46,9 +47,9 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         }
     }
 
-    func cancelJob(_ error: String?) {
+    func cancelJob(_: String?) {
         pdfDocument = nil
-        printing.onCompleted(printJob: self, completed: false, error: error as NSString?)
+        semaphore.signal()
     }
 
     func setDocument(_ data: Data?) {
@@ -57,24 +58,25 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         let dataProvider = CGDataProvider(dataInfo: nil, data: bytesPointer, size: data?.count ?? 0, releaseData: dataProviderReleaseDataCallback)
         pdfDocument = CGPDFDocument(dataProvider!)
 
-        let controller = UIPrintInteractionController.shared
-        controller.delegate = self
-
-        let printInfo = UIPrintInfo.printInfo()
-        printInfo.jobName = jobName!
-        printInfo.outputType = .general
-        if orientation != nil {
-            printInfo.orientation = orientation!
-            orientation = nil
-        }
-        controller.printInfo = printInfo
-        controller.printPageRenderer = self
-        controller.present(animated: true, completionHandler: completionHandler)
+        // Unblock the main thread
+        semaphore.signal()
     }
 
     override public var numberOfPages: Int {
-        let pages = pdfDocument?.numberOfPages ?? 0
-        return pages
+        printing.onLayout(
+            printJob: self,
+            width: paperRect.size.width,
+            height: paperRect.size.height,
+            marginLeft: printableRect.origin.x,
+            marginTop: printableRect.origin.y,
+            marginRight: paperRect.size.width - (printableRect.origin.x + printableRect.size.width),
+            marginBottom: paperRect.size.height - (printableRect.origin.y + printableRect.size.height)
+        )
+
+        // Block the main thread, waiting for a document
+        semaphore.wait()
+
+        return pdfDocument?.numberOfPages ?? 0
     }
 
     func completionHandler(printController _: UIPrintInteractionController, completed: Bool, error: Error?) {
@@ -110,7 +112,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         controller.print(to: printer, completionHandler: completionHandler)
     }
 
-    func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect) {
+    func printPdf(name: String, withPageSize size: CGSize, andMargin _: CGRect) {
         let printing = UIPrintInteractionController.isPrintingAvailable
         if !printing {
             self.printing.onCompleted(printJob: self, completed: false, error: "Printing not available")
@@ -123,15 +125,21 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
 
         jobName = name
 
-        self.printing.onLayout(
-            printJob: self,
-            width: size.width,
-            height: size.height,
-            marginLeft: margin.minX,
-            marginTop: margin.minY,
-            marginRight: size.width - margin.maxX,
-            marginBottom: size.height - margin.maxY
-        )
+        let controller = UIPrintInteractionController.shared
+        controller.delegate = self
+
+        let printInfo = UIPrintInfo.printInfo()
+        printInfo.jobName = jobName!
+        printInfo.outputType = .general
+        if orientation != nil {
+            printInfo.orientation = orientation!
+            orientation = nil
+        }
+        controller.printInfo = printInfo
+        controller.showsPaperSelectionForLoadedPapers = true
+
+        controller.printPageRenderer = self
+        controller.present(animated: true, completionHandler: completionHandler)
     }
 
     static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String) {
@@ -287,7 +295,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     public static func printingInfo() -> NSDictionary {
         let data: NSDictionary = [
             "directPrint": true,
-            "dynamicLayout": false,
+            "dynamicLayout": true,
             "canPrint": true,
             "canConvertHtml": true,
             "canShare": true,
