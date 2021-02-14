@@ -87,6 +87,42 @@ class _MultiPageInstance {
   final List<_MultiPageWidget> widgets = <_MultiPageWidget>[];
 }
 
+/// Create a mult-page section, with automatic overflow from one page to another
+///
+/// ```dart
+/// final pdf = Document();
+/// pdf.addPage(MultiPage(build: (context) {
+///   return [
+///     Text('Hello'),
+///     Text('World'),
+///   ];
+/// }));
+///
+/// An inner widget tree cannot be bigger than a page: A [Widget] cannot be drawn
+/// partially on one page and the remaining on another page: It's insecable.
+///
+/// A small set of [Widget] can automatically span over multiple pages, and can
+/// be used as a direct child of the build method: [Flex], [Partition], [Table], [Wrap],
+/// [GridView], and [Column].
+///
+/// ```dart
+/// final pdf = Document();
+/// pdf.addPage(MultiPage(build: (context) {
+///   return [
+///     Text('Hello'),
+///     Wrap(
+///       children: [
+///         Text('One'),
+///         Text('Two'),
+///         Text('Three'),
+///       ]
+///     ),
+///   ];
+/// }));
+/// ```
+///
+/// The [Wrap] [Widget] here is able to rearrange its children to span them across
+/// multiple pages. But a child of [Wrap] must fit in a page, or an error will raise.
 class MultiPage extends Page {
   MultiPage({
     PageTheme pageTheme,
@@ -116,16 +152,22 @@ class MultiPage extends Page {
 
   final BuildListCallback _buildList;
 
+  /// How the children should be placed along the cross axis.
   final CrossAxisAlignment crossAxisAlignment;
 
+  /// A builder for the page header.
   final BuildCallback header;
 
+  /// A builder for the page footer.
   final BuildCallback footer;
 
+  /// How the children should be placed along the main axis.
   final MainAxisAlignment mainAxisAlignment;
 
   final List<_MultiPageInstance> _pages = <_MultiPageInstance>[];
 
+  /// The maximum number of pages allowed before raising an error.
+  /// This is not checked with a Release build.
   final int maxPages;
 
   void _paintChild(
@@ -200,7 +242,7 @@ class MultiPage extends Page {
         // Detect too big widgets
         if (sameCount++ > maxPages) {
           throw Exception(
-              'This widget created more than $maxPages pages. This may be an issue in the widget or the document.');
+              'This widget created more than $maxPages pages. This may be an issue in the widget or the document. See https://pub.dev/documentation/pdf/latest/widgets/MultiPage-class.html');
         }
         return true;
       }());
