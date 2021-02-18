@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.0-nullsafety.2
+
+- Fix Checkbox Widget
+
 ## 3.0.0-nullsafety.1
 
 - Fix Table border

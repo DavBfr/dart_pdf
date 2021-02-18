@@ -29,7 +29,6 @@ import 'widget.dart';
 class Checkbox extends SingleChildWidget {
   Checkbox({
     required this.value,
-    this.defaultValue,
     this.tristate = false,
     this.activeColor = PdfColors.blue,
     this.checkColor = PdfColors.white,
@@ -51,8 +50,6 @@ class Checkbox extends SingleChildWidget {
 
   final bool value;
 
-  final bool? defaultValue;
-
   final bool tristate;
 
   final PdfColor activeColor;
@@ -69,13 +66,13 @@ class Checkbox extends SingleChildWidget {
     final bf = PdfButtonField(
       rect: context.localToGlobal(box!),
       fieldName: name,
-      value: value,
-      defaultValue: value,
+      value: value ? '/Yes' : null,
+      defaultValue: value ? '/Yes' : null,
       flags: <PdfAnnotFlags>{PdfAnnotFlags.print},
     );
 
-    final g =
-        bf.appearance(context.document, PdfAnnotApparence.normal, name: '/Yes');
+    final g = bf.appearance(context.document, PdfAnnotAppearance.normal,
+        name: '/Yes', selected: value);
     g.drawRect(0, 0, bf.rect.width, bf.rect.height);
     g.setFillColor(activeColor);
     g.fillPath();
@@ -86,7 +83,8 @@ class Checkbox extends SingleChildWidget {
     g.setLineWidth(2);
     g.strokePath();
 
-    bf.appearance(context.document, PdfAnnotApparence.normal, name: '/Off');
+    bf.appearance(context.document, PdfAnnotAppearance.normal,
+        name: '/Off', selected: !value);
 
     PdfAnnot(context.page, bf);
   }
@@ -144,12 +142,6 @@ class FlatButton extends SingleChildWidget {
           ),
         );
 
-  // final PdfColor textColor;
-
-  // final PdfColor color;
-
-  // final EdgeInsets padding;
-
   final String name;
 
   final Widget _childDown;
@@ -177,21 +169,21 @@ class FlatButton extends SingleChildWidget {
       ..translate(box!.x, box!.y);
 
     final cn = context.copyWith(
-        canvas: bf.appearance(context.document, PdfAnnotApparence.normal,
+        canvas: bf.appearance(context.document, PdfAnnotAppearance.normal,
             matrix: mat, boundingBox: box));
     child!.layout(
         cn, BoxConstraints.tightFor(width: box!.width, height: box!.height));
     child!.paint(cn);
 
     final cd = context.copyWith(
-        canvas: bf.appearance(context.document, PdfAnnotApparence.down,
+        canvas: bf.appearance(context.document, PdfAnnotAppearance.down,
             matrix: mat, boundingBox: box));
     _childDown.layout(
         cd, BoxConstraints.tightFor(width: box!.width, height: box!.height));
     _childDown.paint(cd);
 
     final cr = context.copyWith(
-        canvas: bf.appearance(context.document, PdfAnnotApparence.rollover,
+        canvas: bf.appearance(context.document, PdfAnnotAppearance.rollover,
             matrix: mat, boundingBox: box));
     _childRollover.layout(
         cr, BoxConstraints.tightFor(width: box!.width, height: box!.height));

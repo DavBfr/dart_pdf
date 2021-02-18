@@ -290,7 +290,7 @@ class TextField extends Annotation {
     Widget? child,
     double width = 120,
     double height = 13,
-    String? name,
+    required String name,
     PdfBorder? border,
     Set<PdfAnnotFlags>? flags,
     DateTime? date,

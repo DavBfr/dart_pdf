@@ -118,7 +118,14 @@ void main() {
               Checkbox(
                 name: 'Checkbox',
                 value: true,
-                defaultValue: true,
+              ),
+              //
+              SizedBox(width: 20, height: 10),
+              //
+              Label(label: 'unchecked:', width: 100),
+              Checkbox(
+                name: 'Unchecked',
+                value: false,
               ),
               //
               SizedBox(width: double.infinity, height: 10),
