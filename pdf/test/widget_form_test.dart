@@ -81,13 +81,15 @@ void main() {
               Decorated(
                   child: TextField(
                 name: 'Given Name',
+                value: 'David',
                 textStyle: const TextStyle(color: PdfColors.amber),
               )),
               //
               SizedBox(width: double.infinity, height: 10),
               //
               Label(label: 'Family Name:', width: 100),
-              Decorated(child: TextField(name: 'Family Name')),
+              Decorated(
+                  child: TextField(name: 'Family Name', value: 'PHAM-VAN')),
               //
               SizedBox(width: double.infinity, height: 10),
               //
