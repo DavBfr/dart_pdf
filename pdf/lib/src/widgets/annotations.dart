@@ -18,7 +18,6 @@ import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'basic.dart';
 import 'geometry.dart';
 import 'text_style.dart';
 import 'theme.dart';
@@ -291,46 +290,6 @@ class Signature extends Annotation {
               date: date,
               color: color,
               highlighting: highlighting,
-            ));
-}
-
-class TextField extends Annotation {
-  TextField({
-    Widget child,
-    double width = 120,
-    double height = 13,
-    @required String name,
-    PdfBorder border,
-    Set<PdfAnnotFlags> flags,
-    DateTime date,
-    PdfColor color,
-    PdfColor backgroundColor,
-    PdfAnnotHighlighting highlighting,
-    int maxLength,
-    String alternateName,
-    String mappingName,
-    Set<PdfFieldFlags> fieldFlags,
-    String value,
-    String defaultValue,
-    TextStyle textStyle,
-  })  : assert(name != null),
-        super(
-            child: child ?? SizedBox(width: width, height: height),
-            builder: AnnotationTextField(
-              name: name,
-              border: border,
-              flags: flags,
-              date: date,
-              color: color,
-              backgroundColor: backgroundColor,
-              highlighting: highlighting,
-              maxLength: maxLength,
-              alternateName: alternateName,
-              mappingName: mappingName,
-              fieldFlags: fieldFlags,
-              value: value,
-              defaultValue: defaultValue,
-              textStyle: textStyle,
             ));
 }
 

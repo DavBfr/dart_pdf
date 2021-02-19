@@ -4,6 +4,7 @@
 
 - Fix Checkbox Widget
 - Fix SVG colors with percent
+- Fix TextField Widget
 
 ## 2.1.0
 
