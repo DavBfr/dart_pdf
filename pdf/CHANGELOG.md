@@ -3,6 +3,7 @@
 ## 2.1.1
 
 - Fix Checkbox Widget
+- Fix SVG colors with percent
 
 ## 2.1.0
 
