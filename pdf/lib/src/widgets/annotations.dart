@@ -299,7 +299,7 @@ class TextField extends Annotation {
     Widget child,
     double width = 120,
     double height = 13,
-    String name,
+    @required String name,
     PdfBorder border,
     Set<PdfAnnotFlags> flags,
     DateTime date,
@@ -313,7 +313,8 @@ class TextField extends Annotation {
     String value,
     String defaultValue,
     TextStyle textStyle,
-  }) : super(
+  })  : assert(name != null),
+        super(
             child: child ?? SizedBox(width: width, height: height),
             builder: AnnotationTextField(
               name: name,

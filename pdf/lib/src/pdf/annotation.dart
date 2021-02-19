@@ -83,7 +83,7 @@ enum PdfAnnotFlags {
   lockedContent,
 }
 
-enum PdfAnnotApparence {
+enum PdfAnnotAppearance {
   normal,
   rollover,
   down,
@@ -127,6 +127,8 @@ abstract class PdfAnnotBase {
 
   final Map<String, PdfDataType> _appearances = <String, PdfDataType>{};
 
+  PdfName _as;
+
   int get flagValue {
     if (flags == null || flags.isEmpty) {
       return 0;
@@ -139,21 +141,22 @@ abstract class PdfAnnotBase {
 
   PdfGraphics appearance(
     PdfDocument pdfDocument,
-    PdfAnnotApparence type, {
+    PdfAnnotAppearance type, {
     String name,
     Matrix4 matrix,
     PdfRect boundingBox,
+    bool selected = false,
   }) {
     final s = PdfGraphicXObject(pdfDocument, '/Form');
     String n;
     switch (type) {
-      case PdfAnnotApparence.normal:
+      case PdfAnnotAppearance.normal:
         n = '/N';
         break;
-      case PdfAnnotApparence.rollover:
+      case PdfAnnotAppearance.rollover:
         n = '/R';
         break;
-      case PdfAnnotApparence.down:
+      case PdfAnnotAppearance.down:
         n = '/D';
         break;
     }
@@ -182,6 +185,10 @@ abstract class PdfAnnotBase {
     s.params['/BBox'] =
         PdfArray.fromNum(<double>[bbox.x, bbox.y, bbox.width, bbox.height]);
     final g = PdfGraphics(s, s.buf);
+
+    if (selected && name != null) {
+      _as = PdfName(name);
+    }
     return g;
   }
 
@@ -223,9 +230,8 @@ abstract class PdfAnnotBase {
 
     if (_appearances.isNotEmpty) {
       params['/AP'] = PdfDict(_appearances);
-      if (_appearances['/N'] is PdfDict) {
-        final PdfDict n = _appearances['/N'];
-        params['/AS'] = PdfName(n.values.keys.first);
+      if (_as != null) {
+        params['/AS'] = _as;
       }
     }
   }
@@ -667,7 +673,7 @@ class PdfTextField extends PdfFormField {
 class PdfButtonField extends PdfFormField {
   PdfButtonField({
     @required PdfRect rect,
-    String fieldName,
+    @required String fieldName,
     String alternateName,
     String mappingName,
     PdfBorder border,
@@ -695,20 +701,20 @@ class PdfButtonField extends PdfFormField {
           fieldFlags: fieldFlags,
         );
 
-  final bool value;
+  final String value;
 
-  final bool defaultValue;
+  final String defaultValue;
 
   @override
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
 
     if (value != null) {
-      params['/V'] = value ? const PdfName('/Yes') : const PdfName('/Off');
+      params['/V'] = PdfName(value);
     }
+
     if (defaultValue != null) {
-      params['/DV'] =
-          defaultValue ? const PdfName('/Yes') : const PdfName('/Off');
+      params['/DV'] = PdfName(defaultValue);
     }
   }
 }
