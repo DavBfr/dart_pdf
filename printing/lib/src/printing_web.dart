@@ -27,13 +27,13 @@ import 'package:flutter/rendering.dart' show Rect;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:image/image.dart' as im;
 import 'package:pdf/pdf.dart';
-import 'package:printing/src/pdfjs.dart';
-import 'package:printing/src/printer.dart';
-import 'package:printing/src/raster.dart';
 
 import 'callback.dart';
 import 'interface.dart';
+import 'pdfjs.dart';
+import 'printer.dart';
 import 'printing_info.dart';
+import 'raster.dart';
 
 /// Print plugin targetting Flutter on the Web
 class PrintingPlugin extends PrintingPlatform {

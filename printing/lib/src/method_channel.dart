@@ -21,10 +21,10 @@ import 'dart:typed_data';
 import 'package:flutter/rendering.dart' show Rect;
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
-import 'package:printing/src/method_channel_ffi.dart';
 
 import 'callback.dart';
 import 'interface.dart';
+import 'method_channel_ffi.dart' if (dart.library.js) 'method_channel_js.dart';
 import 'print_job.dart';
 import 'printer.dart';
 import 'printing_info.dart';
