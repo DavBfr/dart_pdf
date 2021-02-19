@@ -70,35 +70,18 @@ class PrintingPlugin : public flutter::Plugin {
       auto name = vName != arguments->end() && !vName->second.IsNull()
                       ? std::get<std::string>(vName->second)
                       : std::string{"document"};
-      auto vJob = arguments->find(flutter::EncodableValue("job"));
-      auto jobNum = vJob != arguments->end() ? std::get<int>(vJob->second) : -1;
-      auto job = new PrintJob{&printing, jobNum};
-      auto res = job->printPdf(name);
-      if (!res) {
-        delete job;
-      }
-      result->Success(flutter::EncodableValue(res ? 1 : 0));
-    } else if (method_call.method_name().compare("directPrintPdf") == 0) {
-      const auto* arguments =
-          std::get_if<flutter::EncodableMap>(method_call.arguments());
-      auto vName = arguments->find(flutter::EncodableValue("name"));
-      auto name = vName != arguments->end() && !vName->second.IsNull()
-                      ? std::get<std::string>(vName->second)
-                      : std::string{"document"};
-      auto vDoc = arguments->find(flutter::EncodableValue("doc"));
-      auto doc = vDoc != arguments->end()
-                     ? std::get<std::vector<uint8_t>>(vDoc->second)
-                     : std::vector<uint8_t>{};
       auto vPrinter = arguments->find(flutter::EncodableValue("printer"));
       auto printer = vPrinter != arguments->end()
                          ? std::get<std::string>(vPrinter->second)
                          : std::string{};
       auto vJob = arguments->find(flutter::EncodableValue("job"));
       auto jobNum = vJob != arguments->end() ? std::get<int>(vJob->second) : -1;
-      auto job = std::make_unique<PrintJob>(&printing, jobNum);
-      auto res = job->directPrintPdf(name, doc, printer);
-      result->Success(flutter::EncodableValue(1));
-      printing.onCompleted(job.get(), res, "");
+      auto job = new PrintJob{&printing, jobNum};
+      auto res = job->printPdf(name, printer);
+      if (!res) {
+        delete job;
+      }
+      result->Success(flutter::EncodableValue(res ? 1 : 0));
     } else if (method_call.method_name().compare("sharePdf") == 0) {
       const auto* arguments =
           std::get_if<flutter::EncodableMap>(method_call.arguments());

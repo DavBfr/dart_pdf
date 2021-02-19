@@ -208,17 +208,12 @@ class MethodChannelPrinting extends PrintingPlatform {
   ) async {
     final job = _printJobs.add(
       onCompleted: Completer<bool>(),
+      onLayout: onLayout,
     );
-
-    final bytes = await onLayout(format);
-    if (bytes == null) {
-      return false;
-    }
 
     final params = <String, dynamic>{
       'name': name,
       'printer': printer.url,
-      'doc': bytes,
       'width': format.width,
       'height': format.height,
       'marginLeft': format.marginLeft,
@@ -227,10 +222,12 @@ class MethodChannelPrinting extends PrintingPlatform {
       'marginBottom': format.marginBottom,
       'job': job.index,
     };
-    await _channel.invokeMethod<int>('directPrintPdf', params);
-    final result = await job.onCompleted.future;
-    _printJobs.remove(job.index);
-    return result;
+    await _channel.invokeMethod<int>('printPdf', params);
+    try {
+      return await job.onCompleted.future;
+    } finally {
+      _printJobs.remove(job.index);
+    }
   }
 
   @override

@@ -53,6 +53,9 @@ static void printing_plugin_handle_method_call(PrintingPlugin* self,
 
   } else if (strcmp(method, "printPdf") == 0) {
     auto name = fl_value_get_string(fl_value_lookup_string(args, "name"));
+    auto printerValue = fl_value_lookup_string(args, "printer");
+    auto printer =
+        printerValue == nullptr ? nullptr : fl_value_get_string(printerValue);
     auto jobNum = fl_value_get_int(fl_value_lookup_string(args, "job"));
     auto pageWidth = fl_value_get_float(fl_value_lookup_string(args, "width"));
     auto pageHeight =
@@ -67,23 +70,11 @@ static void printing_plugin_handle_method_call(PrintingPlugin* self,
         fl_value_get_float(fl_value_lookup_string(args, "marginBottom"));
 
     auto job = new print_job(jobNum);
-    auto res = job->print_pdf(name, pageWidth, pageHeight, marginLeft,
+    auto res = job->print_pdf(name, printer, pageWidth, pageHeight, marginLeft,
                               marginTop, marginRight, marginBottom);
     if (!res) {
       delete job;
     }
-    g_autoptr(FlValue) result = fl_value_new_int(res);
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
-
-  } else if (strcmp(method, "directPrintPdf") == 0) {
-    auto jobNum = fl_value_get_int(fl_value_lookup_string(args, "job"));
-    auto name = fl_value_get_string(fl_value_lookup_string(args, "name"));
-    auto printer = fl_value_get_string(fl_value_lookup_string(args, "printer"));
-    auto doc = fl_value_get_uint8_list(fl_value_lookup_string(args, "doc"));
-    auto size = fl_value_get_length(fl_value_lookup_string(args, "doc"));
-
-    auto job = std::make_unique<print_job>(jobNum);
-    auto res = job->direct_print_pdf(name, doc, size, printer);
     g_autoptr(FlValue) result = fl_value_new_int(res);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 

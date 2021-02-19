@@ -109,64 +109,85 @@ static void job_completed(GtkPrintJob* gtk_print_job,
 }
 
 bool print_job::print_pdf(const gchar* name,
+                          const gchar* printer,
                           double pageWidth,
                           double pageHeight,
                           double marginLeft,
                           double marginTop,
                           double marginRight,
                           double marginBottom) {
-  documentName = strdup(name);
-  auto dialog =
-      GTK_PRINT_UNIX_DIALOG(gtk_print_unix_dialog_new(documentName, nullptr));
-  gtk_print_unix_dialog_set_manual_capabilities(
-      dialog, (GtkPrintCapabilities)(GTK_PRINT_CAPABILITY_GENERATE_PDF));
+  GtkPrintSettings* settings;
+  GtkPageSetup* setup;
 
-  gtk_widget_realize(GTK_WIDGET(dialog));
+  if (printer != nullptr) {
+    _printer = nullptr;
+    auto pname = strdup(printer);
+    gtk_enumerate_printers(search_printer, pname, nullptr, true);
+    free(pname);
 
-  auto response = gtk_dialog_run(GTK_DIALOG(dialog));
-  gtk_widget_hide(GTK_WIDGET(dialog));
-
-  switch (response) {
-    case GTK_RESPONSE_OK: {
-      GtkPrinter* printer = gtk_print_unix_dialog_get_selected_printer(
-          GTK_PRINT_UNIX_DIALOG(dialog));
-      if (!gtk_printer_accepts_pdf(printer)) {
-        on_completed(this, false, "This printer does not accept PDF jobs");
-        break;
-      }
-
-      GtkPrintSettings* settings =
-          gtk_print_unix_dialog_get_settings(GTK_PRINT_UNIX_DIALOG(dialog));
-      GtkPageSetup* setup =
-          gtk_print_unix_dialog_get_page_setup(GTK_PRINT_UNIX_DIALOG(dialog));
-
-      auto width = gtk_page_setup_get_page_width(setup, GTK_UNIT_POINTS);
-      auto height = gtk_page_setup_get_page_height(setup, GTK_UNIT_POINTS);
-      auto marginLeft = gtk_page_setup_get_left_margin(setup, GTK_UNIT_POINTS);
-      auto marginTop = gtk_page_setup_get_top_margin(setup, GTK_UNIT_POINTS);
-      auto marginRight =
-          gtk_page_setup_get_right_margin(setup, GTK_UNIT_POINTS);
-      auto marginBottom =
-          gtk_page_setup_get_bottom_margin(setup, GTK_UNIT_POINTS);
-
-      printJob = gtk_print_job_new(name, printer, settings, setup);
-
-      on_layout(this, width, height, marginLeft, marginTop, marginRight,
-                marginBottom);
-
-      g_object_unref(settings);
-      gtk_widget_destroy(GTK_WIDGET(dialog));
-
-      return true;
+    if (!_printer) {
+      on_completed(this, false, "Printer not found");
+      return false;
     }
-    case GTK_RESPONSE_DELETE_EVENT:  // Fall through.
-    case GTK_RESPONSE_CANCEL:        // Cancel
-    case GTK_RESPONSE_APPLY:         // Preview
-      break;
+
+    settings = gtk_print_settings_new();
+    setup = gtk_page_setup_new();
+
+  } else {
+    auto dialog =
+        GTK_PRINT_UNIX_DIALOG(gtk_print_unix_dialog_new(name, nullptr));
+    gtk_print_unix_dialog_set_manual_capabilities(
+        dialog, (GtkPrintCapabilities)(GTK_PRINT_CAPABILITY_GENERATE_PDF));
+
+    gtk_widget_realize(GTK_WIDGET(dialog));
+
+    auto response = gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_hide(GTK_WIDGET(dialog));
+
+    switch (response) {
+      case GTK_RESPONSE_OK: {
+        _printer = gtk_print_unix_dialog_get_selected_printer(
+            GTK_PRINT_UNIX_DIALOG(dialog));
+        settings =
+            gtk_print_unix_dialog_get_settings(GTK_PRINT_UNIX_DIALOG(dialog));
+        setup =
+            gtk_print_unix_dialog_get_page_setup(GTK_PRINT_UNIX_DIALOG(dialog));
+        gtk_widget_destroy(GTK_WIDGET(dialog));
+      } break;
+      case GTK_RESPONSE_DELETE_EVENT:  // Fall through.
+      case GTK_RESPONSE_CANCEL:        // Cancel
+      case GTK_RESPONSE_APPLY:         // Preview
+      default:
+        gtk_widget_destroy(GTK_WIDGET(dialog));
+        on_completed(this, false, nullptr);
+        return true;
+    }
   }
 
-  gtk_widget_destroy(GTK_WIDGET(dialog));
-  on_completed(this, false, nullptr);
+  if (!gtk_printer_accepts_pdf(_printer)) {
+    on_completed(this, false, "This printer does not accept PDF jobs");
+    g_object_unref(_printer);
+    g_object_unref(settings);
+    g_object_unref(setup);
+    return false;
+  }
+
+  auto _width = gtk_page_setup_get_page_width(setup, GTK_UNIT_POINTS);
+  auto _height = gtk_page_setup_get_page_height(setup, GTK_UNIT_POINTS);
+  auto _marginLeft = gtk_page_setup_get_left_margin(setup, GTK_UNIT_POINTS);
+  auto _marginTop = gtk_page_setup_get_top_margin(setup, GTK_UNIT_POINTS);
+  auto _marginRight = gtk_page_setup_get_right_margin(setup, GTK_UNIT_POINTS);
+  auto _marginBottom = gtk_page_setup_get_bottom_margin(setup, GTK_UNIT_POINTS);
+
+  printJob = gtk_print_job_new(name, _printer, settings, setup);
+
+  on_layout(this, _width, _height, _marginLeft, _marginTop, _marginRight,
+            _marginBottom);
+
+  g_object_unref(_printer);
+  g_object_unref(settings);
+  g_object_unref(setup);
+
   return true;
 }
 

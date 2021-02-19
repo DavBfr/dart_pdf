@@ -6,6 +6,7 @@
 - Add Page orientation on PdfPreview
 - Improve PrintJob object
 - Implement dynamic layout on iOS and macOS
+- Review directPrint internals
 
 ## 4.1.0
 

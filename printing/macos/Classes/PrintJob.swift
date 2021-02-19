@@ -119,33 +119,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         return printers
     }
 
-    public func directPrintPdf(name: String, data: Data, withPrinter printer: String, width: CGFloat, height: CGFloat) {
-        let sharedInfo = NSPrintInfo.shared
-        let sharedDict = sharedInfo.dictionary()
-        let printInfoDict = NSMutableDictionary(dictionary: sharedDict)
-        let printInfo = NSPrintInfo(dictionary: printInfoDict as! [NSPrintInfo.AttributeKey: Any])
-        printInfo.printer = NSPrinter(name: printer)!
-
-        let bytesPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: data.count)
-        data.copyBytes(to: bytesPointer, count: data.count)
-        let dataProvider = CGDataProvider(dataInfo: nil, data: bytesPointer, size: data.count, releaseData: dataProviderReleaseDataCallback)
-        pdfDocument = CGPDFDocument(dataProvider!)
-        printInfo.paperSize = NSSize(width: width, height: height)
-        if width > height {
-            printInfo.orientation = NSPrintInfo.PaperOrientation.landscape
-        }
-
-        // Print the custom view
-        printOperation = NSPrintOperation(view: self, printInfo: printInfo)
-        printOperation!.jobTitle = name
-        printOperation!.showsPrintPanel = false
-        printOperation!.showsProgressPanel = false
-
-        let window = NSApplication.shared.mainWindow!
-        printOperation!.runModal(for: window, delegate: self, didRun: #selector(printOperationDidRun(printOperation:success:contextInfo:)), contextInfo: nil)
-    }
-
-    public func printPdf(name: String, withPageSize size: CGSize, andMargin _: CGRect) {
+    public func printPdf(name: String, withPageSize size: CGSize, andMargin _: CGRect, withPrinter printer: String?) {
         let sharedInfo = NSPrintInfo.shared
         let sharedDict = sharedInfo.dictionary()
         let printInfoDict = NSMutableDictionary(dictionary: sharedDict)
@@ -160,6 +134,11 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         printOperation = NSPrintOperation(view: self, printInfo: printInfo)
         printOperation!.jobTitle = name
         printOperation!.printPanel.options = [.showsPreview, .showsPaperSize, .showsOrientation]
+        if printer != nil {
+            printInfo.printer = NSPrinter(name: printer!)!
+            printOperation!.showsPrintPanel = false
+            printOperation!.showsProgressPanel = false
+        }
 
         let window = NSApplication.shared.mainWindow!
         printOperation!.runModal(for: window, delegate: self, didRun: #selector(printOperationDidRun(printOperation:success:contextInfo:)), contextInfo: nil)

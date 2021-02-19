@@ -54,12 +54,13 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
         let args = call.arguments! as! [String: Any]
         if call.method == "printPdf" {
             let name = args["name"] as! String
-            let width = CGFloat((args["width"] as? NSNumber)?.floatValue ?? 0.0)
-            let height = CGFloat((args["height"] as? NSNumber)?.floatValue ?? 0.0)
-            let marginLeft = CGFloat((args["marginLeft"] as? NSNumber)?.floatValue ?? 0.0)
-            let marginTop = CGFloat((args["marginTop"] as? NSNumber)?.floatValue ?? 0.0)
-            let marginRight = CGFloat((args["marginRight"] as? NSNumber)?.floatValue ?? 0.0)
-            let marginBottom = CGFloat((args["marginBottom"] as? NSNumber)?.floatValue ?? 0.0)
+            let printer = args["printer"] as? String
+            let width = CGFloat((args["width"] as! NSNumber).floatValue)
+            let height = CGFloat((args["height"] as! NSNumber).floatValue)
+            let marginLeft = CGFloat((args["marginLeft"] as! NSNumber).floatValue)
+            let marginTop = CGFloat((args["marginTop"] as! NSNumber).floatValue)
+            let marginRight = CGFloat((args["marginRight"] as! NSNumber).floatValue)
+            let marginBottom = CGFloat((args["marginBottom"] as! NSNumber).floatValue)
             let printJob = PrintJob(printing: self, index: args["job"] as! Int)
             jobs[args["job"] as! UInt32] = printJob
             printJob.printPdf(name: name,
@@ -72,14 +73,7 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
                                   y: marginTop,
                                   width: width - marginRight - marginLeft,
                                   height: height - marginBottom - marginTop
-                              ))
-            result(NSNumber(value: 1))
-        } else if call.method == "directPrintPdf" {
-            let name = args["name"] as! String
-            let printer = args["printer"] as! String
-            let object = args["doc"] as! FlutterStandardTypedData
-            let printJob = PrintJob(printing: self, index: args["job"] as! Int)
-            printJob.directPrintPdf(name: name, data: object.data, withPrinter: printer)
+                              ), withPrinter: printer)
             result(NSNumber(value: 1))
         } else if call.method == "sharePdf" {
             let object = args["doc"] as! FlutterStandardTypedData
