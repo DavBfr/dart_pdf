@@ -3,6 +3,7 @@
 ## 3.0.0-nullsafety.2
 
 - Fix Checkbox Widget
+- Fix SVG colors with percent
 
 ## 3.0.0-nullsafety.1
 

@@ -58,7 +58,8 @@ class SvgParser {
 
   final XmlElement root;
 
-  static final _transformParameterRegExp = RegExp(r'[\w.-]+');
+  static final _transformParameterRegExp =
+      RegExp(r'[\w.-]+(px|pt|em|cm|mm|in|%|)');
 
   XmlElement? findById(String id) {
     try {
