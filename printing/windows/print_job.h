@@ -71,11 +71,7 @@ class PrintJob {
 
   std::vector<Printer> listPrinters();
 
-  bool directPrintPdf(std::string name,
-                      std::vector<uint8_t> data,
-                      std::string printer);
-
-  bool printPdf(std::string name);
+  bool printPdf(std::string name, std::string printer);
 
   void writeJob(std::vector<uint8_t> data);
 

@@ -166,7 +166,7 @@ class PrintingPlugin extends PrintingPlatform {
     String name,
     PdfPageFormat format,
   ) {
-    throw UnimplementedError();
+    return layoutPdf(onLayout, name, format);
   }
 
   @override

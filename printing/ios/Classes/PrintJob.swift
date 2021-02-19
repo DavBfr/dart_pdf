@@ -87,32 +87,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         printing.onCompleted(printJob: self, completed: completed, error: error?.localizedDescription as NSString?)
     }
 
-    func directPrintPdf(name: String, data: Data, withPrinter printerID: String) {
-        let printing = UIPrintInteractionController.isPrintingAvailable
-        if !printing {
-            self.printing.onCompleted(printJob: self, completed: false, error: "Printing not available")
-            return
-        }
-
-        let controller = UIPrintInteractionController.shared
-
-        let printInfo = UIPrintInfo.printInfo()
-        printInfo.jobName = name
-        printInfo.outputType = .general
-        controller.printInfo = printInfo
-        controller.printingItem = data
-        let printerURL = URL(string: printerID)
-
-        if printerURL == nil {
-            self.printing.onCompleted(printJob: self, completed: false, error: "Unable to find printer URL")
-            return
-        }
-
-        let printer = UIPrinter(url: printerURL!)
-        controller.print(to: printer, completionHandler: completionHandler)
-    }
-
-    func printPdf(name: String, withPageSize size: CGSize, andMargin _: CGRect) {
+    func printPdf(name: String, withPageSize size: CGSize, andMargin _: CGRect, withPrinter printerID: String?) {
         let printing = UIPrintInteractionController.isPrintingAvailable
         if !printing {
             self.printing.onCompleted(printJob: self, completed: false, error: "Printing not available")
@@ -139,6 +114,20 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         controller.showsPaperSelectionForLoadedPapers = true
 
         controller.printPageRenderer = self
+
+        if printerID != nil {
+            let printerURL = URL(string: printerID!)
+
+            if printerURL == nil {
+                self.printing.onCompleted(printJob: self, completed: false, error: "Unable to find printer URL")
+                return
+            }
+
+            let printer = UIPrinter(url: printerURL!)
+            controller.print(to: printer, completionHandler: completionHandler)
+            return
+        }
+
         controller.present(animated: true, completionHandler: completionHandler)
     }
 

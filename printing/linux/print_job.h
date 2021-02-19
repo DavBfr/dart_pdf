@@ -24,7 +24,6 @@
 class print_job {
  private:
   const int index;
-  char* documentName = nullptr;
   GtkPrintJob* printJob;
 
  public:
@@ -42,6 +41,7 @@ class print_job {
                         const gchar* printer);
 
   bool print_pdf(const gchar* name,
+                 const gchar* printer,
                  double pageWidth,
                  double pageHeight,
                  double marginLeft,
