@@ -1,6 +1,6 @@
 # Changelog
 
-## 5.0.0-nullsafety.2
+## 5.0.0
 
 - Add imageFromAssetBundle and networkImage
 - Add Page orientation on PdfPreview
