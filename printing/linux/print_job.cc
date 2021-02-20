@@ -138,29 +138,34 @@ bool print_job::print_pdf(const gchar* name,
         GTK_PRINT_UNIX_DIALOG(gtk_print_unix_dialog_new(name, nullptr));
     gtk_print_unix_dialog_set_manual_capabilities(
         dialog, (GtkPrintCapabilities)(GTK_PRINT_CAPABILITY_GENERATE_PDF));
+    gtk_print_unix_dialog_set_embed_page_setup(dialog, true);
+    gtk_print_unix_dialog_set_support_selection(dialog, false);
 
     gtk_widget_realize(GTK_WIDGET(dialog));
 
-    auto response = gtk_dialog_run(GTK_DIALOG(dialog));
-    gtk_widget_hide(GTK_WIDGET(dialog));
+    auto loop = true;
 
-    switch (response) {
-      case GTK_RESPONSE_OK: {
-        _printer = gtk_print_unix_dialog_get_selected_printer(
-            GTK_PRINT_UNIX_DIALOG(dialog));
-        settings =
-            gtk_print_unix_dialog_get_settings(GTK_PRINT_UNIX_DIALOG(dialog));
-        setup =
-            gtk_print_unix_dialog_get_page_setup(GTK_PRINT_UNIX_DIALOG(dialog));
-        gtk_widget_destroy(GTK_WIDGET(dialog));
-      } break;
-      case GTK_RESPONSE_DELETE_EVENT:  // Fall through.
-      case GTK_RESPONSE_CANCEL:        // Cancel
-      case GTK_RESPONSE_APPLY:         // Preview
-      default:
-        gtk_widget_destroy(GTK_WIDGET(dialog));
-        on_completed(this, false, nullptr);
-        return true;
+    while (loop) {
+      auto response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+      switch (response) {
+        case GTK_RESPONSE_OK: {
+          _printer = gtk_print_unix_dialog_get_selected_printer(
+              GTK_PRINT_UNIX_DIALOG(dialog));
+          settings =
+              gtk_print_unix_dialog_get_settings(GTK_PRINT_UNIX_DIALOG(dialog));
+          setup = gtk_print_unix_dialog_get_page_setup(
+              GTK_PRINT_UNIX_DIALOG(dialog));
+          gtk_widget_destroy(GTK_WIDGET(dialog));
+          loop = false;
+        } break;
+        case GTK_RESPONSE_APPLY:  // Preview
+          break;
+        default:  // Cancel
+          gtk_widget_destroy(GTK_WIDGET(dialog));
+          on_completed(this, false, nullptr);
+          return true;
+      }
     }
   }
 
@@ -172,8 +177,8 @@ bool print_job::print_pdf(const gchar* name,
     return false;
   }
 
-  auto _width = gtk_page_setup_get_page_width(setup, GTK_UNIT_POINTS);
-  auto _height = gtk_page_setup_get_page_height(setup, GTK_UNIT_POINTS);
+  auto _width = gtk_page_setup_get_paper_width(setup, GTK_UNIT_POINTS);
+  auto _height = gtk_page_setup_get_paper_height(setup, GTK_UNIT_POINTS);
   auto _marginLeft = gtk_page_setup_get_left_margin(setup, GTK_UNIT_POINTS);
   auto _marginTop = gtk_page_setup_get_top_margin(setup, GTK_UNIT_POINTS);
   auto _marginRight = gtk_page_setup_get_right_margin(setup, GTK_UNIT_POINTS);

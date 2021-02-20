@@ -71,7 +71,7 @@ std::wstring fromUtf8(std::string str) {
 }
 
 PrintJob::PrintJob(Printing* printing, int index)
-    : printing(printing), index(index) {}
+    : printing{printing}, index{index} {}
 
 bool PrintJob::printPdf(std::string name, std::string printer) {
   documentName = name;
@@ -102,11 +102,18 @@ bool PrintJob::printPdf(std::string name, std::string printer) {
 
     auto r = PrintDlg(&pd);
 
-    if (r == 1) {
+    if (r != 1) {
+      printing->onCompleted(this, false, "");
+        DeleteDC(hDC);
+  GlobalFree(hDevNames);
+  ClosePrinter(hDevMode);
+      return true;
+    }
+
       hDC = pd.hDC;
       hDevMode = pd.hDevMode;
       hDevNames = pd.hDevNames;
-    }
+
   } else {
     hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), NULL, NULL);
     if (!hDC) {
@@ -235,6 +242,8 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
   DeleteDC(hDC);
   GlobalFree(hDevNames);
   ClosePrinter(hDevMode);
+
+  printing->onCompleted(this, true, "");
 }
 
 void PrintJob::cancelJob(std::string error) {}

@@ -55,7 +55,7 @@ void Printing::onPageRasterEnd(PrintJob* job) {
 
 class OnLayoutResult : public flutter::MethodResult<flutter::EncodableValue> {
  public:
-  OnLayoutResult(PrintJob* job) : job(job) {}
+  OnLayoutResult(PrintJob* job) : job{job} {}
 
  private:
   PrintJob* job;

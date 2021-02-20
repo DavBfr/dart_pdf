@@ -27,6 +27,7 @@ class PdfPreview extends StatefulWidget {
     this.pageFormats,
     this.onError,
     this.onPrinted,
+    this.onPrintError,
     this.onShared,
     this.scrollViewDecoration,
     this.pdfPreviewPageDecoration,
@@ -65,11 +66,14 @@ class PdfPreview extends StatefulWidget {
   /// List of page formats the user can choose
   final Map<String, PdfPageFormat>? pageFormats;
 
-  /// Called if an error creating the Pdf occured
+  /// Widget to display if the PDF document cannot be displayed
   final Widget Function(BuildContext context)? onError;
 
   /// Called if the user prints the pdf document
   final void Function(BuildContext context)? onPrinted;
+
+  /// Called if an error creating the Pdf occured
+  final void Function(BuildContext context, dynamic error)? onPrintError;
 
   /// Called if the user shares the pdf document
   final void Function(BuildContext context)? onShared;
@@ -514,8 +518,8 @@ class _PdfPreviewState extends State<PdfPreview> {
         widget.onPrinted!(context);
       }
     } catch (e) {
-      if (widget.onError != null) {
-        widget.onError!(context);
+      if (widget.onPrintError != null) {
+        widget.onPrintError!(context, e);
       }
     }
   }
