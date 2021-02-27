@@ -5,6 +5,7 @@
 - Fix Checkbox Widget
 - Fix SVG colors with percent
 - Fix TextField Widget
+- Fix border painting with TableRow
 
 ## 2.1.0
 

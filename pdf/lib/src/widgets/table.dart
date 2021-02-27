@@ -607,11 +607,16 @@ class Table extends Widget implements SpanningWidget {
         continue;
       }
 
-      final child = row.children.first;
-      if (child != null && row.decoration != null) {
+      if (row.decoration != null) {
+        var y = double.infinity;
+        var h = 0.0;
+        for (var child in row.children) {
+          y = math.min(y, child.box.y);
+          h = math.max(h, child.box.height);
+        }
         row.decoration.paint(
           context,
-          PdfRect(0, child.box.y, box.width, child.box.height),
+          PdfRect(0, y, box.width, h),
           PaintPhase.background,
         );
       }
@@ -636,11 +641,16 @@ class Table extends Widget implements SpanningWidget {
         continue;
       }
 
-      final child = row.children.first;
-      if (child != null && row.decoration != null) {
+      if (row.decoration != null) {
+        var y = double.infinity;
+        var h = 0.0;
+        for (var child in row.children) {
+          y = math.min(y, child.box.y);
+          h = math.max(h, child.box.height);
+        }
         row.decoration.paint(
           context,
-          PdfRect(0, child.box.y, box.width, child.box.height),
+          PdfRect(0, y, box.width, h),
           PaintPhase.foreground,
         );
       }
