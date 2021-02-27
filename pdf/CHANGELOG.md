@@ -5,6 +5,7 @@
 - Fix Checkbox Widget
 - Fix SVG colors with percent
 - Fix TextField Widget
+- Fix border painting with TableRow
 
 ## 3.0.0-nullsafety.1
 
