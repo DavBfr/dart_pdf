@@ -104,15 +104,15 @@ bool PrintJob::printPdf(std::string name, std::string printer) {
 
     if (r != 1) {
       printing->onCompleted(this, false, "");
-        DeleteDC(hDC);
-  GlobalFree(hDevNames);
-  ClosePrinter(hDevMode);
+      DeleteDC(hDC);
+      GlobalFree(hDevNames);
+      ClosePrinter(hDevMode);
       return true;
     }
 
-      hDC = pd.hDC;
-      hDevMode = pd.hDevMode;
-      hDevNames = pd.hDevNames;
+    hDC = pd.hDC;
+    hDevMode = pd.hDevMode;
+    hDevNames = pd.hDevNames;
 
   } else {
     hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), NULL, NULL);
