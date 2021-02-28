@@ -123,7 +123,7 @@ abstract class PdfAnnotBase {
   /// Color
   final PdfColor? color;
 
-  final Map<String?, PdfDataType> _appearances = <String?, PdfDataType>{};
+  final Map<String, PdfDataType> _appearances = <String, PdfDataType>{};
 
   PdfName? _as;
 
@@ -231,7 +231,7 @@ abstract class PdfAnnotBase {
     if (_appearances.isNotEmpty) {
       params['/AP'] = PdfDict(_appearances);
       if (_as != null) {
-        params['/AS'] = _as;
+        params['/AS'] = _as!;
       }
     }
   }

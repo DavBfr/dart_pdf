@@ -158,7 +158,7 @@ class PdfString extends PdfDataType {
     return PdfString(_date(date));
   }
 
-  final Uint8List? value;
+  final Uint8List value;
 
   final PdfStringFormat format;
 
@@ -269,11 +269,11 @@ class PdfString extends PdfDataType {
   int _codeUnitForDigit(int digit) =>
       digit < 10 ? digit + 0x30 : digit + 0x61 - 10;
 
-  void _output(PdfStream s, Uint8List? value) {
+  void _output(PdfStream s, Uint8List value) {
     switch (format) {
       case PdfStringFormat.binary:
         s.putByte(0x3c);
-        for (var byte in value!) {
+        for (var byte in value) {
           s.putByte(_codeUnitForDigit((byte & 0xF0) >> 4));
           s.putByte(_codeUnitForDigit(byte & 0x0F));
         }
@@ -281,7 +281,7 @@ class PdfString extends PdfDataType {
         break;
       case PdfStringFormat.litteral:
         s.putByte(40);
-        _putTextBytes(s, value!);
+        _putTextBytes(s, value);
         s.putByte(41);
         break;
     }
@@ -350,7 +350,7 @@ class PdfSecString extends PdfString {
       return super.output(s);
     }
 
-    final enc = object.pdfDocument.encryption!.encrypt(value!, object);
+    final enc = object.pdfDocument.encryption!.encrypt(value, object);
     _output(s, enc);
   }
 }
@@ -457,9 +457,9 @@ class PdfArray extends PdfDataType {
     return PdfArray(list.map<PdfNum>((num? e) => PdfNum(e!)).toList());
   }
 
-  final List<PdfDataType?> values = <PdfDataType?>[];
+  final List<PdfDataType> values = <PdfDataType>[];
 
-  void add(PdfDataType? v) {
+  void add(PdfDataType v) {
     values.add(v);
   }
 
@@ -468,7 +468,7 @@ class PdfArray extends PdfDataType {
     s.putString('[');
     if (values.isNotEmpty) {
       for (var n = 0; n < values.length; n++) {
-        final val = values[n]!;
+        final val = values[n];
         if (n > 0 &&
             !(val is PdfName ||
                 val is PdfString ||
@@ -489,7 +489,7 @@ class PdfArray extends PdfDataType {
     }
 
     // ignore: prefer_collection_literals
-    final uniques = LinkedHashMap<PdfDataType?, bool>();
+    final uniques = LinkedHashMap<PdfDataType, bool>();
     for (final s in values) {
       uniques[s] = true;
     }
@@ -511,7 +511,7 @@ class PdfArray extends PdfDataType {
 }
 
 class PdfDict extends PdfDataType {
-  PdfDict([Map<String?, PdfDataType>? values]) {
+  PdfDict([Map<String, PdfDataType>? values]) {
     if (values != null) {
       this.values.addAll(values);
     }
@@ -526,27 +526,27 @@ class PdfDict extends PdfDataType {
     );
   }
 
-  final Map<String?, PdfDataType?> values = <String?, PdfDataType?>{};
+  final Map<String, PdfDataType> values = <String, PdfDataType>{};
 
   bool get isNotEmpty => values.isNotEmpty;
 
-  operator []=(String k, PdfDataType? v) {
+  operator []=(String k, PdfDataType v) {
     values[k] = v;
   }
 
-  PdfDataType? operator [](String? k) {
+  PdfDataType? operator [](String k) {
     return values[k];
   }
 
   @override
   void output(PdfStream s) {
     s.putBytes(const <int>[0x3c, 0x3c]);
-    values.forEach((String? k, PdfDataType? v) {
+    values.forEach((String k, PdfDataType v) {
       s.putString(k);
       if (v is PdfNum || v is PdfBool || v is PdfNull || v is PdfIndirect) {
         s.putByte(0x20);
       }
-      v!.output(s);
+      v.output(s);
     });
     s.putBytes(const <int>[0x3e, 0x3e]);
   }
@@ -557,7 +557,7 @@ class PdfDict extends PdfDataType {
 
   void merge(PdfDict other) {
     for (final key in other.values.keys) {
-      final value = other[key];
+      final value = other[key]!;
       final current = values[key];
       if (current == null) {
         values[key] = value;

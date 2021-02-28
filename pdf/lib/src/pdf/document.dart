@@ -147,7 +147,7 @@ class PdfDocument {
   Uint8List? _documentID;
 
   /// Generates the document ID
-  Uint8List? get documentID {
+  Uint8List get documentID {
     if (_documentID == null) {
       final rnd = math.Random();
       _documentID = Uint8List.fromList(sha256
@@ -156,7 +156,7 @@ class PdfDocument {
           .bytes);
     }
 
-    return _documentID;
+    return _documentID!;
   }
 
   /// Creates a new serial number
@@ -169,18 +169,18 @@ class PdfDocument {
   }
 
   /// The root outline
-  PdfOutline? get outline {
+  PdfOutline get outline {
     if (_outline == null) {
       _outline = PdfOutline(this);
       catalog.outlines = _outline;
     }
-    return _outline;
+    return _outline!;
   }
 
   /// Graphic states for opacity and transfer modes
-  PdfGraphicStates? get graphicStates {
+  PdfGraphicStates get graphicStates {
     _graphicStates ??= PdfGraphicStates(this);
-    return _graphicStates;
+    return _graphicStates!;
   }
 
   /// This document has at least one graphic state

@@ -80,7 +80,7 @@ class PdfPage extends PdfObject with PdfGraphicStream {
       final contentList = PdfArray.fromObjects(contents);
 
       if (params.containsKey('/Contents')) {
-        final prevContent = params['/Contents'];
+        final prevContent = params['/Contents']!;
         if (prevContent is PdfArray) {
           contentList.values.insertAll(0, prevContent.values);
         } else {

@@ -337,7 +337,7 @@ class Outline extends Anchor {
     var l = level;
 
     while (l > 0) {
-      if (parent!.effectiveLevel == l) {
+      if (parent.effectiveLevel == l) {
         break;
       }
 
@@ -349,6 +349,6 @@ class Outline extends Anchor {
       l--;
     }
 
-    parent!.add(_outline!);
+    parent.add(_outline!);
   }
 }

@@ -57,7 +57,7 @@ class PdfNames extends PdfObject {
 
     for (var name in keys) {
       dests.add(PdfSecString.fromString(this, name));
-      dests.add(_dests[name]);
+      dests.add(_dests[name]!);
     }
 
     final dict = PdfDict();

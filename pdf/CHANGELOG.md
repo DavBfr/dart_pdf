@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.1
+
+- Improve internal null-safety
+
 ## 3.0.0
 
 - Fix Checkbox Widget

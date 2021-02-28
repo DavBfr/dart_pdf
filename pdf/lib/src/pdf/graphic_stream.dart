@@ -88,7 +88,7 @@ mixin PdfGraphicStream on PdfObject {
 
   /// Generate a name for the graphic state object
   String stateName(PdfGraphicState state) {
-    return pdfDocument.graphicStates!.stateName(state);
+    return pdfDocument.graphicStates.stateName(state);
   }
 
   @override
@@ -135,7 +135,7 @@ mixin PdfGraphicStream on PdfObject {
         '/K': PdfBool(knockoutTransparency),
       });
 
-      resources['/ExtGState'] = pdfDocument.graphicStates!.ref();
+      resources['/ExtGState'] = pdfDocument.graphicStates.ref();
     }
 
     if (params.containsKey('/Resources')) {
