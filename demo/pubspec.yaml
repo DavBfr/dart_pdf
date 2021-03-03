@@ -10,11 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  intl: ^0.17.0-nullsafety
+  intl:
   open_file:
-  path_provider: ^2.0.0-nullsafety
+  path_provider:
   printing:
-  url_launcher: ^6.0.0-nullsafety
+  url_launcher:
 
 dev_dependencies:
   flutter_test:
