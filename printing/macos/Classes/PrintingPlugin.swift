@@ -17,29 +17,26 @@
 import FlutterMacOS
 import Foundation
 
-// Dart:ffi API
-private var _printingPlugin: PrintingPlugin?
-
-@_cdecl("net_nfet_printing_set_document")
-func setDocument(job: UInt32, doc: UnsafePointer<UInt8>, size: UInt64) {
-    _printingPlugin!.jobs[job]?.setDocument(Data(bytes: doc, count: Int(size)))
-}
-
-@_cdecl("net_nfet_printing_set_error")
-func setError(job: UInt32, message: UnsafePointer<CChar>) {
-    _printingPlugin!.jobs[job]?.cancelJob(String(cString: message))
-}
-
-// End of Dart:ffi API
-
+@objc
 public class PrintingPlugin: NSObject, FlutterPlugin {
+    private static var instance: PrintingPlugin?
     private var channel: FlutterMethodChannel
     public var jobs = [UInt32: PrintJob]()
 
     init(_ channel: FlutterMethodChannel) {
         self.channel = channel
         super.init()
-        _printingPlugin = self
+        PrintingPlugin.instance = self
+    }
+
+    @objc
+    public static func setDocument(job: UInt32, doc: UnsafePointer<UInt8>, size: UInt64) {
+        instance!.jobs[job]?.setDocument(Data(bytes: doc, count: Int(size)))
+    }
+
+    @objc
+    public static func setError(job: UInt32, message: UnsafePointer<CChar>) {
+        instance!.jobs[job]?.cancelJob(String(cString: message))
     }
 
     /// Entry point
