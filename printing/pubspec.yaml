@@ -47,7 +47,7 @@ flutter:
       macos:
         pluginClass: PrintingPlugin
       web:
-        fileName: src/printing_web.dart
+        fileName: printing_web.dart
         pluginClass: PrintingPlugin
       windows:
         pluginClass: PrintingPlugin

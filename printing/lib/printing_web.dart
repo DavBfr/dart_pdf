@@ -28,12 +28,12 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:image/image.dart' as im;
 import 'package:pdf/pdf.dart';
 
-import 'callback.dart';
-import 'interface.dart';
-import 'pdfjs.dart';
-import 'printer.dart';
-import 'printing_info.dart';
-import 'raster.dart';
+import 'src/callback.dart';
+import 'src/interface.dart';
+import 'src/pdfjs.dart';
+import 'src/printer.dart';
+import 'src/printing_info.dart';
+import 'src/raster.dart';
 
 /// Print plugin targetting Flutter on the Web
 class PrintingPlugin extends PrintingPlatform {
@@ -120,10 +120,9 @@ class PrintingPlugin extends PrintingPlatform {
     );
     final pdfUrl = html.Url.createObjectUrl(pdfFile);
     final html.HtmlDocument doc = js.context['document'];
-    // ignore: avoid_as
-    final link = doc.createElement('a') as html.AnchorElement;
-    link.href = pdfUrl;
+    final link = html.AnchorElement(href: pdfUrl);
     link.target = '_blank';
+    doc.body?.append(link);
     link.click();
     link.remove();
     return true;
@@ -141,10 +140,9 @@ class PrintingPlugin extends PrintingPlatform {
     );
     final pdfUrl = html.Url.createObjectUrl(pdfFile);
     final html.HtmlDocument doc = js.context['document'];
-    // ignore: avoid_as
-    final link = doc.createElement('a') as html.AnchorElement;
-    link.href = pdfUrl;
+    final link = html.AnchorElement(href: pdfUrl);
     link.download = filename;
+    doc.body?.append(link);
     link.click();
     link.remove();
     return true;

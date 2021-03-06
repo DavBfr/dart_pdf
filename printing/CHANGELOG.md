@@ -4,6 +4,7 @@
 
 - Fix iOS/macOS release build not working
 - Fix some linting issues
+- Fix Web print
 
 ## 5.0.1
 
