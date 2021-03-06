@@ -84,6 +84,7 @@ mixin Printing {
             for (final printer in printers)
               if (printer.isAvailable)
                 SimpleDialogOption(
+                  onPressed: () => Navigator.of(context).pop(printer),
                   child: Text(
                     printer.name,
                     style: TextStyle(
@@ -92,7 +93,6 @@ mixin Printing {
                           : FontStyle.normal,
                     ),
                   ),
-                  onPressed: () => Navigator.of(context).pop(printer),
                 ),
           ],
         ),

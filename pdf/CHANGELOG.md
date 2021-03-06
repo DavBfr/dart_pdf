@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.2
+
+- Fix some linting issues
+
 ## 3.0.1
 
 - Improve internal null-safety

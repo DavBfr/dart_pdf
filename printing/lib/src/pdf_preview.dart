@@ -390,9 +390,9 @@ class _PdfPreviewState extends State<PdfPreview> {
               final key = keys[index];
               final val = _pageFormats[key];
               return DropdownMenuItem<PdfPageFormat>(
+                value: val,
                 child: Text(key,
                     style: TextStyle(color: theme.accentIconTheme.color)),
-                value: val,
               );
             },
           ),
@@ -418,11 +418,6 @@ class _PdfPreviewState extends State<PdfPreview> {
             color: disabledColor,
             selectedBorderColor: color,
             selectedColor: color,
-            children: <Widget>[
-              Transform.rotate(
-                  angle: -pi / 2, child: const Icon(Icons.note_outlined)),
-              const Icon(Icons.note_outlined),
-            ],
             onPressed: (int index) {
               setState(() {
                 horizontal = index == 1;
@@ -430,6 +425,11 @@ class _PdfPreviewState extends State<PdfPreview> {
               });
             },
             isSelected: <bool>[horizontal == false, horizontal == true],
+            children: <Widget>[
+              Transform.rotate(
+                  angle: -pi / 2, child: const Icon(Icons.note_outlined)),
+              const Icon(Icons.note_outlined),
+            ],
           ),
         );
       }

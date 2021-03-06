@@ -3,6 +3,7 @@
 ## 5.0.2
 
 - Fix iOS/macOS release build not working
+- Fix some linting issues
 
 ## 5.0.1
 
