@@ -36,6 +36,16 @@ for documentation.
    ```
 4. For MacOS add printing capability by opening macos directory in XCode
 
+5. For the web, a javascript library and a small script has to be added to
+   your `web/index.html` file, just before
+   `<script src="main.dart.js" type="application/javascript"></script>`:
+
+   ```html
+   <script src="//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.7.570/pdf.min.js"></script>
+   <script type="text/javascript">
+       pdfjsLib.GlobalWorkerOptions.workerSrc = "//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.7.570/pdf.worker.min.js";
+   </script>
+   ```
 
 ## Examples
 
@@ -134,17 +144,7 @@ PdfPreview(
 );
 ```
 
-This widget is compatible with Android, iOS, macOS and web.
-
-For the web, a javascript library and a small script has to be added to
-your `web/index.html` file:
-
-```html
-<script src="//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.4.456/pdf.min.js"></script>
-<script type="text/javascript">
-     pdfjsLib.GlobalWorkerOptions.workerSrc = "//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.4.456/pdf.worker.min.js";
-</script>
-```
+This widget is compatible with Android, iOS, macOS, Linau, Windows and web.
 
 ## Designing your PDF document
 
