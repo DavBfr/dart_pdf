@@ -15,7 +15,6 @@
  */
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/rendering.dart' show Rect;
@@ -62,14 +61,14 @@ class MethodChannelPrinting extends PrintingPlatform {
         try {
           bytes = await job.onLayout!(format);
         } catch (e) {
-          if (Platform.isMacOS || Platform.isIOS) {
+          if (job.useFFI) {
             return setErrorFfi(job, e.toString());
           }
 
           rethrow;
         }
 
-        if (Platform.isMacOS || Platform.isIOS) {
+        if (job.useFFI) {
           return setDocumentFfi(job, bytes);
         }
 
@@ -139,6 +138,7 @@ class MethodChannelPrinting extends PrintingPlatform {
 
   @override
   Future<bool> layoutPdf(
+    Printer? printer,
     LayoutCallback onLayout,
     String name,
     PdfPageFormat format,
@@ -149,6 +149,7 @@ class MethodChannelPrinting extends PrintingPlatform {
     );
 
     final params = <String, dynamic>{
+      if (printer != null) 'printer': printer.url,
       'name': name,
       'job': job.index,
       'width': format.width,
@@ -196,37 +197,6 @@ class MethodChannelPrinting extends PrintingPlatform {
       return null;
     }
     return Printer.fromMap(printer);
-  }
-
-  @override
-  Future<bool> directPrintPdf(
-    Printer printer,
-    LayoutCallback onLayout,
-    String name,
-    PdfPageFormat format,
-  ) async {
-    final job = _printJobs.add(
-      onCompleted: Completer<bool>(),
-      onLayout: onLayout,
-    );
-
-    final params = <String, dynamic>{
-      'name': name,
-      'printer': printer.url,
-      'width': format.width,
-      'height': format.height,
-      'marginLeft': format.marginLeft,
-      'marginTop': format.marginTop,
-      'marginRight': format.marginRight,
-      'marginBottom': format.marginBottom,
-      'job': job.index,
-    };
-    await _channel.invokeMethod<int>('printPdf', params);
-    try {
-      return await job.onCompleted!.future;
-    } finally {
-      _printJobs.remove(job.index);
-    }
   }
 
   @override

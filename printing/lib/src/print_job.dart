@@ -15,6 +15,7 @@
  */
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'callback.dart';
@@ -29,6 +30,7 @@ class PrintJob {
     this.onHtmlRendered,
     this.onCompleted,
     this.onPageRasterized,
+    required this.useFFI,
   });
 
   /// Callback used when calling Printing.layoutPdf()
@@ -45,6 +47,9 @@ class PrintJob {
 
   /// The Job number
   final int index;
+
+  /// Use the FFI side-channel to send the PDF data
+  final bool useFFI;
 }
 
 /// Represents a list of print jobs
@@ -69,6 +74,7 @@ class PrintJobs {
       onHtmlRendered: onHtmlRendered,
       onCompleted: onCompleted,
       onPageRasterized: onPageRasterized,
+      useFFI: Platform.isMacOS || Platform.isIOS,
     );
     _printJobs[job.index] = job;
     return job;

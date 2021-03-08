@@ -108,7 +108,12 @@ class MockPrinting extends Mock
   Future<PrintingInfo> info() async => const PrintingInfo();
 
   @override
-  Future<bool> layoutPdf(onLayout, String name, PdfPageFormat format) async =>
+  Future<bool> layoutPdf(
+    Printer? printer,
+    LayoutCallback onLayout,
+    String name,
+    PdfPageFormat format,
+  ) async =>
       true;
 
   @override
@@ -117,11 +122,6 @@ class MockPrinting extends Mock
 
   @override
   Future<Printer?> pickPrinter(Rect bounds) async => null;
-
-  @override
-  Future<bool> directPrintPdf(
-          Printer printer, onLayout, String name, PdfPageFormat format) async =>
-      true;
 
   @override
   Stream<PdfRaster> raster(

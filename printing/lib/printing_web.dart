@@ -59,9 +59,11 @@ class PrintingPlugin extends PrintingPlatform {
 
   @override
   Future<bool> layoutPdf(
+    Printer? printer,
     LayoutCallback onLayout,
     String name,
     PdfPageFormat format,
+    bool dynamicLayout,
   ) async {
     final result = await onLayout(format);
 
@@ -155,16 +157,6 @@ class PrintingPlugin extends PrintingPlatform {
     PdfPageFormat format,
   ) {
     throw UnimplementedError();
-  }
-
-  @override
-  Future<bool> directPrintPdf(
-    Printer printer,
-    LayoutCallback onLayout,
-    String name,
-    PdfPageFormat format,
-  ) {
-    return layoutPdf(onLayout, name, format);
   }
 
   @override

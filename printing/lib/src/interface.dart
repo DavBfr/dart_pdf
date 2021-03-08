@@ -60,6 +60,7 @@ abstract class PrintingPlatform extends PlatformInterface {
   /// and false if it is canceled.
   /// throws an exception in case of error
   Future<bool> layoutPdf(
+    Printer? printer,
     LayoutCallback onLayout,
     String name,
     PdfPageFormat format,
@@ -70,18 +71,6 @@ abstract class PrintingPlatform extends PlatformInterface {
 
   /// Opens the native printer picker interface, and returns the URL of the selected printer.
   Future<Printer?> pickPrinter(Rect bounds);
-
-  /// Prints a Pdf document to a specific local printer with no UI
-  ///
-  /// returns a future with a `bool` set to true if the document is printed
-  /// and false if it is canceled.
-  /// throws an exception in case of error
-  Future<bool> directPrintPdf(
-    Printer printer,
-    LayoutCallback onLayout,
-    String name,
-    PdfPageFormat format,
-  );
 
   /// Displays a platform popup to share the Pdf document to another application
   Future<bool> sharePdf(

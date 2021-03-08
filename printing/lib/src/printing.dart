@@ -41,7 +41,12 @@ mixin Printing {
     String name = 'Document',
     PdfPageFormat format = PdfPageFormat.standard,
   }) {
-    return PrintingPlatform.instance.layoutPdf(onLayout, name, format);
+    return PrintingPlatform.instance.layoutPdf(
+      null,
+      onLayout,
+      name,
+      format,
+    );
   }
 
   /// Enumerate the available printers on the system.
@@ -118,7 +123,7 @@ mixin Printing {
     String name = 'Document',
     PdfPageFormat format = PdfPageFormat.standard,
   }) {
-    return PrintingPlatform.instance.directPrintPdf(
+    return PrintingPlatform.instance.layoutPdf(
       printer,
       onLayout,
       name,
