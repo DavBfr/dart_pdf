@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.0.3
+
+- Fix RichText annotations
+
 ## 5.0.2
 
 - Fix iOS/macOS release build not working

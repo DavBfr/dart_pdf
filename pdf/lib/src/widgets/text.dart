@@ -360,7 +360,10 @@ class _WidgetSpan extends _Span {
 }
 
 typedef _VisitorCallback = bool Function(
-    InlineSpan span, TextStyle? parentStyle);
+  InlineSpan span,
+  TextStyle? parentStyle,
+  AnnotationBuilder? annotation,
+);
 
 @immutable
 abstract class InlineSpan {
@@ -374,16 +377,24 @@ abstract class InlineSpan {
 
   String toPlainText() {
     final buffer = StringBuffer();
-    visitChildren((InlineSpan span, TextStyle? style) {
+    visitChildren((
+      InlineSpan span,
+      TextStyle? style,
+      AnnotationBuilder? annotation,
+    ) {
       if (span is TextSpan) {
         buffer.write(span.text);
       }
       return true;
-    }, null);
+    }, null, null);
     return buffer.toString();
   }
 
-  bool visitChildren(_VisitorCallback visitor, TextStyle? parentStyle);
+  bool visitChildren(
+    _VisitorCallback visitor,
+    TextStyle? parentStyle,
+    AnnotationBuilder? annotation,
+  );
 }
 
 class WidgetSpan extends InlineSpan {
@@ -400,10 +411,15 @@ class WidgetSpan extends InlineSpan {
 
   /// Calls `visitor` on this [WidgetSpan]. There are no children spans to walk.
   @override
-  bool visitChildren(_VisitorCallback visitor, TextStyle? parentStyle) {
+  bool visitChildren(
+    _VisitorCallback visitor,
+    TextStyle? parentStyle,
+    AnnotationBuilder? annotation,
+  ) {
     final _style = parentStyle?.merge(style);
+    final _a = this.annotation ?? annotation;
 
-    return visitor(this, _style);
+    return visitor(this, _style, _a);
   }
 }
 
@@ -421,17 +437,22 @@ class TextSpan extends InlineSpan {
   final List<InlineSpan>? children;
 
   @override
-  bool visitChildren(_VisitorCallback visitor, TextStyle? parentStyle) {
+  bool visitChildren(
+    _VisitorCallback visitor,
+    TextStyle? parentStyle,
+    AnnotationBuilder? annotation,
+  ) {
     final _style = parentStyle?.merge(style);
+    final _a = this.annotation ?? annotation;
 
     if (text != null) {
-      if (!visitor(this, _style)) {
+      if (!visitor(this, _style, _a)) {
         return false;
       }
     }
     if (children != null) {
       for (var child in children!) {
-        if (!child.visitChildren(visitor, _style)) {
+        if (!child.visitChildren(visitor, _style, _a)) {
           return false;
         }
       }
@@ -571,7 +592,11 @@ class RichText extends Widget {
     var spanStart = 0;
     var decorationStart = 0;
 
-    text.visitChildren((InlineSpan span, TextStyle? style) {
+    text.visitChildren((
+      InlineSpan span,
+      TextStyle? style,
+      AnnotationBuilder? annotation,
+    ) {
       if (span is TextSpan) {
         if (span.text == null) {
           return true;
@@ -653,7 +678,7 @@ class RichText extends Widget {
               spanCount > 1,
               _TextDecoration(
                 style,
-                span.annotation,
+                annotation,
                 _spans.length - 1,
                 _spans.length - 1,
               ),
@@ -764,7 +789,7 @@ class RichText extends Widget {
           spanCount > 1,
           _TextDecoration(
             style,
-            span.annotation,
+            annotation,
             _spans.length - 1,
             _spans.length - 1,
           ),
@@ -774,7 +799,7 @@ class RichText extends Widget {
       }
 
       return true;
-    }, defaultstyle);
+    }, defaultstyle, null);
 
     width = math.max(
         width,
