@@ -40,12 +40,14 @@ mixin Printing {
     required LayoutCallback onLayout,
     String name = 'Document',
     PdfPageFormat format = PdfPageFormat.standard,
+    bool dynamicLayout = true,
   }) {
     return PrintingPlatform.instance.layoutPdf(
       null,
       onLayout,
       name,
       format,
+      dynamicLayout,
     );
   }
 
@@ -122,12 +124,14 @@ mixin Printing {
     required LayoutCallback onLayout,
     String name = 'Document',
     PdfPageFormat format = PdfPageFormat.standard,
+    bool dynamicLayout = true,
   }) {
     return PrintingPlatform.instance.layoutPdf(
       printer,
       onLayout,
       name,
       format,
+      dynamicLayout,
     );
   }
 

@@ -34,6 +34,7 @@ class PdfPreview extends StatefulWidget {
     this.pdfFileName,
     this.useActions = true,
     this.pages,
+    this.dynamicLayout = true,
   }) : super(key: key);
 
   /// Called when a pdf document is needed
@@ -89,6 +90,11 @@ class PdfPreview extends StatefulWidget {
 
   /// Pages to display. Default will display all the pages.
   final List<int>? pages;
+
+  /// Request page re-layout to match the printer paper and margins.
+  /// Mitigate an issue with iOS and macOS print dialog that prevent any
+  /// channel message while opened.
+  final bool dynamicLayout;
 
   @override
   _PdfPreviewState createState() => _PdfPreviewState();
@@ -512,6 +518,7 @@ class _PdfPreviewState extends State<PdfPreview> {
         onLayout: widget.build,
         name: widget.pdfFileName ?? 'Document',
         format: format,
+        dynamicLayout: widget.dynamicLayout,
       );
 
       if (result && widget.onPrinted != null) {

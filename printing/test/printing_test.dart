@@ -113,6 +113,7 @@ class MockPrinting extends Mock
     LayoutCallback onLayout,
     String name,
     PdfPageFormat format,
+    bool dynamicLayout,
   ) async =>
       true;
 

@@ -142,6 +142,7 @@ class MethodChannelPrinting extends PrintingPlatform {
     LayoutCallback onLayout,
     String name,
     PdfPageFormat format,
+    bool dynamicLayout,
   ) async {
     final job = _printJobs.add(
       onCompleted: Completer<bool>(),
@@ -158,6 +159,7 @@ class MethodChannelPrinting extends PrintingPlatform {
       'marginTop': format.marginTop,
       'marginRight': format.marginRight,
       'marginBottom': format.marginBottom,
+      'dynamic': dynamicLayout,
     };
 
     await _channel.invokeMethod<int>('printPdf', params);
