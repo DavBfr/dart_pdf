@@ -3,6 +3,7 @@
 ## 5.0.3
 
 - Fix RichText annotations
+- Fix rotated pages display on iOS and macOS
 
 ## 5.0.2
 
