@@ -133,6 +133,9 @@ test: test-pdf test-printing test-demo node_modules
 clean:
 	git clean -fdx -e .vscode -e ref
 
+clean-dart:
+	for d in $(shell find . -name build -o -name .dart_tool -type directory); do rm -rf $$d; done
+
 publish-pdf: format clean
 	test -z "$(shell git status --porcelain)"
 	find pdf -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
