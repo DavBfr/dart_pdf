@@ -3,6 +3,7 @@
 ## 3.0.2
 
 - Fix some linting issues
+- Add PdfPage.rotate attribute
 
 ## 3.0.1
 

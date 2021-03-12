@@ -23,6 +23,21 @@ import 'object.dart';
 import 'object_stream.dart';
 import 'page_format.dart';
 
+/// Page rotation
+enum PdfPageRotation {
+  /// No rotation
+  none,
+
+  /// Rotated 90 degree clockwise
+  rotate90,
+
+  /// Rotated 180 degree clockwise
+  rotate180,
+
+  /// Rotated 270 degree clockwise
+  rotate270,
+}
+
 /// Page object, which will hold any contents for this page.
 class PdfPage extends PdfObject with PdfGraphicStream {
   /// This constructs a Page object, which will hold any contents for this
@@ -30,6 +45,7 @@ class PdfPage extends PdfObject with PdfGraphicStream {
   PdfPage(
     PdfDocument pdfDocument, {
     this.pageFormat = PdfPageFormat.standard,
+    this.rotate = PdfPageRotation.none,
     int? index,
   }) : super(pdfDocument, type: '/Page') {
     if (index != null) {
@@ -42,11 +58,14 @@ class PdfPage extends PdfObject with PdfGraphicStream {
   /// This is this page format, ie the size of the page, margins, and rotation
   PdfPageFormat pageFormat;
 
+  /// The page rotation angle
+  PdfPageRotation rotate;
+
   /// This holds the contents of the page.
-  List<PdfObjectStream> contents = <PdfObjectStream>[];
+  final contents = <PdfObjectStream>[];
 
   /// This holds any Annotations contained within this page.
-  List<PdfAnnot> annotations = <PdfAnnot>[];
+  final annotations = <PdfAnnot>[];
 
   /// This returns a [PdfGraphics] object, which can then be used to render
   /// on to this page. If a previous [PdfGraphics] object was used, this object
@@ -70,6 +89,10 @@ class PdfPage extends PdfObject with PdfGraphicStream {
 
     // the /Parent pages object
     params['/Parent'] = pdfDocument.pdfPageList.ref();
+
+    if (rotate != PdfPageRotation.none) {
+      params['/Rotate'] = PdfNum(rotate.index * 90);
+    }
 
     // the /MediaBox for the page size
     params['/MediaBox'] =
