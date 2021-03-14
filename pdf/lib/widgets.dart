@@ -25,6 +25,7 @@ export 'src/widgets/chart/bar_chart.dart';
 export 'src/widgets/chart/chart.dart';
 export 'src/widgets/chart/grid_axis.dart';
 export 'src/widgets/chart/grid_cartesian.dart';
+export 'src/widgets/chart/grid_radial.dart';
 export 'src/widgets/chart/legend.dart';
 export 'src/widgets/chart/line_chart.dart';
 export 'src/widgets/clip.dart';

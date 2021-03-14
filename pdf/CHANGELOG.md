@@ -4,6 +4,7 @@
 
 - Fix some linting issues
 - Add PdfPage.rotate attribute
+- Add RadialGrid for charts with polar coordinates
 
 ## 3.0.1
 
