@@ -25,29 +25,40 @@ Future<Uint8List> generateReport(PdfPageFormat pageFormat) async {
   const tableHeaders = ['Category', 'Budget', 'Expense', 'Result'];
 
   const dataTable = [
-    ['Phone', 80, 95, -15],
-    ['Internet', 250, 230, 20],
-    ['Electricity', 300, 375, -75],
-    ['Movies', 85, 80, 5],
-    ['Food', 300, 350, -50],
-    ['Fuel', 650, 550, 100],
-    ['Insurance', 250, 310, -60],
+    ['Phone', 80, 95],
+    ['Internet', 250, 230],
+    ['Electricity', 300, 375],
+    ['Movies', 85, 80],
+    ['Food', 300, 350],
+    ['Fuel', 650, 550],
+    ['Insurance', 250, 310],
   ];
+
+  // Some summary maths
+  final budget = dataTable
+      .map((e) => e[1] as num)
+      .reduce((value, element) => value + element);
+  final expense = dataTable
+      .map((e) => e[2] as num)
+      .reduce((value, element) => value + element);
 
   final baseColor = PdfColors.cyan;
 
   // Create a PDF document.
   final document = pw.Document();
 
+  final theme = pw.ThemeData.withFont(
+    base: pw.Font.ttf(await rootBundle.load('assets/open-sans.ttf')),
+    bold: pw.Font.ttf(await rootBundle.load('assets/open-sans-bold.ttf')),
+  );
+
   // Add page to the PDF
   document.addPage(
     pw.Page(
       pageFormat: pageFormat,
-      theme: pw.ThemeData.withFont(
-        base: pw.Font.ttf(await rootBundle.load('assets/open-sans.ttf')),
-        bold: pw.Font.ttf(await rootBundle.load('assets/open-sans-bold.ttf')),
-      ),
+      theme: theme,
       build: (context) {
+        // Top bar chart
         final chart1 = pw.Chart(
           left: pw.Container(
             alignment: pw.Alignment.topCenter,
@@ -117,6 +128,7 @@ Future<Uint8List> generateReport(PdfPageFormat pageFormat) async {
           ],
         );
 
+        // Left curved line chart
         final chart2 = pw.Chart(
           grid: pw.CartesianGrid(
             xAxis: pw.FixedAxis([0, 1, 2, 3, 4, 5, 6]),
@@ -143,10 +155,19 @@ Future<Uint8List> generateReport(PdfPageFormat pageFormat) async {
           ],
         );
 
+        // Data table
         final table = pw.Table.fromTextArray(
           border: null,
           headers: tableHeaders,
-          data: dataTable,
+          data: List<List<dynamic>>.generate(
+            dataTable.length,
+            (index) => <dynamic>[
+              dataTable[index][0],
+              dataTable[index][1],
+              dataTable[index][2],
+              (dataTable[index][1] as num) - (dataTable[index][2] as num),
+            ],
+          ),
           headerStyle: pw.TextStyle(
             color: PdfColors.white,
             fontWeight: pw.FontWeight.bold,
@@ -162,8 +183,11 @@ Future<Uint8List> generateReport(PdfPageFormat pageFormat) async {
               ),
             ),
           ),
+          cellAlignment: pw.Alignment.centerRight,
+          cellAlignments: {0: pw.Alignment.centerLeft},
         );
 
+        // Page layout
         return pw.Column(
           children: [
             pw.Text('Budget Report',
@@ -223,7 +247,7 @@ Future<Uint8List> generateReport(PdfPageFormat pageFormat) async {
                         ),
                       ),
                       pw.Text(
-                        'Budget was originally \$1915. A total of \$1990 was spent on the month of January which exceeded the overall budget by \$75',
+                        'Budget was originally \$$budget. A total of \$$expense was spent on the month of January which exceeded the overall budget by \$${expense - budget}',
                         textAlign: pw.TextAlign.justify,
                       )
                     ],
@@ -232,6 +256,55 @@ Future<Uint8List> generateReport(PdfPageFormat pageFormat) async {
               ],
             ),
           ],
+        );
+      },
+    ),
+  );
+
+  // Second page with a pie chart
+  document.addPage(
+    pw.Page(
+      pageFormat: pageFormat,
+      theme: theme,
+      build: (context) {
+        const chartColors = [
+          PdfColors.blue300,
+          PdfColors.green300,
+          PdfColors.amber300,
+          PdfColors.pink300,
+          PdfColors.cyan300,
+          PdfColors.purple300,
+          PdfColors.lime300,
+        ];
+
+        return pw.SizedBox(
+          height: 400,
+          child: pw.Chart(
+            title: pw.Text(
+              'Expense breakdown',
+              style: pw.TextStyle(
+                color: baseColor,
+                fontSize: 20,
+              ),
+            ),
+            grid: pw.PieGrid(),
+            datasets: List<pw.Dataset>.generate(dataTable.length, (index) {
+              final data = dataTable[index];
+              final color = chartColors[index % chartColors.length];
+              final textColor =
+                  color.luminance < 0.2 ? PdfColors.white : PdfColors.black;
+
+              final value = (data[2] as num).toDouble();
+              final pct = (value / expense * 100).round();
+
+              return pw.PieDataSet(
+                legend: '${data[0]}\n$pct%',
+                value: value,
+                color: color,
+                legendStyle: pw.TextStyle(fontSize: 10, color: textColor),
+              );
+            }),
+          ),
         );
       },
     ),

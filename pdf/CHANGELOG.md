@@ -1,10 +1,11 @@
 # Changelog
 
-## 3.0.2
+## 3.1.0
 
 - Fix some linting issues
 - Add PdfPage.rotate attribute
 - Add RadialGrid for charts with polar coordinates
+- Add PieChart
 
 ## 3.0.1
 

@@ -35,6 +35,7 @@ class ChartLegend extends StatelessWidget {
     this.direction = Axis.vertical,
     this.decoration,
     this.padding = const EdgeInsets.all(5),
+    this.maxWidth = 200,
   });
 
   final TextStyle? textStyle;
@@ -46,6 +47,8 @@ class ChartLegend extends StatelessWidget {
   final BoxDecoration? decoration;
 
   final EdgeInsets padding;
+
+  final double maxWidth;
 
   Widget _buildLegend(Context context, Dataset dataset) {
     final style = Theme.of(context).defaultTextStyle.merge(textStyle);
@@ -59,10 +62,14 @@ class ChartLegend extends StatelessWidget {
           margin: const EdgeInsets.only(right: 5),
           child: dataset.legendShape(),
         ),
-        Text(
-          dataset.legend!,
-          style: textStyle,
-        )
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: Text(
+            dataset.legend!,
+            style: textStyle,
+            softWrap: false,
+          ),
+        ),
       ],
     );
   }
