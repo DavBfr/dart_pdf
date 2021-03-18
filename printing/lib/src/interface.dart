@@ -29,7 +29,7 @@ import 'raster.dart';
 
 /// The interface that implementations of printing must implement.
 abstract class PrintingPlatform extends PlatformInterface {
-  /// Constructs a UrlLauncherPlatform.
+  /// Constructs a PrintingPlatform.
   PrintingPlatform() : super(token: _token);
 
   static final Object _token = Object();

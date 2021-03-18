@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.0.4
+
+- Improve console error reporting
+
 ## 5.0.3
 
 - Fix RichText annotations

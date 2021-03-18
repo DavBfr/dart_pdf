@@ -23,6 +23,7 @@ import 'dart:js_util';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart' show Rect;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:image/image.dart' as im;
@@ -65,7 +66,30 @@ class PrintingPlugin extends PrintingPlatform {
     PdfPageFormat format,
     bool dynamicLayout,
   ) async {
-    final result = await onLayout(format);
+    late Uint8List result;
+    try {
+      result = await onLayout(format);
+    } catch (e, s) {
+      InformationCollector? collector;
+
+      assert(() {
+        collector = () sync* {
+          yield StringProperty('PageFormat', format.toString());
+        };
+        return true;
+      }());
+
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: e,
+        stack: s,
+        stackFilter: (input) => input,
+        library: 'printing',
+        context: ErrorDescription('while generating a PDF'),
+        informationCollector: collector,
+      ));
+
+      rethrow;
+    }
 
     if (result.isEmpty) {
       return false;

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -140,13 +141,42 @@ class _PdfPreviewState extends State<PdfPreview> {
     Uint8List _doc;
 
     if (!info.canRaster) {
+      assert(() {
+        if (kIsWeb) {
+          FlutterError.reportError(FlutterErrorDetails(
+            exception: Exception(
+                'Unable to find the `pdf.js` library.\nPlease follow the installation instructions at https://github.com/DavBfr/dart_pdf/tree/master/printing#installing'),
+            library: 'printing',
+            context: ErrorDescription('while rendering a PDF'),
+          ));
+        }
+
+        return true;
+      }());
+
       return;
     }
 
     try {
       _doc = await widget.build(computedPageFormat);
-    } catch (e) {
-      error = e;
+    } catch (exception, stack) {
+      InformationCollector? collector;
+
+      assert(() {
+        collector = () sync* {
+          yield StringProperty('PageFormat', computedPageFormat.toString());
+        };
+        return true;
+      }());
+
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'printing',
+        context: ErrorDescription('while generating a PDF'),
+        informationCollector: collector,
+      ));
+      error = exception;
       return;
     }
 
@@ -270,7 +300,6 @@ class _PdfPreviewState extends State<PdfPreview> {
     if (error != null) {
       var content = _showError();
       assert(() {
-        print(error);
         content = ErrorWidget(error!);
         return true;
       }());

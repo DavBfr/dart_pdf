@@ -17,6 +17,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart' show Rect;
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
@@ -60,7 +61,25 @@ class MethodChannelPrinting extends PrintingPlatform {
         Uint8List bytes;
         try {
           bytes = await job.onLayout!(format);
-        } catch (e) {
+        } catch (e, s) {
+          InformationCollector? collector;
+
+          assert(() {
+            collector = () sync* {
+              yield StringProperty('PageFormat', format.toString());
+            };
+            return true;
+          }());
+
+          FlutterError.reportError(FlutterErrorDetails(
+            exception: e,
+            stack: s,
+            stackFilter: (input) => input,
+            library: 'printing',
+            context: ErrorDescription('while generating a PDF'),
+            informationCollector: collector,
+          ));
+
           if (job.useFFI) {
             return setErrorFfi(job, e.toString());
           }

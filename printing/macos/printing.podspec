@@ -3,7 +3,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'printing'
-  s.version          = '0.0.1'
+  s.version          = '1.0.0'
   s.summary          = 'Plugin that allows Flutter apps to generate and print documents to android or ios compatible printers'
   s.description      = <<-DESC
 Plugin that allows Flutter apps to generate and print documents to android or ios compatible printers
