@@ -6,6 +6,7 @@
 - Add PdfPage.rotate attribute
 - Add RadialGrid for charts with polar coordinates
 - Add PieChart
+- Fix Text layout with softwrap
 
 ## 3.0.1
 

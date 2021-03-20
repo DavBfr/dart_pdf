@@ -461,16 +461,89 @@ class TextSpan extends InlineSpan {
   }
 }
 
+class _Line {
+  const _Line(
+    this.parent,
+    this.firstSpan,
+    this.countSpan,
+    this.baseline,
+    this.wordsWidth,
+    this.textDirection,
+  );
+
+  final RichText parent;
+
+  final int firstSpan;
+  final int countSpan;
+
+  TextAlign get textAlign => parent.textAlign;
+
+  final double baseline;
+
+  final double wordsWidth;
+
+  final TextDirection textDirection;
+
+  @override
+  String toString() =>
+      '$runtimeType $firstSpan-${firstSpan + countSpan} baseline: $baseline width:$wordsWidth';
+
+  void realign(double totalWidth, bool isLast) {
+    final spans = parent._spans.sublist(firstSpan, firstSpan + countSpan);
+
+    var delta = 0.0;
+    switch (textAlign) {
+      case TextAlign.left:
+        break;
+      case TextAlign.right:
+        delta = totalWidth - wordsWidth;
+        break;
+      case TextAlign.center:
+        delta = (totalWidth - wordsWidth) / 2.0;
+        break;
+      case TextAlign.justify:
+        if (isLast) {
+          totalWidth = wordsWidth;
+          break;
+        }
+        delta = (totalWidth - wordsWidth) / (spans.length - 1);
+        var x = 0.0;
+        for (var span in spans) {
+          span.offset = span.offset.translate(x, -baseline);
+          x += delta;
+        }
+        return;
+    }
+
+    if (textDirection == TextDirection.rtl) {
+      for (var span in spans) {
+        span.offset = PdfPoint(
+          totalWidth - (span.offset.x + span.width!) - delta,
+          span.offset.y - baseline,
+        );
+      }
+
+      return;
+    }
+
+    for (var span in spans) {
+      span.offset = span.offset.translate(delta, -baseline);
+    }
+
+    return;
+  }
+}
+
 class RichText extends Widget {
-  RichText(
-      {required this.text,
-      TextAlign? textAlign,
-      this.textDirection,
-      bool? softWrap,
-      this.tightBounds = false,
-      this.textScaleFactor = 1.0,
-      int? maxLines})
-      : _textAlign = textAlign,
+  RichText({
+    required this.text,
+    TextAlign? textAlign,
+    this.textDirection,
+    bool? softWrap,
+    this.tightBounds = false,
+    this.textScaleFactor = 1.0,
+    int? maxLines,
+  })  : _textAlign = textAlign,
         _softWrap = softWrap,
         _maxLines = maxLines;
 
@@ -485,7 +558,7 @@ class RichText extends Widget {
 
   final double textScaleFactor;
 
-  bool? get softWrap => _softWrap;
+  bool get softWrap => _softWrap!;
   bool? _softWrap;
 
   final bool tightBounds;
@@ -496,57 +569,6 @@ class RichText extends Widget {
   final List<_Span> _spans = <_Span>[];
 
   final List<_TextDecoration> _decorations = <_TextDecoration>[];
-
-  double? _realignLine(
-    List<_Span> spans,
-    List<_TextDecoration> decorations,
-    double? totalWidth,
-    double wordsWidth,
-    bool last,
-    double? baseline,
-    TextDirection textDirection,
-  ) {
-    var delta = 0.0;
-    switch (textAlign) {
-      case TextAlign.left:
-        break;
-      case TextAlign.right:
-        delta = totalWidth! - wordsWidth;
-        break;
-      case TextAlign.center:
-        delta = (totalWidth! - wordsWidth) / 2.0;
-        break;
-      case TextAlign.justify:
-        if (last) {
-          totalWidth = wordsWidth;
-          break;
-        }
-        delta = (totalWidth! - wordsWidth) / (spans.length - 1);
-        var x = 0.0;
-        for (var span in spans) {
-          span.offset = span.offset.translate(x, -baseline!);
-          x += delta;
-        }
-        return totalWidth;
-    }
-
-    if (textDirection == TextDirection.rtl) {
-      for (var span in spans) {
-        span.offset = PdfPoint(
-          totalWidth! - (span.offset.x + span.width!) - delta,
-          span.offset.y - baseline!,
-        );
-      }
-
-      return totalWidth;
-    }
-
-    for (var span in spans) {
-      span.offset = span.offset.translate(delta, -baseline!);
-    }
-
-    return totalWidth;
-  }
 
   void _appendDecoration(bool append, _TextDecoration td) {
     if (append && _decorations.isNotEmpty) {
@@ -583,14 +605,14 @@ class RichText extends Widget {
 
     var offsetX = 0.0;
     var offsetY = 0.0;
-    var width = 0.0;
+
     double? top;
     double? bottom;
 
-    var lines = 1;
+    final lines = <_Line>[];
     var spanCount = 0;
     var spanStart = 0;
-    var decorationStart = 0;
+    var overflow = false;
 
     text.visitChildren((
       InlineSpan span,
@@ -626,25 +648,22 @@ class RichText extends Widget {
                 (style.fontSize! * textScaleFactor);
 
             if (offsetX + metrics.width > constraintWidth && spanCount > 0) {
-              width = math.max(
-                  width,
-                  _realignLine(
-                    _spans.sublist(spanStart),
-                    _decorations.sublist(decorationStart),
-                    constraintWidth,
-                    offsetX -
-                        space.advanceWidth * style.wordSpacing! -
-                        style.letterSpacing!,
-                    false,
-                    bottom,
-                    _textDirection,
-                  )!);
+              overflow = true;
+              lines.add(_Line(
+                this,
+                spanStart,
+                spanCount,
+                bottom ?? 0,
+                offsetX -
+                    space.advanceWidth * style.wordSpacing! -
+                    style.letterSpacing!,
+                _textDirection,
+              ));
 
               spanStart += spanCount;
-              decorationStart = _decorations.length;
+              spanCount = 0;
 
-              lines++;
-              if (maxLines != null && lines > maxLines!) {
+              if (maxLines != null && lines.length >= maxLines!) {
                 return false;
               }
 
@@ -656,7 +675,6 @@ class RichText extends Widget {
               if (offsetY > constraintHeight) {
                 return false;
               }
-              spanCount = 0;
             }
 
             final baseline = span.baseline! * textScaleFactor;
@@ -689,26 +707,21 @@ class RichText extends Widget {
                 style.letterSpacing!;
           }
 
-          if (softWrap! && line < spanLines.length - 1) {
-            width = math.max(
-                width,
-                _realignLine(
-                  _spans.sublist(spanStart),
-                  _decorations.sublist(decorationStart),
-                  constraintWidth,
-                  offsetX -
-                      space.advanceWidth * style.wordSpacing! -
-                      style.letterSpacing!,
-                  true,
-                  bottom,
-                  _textDirection,
-                )!);
+          if (softWrap && line < spanLines.length - 1) {
+            lines.add(_Line(
+                this,
+                spanStart,
+                spanCount,
+                bottom ?? 0,
+                offsetX -
+                    space.advanceWidth * style.wordSpacing! -
+                    style.letterSpacing!,
+                _textDirection));
 
             spanStart += spanCount;
-            decorationStart = _decorations.length;
 
-            lines++;
-            if (maxLines != null && lines > maxLines!) {
+            if (maxLines != null && lines.length >= maxLines!) {
+              spanCount = 0;
               return false;
             }
 
@@ -720,11 +733,11 @@ class RichText extends Widget {
             }
             top = null;
             bottom = null;
+            spanCount = 0;
 
             if (offsetY > constraintHeight) {
               return false;
             }
-            spanCount = 0;
           }
         }
 
@@ -743,23 +756,20 @@ class RichText extends Widget {
         );
 
         if (offsetX + ws.width! > constraintWidth && spanCount > 0) {
-          width = math.max(
-              width,
-              _realignLine(
-                _spans.sublist(spanStart),
-                _decorations.sublist(decorationStart),
-                constraintWidth,
-                offsetX,
-                false,
-                bottom,
-                _textDirection,
-              )!);
+          overflow = true;
+          lines.add(_Line(
+            this,
+            spanStart,
+            spanCount,
+            bottom ?? 0,
+            offsetX,
+            _textDirection,
+          ));
 
           spanStart += spanCount;
-          decorationStart = _decorations.length;
+          spanCount = 0;
 
-          lines++;
-          if (maxLines != null && lines > maxLines!) {
+          if (maxLines != null && lines.length > maxLines!) {
             return false;
           }
 
@@ -771,7 +781,6 @@ class RichText extends Widget {
           if (offsetY > constraintHeight) {
             return false;
           }
-          spanCount = 0;
         }
 
         final baseline = span.baseline! * textScaleFactor;
@@ -801,23 +810,37 @@ class RichText extends Widget {
       return true;
     }, defaultstyle, null);
 
-    width = math.max(
-        width,
-        _realignLine(
-          _spans.sublist(spanStart),
-          _decorations.sublist(decorationStart),
-          lines > 1 ? constraintWidth : offsetX,
-          offsetX,
-          true,
-          bottom,
-          _textDirection,
-        )!);
+    if (spanCount > 0) {
+      lines.add(_Line(
+        this,
+        spanStart,
+        spanCount,
+        bottom ?? 0,
+        offsetX,
+        _textDirection,
+      ));
+    }
 
-    bottom ??= 0.0;
-    top ??= 0.0;
+    assert(!overflow || constraintWidth.isFinite);
+    var width = overflow ? constraintWidth : constraints.minWidth;
+
+    if (lines.isNotEmpty) {
+      if (!overflow) {
+        // Calculate the final width
+        for (final line in lines) {
+          width = math.max(width, line.wordsWidth);
+        }
+      }
+
+      // Realign all the lines
+      for (final line in lines.sublist(0, lines.length - 1)) {
+        line.realign(width, false);
+      }
+      lines.last.realign(width, true);
+    }
 
     box = PdfRect(0, 0, constraints.constrainWidth(width),
-        constraints.constrainHeight(offsetY + bottom! - top!));
+        constraints.constrainHeight(offsetY + (bottom ?? 0) - (top ?? 0)));
   }
 
   @override
