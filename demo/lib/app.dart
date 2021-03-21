@@ -24,6 +24,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:printing_demo/certificate.dart';
 import 'package:url_launcher/url_launcher.dart' as ul;
 
 import 'calendar.dart';
@@ -33,6 +34,15 @@ import 'report.dart';
 import 'resume.dart';
 
 class MyApp extends StatefulWidget {
+  static const examples = <Example>[
+    Example('RÉSUMÉ', 'resume.dart', generateResume),
+    Example('DOCUMENT', 'document.dart', generateDocument),
+    Example('INVOICE', 'invoice.dart', generateInvoice),
+    Example('REPORT', 'report.dart', generateReport),
+    Example('CALENDAR', 'calendar.dart', generateCalendar),
+    Example('CERTIFICATE', 'certificate.dart', generateCertificate),
+  ];
+
   @override
   MyAppState createState() {
     return MyAppState();
@@ -40,9 +50,6 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
-  List<Tab>? _myTabs;
-  List<LayoutCallback>? _tabGen;
-  List<String>? _tabUrl;
   int _tab = 0;
   TabController? _tabController;
 
@@ -57,33 +64,9 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   Future<void> _init() async {
     final info = await Printing.info();
 
-    _myTabs = const <Tab>[
-      Tab(text: 'RÉSUMÉ'),
-      Tab(text: 'DOCUMENT'),
-      Tab(text: 'INVOICE'),
-      Tab(text: 'REPORT'),
-      Tab(text: 'CALENDAR'),
-    ];
-
-    _tabGen = const <LayoutCallback>[
-      generateResume,
-      generateDocument,
-      generateInvoice,
-      generateReport,
-      generateCalendar,
-    ];
-
-    _tabUrl = const <String>[
-      'resume.dart',
-      'document.dart',
-      'invoice.dart',
-      'report.dart',
-      'calendar.dart',
-    ];
-
     _tabController = TabController(
       vsync: this,
-      length: _myTabs!.length,
+      length: MyApp.examples.length,
       initialIndex: _tab,
     );
     _tabController!.addListener(() {
@@ -155,12 +138,13 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
         title: const Text('Pdf Printing Example'),
         bottom: TabBar(
           controller: _tabController,
-          tabs: _myTabs!,
+          tabs: MyApp.examples.map<Tab>((e) => Tab(text: e.name)).toList(),
+          isScrollable: true,
         ),
       ),
       body: PdfPreview(
         maxPageWidth: 700,
-        build: _tabGen![_tab],
+        build: MyApp.examples[_tab].builder,
         actions: actions,
         onPrinted: _showPrintedToast,
         onShared: _showSharedToast,
@@ -175,7 +159,17 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
   void _showSources() {
     ul.launch(
-      'https://github.com/DavBfr/dart_pdf/blob/master/demo/lib/${_tabUrl![_tab]}',
+      'https://github.com/DavBfr/dart_pdf/blob/master/demo/lib/${MyApp.examples[_tab].file}',
     );
   }
+}
+
+class Example {
+  const Example(this.name, this.file, this.builder);
+
+  final String name;
+
+  final String file;
+
+  final LayoutCallback builder;
 }
