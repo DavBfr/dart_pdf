@@ -262,28 +262,28 @@ class PdfGraphics {
   void setFont(
     PdfFont font,
     double size, {
-    double? charSpace = 0,
-    double wordSpace = 0,
-    double scale = 1,
+    double? charSpace,
+    double? wordSpace,
+    double? scale,
     PdfTextRenderingMode? mode = PdfTextRenderingMode.fill,
-    double rise = 0,
+    double? rise,
   }) {
     buf.putString('${font.name} ');
     PdfNum(size).output(buf);
     buf.putString(' Tf\n');
-    if (charSpace != 0) {
-      PdfNum(charSpace!).output(buf);
+    if (charSpace != null) {
+      PdfNum(charSpace).output(buf);
       buf.putString(' Tc\n');
     }
-    if (wordSpace != 0) {
+    if (wordSpace != null) {
       PdfNum(wordSpace).output(buf);
       buf.putString(' Tw\n');
     }
-    if (scale != 1) {
+    if (scale != null) {
       PdfNum(scale * 100).output(buf);
       buf.putString(' Tz\n');
     }
-    if (rise != 0) {
+    if (rise != null) {
       PdfNum(rise).output(buf);
       buf.putString(' Ts\n');
     }

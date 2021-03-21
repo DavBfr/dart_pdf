@@ -7,6 +7,7 @@
 - Add RadialGrid for charts with polar coordinates
 - Add PieChart
 - Fix Text layout with softwrap
+- Fix letterSpacing issue
 
 ## 3.0.1
 
