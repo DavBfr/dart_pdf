@@ -10,5 +10,6 @@ This set of plugins allows Flutter apps to generate and print pdf files to the d
 
 * dart pdf: <https://pub.dev/packages/pdf>
 * flutter printing: <https://pub.dev/packages/printing>
+* Live Demo: <https://davbfr.github.io/dart_pdf/>
 
 [![Buy Me A Coffee](https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/custom_images/orange_img.png "Buy Me A Coffee")](https://www.buymeacoffee.com/JORBmbw9h "Buy Me A Coffee")
