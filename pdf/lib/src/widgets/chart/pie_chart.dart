@@ -109,7 +109,7 @@ class PieGrid extends ChartGrid {
   }
 }
 
-enum PieLegendPosition { none, auto, inside }
+enum PieLegendPosition { none, auto, inside, outside }
 
 class PieDataSet extends Dataset {
   PieDataSet({
@@ -123,16 +123,22 @@ class PieDataSet extends Dataset {
     this.surfaceOpacity = 1,
     this.offset = 0,
     this.legendStyle,
+    this.legendAlign,
     this.legendPosition = PieLegendPosition.auto,
+    this.legendLineWidth = 1.0,
+    this.legendLineColor = PdfColors.black,
+    Widget? legendWidget,
+    this.legendOffset = 20,
   })  : drawBorder = drawBorder ?? borderColor != null && color != borderColor,
         assert((drawBorder ?? borderColor != null && color != borderColor) ||
             drawSurface),
+        _legendWidget = legendWidget,
         super(
           legend: legend,
           color: color,
         );
 
-  final double value;
+  final num value;
 
   late double angleStart;
 
@@ -150,18 +156,124 @@ class PieDataSet extends Dataset {
 
   final TextStyle? legendStyle;
 
+  final TextAlign? legendAlign;
   final PieLegendPosition legendPosition;
+
+  Widget? _legendWidget;
+
+  final double legendOffset;
+
+  final double legendLineWidth;
+
+  final PdfColor legendLineColor;
+
+  PdfPoint? _legendAnchor;
+  PdfPoint? _legendPivot;
+  PdfPoint? _legendStart;
+
+  bool get _isFullCircle => angleEnd - angleStart >= pi * 2;
 
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    // final size = constraints.biggest;
+    final _offset = _isFullCircle ? 0 : offset;
 
     // ignore: avoid_as
     final grid = Chart.of(context).grid as PieGrid;
-    final len = grid.pieSize + offset;
+    final len = grid.pieSize + _offset;
+    var x = -len;
+    var y = -len;
+    var w = len * 2;
+    var h = len * 2;
 
-    box = PdfRect(-len, -len, len * 2, len * 2);
+    final lp = legendPosition == PieLegendPosition.auto
+        ? (angleEnd - angleStart > pi / 6
+            ? PieLegendPosition.inside
+            : PieLegendPosition.outside)
+        : legendPosition;
+
+    // Find the legend position
+    final bisect = _isFullCircle ? 1 / 4 * pi : (angleStart + angleEnd) / 2;
+
+    final _legendAlign = legendAlign ??
+        (lp == PieLegendPosition.inside
+            ? TextAlign.center
+            : (bisect > pi ? TextAlign.right : TextAlign.left));
+
+    _legendWidget ??= legend == null
+        ? null
+        : Text(legend!, style: legendStyle, textAlign: _legendAlign);
+
+    if (_legendWidget != null) {
+      _legendWidget!.layout(context,
+          BoxConstraints(maxWidth: grid.pieSize, maxHeight: grid.pieSize));
+      assert(_legendWidget!.box != null);
+
+      final ls = _legendWidget!.box!.size;
+
+      // final style = Theme.of(context).defaultTextStyle.merge(legendStyle);
+
+      switch (lp) {
+        case PieLegendPosition.outside:
+          final o = grid.pieSize + legendOffset;
+          final cx = sin(bisect) * (_offset + o);
+          final cy = cos(bisect) * (_offset + o);
+
+          _legendStart = PdfPoint(
+            sin(bisect) * (_offset + grid.pieSize + legendOffset * 0.1),
+            cos(bisect) * (_offset + grid.pieSize + legendOffset * 0.1),
+          );
+
+          _legendPivot = PdfPoint(cx, cy);
+          if (bisect > pi) {
+            _legendAnchor = PdfPoint(
+              cx - legendOffset / 2 * 0.8,
+              cy,
+            );
+            _legendWidget!.box = PdfRect.fromPoints(
+                PdfPoint(
+                  cx - legendOffset / 2 - ls.x,
+                  cy - ls.y / 2,
+                ),
+                ls);
+            w = max(w, (-cx + legendOffset / 2 + ls.x) * 2);
+            h = max(h, cy.abs() * 2 + ls.y);
+            x = -w / 2;
+            y = -h / 2;
+          } else {
+            _legendAnchor = PdfPoint(
+              cx + legendOffset / 2 * 0.8,
+              cy,
+            );
+            _legendWidget!.box = PdfRect.fromPoints(
+                PdfPoint(
+                  cx + legendOffset / 2,
+                  cy - ls.y / 2,
+                ),
+                ls);
+            w = max(w, (cx + legendOffset / 2 + ls.x) * 2);
+            h = max(h, cy.abs() * 2 + ls.y);
+            x = -w / 2;
+            y = -h / 2;
+          }
+          break;
+        case PieLegendPosition.inside:
+          final o = _isFullCircle ? 0 : grid.pieSize * 2 / 3;
+          final cx = sin(bisect) * (_offset + o);
+          final cy = cos(bisect) * (_offset + o);
+          _legendWidget!.box = PdfRect.fromPoints(
+              PdfPoint(
+                cx - ls.x / 2,
+                cy - ls.y / 2,
+              ),
+              ls);
+          break;
+        default:
+          break;
+      }
+    }
+
+    box = PdfRect(x, y, w, h);
   }
 
   void _shape(Context context) {
@@ -178,11 +290,15 @@ class PieDataSet extends Dataset {
     final ex = cx + sin(angleEnd) * grid.pieSize;
     final ey = cy + cos(angleEnd) * grid.pieSize;
 
-    context.canvas
-      ..moveTo(cx, cy)
-      ..lineTo(sx, sy)
-      ..bezierArc(sx, sy, grid.pieSize, grid.pieSize, ex, ey,
-          large: angleEnd - angleStart > pi);
+    if (_isFullCircle) {
+      context.canvas.drawEllipse(0, 0, grid.pieSize, grid.pieSize);
+    } else {
+      context.canvas
+        ..moveTo(cx, cy)
+        ..lineTo(sx, sy)
+        ..bezierArc(sx, sy, grid.pieSize, grid.pieSize, ex, ey,
+            large: angleEnd - angleStart > pi);
+    }
   }
 
   @override
@@ -224,23 +340,49 @@ class PieDataSet extends Dataset {
   }
 
   void paintLegend(Context context) {
-    if (legendPosition != PieLegendPosition.none && legend != null) {
-      // ignore: avoid_as
-      final grid = Chart.of(context).grid as PieGrid;
+    if (legendPosition != PieLegendPosition.none && _legendWidget != null) {
+      if (_legendAnchor != null &&
+          _legendPivot != null &&
+          _legendStart != null) {
+        context.canvas
+          ..saveContext()
+          ..moveTo(_legendStart!.x, _legendStart!.y)
+          ..lineTo(_legendPivot!.x, _legendPivot!.y)
+          ..lineTo(_legendAnchor!.x, _legendAnchor!.y)
+          ..setLineWidth(legendLineWidth)
+          ..setLineCap(PdfLineCap.round)
+          ..setLineJoin(PdfLineJoin.round)
+          ..setStrokeColor(legendLineColor)
+          ..strokePath()
+          ..restoreContext();
+      }
 
-      final bisect = (angleStart + angleEnd) / 2;
+      _legendWidget!.paint(context);
+    }
+  }
 
-      final o = grid.pieSize * 2 / 3;
-      final cx = sin(bisect) * (offset + o);
-      final cy = cos(bisect) * (offset + o);
+  @override
+  void debugPaint(Context context) {
+    super.debugPaint(context);
 
-      Widget.draw(
-        Text(legend!, style: legendStyle, textAlign: TextAlign.center),
-        offset: PdfPoint(cx, cy),
-        context: context,
-        alignment: Alignment.center,
-        constraints: const BoxConstraints(maxWidth: 200, maxHeight: 200),
-      );
+    // ignore: avoid_as
+    final grid = Chart.of(context).grid as PieGrid;
+
+    final bisect = (angleStart + angleEnd) / 2;
+
+    final cx = sin(bisect) * (offset + grid.pieSize + legendOffset);
+    final cy = cos(bisect) * (offset + grid.pieSize + legendOffset);
+
+    if (_legendWidget != null) {
+      context.canvas
+        ..saveContext()
+        ..moveTo(0, 0)
+        ..lineTo(cx, cy)
+        ..setLineWidth(0.5)
+        ..setLineDashPattern([3, 1])
+        ..setStrokeColor(PdfColors.blue)
+        ..strokePath()
+        ..restoreContext();
     }
   }
 }
