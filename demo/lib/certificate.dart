@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:pdf/pdf.dart';
-import 'package:vector_math/vector_math_64.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:vector_math/vector_math_64.dart';
 
 final _cache = <String, Uint8List>{};
 
 Future<Uint8List> _download(String url) async {
   if (!_cache.containsKey(url)) {
     print('Downloading $url');
-    final client = HttpClient();
-    final request = await client.getUrl(Uri.parse(url));
-    final response = await request.close();
-    final builder = await response.fold(
-        BytesBuilder(), (BytesBuilder b, List<int> d) => b..add(d));
-    final List<int> data = builder.takeBytes();
+    final response = await http.get(Uri.parse(url));
+    final data = response.bodyBytes;
     _cache[url] = Uint8List.fromList(data);
   }
 
