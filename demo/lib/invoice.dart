@@ -21,7 +21,10 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-Future<Uint8List> generateInvoice(PdfPageFormat pageFormat) async {
+import 'data.dart';
+
+Future<Uint8List> generateInvoice(
+    PdfPageFormat pageFormat, CustomData data) async {
   final lorem = pw.LoremText();
 
   final products = <Product>[

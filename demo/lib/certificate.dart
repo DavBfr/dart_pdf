@@ -23,6 +23,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:vector_math/vector_math_64.dart';
 
+import 'data.dart';
+
 final _cache = <String, Uint8List>{};
 
 Future<Uint8List> _download(String url) async {
@@ -41,7 +43,8 @@ Future<pw.Font> _downloadFont(String url) async {
   return pw.Font.ttf(data.buffer.asByteData());
 }
 
-Future<Uint8List> generateCertificate(PdfPageFormat pageFormat) async {
+Future<Uint8List> generateCertificate(
+    PdfPageFormat pageFormat, CustomData data) async {
   final lorem = pw.LoremText();
   final pdf = pw.Document();
 
@@ -97,7 +100,7 @@ Future<Uint8List> generateCertificate(PdfPageFormat pageFormat) async {
             child: pw.Divider(color: PdfColors.grey, thickness: 1.5),
           ),
           pw.Text(
-            'Louis Mitchell',
+            data.name,
             style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 20,
@@ -127,7 +130,7 @@ Future<Uint8List> generateCertificate(PdfPageFormat pageFormat) async {
               pw.Padding(
                 padding: pw.EdgeInsets.symmetric(horizontal: 10),
                 child: pw.Text(
-                  'Rubix Cube Challenge',
+                  'Flutter PDF Demo',
                   style: pw.TextStyle(
                     fontSize: 10,
                   ),

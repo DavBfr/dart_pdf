@@ -16,6 +16,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,7 @@ import 'package:printing_demo/certificate.dart';
 import 'package:url_launcher/url_launcher.dart' as ul;
 
 import 'calendar.dart';
+import 'data.dart';
 import 'document.dart';
 import 'invoice.dart';
 import 'report.dart';
@@ -40,7 +42,7 @@ class MyApp extends StatefulWidget {
     Example('INVOICE', 'invoice.dart', generateInvoice),
     Example('REPORT', 'report.dart', generateReport),
     Example('CALENDAR', 'calendar.dart', generateCalendar),
-    Example('CERTIFICATE', 'certificate.dart', generateCertificate),
+    Example('CERTIFICATE', 'certificate.dart', generateCertificate, true),
   ];
 
   @override
@@ -55,10 +57,19 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
   PrintingInfo? printingInfo;
 
+  var _data = CustomData();
+  var _hasData = false;
+  var _pending = false;
+
   @override
   void initState() {
     super.initState();
     _init();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
   }
 
   Future<void> _init() async {
@@ -73,6 +84,18 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
       setState(() {
         _tab = _tabController!.index;
       });
+      if (MyApp.examples[_tab].needsData && !_hasData && !_pending) {
+        _pending = true;
+        askName(context).then((value) {
+          if (value != null) {
+            setState(() {
+              _data = CustomData(name: value);
+              _hasData = true;
+              _pending = false;
+            });
+          }
+        });
+      }
     });
 
     setState(() {
@@ -81,10 +104,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   }
 
   void _showPrintedToast(BuildContext context) {
-    final scaffold = Scaffold.of(context);
-
-    // ignore: deprecated_member_use
-    scaffold.showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Document printed successfully'),
       ),
@@ -92,10 +112,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   }
 
   void _showSharedToast(BuildContext context) {
-    final scaffold = Scaffold.of(context);
-
-    // ignore: deprecated_member_use
-    scaffold.showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Document shared successfully'),
       ),
@@ -144,7 +161,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
       ),
       body: PdfPreview(
         maxPageWidth: 700,
-        build: MyApp.examples[_tab].builder,
+        build: (format) => MyApp.examples[_tab].builder(format, _data),
         actions: actions,
         onPrinted: _showPrintedToast,
         onShared: _showSharedToast,
@@ -162,14 +179,47 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
       'https://github.com/DavBfr/dart_pdf/blob/master/demo/lib/${MyApp.examples[_tab].file}',
     );
   }
+
+  Future<String?> askName(BuildContext context) {
+    return showDialog<String>(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          final controller = TextEditingController();
+
+          return AlertDialog(
+            title: Text('Please type your name:'),
+            contentPadding: EdgeInsets.symmetric(horizontal: 20),
+            content: TextField(
+              decoration: InputDecoration(hintText: '[your name]'),
+              controller: controller,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  if (controller.text != '') {
+                    Navigator.pop(context, controller.text);
+                  }
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        });
+  }
 }
 
+typedef LayoutCallbackWithData = Future<Uint8List> Function(
+    PdfPageFormat pageFormat, CustomData data);
+
 class Example {
-  const Example(this.name, this.file, this.builder);
+  const Example(this.name, this.file, this.builder, [this.needsData = false]);
 
   final String name;
 
   final String file;
 
-  final LayoutCallback builder;
+  final LayoutCallbackWithData builder;
+
+  final bool needsData;
 }

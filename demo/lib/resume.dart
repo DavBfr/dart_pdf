@@ -21,12 +21,13 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:printing_demo/data.dart';
 
 const PdfColor green = PdfColor.fromInt(0xff9ce5d0);
 const PdfColor lightGreen = PdfColor.fromInt(0xffcdf1e7);
 const sep = 120.0;
 
-Future<Uint8List> generateResume(PdfPageFormat format) async {
+Future<Uint8List> generateResume(PdfPageFormat format, CustomData data) async {
   final doc = pw.Document(title: 'My Résumé', author: 'David PHAM-VAN');
 
   final profileImage = pw.MemoryImage(

@@ -19,7 +19,10 @@ import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-Future<Uint8List> generateDocument(PdfPageFormat format) async {
+import 'data.dart';
+
+Future<Uint8List> generateDocument(
+    PdfPageFormat format, CustomData data) async {
   final doc = pw.Document(pageMode: PdfPageMode.outlines);
 
   doc.addPage(pw.MultiPage(

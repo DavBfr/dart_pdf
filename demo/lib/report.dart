@@ -21,7 +21,10 @@ import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-Future<Uint8List> generateReport(PdfPageFormat pageFormat) async {
+import 'data.dart';
+
+Future<Uint8List> generateReport(
+    PdfPageFormat pageFormat, CustomData data) async {
   const tableHeaders = ['Category', 'Budget', 'Expense', 'Result'];
 
   const dataTable = [
