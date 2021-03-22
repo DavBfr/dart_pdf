@@ -98,6 +98,7 @@ class _MultiPageInstance {
 ///     Text('World'),
 ///   ];
 /// }));
+/// ```
 ///
 /// An inner widget tree cannot be bigger than a page: A [Widget] cannot be drawn
 /// partially on one page and the remaining on another page: It's insecable.

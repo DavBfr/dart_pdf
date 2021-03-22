@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.1
+
+- Fix documentation
+
 ## 3.1.0
 
 - Fix some linting issues
