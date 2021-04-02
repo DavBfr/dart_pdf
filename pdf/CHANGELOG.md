@@ -4,6 +4,7 @@
 
 - Fix documentation
 - Add Positioned.fill()
+- Improve GraphicState
 
 ## 3.1.0
 

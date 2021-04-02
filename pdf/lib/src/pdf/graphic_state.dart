@@ -20,6 +20,7 @@ import 'package:meta/meta.dart';
 
 import 'data_types.dart';
 import 'document.dart';
+import 'function.dart';
 import 'object.dart';
 import 'smask.dart';
 
@@ -83,22 +84,40 @@ enum PdfBlendMode {
 @immutable
 class PdfGraphicState {
   /// Create a new graphic state
-  const PdfGraphicState({this.opacity, this.blendMode, this.softMask});
+  const PdfGraphicState({
+    double? opacity,
+    double? strokeOpacity,
+    double? fillOpacity,
+    this.blendMode,
+    this.softMask,
+    this.transferFunction,
+  })  : fillOpacity = fillOpacity ?? opacity,
+        strokeOpacity = strokeOpacity ?? opacity;
 
-  /// The opacity to apply to this graphic state
-  final double? opacity;
+  /// Fill opacity to apply to this graphic state
+  final double? fillOpacity;
+
+  /// Stroke opacity to apply to this graphic state
+  final double? strokeOpacity;
 
   /// The current blend mode to be used
   final PdfBlendMode? blendMode;
 
+  /// Opacity mask
   final PdfSoftMask? softMask;
+
+  /// Color transfer function
+  final PdfFunction? transferFunction;
 
   PdfDict output() {
     final params = PdfDict();
 
-    if (opacity != null) {
-      params['/CA'] = PdfNum(opacity!);
-      params['/ca'] = PdfNum(opacity!);
+    if (strokeOpacity != null) {
+      params['/CA'] = PdfNum(strokeOpacity!);
+    }
+
+    if (fillOpacity != null) {
+      params['/ca'] = PdfNum(fillOpacity!);
     }
 
     if (blendMode != null) {
@@ -111,6 +130,10 @@ class PdfGraphicState {
       params['/SMask'] = softMask!.output();
     }
 
+    if (transferFunction != null) {
+      params['/TR'] = transferFunction!.ref();
+    }
+
     return params;
   }
 
@@ -119,13 +142,20 @@ class PdfGraphicState {
     if (!(other is PdfGraphicState)) {
       return false;
     }
-    return other.opacity == opacity &&
+    return other.fillOpacity == fillOpacity &&
+        other.strokeOpacity == strokeOpacity &&
         other.blendMode == blendMode &&
-        other.softMask == softMask;
+        other.softMask == softMask &&
+        other.transferFunction == transferFunction;
   }
 
   @override
-  int get hashCode => opacity.hashCode;
+  int get hashCode =>
+      fillOpacity.hashCode *
+      strokeOpacity.hashCode *
+      blendMode.hashCode *
+      softMask.hashCode *
+      transferFunction.hashCode;
 }
 
 /// Stores all the graphic states used in the document
