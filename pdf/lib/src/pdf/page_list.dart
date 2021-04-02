@@ -25,7 +25,7 @@ class PdfPageList extends PdfObject {
   PdfPageList(PdfDocument pdfDocument) : super(pdfDocument, type: '/Pages');
 
   /// This holds the pages
-  final List<PdfPage?> pages = <PdfPage?>[];
+  final pages = <PdfPage>[];
 
   @override
   void prepare() {
