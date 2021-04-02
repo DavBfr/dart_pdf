@@ -57,7 +57,7 @@ class PdfObjectStream extends PdfObject {
 
     if (_data == null) {
       if (isBinary) {
-        // This is a Ascii85 stream
+        // This is an Ascii85 stream
         final e = Ascii85Encoder();
         _data = e.convert(buf.output());
         params['/Filter'] = const PdfName('/ASCII85Decode');
