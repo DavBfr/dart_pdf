@@ -20,6 +20,7 @@ import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'geometry.dart';
+import 'text.dart';
 import 'widget.dart';
 
 /// How to size the non-positioned children of a [Stack].
@@ -38,6 +39,46 @@ class Positioned extends SingleChildWidget {
     this.bottom,
     required Widget child,
   }) : super(child: child);
+
+  /// Creates a Positioned object with left, top, right, and bottom set to 0.0
+  /// unless a value for them is passed.
+  Positioned.fill({
+    this.left = 0.0,
+    this.top = 0.0,
+    this.right = 0.0,
+    this.bottom = 0.0,
+    required Widget child,
+  }) : super(child: child);
+
+  /// Creates a widget that controls where a child of a [Stack] is positioned.
+  factory Positioned.directional({
+    required TextDirection textDirection,
+    double? start,
+    double? top,
+    double? end,
+    double? bottom,
+    required Widget child,
+  }) {
+    double? left;
+    double? right;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        left = end;
+        right = start;
+        break;
+      case TextDirection.ltr:
+        left = start;
+        right = end;
+        break;
+    }
+    return Positioned(
+      left: left,
+      top: top,
+      right: right,
+      bottom: bottom,
+      child: child,
+    );
+  }
 
   final double? left;
 

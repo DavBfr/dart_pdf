@@ -3,6 +3,7 @@
 ## 3.1.1
 
 - Fix documentation
+- Add Positioned.fill()
 
 ## 3.1.0
 
