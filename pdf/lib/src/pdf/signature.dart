@@ -14,20 +14,53 @@
  * limitations under the License.
  */
 
+import 'dart:typed_data';
+
+import 'package:pdf/src/pdf/object_stream.dart';
+
 import 'data_types.dart';
 import 'document.dart';
 import 'object.dart';
 import 'object_dict.dart';
 import 'stream.dart';
 
-enum PdfSigFlags { signaturesExist, appendOnly }
+/// Signature flags
+enum PdfSigFlags {
+  /// The document contains at least one signature field.
+
+  signaturesExist,
+
+  /// The document contains signatures that may be invalidated if the file is
+  /// saved (written) in a way that alters its previous contents, as opposed
+  /// to an incremental update.
+  appendOnly,
+}
 
 class PdfSignature extends PdfObjectDict {
   PdfSignature(
     PdfDocument pdfDocument, {
     required this.value,
     required this.flags,
-  }) : super(pdfDocument, type: '/Sig');
+    List<Uint8List>? crl,
+    List<Uint8List>? cert,
+    List<Uint8List>? ocsp,
+  }) : super(pdfDocument, type: '/Sig') {
+    if (crl != null) {
+      for (final o in crl) {
+        this.crl.add(PdfObjectStream(pdfDocument)..buf.putBytes(o));
+      }
+    }
+    if (cert != null) {
+      for (final o in cert) {
+        this.cert.add(PdfObjectStream(pdfDocument)..buf.putBytes(o));
+      }
+    }
+    if (ocsp != null) {
+      for (final o in ocsp) {
+        this.ocsp.add(PdfObjectStream(pdfDocument)..buf.putBytes(o));
+      }
+    }
+  }
 
   final Set<PdfSigFlags> flags;
 
@@ -39,7 +72,14 @@ class PdfSignature extends PdfObjectDict {
           .map<int>((PdfSigFlags e) => 1 >> e.index)
           .reduce((int a, int b) => a | b);
 
+  final crl = <PdfObjectStream>[];
+
+  final cert = <PdfObjectStream>[];
+
+  final ocsp = <PdfObjectStream>[];
+
   int? _offsetStart;
+
   int? _offsetEnd;
 
   @override
@@ -60,6 +100,9 @@ class PdfSignature extends PdfObjectDict {
 }
 
 abstract class PdfSignatureBase {
+  /// Modification detection and prevention
+  bool get hasMDP => false;
+
   void preSign(PdfObject object, PdfDict params);
 
   Future<void> sign(PdfObject object, PdfStream os, PdfDict params,

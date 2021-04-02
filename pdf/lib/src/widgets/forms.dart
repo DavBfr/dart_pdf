@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import 'dart:typed_data';
+
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -320,6 +322,9 @@ class Signature extends SingleChildWidget {
     this.date,
     this.color,
     this.highlighting,
+    this.crl,
+    this.cert,
+    this.ocsp,
   })  : value = value ?? crypto,
         super(child: child);
 
@@ -346,6 +351,15 @@ class Signature extends SingleChildWidget {
   /// Field highlighting
   final PdfAnnotHighlighting? highlighting;
 
+  /// Certificate revocation lists
+  final List<Uint8List>? crl;
+
+  /// Additional X509 certificates
+  final List<Uint8List>? cert;
+
+  /// Online Certificate Status Protocol
+  final List<Uint8List>? ocsp;
+
   @override
   void paint(Context context) {
     super.paint(context);
@@ -358,6 +372,9 @@ class Signature extends SingleChildWidget {
           PdfSigFlags.signaturesExist,
           if (appendOnly) PdfSigFlags.appendOnly,
         },
+        crl: crl,
+        cert: cert,
+        ocsp: ocsp,
       );
     } else {
       paintChild(context);

@@ -47,7 +47,9 @@ class PdfPage extends PdfObjectDict with PdfGraphicStream {
     this.pageFormat = PdfPageFormat.standard,
     this.rotate = PdfPageRotation.none,
     int? index,
-  }) : super(pdfDocument, type: '/Page') {
+    int? objser,
+    int objgen = 0,
+  }) : super(pdfDocument, type: '/Page', objser: objser, objgen: objgen) {
     if (index != null) {
       pdfDocument.pdfPageList.pages.insert(index, this);
     } else {

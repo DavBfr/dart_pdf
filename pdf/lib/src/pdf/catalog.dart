@@ -81,9 +81,26 @@ class PdfCatalog extends PdfObjectDict {
     params['/PageMode'] = PdfName(_PdfPageModes[pageMode.index]);
 
     if (pdfDocument.sign != null) {
-      params['/Perms'] = PdfDict({
-        '/DocMDP': pdfDocument.sign!.ref(),
-      });
+      if (pdfDocument.sign!.value.hasMDP) {
+        params['/Perms'] = PdfDict({
+          '/DocMDP': pdfDocument.sign!.ref(),
+        });
+      }
+
+      final dss = PdfDict();
+      if (pdfDocument.sign!.crl.isNotEmpty) {
+        dss['/CRLs'] = PdfArray.fromObjects(pdfDocument.sign!.crl);
+      }
+      if (pdfDocument.sign!.cert.isNotEmpty) {
+        dss['/Certs'] = PdfArray.fromObjects(pdfDocument.sign!.cert);
+      }
+      if (pdfDocument.sign!.ocsp.isNotEmpty) {
+        dss['/OCSPs'] = PdfArray.fromObjects(pdfDocument.sign!.ocsp);
+      }
+
+      if (dss.values.isNotEmpty) {
+        params['/DSS'] = dss;
+      }
     }
 
     final widgets = <PdfAnnot>[];
@@ -100,6 +117,13 @@ class PdfCatalog extends PdfObjectDict {
         '/SigFlags': PdfNum(pdfDocument.sign?.flagsValue ?? 0),
         '/Fields': PdfArray.fromObjects(widgets),
       });
+
+      // final acroForm = (params['/AcroForm'] ??= PdfDict()) as PdfDict;
+      // acroForm['/SigFlags'] = PdfNum(pdfDocument.sign?.flagsValue ?? 0);
+      // final fields = (acroForm['/Fields'] ??= PdfArray()) as PdfArray;
+      // for (final w in widgets) {
+      //   fields.add(w.ref());
+      // }
     }
   }
 }
