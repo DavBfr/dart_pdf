@@ -441,25 +441,25 @@ class PdfIndirect extends PdfDataType {
   int get hashCode => ser.hashCode + gen.hashCode;
 }
 
-class PdfArray extends PdfDataType {
-  PdfArray([Iterable<PdfDataType>? values]) {
+class PdfArray<T extends PdfDataType> extends PdfDataType {
+  PdfArray([Iterable<T>? values]) {
     if (values != null) {
       this.values.addAll(values);
     }
   }
 
-  factory PdfArray.fromObjects(List<PdfObject?> objects) {
+  static PdfArray<PdfIndirect> fromObjects(List<PdfObject?> objects) {
     return PdfArray(
         objects.map<PdfIndirect>((PdfObject? e) => e!.ref()).toList());
   }
 
-  factory PdfArray.fromNum(List<num?> list) {
+  static PdfArray<PdfNum> fromNum(List<num?> list) {
     return PdfArray(list.map<PdfNum>((num? e) => PdfNum(e!)).toList());
   }
 
-  final List<PdfDataType> values = <PdfDataType>[];
+  final List<T> values = <T>[];
 
-  void add(PdfDataType v) {
+  void add(T v) {
     values.add(v);
   }
 
@@ -489,7 +489,7 @@ class PdfArray extends PdfDataType {
     }
 
     // ignore: prefer_collection_literals
-    final uniques = LinkedHashMap<PdfDataType, bool>();
+    final uniques = LinkedHashMap<T, bool>();
     for (final s in values) {
       uniques[s] = true;
     }
@@ -510,14 +510,14 @@ class PdfArray extends PdfDataType {
   int get hashCode => values.hashCode;
 }
 
-class PdfDict extends PdfDataType {
-  PdfDict([Map<String, PdfDataType>? values]) {
+class PdfDict<T extends PdfDataType> extends PdfDataType {
+  PdfDict([Map<String, T>? values]) {
     if (values != null) {
       this.values.addAll(values);
     }
   }
 
-  factory PdfDict.fromObjectMap(Map<String, PdfObject> objects) {
+  static PdfDict<PdfIndirect> fromObjectMap(Map<String, PdfObject> objects) {
     return PdfDict(
       objects.map<String, PdfIndirect>(
         (String key, PdfObject value) =>
@@ -526,22 +526,22 @@ class PdfDict extends PdfDataType {
     );
   }
 
-  final Map<String, PdfDataType> values = <String, PdfDataType>{};
+  final Map<String, T> values = <String, T>{};
 
   bool get isNotEmpty => values.isNotEmpty;
 
-  operator []=(String k, PdfDataType v) {
+  operator []=(String k, T v) {
     values[k] = v;
   }
 
-  PdfDataType? operator [](String k) {
+  T? operator [](String k) {
     return values[k];
   }
 
   @override
   void output(PdfStream s) {
     s.putBytes(const <int>[0x3c, 0x3c]);
-    values.forEach((String k, PdfDataType v) {
+    values.forEach((String k, T v) {
       s.putString(k);
       if (v is PdfNum || v is PdfBool || v is PdfNull || v is PdfIndirect) {
         s.putByte(0x20);
@@ -555,7 +555,7 @@ class PdfDict extends PdfDataType {
     return values.containsKey(key);
   }
 
-  void merge(PdfDict other) {
+  void merge(PdfDict<T> other) {
     for (final key in other.values.keys) {
       final value = other[key]!;
       final current = values[key];
@@ -572,7 +572,7 @@ class PdfDict extends PdfDataType {
     }
   }
 
-  void addAll(PdfDict other) {
+  void addAll(PdfDict<T> other) {
     values.addAll(other.values);
   }
 

@@ -99,25 +99,24 @@ class PdfPage extends PdfObject with PdfGraphicStream {
         PdfArray.fromNum(<double>[0, 0, pageFormat.width, pageFormat.height]);
 
     // The graphic operations to draw the page
-    if (contents.isNotEmpty) {
-      final contentList = PdfArray.fromObjects(contents);
+    final contentList = PdfArray.fromObjects(contents);
 
-      if (params.containsKey('/Contents')) {
-        final prevContent = params['/Contents']!;
-        if (prevContent is PdfArray) {
-          contentList.values.insertAll(0, prevContent.values);
-        } else {
-          contentList.values.insert(0, prevContent);
-        }
+    if (params.containsKey('/Contents')) {
+      final prevContent = params['/Contents']!;
+      if (prevContent is PdfArray) {
+        contentList.values
+            .insertAll(0, prevContent.values.whereType<PdfIndirect>());
+      } else if (prevContent is PdfIndirect) {
+        contentList.values.insert(0, prevContent);
       }
+    }
 
-      contentList.uniq();
+    contentList.uniq();
 
-      if (contentList.values.length == 1) {
-        params['/Contents'] = contentList.values.first;
-      } else {
-        params['/Contents'] = contentList;
-      }
+    if (contentList.values.length == 1) {
+      params['/Contents'] = contentList.values.first;
+    } else if (contents.isNotEmpty) {
+      params['/Contents'] = contentList;
     }
 
     // The /Annots object
