@@ -22,7 +22,10 @@ import 'brush.dart';
 class SvgParser {
   /// Create an SVG parser
 
-  factory SvgParser({required XmlDocument xml}) {
+  factory SvgParser({
+    required XmlDocument xml,
+    PdfColor? colorFilter,
+  }) {
     final root = xml.rootElement;
 
     final vbattr = root.getAttribute('viewBox');
@@ -45,10 +48,22 @@ class SvgParser {
 
     final viewBox = PdfRect(fvb[0], fvb[1], fvb[2], fvb[3]);
 
-    return SvgParser._(width, height, viewBox, root);
+    return SvgParser._(
+      width,
+      height,
+      viewBox,
+      root,
+      colorFilter,
+    );
   }
 
-  SvgParser._(this.width, this.height, this.viewBox, this.root);
+  SvgParser._(
+    this.width,
+    this.height,
+    this.viewBox,
+    this.root,
+    this.colorFilter,
+  );
 
   final PdfRect viewBox;
 
@@ -57,6 +72,8 @@ class SvgParser {
   final double? height;
 
   final XmlElement root;
+
+  final PdfColor? colorFilter;
 
   static final _transformParameterRegExp =
       RegExp(r'[\w.-]+(px|pt|em|cm|mm|in|%|)');

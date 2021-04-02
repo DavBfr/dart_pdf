@@ -31,9 +31,13 @@ class SvgImage extends Widget {
     bool clip = true,
     double? width,
     double? height,
+    PdfColor? colorFilter,
   }) {
     final xml = XmlDocument.parse(svg);
-    final parser = SvgParser(xml: xml);
+    final parser = SvgParser(
+      xml: xml,
+      colorFilter: colorFilter,
+    );
 
     return SvgImage._fromParser(
       parser,

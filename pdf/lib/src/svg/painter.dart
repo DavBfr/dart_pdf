@@ -15,6 +15,7 @@
  */
 
 import 'package:pdf/pdf.dart';
+import 'package:pdf/src/svg/color.dart';
 import 'package:pdf/widgets.dart';
 
 import 'brush.dart';
@@ -38,11 +39,12 @@ class SvgPainter {
   final PdfRect boundingBox;
 
   void paint() {
-    SvgGroup.fromXml(
-      parser.root,
-      this,
-      SvgBrush.defaultContext,
-    ).paint(_canvas!);
+    final brush = parser.colorFilter == null
+        ? SvgBrush.defaultContext
+        : SvgBrush.defaultContext
+            .copyWith(fill: SvgColor(color: parser.colorFilter));
+
+    SvgGroup.fromXml(parser.root, this, brush).paint(_canvas!);
   }
 
   final _fontCache = <String, Font>{};

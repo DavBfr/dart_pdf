@@ -5,6 +5,7 @@
 - Fix documentation
 - Add Positioned.fill()
 - Improve GraphicState
+- Add SVG Color filter
 
 ## 3.1.0
 

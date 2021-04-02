@@ -38,6 +38,10 @@ class SvgColor {
       return none;
     }
 
+    if (painter.parser.colorFilter != null) {
+      return SvgColor(color: painter.parser.colorFilter);
+    }
+
     if (svgColors.containsKey(color)) {
       return SvgColor(color: svgColors[color]);
     }
