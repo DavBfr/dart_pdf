@@ -597,7 +597,6 @@ class PdfColorType extends PdfDataType {
   @override
   void output(PdfStream s) {
     if (color is PdfColorCmyk) {
-      // ignore: avoid_as
       final k = color as PdfColorCmyk;
       PdfArray.fromNum(<double>[
         k.cyan,

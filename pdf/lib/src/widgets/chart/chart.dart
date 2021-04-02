@@ -59,7 +59,6 @@ class Chart extends Widget implements Inherited {
 
   late Widget _child;
 
-  // ignore: avoid_as
   static Chart of(Context context) => context.dependsOn<Chart>()!;
 
   PdfPoint _computeSize(BoxConstraints constraints) {

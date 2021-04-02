@@ -12,7 +12,6 @@ analyzer:
 linter:
   rules:
     - always_put_control_body_on_new_line
-    - avoid_as
     - avoid_bool_literals_in_conditional_expressions
     - avoid_classes_with_only_static_members
     - avoid_field_initializers_in_const_classes

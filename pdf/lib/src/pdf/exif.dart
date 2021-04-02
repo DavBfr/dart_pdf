@@ -354,12 +354,8 @@ orientation: $orientation''';
         _readTags(buffer, tiffOffset, tiffOffset + firstIFDOffset, bigEnd);
 
     if (tags.containsKey(PdfExifTag.ExifIFDPointer)) {
-      final exifData = _readTags(
-          buffer,
-          tiffOffset,
-          // ignore: avoid_as
-          tiffOffset + tags[PdfExifTag.ExifIFDPointer] as int,
-          bigEnd);
+      final exifData = _readTags(buffer, tiffOffset,
+          tiffOffset + tags[PdfExifTag.ExifIFDPointer] as int, bigEnd);
       tags.addAll(exifData);
     }
 

@@ -219,7 +219,7 @@ class _PdfPreviewState extends State<PdfPreview> {
   void initState() {
     if (widget.initialPageFormat == null) {
       final locale = WidgetsBinding.instance!.window.locale;
-      // ignore: unnecessary_cast, avoid_as
+      // ignore: unnecessary_cast
       final cc = (locale as Locale?)?.countryCode ?? 'US';
 
       if (cc == 'US' || cc == 'CA' || cc == 'MX') {
@@ -562,7 +562,6 @@ class _PdfPreviewState extends State<PdfPreview> {
   Future<void> _share() async {
     // Calculate the widget center for iPad sharing popup position
     final referenceBox =
-        // ignore: avoid_as
         shareWidget.currentContext!.findRenderObject() as RenderBox;
     final topLeft =
         referenceBox.localToGlobal(referenceBox.paintBounds.topLeft);

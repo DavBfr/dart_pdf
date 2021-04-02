@@ -81,7 +81,6 @@ class Context {
   }
 
   T? dependsOn<T>() {
-    // ignore: avoid_as
     return _inherited[T] as T?;
   }
 

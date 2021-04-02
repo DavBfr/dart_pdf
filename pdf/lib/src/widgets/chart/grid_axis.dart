@@ -375,7 +375,6 @@ class FixedAxis<T extends num> extends GridAxis {
       return;
     }
 
-    // ignore: avoid_as
     final grid = Chart.of(context).grid as CartesianGrid;
 
     switch (direction) {

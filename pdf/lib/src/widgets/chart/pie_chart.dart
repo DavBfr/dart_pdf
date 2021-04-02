@@ -178,7 +178,6 @@ class PieDataSet extends Dataset {
       {bool parentUsesSize = false}) {
     final _offset = _isFullCircle ? 0 : offset;
 
-    // ignore: avoid_as
     final grid = Chart.of(context).grid as PieGrid;
     final len = grid.pieSize + _offset;
     var x = -len;
@@ -277,7 +276,6 @@ class PieDataSet extends Dataset {
   }
 
   void _shape(Context context) {
-    // ignore: avoid_as
     final grid = Chart.of(context).grid as PieGrid;
 
     final bisect = (angleStart + angleEnd) / 2;
@@ -365,7 +363,6 @@ class PieDataSet extends Dataset {
   void debugPaint(Context context) {
     super.debugPaint(context);
 
-    // ignore: avoid_as
     final grid = Chart.of(context).grid as PieGrid;
 
     final bisect = (angleStart + angleEnd) / 2;

@@ -84,9 +84,7 @@ Future<Uint8List> generateReport(
           grid: pw.CartesianGrid(
             xAxis: pw.FixedAxis.fromStrings(
               List<String>.generate(
-                  dataTable.length,
-                  // ignore: avoid_as
-                  (index) => dataTable[index][0] as String),
+                  dataTable.length, (index) => dataTable[index][0] as String),
               marginStart: 30,
               marginEnd: 30,
               ticks: true,
@@ -107,7 +105,6 @@ Future<Uint8List> generateReport(
               data: List<pw.LineChartValue>.generate(
                 dataTable.length,
                 (i) {
-                  // ignore: avoid_as
                   final v = dataTable[i][2] as num;
                   return pw.LineChartValue(i.toDouble(), v.toDouble());
                 },
@@ -122,7 +119,6 @@ Future<Uint8List> generateReport(
               data: List<pw.LineChartValue>.generate(
                 dataTable.length,
                 (i) {
-                  // ignore: avoid_as
                   final v = dataTable[i][1] as num;
                   return pw.LineChartValue(i.toDouble(), v.toDouble());
                 },
@@ -149,7 +145,6 @@ Future<Uint8List> generateReport(
               data: List<pw.LineChartValue>.generate(
                 dataTable.length,
                 (i) {
-                  // ignore: avoid_as
                   final v = dataTable[i][2] as num;
                   return pw.LineChartValue(i.toDouble(), v.toDouble());
                 },

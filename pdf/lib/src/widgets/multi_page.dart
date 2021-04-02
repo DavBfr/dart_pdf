@@ -317,7 +317,6 @@ class MultiPage extends Page {
               'You probably need a SpanningWidget or use a single page layout');
         }
 
-        // ignore: avoid_as
         final span = child as SpanningWidget;
 
         final localConstraints =

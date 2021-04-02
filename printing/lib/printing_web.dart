@@ -208,7 +208,7 @@ class PrintingPlugin extends PrintingPlatform {
 
     final html.CanvasElement canvas =
         js.context['document'].createElement('canvas');
-    // ignore: avoid_as
+
     final context = canvas.getContext('2d') as html.CanvasRenderingContext2D?;
     final _pages = pages ?? Iterable<int>.generate(numPages, (index) => index);
 
@@ -233,7 +233,6 @@ class PrintingPlugin extends PrintingPlatform {
       r.readAsArrayBuffer(blob);
       r.onLoadEnd.listen(
         (ProgressEvent e) {
-          // ignore: avoid_as
           data.add(r.result as List<int>);
           completer.complete();
         },
