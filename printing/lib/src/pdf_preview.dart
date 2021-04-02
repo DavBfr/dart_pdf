@@ -240,6 +240,12 @@ class _PdfPreviewState extends State<PdfPreview> {
   }
 
   @override
+  void dispose() {
+    previewUpdate?.cancel();
+    super.dispose();
+  }
+
+  @override
   void reassemble() {
     _raster();
     super.reassemble();

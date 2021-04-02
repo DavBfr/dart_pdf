@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.0.5
+
+- Fix PdfPreview timer dispose [wwl901215]
+
 ## 5.0.4
 
 - Improve console error reporting
