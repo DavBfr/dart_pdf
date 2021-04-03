@@ -3,6 +3,7 @@
 ## 5.0.5
 
 - Fix PdfPreview timer dispose [wwl901215]
+- Remove unnecessary _raster call in PdfPreview [yaymalaga]
 
 ## 5.0.4
 

@@ -128,6 +128,8 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   Timer? previewUpdate;
 
+  var _rastering = false;
+
   static const defaultPageFormats = <String, PdfPageFormat>{
     'A4': PdfPageFormat.a4,
     'Letter': PdfPageFormat.letter,
@@ -138,6 +140,11 @@ class _PdfPreviewState extends State<PdfPreview> {
       : pageFormat;
 
   Future<void> _raster() async {
+    if (_rastering) {
+      return;
+    }
+    _rastering = true;
+
     Uint8List _doc;
 
     if (!info.canRaster) {
@@ -154,6 +161,7 @@ class _PdfPreviewState extends State<PdfPreview> {
         return true;
       }());
 
+      _rastering = false;
       return;
     }
 
@@ -177,6 +185,7 @@ class _PdfPreviewState extends State<PdfPreview> {
         informationCollector: collector,
       ));
       error = exception;
+      _rastering = false;
       return;
     }
 
@@ -193,6 +202,7 @@ class _PdfPreviewState extends State<PdfPreview> {
       pages: widget.pages,
     )) {
       if (!mounted) {
+        _rastering = false;
         return;
       }
       setState(() {
@@ -213,6 +223,7 @@ class _PdfPreviewState extends State<PdfPreview> {
     }
 
     pages.removeRange(pageNum, pages.length);
+    _rastering = false;
   }
 
   @override
@@ -256,7 +267,6 @@ class _PdfPreviewState extends State<PdfPreview> {
     if (oldWidget.build != widget.build) {
       preview = null;
       updatePosition = null;
-      pages.clear();
       _raster();
     }
     super.didUpdateWidget(oldWidget);

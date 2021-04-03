@@ -66,10 +66,11 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
       initialIndex: _tab,
     );
     _tabController!.addListener(() {
-      setState(() {
-        _tab = _tabController!.index;
-        print('set state 1');
-      });
+      if (_tab != _tabController!.index) {
+        setState(() {
+          _tab = _tabController!.index;
+        });
+      }
       if (examples[_tab].needsData && !_hasData && !_pending) {
         _pending = true;
         askName(context).then((value) {
@@ -86,7 +87,6 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
     setState(() {
       printingInfo = info;
-      print('set state 2');
     });
   }
 
