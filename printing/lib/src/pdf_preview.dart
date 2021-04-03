@@ -263,7 +263,6 @@ class _PdfPreviewState extends State<PdfPreview> {
         setState(() {
           infoLoaded = true;
           info = _info;
-          _raster();
         });
       });
     }
