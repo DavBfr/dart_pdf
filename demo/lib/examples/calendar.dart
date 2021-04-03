@@ -21,7 +21,7 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 
-import 'data.dart';
+import '../data.dart';
 
 class Calendar extends StatelessWidget {
   Calendar({

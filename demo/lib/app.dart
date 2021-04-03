@@ -16,7 +16,6 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,26 +24,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:printing_demo/certificate.dart';
 import 'package:url_launcher/url_launcher.dart' as ul;
 
-import 'calendar.dart';
 import 'data.dart';
-import 'document.dart';
-import 'invoice.dart';
-import 'report.dart';
-import 'resume.dart';
+import 'examples.dart';
 
 class MyApp extends StatefulWidget {
-  static const examples = <Example>[
-    Example('RÉSUMÉ', 'resume.dart', generateResume),
-    Example('DOCUMENT', 'document.dart', generateDocument),
-    Example('INVOICE', 'invoice.dart', generateInvoice),
-    Example('REPORT', 'report.dart', generateReport),
-    Example('CALENDAR', 'calendar.dart', generateCalendar),
-    Example('CERTIFICATE', 'certificate.dart', generateCertificate, true),
-  ];
-
   @override
   MyAppState createState() {
     return MyAppState();
@@ -77,14 +62,15 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
     _tabController = TabController(
       vsync: this,
-      length: MyApp.examples.length,
+      length: examples.length,
       initialIndex: _tab,
     );
     _tabController!.addListener(() {
       setState(() {
         _tab = _tabController!.index;
+        print('set state 1');
       });
-      if (MyApp.examples[_tab].needsData && !_hasData && !_pending) {
+      if (examples[_tab].needsData && !_hasData && !_pending) {
         _pending = true;
         askName(context).then((value) {
           if (value != null) {
@@ -100,6 +86,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
     setState(() {
       printingInfo = info;
+      print('set state 2');
     });
   }
 
@@ -152,16 +139,16 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pdf Printing Example'),
+        title: const Text('Flutter PDF Demo'),
         bottom: TabBar(
           controller: _tabController,
-          tabs: MyApp.examples.map<Tab>((e) => Tab(text: e.name)).toList(),
+          tabs: examples.map<Tab>((e) => Tab(text: e.name)).toList(),
           isScrollable: true,
         ),
       ),
       body: PdfPreview(
         maxPageWidth: 700,
-        build: (format) => MyApp.examples[_tab].builder(format, _data),
+        build: (format) => examples[_tab].builder(format, _data),
         actions: actions,
         onPrinted: _showPrintedToast,
         onShared: _showSharedToast,
@@ -176,7 +163,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
   void _showSources() {
     ul.launch(
-      'https://github.com/DavBfr/dart_pdf/blob/master/demo/lib/${MyApp.examples[_tab].file}',
+      'https://github.com/DavBfr/dart_pdf/blob/master/demo/lib/examples/${examples[_tab].file}',
     );
   }
 
@@ -207,19 +194,4 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
           );
         });
   }
-}
-
-typedef LayoutCallbackWithData = Future<Uint8List> Function(
-    PdfPageFormat pageFormat, CustomData data);
-
-class Example {
-  const Example(this.name, this.file, this.builder, [this.needsData = false]);
-
-  final String name;
-
-  final String file;
-
-  final LayoutCallbackWithData builder;
-
-  final bool needsData;
 }

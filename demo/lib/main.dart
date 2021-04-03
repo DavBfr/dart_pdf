@@ -21,5 +21,10 @@ import 'app.dart';
 
 void main() {
   debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-  runApp(MaterialApp(home: MyApp()));
+  runApp(
+    MaterialApp(
+      title: 'Flutter PDF Demo',
+      home: MyApp(),
+    ),
+  );
 }
