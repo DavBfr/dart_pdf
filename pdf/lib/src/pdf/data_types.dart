@@ -20,6 +20,7 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
+import 'ascii85.dart';
 import 'color.dart';
 import 'object.dart';
 import 'stream.dart';
@@ -113,7 +114,7 @@ class PdfNum extends PdfDataType {
 }
 
 class PdfNumList extends PdfDataType {
-  PdfNumList(this.values);
+  const PdfNumList(this.values);
 
   final List<num> values;
 
@@ -511,11 +512,15 @@ class PdfArray<T extends PdfDataType> extends PdfDataType {
 }
 
 class PdfDict<T extends PdfDataType> extends PdfDataType {
-  PdfDict([Map<String, T>? values]) {
+  factory PdfDict([Map<String, T>? values]) {
+    final _values = <String, T>{};
     if (values != null) {
-      this.values.addAll(values);
+      _values.addAll(values);
     }
+    return PdfDict.values(_values);
   }
+
+  const PdfDict.values([this.values = const {}]);
 
   static PdfDict<PdfIndirect> fromObjectMap(Map<String, PdfObject> objects) {
     return PdfDict(
@@ -526,7 +531,7 @@ class PdfDict<T extends PdfDataType> extends PdfDataType {
     );
   }
 
-  final values = <String, T>{};
+  final Map<String, T> values;
 
   bool get isNotEmpty => values.isNotEmpty;
 
@@ -587,6 +592,63 @@ class PdfDict<T extends PdfDataType> extends PdfDataType {
 
   @override
   int get hashCode => values.hashCode;
+}
+
+class PdfDictStream extends PdfDict<PdfDataType> {
+  const PdfDictStream({
+    required this.object,
+    Map<String, PdfDataType> values = const <String, PdfDataType>{},
+    required this.data,
+    this.isBinary = false,
+  }) : super.values(values);
+
+  final Uint8List data;
+
+  final PdfObject object;
+
+  final bool isBinary;
+
+  @override
+  void output(PdfStream s) {
+    final _values = PdfDict(values);
+
+    Uint8List? _data;
+
+    if (_values.containsKey('/Filter')) {
+      // The data is already in the right format
+      _data = data;
+    } else if (object.pdfDocument.deflate != null) {
+      // Compress the data
+      final newData = Uint8List.fromList(object.pdfDocument.deflate!(data));
+      if (newData.lengthInBytes < data.lengthInBytes) {
+        _values['/Filter'] = const PdfName('/FlateDecode');
+        _data = newData;
+      }
+    }
+
+    if (_data == null) {
+      if (isBinary) {
+        // This is an Ascii85 stream
+        final e = Ascii85Encoder();
+        _data = e.convert(data);
+        _values['/Filter'] = const PdfName('/ASCII85Decode');
+      } else {
+        // This is a non-deflated stream
+        _data = data;
+      }
+    }
+
+    if (object.pdfDocument.encryption != null) {
+      _data = object.pdfDocument.encryption!.encrypt(_data, object);
+    }
+
+    _values['/Length'] = PdfNum(_data.length);
+
+    _values.output(s);
+    s.putString('stream\n');
+    s.putBytes(_data);
+    s.putString('\nendstream\n');
+  }
 }
 
 class PdfColorType extends PdfDataType {

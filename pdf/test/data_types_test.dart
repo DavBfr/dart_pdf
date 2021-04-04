@@ -38,6 +38,10 @@ void main() {
     expect(const PdfNum(50.1).toString(), '50.1');
   });
 
+  test('PdfDataTypes NumList', () {
+    expect(const PdfNumList([0, 1, 2, 3]).toString(), '0 1 2 3');
+  });
+
   test('PdfDataTypes String', () {
     expect(PdfString.fromString('test').toString(), '(test)');
     expect(PdfString.fromString('Zoé').toString(), '(Zoé)');
@@ -105,8 +109,8 @@ void main() {
         '/String': PdfString.fromString('hello'),
         '/Null': const PdfNull(),
         '/Indirect': const PdfIndirect(55, 0),
-        '/Array': PdfArray<PdfDataType>([]),
-        '/Dict': PdfDict<PdfDataType>({}),
+        '/Array': PdfArray(),
+        '/Dict': PdfDict(),
       }).toString(),
       '<</Name/Value/Bool true/Num 42/String(hello)/Null null/Indirect 55 0 R/Array[]/Dict<<>>>>',
     );
