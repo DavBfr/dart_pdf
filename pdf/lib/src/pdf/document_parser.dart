@@ -32,6 +32,8 @@ abstract class PdfDocumentParserBase {
   /// The offset of the previous cross reference table
   int get xrefOffset;
 
+  PdfVersion get version => PdfVersion.pdf_1_4;
+
   /// Import the existing objects into the new PDF document
   void mergeDocument(PdfDocument pdfDocument);
 }

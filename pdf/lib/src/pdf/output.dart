@@ -16,6 +16,7 @@
 
 import 'catalog.dart';
 import 'data_types.dart';
+import 'document.dart';
 import 'encryption.dart';
 import 'info.dart';
 import 'object.dart';
@@ -26,10 +27,23 @@ import 'xref.dart';
 /// PDF document writer
 class PdfOutput {
   /// This creates a Pdf [PdfStream]
-  PdfOutput(this.os) {
-    os.putString('%PDF-1.4\n');
+  PdfOutput(this.os, this.version) {
+    String v;
+    switch (version) {
+      case PdfVersion.pdf_1_4:
+        v = '1.4';
+        break;
+      case PdfVersion.pdf_1_5:
+        v = '1.5';
+        break;
+    }
+
+    os.putString('%PDF-$v\n');
     os.putBytes(const <int>[0x25, 0xC2, 0xA5, 0xC2, 0xB1, 0xC3, 0xAB, 0x0A]);
   }
+
+  /// Pdf version to output
+  final PdfVersion version;
 
   /// This is the actual [PdfStream] used to write to.
   final PdfStream os;
@@ -48,6 +62,9 @@ class PdfOutput {
 
   /// This is used to track the /Sign object (signature)
   PdfSignature? signatureID;
+
+  /// Generate a compressed cross reference table
+  bool get isCompressed => version.index > PdfVersion.pdf_1_4.index;
 
   /// This method writes a [PdfObject] to the stream.
   void write(PdfObject ob) {
@@ -72,12 +89,6 @@ class PdfOutput {
     if (rootID == null) {
       throw Exception('Root object is not present in document');
     }
-
-    final _xref = os.offset;
-    xref.output(os);
-
-    // now the trailer object
-    os.putString('trailer\n');
 
     final params = PdfDict();
 
@@ -104,9 +115,22 @@ class PdfOutput {
       params['/Prev'] = PdfNum(rootID!.pdfDocument.prev!.xrefOffset);
     }
 
-    // end the trailer object
-    params.output(os);
-    os.putString('\nstartxref\n$_xref\n%%EOF\n');
+    final _xref = os.offset;
+    if (isCompressed) {
+      xref.outputCompressed(rootID!, os, params);
+    } else {
+      xref.output(os);
+    }
+
+    if (!isCompressed) {
+      // the trailer object
+      os.putString('trailer\n');
+      params.output(os);
+      os.putByte(0x0a);
+    }
+
+    // the reference to the xref object
+    os.putString('startxref\n$_xref\n%%EOF\n');
 
     if (signatureID != null) {
       await signatureID!.writeSignature(os);

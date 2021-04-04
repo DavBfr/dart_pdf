@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import 'dart:typed_data';
+
 import 'package:pdf/src/pdf/stream.dart';
 
 import 'data_types.dart';
@@ -43,6 +45,24 @@ class PdfXref {
       return rs + ' f ';
     }
     return rs + ' n ';
+  }
+
+  /// The xref in the format of the compressed xref section in the Pdf file
+  int cref(ByteData o, int ofs, List<int> w) {
+    assert(w.length >= 3);
+
+    void setVal(int l, int v) {
+      for (var n = 0; n < l; n++) {
+        o.setUint8(ofs, (v >> (l - n - 1) * 8) & 0xff);
+        ofs++;
+      }
+    }
+
+    setVal(w[0], 1);
+    setVal(w[1], offset);
+    setVal(w[2], generation);
+
+    return ofs;
   }
 
   @override
@@ -112,5 +132,71 @@ class PdfXrefTable extends PdfDataType {
 
     // now write the last block
     _writeblock(s, firstid, block);
+  }
+
+  /// Output a compressed cross-reference table
+  void outputCompressed(PdfObject object, PdfStream s, PdfDict params) {
+    // Write this object too
+    final id = offsets.last.id + 1;
+    final offset = s.offset;
+    offsets.add(PdfXref(id, offset));
+
+    // Sort all references
+    offsets.sort((a, b) => a.id.compareTo(b.id));
+
+    s.putString('$id 0 obj\n');
+
+    params['/Type'] = const PdfName('/XRef');
+    params['/Size'] = PdfNum(id + 1);
+
+    var firstid = 0; // First id in block
+    var lastid = 0; // The last id used
+    final blocks = <int>[]; // xrefs in this block first, count
+
+    // We need block 0 to exist
+    blocks.add(firstid);
+
+    for (var x in offsets) {
+      // check to see if block is in range
+      if (x.id != (lastid + 1)) {
+        // no, so store this block, and reset
+        blocks.add(lastid - firstid + 1);
+        firstid = x.id;
+        blocks.add(firstid);
+      }
+      lastid = x.id;
+    }
+    blocks.add(lastid - firstid + 1);
+
+    if (!(blocks.length == 2 && blocks[0] == 0 && blocks[1] == id + 1)) {
+      params['/Index'] = PdfArray.fromNum(blocks);
+    }
+
+    var bytes = 2; // A pdf less than 256 bytes is unlikely
+    while (1 << (bytes * 8) < offset) {
+      bytes++;
+    }
+
+    final w = [1, bytes, 1];
+    params['/W'] = PdfArray.fromNum(w);
+    final wl = w.reduce((a, b) => a + b);
+
+    final o = ByteData((offsets.length + 2) * wl);
+    var ofs = 0;
+    // Write offset zero, all zeros
+    ofs += wl;
+
+    for (var x in offsets) {
+      ofs = x.cref(o, ofs, w);
+    }
+
+    // Write the object
+    PdfDictStream(
+      object: object,
+      data: o.buffer.asUint8List(),
+      isBinary: true,
+      encrypt: false,
+      values: params.values,
+    ).output(s);
   }
 }

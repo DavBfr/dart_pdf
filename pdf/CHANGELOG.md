@@ -1,11 +1,12 @@
 # Changelog
 
-## 3.1.1
+## 3.2.0
 
 - Fix documentation
 - Add Positioned.fill()
 - Improve GraphicState
 - Add SVG Color filter
+- Implement Compressed XREF
 
 ## 3.1.0
 

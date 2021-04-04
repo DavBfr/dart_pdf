@@ -57,7 +57,7 @@ class PdfCatalog extends PdfObjectDict {
     super.prepare();
 
     /// the PDF specification version, overrides the header version starting from 1.4
-    params['/Version'] = PdfName('/${pdfDocument.version}');
+    params['/Version'] = PdfName('/${pdfDocument.versionString}');
 
     params['/Pages'] = pdfPageList.ref();
 

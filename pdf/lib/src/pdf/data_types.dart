@@ -600,6 +600,7 @@ class PdfDictStream extends PdfDict<PdfDataType> {
     Map<String, PdfDataType> values = const <String, PdfDataType>{},
     required this.data,
     this.isBinary = false,
+    this.encrypt = true,
   }) : super.values(values);
 
   final Uint8List data;
@@ -607,6 +608,8 @@ class PdfDictStream extends PdfDict<PdfDataType> {
   final PdfObject object;
 
   final bool isBinary;
+
+  final bool encrypt;
 
   @override
   void output(PdfStream s) {
@@ -638,7 +641,7 @@ class PdfDictStream extends PdfDict<PdfDataType> {
       }
     }
 
-    if (object.pdfDocument.encryption != null) {
+    if (encrypt && object.pdfDocument.encryption != null) {
       _data = object.pdfDocument.encryption!.encrypt(_data, object);
     }
 

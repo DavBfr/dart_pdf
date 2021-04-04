@@ -35,6 +35,15 @@ import 'page_list.dart';
 import 'signature.dart';
 import 'stream.dart';
 
+/// PDF version to generate
+enum PdfVersion {
+  /// PDF 1.4
+  pdf_1_4,
+
+  /// PDF 1.5 to 1.7
+  pdf_1_5,
+}
+
 /// Display hint for the PDF viewer
 enum PdfPageMode {
   /// This page mode indicates that the document
@@ -69,6 +78,7 @@ class PdfDocument {
     PdfPageMode pageMode = PdfPageMode.none,
     DeflateCallback? deflate,
     bool compress = true,
+    this.version = PdfVersion.pdf_1_4,
   })  : deflate = compress ? (deflate ?? defaultDeflate) : null,
         prev = null,
         _objser = 1 {
@@ -84,7 +94,8 @@ class PdfDocument {
     DeflateCallback? deflate,
     bool compress = true,
   })  : deflate = compress ? (deflate ?? defaultDeflate) : null,
-        _objser = prev!.size {
+        _objser = prev!.size,
+        version = prev.version {
     // Now create some standard objects
     pdfPageList = PdfPageList(this);
     pdfNames = PdfNames(this);
@@ -106,6 +117,9 @@ class PdfDocument {
 
   /// This is the Catalog object, which is required by each Pdf Document
   late PdfCatalog catalog;
+
+  /// PDF version to generate
+  final PdfVersion version;
 
   /// This is the info object. Although this is an optional object, we
   /// include it.
@@ -139,7 +153,7 @@ class PdfDocument {
   PdfGraphicStates? _graphicStates;
 
   /// The PDF specification version
-  final String version = '1.7';
+  final String versionString = '1.7';
 
   /// This holds the current fonts
   final Set<PdfFont> fonts = <PdfFont>{};
@@ -188,7 +202,7 @@ class PdfDocument {
 
   /// This writes the document to an OutputStream.
   Future<void> _write(PdfStream os) async {
-    final pos = PdfOutput(os);
+    final pos = PdfOutput(os, version);
 
     // Write each object to the [PdfStream]. We call via the output
     // as that builds the xref table

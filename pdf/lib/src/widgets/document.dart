@@ -26,6 +26,7 @@ class Document {
     PdfPageMode pageMode = PdfPageMode.none,
     DeflateCallback? deflate,
     bool compress = true,
+    PdfVersion version = PdfVersion.pdf_1_4,
     this.theme,
     String? title,
     String? author,
@@ -37,6 +38,7 @@ class Document {
           pageMode: pageMode,
           deflate: deflate,
           compress: compress,
+          version: version,
         ) {
     if (title != null ||
         author != null ||
