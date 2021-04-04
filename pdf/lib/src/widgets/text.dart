@@ -55,7 +55,7 @@ abstract class _Span {
 
   void paint(
     Context context,
-    TextStyle? style,
+    TextStyle style,
     double textScaleFactor,
     PdfPoint point,
   );
@@ -261,18 +261,18 @@ class _Word extends _Span {
   @override
   void paint(
     Context context,
-    TextStyle? style,
+    TextStyle style,
     double textScaleFactor,
     PdfPoint point,
   ) {
     context.canvas.drawString(
-      style!.font!.getFont(context)!,
+      style.font!.getFont(context)!,
       style.fontSize! * textScaleFactor,
       text,
       point.x + offset.x,
       point.y + offset.y,
-      mode: style.renderingMode,
-      charSpace: style.letterSpacing,
+      mode: style.renderingMode ?? PdfTextRenderingMode.fill,
+      charSpace: style.letterSpacing ?? 0,
     );
   }
 
@@ -312,10 +312,10 @@ class _WidgetSpan extends _Span {
   double get top => 0;
 
   @override
-  double? get width => widget.box!.width;
+  double get width => widget.box!.width;
 
   @override
-  double? get height => widget.box!.height;
+  double get height => widget.box!.height;
 
   @override
   PdfPoint get offset => widget.box!.offset;
@@ -755,7 +755,7 @@ class RichText extends Widget {
           style,
         );
 
-        if (offsetX + ws.width! > constraintWidth && spanCount > 0) {
+        if (offsetX + ws.width > constraintWidth && spanCount > 0) {
           overflow = true;
           lines.add(_Line(
             this,
@@ -786,8 +786,8 @@ class RichText extends Widget {
         final baseline = span.baseline! * textScaleFactor;
         top = math.min(top ?? baseline, baseline);
         bottom = math.max(
-          bottom ?? ws.height! + baseline,
-          ws.height! + baseline,
+          bottom ?? ws.height + baseline,
+          ws.height + baseline,
         );
 
         ws.offset = PdfPoint(offsetX, -offsetY + baseline);
@@ -804,7 +804,7 @@ class RichText extends Widget {
           ),
         );
 
-        offsetX += ws.left + ws.width!;
+        offsetX += ws.left + ws.width;
       }
 
       return true;
@@ -897,7 +897,7 @@ class RichText extends Widget {
 
       span.paint(
         context,
-        currentStyle,
+        currentStyle!,
         textScaleFactor,
         PdfPoint(box!.left, box!.top),
       );

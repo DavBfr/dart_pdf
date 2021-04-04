@@ -123,7 +123,7 @@ abstract class PdfAnnotBase {
   /// Color
   final PdfColor? color;
 
-  final Map<String, PdfDataType> _appearances = <String, PdfDataType>{};
+  final _appearances = <String, PdfDataType>{};
 
   PdfName? _as;
 
@@ -171,19 +171,13 @@ abstract class PdfAnnotBase {
     }
 
     if (matrix != null) {
-      s.params['/Matrix'] = PdfArray.fromNum(<double>[
-        matrix[0],
-        matrix[1],
-        matrix[4],
-        matrix[5],
-        matrix[12],
-        matrix[13]
-      ]);
+      s.params['/Matrix'] = PdfArray.fromNum(
+          [matrix[0], matrix[1], matrix[4], matrix[5], matrix[12], matrix[13]]);
     }
 
     final bbox = boundingBox ?? PdfRect.fromPoints(PdfPoint.zero, rect.size);
     s.params['/BBox'] =
-        PdfArray.fromNum(<double?>[bbox.x, bbox.y, bbox.width, bbox.height]);
+        PdfArray.fromNum([bbox.x, bbox.y, bbox.width, bbox.height]);
     final g = PdfGraphics(s, s.buf);
 
     if (selected && name != null) {
@@ -196,14 +190,14 @@ abstract class PdfAnnotBase {
   @mustCallSuper
   void build(PdfPage page, PdfObject object, PdfDict params) {
     params['/Subtype'] = PdfName(subtype);
-    params['/Rect'] = PdfArray.fromNum(
-        <double?>[rect.left, rect.bottom, rect.right, rect.top]);
+    params['/Rect'] =
+        PdfArray.fromNum([rect.left, rect.bottom, rect.right, rect.top]);
 
     params['/P'] = page.ref();
 
     // handle the border
     if (border == null) {
-      params['/Border'] = PdfArray.fromNum(const <int>[0, 0, 0]);
+      params['/Border'] = PdfArray.fromNum(const [0, 0, 0]);
     } else {
       params['/BS'] = border!.ref();
     }
@@ -283,7 +277,7 @@ class PdfAnnotNamedLink extends PdfAnnotBase {
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
     params['/A'] = PdfDict(
-      <String, PdfDataType>{
+      {
         '/S': const PdfName('/GoTo'),
         '/D': PdfSecString.fromString(object, dest),
       },
@@ -315,7 +309,7 @@ class PdfAnnotUrlLink extends PdfAnnotBase {
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
     params['/A'] = PdfDict(
-      <String, PdfDataType>{
+      {
         '/S': const PdfName('/URI'),
         '/URI': PdfSecString.fromString(object, url),
       },

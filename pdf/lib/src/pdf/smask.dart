@@ -30,19 +30,19 @@ class PdfSoftMask {
       bool knockout = false,
       bool invert = false}) {
     _mask = PdfGraphicXObject(document);
-    _mask!.params['/BBox'] = PdfArray.fromNum([
+    _mask.params['/BBox'] = PdfArray.fromNum([
       boundingBox.x,
       boundingBox.y,
       boundingBox.width,
       boundingBox.height,
     ]);
     if (isolated) {
-      _mask!.params['/I'] = const PdfBool(true);
+      _mask.params['/I'] = const PdfBool(true);
     }
     if (knockout) {
-      _mask!.params['/K'] = const PdfBool(true);
+      _mask.params['/K'] = const PdfBool(true);
     }
-    _graphics = PdfGraphics(_mask, _mask!.buf);
+    _graphics = PdfGraphics(_mask, _mask.buf);
 
     if (invert) {
       _tr = PdfFunction(
@@ -54,7 +54,7 @@ class PdfSoftMask {
 
   final PdfDocument document;
 
-  PdfGraphicXObject? _mask;
+  late PdfGraphicXObject _mask;
 
   PdfGraphics? _graphics;
 
@@ -65,7 +65,7 @@ class PdfSoftMask {
   PdfDict output() {
     final params = PdfDict({
       '/S': const PdfName('/Luminosity'),
-      '/G': _mask!.ref(),
+      '/G': _mask.ref(),
     });
 
     if (_tr != null) {

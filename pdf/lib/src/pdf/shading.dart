@@ -64,7 +64,7 @@ class PdfShading extends PdfObject {
 
     params['/ShadingType'] = PdfNum(shadingType.index + 2);
     if (boundingBox != null) {
-      params['/BBox'] = PdfArray.fromNum(<double?>[
+      params['/BBox'] = PdfArray.fromNum([
         boundingBox!.left,
         boundingBox!.bottom,
         boundingBox!.right,
@@ -75,13 +75,12 @@ class PdfShading extends PdfObject {
     params['/ColorSpace'] = const PdfName('/DeviceRGB');
 
     if (shadingType == PdfShadingType.axial) {
-      params['/Coords'] =
-          PdfArray.fromNum(<double?>[start.x, start.y, end.x, end.y]);
+      params['/Coords'] = PdfArray.fromNum([start.x, start.y, end.x, end.y]);
     } else if (shadingType == PdfShadingType.radial) {
       assert(radius0 != null);
       assert(radius1 != null);
       params['/Coords'] = PdfArray.fromNum(
-          <double?>[start.x, start.y, radius0, end.x, end.y, radius1]);
+          [start.x, start.y, radius0!, end.x, end.y, radius1!]);
     }
     // params['/Domain'] = PdfArray.fromNum(<num>[0, 1]);
     if (extendStart || extendEnd) {

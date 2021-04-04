@@ -115,7 +115,7 @@ class PdfNum extends PdfDataType {
 class PdfNumList extends PdfDataType {
   PdfNumList(this.values);
 
-  final List<num?> values;
+  final List<num> values;
 
   @override
   void output(PdfStream s) {
@@ -123,7 +123,7 @@ class PdfNumList extends PdfDataType {
       if (n > 0) {
         s.putByte(0x20);
       }
-      PdfNum(values[n]!).output(s);
+      PdfNum(values[n]).output(s);
     }
   }
 
@@ -448,13 +448,13 @@ class PdfArray<T extends PdfDataType> extends PdfDataType {
     }
   }
 
-  static PdfArray<PdfIndirect> fromObjects(List<PdfObject?> objects) {
+  static PdfArray<PdfIndirect> fromObjects(List<PdfObject> objects) {
     return PdfArray(
-        objects.map<PdfIndirect>((PdfObject? e) => e!.ref()).toList());
+        objects.map<PdfIndirect>((PdfObject e) => e.ref()).toList());
   }
 
-  static PdfArray<PdfNum> fromNum(List<num?> list) {
-    return PdfArray(list.map<PdfNum>((num? e) => PdfNum(e!)).toList());
+  static PdfArray<PdfNum> fromNum(List<num> list) {
+    return PdfArray(list.map<PdfNum>((num e) => PdfNum(e)).toList());
   }
 
   final List<T> values = <T>[];
