@@ -19,11 +19,12 @@ import 'data_types.dart';
 import 'document.dart';
 import 'names.dart';
 import 'object.dart';
+import 'object_dict.dart';
 import 'outline.dart';
 import 'page_list.dart';
 
 /// Pdf Catalog object
-class PdfCatalog extends PdfObject {
+class PdfCatalog extends PdfObjectDict {
   /// This constructs a Pdf Catalog object
   PdfCatalog(
     PdfDocument pdfDocument,

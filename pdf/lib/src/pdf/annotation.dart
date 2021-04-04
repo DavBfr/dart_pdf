@@ -25,12 +25,13 @@ import 'font.dart';
 import 'graphic_stream.dart';
 import 'graphics.dart';
 import 'object.dart';
+import 'object_dict.dart';
 import 'page.dart';
 import 'point.dart';
 import 'rect.dart';
 import 'stream.dart';
 
-class PdfAnnot extends PdfObject {
+class PdfAnnot extends PdfObjectDict {
   PdfAnnot(this.pdfPage, this.annot)
       : super(pdfPage.pdfDocument, type: '/Annot') {
     pdfPage.annotations.add(this);

@@ -19,11 +19,11 @@ import 'dart:typed_data';
 import 'ascii85.dart';
 import 'data_types.dart';
 import 'document.dart';
-import 'object.dart';
+import 'object_dict.dart';
 import 'stream.dart';
 
 /// Stream Object
-class PdfObjectStream extends PdfObject {
+class PdfObjectStream extends PdfObjectDict {
   /// Constructs a stream object to store some data
   PdfObjectStream(
     PdfDocument pdfDocument, {

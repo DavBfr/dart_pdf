@@ -17,11 +17,12 @@
 import 'data_types.dart';
 import 'document.dart';
 import 'object.dart';
+import 'object_dict.dart';
 import 'stream.dart';
 
 enum PdfSigFlags { signaturesExist, appendOnly }
 
-class PdfSignature extends PdfObject {
+class PdfSignature extends PdfObjectDict {
   PdfSignature(
     PdfDocument pdfDocument, {
     required this.crypto,

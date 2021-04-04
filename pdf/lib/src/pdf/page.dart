@@ -19,7 +19,7 @@ import 'data_types.dart';
 import 'document.dart';
 import 'graphic_stream.dart';
 import 'graphics.dart';
-import 'object.dart';
+import 'object_dict.dart';
 import 'object_stream.dart';
 import 'page_format.dart';
 
@@ -39,7 +39,7 @@ enum PdfPageRotation {
 }
 
 /// Page object, which will hold any contents for this page.
-class PdfPage extends PdfObject with PdfGraphicStream {
+class PdfPage extends PdfObjectDict with PdfGraphicStream {
   /// This constructs a Page object, which will hold any contents for this
   /// page.
   PdfPage(

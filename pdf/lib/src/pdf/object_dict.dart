@@ -16,22 +16,26 @@
 
 import 'data_types.dart';
 import 'document.dart';
-import 'object_dict.dart';
-import 'page.dart';
+import 'object.dart';
 
-/// PdfPageList object
-class PdfPageList extends PdfObjectDict {
-  /// This constructs a [PdfPageList] object.
-  PdfPageList(PdfDocument pdfDocument) : super(pdfDocument, type: '/Pages');
+/// Object with a PdfDict used in the PDF file
+class PdfObjectDict extends PdfObject {
+  /// This is usually called by extensors to this class, and sets the
+  /// Pdf Object Type
+  PdfObjectDict(
+    PdfDocument pdfDocument, {
+    String? type,
+    int objgen = 0,
+    int? objser,
+  }) : super(pdfDocument, objgen: objgen, objser: objser) {
+    if (type != null) {
+      params['/Type'] = PdfName(type);
+    }
+  }
 
-  /// This holds the pages
-  final pages = <PdfPage>[];
+  /// This is the object parameters.
+  final PdfDict params = PdfDict();
 
   @override
-  void prepare() {
-    super.prepare();
-
-    params['/Kids'] = PdfArray.fromObjects(pages);
-    params['/Count'] = PdfNum(pages.length);
-  }
+  String toString() => '$runtimeType $params';
 }

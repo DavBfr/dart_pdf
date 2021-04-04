@@ -16,11 +16,12 @@
 
 import 'data_types.dart';
 import 'object.dart';
+import 'object_dict.dart';
 import 'object_stream.dart';
 import 'ttffont.dart';
 
 /// Font descriptor object
-class PdfFontDescriptor extends PdfObject {
+class PdfFontDescriptor extends PdfObjectDict {
   /// Create a Font descriptor object
   PdfFontDescriptor(
     this.ttfFont,

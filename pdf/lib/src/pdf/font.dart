@@ -19,14 +19,14 @@ import 'dart:convert';
 import 'data_types.dart';
 import 'document.dart';
 import 'font_metrics.dart';
-import 'object.dart';
+import 'object_dict.dart';
 import 'point.dart';
 import 'stream.dart';
 import 'type1_font.dart';
 import 'type1_fonts.dart';
 
 /// Pdf font object
-abstract class PdfFont extends PdfObject {
+abstract class PdfFont extends PdfObjectDict {
   /// Constructs a [PdfFont]. This will attempt to map the font from a known
   /// font name to that in Pdf, defaulting to Helvetica if not possible.
   PdfFont.create(PdfDocument pdfDocument, {required this.subtype})
