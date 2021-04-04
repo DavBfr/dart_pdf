@@ -17,7 +17,7 @@
 import 'color.dart';
 import 'data_types.dart';
 import 'document.dart';
-import 'object.dart';
+import 'object_dict.dart';
 import 'page.dart';
 import 'rect.dart';
 
@@ -46,7 +46,7 @@ enum PdfOutlineStyle {
 }
 
 /// Pdf Outline object
-class PdfOutline extends PdfObject {
+class PdfOutline extends PdfObjectDict {
   /// Constructs a Pdf Outline object.
   /// When selected, the specified region is displayed.
   PdfOutline(

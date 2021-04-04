@@ -19,10 +19,10 @@ import 'package:vector_math/vector_math_64.dart';
 import 'data_types.dart';
 import 'document.dart';
 import 'graphic_state.dart';
-import 'object.dart';
+import 'object_dict.dart';
 import 'shading.dart';
 
-abstract class PdfPattern extends PdfObject {
+abstract class PdfPattern extends PdfObjectDict {
   PdfPattern(PdfDocument pdfDocument, this.patternType, this.matrix)
       : super(pdfDocument);
 

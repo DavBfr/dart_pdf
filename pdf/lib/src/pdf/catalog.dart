@@ -18,7 +18,6 @@ import 'annotation.dart';
 import 'data_types.dart';
 import 'document.dart';
 import 'names.dart';
-import 'object.dart';
 import 'object_dict.dart';
 import 'outline.dart';
 import 'page_list.dart';

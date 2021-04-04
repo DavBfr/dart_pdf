@@ -17,24 +17,15 @@
 import 'data_types.dart';
 import 'document.dart';
 import 'object.dart';
-import 'stream.dart';
 
 /// An array object
-class PdfArrayObject extends PdfObject {
+class PdfArrayObject extends PdfObject<PdfArray> {
   /// Creates an array object
   PdfArrayObject(
     PdfDocument pdfDocument,
-    this.array,
-  ) : super(pdfDocument);
+    PdfArray array,
+  ) : super(pdfDocument, params: array);
 
   /// The array
-  final PdfArray array;
-
-  @override
-  void writeContent(PdfStream os) {
-    super.writeContent(os);
-
-    array.output(os);
-    os.putBytes(<int>[0x0a]);
-  }
+  PdfArray get array => params;
 }

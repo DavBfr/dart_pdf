@@ -18,9 +18,10 @@ import 'dart:typed_data';
 
 import 'document.dart';
 import 'object.dart';
+import 'object_dict.dart';
 
 /// Encryption object
-abstract class PdfEncryption extends PdfObject {
+abstract class PdfEncryption extends PdfObjectDict {
   /// Creates an encryption object
   PdfEncryption(PdfDocument pdfDocument) : super(pdfDocument);
 

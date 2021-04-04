@@ -21,7 +21,7 @@ import 'package:meta/meta.dart';
 import 'data_types.dart';
 import 'document.dart';
 import 'function.dart';
-import 'object.dart';
+import 'object_dict.dart';
 import 'smask.dart';
 
 enum PdfBlendMode {
@@ -159,7 +159,7 @@ class PdfGraphicState {
 }
 
 /// Stores all the graphic states used in the document
-class PdfGraphicStates extends PdfObject {
+class PdfGraphicStates extends PdfObjectDict {
   /// Create a new Graphic States object
   PdfGraphicStates(PdfDocument pdfDocument) : super(pdfDocument);
 

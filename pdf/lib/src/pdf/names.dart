@@ -16,11 +16,11 @@
 
 import 'data_types.dart';
 import 'document.dart';
-import 'object.dart';
+import 'object_dict.dart';
 import 'page.dart';
 
 /// Pdf Name object
-class PdfNames extends PdfObject {
+class PdfNames extends PdfObjectDict {
   /// This constructs a Pdf Name object
   PdfNames(PdfDocument pdfDocument) : super(pdfDocument);
 

@@ -17,13 +17,13 @@
 import 'data_types.dart';
 import 'document.dart';
 import 'function.dart';
-import 'object.dart';
+import 'object_dict.dart';
 import 'point.dart';
 import 'rect.dart';
 
 enum PdfShadingType { axial, radial }
 
-class PdfShading extends PdfObject {
+class PdfShading extends PdfObjectDict {
   PdfShading(
     PdfDocument pdfDocument, {
     required this.shadingType,

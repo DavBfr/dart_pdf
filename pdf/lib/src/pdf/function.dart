@@ -17,10 +17,10 @@
 import 'color.dart';
 import 'data_types.dart';
 import 'document.dart';
-import 'object.dart';
+import 'object_dict.dart';
 import 'object_stream.dart';
 
-abstract class PdfBaseFunction extends PdfObject {
+abstract class PdfBaseFunction extends PdfObjectDict {
   PdfBaseFunction(PdfDocument pdfDocument) : super(pdfDocument);
 
   factory PdfBaseFunction.colorsAndStops(

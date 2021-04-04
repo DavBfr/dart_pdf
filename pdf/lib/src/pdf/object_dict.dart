@@ -17,9 +17,10 @@
 import 'data_types.dart';
 import 'document.dart';
 import 'object.dart';
+import 'stream.dart';
 
 /// Object with a PdfDict used in the PDF file
-class PdfObjectDict extends PdfObject {
+class PdfObjectDict extends PdfObject<PdfDict> {
   /// This is usually called by extensors to this class, and sets the
   /// Pdf Object Type
   PdfObjectDict(
@@ -27,15 +28,17 @@ class PdfObjectDict extends PdfObject {
     String? type,
     int objgen = 0,
     int? objser,
-  }) : super(pdfDocument, objgen: objgen, objser: objser) {
+  }) : super(pdfDocument, params: PdfDict(), objgen: objgen, objser: objser) {
     if (type != null) {
       params['/Type'] = PdfName(type);
     }
   }
 
-  /// This is the object parameters.
-  final PdfDict params = PdfDict();
-
   @override
-  String toString() => '$runtimeType $params';
+  void writeContent(PdfStream os) {
+    if (params.isNotEmpty) {
+      params.output(os);
+      os.putByte(0x0a);
+    }
+  }
 }

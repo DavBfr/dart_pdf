@@ -17,7 +17,7 @@
 import 'annotation.dart';
 import 'data_types.dart';
 import 'document.dart';
-import 'object.dart';
+import 'object_dict.dart';
 
 /// Border style
 enum PdfBorderStyle {
@@ -40,7 +40,7 @@ enum PdfBorderStyle {
 }
 
 /// Defines a border object
-class PdfBorder extends PdfObject {
+class PdfBorder extends PdfObjectDict {
   /// Creates a border using the predefined styles in [PdfAnnot].
   PdfBorder(
     PdfDocument pdfDocument,

@@ -21,12 +21,12 @@ import 'document.dart';
 import 'stream.dart';
 
 /// Base Object used in the PDF file
-class PdfObject {
+abstract class PdfObject<T extends PdfDataType> {
   /// This is usually called by extensors to this class, and sets the
   /// Pdf Object Type
   PdfObject(
     this.pdfDocument, {
-    // String? type,
+    required this.params,
     this.objgen = 0,
     int? objser,
   }) : objser = objser ?? pdfDocument.genSerial() {
@@ -34,7 +34,7 @@ class PdfObject {
   }
 
   /// This is the object parameters.
-  final PdfDict params = PdfDict();
+  final T params;
 
   /// This is the unique serial number for this object.
   final int objser;
@@ -64,10 +64,8 @@ class PdfObject {
   }
 
   void writeContent(PdfStream os) {
-    if (params.isNotEmpty) {
-      params.output(os);
-      os.putString('\n');
-    }
+    params.output(os);
+    os.putByte(0x0a);
   }
 
   /// The write method should call this after writing anything to the

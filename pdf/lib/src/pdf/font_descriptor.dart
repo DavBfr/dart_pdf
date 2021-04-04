@@ -15,7 +15,6 @@
  */
 
 import 'data_types.dart';
-import 'object.dart';
 import 'object_dict.dart';
 import 'object_stream.dart';
 import 'ttffont.dart';

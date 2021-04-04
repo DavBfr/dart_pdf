@@ -16,10 +16,10 @@
 
 import 'data_types.dart';
 import 'document.dart';
-import 'object.dart';
+import 'object_dict.dart';
 
 /// Information object
-class PdfInfo extends PdfObject {
+class PdfInfo extends PdfObjectDict {
   /// Create an information object
   PdfInfo(PdfDocument pdfDocument,
       {this.title,

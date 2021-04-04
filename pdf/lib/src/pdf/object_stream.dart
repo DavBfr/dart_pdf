@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import 'dart:typed_data';
-
-import 'ascii85.dart';
 import 'data_types.dart';
 import 'document.dart';
 import 'object_dict.dart';
@@ -37,47 +34,13 @@ class PdfObjectStream extends PdfObjectDict {
   /// defines if the stream needs to be converted to ascii85
   final bool isBinary;
 
-  Uint8List? _data;
-
-  @override
-  void prepare() {
-    super.prepare();
-
-    if (params.containsKey('/Filter') && _data == null) {
-      // The data is already in the right format
-      _data = buf.output();
-    } else if (pdfDocument.deflate != null) {
-      final original = buf.output();
-      final newData = Uint8List.fromList(pdfDocument.deflate!(original));
-      if (newData.lengthInBytes < original.lengthInBytes) {
-        params['/Filter'] = const PdfName('/FlateDecode');
-        _data = newData;
-      }
-    }
-
-    if (_data == null) {
-      if (isBinary) {
-        // This is an Ascii85 stream
-        final e = Ascii85Encoder();
-        _data = e.convert(buf.output());
-        params['/Filter'] = const PdfName('/ASCII85Decode');
-      } else {
-        // This is a non-deflated stream
-        _data = buf.output();
-      }
-    }
-    if (pdfDocument.encryption != null) {
-      _data = pdfDocument.encryption!.encrypt(_data!, this);
-    }
-    params['/Length'] = PdfNum(_data!.length);
-  }
-
   @override
   void writeContent(PdfStream os) {
-    super.writeContent(os);
-
-    os.putString('stream\n');
-    os.putBytes(_data!);
-    os.putString('\nendstream\n');
+    PdfDictStream(
+      object: this,
+      isBinary: isBinary,
+      values: params.values,
+      data: buf.output(),
+    ).output(os);
   }
 }
