@@ -526,7 +526,7 @@ class PdfDict<T extends PdfDataType> extends PdfDataType {
     );
   }
 
-  final Map<String, T> values = <String, T>{};
+  final values = <String, T>{};
 
   bool get isNotEmpty => values.isNotEmpty;
 

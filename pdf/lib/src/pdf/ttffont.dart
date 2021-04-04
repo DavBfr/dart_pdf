@@ -111,19 +111,19 @@ class PdfTtfFont extends PdfFont {
     file.buf.putBytes(data);
     file.params['/Length1'] = PdfNum(data.length);
 
-    final descendantFont = PdfDict(<String, PdfDataType>{
+    final descendantFont = PdfDict({
       '/Type': const PdfName('/Font'),
       '/BaseFont': PdfName('/' + fontName),
       '/FontFile2': file.ref(),
       '/FontDescriptor': descriptor.ref(),
-      '/W': PdfArray(<PdfDataType>[
+      '/W': PdfArray([
         const PdfNum(0),
         widthsObject.ref(),
       ]),
       '/CIDToGIDMap': const PdfName('/Identity'),
       '/DW': const PdfNum(1000),
       '/Subtype': const PdfName('/CIDFontType2'),
-      '/CIDSystemInfo': PdfDict(<String, PdfDataType>{
+      '/CIDSystemInfo': PdfDict({
         '/Supplement': const PdfNum(0),
         '/Registry': PdfSecString.fromString(this, 'Adobe'),
         '/Ordering': PdfSecString.fromString(this, 'Identity-H'),
@@ -132,7 +132,7 @@ class PdfTtfFont extends PdfFont {
 
     params['/BaseFont'] = PdfName('/' + fontName);
     params['/Encoding'] = const PdfName('/Identity-H');
-    params['/DescendantFonts'] = PdfArray(<PdfDataType>[descendantFont]);
+    params['/DescendantFonts'] = PdfArray([descendantFont]);
     params['/ToUnicode'] = unicodeCMap.ref();
 
     charMin = 0;

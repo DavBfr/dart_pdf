@@ -112,7 +112,7 @@ class PdfOutput {
       params['/Root'] = rootID!.ref();
       final id =
           PdfString(rootID!.pdfDocument.documentID, PdfStringFormat.binary);
-      params['/ID'] = PdfArray(<PdfDataType>[id, id]);
+      params['/ID'] = PdfArray([id, id]);
     } else {
       throw Exception('Root object is not present in document');
     }

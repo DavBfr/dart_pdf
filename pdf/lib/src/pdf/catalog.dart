@@ -73,7 +73,7 @@ class PdfCatalog extends PdfObject {
     params['/PageMode'] = PdfName(_PdfPageModes[pageMode.index]);
 
     if (pdfDocument.sign != null) {
-      params['/Perms'] = PdfDict(<String, PdfDataType>{
+      params['/Perms'] = PdfDict({
         '/DocMDP': pdfDocument.sign!.ref(),
       });
     }
@@ -88,7 +88,7 @@ class PdfCatalog extends PdfObject {
     }
 
     if (widgets.isNotEmpty) {
-      params['/AcroForm'] = PdfDict(<String, PdfDataType>{
+      params['/AcroForm'] = PdfDict({
         '/SigFlags': PdfNum(pdfDocument.sign?.flagsValue ?? 0),
         '/Fields': PdfArray.fromObjects(widgets),
       });

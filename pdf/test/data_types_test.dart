@@ -76,11 +76,11 @@ void main() {
   test('PdfDataTypes Array', () {
     expect(PdfArray().toString(), '[]');
     expect(
-      PdfArray(<PdfDataType>[const PdfNum(1), const PdfNum(2)]).toString(),
+      PdfArray([const PdfNum(1), const PdfNum(2)]).toString(),
       '[1 2]',
     );
     expect(
-      PdfArray(<PdfDataType>[
+      PdfArray([
         const PdfName('/Name'),
         const PdfName('/Other'),
         const PdfBool(false),
@@ -98,15 +98,15 @@ void main() {
     expect(PdfDict().toString(), '<<>>');
 
     expect(
-      PdfDict(<String, PdfDataType>{
+      PdfDict({
         '/Name': const PdfName('/Value'),
         '/Bool': const PdfBool(true),
         '/Num': const PdfNum(42),
         '/String': PdfString.fromString('hello'),
         '/Null': const PdfNull(),
         '/Indirect': const PdfIndirect(55, 0),
-        '/Array': PdfArray(<PdfDataType>[]),
-        '/Dict': PdfDict(<String, PdfDataType>{}),
+        '/Array': PdfArray<PdfDataType>([]),
+        '/Dict': PdfDict<PdfDataType>({}),
       }).toString(),
       '<</Name/Value/Bool true/Num 42/String(hello)/Null null/Indirect 55 0 R/Array[]/Dict<<>>>>',
     );

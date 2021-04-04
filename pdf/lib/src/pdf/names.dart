@@ -36,8 +36,8 @@ class PdfNames extends PdfObject {
   }) {
     assert(page.pdfDocument == pdfDocument);
 
-    _dests[name] = PdfDict(<String, PdfDataType>{
-      '/D': PdfArray(<PdfDataType>[
+    _dests[name] = PdfDict({
+      '/D': PdfArray([
         page.ref(),
         const PdfName('/XYZ'),
         if (posX == null) const PdfNull() else PdfNum(posX),
@@ -63,7 +63,7 @@ class PdfNames extends PdfObject {
     final dict = PdfDict();
     if (dests.values.isNotEmpty) {
       dict['/Names'] = dests;
-      dict['/Limits'] = PdfArray(<PdfDataType>[
+      dict['/Limits'] = PdfArray([
         PdfSecString.fromString(this, keys.first),
         PdfSecString.fromString(this, keys.last),
       ]);
