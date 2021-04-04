@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import 'package:pdf/src/pdf/stream.dart';
+
+import 'data_types.dart';
+import 'object.dart';
+
 /// Cross-reference for a Pdf Object
 class PdfXref {
   /// Creates a cross-reference for a Pdf Object
@@ -41,5 +46,71 @@ class PdfXref {
   }
 
   @override
+  bool operator ==(Object other) {
+    if (other is PdfXref) {
+      return offset == other.offset;
+    }
+
+    return false;
+  }
+
+  @override
   String toString() => '$runtimeType $id $generation $offset';
+
+  @override
+  int get hashCode => offset;
+}
+
+class PdfXrefTable extends PdfDataType {
+  PdfXrefTable();
+
+  /// Contains offsets of each object
+  final offsets = <PdfXref>[];
+
+  /// Add a xross reference element to the set
+  void add(PdfXref xref) {
+    offsets.add(xref);
+  }
+
+  /// Writes a block of references to the Pdf file
+  void _writeblock(PdfStream s, int firstid, List<PdfXref> block) {
+    s.putString('$firstid ${block.length}\n');
+
+    for (var x in block) {
+      s.putString(x.ref());
+      s.putByte(0x0a);
+    }
+  }
+
+  @override
+  void output(PdfStream s) {
+    s.putString('xref\n');
+
+    // Now scan through the offsets list. They should be in sequence.
+    offsets.sort((a, b) => a.id.compareTo(b.id));
+
+    var firstid = 0; // First id in block
+    var lastid = 0; // The last id used
+    final block = <PdfXref>[]; // xrefs in this block
+
+    // We need block 0 to exist
+    block.add(PdfXref(0, 0, generation: 65535));
+
+    for (var x in offsets) {
+      // check to see if block is in range
+      if (x.id != (lastid + 1)) {
+        // no, so write this block, and reset
+        _writeblock(s, firstid, block);
+        block.clear();
+        firstid = x.id;
+      }
+
+      // now add to block
+      block.add(x);
+      lastid = x.id;
+    }
+
+    // now write the last block
+    _writeblock(s, firstid, block);
+  }
 }

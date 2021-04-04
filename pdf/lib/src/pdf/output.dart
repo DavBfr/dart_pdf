@@ -34,8 +34,8 @@ class PdfOutput {
   /// This is the actual [PdfStream] used to write to.
   final PdfStream os;
 
-  /// This vector contains offsets of each object
-  List<PdfXref> offsets = <PdfXref>[];
+  /// Cross reference table
+  final xref = PdfXrefTable();
 
   /// This is used to track the /Root object (catalog)
   PdfObject? rootID;
@@ -63,41 +63,18 @@ class PdfOutput {
       signatureID = ob;
     }
 
-    offsets.add(PdfXref(ob.objser, os.offset));
+    xref.add(PdfXref(ob.objser, os.offset));
     ob.write(os);
   }
 
   /// This closes the Stream, writing the xref table
   Future<void> close() async {
-    final xref = os.offset;
-    os.putString('xref\n');
-
-    // Now scan through the offsets list. They should be in sequence.
-    offsets.sort((a, b) => a.id.compareTo(b.id));
-
-    var firstid = 0; // First id in block
-    var lastid = 0; // The last id used
-    final block = <PdfXref>[]; // xrefs in this block
-
-    // We need block 0 to exist
-    block.add(PdfXref(0, 0, generation: 65535));
-
-    for (var x in offsets) {
-      // check to see if block is in range
-      if (x.id != (lastid + 1)) {
-        // no, so write this block, and reset
-        writeblock(firstid, block);
-        block.clear();
-        firstid = x.id;
-      }
-
-      // now add to block
-      block.add(x);
-      lastid = x.id;
+    if (rootID == null) {
+      throw Exception('Root object is not present in document');
     }
 
-    // now write the last block
-    writeblock(firstid, block);
+    final _xref = os.offset;
+    xref.output(os);
 
     // now the trailer object
     os.putString('trailer\n');
@@ -108,14 +85,10 @@ class PdfOutput {
     params['/Size'] = PdfNum(rootID!.pdfDocument.objser);
 
     // the /Root catalog indirect reference (REQUIRED)
-    if (rootID != null) {
-      params['/Root'] = rootID!.ref();
-      final id =
-          PdfString(rootID!.pdfDocument.documentID, PdfStringFormat.binary);
-      params['/ID'] = PdfArray([id, id]);
-    } else {
-      throw Exception('Root object is not present in document');
-    }
+    params['/Root'] = rootID!.ref();
+    final id =
+        PdfString(rootID!.pdfDocument.documentID, PdfStringFormat.binary);
+    params['/ID'] = PdfArray([id, id]);
 
     // the /Info reference (OPTIONAL)
     if (infoID != null) {
@@ -133,20 +106,10 @@ class PdfOutput {
 
     // end the trailer object
     params.output(os);
-    os.putString('\nstartxref\n$xref\n%%EOF\n');
+    os.putString('\nstartxref\n$_xref\n%%EOF\n');
 
     if (signatureID != null) {
       await signatureID!.writeSignature(os);
-    }
-  }
-
-  /// Writes a block of references to the Pdf file
-  void writeblock(int firstid, List<PdfXref> block) {
-    os.putString('$firstid ${block.length}\n');
-
-    for (var x in block) {
-      os.putString(x.ref());
-      os.putString('\n');
     }
   }
 }
