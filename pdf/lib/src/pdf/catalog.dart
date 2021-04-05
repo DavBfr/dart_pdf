@@ -17,6 +17,7 @@
 import 'annotation.dart';
 import 'data_types.dart';
 import 'document.dart';
+import 'metadata.dart';
 import 'names.dart';
 import 'object_dict.dart';
 import 'outline.dart';
@@ -37,6 +38,9 @@ class PdfCatalog extends PdfObjectDict {
 
   /// The outlines of the document
   PdfOutline? outlines;
+
+  /// The document metadata
+  PdfMetadata? metadata;
 
   /// The initial page mode
   final PdfPageMode pageMode;
@@ -64,6 +68,10 @@ class PdfCatalog extends PdfObjectDict {
     // the Outlines object
     if (outlines != null && outlines!.outlines.isNotEmpty) {
       params['/Outlines'] = outlines!.ref();
+    }
+
+    if (metadata != null) {
+      params['/Metadata'] = metadata!.ref();
     }
 
     // the Names object

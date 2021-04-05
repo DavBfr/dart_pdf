@@ -30,6 +30,7 @@ export 'src/pdf/graphic_state.dart';
 export 'src/pdf/graphics.dart';
 export 'src/pdf/image.dart';
 export 'src/pdf/info.dart';
+export 'src/pdf/metadata.dart';
 export 'src/pdf/outline.dart';
 export 'src/pdf/page.dart';
 export 'src/pdf/page_format.dart';

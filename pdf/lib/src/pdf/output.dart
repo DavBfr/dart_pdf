@@ -52,10 +52,10 @@ class PdfOutput {
   final xref = PdfXrefTable();
 
   /// This is used to track the /Root object (catalog)
-  PdfObject? rootID;
+  PdfCatalog? rootID;
 
   /// This is used to track the /Info object (info)
-  PdfObject? infoID;
+  PdfInfo? infoID;
 
   /// This is used to track the /Encrypt object (encryption)
   PdfEncryption? encryptID;

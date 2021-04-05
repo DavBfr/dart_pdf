@@ -17,6 +17,7 @@
 import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
+import 'package:xml/xml.dart';
 
 import 'page.dart';
 import 'theme.dart';
@@ -34,6 +35,7 @@ class Document {
     String? subject,
     String? keywords,
     String? producer,
+    XmlDocument? metadata,
   }) : document = PdfDocument(
           pageMode: pageMode,
           deflate: deflate,
@@ -46,7 +48,7 @@ class Document {
         subject != null ||
         keywords != null ||
         producer != null) {
-      document.info = PdfInfo(
+      PdfInfo(
         document,
         title: title,
         author: author,
@@ -55,6 +57,9 @@ class Document {
         keywords: keywords,
         producer: producer,
       );
+    }
+    if (metadata != null) {
+      PdfMetadata(document, metadata);
     }
   }
 
@@ -82,7 +87,7 @@ class Document {
         subject != null ||
         keywords != null ||
         producer != null) {
-      document.info = PdfInfo(
+      PdfInfo(
         document,
         title: title,
         author: author,

@@ -7,6 +7,7 @@
 - Improve GraphicState
 - Add SVG Color filter
 - Implement Compressed XREF
+- Add support for Metadata XML
 
 ## 3.1.0
 

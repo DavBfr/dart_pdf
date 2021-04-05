@@ -28,7 +28,7 @@ void main() {
     img.fillRange(0, img.length - 1, 0x12345678);
 
     final pdf = PdfDocument();
-    pdf.info = PdfInfo(pdf,
+    PdfInfo(pdf,
         author: 'David PHAM-VAN',
         creator: 'David PHAM-VAN',
         title: 'My Title',

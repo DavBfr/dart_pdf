@@ -14,33 +14,38 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:xml/xml.dart';
+
 import 'data_types.dart';
 import 'document.dart';
-import 'object_dict.dart';
-import 'stream.dart';
+import 'object.dart';
 
-/// Stream Object
-class PdfObjectStream extends PdfObjectDict {
-  /// Constructs a stream object to store some data
-  PdfObjectStream(
-    PdfDocument pdfDocument, {
-    String? type,
-    this.isBinary = false,
-  }) : super(pdfDocument, type: type);
+/// Pdf Metadata
+class PdfMetadata extends PdfObject<PdfDictStream> {
+  /// Store an Xml object
+  PdfMetadata(
+    PdfDocument pdfDocument,
+    this.metadata,
+  ) : super(
+          pdfDocument,
+          params: PdfDictStream(
+            object: pdfDocument.catalog,
+            compress: false,
+            encrypt: false,
+          ),
+        ) {
+    pdfDocument.catalog.metadata = this;
+  }
 
-  /// This holds the stream's content.
-  final PdfStream buf = PdfStream();
-
-  /// defines if the stream needs to be converted to ascii85
-  final bool isBinary;
+  final XmlDocument metadata;
 
   @override
-  void writeContent(PdfStream os) {
-    PdfDictStream.values(
-      object: this,
-      isBinary: isBinary,
-      values: params.values,
-      data: buf.output(),
-    ).output(os);
+  void prepare() {
+    super.prepare();
+    params['/SubType'] = const PdfName('/XML');
+    params.data = Uint8List.fromList(utf8.encode(metadata.toString()));
   }
 }

@@ -595,21 +595,42 @@ class PdfDict<T extends PdfDataType> extends PdfDataType {
 }
 
 class PdfDictStream extends PdfDict<PdfDataType> {
-  const PdfDictStream({
+  factory PdfDictStream({
+    required PdfObject object,
+    Map<String, PdfDataType>? values,
+    Uint8List? data,
+    bool isBinary = false,
+    bool encrypt = true,
+    bool compress = true,
+  }) {
+    return PdfDictStream.values(
+      object: object,
+      values: values ?? {},
+      data: data ?? Uint8List(0),
+      encrypt: encrypt,
+      compress: compress,
+      isBinary: isBinary,
+    );
+  }
+
+  PdfDictStream.values({
     required this.object,
-    Map<String, PdfDataType> values = const <String, PdfDataType>{},
+    required Map<String, PdfDataType> values,
     required this.data,
     this.isBinary = false,
     this.encrypt = true,
+    this.compress = true,
   }) : super.values(values);
 
-  final Uint8List data;
+  Uint8List data;
 
   final PdfObject object;
 
   final bool isBinary;
 
   final bool encrypt;
+
+  final bool compress;
 
   @override
   void output(PdfStream s) {
@@ -620,7 +641,7 @@ class PdfDictStream extends PdfDict<PdfDataType> {
     if (_values.containsKey('/Filter')) {
       // The data is already in the right format
       _data = data;
-    } else if (object.pdfDocument.deflate != null) {
+    } else if (compress && object.pdfDocument.deflate != null) {
       // Compress the data
       final newData = Uint8List.fromList(object.pdfDocument.deflate!(data));
       if (newData.lengthInBytes < data.lengthInBytes) {

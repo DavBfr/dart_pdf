@@ -123,6 +123,7 @@ class PdfDocument {
 
   /// This is the info object. Although this is an optional object, we
   /// include it.
+  @Deprecated('This can safely be removed.')
   PdfInfo? info;
 
   /// This is the Pages object, which is required by each Pdf Document
