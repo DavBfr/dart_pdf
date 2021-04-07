@@ -21,30 +21,35 @@ import 'package:pdf/src/pdf/stream.dart';
 import 'data_types.dart';
 import 'object.dart';
 
+enum PdfCrossRefEntryType { free, inUse }
+
 /// Cross-reference for a Pdf Object
 class PdfXref {
   /// Creates a cross-reference for a Pdf Object
-  PdfXref(this.id, this.offset, {this.generation = 0});
+  const PdfXref(
+    this.id,
+    this.offset, {
+    this.generation = 0,
+    this.type = PdfCrossRefEntryType.inUse,
+  });
 
   /// The id of a Pdf Object
-  int id;
+  final int id;
 
   /// The offset within the Pdf file
-  int offset;
+  final int offset;
 
   /// The generation of the object, usually 0
-  int generation = 0;
+  final int generation;
+
+  final PdfCrossRefEntryType type;
 
   /// The xref in the format of the xref section in the Pdf file
   String ref() {
-    final rs = offset.toString().padLeft(10, '0') +
+    return offset.toString().padLeft(10, '0') +
         ' ' +
-        generation.toString().padLeft(5, '0');
-
-    if (generation == 65535) {
-      return rs + ' f ';
-    }
-    return rs + ' n ';
+        generation.toString().padLeft(5, '0') +
+        (type == PdfCrossRefEntryType.inUse ? ' n ' : ' f ');
   }
 
   /// The xref in the format of the compressed xref section in the Pdf file
@@ -58,7 +63,7 @@ class PdfXref {
       }
     }
 
-    setVal(w[0], 1);
+    setVal(w[0], type == PdfCrossRefEntryType.inUse ? 1 : 0);
     setVal(w[1], offset);
     setVal(w[2], generation);
 
@@ -75,7 +80,7 @@ class PdfXref {
   }
 
   @override
-  String toString() => '$runtimeType $id $generation $offset';
+  String toString() => '$runtimeType $id $generation $offset $type';
 
   @override
   int get hashCode => offset;
@@ -114,7 +119,12 @@ class PdfXrefTable extends PdfDataType {
     final block = <PdfXref>[]; // xrefs in this block
 
     // We need block 0 to exist
-    block.add(PdfXref(0, 0, generation: 65535));
+    block.add(const PdfXref(
+      0,
+      0,
+      generation: 65535,
+      type: PdfCrossRefEntryType.free,
+    ));
 
     for (var x in offsets) {
       // check to see if block is in range
@@ -181,7 +191,7 @@ class PdfXrefTable extends PdfDataType {
     params['/W'] = PdfArray.fromNum(w);
     final wl = w.reduce((a, b) => a + b);
 
-    final o = ByteData((offsets.length + 2) * wl);
+    final o = ByteData((offsets.length + 1) * wl);
     var ofs = 0;
     // Write offset zero, all zeros
     ofs += wl;
@@ -194,7 +204,7 @@ class PdfXrefTable extends PdfDataType {
     PdfDictStream(
       object: object,
       data: o.buffer.asUint8List(),
-      isBinary: true,
+      isBinary: false,
       encrypt: false,
       values: params.values,
     ).output(s);
