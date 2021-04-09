@@ -207,7 +207,8 @@ public class PrintingJob extends PrintDocumentAdapter {
         printing.onCompleted(PrintingJob.this, false, message);
     }
 
-    static void sharePdf(final Context context, final byte[] data, final String name) {
+    static void sharePdf(final Context context, final byte[] data, final String name,
+                         final String subject, final String body, final ArrayList<String> emails) {
         assert name != null;
 
         try {
@@ -233,6 +234,9 @@ public class PrintingJob extends PrintDocumentAdapter {
             shareIntent.setType("application/pdf");
             shareIntent.putExtra(Intent.EXTRA_STREAM, apkURI);
             shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+            shareIntent.putExtra(Intent.EXTRA_TEXT, body);
+            shareIntent.putExtra(Intent.EXTRA_EMAIL, emails != null ? emails.toArray(new String[0]) : null);
             Intent chooserIntent = Intent.createChooser(shareIntent, null);
             List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(
                     chooserIntent, PackageManager.MATCH_DEFAULT_ONLY);

@@ -49,7 +49,10 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                 case "sharePdf": {
                     final byte[] document = call.argument("doc");
                     final String name = call.argument("name");
-                    PrintingJob.sharePdf(activity, document, name);
+                    final String subject = call.argument("subject");
+                    final String body = call.argument("body");
+                    final ArrayList<String> emails = call.argument("emails");
+                    PrintingJob.sharePdf(activity, document, name, subject, body, emails);
                     result.success(1);
                     break;
                 }

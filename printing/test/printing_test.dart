@@ -118,7 +118,8 @@ class MockPrinting extends Mock
       true;
 
   @override
-  Future<bool> sharePdf(Uint8List bytes, String filename, Rect bounds) async =>
+  Future<bool> sharePdf(Uint8List bytes, String filename, Rect bounds,
+          String? subject, String? body, List<String>? emails) async =>
       true;
 
   @override

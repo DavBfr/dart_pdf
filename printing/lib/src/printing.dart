@@ -135,11 +135,26 @@ mixin Printing {
     );
   }
 
-  /// Displays a platform popup to share the Pdf document to another application
+  /// Displays a platform popup to share the Pdf document to another application.
+  ///
+  /// [subject] will be the email subject if selected application is email.
+  ///
+  /// [body] will be the extra text that can be shared along with the Pdf document.
+  /// For email application [body] will be the email body text.
+  ///
+  /// [emails] will be the list of emails to which you want to share the Pdf document.
+  /// If the selected application is email application then the these [emails] will be
+  /// filled in the to address.
+  ///
+  /// [subject] and [body] will only work for Android and iOS platforms.
+  /// [emails] will only work for Android Platform.
   static Future<bool> sharePdf({
     required Uint8List bytes,
     String filename = 'document.pdf',
     Rect? bounds,
+    String? subject,
+    String? body,
+    List<String>? emails,
   }) {
     bounds ??= Rect.fromCircle(center: Offset.zero, radius: 10);
 
@@ -147,6 +162,9 @@ mixin Printing {
       bytes,
       filename,
       bounds,
+      subject,
+      body,
+      emails,
     );
   }
 
