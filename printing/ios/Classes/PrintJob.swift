@@ -186,7 +186,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         )
     }
 
-    static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String) {
+    static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String, subject: String?, body: String?) {
         let tmpDirURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
         let fileURL = tmpDirURL.appendingPathComponent(name)
 
@@ -197,7 +197,8 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             return
         }
 
-        let activityViewController = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
+        let activityViewController = UIActivityViewController(activityItems: [fileURL, body], applicationActivities: nil)
+        activityViewController.setValue(subject, forKey: "subject")
         if UI_USER_INTERFACE_IDIOM() == .pad {
             let controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController
             activityViewController.popoverPresentationController?.sourceView = controller?.view

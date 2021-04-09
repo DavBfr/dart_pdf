@@ -84,7 +84,9 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
                     width: CGFloat((args["w"] as? NSNumber)?.floatValue ?? 0.0),
                     height: CGFloat((args["h"] as? NSNumber)?.floatValue ?? 0.0)
                 ),
-                andName: args["name"] as! String
+                andName: args["name"] as! String,
+                subject: args["subject"] as? String,
+                body: args["body"] as? String
             )
             result(NSNumber(value: 1))
         } else if call.method == "convertHtml" {
