@@ -159,6 +159,9 @@ class PrintingPlugin extends PrintingPlatform {
     Uint8List bytes,
     String filename,
     Rect bounds,
+    String? subject,
+    String? body,
+    List<String>? emails,
   ) async {
     final pdfFile = html.Blob(
       <Uint8List>[Uint8List.fromList(bytes)],

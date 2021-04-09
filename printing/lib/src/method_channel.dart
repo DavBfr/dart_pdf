@@ -225,10 +225,16 @@ class MethodChannelPrinting extends PrintingPlatform {
     Uint8List bytes,
     String filename,
     Rect bounds,
+    String? subject,
+    String? body,
+    List<String>? emails,
   ) async {
     final params = <String, dynamic>{
       'doc': Uint8List.fromList(bytes),
       'name': filename,
+      'subject': subject,
+      'body': body,
+      'emails': emails,
       'x': bounds.left,
       'y': bounds.top,
       'w': bounds.width,
