@@ -36,6 +36,9 @@ class PdfPreview extends StatefulWidget {
     this.useActions = true,
     this.pages,
     this.dynamicLayout = true,
+    this.shareActionExtraBody,
+    this.shareActionExtraSubject,
+    this.shareActionExtraEmails,
   }) : super(key: key);
 
   /// Called when a pdf document is needed
@@ -96,6 +99,17 @@ class PdfPreview extends StatefulWidget {
   /// Mitigate an issue with iOS and macOS print dialog that prevent any
   /// channel message while opened.
   final bool dynamicLayout;
+
+  /// email subject when email application is selected from the share dialog
+  final String? shareActionExtraSubject;
+
+  /// extra text to share with Pdf document
+  final String? shareActionExtraBody;
+
+  /// list of email addresses which will be filled automatically if the email application
+  /// is selected from the share dialog.
+  /// This will work only for Android platform.
+  final List<String>? shareActionExtraEmails;
 
   @override
   _PdfPreviewState createState() => _PdfPreviewState();
@@ -590,6 +604,9 @@ class _PdfPreviewState extends State<PdfPreview> {
       bytes: bytes,
       bounds: bounds,
       filename: widget.pdfFileName ?? 'document.pdf',
+      body: widget.shareActionExtraBody,
+      subject: widget.shareActionExtraSubject,
+      emails: widget.shareActionExtraEmails,
     );
 
     if (result && widget.onShared != null) {
