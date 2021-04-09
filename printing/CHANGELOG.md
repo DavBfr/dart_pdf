@@ -1,9 +1,11 @@
 # Changelog
 
-## 5.0.5
+## 5.1.0
 
 - Fix PdfPreview timer dispose [wwl901215]
 - Remove unnecessary _raster call in PdfPreview [yaymalaga]
+- Added subject, body and email parameters in sharePdf [Deepak]
+- Subject, body and emails parameter to pdf preview [Deepak]
 
 ## 5.0.4
 
