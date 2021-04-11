@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.0
+
+- Implement To be signed flieds
+
 ## 3.2.0
 
 - Fix documentation

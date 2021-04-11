@@ -25,25 +25,26 @@ enum PdfSigFlags { signaturesExist, appendOnly }
 class PdfSignature extends PdfObjectDict {
   PdfSignature(
     PdfDocument pdfDocument, {
-    required this.crypto,
-    Set<PdfSigFlags>? flags,
-  })  : flags = flags ?? const <PdfSigFlags>{PdfSigFlags.signaturesExist},
-        super(pdfDocument, type: '/Sig');
+    required this.value,
+    required this.flags,
+  }) : super(pdfDocument, type: '/Sig');
 
   final Set<PdfSigFlags> flags;
 
-  final PdfSignatureBase crypto;
+  final PdfSignatureBase value;
 
-  int get flagsValue => flags
-      .map<int>((PdfSigFlags e) => 1 >> e.index)
-      .reduce((int a, int b) => a | b);
+  int get flagsValue => flags.isEmpty
+      ? 0
+      : flags
+          .map<int>((PdfSigFlags e) => 1 >> e.index)
+          .reduce((int a, int b) => a | b);
 
   int? _offsetStart;
   int? _offsetEnd;
 
   @override
   void write(PdfStream os) {
-    crypto.preSign(this, params);
+    value.preSign(this, params);
 
     _offsetStart = os.offset + '$objser $objgen obj\n'.length;
     super.write(os);
@@ -54,7 +55,7 @@ class PdfSignature extends PdfObjectDict {
     assert(_offsetStart != null && _offsetEnd != null,
         'Must reserve the object space before signing the document');
 
-    await crypto.sign(this, os, params, _offsetStart, _offsetEnd);
+    await value.sign(this, os, params, _offsetStart, _offsetEnd);
   }
 }
 

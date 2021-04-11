@@ -100,57 +100,6 @@ class AnnotationUrl extends AnnotationBuilder {
   }
 }
 
-class AnnotationSignature extends AnnotationBuilder {
-  AnnotationSignature(
-    this.crypto, {
-    this.name,
-    this.signFlags,
-    this.border,
-    this.flags,
-    this.date,
-    this.color,
-    this.highlighting,
-  });
-
-  final Set<PdfSigFlags>? signFlags;
-
-  final PdfSignatureBase crypto;
-
-  final String? name;
-
-  final PdfBorder? border;
-
-  final Set<PdfAnnotFlags>? flags;
-
-  final DateTime? date;
-
-  final PdfColor? color;
-
-  final PdfAnnotHighlighting? highlighting;
-
-  @override
-  void build(Context context, PdfRect? box) {
-    context.document.sign ??= PdfSignature(
-      context.document,
-      crypto: crypto,
-      flags: signFlags,
-    );
-
-    PdfAnnot(
-      context.page,
-      PdfAnnotSign(
-        rect: context.localToGlobal(box!),
-        fieldName: name,
-        border: border,
-        flags: flags,
-        date: date,
-        color: color,
-        highlighting: highlighting,
-      ),
-    );
-  }
-}
-
 class AnnotationTextField extends AnnotationBuilder {
   AnnotationTextField({
     this.name,
@@ -257,31 +206,6 @@ class UrlLink extends Annotation {
     required Widget child,
     required String destination,
   }) : super(child: child, builder: AnnotationUrl(destination));
-}
-
-class Signature extends Annotation {
-  Signature({
-    required Widget child,
-    required PdfSignatureBase crypto,
-    required String name,
-    Set<PdfSigFlags>? signFlags,
-    PdfBorder? border,
-    Set<PdfAnnotFlags>? flags,
-    DateTime? date,
-    PdfColor? color,
-    PdfAnnotHighlighting? highlighting,
-  }) : super(
-            child: child,
-            builder: AnnotationSignature(
-              crypto,
-              signFlags: signFlags,
-              name: name,
-              border: border,
-              flags: flags,
-              date: date,
-              color: color,
-              highlighting: highlighting,
-            ));
 }
 
 class Outline extends Anchor {

@@ -307,3 +307,94 @@ class TextField extends StatelessWidget {
     PdfAnnot(context.page, tf);
   }
 }
+
+class Signature extends SingleChildWidget {
+  Signature({
+    Widget? child,
+    @Deprecated('Use value instead') PdfSignatureBase? crypto,
+    PdfSignatureBase? value,
+    required this.name,
+    this.appendOnly = false,
+    this.border,
+    this.flags,
+    this.date,
+    this.color,
+    this.highlighting,
+  })  : value = value ?? crypto,
+        super(child: child);
+
+  /// Field name
+  final String name;
+
+  /// Digital signature
+  final PdfSignatureBase? value;
+
+  /// Append
+  final bool appendOnly;
+
+  final PdfBorder? border;
+
+  /// Flags for this field
+  final Set<PdfAnnotFlags>? flags;
+
+  /// Date metadata
+  final DateTime? date;
+
+  /// Field color
+  final PdfColor? color;
+
+  /// Field highlighting
+  final PdfAnnotHighlighting? highlighting;
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+
+    if (value != null) {
+      context.document.sign ??= PdfSignature(
+        context.document,
+        value: value!,
+        flags: {
+          PdfSigFlags.signaturesExist,
+          if (appendOnly) PdfSigFlags.appendOnly,
+        },
+      );
+    } else {
+      paintChild(context);
+    }
+
+    final bf = PdfAnnotSign(
+      rect: context.localToGlobal(box!),
+      fieldName: name,
+      border: border,
+      flags: flags,
+      date: date,
+      color: color,
+      highlighting: highlighting,
+    );
+
+    if (child != null && value != null) {
+      final mat = context.canvas.getTransform();
+      final translation = Vector3(0, 0, 0);
+      final rotation = Quaternion(0, 0, 0, 0);
+      final scale = Vector3(0, 0, 0);
+      mat
+        ..decompose(translation, rotation, scale)
+        ..leftTranslate(-translation.x, -translation.y)
+        ..translate(box!.x, box!.y);
+
+      final canvas = bf.appearance(context.document, PdfAnnotAppearance.normal,
+          matrix: mat);
+      Widget.draw(
+        child!,
+        offset: PdfPoint.zero,
+        canvas: canvas,
+        page: context.page,
+        constraints:
+            BoxConstraints.tightFor(width: box!.width, height: box!.height),
+      );
+    }
+
+    PdfAnnot(context.page, bf);
+  }
+}
