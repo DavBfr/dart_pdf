@@ -33,14 +33,14 @@ enum TextDirection { ltr, rtl }
 abstract class _Span {
   _Span(this.style);
 
-  final TextStyle? style;
+  final TextStyle style;
 
-  PdfPoint offset = PdfPoint.zero;
+  var offset = PdfPoint.zero;
 
-  late double left;
-  late double top;
-  double? width;
-  double? height;
+  double get left;
+  double get top;
+  double get width;
+  double get height;
 
   @override
   String toString() {
@@ -83,13 +83,13 @@ class _TextDecoration {
     }
     final x1 = spans[startSpan].offset.x + spans[startSpan].left;
     final x2 =
-        spans[endSpan].offset.x + spans[endSpan].left + spans[endSpan].width!;
+        spans[endSpan].offset.x + spans[endSpan].left + spans[endSpan].width;
     var y1 = spans[startSpan].offset.y + spans[startSpan].top;
-    var y2 = y1 + spans[startSpan].height!;
+    var y2 = y1 + spans[startSpan].height;
 
     for (var n = startSpan + 1; n <= endSpan; n++) {
       final ny1 = spans[n].offset.y + spans[n].top;
-      final ny2 = ny1 + spans[n].height!;
+      final ny2 = ny1 + spans[n].height;
       y1 = math.min(y1, ny1);
       y2 = math.max(y2, ny2);
     }
@@ -233,7 +233,7 @@ class _TextDecoration {
 class _Word extends _Span {
   _Word(
     this.text,
-    TextStyle? style,
+    TextStyle style,
     this.metrics,
   ) : super(style);
 
@@ -476,7 +476,7 @@ class _Line {
   final int firstSpan;
   final int countSpan;
 
-  TextAlign get textAlign => parent.textAlign;
+  TextAlign get textAlign => parent._textAlign;
 
   final double baseline;
 
@@ -518,7 +518,7 @@ class _Line {
     if (textDirection == TextDirection.rtl) {
       for (var span in spans) {
         span.offset = PdfPoint(
-          totalWidth - (span.offset.x + span.width!) - delta,
+          totalWidth - (span.offset.x + span.width) - delta,
           span.offset.y - baseline,
         );
       }
@@ -537,34 +537,31 @@ class _Line {
 class RichText extends Widget {
   RichText({
     required this.text,
-    TextAlign? textAlign,
+    this.textAlign,
     this.textDirection,
-    bool? softWrap,
+    this.softWrap,
     this.tightBounds = false,
     this.textScaleFactor = 1.0,
-    int? maxLines,
-  })  : _textAlign = textAlign,
-        _softWrap = softWrap,
-        _maxLines = maxLines;
+    this.maxLines,
+  });
 
   static bool debug = false;
 
   final InlineSpan text;
 
-  TextAlign get textAlign => _textAlign!;
-  TextAlign? _textAlign;
+  final TextAlign? textAlign;
+
+  late TextAlign _textAlign;
 
   final TextDirection? textDirection;
 
   final double textScaleFactor;
 
-  bool get softWrap => _softWrap!;
-  bool? _softWrap;
+  final bool? softWrap;
 
   final bool tightBounds;
 
-  int? get maxLines => _maxLines;
-  int? _maxLines;
+  final int? maxLines;
 
   final List<_Span> _spans = <_Span>[];
 
@@ -591,9 +588,9 @@ class RichText extends Widget {
 
     final theme = Theme.of(context);
     final defaultstyle = theme.defaultTextStyle;
-    _softWrap ??= theme.softWrap;
-    _maxLines ??= theme.maxLines;
-    _textAlign ??= theme.textAlign;
+    final _softWrap = softWrap ?? theme.softWrap;
+    final _maxLines = maxLines ?? theme.maxLines;
+    _textAlign = textAlign ?? theme.textAlign;
     final _textDirection = textDirection ?? Directionality.of(context);
 
     final constraintWidth = constraints.hasBoundedWidth
@@ -606,8 +603,8 @@ class RichText extends Widget {
     var offsetX = 0.0;
     var offsetY = 0.0;
 
-    double? top;
-    double? bottom;
+    var top = 0.0;
+    var bottom = 0.0;
 
     final lines = <_Line>[];
     var spanCount = 0;
@@ -635,7 +632,10 @@ class RichText extends Widget {
             .split('\n');
 
         for (var line = 0; line < spanLines.length; line++) {
-          for (var word in spanLines[line].split(RegExp(r'\s'))) {
+          final words = spanLines[line].split(RegExp(r'\s'));
+          for (var index = 0; index < words.length; index++) {
+            final word = words[index];
+
             if (word.isEmpty) {
               offsetX += space.advanceWidth * style.wordSpacing! +
                   style.letterSpacing!;
@@ -647,41 +647,54 @@ class RichText extends Widget {
                         (style.fontSize! * textScaleFactor)) *
                 (style.fontSize! * textScaleFactor);
 
-            if (offsetX + metrics.width > constraintWidth && spanCount > 0) {
-              overflow = true;
-              lines.add(_Line(
-                this,
-                spanStart,
-                spanCount,
-                bottom ?? 0,
-                offsetX -
-                    space.advanceWidth * style.wordSpacing! -
-                    style.letterSpacing!,
-                _textDirection,
-              ));
+            if (offsetX + metrics.width > constraintWidth + 0.00001) {
+              if (spanCount > 0 && metrics.width <= constraintWidth) {
+                overflow = true;
+                lines.add(_Line(
+                  this,
+                  spanStart,
+                  spanCount,
+                  bottom,
+                  offsetX -
+                      space.advanceWidth * style.wordSpacing! -
+                      style.letterSpacing!,
+                  _textDirection,
+                ));
 
-              spanStart += spanCount;
-              spanCount = 0;
+                spanStart += spanCount;
+                spanCount = 0;
 
-              if (maxLines != null && lines.length >= maxLines!) {
-                return false;
-              }
+                if (_maxLines != null && lines.length >= _maxLines) {
+                  return false;
+                }
 
-              offsetX = 0.0;
-              offsetY += bottom! - top! + style.lineSpacing!;
-              top = null;
-              bottom = null;
+                offsetX = 0.0;
+                offsetY += bottom - top + style.lineSpacing!;
 
-              if (offsetY > constraintHeight) {
-                return false;
+                top = 0;
+                bottom = 0;
+
+                if (offsetY > constraintHeight) {
+                  return false;
+                }
+              } else {
+                // One word Overflow, try to split it.
+                final pos = _splitWord(word, font, style, constraintWidth);
+
+                words[index] = word.substring(0, pos);
+                words.insert(index + 1, word.substring(pos));
+
+                // Try again
+                index--;
+                continue;
               }
             }
 
             final baseline = span.baseline! * textScaleFactor;
             final mt = tightBounds ? metrics.top : metrics.descent;
             final mb = tightBounds ? metrics.bottom : metrics.ascent;
-            top = math.min(top ?? mt + baseline, mt + baseline);
-            bottom = math.max(bottom ?? mb + baseline, mb + baseline);
+            top = math.min(top, mt + baseline);
+            bottom = math.max(bottom, mb + baseline);
 
             final wd = _Word(
               word,
@@ -707,12 +720,12 @@ class RichText extends Widget {
                 style.letterSpacing!;
           }
 
-          if (softWrap && line < spanLines.length - 1) {
+          if (_softWrap && line < spanLines.length - 1) {
             lines.add(_Line(
                 this,
                 spanStart,
                 spanCount,
-                bottom ?? 0,
+                bottom,
                 offsetX -
                     space.advanceWidth * style.wordSpacing! -
                     style.letterSpacing!,
@@ -720,19 +733,19 @@ class RichText extends Widget {
 
             spanStart += spanCount;
 
-            if (maxLines != null && lines.length >= maxLines!) {
+            if (_maxLines != null && lines.length >= _maxLines) {
               spanCount = 0;
               return false;
             }
 
             offsetX = 0.0;
             if (spanCount > 0) {
-              offsetY += bottom! - top! + style.lineSpacing!;
+              offsetY += bottom - top + style.lineSpacing!;
             } else {
               offsetY += space.ascent + space.descent + style.lineSpacing!;
             }
-            top = null;
-            bottom = null;
+            top = 0;
+            bottom = 0;
             spanCount = 0;
 
             if (offsetY > constraintHeight) {
@@ -746,13 +759,13 @@ class RichText extends Widget {
       } else if (span is WidgetSpan) {
         span.child.layout(
             context,
-            BoxConstraints.tight(PdfPoint(
-              double.infinity,
-              style!.fontSize! * textScaleFactor,
-            )));
+            BoxConstraints(
+              maxWidth: constraintWidth,
+              maxHeight: constraintHeight,
+            ));
         final ws = _WidgetSpan(
           span.child,
-          style,
+          style!,
         );
 
         if (offsetX + ws.width > constraintWidth && spanCount > 0) {
@@ -761,7 +774,7 @@ class RichText extends Widget {
             this,
             spanStart,
             spanCount,
-            bottom ?? 0,
+            bottom,
             offsetX,
             _textDirection,
           ));
@@ -769,14 +782,14 @@ class RichText extends Widget {
           spanStart += spanCount;
           spanCount = 0;
 
-          if (maxLines != null && lines.length > maxLines!) {
+          if (_maxLines != null && lines.length > _maxLines) {
             return false;
           }
 
           offsetX = 0.0;
-          offsetY += bottom! - top! + style.lineSpacing!;
-          top = null;
-          bottom = null;
+          offsetY += bottom - top + style.lineSpacing!;
+          top = 0;
+          bottom = 0;
 
           if (offsetY > constraintHeight) {
             return false;
@@ -784,9 +797,9 @@ class RichText extends Widget {
         }
 
         final baseline = span.baseline! * textScaleFactor;
-        top = math.min(top ?? baseline, baseline);
+        top = math.min(top, baseline);
         bottom = math.max(
-          bottom ?? ws.height + baseline,
+          bottom,
           ws.height + baseline,
         );
 
@@ -815,7 +828,7 @@ class RichText extends Widget {
         this,
         spanStart,
         spanCount,
-        bottom ?? 0,
+        bottom,
         offsetX,
         _textDirection,
       ));
@@ -840,7 +853,7 @@ class RichText extends Widget {
     }
 
     box = PdfRect(0, 0, constraints.constrainWidth(width),
-        constraints.constrainHeight(offsetY + (bottom ?? 0) - (top ?? 0)));
+        constraints.constrainHeight(offsetY + bottom - top));
   }
 
   @override
@@ -889,7 +902,7 @@ class RichText extends Widget {
 
       if (span.style != currentStyle) {
         currentStyle = span.style;
-        if (currentStyle!.color != currentColor) {
+        if (currentStyle.color != currentColor) {
           currentColor = currentStyle.color;
           context.canvas.setFillColor(currentColor);
         }
@@ -911,6 +924,29 @@ class RichText extends Widget {
         _spans,
       );
     }
+  }
+
+  int _splitWord(String word, PdfFont font, TextStyle style, double maxWidth) {
+    var low = 0;
+    var high = word.length;
+    var pos = (low + high) ~/ 2;
+
+    while (low + 1 < high) {
+      final metrics = font.stringMetrics(word.substring(0, pos),
+              letterSpacing:
+                  style.letterSpacing! / (style.fontSize! * textScaleFactor)) *
+          (style.fontSize! * textScaleFactor);
+
+      if (metrics.width > maxWidth) {
+        high = pos;
+      } else {
+        low = pos;
+      }
+
+      pos = (low + high) ~/ 2;
+    }
+
+    return pos;
   }
 }
 

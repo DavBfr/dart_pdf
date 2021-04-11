@@ -3,6 +3,7 @@
 ## 3.3.0
 
 - Implement To be signed flieds
+- Improve Text rendering
 
 ## 3.2.0
 
