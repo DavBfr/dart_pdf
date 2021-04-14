@@ -234,6 +234,8 @@ class FractionColumnWidth extends TableColumnWidth {
 }
 
 typedef OnCellFormat = String Function(int index, dynamic data);
+typedef OnCellDecoration = BoxDecoration Function(
+    int index, dynamic data, int rowNum);
 
 /// A widget that uses the table layout algorithm for its children.
 class Table extends Widget implements SpanningWidget {
@@ -256,6 +258,7 @@ class Table extends Widget implements SpanningWidget {
     TextStyle? cellStyle,
     TextStyle? oddCellStyle,
     OnCellFormat? cellFormat,
+    OnCellDecoration? cellDecoration,
     int headerCount = 1,
     List<dynamic>? headers,
     EdgeInsets? headerPadding,
@@ -356,6 +359,9 @@ class Table extends Widget implements SpanningWidget {
               alignment: align,
               padding: cellPadding,
               constraints: BoxConstraints(minHeight: cellHeight),
+              decoration: cellDecoration == null
+                  ? null
+                  : cellDecoration(tableRow.length, cell, rowNum),
               child: Text(
                 cellFormat == null
                     ? cell.toString()
