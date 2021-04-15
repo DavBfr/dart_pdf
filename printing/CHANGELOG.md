@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.2.0
+
+- Improve Android page format detection [Deepak]
+
 ## 5.1.0
 
 - Fix PdfPreview timer dispose [wwl901215]
