@@ -203,19 +203,13 @@ public class PrintingJob extends PrintDocumentAdapter {
 
         // get the media size from predefined media sizes
         for (PrintAttributes.MediaSize size : getAllPredefinedSizes()) {
+            // https://github.com/DavBfr/dart_pdf/issues/635
             int err = 20;
-            if (isPortrait) {
-                if ((widthMils + err) >= size.getWidthMils() && (widthMils - err) <= size.getWidthMils() &&
-                        (heightMils + err) >= size.getHeightMils() && (heightMils - err) <= size.getHeightMils()) {
-                    mediaSize = size.asPortrait();
-                    break;
-                }
-            } else {
-                if ((widthMils + err) >= size.getHeightMils() && (widthMils - err) <= size.getHeightMils() &&
-                        (heightMils + err) >= size.getWidthMils() && (heightMils - err) <= size.getWidthMils()) {
-                    mediaSize = size.asLandscape();
-                    break;
-                }
+            PrintAttributes.MediaSize m = isPortrait ? size.asPortrait() : size.asLandscape();
+            if ((widthMils + err) >= m.getWidthMils() && (widthMils - err) <= m.getWidthMils() &&
+                    (heightMils + err) >= m.getHeightMils() && (heightMils - err) <= m.getHeightMils()) {
+                mediaSize = m;
+                break;
             }
         }
 
