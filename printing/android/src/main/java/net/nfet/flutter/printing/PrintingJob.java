@@ -194,11 +194,133 @@ public class PrintingJob extends PrintDocumentAdapter {
         jobName = name;
 
         PrintAttributes.Builder attrBuilder = new PrintAttributes.Builder();
-        if (width > height) {
-            attrBuilder.setMediaSize(PrintAttributes.MediaSize.UNKNOWN_LANDSCAPE);
+
+        int widthMils = Double.valueOf(width * 1000.0 / 72.0).intValue();
+        int heightMils = Double.valueOf(height * 1000.0 / 72.0).intValue();
+
+        PrintAttributes.MediaSize mediaSize = null;
+        boolean isPortrait = heightMils >= widthMils;
+
+        // get the media size from predefined media sizes
+        for (PrintAttributes.MediaSize size : getAllPredefinedSizes()) {
+            int err = 20;
+            if (isPortrait) {
+                if ((widthMils + err) >= size.getWidthMils() && (widthMils - err) <= size.getWidthMils() &&
+                        (heightMils + err) >= size.getHeightMils() && (heightMils - err) <= size.getHeightMils()) {
+                    mediaSize = size.asPortrait();
+                    break;
+                }
+            } else {
+                if ((widthMils + err) >= size.getHeightMils() && (widthMils - err) <= size.getHeightMils() &&
+                        (heightMils + err) >= size.getWidthMils() && (heightMils - err) <= size.getWidthMils()) {
+                    mediaSize = size.asLandscape();
+                    break;
+                }
+            }
         }
+
+        if (mediaSize == null) {
+            mediaSize = isPortrait ? PrintAttributes.MediaSize.UNKNOWN_PORTRAIT : PrintAttributes.MediaSize.UNKNOWN_LANDSCAPE;
+        }
+
+        attrBuilder.setMediaSize(mediaSize);
         PrintAttributes attrib = attrBuilder.build();
         printJob = printManager.print(name, this, attrib);
+    }
+
+    List<PrintAttributes.MediaSize> getAllPredefinedSizes() {
+        List<PrintAttributes.MediaSize> sizes = new ArrayList<>();
+
+        // ISO sizes
+        sizes.add(PrintAttributes.MediaSize.ISO_A0);
+        sizes.add(PrintAttributes.MediaSize.ISO_A1);
+        sizes.add(PrintAttributes.MediaSize.ISO_A2);
+        sizes.add(PrintAttributes.MediaSize.ISO_A3);
+        sizes.add(PrintAttributes.MediaSize.ISO_A4);
+        sizes.add(PrintAttributes.MediaSize.ISO_A5);
+        sizes.add(PrintAttributes.MediaSize.ISO_A6);
+        sizes.add(PrintAttributes.MediaSize.ISO_A7);
+        sizes.add(PrintAttributes.MediaSize.ISO_A8);
+        sizes.add(PrintAttributes.MediaSize.ISO_A9);
+        sizes.add(PrintAttributes.MediaSize.ISO_A10);
+        sizes.add(PrintAttributes.MediaSize.ISO_B0);
+        sizes.add(PrintAttributes.MediaSize.ISO_B1);
+        sizes.add(PrintAttributes.MediaSize.ISO_B2);
+        sizes.add(PrintAttributes.MediaSize.ISO_B3);
+        sizes.add(PrintAttributes.MediaSize.ISO_B4);
+        sizes.add(PrintAttributes.MediaSize.ISO_B5);
+        sizes.add(PrintAttributes.MediaSize.ISO_B6);
+        sizes.add(PrintAttributes.MediaSize.ISO_B7);
+        sizes.add(PrintAttributes.MediaSize.ISO_B8);
+        sizes.add(PrintAttributes.MediaSize.ISO_B9);
+        sizes.add(PrintAttributes.MediaSize.ISO_B10);
+        sizes.add(PrintAttributes.MediaSize.ISO_C0);
+        sizes.add(PrintAttributes.MediaSize.ISO_C1);
+        sizes.add(PrintAttributes.MediaSize.ISO_C2);
+        sizes.add(PrintAttributes.MediaSize.ISO_C3);
+        sizes.add(PrintAttributes.MediaSize.ISO_C4);
+        sizes.add(PrintAttributes.MediaSize.ISO_C5);
+        sizes.add(PrintAttributes.MediaSize.ISO_C6);
+        sizes.add(PrintAttributes.MediaSize.ISO_C7);
+        sizes.add(PrintAttributes.MediaSize.ISO_C8);
+        sizes.add(PrintAttributes.MediaSize.ISO_C9);
+        sizes.add(PrintAttributes.MediaSize.ISO_C10);
+
+        // North America
+        sizes.add(PrintAttributes.MediaSize.NA_LETTER);
+        sizes.add(PrintAttributes.MediaSize.NA_GOVT_LETTER);
+        sizes.add(PrintAttributes.MediaSize.NA_LEGAL);
+        sizes.add(PrintAttributes.MediaSize.NA_JUNIOR_LEGAL);
+        sizes.add(PrintAttributes.MediaSize.NA_LEDGER);
+        sizes.add(PrintAttributes.MediaSize.NA_TABLOID);
+        sizes.add(PrintAttributes.MediaSize.NA_INDEX_3X5);
+        sizes.add(PrintAttributes.MediaSize.NA_INDEX_4X6);
+        sizes.add(PrintAttributes.MediaSize.NA_INDEX_5X8);
+        sizes.add(PrintAttributes.MediaSize.NA_MONARCH);
+        sizes.add(PrintAttributes.MediaSize.NA_QUARTO);
+        sizes.add(PrintAttributes.MediaSize.NA_FOOLSCAP);
+
+        // Chinese
+        sizes.add(PrintAttributes.MediaSize.ROC_8K);
+        sizes.add(PrintAttributes.MediaSize.ROC_16K);
+        sizes.add(PrintAttributes.MediaSize.PRC_1);
+        sizes.add(PrintAttributes.MediaSize.PRC_2);
+        sizes.add(PrintAttributes.MediaSize.PRC_3);
+        sizes.add(PrintAttributes.MediaSize.PRC_4);
+        sizes.add(PrintAttributes.MediaSize.PRC_5);
+        sizes.add(PrintAttributes.MediaSize.PRC_6);
+        sizes.add(PrintAttributes.MediaSize.PRC_7);
+        sizes.add(PrintAttributes.MediaSize.PRC_8);
+        sizes.add(PrintAttributes.MediaSize.PRC_9);
+        sizes.add(PrintAttributes.MediaSize.PRC_10);
+        sizes.add(PrintAttributes.MediaSize.PRC_16K);
+        sizes.add(PrintAttributes.MediaSize.OM_PA_KAI);
+        sizes.add(PrintAttributes.MediaSize.OM_DAI_PA_KAI);
+        sizes.add(PrintAttributes.MediaSize.OM_JUURO_KU_KAI);
+
+        // Japanese
+        sizes.add(PrintAttributes.MediaSize.JIS_B10);
+        sizes.add(PrintAttributes.MediaSize.JIS_B9);
+        sizes.add(PrintAttributes.MediaSize.JIS_B8);
+        sizes.add(PrintAttributes.MediaSize.JIS_B7);
+        sizes.add(PrintAttributes.MediaSize.JIS_B6);
+        sizes.add(PrintAttributes.MediaSize.JIS_B5);
+        sizes.add(PrintAttributes.MediaSize.JIS_B4);
+        sizes.add(PrintAttributes.MediaSize.JIS_B3);
+        sizes.add(PrintAttributes.MediaSize.JIS_B2);
+        sizes.add(PrintAttributes.MediaSize.JIS_B1);
+        sizes.add(PrintAttributes.MediaSize.JIS_B0);
+        sizes.add(PrintAttributes.MediaSize.JIS_EXEC);
+        sizes.add(PrintAttributes.MediaSize.JPN_CHOU4);
+        sizes.add(PrintAttributes.MediaSize.JPN_CHOU3);
+        sizes.add(PrintAttributes.MediaSize.JPN_CHOU2);
+        sizes.add(PrintAttributes.MediaSize.JPN_HAGAKI);
+        sizes.add(PrintAttributes.MediaSize.JPN_OUFUKU);
+        sizes.add(PrintAttributes.MediaSize.JPN_KAHU);
+        sizes.add(PrintAttributes.MediaSize.JPN_KAKU2);
+        sizes.add(PrintAttributes.MediaSize.JPN_YOU4);
+
+        return sizes;
     }
 
     void cancelJob(String message) {
