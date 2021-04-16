@@ -165,20 +165,21 @@ class Paragraph extends StatelessWidget {
 }
 
 class Bullet extends StatelessWidget {
-  Bullet(
-      {this.text,
-      this.textAlign = TextAlign.left,
-      this.style,
-      this.margin = const EdgeInsets.only(bottom: 2.0 * PdfPageFormat.mm),
-      this.padding,
-      this.bulletSize = 2.0 * PdfPageFormat.mm,
-      this.bulletMargin = const EdgeInsets.only(
-        top: 1.5 * PdfPageFormat.mm,
-        left: 5.0 * PdfPageFormat.mm,
-        right: 2.0 * PdfPageFormat.mm,
-      ),
-      this.bulletShape = BoxShape.circle,
-      this.bulletColor = PdfColors.black});
+  Bullet({
+    this.text,
+    this.textAlign = TextAlign.left,
+    this.style,
+    this.margin = const EdgeInsets.only(bottom: 2.0 * PdfPageFormat.mm),
+    this.padding,
+    this.bulletSize = 2.0 * PdfPageFormat.mm,
+    this.bulletMargin = const EdgeInsets.only(
+      top: 1.5 * PdfPageFormat.mm,
+      left: 5.0 * PdfPageFormat.mm,
+      right: 2.0 * PdfPageFormat.mm,
+    ),
+    this.bulletShape = BoxShape.circle,
+    this.bulletColor = PdfColors.black,
+  });
 
   final String? text;
 
@@ -213,11 +214,13 @@ class Bullet extends StatelessWidget {
             decoration: BoxDecoration(color: bulletColor, shape: bulletShape),
           ),
           Expanded(
-            child: Text(
-              text!,
-              textAlign: textAlign,
-              style: Theme.of(context).bulletStyle.merge(style),
-            ),
+            child: text == null
+                ? SizedBox()
+                : Text(
+                    text!,
+                    textAlign: textAlign,
+                    style: Theme.of(context).bulletStyle.merge(style),
+                  ),
           )
         ],
       ),
