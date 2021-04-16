@@ -34,7 +34,7 @@ import 'widget.dart';
 abstract class WidgetContext {
   WidgetContext clone();
 
-  void apply(WidgetContext other);
+  void apply(covariant WidgetContext other);
 }
 
 abstract class SpanningWidget extends Widget {
@@ -48,7 +48,7 @@ abstract class SpanningWidget extends Widget {
 
   /// Aplpy the context for next layout
   @protected
-  void restoreContext(WidgetContext context);
+  void restoreContext(covariant WidgetContext context);
 }
 
 class NewPage extends Widget {

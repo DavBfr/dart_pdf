@@ -141,11 +141,9 @@ class _TableContext extends WidgetContext {
   int lastLine = 0;
 
   @override
-  void apply(WidgetContext other) {
-    if (other is _TableContext) {
-      firstLine = other.firstLine;
-      lastLine = other.lastLine;
-    }
+  void apply(_TableContext other) {
+    firstLine = other.firstLine;
+    lastLine = other.lastLine;
   }
 
   @override
@@ -425,7 +423,7 @@ class Table extends Widget implements SpanningWidget {
   }
 
   @override
-  void restoreContext(WidgetContext context) {
+  void restoreContext(_TableContext context) {
     _context.apply(context);
     _context.firstLine = _context.lastLine;
   }

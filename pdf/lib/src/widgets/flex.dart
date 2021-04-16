@@ -67,11 +67,9 @@ class _FlexContext extends WidgetContext {
   int lastChild = 0;
 
   @override
-  void apply(WidgetContext other) {
-    if (other is _FlexContext) {
-      firstChild = other.firstChild;
-      lastChild = other.lastChild;
-    }
+  void apply(_FlexContext other) {
+    firstChild = other.firstChild;
+    lastChild = other.lastChild;
   }
 
   @override
@@ -504,10 +502,8 @@ class Flex extends MultiChildWidget implements SpanningWidget {
   bool get hasMoreWidgets => true;
 
   @override
-  void restoreContext(WidgetContext context) {
-    if (context is _FlexContext) {
-      _context.firstChild = context.lastChild;
-    }
+  void restoreContext(_FlexContext context) {
+    _context.firstChild = context.lastChild;
   }
 
   @override

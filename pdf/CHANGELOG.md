@@ -6,6 +6,7 @@
 - Improve Text rendering
 - Add individual cell decoration
 - Improve Bullet Widget
+- Use covariant on SpanningWidget
 
 ## 3.2.0
 

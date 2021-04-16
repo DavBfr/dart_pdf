@@ -50,11 +50,9 @@ class _WrapContext extends WidgetContext {
   int lastChild = 0;
 
   @override
-  void apply(WidgetContext other) {
-    if (other is _WrapContext) {
-      firstChild = other.firstChild;
-      lastChild = other.lastChild;
-    }
+  void apply(_WrapContext other) {
+    firstChild = other.firstChild;
+    lastChild = other.lastChild;
   }
 
   @override
@@ -394,10 +392,8 @@ class Wrap extends MultiChildWidget implements SpanningWidget {
   }
 
   @override
-  void restoreContext(WidgetContext context) {
-    if (context is _WrapContext) {
-      _context.firstChild = context.lastChild;
-    }
+  void restoreContext(_WrapContext context) {
+    _context.firstChild = context.lastChild;
   }
 
   @override
