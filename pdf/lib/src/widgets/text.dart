@@ -669,7 +669,7 @@ class RichText extends Widget {
                 }
 
                 offsetX = 0.0;
-                offsetY += bottom - top + style.lineSpacing!;
+                offsetY += bottom - top + style.lineSpacing! * textScaleFactor;
 
                 top = 0;
                 bottom = 0;
@@ -740,9 +740,11 @@ class RichText extends Widget {
 
             offsetX = 0.0;
             if (spanCount > 0) {
-              offsetY += bottom - top + style.lineSpacing!;
+              offsetY += bottom - top + style.lineSpacing! * textScaleFactor;
             } else {
-              offsetY += space.ascent + space.descent + style.lineSpacing!;
+              offsetY += space.ascent +
+                  space.descent +
+                  style.lineSpacing! * textScaleFactor;
             }
             top = 0;
             bottom = 0;
@@ -787,7 +789,7 @@ class RichText extends Widget {
           }
 
           offsetX = 0.0;
-          offsetY += bottom - top + style.lineSpacing!;
+          offsetY += bottom - top + style.lineSpacing! * textScaleFactor;
           top = 0;
           bottom = 0;
 
