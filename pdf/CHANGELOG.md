@@ -9,6 +9,7 @@
 - Use covariant on SpanningWidget
 - ImageProvider.resolve returns non-null object
 - Fix textScalingFactor with lineSpacing
+- Implement SpanningWidget on RichText
 
 ## 3.2.0
 

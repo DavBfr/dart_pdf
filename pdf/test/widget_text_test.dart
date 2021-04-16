@@ -290,6 +290,38 @@ void main() {
     );
   });
 
+  test('Text Widgets RichText overflow.span', () {
+    final rnd = math.Random(42);
+    final para = LoremText(random: rnd).paragraph(100);
+
+    pdf.addPage(
+      MultiPage(
+        pageFormat: const PdfPageFormat(600, 200, marginAll: 10),
+        build: (Context context) => [
+          SizedBox(height: 90, width: 20),
+          RichText(
+            overflow: TextOverflow.span,
+            textAlign: TextAlign.justify,
+            text: TextSpan(
+              text: para,
+              children: [
+                const TextSpan(text: ' '),
+                const TextSpan(
+                  text: 'Underline',
+                  style: TextStyle(decoration: TextDecoration.underline),
+                ),
+                const TextSpan(text: '. '),
+                TextSpan(text: para),
+                TextSpan(text: para),
+                TextSpan(text: para),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  });
+
   tearDownAll(() async {
     final file = File('widgets-text.pdf');
     await file.writeAsBytes(await pdf.save());

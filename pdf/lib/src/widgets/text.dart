@@ -22,6 +22,7 @@ import 'package:pdf/pdf.dart';
 import 'annotations.dart';
 import 'document.dart';
 import 'geometry.dart';
+import 'multi_page.dart';
 import 'text_style.dart';
 import 'theme.dart';
 import 'widget.dart';
@@ -29,6 +30,15 @@ import 'widget.dart';
 enum TextAlign { left, right, center, justify }
 
 enum TextDirection { ltr, rtl }
+
+/// How overflowing text should be handled.
+enum TextOverflow {
+  /// Span to the next page when possible.
+  span,
+
+  /// Render overflowing text outside of its container.
+  visible,
+}
 
 abstract class _Span {
   _Span(this.style);
@@ -81,6 +91,7 @@ class _TextDecoration {
     if (_box != null) {
       return _box;
     }
+
     final x1 = spans[startSpan].offset.x + spans[startSpan].left;
     final x2 =
         spans[endSpan].offset.x + spans[endSpan].left + spans[endSpan].width;
@@ -475,6 +486,7 @@ class _Line {
 
   final int firstSpan;
   final int countSpan;
+  int get lastSpan => firstSpan + countSpan;
 
   TextAlign get textAlign => parent._textAlign;
 
@@ -484,12 +496,17 @@ class _Line {
 
   final TextDirection textDirection;
 
+  double get height => parent._spans
+      .sublist(firstSpan, lastSpan)
+      .reduce((a, b) => a.height > b.height ? a : b)
+      .height;
+
   @override
   String toString() =>
-      '$runtimeType $firstSpan-${firstSpan + countSpan} baseline: $baseline width:$wordsWidth';
+      '$runtimeType $firstSpan-$lastSpan baseline: $baseline width:$wordsWidth';
 
   void realign(double totalWidth, bool isLast) {
-    final spans = parent._spans.sublist(firstSpan, firstSpan + countSpan);
+    final spans = parent._spans.sublist(firstSpan, lastSpan);
 
     var delta = 0.0;
     switch (textAlign) {
@@ -534,7 +551,31 @@ class _Line {
   }
 }
 
-class RichText extends Widget {
+class _RichTextContext extends WidgetContext {
+  var startOffset = 0.0;
+  var endOffset = 0.0;
+  var spanStart = 0;
+  var spanEnd = 0;
+
+  @override
+  void apply(_RichTextContext other) {
+    startOffset = other.startOffset;
+    endOffset = other.endOffset;
+    spanStart = other.spanStart;
+    spanEnd = other.spanEnd;
+  }
+
+  @override
+  WidgetContext clone() {
+    return _RichTextContext()..apply(this);
+  }
+
+  @override
+  String toString() =>
+      '$runtimeType Offset: $startOffset -> $endOffset  Span: $spanStart -> $spanEnd';
+}
+
+class RichText extends Widget implements SpanningWidget {
   RichText({
     required this.text,
     this.textAlign,
@@ -543,6 +584,7 @@ class RichText extends Widget {
     this.tightBounds = false,
     this.textScaleFactor = 1.0,
     this.maxLines,
+    this.overflow = TextOverflow.visible,
   });
 
   static bool debug = false;
@@ -566,6 +608,10 @@ class RichText extends Widget {
   final List<_Span> _spans = <_Span>[];
 
   final List<_TextDecoration> _decorations = <_TextDecoration>[];
+
+  final _context = _RichTextContext();
+
+  final TextOverflow overflow;
 
   void _appendDecoration(bool append, _TextDecoration td) {
     if (append && _decorations.isNotEmpty) {
@@ -601,7 +647,7 @@ class RichText extends Widget {
         : constraints.constrainHeight();
 
     var offsetX = 0.0;
-    var offsetY = 0.0;
+    var offsetY = _context.startOffset;
 
     var top = 0.0;
     var bottom = 0.0;
@@ -664,19 +710,20 @@ class RichText extends Widget {
                 spanStart += spanCount;
                 spanCount = 0;
 
+                offsetX = 0.0;
+                offsetY += bottom - top;
+                top = 0;
+                bottom = 0;
+
                 if (_maxLines != null && lines.length >= _maxLines) {
                   return false;
                 }
 
-                offsetX = 0.0;
-                offsetY += bottom - top + style.lineSpacing! * textScaleFactor;
-
-                top = 0;
-                bottom = 0;
-
                 if (offsetY > constraintHeight) {
                   return false;
                 }
+
+                offsetY += style.lineSpacing! * textScaleFactor;
               } else {
                 // One word Overflow, try to split it.
                 final pos = _splitWord(word, font, style, constraintWidth);
@@ -733,26 +780,25 @@ class RichText extends Widget {
 
             spanStart += spanCount;
 
-            if (_maxLines != null && lines.length >= _maxLines) {
-              spanCount = 0;
-              return false;
-            }
-
             offsetX = 0.0;
             if (spanCount > 0) {
-              offsetY += bottom - top + style.lineSpacing! * textScaleFactor;
+              offsetY += bottom - top;
             } else {
-              offsetY += space.ascent +
-                  space.descent +
-                  style.lineSpacing! * textScaleFactor;
+              offsetY += space.ascent + space.descent;
             }
             top = 0;
             bottom = 0;
             spanCount = 0;
 
+            if (_maxLines != null && lines.length >= _maxLines) {
+              return false;
+            }
+
             if (offsetY > constraintHeight) {
               return false;
             }
+
+            offsetY += style.lineSpacing! * textScaleFactor;
           }
         }
 
@@ -789,13 +835,15 @@ class RichText extends Widget {
           }
 
           offsetX = 0.0;
-          offsetY += bottom - top + style.lineSpacing! * textScaleFactor;
+          offsetY += bottom - top;
           top = 0;
           bottom = 0;
 
           if (offsetY > constraintHeight) {
             return false;
           }
+
+          offsetY += style.lineSpacing! * textScaleFactor;
         }
 
         final baseline = span.baseline! * textScaleFactor;
@@ -834,6 +882,7 @@ class RichText extends Widget {
         offsetX,
         _textDirection,
       ));
+      offsetY += bottom - top;
     }
 
     assert(!overflow || constraintWidth.isFinite);
@@ -855,7 +904,29 @@ class RichText extends Widget {
     }
 
     box = PdfRect(0, 0, constraints.constrainWidth(width),
-        constraints.constrainHeight(offsetY + bottom - top));
+        constraints.constrainHeight(offsetY));
+
+    _context
+      ..endOffset = offsetY - _context.startOffset
+      ..spanEnd = _spans.length;
+
+    if (this.overflow != TextOverflow.span) {
+      return;
+    }
+
+    if (offsetY > constraintHeight + 0.0001) {
+      _context.spanEnd -= lines.last.countSpan;
+      _context.endOffset -= lines.last.height;
+    }
+
+    for (var index = 0; index < _decorations.length; index++) {
+      final decoration = _decorations[index];
+      if (decoration.startSpan >= _context.spanEnd ||
+          decoration.endSpan < _context.spanStart) {
+        _decorations.removeAt(index);
+        index--;
+      }
+    }
   }
 
   @override
@@ -894,7 +965,7 @@ class RichText extends Widget {
       );
     }
 
-    for (var span in _spans) {
+    for (var span in _spans.sublist(_context.spanStart, _context.spanEnd)) {
       assert(() {
         if (Document.debug && RichText.debug) {
           span.debugPaint(context, textScaleFactor, box);
@@ -950,6 +1021,23 @@ class RichText extends Widget {
 
     return pos;
   }
+
+  @override
+  bool get canSpan => overflow == TextOverflow.span;
+
+  @override
+  bool get hasMoreWidgets => overflow == TextOverflow.span;
+
+  @override
+  void restoreContext(_RichTextContext context) {
+    _context.spanStart = context.spanEnd;
+    _context.startOffset = -context.endOffset;
+  }
+
+  @override
+  WidgetContext saveContext() {
+    return _context;
+  }
 }
 
 class Text extends RichText {
@@ -962,12 +1050,15 @@ class Text extends RichText {
     bool tightBounds = false,
     double textScaleFactor = 1.0,
     int? maxLines,
+    TextOverflow overflow = TextOverflow.visible,
   }) : super(
-            text: TextSpan(text: text, style: style),
-            textAlign: textAlign,
-            softWrap: softWrap,
-            tightBounds: tightBounds,
-            textDirection: textDirection,
-            textScaleFactor: textScaleFactor,
-            maxLines: maxLines);
+          text: TextSpan(text: text, style: style),
+          textAlign: textAlign,
+          softWrap: softWrap,
+          tightBounds: tightBounds,
+          textDirection: textDirection,
+          textScaleFactor: textScaleFactor,
+          maxLines: maxLines,
+          overflow: overflow,
+        );
 }
