@@ -121,7 +121,7 @@ class Image extends Widget {
 
     _paintImage(
       canvas: context.canvas,
-      image: image.resolve(context, rect.size, dpi: dpi)!,
+      image: image.resolve(context, rect.size, dpi: dpi),
       rect: box!,
       alignment: alignment,
       fit: fit,

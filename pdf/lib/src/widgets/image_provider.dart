@@ -51,7 +51,7 @@ abstract class ImageProvider {
 
   /// Resolves this image provider using the given context, returning a PdfImage
   /// The image is automatically added to the document
-  PdfImage? resolve(Context context, PdfPoint size, {double? dpi}) {
+  PdfImage resolve(Context context, PdfPoint size, {double? dpi}) {
     final effectiveDpi = dpi ?? this.dpi;
 
     if (effectiveDpi == null || _cache[0] != null) {
@@ -59,7 +59,7 @@ abstract class ImageProvider {
 
       assert(_cache[0]!.pdfDocument == context.document,
           'Do not reuse an ImageProvider object across multiple documents');
-      return _cache[0];
+      return _cache[0]!;
     }
 
     final width = (size.x / PdfPageFormat.inch * effectiveDpi).toInt();
@@ -71,7 +71,7 @@ abstract class ImageProvider {
 
     assert(_cache[width]!.pdfDocument == context.document,
         'Do not reuse an ImageProvider object across multiple documents');
-    return _cache[width];
+    return _cache[width]!;
   }
 }
 

@@ -53,7 +53,7 @@ class DecorationImage extends DecorationGraphic {
 
   @override
   void paint(Context context, PdfRect box) {
-    final _image = image.resolve(context, box.size, dpi: dpi)!;
+    final _image = image.resolve(context, box.size, dpi: dpi);
 
     final imageSize =
         PdfPoint(_image.width.toDouble(), _image.height.toDouble());

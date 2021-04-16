@@ -7,6 +7,7 @@
 - Add individual cell decoration
 - Improve Bullet Widget
 - Use covariant on SpanningWidget
+- ImageProvider.resolve returns non-null object
 
 ## 3.2.0
 
