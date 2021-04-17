@@ -216,9 +216,11 @@ class _Block extends pw.StatelessWidget {
                 pw.Container(
                   width: 6,
                   height: 6,
-                  margin: const pw.EdgeInsets.only(top: 2.5, left: 2, right: 5),
+                  margin: const pw.EdgeInsets.only(top: 5.5, left: 2, right: 5),
                   decoration: const pw.BoxDecoration(
-                      color: green, shape: pw.BoxShape.circle),
+                    color: green,
+                    shape: pw.BoxShape.circle,
+                  ),
                 ),
                 pw.Text(title,
                     style: pw.Theme.of(context)
@@ -250,13 +252,17 @@ class _Category extends pw.StatelessWidget {
   @override
   pw.Widget build(pw.Context context) {
     return pw.Container(
-        decoration: const pw.BoxDecoration(
-          color: lightGreen,
-          borderRadius: pw.BorderRadius.all(pw.Radius.circular(6)),
-        ),
-        margin: const pw.EdgeInsets.only(bottom: 10, top: 20),
-        padding: const pw.EdgeInsets.fromLTRB(10, 7, 10, 4),
-        child: pw.Text(title, textScaleFactor: 1.5));
+      decoration: const pw.BoxDecoration(
+        color: lightGreen,
+        borderRadius: pw.BorderRadius.all(pw.Radius.circular(6)),
+      ),
+      margin: const pw.EdgeInsets.only(bottom: 10, top: 20),
+      padding: const pw.EdgeInsets.fromLTRB(10, 4, 10, 4),
+      child: pw.Text(
+        title,
+        textScaleFactor: 1.5,
+      ),
+    );
   }
 }
 
