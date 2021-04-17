@@ -67,7 +67,7 @@ class _WrapContext extends WidgetContext {
 }
 
 /// A widget that displays its children in multiple horizontal or vertical runs.
-class Wrap extends MultiChildWidget implements SpanningWidget {
+class Wrap extends MultiChildWidget with SpanningWidget {
   /// Creates a wrap layout.
 
   Wrap({

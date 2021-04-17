@@ -24,7 +24,7 @@ import 'geometry.dart';
 import 'multi_page.dart';
 import 'widget.dart';
 
-class Partition implements SpanningWidget {
+class Partition extends Widget with SpanningWidget {
   Partition({
     required this.child,
     this.width,
@@ -59,6 +59,7 @@ class Partition implements SpanningWidget {
 
   @override
   void paint(Context context) {
+    super.paint(context);
     child.paint(context);
   }
 
@@ -102,7 +103,7 @@ class _PartitionsContext extends WidgetContext {
   }
 }
 
-class Partitions extends Widget implements SpanningWidget {
+class Partitions extends Widget with SpanningWidget {
   Partitions({
     required this.children,
     this.mainAxisSize = MainAxisSize.max,

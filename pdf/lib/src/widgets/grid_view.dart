@@ -53,7 +53,7 @@ class _GridViewContext extends WidgetContext {
       '$runtimeType first:$firstChild last:$lastChild size:${childCrossAxis}x$childMainAxis';
 }
 
-class GridView extends MultiChildWidget implements SpanningWidget {
+class GridView extends MultiChildWidget with SpanningWidget {
   GridView(
       {this.direction = Axis.vertical,
       this.padding = EdgeInsets.zero,

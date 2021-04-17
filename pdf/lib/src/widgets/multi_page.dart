@@ -37,7 +37,7 @@ abstract class WidgetContext {
   void apply(covariant WidgetContext other);
 }
 
-abstract class SpanningWidget extends Widget {
+mixin SpanningWidget on Widget {
   bool get canSpan;
 
   bool get hasMoreWidgets;
@@ -46,7 +46,7 @@ abstract class SpanningWidget extends Widget {
   @protected
   WidgetContext saveContext();
 
-  /// Aplpy the context for next layout
+  /// Apply the context for next layout
   @protected
   void restoreContext(covariant WidgetContext context);
 }
@@ -230,10 +230,6 @@ class MultiPage extends Page {
 
     while (_index < children.length) {
       final child = children[_index];
-      var canSpan = false;
-      if (child is SpanningWidget) {
-        canSpan = child.canSpan;
-      }
 
       assert(() {
         // Detect too big widgets
@@ -292,13 +288,15 @@ class MultiPage extends Page {
       }
 
       // If we are processing a multi-page widget, we restore its context
-      if (widgetContext != null && canSpan && child is SpanningWidget) {
+      if (widgetContext != null && child is SpanningWidget) {
         child.restoreContext(widgetContext);
         widgetContext = null;
       }
 
       child.layout(context, constraints, parentUsesSize: false);
       assert(child.box != null);
+
+      final canSpan = child is SpanningWidget && child.canSpan;
 
       // What to do if the widget is too big for the page?
       if (offsetStart! - child.box!.height < offsetEnd) {
@@ -475,7 +473,8 @@ class MultiPage extends Page {
         final flex = child is Flexible ? child.flex : 0;
         final fit = child is Flexible ? child.fit : FlexFit.loose;
         if (flex > 0) {
-          assert(child is! SpanningWidget);
+          assert(child is! SpanningWidget || child.canSpan == false,
+              'Cannot have a spanning widget flexible');
           final maxChildExtent = child == lastFlexChild
               ? (freeSpace - allocatedFlexSpace)
               : spacePerFlex * flex;

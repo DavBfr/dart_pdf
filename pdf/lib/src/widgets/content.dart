@@ -133,12 +133,13 @@ class Header extends StatelessWidget {
 }
 
 class Paragraph extends StatelessWidget {
-  Paragraph(
-      {this.text,
-      this.textAlign = TextAlign.justify,
-      this.style,
-      this.margin = const EdgeInsets.only(bottom: 5.0 * PdfPageFormat.mm),
-      this.padding});
+  Paragraph({
+    this.text,
+    this.textAlign = TextAlign.justify,
+    this.style,
+    this.margin = const EdgeInsets.only(bottom: 5.0 * PdfPageFormat.mm),
+    this.padding,
+  });
 
   final String? text;
 
@@ -159,6 +160,7 @@ class Paragraph extends StatelessWidget {
         text!,
         textAlign: textAlign,
         style: style ?? Theme.of(context).paragraphStyle,
+        overflow: TextOverflow.span,
       ),
     );
   }

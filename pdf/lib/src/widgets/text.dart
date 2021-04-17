@@ -575,7 +575,7 @@ class _RichTextContext extends WidgetContext {
       '$runtimeType Offset: $startOffset -> $endOffset  Span: $spanStart -> $spanEnd';
 }
 
-class RichText extends Widget implements SpanningWidget {
+class RichText extends Widget with SpanningWidget {
   RichText({
     required this.text,
     this.textAlign,

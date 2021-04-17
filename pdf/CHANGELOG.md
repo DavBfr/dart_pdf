@@ -10,6 +10,7 @@
 - ImageProvider.resolve returns non-null object
 - Fix textScalingFactor with lineSpacing
 - Implement SpanningWidget on RichText
+- Passthrough SpanningWidget on SingleChildWidget and StatelessWidget
 
 ## 3.2.0
 

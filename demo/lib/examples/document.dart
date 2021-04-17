@@ -26,8 +26,8 @@ Future<Uint8List> generateDocument(
   final doc = pw.Document(pageMode: PdfPageMode.outlines);
 
   doc.addPage(pw.MultiPage(
-      pageFormat:
-          PdfPageFormat.letter.copyWith(marginBottom: 1.5 * PdfPageFormat.cm),
+      pageFormat: format.copyWith(marginBottom: 1.5 * PdfPageFormat.cm),
+      orientation: pw.PageOrientation.portrait,
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       header: (pw.Context context) {
         if (context.pageNumber == 1) {

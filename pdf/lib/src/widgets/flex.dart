@@ -81,7 +81,7 @@ class _FlexContext extends WidgetContext {
   String toString() => '$runtimeType first:$firstChild last:$lastChild';
 }
 
-class Flex extends MultiChildWidget implements SpanningWidget {
+class Flex extends MultiChildWidget with SpanningWidget {
   Flex({
     required this.direction,
     this.mainAxisAlignment = MainAxisAlignment.start,

@@ -236,7 +236,7 @@ typedef OnCellDecoration = BoxDecoration Function(
     int index, dynamic data, int rowNum);
 
 /// A widget that uses the table layout algorithm for its children.
-class Table extends Widget implements SpanningWidget {
+class Table extends Widget with SpanningWidget {
   Table({
     this.children = const <TableRow>[],
     this.border,

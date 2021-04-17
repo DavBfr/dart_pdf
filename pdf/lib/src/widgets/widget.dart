@@ -19,6 +19,7 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'document.dart';
@@ -210,7 +211,7 @@ abstract class Widget {
   }
 }
 
-abstract class StatelessWidget extends Widget {
+abstract class StatelessWidget extends Widget with SpanningWidget {
   StatelessWidget() : super();
 
   Widget? _child;
@@ -246,9 +247,33 @@ abstract class StatelessWidget extends Widget {
 
   @protected
   Widget build(Context context);
+
+  @override
+  bool get canSpan =>
+      _child is SpanningWidget && (_child as SpanningWidget).canSpan;
+
+  @override
+  bool get hasMoreWidgets =>
+      _child is SpanningWidget && (_child as SpanningWidget).hasMoreWidgets;
+
+  @override
+  void restoreContext(covariant WidgetContext context) {
+    if (_child is SpanningWidget) {
+      (_child as SpanningWidget).restoreContext(context);
+    }
+  }
+
+  @override
+  WidgetContext saveContext() {
+    if (_child is SpanningWidget) {
+      return (_child as SpanningWidget).saveContext();
+    }
+
+    throw UnimplementedError();
+  }
 }
 
-abstract class SingleChildWidget extends Widget {
+abstract class SingleChildWidget extends Widget with SpanningWidget {
   SingleChildWidget({this.child}) : super();
 
   final Widget? child;
@@ -277,6 +302,30 @@ abstract class SingleChildWidget extends Widget {
       context.canvas.restoreContext();
     }
   }
+
+  @override
+  bool get canSpan =>
+      child is SpanningWidget && (child as SpanningWidget).canSpan;
+
+  @override
+  bool get hasMoreWidgets =>
+      child is SpanningWidget && (child as SpanningWidget).hasMoreWidgets;
+
+  @override
+  void restoreContext(covariant WidgetContext context) {
+    if (child is SpanningWidget) {
+      (child as SpanningWidget).restoreContext(context);
+    }
+  }
+
+  @override
+  WidgetContext saveContext() {
+    if (child is SpanningWidget) {
+      return (child as SpanningWidget).saveContext();
+    }
+
+    throw UnimplementedError();
+  }
 }
 
 abstract class MultiChildWidget extends Widget {
@@ -285,14 +334,17 @@ abstract class MultiChildWidget extends Widget {
   final List<Widget> children;
 }
 
-class InheritedWidget extends Widget {
-  InheritedWidget({this.build, this.inherited});
+class InheritedWidget extends SingleChildWidget {
+  InheritedWidget({this.build, this.inherited}) : super();
 
   final BuildCallback? build;
 
   final Inherited? inherited;
 
   Context? _context;
+
+  @override
+  Widget? get child => _child;
 
   Widget? _child;
 
@@ -301,29 +353,13 @@ class InheritedWidget extends Widget {
       {bool parentUsesSize = false}) {
     _context = inherited != null ? context.inheritFrom(inherited!) : context;
     _child = build!(_context!);
-
-    if (_child != null) {
-      _child!.layout(_context!, constraints, parentUsesSize: parentUsesSize);
-      assert(_child!.box != null);
-      box = _child!.box;
-    } else {
-      box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
-    }
+    super.layout(_context!, constraints);
   }
 
   @override
   void paint(Context context) {
     assert(_context != null);
     super.paint(_context!);
-
-    if (_child != null) {
-      final mat = Matrix4.identity();
-      mat.translate(box!.x, box!.y);
-      context.canvas
-        ..saveContext()
-        ..setTransform(mat);
-      _child!.paint(_context!);
-      context.canvas.restoreContext();
-    }
+    paintChild(_context!);
   }
 }
