@@ -206,15 +206,17 @@ public class PrintingJob extends PrintDocumentAdapter {
             // https://github.com/DavBfr/dart_pdf/issues/635
             int err = 20;
             PrintAttributes.MediaSize m = isPortrait ? size.asPortrait() : size.asLandscape();
-            if ((widthMils + err) >= m.getWidthMils() && (widthMils - err) <= m.getWidthMils() &&
-                    (heightMils + err) >= m.getHeightMils() && (heightMils - err) <= m.getHeightMils()) {
+            if ((widthMils + err) >= m.getWidthMils() && (widthMils - err) <= m.getWidthMils()
+                    && (heightMils + err) >= m.getHeightMils()
+                    && (heightMils - err) <= m.getHeightMils()) {
                 mediaSize = m;
                 break;
             }
         }
 
         if (mediaSize == null) {
-            mediaSize = isPortrait ? PrintAttributes.MediaSize.UNKNOWN_PORTRAIT : PrintAttributes.MediaSize.UNKNOWN_LANDSCAPE;
+            mediaSize = isPortrait ? PrintAttributes.MediaSize.UNKNOWN_PORTRAIT
+                                   : PrintAttributes.MediaSize.UNKNOWN_LANDSCAPE;
         }
 
         attrBuilder.setMediaSize(mediaSize);
