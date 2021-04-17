@@ -16,6 +16,7 @@
 
 import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -25,7 +26,14 @@ Future<Uint8List> generateDocument(
     PdfPageFormat format, CustomData data) async {
   final doc = pw.Document(pageMode: PdfPageMode.outlines);
 
+  final font1 = await rootBundle.load('assets/open-sans.ttf');
+  final font2 = await rootBundle.load('assets/open-sans-bold.ttf');
+
   doc.addPage(pw.MultiPage(
+      theme: pw.ThemeData.withFont(
+        base: pw.Font.ttf(font1),
+        bold: pw.Font.ttf(font2),
+      ),
       pageFormat: format.copyWith(marginBottom: 1.5 * PdfPageFormat.cm),
       orientation: pw.PageOrientation.portrait,
       crossAxisAlignment: pw.CrossAxisAlignment.start,

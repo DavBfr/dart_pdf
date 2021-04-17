@@ -101,6 +101,7 @@ Future<Uint8List> generateCertificate(
           ),
           pw.Text(
             data.name,
+            textAlign: pw.TextAlign.center,
             style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 20,

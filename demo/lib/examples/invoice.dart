@@ -222,6 +222,7 @@ class Invoice {
           child: pw.BarcodeWidget(
             barcode: pw.Barcode.pdf417(),
             data: 'Invoice# $invoiceNumber',
+            drawText: false,
           ),
         ),
         pw.Text(

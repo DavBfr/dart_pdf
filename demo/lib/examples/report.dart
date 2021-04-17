@@ -55,136 +55,138 @@ Future<Uint8List> generateReport(
     bold: pw.Font.ttf(await rootBundle.load('assets/open-sans-bold.ttf')),
   );
 
+  // Top bar chart
+  final chart1 = pw.Chart(
+    left: pw.Container(
+      alignment: pw.Alignment.topCenter,
+      margin: const pw.EdgeInsets.only(right: 5, top: 10),
+      child: pw.Transform.rotateBox(
+        angle: pi / 2,
+        child: pw.Text('Amount'),
+      ),
+    ),
+    overlay: pw.ChartLegend(
+      position: const pw.Alignment(-.7, 1),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+        border: pw.Border.all(
+          color: PdfColors.black,
+          width: .5,
+        ),
+      ),
+    ),
+    grid: pw.CartesianGrid(
+      xAxis: pw.FixedAxis.fromStrings(
+        List<String>.generate(
+            dataTable.length, (index) => dataTable[index][0] as String),
+        marginStart: 30,
+        marginEnd: 30,
+        ticks: true,
+      ),
+      yAxis: pw.FixedAxis(
+        [0, 100, 200, 300, 400, 500, 600, 700],
+        format: (v) => '\$$v',
+        divisions: true,
+      ),
+    ),
+    datasets: [
+      pw.BarDataSet(
+        color: PdfColors.blue100,
+        legend: tableHeaders[2],
+        width: 15,
+        offset: -10,
+        borderColor: baseColor,
+        data: List<pw.LineChartValue>.generate(
+          dataTable.length,
+          (i) {
+            final v = dataTable[i][2] as num;
+            return pw.LineChartValue(i.toDouble(), v.toDouble());
+          },
+        ),
+      ),
+      pw.BarDataSet(
+        color: PdfColors.amber100,
+        legend: tableHeaders[1],
+        width: 15,
+        offset: 10,
+        borderColor: PdfColors.amber,
+        data: List<pw.LineChartValue>.generate(
+          dataTable.length,
+          (i) {
+            final v = dataTable[i][1] as num;
+            return pw.LineChartValue(i.toDouble(), v.toDouble());
+          },
+        ),
+      ),
+    ],
+  );
+
+  // Left curved line chart
+  final chart2 = pw.Chart(
+    right: pw.ChartLegend(),
+    grid: pw.CartesianGrid(
+      xAxis: pw.FixedAxis([0, 1, 2, 3, 4, 5, 6]),
+      yAxis: pw.FixedAxis(
+        [0, 200, 400, 600],
+        divisions: true,
+      ),
+    ),
+    datasets: [
+      pw.LineDataSet(
+        legend: 'Expense',
+        drawSurface: true,
+        isCurved: true,
+        drawPoints: false,
+        color: baseColor,
+        data: List<pw.LineChartValue>.generate(
+          dataTable.length,
+          (i) {
+            final v = dataTable[i][2] as num;
+            return pw.LineChartValue(i.toDouble(), v.toDouble());
+          },
+        ),
+      ),
+    ],
+  );
+
+  // Data table
+  final table = pw.Table.fromTextArray(
+    border: null,
+    headers: tableHeaders,
+    data: List<List<dynamic>>.generate(
+      dataTable.length,
+      (index) => <dynamic>[
+        dataTable[index][0],
+        dataTable[index][1],
+        dataTable[index][2],
+        (dataTable[index][1] as num) - (dataTable[index][2] as num),
+      ],
+    ),
+    headerStyle: pw.TextStyle(
+      color: PdfColors.white,
+      fontWeight: pw.FontWeight.bold,
+    ),
+    headerDecoration: pw.BoxDecoration(
+      color: baseColor,
+    ),
+    rowDecoration: pw.BoxDecoration(
+      border: pw.Border(
+        bottom: pw.BorderSide(
+          color: baseColor,
+          width: .5,
+        ),
+      ),
+    ),
+    cellAlignment: pw.Alignment.centerRight,
+    cellAlignments: {0: pw.Alignment.centerLeft},
+  );
+
   // Add page to the PDF
   document.addPage(
     pw.Page(
       pageFormat: pageFormat,
       theme: theme,
       build: (context) {
-        // Top bar chart
-        final chart1 = pw.Chart(
-          left: pw.Container(
-            alignment: pw.Alignment.topCenter,
-            margin: const pw.EdgeInsets.only(right: 5, top: 10),
-            child: pw.Transform.rotateBox(
-              angle: pi / 2,
-              child: pw.Text('Amount'),
-            ),
-          ),
-          overlay: pw.ChartLegend(
-            position: const pw.Alignment(-.7, 1),
-            decoration: pw.BoxDecoration(
-              color: PdfColors.white,
-              border: pw.Border.all(
-                color: PdfColors.black,
-                width: .5,
-              ),
-            ),
-          ),
-          grid: pw.CartesianGrid(
-            xAxis: pw.FixedAxis.fromStrings(
-              List<String>.generate(
-                  dataTable.length, (index) => dataTable[index][0] as String),
-              marginStart: 30,
-              marginEnd: 30,
-              ticks: true,
-            ),
-            yAxis: pw.FixedAxis(
-              [0, 100, 200, 300, 400, 500, 600, 700],
-              format: (v) => '\$$v',
-              divisions: true,
-            ),
-          ),
-          datasets: [
-            pw.BarDataSet(
-              color: PdfColors.blue100,
-              legend: tableHeaders[2],
-              width: 15,
-              offset: -10,
-              borderColor: baseColor,
-              data: List<pw.LineChartValue>.generate(
-                dataTable.length,
-                (i) {
-                  final v = dataTable[i][2] as num;
-                  return pw.LineChartValue(i.toDouble(), v.toDouble());
-                },
-              ),
-            ),
-            pw.BarDataSet(
-              color: PdfColors.amber100,
-              legend: tableHeaders[1],
-              width: 15,
-              offset: 10,
-              borderColor: PdfColors.amber,
-              data: List<pw.LineChartValue>.generate(
-                dataTable.length,
-                (i) {
-                  final v = dataTable[i][1] as num;
-                  return pw.LineChartValue(i.toDouble(), v.toDouble());
-                },
-              ),
-            ),
-          ],
-        );
-
-        // Left curved line chart
-        final chart2 = pw.Chart(
-          grid: pw.CartesianGrid(
-            xAxis: pw.FixedAxis([0, 1, 2, 3, 4, 5, 6]),
-            yAxis: pw.FixedAxis(
-              [0, 200, 400, 600],
-              divisions: true,
-            ),
-          ),
-          datasets: [
-            pw.LineDataSet(
-              drawSurface: true,
-              isCurved: true,
-              drawPoints: false,
-              color: baseColor,
-              data: List<pw.LineChartValue>.generate(
-                dataTable.length,
-                (i) {
-                  final v = dataTable[i][2] as num;
-                  return pw.LineChartValue(i.toDouble(), v.toDouble());
-                },
-              ),
-            ),
-          ],
-        );
-
-        // Data table
-        final table = pw.Table.fromTextArray(
-          border: null,
-          headers: tableHeaders,
-          data: List<List<dynamic>>.generate(
-            dataTable.length,
-            (index) => <dynamic>[
-              dataTable[index][0],
-              dataTable[index][1],
-              dataTable[index][2],
-              (dataTable[index][1] as num) - (dataTable[index][2] as num),
-            ],
-          ),
-          headerStyle: pw.TextStyle(
-            color: PdfColors.white,
-            fontWeight: pw.FontWeight.bold,
-          ),
-          headerDecoration: pw.BoxDecoration(
-            color: baseColor,
-          ),
-          rowDecoration: pw.BoxDecoration(
-            border: pw.Border(
-              bottom: pw.BorderSide(
-                color: baseColor,
-                width: .5,
-              ),
-            ),
-          ),
-          cellAlignment: pw.Alignment.centerRight,
-          cellAlignments: {0: pw.Alignment.centerLeft},
-        );
-
         // Page layout
         return pw.Column(
           children: [
@@ -196,17 +198,7 @@ Future<Uint8List> generateReport(
             pw.Divider(thickness: 4),
             pw.Expanded(flex: 3, child: chart1),
             pw.Divider(),
-            pw.Expanded(
-              flex: 2,
-              child: pw.Row(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Expanded(child: chart2),
-                  pw.SizedBox(width: 10),
-                  pw.Expanded(child: table),
-                ],
-              ),
-            ),
+            pw.Expanded(flex: 2, child: chart2),
             pw.SizedBox(height: 10),
             pw.Row(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -275,34 +267,38 @@ Future<Uint8List> generateReport(
           PdfColors.lime300,
         ];
 
-        return pw.SizedBox(
-          height: 400,
-          child: pw.Chart(
-            title: pw.Text(
-              'Expense breakdown',
-              style: pw.TextStyle(
-                color: baseColor,
-                fontSize: 20,
+        return pw.Column(
+          children: [
+            pw.Flexible(
+              child: pw.Chart(
+                title: pw.Text(
+                  'Expense breakdown',
+                  style: pw.TextStyle(
+                    color: baseColor,
+                    fontSize: 20,
+                  ),
+                ),
+                grid: pw.PieGrid(),
+                datasets: List<pw.Dataset>.generate(dataTable.length, (index) {
+                  final data = dataTable[index];
+                  final color = chartColors[index % chartColors.length];
+                  final textColor =
+                      color.luminance < 0.2 ? PdfColors.white : PdfColors.black;
+
+                  final value = (data[2] as num).toDouble();
+                  final pct = (value / expense * 100).round();
+
+                  return pw.PieDataSet(
+                    legend: '${data[0]}\n$pct%',
+                    value: value,
+                    color: color,
+                    legendStyle: pw.TextStyle(fontSize: 10, color: textColor),
+                  );
+                }),
               ),
             ),
-            grid: pw.PieGrid(),
-            datasets: List<pw.Dataset>.generate(dataTable.length, (index) {
-              final data = dataTable[index];
-              final color = chartColors[index % chartColors.length];
-              final textColor =
-                  color.luminance < 0.2 ? PdfColors.white : PdfColors.black;
-
-              final value = (data[2] as num).toDouble();
-              final pct = (value / expense * 100).round();
-
-              return pw.PieDataSet(
-                legend: '${data[0]}\n$pct%',
-                value: value,
-                color: color,
-                legendStyle: pw.TextStyle(fontSize: 10, color: textColor),
-              );
-            }),
-          ),
+            table,
+          ],
         );
       },
     ),

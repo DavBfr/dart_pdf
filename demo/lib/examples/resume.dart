@@ -141,6 +141,7 @@ Future<Uint8List> generateResume(PdfPageFormat format, CustomData data) async {
                           width: 60,
                           height: 60,
                           barcode: pw.Barcode.qrCode(),
+                          drawText: false,
                         ),
                       ],
                     ),

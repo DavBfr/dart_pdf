@@ -39,6 +39,7 @@ class ThemeData extends Inherited {
     TextStyle? tableCell,
     bool? softWrap,
     TextAlign? textAlign,
+    TextOverflow? overflow,
     int? maxLines,
     IconThemeData? iconTheme,
   }) {
@@ -56,6 +57,7 @@ class ThemeData extends Inherited {
       tableHeader: tableHeader,
       tableCell: tableCell,
       softWrap: softWrap,
+      overflow: overflow,
       textAlign: textAlign,
       maxLines: maxLines,
       iconTheme: iconTheme,
@@ -75,6 +77,7 @@ class ThemeData extends Inherited {
     required this.tableHeader,
     required this.tableCell,
     required this.softWrap,
+    required this.overflow,
     required this.textAlign,
     required this.iconTheme,
     this.maxLines,
@@ -121,6 +124,7 @@ class ThemeData extends Inherited {
           fontSize: fontSize * 0.8, fontWeight: FontWeight.bold),
       tableCell: defaultStyle.copyWith(fontSize: fontSize * 0.8),
       softWrap: true,
+      overflow: TextOverflow.visible,
       textAlign: TextAlign.left,
       iconTheme: IconThemeData.fallback(icons),
     );
@@ -143,6 +147,7 @@ class ThemeData extends Inherited {
     bool? softWrap,
     TextAlign? textAlign,
     int? maxLines,
+    TextOverflow? overflow,
     IconThemeData? iconTheme,
   }) =>
       ThemeData._(
@@ -158,6 +163,7 @@ class ThemeData extends Inherited {
         tableHeader: this.tableHeader.merge(tableHeader),
         tableCell: this.tableCell.merge(tableCell),
         softWrap: softWrap ?? this.softWrap,
+        overflow: overflow ?? this.overflow,
         textAlign: textAlign ?? this.textAlign,
         maxLines: maxLines ?? this.maxLines,
         iconTheme: iconTheme ?? this.iconTheme,
@@ -183,6 +189,7 @@ class ThemeData extends Inherited {
   final TextAlign textAlign;
   final bool softWrap;
   final int? maxLines;
+  final TextOverflow overflow;
 
   final IconThemeData iconTheme;
 }
@@ -216,6 +223,7 @@ class DefaultTextStyle extends StatelessWidget implements Inherited {
     required this.child,
     this.textAlign,
     this.softWrap = true,
+    this.overflow,
     this.maxLines,
   }) : assert(maxLines == null || maxLines > 0);
 
@@ -224,6 +232,7 @@ class DefaultTextStyle extends StatelessWidget implements Inherited {
     TextAlign? textAlign,
     bool? softWrap,
     int? maxLines,
+    TextOverflow? overflow,
     required Widget child,
   }) {
     return Builder(
@@ -234,6 +243,7 @@ class DefaultTextStyle extends StatelessWidget implements Inherited {
           style: parent.defaultTextStyle.merge(style),
           textAlign: textAlign ?? parent.textAlign,
           softWrap: softWrap ?? parent.softWrap,
+          overflow: overflow ?? parent.overflow,
           maxLines: maxLines ?? parent.maxLines,
           child: child,
         );
@@ -251,12 +261,15 @@ class DefaultTextStyle extends StatelessWidget implements Inherited {
 
   final int? maxLines;
 
+  final TextOverflow? overflow;
+
   @override
   Widget build(Context context) {
     final theme = Theme.of(context).copyWith(
       defaultTextStyle: style,
       textAlign: textAlign,
       softWrap: softWrap,
+      overflow: overflow,
       maxLines: maxLines,
     );
 

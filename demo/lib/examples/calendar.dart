@@ -59,12 +59,14 @@ class Calendar extends StatelessWidget {
   ) {
     return Container(
       color: PdfColors.blue200,
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.only(top: 8, left: 8, bottom: 8),
       child: Text(
         DateFormat.EEEE().format(date),
         style: const TextStyle(
           fontSize: 15,
         ),
+        maxLines: 1,
+        overflow: TextOverflow.clip,
       ),
     );
   }

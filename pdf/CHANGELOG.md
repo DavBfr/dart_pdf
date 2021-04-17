@@ -11,6 +11,7 @@
 - Fix textScalingFactor with lineSpacing
 - Implement SpanningWidget on RichText
 - Passthrough SpanningWidget on SingleChildWidget and StatelessWidget
+- Improve TextOverflow support
 
 ## 3.2.0
 

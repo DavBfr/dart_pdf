@@ -33,11 +33,14 @@ enum TextDirection { ltr, rtl }
 
 /// How overflowing text should be handled.
 enum TextOverflow {
-  /// Span to the next page when possible.
-  span,
+  /// Clip the overflowing text to fix its container.
+  clip,
 
   /// Render overflowing text outside of its container.
   visible,
+
+  /// Span to the next page when possible.
+  span,
 }
 
 abstract class _Span {
@@ -611,7 +614,9 @@ class RichText extends Widget with SpanningWidget {
 
   final _context = _RichTextContext();
 
-  final TextOverflow overflow;
+  final TextOverflow? overflow;
+
+  var _mustClip = false;
 
   void _appendDecoration(bool append, _TextDecoration td) {
     if (append && _decorations.isNotEmpty) {
@@ -638,6 +643,7 @@ class RichText extends Widget with SpanningWidget {
     final _maxLines = maxLines ?? theme.maxLines;
     _textAlign = textAlign ?? theme.textAlign;
     final _textDirection = textDirection ?? Directionality.of(context);
+    final _overflow = this.overflow ?? theme.overflow;
 
     final constraintWidth = constraints.hasBoundedWidth
         ? constraints.maxWidth
@@ -728,12 +734,14 @@ class RichText extends Widget with SpanningWidget {
                 // One word Overflow, try to split it.
                 final pos = _splitWord(word, font, style, constraintWidth);
 
-                words[index] = word.substring(0, pos);
-                words.insert(index + 1, word.substring(pos));
+                if (pos < word.length) {
+                  words[index] = word.substring(0, pos);
+                  words.insert(index + 1, word.substring(pos));
 
-                // Try again
-                index--;
-                continue;
+                  // Try again
+                  index--;
+                  continue;
+                }
               }
             }
 
@@ -910,7 +918,10 @@ class RichText extends Widget with SpanningWidget {
       ..endOffset = offsetY - _context.startOffset
       ..spanEnd = _spans.length;
 
-    if (this.overflow != TextOverflow.span) {
+    if (_overflow != TextOverflow.span) {
+      if (_overflow != TextOverflow.visible) {
+        _mustClip = true;
+      }
       return;
     }
 
@@ -948,6 +959,13 @@ class RichText extends Widget with SpanningWidget {
     super.paint(context);
     TextStyle? currentStyle;
     PdfColor? currentColor;
+
+    if (_mustClip) {
+      context.canvas
+        ..saveContext()
+        ..drawBox(box!)
+        ..clipPath();
+    }
 
     for (var decoration in _decorations) {
       assert(() {
@@ -997,6 +1015,10 @@ class RichText extends Widget with SpanningWidget {
         _spans,
       );
     }
+
+    if (_mustClip) {
+      context.canvas.restoreContext();
+    }
   }
 
   int _splitWord(String word, PdfFont font, TextStyle style, double maxWidth) {
@@ -1019,7 +1041,7 @@ class RichText extends Widget with SpanningWidget {
       pos = (low + high) ~/ 2;
     }
 
-    return pos;
+    return math.max(1, pos);
   }
 
   @override
@@ -1050,7 +1072,7 @@ class Text extends RichText {
     bool tightBounds = false,
     double textScaleFactor = 1.0,
     int? maxLines,
-    TextOverflow overflow = TextOverflow.visible,
+    TextOverflow? overflow,
   }) : super(
           text: TextSpan(text: text, style: style),
           textAlign: textAlign,
