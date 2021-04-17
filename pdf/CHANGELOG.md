@@ -4,6 +4,7 @@
 
 - Implement To be signed flieds
 - Improve Text rendering
+- Add individual cell decoration
 
 ## 3.2.0
 
