@@ -128,8 +128,8 @@ class TableBorder extends Border {
         context.canvas.moveTo(box.x, offset);
         context.canvas.lineTo(box.right, offset);
       }
-      context.canvas.setStrokeColor(verticalInside.color);
-      context.canvas.setLineWidth(verticalInside.width);
+      context.canvas.setStrokeColor(horizontalInside.color);
+      context.canvas.setLineWidth(horizontalInside.width);
       context.canvas.strokePath();
       horizontalInside.style.unsetStyle(context);
     }
