@@ -14,17 +14,25 @@
  * limitations under the License.
  */
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'app.dart';
 
 void main() {
-  debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-  runApp(
-    MaterialApp(
+  runApp(App());
+}
+
+class App extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    const scrollbarTheme =
+        ScrollbarThemeData(isAlwaysShown: true, showTrackOnHover: true);
+
+    return MaterialApp(
+      theme: ThemeData.light().copyWith(scrollbarTheme: scrollbarTheme),
+      darkTheme: ThemeData.dark().copyWith(scrollbarTheme: scrollbarTheme),
       title: 'Flutter PDF Demo',
       home: MyApp(),
-    ),
-  );
+    );
+  }
 }
