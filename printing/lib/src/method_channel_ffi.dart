@@ -39,18 +39,18 @@ void setDocumentFfi(PrintJob job, Uint8List data) {
   ffi.calloc.free(nativeBytes);
 }
 
-final _SetDocument_Dart _setDocument =
-    _dynamicLibrary.lookupFunction<_SetDocument_C, _SetDocument_Dart>(
+final _SetDocumentDart _setDocument =
+    _dynamicLibrary.lookupFunction<_SetDocumentC, _SetDocumentDart>(
   'net_nfet_printing_set_document',
 );
 
-typedef _SetDocument_C = ffi.Void Function(
+typedef _SetDocumentC = ffi.Void Function(
   ffi.Uint32 job,
   ffi.Pointer<ffi.Uint8> data,
   ffi.Uint64 size,
 );
 
-typedef _SetDocument_Dart = void Function(
+typedef _SetDocumentDart = void Function(
   int job,
   ffi.Pointer<ffi.Uint8> data,
   int size,
@@ -61,17 +61,17 @@ void setErrorFfi(PrintJob job, String message) {
   _setError(job.index, ffi.StringUtf8Pointer(message).toNativeUtf8());
 }
 
-final _SetError_Dart _setError =
-    _dynamicLibrary.lookupFunction<_SetError_C, _SetError_Dart>(
+final _SetErrorDart _setError =
+    _dynamicLibrary.lookupFunction<_SetErrorC, _SetErrorDart>(
   'net_nfet_printing_set_error',
 );
 
-typedef _SetError_C = ffi.Void Function(
+typedef _SetErrorC = ffi.Void Function(
   ffi.Uint32 job,
   ffi.Pointer<ffi.Utf8> message,
 );
 
-typedef _SetError_Dart = void Function(
+typedef _SetErrorDart = void Function(
   int job,
   ffi.Pointer<ffi.Utf8> message,
 );

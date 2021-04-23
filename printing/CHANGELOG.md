@@ -8,6 +8,7 @@
 - Add shouldRepaint parameter
 - Fix icon colors
 - Fix Windows build
+- Fix lint warnings
 
 ## 5.1.0
 
