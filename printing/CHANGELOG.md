@@ -7,6 +7,7 @@
 - Fix Scrollbar positionning and default margins
 - Add shouldRepaint parameter
 - Fix icon colors
+- Fix Windows build
 
 ## 5.1.0
 

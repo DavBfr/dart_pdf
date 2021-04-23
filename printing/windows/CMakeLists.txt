@@ -17,6 +17,13 @@ set(PROJECT_NAME "printing")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
 set(ARCH "x64")
+set(PDFIUM_VERSION "4475")
+
+if(${PDFIUM_VERSION} STREQUAL "latest")
+  set(PDFIUM_URL "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-windows-${ARCH}.zip")
+else()
+  set(PDFIUM_URL "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F${PDFIUM_VERSION}/pdfium-windows-${ARCH}.zip")
+endif()
 
 # Download pdfium
 include(../windows/DownloadProject.cmake)
@@ -24,7 +31,7 @@ download_project(
   PROJ
   pdfium
   URL
-  https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-windows-${ARCH}.zip
+  ${PDFIUM_URL}
   )
 
 # This value is used when generating builds using this plugin, so it must not be
