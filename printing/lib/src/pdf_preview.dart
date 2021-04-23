@@ -362,19 +362,19 @@ class _PdfPreviewState extends State<PdfPreview> {
     }
 
     return ListView.builder(
-        controller: scrollController,
-        padding: widget.padding,
-        itemCount: pages.length,
-        itemBuilder: (BuildContext context, int index) => GestureDetector(
-          onDoubleTap: () {
-            setState(() {
-              updatePosition = scrollController.position.pixels;
-              preview = index;
-              transformationController.value.setIdentity();
-            });
-          },
-          child: pages[index],
-        ),
+      controller: scrollController,
+      padding: widget.padding,
+      itemCount: pages.length,
+      itemBuilder: (BuildContext context, int index) => GestureDetector(
+        onDoubleTap: () {
+          setState(() {
+            updatePosition = scrollController.position.pixels;
+            preview = index;
+            transformationController.value.setIdentity();
+          });
+        },
+        child: pages[index],
+      ),
     );
   }
 
@@ -396,6 +396,7 @@ class _PdfPreviewState extends State<PdfPreview> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final iconColor = theme.primaryIconTheme.color ?? Colors.white;
 
     Widget page;
 
@@ -437,7 +438,6 @@ class _PdfPreviewState extends State<PdfPreview> {
       actions.add(
         IconButton(
           icon: const Icon(Icons.print),
-          color: theme.accentIconTheme.color,
           onPressed: _print,
         ),
       );
@@ -448,7 +448,6 @@ class _PdfPreviewState extends State<PdfPreview> {
         IconButton(
           key: shareWidget,
           icon: const Icon(Icons.share),
-          color: theme.accentIconTheme.color,
           onPressed: _share,
         ),
       );
@@ -462,7 +461,7 @@ class _PdfPreviewState extends State<PdfPreview> {
           dropdownColor: theme.primaryColor,
           icon: Icon(
             Icons.arrow_drop_down,
-            color: theme.accentIconTheme.color,
+            color: iconColor,
           ),
           value: pageFormat,
           items: List<DropdownMenuItem<PdfPageFormat>>.generate(
@@ -472,8 +471,7 @@ class _PdfPreviewState extends State<PdfPreview> {
               final val = _pageFormats[key];
               return DropdownMenuItem<PdfPageFormat>(
                 value: val,
-                child: Text(key,
-                    style: TextStyle(color: theme.accentIconTheme.color)),
+                child: Text(key, style: TextStyle(color: iconColor)),
               );
             },
           ),
@@ -490,15 +488,15 @@ class _PdfPreviewState extends State<PdfPreview> {
 
       if (widget.canChangeOrientation) {
         horizontal ??= pageFormat.width > pageFormat.height;
-        final color = theme.accentIconTheme.color!;
-        final disabledColor = color.withAlpha(120);
+
+        final disabledColor = iconColor.withAlpha(120);
         actions.add(
           ToggleButtons(
             renderBorder: false,
             borderColor: disabledColor,
             color: disabledColor,
-            selectedBorderColor: color,
-            selectedColor: color,
+            selectedBorderColor: iconColor,
+            selectedColor: iconColor,
             onPressed: (int index) {
               setState(() {
                 horizontal = index == 1;
@@ -521,7 +519,6 @@ class _PdfPreviewState extends State<PdfPreview> {
         actions.add(
           IconButton(
             icon: action.icon,
-            color: theme.accentIconTheme.color,
             onPressed: action.onPressed == null
                 ? null
                 : () => action.onPressed!(
@@ -563,18 +560,22 @@ class _PdfPreviewState extends State<PdfPreview> {
                 ? Scrollbar(controller: scrollController, child: scrollView)
                 : scrollView),
         if (actions.isNotEmpty && widget.useActions)
-          Material(
-            elevation: 4,
-            color: theme.primaryColor,
-            child: SizedBox(
-              width: double.infinity,
-              child: SafeArea(
-                child: Wrap(
-                  alignment: WrapAlignment.spaceAround,
-                  children: actions,
+          IconTheme.merge(
+            data: IconThemeData(
+              color: iconColor,
+            ),
+            child: Material(
+              elevation: 4,
+              color: theme.primaryColor,
+              child: SizedBox(
+                width: double.infinity,
+                child: SafeArea(
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceAround,
+                    children: actions,
+                  ),
                 ),
               ),
-            ),
             ),
           )
       ],

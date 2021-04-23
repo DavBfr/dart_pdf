@@ -6,6 +6,7 @@
 - Add previewPageMargin and padding parameters [Deepak]
 - Fix Scrollbar positionning and default margins
 - Add shouldRepaint parameter
+- Fix icon colors
 
 ## 5.1.0
 
