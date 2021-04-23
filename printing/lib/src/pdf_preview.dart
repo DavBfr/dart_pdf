@@ -39,6 +39,8 @@ class PdfPreview extends StatefulWidget {
     this.shareActionExtraBody,
     this.shareActionExtraSubject,
     this.shareActionExtraEmails,
+    this.previewPageMargin,
+    this.padding,
   }) : super(key: key);
 
   /// Called when a pdf document is needed
@@ -110,6 +112,14 @@ class PdfPreview extends StatefulWidget {
   /// is selected from the share dialog.
   /// This will work only for Android platform.
   final List<String>? shareActionExtraEmails;
+
+  /// margin for the document preview page
+  ///
+  /// defaults to [EdgeInsets.only(left: 8, top: 8, right: 8, bottom: 12,)],
+  final EdgeInsets? previewPageMargin;
+
+  /// padding for the pdf_preview widget
+  final EdgeInsets? padding;
 
   @override
   _PdfPreviewState createState() => _PdfPreviewState();
@@ -224,11 +234,13 @@ class _PdfPreviewState extends State<PdfPreview> {
           pages.add(_PdfPreviewPage(
             page: page,
             pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
+            pageMargin: widget.previewPageMargin,
           ));
         } else {
           pages[pageNum] = _PdfPreviewPage(
             page: page,
             pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
+            pageMargin: widget.previewPageMargin,
           );
         }
       });
@@ -346,6 +358,7 @@ class _PdfPreviewState extends State<PdfPreview> {
     return Scrollbar(
       child: ListView.builder(
         controller: scrollController,
+        padding: widget.padding,
         itemCount: pages.length,
         itemBuilder: (BuildContext context, int index) => GestureDetector(
           onDoubleTap: () {
@@ -620,22 +633,25 @@ class _PdfPreviewPage extends StatelessWidget {
     Key? key,
     this.page,
     this.pdfPreviewPageDecoration,
+    this.pageMargin,
   }) : super(key: key);
 
   final PdfRaster? page;
   final Decoration? pdfPreviewPageDecoration;
+  final EdgeInsets? pageMargin;
 
   @override
   Widget build(BuildContext context) {
     final im = PdfRasterImage(page!);
 
     return Container(
-      margin: const EdgeInsets.only(
-        left: 8,
-        top: 8,
-        right: 8,
-        bottom: 12,
-      ),
+      margin: pageMargin ??
+          const EdgeInsets.only(
+            left: 8,
+            top: 8,
+            right: 8,
+            bottom: 12,
+          ),
       decoration: pdfPreviewPageDecoration ??
           const BoxDecoration(
             color: Colors.white,
