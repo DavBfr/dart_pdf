@@ -115,7 +115,7 @@ class PdfPreview extends StatefulWidget {
 
   /// margin for the document preview page
   ///
-  /// defaults to [EdgeInsets.only(left: 8, top: 8, right: 8, bottom: 12,)],
+  /// defaults to [EdgeInsets.only(left: 20, top: 8, right: 20, bottom: 12)],
   final EdgeInsets? previewPageMargin;
 
   /// padding for the pdf_preview widget
@@ -146,7 +146,9 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   double? updatePosition;
 
-  final scrollController = ScrollController();
+  final scrollController = ScrollController(
+    keepScrollOffset: true,
+  );
 
   final transformationController = TransformationController();
 
@@ -355,8 +357,7 @@ class _PdfPreviewState extends State<PdfPreview> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Scrollbar(
-      child: ListView.builder(
+    return ListView.builder(
         controller: scrollController,
         padding: widget.padding,
         itemCount: pages.length,
@@ -370,7 +371,6 @@ class _PdfPreviewState extends State<PdfPreview> {
           },
           child: pages[index],
         ),
-      ),
     );
   }
 
@@ -554,7 +554,10 @@ class _PdfPreviewState extends State<PdfPreview> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Expanded(child: scrollView),
+        Expanded(
+            child: scrollController.hasClients
+                ? Scrollbar(controller: scrollController, child: scrollView)
+                : scrollView),
         if (actions.isNotEmpty && widget.useActions)
           Material(
             elevation: 4,
@@ -567,6 +570,7 @@ class _PdfPreviewState extends State<PdfPreview> {
                   children: actions,
                 ),
               ),
+            ),
             ),
           )
       ],
@@ -643,13 +647,18 @@ class _PdfPreviewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final im = PdfRasterImage(page!);
+    final scrollbarTrack = Theme.of(context)
+            .scrollbarTheme
+            .thickness
+            ?.resolve({MaterialState.hovered}) ??
+        12;
 
     return Container(
       margin: pageMargin ??
-          const EdgeInsets.only(
-            left: 8,
+          EdgeInsets.only(
+            left: 8 + scrollbarTrack,
             top: 8,
-            right: 8,
+            right: 8 + scrollbarTrack,
             bottom: 12,
           ),
       decoration: pdfPreviewPageDecoration ??

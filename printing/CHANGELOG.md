@@ -3,6 +3,8 @@
 ## 5.2.0
 
 - Improve Android page format detection [Deepak]
+- Add previewPageMargin and padding parameters [Deepak]
+- Fix Scrollbar positionning and default margins
 
 ## 5.1.0
 
