@@ -195,4 +195,9 @@ class PdfOutline extends PdfObjectDict {
 
     return c;
   }
+
+  @override
+  String toString() {
+    return '$runtimeType $anchor $title';
+  }
 }

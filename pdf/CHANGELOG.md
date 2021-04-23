@@ -5,6 +5,7 @@
 - Fix Text.softWrap behavior
 - Add TableOfContent Widget
 - Add LinearProgressIndicator
+- Add PdfOutline.toString()
 
 ## 3.3.0
 
