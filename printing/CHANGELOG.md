@@ -5,6 +5,7 @@
 - Improve Android page format detection [Deepak]
 - Add previewPageMargin and padding parameters [Deepak]
 - Fix Scrollbar positionning and default margins
+- Add shouldRepaint parameter
 
 ## 5.1.0
 

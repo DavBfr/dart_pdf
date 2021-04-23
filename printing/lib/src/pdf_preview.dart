@@ -41,6 +41,7 @@ class PdfPreview extends StatefulWidget {
     this.shareActionExtraEmails,
     this.previewPageMargin,
     this.padding,
+    this.shouldRepaint = false,
   }) : super(key: key);
 
   /// Called when a pdf document is needed
@@ -120,6 +121,9 @@ class PdfPreview extends StatefulWidget {
 
   /// padding for the pdf_preview widget
   final EdgeInsets? padding;
+
+  /// Force repainting the PDF document
+  final bool shouldRepaint;
 
   @override
   _PdfPreviewState createState() => _PdfPreviewState();
@@ -292,7 +296,7 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   @override
   void didUpdateWidget(covariant PdfPreview oldWidget) {
-    if (oldWidget.build != widget.build) {
+    if (oldWidget.build != widget.build || widget.shouldRepaint) {
       preview = null;
       updatePosition = null;
       _raster();
