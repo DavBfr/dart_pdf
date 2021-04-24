@@ -267,6 +267,7 @@ ref: svg
 	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_reference_1-7.pdf'
 
 gh-pages: all
+	cd test; $(DART_BIN) --enable-asserts github_social_preview.dart
 	cd demo; $(FLUTTER_BIN) build web
 	git checkout gh-pages
 	rm -rf assets icons

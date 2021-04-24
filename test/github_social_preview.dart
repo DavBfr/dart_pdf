@@ -68,7 +68,7 @@ Future<void> main() async {
             ),
           ),
           // Add a vertical separator
-          Container(width: 5 * px, color: PdfColors.lightBlue),
+          VerticalDivider(width: 5 * px, color: PdfColors.lightBlue),
           // Show "Hello World!" centered and rotated on the second half of the page
           Flexible(
             fit: FlexFit.tight,
@@ -95,8 +95,62 @@ Future<void> main() async {
   await File('social_preview.pdf').writeAsBytes(await pdf.save());
 
   // Convert to png
-  Process.runSync('pdftocairo',
-      ['social_preview.pdf', '-png', '-r', '72', 'social_preview.png']);
+  Process.runSync('pdftocairo', [
+    'social_preview.pdf',
+    '-png',
+    '-singlefile',
+    '-r',
+    dpi.toString(),
+    'social_preview',
+  ]);
+
+  // Generate some favicons
+  Document.debug = false;
+
+  // Create a pdf document
+  final favicon = Document();
+
+  favicon.addPage(
+    Page(
+      pageFormat: PdfPageFormat(512, 512),
+      build: (context) => Center(child: PdfLogo()),
+    ),
+  );
+
+  await File('favicon.pdf').writeAsBytes(await favicon.save());
+
+  // Convert to png
+  Process.runSync('pdftocairo', [
+    'favicon.pdf',
+    '-png',
+    '-singlefile',
+    '-transp',
+    '-r',
+    dpi.toString(),
+    '../demo/web/icon-512',
+  ]);
+  Process.runSync('pdftocairo', [
+    'favicon.pdf',
+    '-png',
+    '-singlefile',
+    '-transp',
+    '-scale-to',
+    '192',
+    '-r',
+    dpi.toString(),
+    '../demo/web/icon-192',
+  ]);
+  Process.runSync('pdftocairo', [
+    'favicon.pdf',
+    '-png',
+    '-singlefile',
+    '-transp',
+    '-scale-to',
+    '16',
+    '-r',
+    dpi.toString(),
+    '../demo/web/favicon',
+  ]);
 }
 
 class SyntaxHighlighterStyle {

@@ -40,3 +40,5 @@ assets/*.png
 assets/*.jpg
 assets/logo.svg
 linux
+
+web/*.png
