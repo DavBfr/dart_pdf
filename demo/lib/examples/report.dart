@@ -282,17 +282,13 @@ Future<Uint8List> generateReport(
                 datasets: List<pw.Dataset>.generate(dataTable.length, (index) {
                   final data = dataTable[index];
                   final color = chartColors[index % chartColors.length];
-                  final textColor =
-                      color.luminance < 0.2 ? PdfColors.white : PdfColors.black;
-
                   final value = (data[2] as num).toDouble();
                   final pct = (value / expense * 100).round();
-
                   return pw.PieDataSet(
                     legend: '${data[0]}\n$pct%',
                     value: value,
                     color: color,
-                    legendStyle: pw.TextStyle(fontSize: 10, color: textColor),
+                    legendStyle: pw.TextStyle(fontSize: 10),
                   );
                 }),
               ),

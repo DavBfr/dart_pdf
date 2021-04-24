@@ -83,11 +83,9 @@ class Invoice {
   static const _darkColor = PdfColors.blueGrey800;
   static const _lightColor = PdfColors.white;
 
-  PdfColor get _baseTextColor =>
-      baseColor.luminance < 0.5 ? _lightColor : _darkColor;
+  PdfColor get _baseTextColor => baseColor.isLight ? _lightColor : _darkColor;
 
-  PdfColor get _accentTextColor =>
-      baseColor.luminance < 0.5 ? _lightColor : _darkColor;
+  PdfColor get _accentTextColor => baseColor.isLight ? _lightColor : _darkColor;
 
   double get _total =>
       products.map<double>((p) => p.total).reduce((a, b) => a + b);

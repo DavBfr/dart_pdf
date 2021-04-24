@@ -180,6 +180,16 @@ class PdfColor {
     return math.pow((component + 0.055) / 1.055, 2.4).toDouble();
   }
 
+  /// Determines whether the given [PdfColor] is light.
+  bool get isLight => !isDark;
+
+  /// Determines whether the given [PdfColor] is dark.
+  bool get isDark {
+    final relativeLuminance = luminance;
+    const kThreshold = 0.15;
+    return (relativeLuminance + 0.05) * (relativeLuminance + 0.05) > kThreshold;
+  }
+
   /// Get the luminance
   double get luminance {
     final R = _linearizeColorComponent(red);
@@ -238,6 +248,12 @@ class PdfColor {
 
   @override
   int get hashCode => toInt();
+}
+
+class PdfColorGrey extends PdfColor {
+  /// Create a grey color
+  const PdfColorGrey(double color, [double alpha = 1.0])
+      : super(color, color, color, alpha);
 }
 
 /// Represents an CMYK color

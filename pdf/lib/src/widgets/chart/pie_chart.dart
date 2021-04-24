@@ -126,13 +126,14 @@ class PieDataSet extends Dataset {
     this.legendAlign,
     this.legendPosition = PieLegendPosition.auto,
     this.legendLineWidth = 1.0,
-    this.legendLineColor = PdfColors.black,
+    PdfColor? legendLineColor,
     Widget? legendWidget,
     this.legendOffset = 20,
   })  : drawBorder = drawBorder ?? borderColor != null && color != borderColor,
         assert((drawBorder ?? borderColor != null && color != borderColor) ||
             drawSurface),
         _legendWidget = legendWidget,
+        legendLineColor = legendLineColor ?? color,
         super(
           legend: legend,
           color: color,
@@ -201,7 +202,18 @@ class PieDataSet extends Dataset {
 
     _legendWidget ??= legend == null
         ? null
-        : Text(legend!, style: legendStyle, textAlign: _legendAlign);
+        : RichText(
+            text: TextSpan(
+              children: [TextSpan(text: legend!, style: legendStyle)],
+              style: TextStyle(
+                  color: lp == PieLegendPosition.inside
+                      ? color!.isLight
+                          ? PdfColors.white
+                          : PdfColors.black
+                      : null),
+            ),
+            textAlign: _legendAlign,
+          );
 
     if (_legendWidget != null) {
       _legendWidget!.layout(context,

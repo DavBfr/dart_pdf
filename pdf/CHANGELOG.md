@@ -13,6 +13,7 @@
 - Passthrough SpanningWidget on SingleChildWidget and StatelessWidget
 - Improve TextOverflow support
 - Fix Table horizontalInside borders
+- Improve PieChart default colors
 
 ## 3.2.0
 
