@@ -16,9 +16,9 @@
 
 import 'dart:io';
 
-import 'package:test/test.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
+import 'package:test/test.dart';
 
 late Document pdf;
 
@@ -211,6 +211,83 @@ void main() {
         ),
       ));
     });
+  });
+
+  test('Standard PieChart', () {
+    const data = <String, double>{
+      'Wind': 8.4,
+      'Hydro': 7.4,
+      'Solar': 2.4,
+      'Biomass': 1.4,
+      'Geothermal': 0.4,
+      'Nuclear': 20,
+      'Coal': 19,
+      'Petroleum': 1,
+      'Natural gas': 40,
+    };
+    var color = 0;
+
+    pdf.addPage(
+      Page(
+        pageFormat: PdfPageFormat.standard.landscape,
+        build: (Context context) => Chart(
+          title: Text('Sources of U.S. electricity generation, 2020'),
+          grid: PieGrid(),
+          datasets: [
+            for (final item in data.entries)
+              PieDataSet(
+                legend: item.key,
+                value: item.value,
+                color: PdfColors
+                    .primaries[(color++) * 4 % PdfColors.primaries.length],
+                offset: color == 6 ? 30 : 0,
+              ),
+          ],
+        ),
+      ),
+    );
+  });
+
+  test('Donnuts PieChart', () {
+    const internalRadius = 150.0;
+    const data = <String, int>{
+      'Dogs': 5528,
+      'Birds': 2211,
+      'Rabbits': 3216,
+      'Ermine': 740,
+      'Cats': 8241,
+    };
+    var color = 0;
+    final total = data.values.fold<int>(0, (v, e) => v + e);
+
+    pdf.addPage(
+      Page(
+        pageFormat: PdfPageFormat.standard.landscape,
+        build: (Context context) => Stack(
+          alignment: Alignment.center,
+          children: [
+            Text(
+              'Pets',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 30),
+            ),
+            Chart(
+              grid: PieGrid(startAngle: 1),
+              datasets: [
+                for (final item in data.entries)
+                  PieDataSet(
+                    legend: '${item.key} ${item.value * 100 ~/ total}%',
+                    value: item.value,
+                    color: PdfColors
+                        .primaries[(color++) * 2 % PdfColors.primaries.length],
+                    innerRadius: internalRadius,
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   });
 
   tearDownAll(() async {

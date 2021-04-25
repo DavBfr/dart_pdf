@@ -14,6 +14,7 @@
 - Improve TextOverflow support
 - Fix Table horizontalInside borders
 - Improve PieChart default colors
+- Implement donnut chart
 
 ## 3.2.0
 

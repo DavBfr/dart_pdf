@@ -2,20 +2,21 @@
 
 import 'dart:math';
 
+import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 class PieGrid extends ChartGrid {
-  PieGrid();
+  PieGrid({this.startAngle = 0});
 
-  late PdfRect gridBox;
+  /// Start angle for the first [PieDataSet]
+  final double startAngle;
 
-  late double total;
+  late double _radius;
 
-  late double unit;
-
-  late double pieSize;
+  /// Nominal radius of a pie slice
+  double get radius => _radius;
 
   @override
   void layout(Context context, BoxConstraints constraints,
@@ -25,19 +26,19 @@ class PieGrid extends ChartGrid {
     final datasets = Chart.of(context).datasets;
     final size = constraints.biggest;
 
-    gridBox = PdfRect(0, 0, size.x, size.y);
+    final _gridBox = PdfRect(0, 0, size.x, size.y);
 
-    total = 0.0;
+    var _total = 0.0;
 
     for (final dataset in datasets) {
-      assert(dataset is PieDataSet, 'Use only PieDataSet with a PieGrid');
+      assert(dataset is PieDataSet, 'Use only PieDataset with a PieGrid');
       if (dataset is PieDataSet) {
-        total += dataset.value;
+        _total += dataset.value;
       }
     }
 
-    unit = pi / total * 2;
-    var angle = 0.0;
+    final unit = pi / _total * 2;
+    var angle = startAngle;
 
     for (final dataset in datasets) {
       if (dataset is PieDataSet) {
@@ -47,19 +48,19 @@ class PieGrid extends ChartGrid {
       }
     }
 
-    pieSize = min(gridBox.width / 2, gridBox.height / 2);
+    _radius = min(_gridBox.width / 2, _gridBox.height / 2);
     var reduce = false;
 
     do {
       reduce = false;
       for (final dataset in datasets) {
         if (dataset is PieDataSet) {
-          dataset.layout(context, BoxConstraints.tight(gridBox.size));
+          dataset.layout(context, BoxConstraints.tight(_gridBox.size));
           assert(dataset.box != null);
-          if (pieSize > 20 &&
-              (dataset.box!.width > gridBox.width ||
-                  dataset.box!.height > gridBox.height)) {
-            pieSize -= 10;
+          if (_radius > 20 &&
+              (dataset.box!.width > _gridBox.width ||
+                  dataset.box!.height > _gridBox.height)) {
+            _radius -= 10;
             reduce = true;
             break;
           }
@@ -129,7 +130,10 @@ class PieDataSet extends Dataset {
     PdfColor? legendLineColor,
     Widget? legendWidget,
     this.legendOffset = 20,
-  })  : drawBorder = drawBorder ?? borderColor != null && color != borderColor,
+    this.innerRadius = 0,
+  })  : assert(innerRadius >= 0),
+        assert(offset >= 0),
+        drawBorder = drawBorder ?? borderColor != null && color != borderColor,
         assert((drawBorder ?? borderColor != null && color != borderColor) ||
             drawSurface),
         _legendWidget = legendWidget,
@@ -168,6 +172,8 @@ class PieDataSet extends Dataset {
 
   final PdfColor legendLineColor;
 
+  final double innerRadius;
+
   PdfPoint? _legendAnchor;
   PdfPoint? _legendPivot;
   PdfPoint? _legendStart;
@@ -180,7 +186,7 @@ class PieDataSet extends Dataset {
     final _offset = _isFullCircle ? 0 : offset;
 
     final grid = Chart.of(context).grid as PieGrid;
-    final len = grid.pieSize + _offset;
+    final len = grid.radius + _offset;
     var x = -len;
     var y = -len;
     var w = len * 2;
@@ -217,7 +223,7 @@ class PieDataSet extends Dataset {
 
     if (_legendWidget != null) {
       _legendWidget!.layout(context,
-          BoxConstraints(maxWidth: grid.pieSize, maxHeight: grid.pieSize));
+          BoxConstraints(maxWidth: grid.radius, maxHeight: grid.radius));
       assert(_legendWidget!.box != null);
 
       final ls = _legendWidget!.box!.size;
@@ -226,13 +232,13 @@ class PieDataSet extends Dataset {
 
       switch (lp) {
         case PieLegendPosition.outside:
-          final o = grid.pieSize + legendOffset;
+          final o = grid.radius + legendOffset;
           final cx = sin(bisect) * (_offset + o);
           final cy = cos(bisect) * (_offset + o);
 
           _legendStart = PdfPoint(
-            sin(bisect) * (_offset + grid.pieSize + legendOffset * 0.1),
-            cos(bisect) * (_offset + grid.pieSize + legendOffset * 0.1),
+            sin(bisect) * (_offset + grid.radius + legendOffset * 0.1),
+            cos(bisect) * (_offset + grid.radius + legendOffset * 0.1),
           );
 
           _legendPivot = PdfPoint(cx, cy);
@@ -269,9 +275,23 @@ class PieDataSet extends Dataset {
           }
           break;
         case PieLegendPosition.inside:
-          final o = _isFullCircle ? 0 : grid.pieSize * 2 / 3;
-          final cx = sin(bisect) * (_offset + o);
-          final cy = cos(bisect) * (_offset + o);
+          final double o;
+          final double cx;
+          final double cy;
+          if (innerRadius == 0) {
+            o = _isFullCircle ? 0 : grid.radius * 2 / 3;
+            cx = sin(bisect) * (_offset + o);
+            cy = cos(bisect) * (_offset + o);
+          } else {
+            o = (grid.radius + innerRadius) / 2;
+            if (_isFullCircle) {
+              cx = 0;
+              cy = o;
+            } else {
+              cx = sin(bisect) * (_offset + o);
+              cy = cos(bisect) * (_offset + o);
+            }
+          }
           _legendWidget!.box = PdfRect.fromPoints(
               PdfPoint(
                 cx - ls.x / 2,
@@ -287,7 +307,7 @@ class PieDataSet extends Dataset {
     box = PdfRect(x, y, w, h);
   }
 
-  void _shape(Context context) {
+  void _paintSliceShape(Context context) {
     final grid = Chart.of(context).grid as PieGrid;
 
     final bisect = (angleStart + angleEnd) / 2;
@@ -295,19 +315,60 @@ class PieDataSet extends Dataset {
     final cx = sin(bisect) * offset;
     final cy = cos(bisect) * offset;
 
-    final sx = cx + sin(angleStart) * grid.pieSize;
-    final sy = cy + cos(angleStart) * grid.pieSize;
-    final ex = cx + sin(angleEnd) * grid.pieSize;
-    final ey = cy + cos(angleEnd) * grid.pieSize;
+    final sx = cx + sin(angleStart) * grid.radius;
+    final sy = cy + cos(angleStart) * grid.radius;
+    final ex = cx + sin(angleEnd) * grid.radius;
+    final ey = cy + cos(angleEnd) * grid.radius;
 
     if (_isFullCircle) {
-      context.canvas.drawEllipse(0, 0, grid.pieSize, grid.pieSize);
+      context.canvas.drawEllipse(0, 0, grid.radius, grid.radius);
     } else {
       context.canvas
         ..moveTo(cx, cy)
         ..lineTo(sx, sy)
-        ..bezierArc(sx, sy, grid.pieSize, grid.pieSize, ex, ey,
+        ..bezierArc(sx, sy, grid.radius, grid.radius, ex, ey,
             large: angleEnd - angleStart > pi);
+    }
+  }
+
+  void _paintDonnutShape(Context context) {
+    final grid = Chart.of(context).grid as PieGrid;
+
+    final bisect = (angleStart + angleEnd) / 2;
+
+    final cx = sin(bisect) * offset;
+    final cy = cos(bisect) * offset;
+
+    final stx = cx + sin(angleStart) * grid.radius;
+    final sty = cy + cos(angleStart) * grid.radius;
+    final etx = cx + sin(angleEnd) * grid.radius;
+    final ety = cy + cos(angleEnd) * grid.radius;
+    final sbx = cx + sin(angleStart) * innerRadius;
+    final sby = cy + cos(angleStart) * innerRadius;
+    final ebx = cx + sin(angleEnd) * innerRadius;
+    final eby = cy + cos(angleEnd) * innerRadius;
+
+    if (_isFullCircle) {
+      context.canvas.drawEllipse(0, 0, grid.radius, grid.radius);
+      context.canvas
+          .drawEllipse(0, 0, innerRadius, innerRadius, clockwise: false);
+    } else {
+      context.canvas
+        ..moveTo(stx, sty)
+        ..bezierArc(stx, sty, grid.radius, grid.radius, etx, ety,
+            large: angleEnd - angleStart > pi)
+        ..lineTo(ebx, eby)
+        ..bezierArc(ebx, eby, innerRadius, innerRadius, sbx, sby,
+            large: angleEnd - angleStart > pi, sweep: true)
+        ..lineTo(stx, sty);
+    }
+  }
+
+  void _paintShape(Context context) {
+    if (innerRadius == 0) {
+      _paintSliceShape(context);
+    } else {
+      _paintDonnutShape(context);
     }
   }
 
@@ -316,7 +377,7 @@ class PieDataSet extends Dataset {
     super.paint(context);
 
     if (drawSurface) {
-      _shape(context);
+      _paintShape(context);
       if (surfaceOpacity != 1) {
         context.canvas
           ..saveContext()
@@ -340,7 +401,7 @@ class PieDataSet extends Dataset {
     super.paint(context);
 
     if (drawBorder) {
-      _shape(context);
+      _paintShape(context);
       context.canvas
         ..setLineWidth(borderWidth)
         ..setLineJoin(PdfLineJoin.round)
@@ -349,6 +410,7 @@ class PieDataSet extends Dataset {
     }
   }
 
+  @protected
   void paintLegend(Context context) {
     if (legendPosition != PieLegendPosition.none && _legendWidget != null) {
       if (_legendAnchor != null &&
@@ -379,8 +441,8 @@ class PieDataSet extends Dataset {
 
     final bisect = (angleStart + angleEnd) / 2;
 
-    final cx = sin(bisect) * (offset + grid.pieSize + legendOffset);
-    final cy = cos(bisect) * (offset + grid.pieSize + legendOffset);
+    final cx = sin(bisect) * (offset + grid.radius + legendOffset);
+    final cy = cos(bisect) * (offset + grid.radius + legendOffset);
 
     if (_legendWidget != null) {
       context.canvas

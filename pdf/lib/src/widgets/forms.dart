@@ -17,6 +17,7 @@
 import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
+import 'package:pdf/src/pdf/data_types.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'basic.dart';
@@ -294,7 +295,7 @@ class TextField extends StatelessWidget {
     if (value != null) {
       final canvas = tf.appearance(context.document, PdfAnnotAppearance.normal,
           matrix: mat, boundingBox: box);
-      canvas.buf.putString('/Tx BMC\n');
+      canvas.markContentBegin(const PdfName('/Tx'));
       Widget.draw(
         Text(value!, style: _textStyle),
         offset: PdfPoint.zero,
@@ -303,7 +304,7 @@ class TextField extends StatelessWidget {
         constraints:
             BoxConstraints.tightFor(width: box!.width, height: box!.height),
       );
-      canvas.buf.putString('EMC\n');
+      canvas.markContentEnd();
     }
 
     PdfAnnot(context.page, tf);

@@ -100,7 +100,7 @@ class _PdfGraphicsContext {
 /// Pdf drawing operations
 class PdfGraphics {
   /// Create a new graphic canvas
-  PdfGraphics(this._page, this.buf) {
+  PdfGraphics(this._page, this._buf) {
     _context = _PdfGraphicsContext(ctm: Matrix4.identity());
   }
 
@@ -114,7 +114,7 @@ class PdfGraphics {
   final PdfGraphicStream _page;
 
   /// Buffer where to write the graphic operations
-  final PdfStream buf;
+  final PdfStream _buf;
 
   /// Default font if none selected
   PdfFont? get defaultFont => _page.getDefaultFont();
@@ -122,36 +122,36 @@ class PdfGraphics {
   /// Draw a surface on the previously defined shape
   /// set evenOdd to false to use the nonzero winding number rule to determine the region to fill and to true to use the even-odd rule to determine the region to fill
   void fillPath({bool evenOdd = false}) {
-    buf.putString('f${evenOdd ? '*' : ''}\n');
+    _buf.putString('f${evenOdd ? '*' : ''}\n');
   }
 
   /// Draw the contour of the previously defined shape
   void strokePath({bool close = false}) {
-    buf.putString('${close ? 's' : 'S'}\n');
+    _buf.putString('${close ? 's' : 'S'}\n');
   }
 
   /// Close the path with a line
   void closePath() {
-    buf.putString('h\n');
+    _buf.putString('h\n');
   }
 
   /// Create a clipping surface from the previously defined shape,
   /// to prevent any further drawing outside
   void clipPath({bool evenOdd = false, bool end = true}) {
-    buf.putString('W${evenOdd ? '*' : ''}${end ? ' n' : ''}\n');
+    _buf.putString('W${evenOdd ? '*' : ''}${end ? ' n' : ''}\n');
   }
 
   /// Draw a surface on the previously defined shape and then draw the contour
   /// set evenOdd to false to use the nonzero winding number rule to determine the region to fill and to true to use the even-odd rule to determine the region to fill
   void fillAndStrokePath({bool evenOdd = false, bool close = false}) {
-    buf.putString('${close ? 'b' : 'B'}${evenOdd ? '*' : ''}\n');
+    _buf.putString('${close ? 'b' : 'B'}${evenOdd ? '*' : ''}\n');
   }
 
   /// Apply a shader
   void applyShader(PdfShading shader) {
     // The shader needs to be registered in the page resources
     _page.addShader(shader);
-    buf.putString('${shader.name} sh\n');
+    _buf.putString('${shader.name} sh\n');
   }
 
   /// This releases any resources used by this Graphics object. You must use
@@ -162,14 +162,14 @@ class PdfGraphics {
   void restoreContext() {
     if (_contextQueue.isNotEmpty) {
       // restore graphics context
-      buf.putString('Q\n');
+      _buf.putString('Q\n');
       _context = _contextQueue.removeLast();
     }
   }
 
   /// Save the graphc context
   void saveContext() {
-    buf.putString('q\n');
+    _buf.putString('q\n');
     _contextQueue.addLast(_context.copy());
   }
 
@@ -182,35 +182,35 @@ class PdfGraphics {
     _page.addXObject(img);
 
     // q w 0 0 h x y cm % the coordinate matrix
-    buf.putString('q ');
+    _buf.putString('q ');
     switch (img.orientation) {
       case PdfImageOrientation.topLeft:
-        PdfNumList(<double>[w, 0, 0, h, x, y]).output(buf);
+        PdfNumList(<double>[w, 0, 0, h, x, y]).output(_buf);
         break;
       case PdfImageOrientation.topRight:
-        PdfNumList(<double>[-w, 0, 0, h, w + x, y]).output(buf);
+        PdfNumList(<double>[-w, 0, 0, h, w + x, y]).output(_buf);
         break;
       case PdfImageOrientation.bottomRight:
-        PdfNumList(<double>[-w, 0, 0, -h, w + x, h + y]).output(buf);
+        PdfNumList(<double>[-w, 0, 0, -h, w + x, h + y]).output(_buf);
         break;
       case PdfImageOrientation.bottomLeft:
-        PdfNumList(<double>[w, 0, 0, -h, x, h + y]).output(buf);
+        PdfNumList(<double>[w, 0, 0, -h, x, h + y]).output(_buf);
         break;
       case PdfImageOrientation.leftTop:
-        PdfNumList(<double>[0, -h, -w, 0, w + x, h + y]).output(buf);
+        PdfNumList(<double>[0, -h, -w, 0, w + x, h + y]).output(_buf);
         break;
       case PdfImageOrientation.rightTop:
-        PdfNumList(<double>[0, -h, w, 0, x, h + y]).output(buf);
+        PdfNumList(<double>[0, -h, w, 0, x, h + y]).output(_buf);
         break;
       case PdfImageOrientation.rightBottom:
-        PdfNumList(<double>[0, h, w, 0, x, y]).output(buf);
+        PdfNumList(<double>[0, h, w, 0, x, y]).output(_buf);
         break;
       case PdfImageOrientation.leftBottom:
-        PdfNumList(<double>[0, h, -w, 0, w + x, y]).output(buf);
+        PdfNumList(<double>[0, h, -w, 0, w + x, y]).output(_buf);
         break;
     }
 
-    buf.putString(' cm ${img.name} Do Q\n');
+    _buf.putString(' cm ${img.name} Do Q\n');
   }
 
   /// Draws a line between two coordinates.
@@ -220,12 +220,22 @@ class PdfGraphics {
   }
 
   /// Draws an ellipse
-  void drawEllipse(double x, double y, double r1, double r2) {
+  ///
+  /// Use clockwise=false to draw the inside of a donnnut
+  void drawEllipse(double x, double y, double r1, double r2,
+      {bool clockwise = true}) {
     moveTo(x, y - r2);
-    curveTo(x + _m4 * r1, y - r2, x + r1, y - _m4 * r2, x + r1, y);
-    curveTo(x + r1, y + _m4 * r2, x + _m4 * r1, y + r2, x, y + r2);
-    curveTo(x - _m4 * r1, y + r2, x - r1, y + _m4 * r2, x - r1, y);
-    curveTo(x - r1, y - _m4 * r2, x - _m4 * r1, y - r2, x, y - r2);
+    if (clockwise) {
+      curveTo(x + _m4 * r1, y - r2, x + r1, y - _m4 * r2, x + r1, y);
+      curveTo(x + r1, y + _m4 * r2, x + _m4 * r1, y + r2, x, y + r2);
+      curveTo(x - _m4 * r1, y + r2, x - r1, y + _m4 * r2, x - r1, y);
+      curveTo(x - r1, y - _m4 * r2, x - _m4 * r1, y - r2, x, y - r2);
+    } else {
+      curveTo(x - _m4 * r1, y - r2, x - r1, y - _m4 * r2, x - r1, y);
+      curveTo(x - r1, y + _m4 * r2, x - _m4 * r1, y + r2, x, y + r2);
+      curveTo(x + _m4 * r1, y + r2, x + r1, y + _m4 * r2, x + r1, y);
+      curveTo(x + r1, y - _m4 * r2, x + _m4 * r1, y - r2, x, y - r2);
+    }
   }
 
   /// Draws a Rectangle
@@ -235,8 +245,8 @@ class PdfGraphics {
     double w,
     double h,
   ) {
-    PdfNumList([x, y, w, h]).output(buf);
-    buf.putString(' re\n');
+    PdfNumList([x, y, w, h]).output(_buf);
+    _buf.putString(' re\n');
   }
 
   /// Draws a Rectangle
@@ -268,27 +278,27 @@ class PdfGraphics {
     PdfTextRenderingMode? mode = PdfTextRenderingMode.fill,
     double? rise,
   }) {
-    buf.putString('${font.name} ');
-    PdfNum(size).output(buf);
-    buf.putString(' Tf\n');
+    _buf.putString('${font.name} ');
+    PdfNum(size).output(_buf);
+    _buf.putString(' Tf\n');
     if (charSpace != null) {
-      PdfNum(charSpace).output(buf);
-      buf.putString(' Tc\n');
+      PdfNum(charSpace).output(_buf);
+      _buf.putString(' Tc\n');
     }
     if (wordSpace != null) {
-      PdfNum(wordSpace).output(buf);
-      buf.putString(' Tw\n');
+      PdfNum(wordSpace).output(_buf);
+      _buf.putString(' Tw\n');
     }
     if (scale != null) {
-      PdfNum(scale * 100).output(buf);
-      buf.putString(' Tz\n');
+      PdfNum(scale * 100).output(_buf);
+      _buf.putString(' Tz\n');
     }
     if (rise != null) {
-      PdfNum(rise).output(buf);
-      buf.putString(' Ts\n');
+      PdfNum(rise).output(_buf);
+      _buf.putString(' Ts\n');
     }
     if (mode != PdfTextRenderingMode.fill) {
-      buf.putString('${mode!.index} Tr\n');
+      _buf.putString('${mode!.index} Tr\n');
     }
   }
 
@@ -307,22 +317,22 @@ class PdfGraphics {
   }) {
     _page.addFont(font);
 
-    buf.putString('BT ');
-    PdfNumList([x, y]).output(buf);
-    buf.putString(' Td ');
+    _buf.putString('BT ');
+    PdfNumList([x, y]).output(_buf);
+    _buf.putString(' Td ');
     setFont(font, size,
         charSpace: charSpace,
         mode: mode,
         rise: rise,
         scale: scale,
         wordSpace: wordSpace);
-    buf.putString('[');
-    font.putText(buf, s);
-    buf.putString(']TJ ET\n');
+    _buf.putString('[');
+    font.putText(_buf, s);
+    _buf.putString(']TJ ET\n');
   }
 
   void reset() {
-    buf.putString('0 Tr\n');
+    _buf.putString('0 Tr\n');
   }
 
   /// Sets the color for drawing
@@ -335,11 +345,11 @@ class PdfGraphics {
   void setFillColor(PdfColor? color) {
     if (color is PdfColorCmyk) {
       PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
-          .output(buf);
-      buf.putString(' k\n');
+          .output(_buf);
+      _buf.putString(' k\n');
     } else {
-      PdfNumList(<double>[color!.red, color.green, color.blue]).output(buf);
-      buf.putString(' rg\n');
+      PdfNumList(<double>[color!.red, color.green, color.blue]).output(_buf);
+      _buf.putString(' rg\n');
     }
   }
 
@@ -347,11 +357,11 @@ class PdfGraphics {
   void setStrokeColor(PdfColor? color) {
     if (color is PdfColorCmyk) {
       PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
-          .output(buf);
-      buf.putString(' K\n');
+          .output(_buf);
+      _buf.putString(' K\n');
     } else {
-      PdfNumList(<double>[color!.red, color.green, color.blue]).output(buf);
-      buf.putString(' RG\n');
+      PdfNumList(<double>[color!.red, color.green, color.blue]).output(_buf);
+      _buf.putString(' RG\n');
     }
   }
 
@@ -359,27 +369,27 @@ class PdfGraphics {
   void setFillPattern(PdfPattern pattern) {
     // The shader needs to be registered in the page resources
     _page.addPattern(pattern);
-    buf.putString('/Pattern cs${pattern.name} scn\n');
+    _buf.putString('/Pattern cs${pattern.name} scn\n');
   }
 
   /// Sets the stroke pattern for drawing
   void setStrokePattern(PdfPattern pattern) {
     // The shader needs to be registered in the page resources
     _page.addPattern(pattern);
-    buf.putString('/Pattern CS${pattern.name} SCN\n');
+    _buf.putString('/Pattern CS${pattern.name} SCN\n');
   }
 
   /// Set the graphic state for drawing
   void setGraphicState(PdfGraphicState state) {
     final name = _page.stateName(state);
-    buf.putString('$name gs\n');
+    _buf.putString('$name gs\n');
   }
 
   /// Set the transformation Matrix
   void setTransform(Matrix4 t) {
     final s = t.storage;
-    PdfNumList(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]).output(buf);
-    buf.putString(' cm\n');
+    PdfNumList(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]).output(_buf);
+    _buf.putString(' cm\n');
     _context.ctm.multiply(t);
   }
 
@@ -390,14 +400,14 @@ class PdfGraphics {
 
   /// This adds a line segment to the current path
   void lineTo(double x, double y) {
-    PdfNumList([x, y]).output(buf);
-    buf.putString(' l\n');
+    PdfNumList([x, y]).output(_buf);
+    _buf.putString(' l\n');
   }
 
   /// This moves the current drawing point.
   void moveTo(double x, double y) {
-    PdfNumList([x, y]).output(buf);
-    buf.putString(' m\n');
+    PdfNumList([x, y]).output(_buf);
+    _buf.putString(' m\n');
   }
 
   /// Draw a cubic bézier curve from the current point to (x3,y3)
@@ -405,8 +415,8 @@ class PdfGraphics {
   /// and (x2,y2) as the control point at the end of the curve.
   void curveTo(
       double x1, double y1, double x2, double y2, double x3, double y3) {
-    PdfNumList([x1, y1, x2, y2, x3, y3]).output(buf);
-    buf.putString(' c\n');
+    PdfNumList([x1, y1, x2, y2, x3, y3]).output(_buf);
+    _buf.putString(' c\n');
   }
 
   double _vectorAngle(double ux, double uy, double vx, double vy) {
@@ -566,25 +576,25 @@ class PdfGraphics {
 
   /// Set line starting and ending cap type
   void setLineCap(PdfLineCap cap) {
-    buf.putString('${cap.index} J\n');
+    _buf.putString('${cap.index} J\n');
   }
 
   /// Set line join type
   void setLineJoin(PdfLineJoin join) {
-    buf.putString('${join.index} j\n');
+    _buf.putString('${join.index} j\n');
   }
 
   /// Set line width
   void setLineWidth(double width) {
-    PdfNum(width).output(buf);
-    buf.putString(' w\n');
+    PdfNum(width).output(_buf);
+    _buf.putString(' w\n');
   }
 
   /// Set line joint miter limit, applies if the
   void setMiterLimit(double limit) {
     assert(limit >= 1.0);
-    PdfNum(limit).output(buf);
-    buf.putString(' M\n');
+    PdfNum(limit).output(_buf);
+    _buf.putString(' M\n');
   }
 
   /// The dash array shall be cycled through, adding up the lengths of dashes and gaps.
@@ -592,8 +602,17 @@ class PdfGraphics {
   ///
   /// Example: [2 1] will create a dash pattern with 2 on, 1 off, 2 on, 1 off, ...
   void setLineDashPattern([List<num> array = const <num>[], int phase = 0]) {
-    PdfArray.fromNum(array).output(buf);
-    buf.putString(' $phase d\n');
+    PdfArray.fromNum(array).output(_buf);
+    _buf.putString(' $phase d\n');
+  }
+
+  void markContentBegin(PdfName tag) {
+    tag.output(_buf);
+    _buf.putString(' BMC\n');
+  }
+
+  void markContentEnd() {
+    _buf.putString('EMC\n');
   }
 }
 
