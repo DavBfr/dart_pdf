@@ -16,13 +16,21 @@ cmake_minimum_required(VERSION 3.10)
 set(PROJECT_NAME "printing")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
+set(PDFIUM_VERSION "latest")
+
+if(${PDFIUM_VERSION} STREQUAL "latest")
+  set(PDFIUM_URL "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-linux.tgz")
+else()
+  set(PDFIUM_URL "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F${PDFIUM_VERSION}/pdfium-linux.tgz")
+endif()
+
 # Download pdfium
 include(../windows/DownloadProject.cmake)
 download_project(
   PROJ
   pdfium
   URL
-  https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-linux.tgz
+  ${PDFIUM_URL}
   )
 
 # This value is used when generating builds using this plugin, so it must not be

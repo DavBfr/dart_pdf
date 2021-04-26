@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.2.1
+
+- Fix Linux build
+
 ## 5.2.0
 
 - Improve Android page format detection [Deepak]
