@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.1
+
+- Fix Text.softWrap behavior
+
 ## 3.3.0
 
 - Implement To be signed flieds

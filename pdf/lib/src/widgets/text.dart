@@ -699,7 +699,8 @@ class RichText extends Widget with SpanningWidget {
                         (style.fontSize! * textScaleFactor)) *
                 (style.fontSize! * textScaleFactor);
 
-            if (offsetX + metrics.width > constraintWidth + 0.00001) {
+            if (_softWrap &&
+                offsetX + metrics.width > constraintWidth + 0.00001) {
               if (spanCount > 0 && metrics.width <= constraintWidth) {
                 overflow = true;
                 lines.add(_Line(
@@ -775,7 +776,7 @@ class RichText extends Widget with SpanningWidget {
                 style.letterSpacing!;
           }
 
-          if (_softWrap && line < spanLines.length - 1) {
+          if (line < spanLines.length - 1) {
             lines.add(_Line(
                 this,
                 spanStart,

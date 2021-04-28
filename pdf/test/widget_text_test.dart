@@ -63,17 +63,36 @@ void main() {
   });
 
   test('Text Widgets softWrap', () {
-    pdf.addPage(MultiPage(
+    final para = LoremText().paragraph(40);
+
+    pdf.addPage(
+      MultiPage(
         build: (Context context) => <Widget>[
-              Text(
-                'Text with\nsoft wrap\nenabled',
-                softWrap: true,
-              ),
-              Text(
-                'Text with\nsoft wrap\ndisabled',
-                softWrap: false,
-              ),
-            ]));
+          Text(
+            'Text with\nsoft wrap\nenabled',
+            softWrap: true,
+          ),
+          Text(
+            'Text with\nsoft wrap\ndisabled',
+            softWrap: false,
+          ),
+          SizedBox(
+            width: 120,
+            child: Text(
+              para,
+              softWrap: false,
+            ),
+          ),
+          SizedBox(
+            width: 120,
+            child: Text(
+              para,
+              softWrap: true,
+            ),
+          ),
+        ],
+      ),
+    );
   });
 
   test('Text Widgets Alignement', () {
@@ -85,7 +104,6 @@ void main() {
         Text(
           '$align:\n' + para,
           textAlign: align,
-          softWrap: true,
         ),
       );
     }
