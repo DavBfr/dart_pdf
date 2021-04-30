@@ -25,6 +25,7 @@ import 'container.dart';
 import 'decoration.dart';
 import 'flex.dart';
 import 'geometry.dart';
+import 'multi_page.dart';
 import 'text.dart';
 import 'text_style.dart';
 import 'theme.dart';
@@ -128,6 +129,49 @@ class Header extends StatelessWidget {
       level: level,
       color: outlineColor,
       style: outlineStyle,
+    );
+  }
+}
+
+class TableOfContent extends StatelessWidget {
+  Iterable<Widget> _buildToc(PdfOutline o, int l) sync* {
+    for (final c in o.outlines) {
+      if (c.title != null) {
+        yield Padding(
+          padding: const EdgeInsets.only(bottom: 2),
+          child: Link(
+            destination: c.anchor!,
+            child: Row(
+              children: [
+                SizedBox(width: 10.0 * l),
+                Text('${c.title}'),
+                SizedBox(width: 8),
+                Expanded(
+                    child: Divider(
+                  borderStyle: BorderStyle.dotted,
+                  thickness: 0.2,
+                )),
+                SizedBox(width: 8),
+                Text('${c.page}'),
+              ],
+            ),
+          ),
+        );
+        yield* _buildToc(c, l + 1);
+      }
+    }
+  }
+
+  @override
+  Widget build(Context context) {
+    assert(context.page is! MultiPage,
+        '$runtimeType will not work with MultiPage');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ..._buildToc(context.document.outline, 0),
+      ],
     );
   }
 }

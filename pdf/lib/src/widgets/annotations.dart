@@ -255,6 +255,7 @@ class Outline extends Anchor {
       anchor: name,
       color: color,
       style: style,
+      page: context.pageNumber,
     );
 
     var parent = context.document.outline;

@@ -28,6 +28,72 @@ Future<Uint8List> generateDocument(
 
   final font1 = await rootBundle.load('assets/open-sans.ttf');
   final font2 = await rootBundle.load('assets/open-sans-bold.ttf');
+  final shape = await rootBundle.loadString('assets/document.svg');
+
+  doc.addPage(
+    pw.Page(
+      pageTheme: pw.PageTheme(
+        pageFormat: format.copyWith(marginBottom: 1.5 * PdfPageFormat.cm),
+        orientation: pw.PageOrientation.portrait,
+        buildBackground: (context) => pw.FullPage(
+          ignoreMargins: true,
+          child: pw.SvgImage(svg: shape, fit: pw.BoxFit.fill),
+        ),
+      ),
+      build: (context) {
+        return pw.Column(
+          children: [
+            pw.Spacer(),
+            pw.RichText(
+                text: pw.TextSpan(children: [
+              pw.TextSpan(
+                text: DateTime.now().year.toString() + '\n',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.grey600,
+                  fontSize: 40,
+                ),
+              ),
+              pw.TextSpan(
+                text: 'Portable Document Format',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 40,
+                ),
+              ),
+            ])),
+            pw.Spacer(),
+            pw.Container(
+              alignment: pw.Alignment.topRight,
+              height: 150,
+              child: pw.PdfLogo(),
+            ),
+            pw.Spacer(flex: 2),
+          ],
+        );
+      },
+    ),
+  );
+
+  doc.addPage(
+    pw.Page(
+      pageFormat: format.copyWith(marginBottom: 1.5 * PdfPageFormat.cm),
+      orientation: pw.PageOrientation.portrait,
+      build: (context) {
+        return pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Center(
+              child: pw.Text('Table of content',
+                  style: pw.Theme.of(context).header0),
+            ),
+            pw.SizedBox(height: 20),
+            pw.TableOfContent(),
+          ],
+        );
+      },
+    ),
+  );
 
   doc.addPage(pw.MultiPage(
       theme: pw.ThemeData.withFont(

@@ -1,8 +1,9 @@
 # Changelog
 
-## 3.3.1
+## 3.4.0
 
 - Fix Text.softWrap behavior
+- Add TableOfContent Widget
 
 ## 3.3.0
 
