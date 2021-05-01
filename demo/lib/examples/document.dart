@@ -29,47 +29,70 @@ Future<Uint8List> generateDocument(
   final font1 = await rootBundle.load('assets/open-sans.ttf');
   final font2 = await rootBundle.load('assets/open-sans-bold.ttf');
   final shape = await rootBundle.loadString('assets/document.svg');
+  final swirls = await rootBundle.loadString('assets/swirls2.svg');
 
   doc.addPage(
     pw.Page(
       pageTheme: pw.PageTheme(
-        pageFormat: format.copyWith(marginBottom: 1.5 * PdfPageFormat.cm),
-        orientation: pw.PageOrientation.portrait,
-        buildBackground: (context) => pw.FullPage(
-          ignoreMargins: true,
-          child: pw.SvgImage(svg: shape, fit: pw.BoxFit.fill),
+        pageFormat: format.copyWith(
+          marginBottom: 0,
+          marginLeft: 0,
+          marginRight: 0,
+          marginTop: 0,
         ),
+        orientation: pw.PageOrientation.portrait,
+        buildBackground: (context) =>
+            pw.SvgImage(svg: shape, fit: pw.BoxFit.fill),
       ),
       build: (context) {
-        return pw.Column(
-          children: [
-            pw.Spacer(),
-            pw.RichText(
-                text: pw.TextSpan(children: [
-              pw.TextSpan(
-                text: DateTime.now().year.toString() + '\n',
-                style: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold,
-                  color: PdfColors.grey600,
-                  fontSize: 40,
+        return pw.Padding(
+          padding: pw.EdgeInsets.only(
+            left: 60,
+            right: 60,
+            bottom: 30,
+          ),
+          child: pw.Column(
+            children: [
+              pw.Spacer(),
+              pw.RichText(
+                  text: pw.TextSpan(children: [
+                pw.TextSpan(
+                  text: DateTime.now().year.toString() + '\n',
+                  style: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.grey600,
+                    fontSize: 40,
+                  ),
+                ),
+                pw.TextSpan(
+                  text: 'Portable Document Format',
+                  style: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 40,
+                  ),
+                ),
+              ])),
+              pw.Spacer(),
+              pw.Container(
+                alignment: pw.Alignment.topRight,
+                height: 150,
+                child: pw.PdfLogo(),
+              ),
+              pw.Spacer(flex: 2),
+              pw.Align(
+                alignment: pw.Alignment.topLeft,
+                child: pw.UrlLink(
+                  destination: 'https://wikipedia.org/wiki/PDF',
+                  child: pw.Text(
+                    'https://wikipedia.org/wiki/PDF',
+                    style: pw.TextStyle(
+                      color: PdfColors.pink100,
+                    ),
+                  ),
                 ),
               ),
-              pw.TextSpan(
-                text: 'Portable Document Format',
-                style: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold,
-                  fontSize: 40,
-                ),
-              ),
-            ])),
-            pw.Spacer(),
-            pw.Container(
-              alignment: pw.Alignment.topRight,
-              height: 150,
-              child: pw.PdfLogo(),
-            ),
-            pw.Spacer(flex: 2),
-          ],
+            ],
+          ),
         );
       },
     ),
@@ -81,7 +104,6 @@ Future<Uint8List> generateDocument(
       orientation: pw.PageOrientation.portrait,
       build: (context) {
         return pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.Center(
               child: pw.Text('Table of content',
@@ -89,6 +111,11 @@ Future<Uint8List> generateDocument(
             ),
             pw.SizedBox(height: 20),
             pw.TableOfContent(),
+            pw.Spacer(),
+            pw.Center(
+                child: pw.SvgImage(
+                    svg: swirls, width: 100, colorFilter: PdfColors.grey)),
+            pw.Spacer(),
           ],
         );
       },
