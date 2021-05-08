@@ -28,10 +28,14 @@ class CircularProgressIndicator extends Widget {
       this.strokeWidth = 4.0,
       this.backgroundColor});
 
+  /// The value of this progress indicator.
+  /// A value of 0.0 means no progress and 1.0 means that progress is complete.
   final double value;
 
+  /// The progress indicator's color
   final PdfColor? color;
 
+  /// The progress indicator's background color.
   final PdfColor? backgroundColor;
 
   final double strokeWidth;
@@ -93,6 +97,67 @@ class CircularProgressIndicator extends Widget {
             large: adjustedValue > .5, sweep: true)
         ..lineTo(startTop.x, startTop.y)
         ..setFillColor(color ?? PdfColors.indigo)
+        ..fillPath();
+    }
+  }
+}
+
+/// A material design linear progress indicator, also known as a progress bar.
+class LinearProgressIndicator extends Widget {
+  /// Creates a linear progress indicator.
+  LinearProgressIndicator({
+    required this.value,
+    this.backgroundColor,
+    this.valueColor,
+    this.minHeight,
+  });
+
+  /// The progress indicator's background color.
+  final PdfColor? backgroundColor;
+
+  /// The minimum height of the line used to draw the indicator.
+  final double? minHeight;
+
+  /// The value of this progress indicator.
+  /// A value of 0.0 means no progress and 1.0 means that progress is complete.
+  final double value;
+
+  /// The progress indicator's color
+  final PdfColor? valueColor;
+
+  @override
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    box = PdfRect.fromPoints(
+      PdfPoint.zero,
+      BoxConstraints(
+        minWidth: double.infinity,
+        minHeight: minHeight ?? 4.0,
+      ).enforce(constraints).smallest,
+    );
+  }
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+
+    final vc = value.clamp(0.0, 1.0);
+    final _valueColor = valueColor ?? PdfColors.blue;
+    final _backgroundColor = backgroundColor ?? _valueColor.shade(0.1);
+
+    if (vc < 1.0) {
+      final epsilon = vc == 0 ? 0 : 0.01;
+      context.canvas
+        ..drawRect(box!.left + box!.width * vc - epsilon, box!.bottom,
+            box!.width * (1 - vc) + epsilon, box!.height)
+        ..setFillColor(_backgroundColor)
+        ..fillPath();
+    }
+
+    if (vc > 0.0) {
+      context.canvas
+        ..drawRect(box!.left, box!.bottom, box!.width * vc, box!.height)
+        ..setFillColor(_valueColor)
         ..fillPath();
     }
   }

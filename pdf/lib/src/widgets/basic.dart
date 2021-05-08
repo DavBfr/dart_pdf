@@ -62,7 +62,7 @@ class LimitedBox extends SingleChildWidget {
       assert(child!.box != null);
       size = constraints.constrain(child!.box!.size);
     } else {
-      size = _limitConstraints(constraints).constrain(PdfPoint.zero);
+      size = _limitConstraints(constraints).smallest;
     }
     box = PdfRect.fromPoints(PdfPoint.zero, size);
   }
@@ -425,8 +425,8 @@ class ConstrainedBox extends SingleChildWidget {
       assert(child!.box != null);
       box = child!.box;
     } else {
-      box = PdfRect.fromPoints(PdfPoint.zero,
-          this.constraints.enforce(constraints).constrain(PdfPoint.zero));
+      box = PdfRect.fromPoints(
+          PdfPoint.zero, this.constraints.enforce(constraints).smallest);
     }
   }
 
