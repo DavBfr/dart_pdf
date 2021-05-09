@@ -112,6 +112,23 @@ class PdfPageFormat {
 
   @override
   String toString() {
-    return 'Page ${width}x$height margins:$marginLeft, $marginTop, $marginRight, $marginBottom';
+    return '$runtimeType ${width}x$height margins:$marginLeft, $marginTop, $marginRight, $marginBottom';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! PdfPageFormat) {
+      return false;
+    }
+
+    return other.width == width &&
+        other.height == height &&
+        other.marginLeft == marginLeft &&
+        other.marginTop == marginTop &&
+        other.marginRight == marginRight &&
+        other.marginBottom == marginBottom;
+  }
+
+  @override
+  int get hashCode => toString().hashCode;
 }

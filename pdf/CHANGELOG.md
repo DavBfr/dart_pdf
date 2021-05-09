@@ -6,6 +6,7 @@
 - Add TableOfContent Widget
 - Add LinearProgressIndicator
 - Add PdfOutline.toString()
+- Add equality operator to PdfPageFormat
 
 ## 3.3.0
 
