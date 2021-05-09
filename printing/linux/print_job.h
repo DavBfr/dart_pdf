@@ -70,7 +70,7 @@ void on_page_rasterized(print_job* job,
                         int width,
                         int height);
 
-void on_page_raster_end(print_job* job);
+void on_page_raster_end(print_job* job, const char* error);
 
 void on_layout(print_job* job,
                double pageWidth,

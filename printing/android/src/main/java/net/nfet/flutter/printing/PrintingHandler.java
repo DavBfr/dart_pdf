@@ -194,9 +194,12 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
 
     /// The page has been converted to an image
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    void onPageRasterEnd(PrintingJob printJob) {
+    void onPageRasterEnd(PrintingJob printJob, String error) {
         HashMap<String, Object> args = new HashMap<>();
         args.put("job", printJob.index);
+        if (error != null) {
+            args.put("error", error);
+        }
 
         channel.invokeMethod("onPageRasterEnd", args);
     }

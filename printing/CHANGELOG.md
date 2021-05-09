@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.2.2
+
+- Fix raster crash on all OS.
+
 ## 5.2.1
 
 - Fix Linux build

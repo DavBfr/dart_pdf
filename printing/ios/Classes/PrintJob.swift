@@ -296,13 +296,17 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
 
     public func rasterPdf(data: Data, pages: [Int]?, scale: CGFloat) {
         let provider = CGDataProvider(data: data as CFData)!
-        let document = CGPDFDocument(provider)!
+        let document = CGPDFDocument(provider)
+        if document == nil {
+            printing.onPageRasterEnd(printJob: self, error: "Cannot raster a malformed PDF file")
+            return
+        }
 
         DispatchQueue.global().async {
-            let pageCount = document.numberOfPages
+            let pageCount = document!.numberOfPages
 
             for pageNum in pages ?? Array(0 ... pageCount - 1) {
-                guard let page = document.page(at: pageNum + 1) else { continue }
+                guard let page = document!.page(at: pageNum + 1) else { continue }
                 let angle = CGFloat(page.rotationAngle) * CGFloat.pi / -180
                 let rect = page.getBoxRect(.mediaBox)
                 let width = Int(abs((cos(angle) * rect.width + sin(angle) * rect.height) * scale))
@@ -321,6 +325,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                         space: rgb,
                         bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
                     )
+
                     if context != nil {
                         context!.translateBy(x: CGFloat(width) / 2, y: CGFloat(height) / 2)
                         context!.scaleBy(x: scale, y: scale)
@@ -336,7 +341,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             }
 
             DispatchQueue.main.sync {
-                self.printing.onPageRasterEnd(printJob: self)
+                self.printing.onPageRasterEnd(printJob: self, error: nil)
             }
         }
     }
@@ -349,6 +354,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             "canConvertHtml": true,
             "canShare": true,
             "canRaster": true,
+            "canListPrinters": false,
         ]
         return data
     }

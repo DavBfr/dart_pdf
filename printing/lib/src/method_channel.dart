@@ -130,6 +130,10 @@ class MethodChannelPrinting extends PrintingPlatform {
       case 'onPageRasterEnd':
         final job = _printJobs.getJob(call.arguments['job']);
         if (job != null) {
+          final dynamic error = call.arguments['error'];
+          if (error != null) {
+            job.onPageRasterized!.addError(error);
+          }
           await job.onPageRasterized!.close();
           _printJobs.remove(job.index);
         }

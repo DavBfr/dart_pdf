@@ -193,9 +193,10 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
         channel.invokeMethod("onPageRasterized", arguments: data)
     }
 
-    public func onPageRasterEnd(printJob: PrintJob) {
+    public func onPageRasterEnd(printJob: PrintJob, error: String?) {
         let data: NSDictionary = [
             "job": printJob.index,
+            "error": error as Any,
         ]
         channel.invokeMethod("onPageRasterEnd", arguments: data)
     }

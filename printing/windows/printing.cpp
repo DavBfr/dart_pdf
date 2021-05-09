@@ -44,13 +44,18 @@ void Printing::onPageRasterized(std::vector<uint8_t> data,
           })));
 }
 
-void Printing::onPageRasterEnd(PrintJob* job) {
-  channel->InvokeMethod("onPageRasterEnd",
-                        std::make_unique<flutter::EncodableValue>(
-                            flutter::EncodableValue(flutter::EncodableMap{
-                                {flutter::EncodableValue("job"),
-                                 flutter::EncodableValue(job->id())},
-                            })));
+void Printing::onPageRasterEnd(PrintJob* job, const char* error) {
+  auto map = flutter::EncodableMap{
+      {flutter::EncodableValue("job"), flutter::EncodableValue(job->id())},
+  };
+
+  if (!error.empty()) {
+    map[flutter::EncodableValue("error")] = flutter::EncodableValue(error);
+  }
+
+  channel->InvokeMethod(
+      "onPageRasterEnd",
+      std::make_unique<flutter::EncodableValue>(flutter::EncodableValue(map)));
 }
 
 class OnLayoutResult : public flutter::MethodResult<flutter::EncodableValue> {

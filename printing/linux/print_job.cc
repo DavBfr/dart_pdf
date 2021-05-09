@@ -249,7 +249,7 @@ void print_job::raster_pdf(const uint8_t data[],
   auto doc = FPDF_LoadMemDocument64(data, size, nullptr);
   if (!doc) {
     FPDF_DestroyLibrary();
-    on_page_raster_end(this);
+    on_page_raster_end(this, "Cannot raster a malformed PDF file");
     return;
   }
 
@@ -307,7 +307,7 @@ void print_job::raster_pdf(const uint8_t data[],
 
   FPDF_DestroyLibrary();
 
-  on_page_raster_end(this);
+  on_page_raster_end(this, nullptr);
 }
 
 FlValue* print_job::printing_info() {

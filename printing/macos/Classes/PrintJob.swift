@@ -242,13 +242,17 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
 
     public func rasterPdf(data: Data, pages: [Int]?, scale: CGFloat) {
         let provider = CGDataProvider(data: data as CFData)!
-        let document = CGPDFDocument(provider)!
+        let document = CGPDFDocument(provider)
+        if document == nil {
+            printing.onPageRasterEnd(printJob: self, error: "Cannot raster a malformed PDF file")
+            return
+        }
 
         DispatchQueue.global().async {
-            let pageCount = document.numberOfPages
+            let pageCount = document!.numberOfPages
 
             for pageNum in pages ?? Array(0 ... pageCount - 1) {
-                guard let page = document.page(at: pageNum + 1) else { continue }
+                guard let page = document!.page(at: pageNum + 1) else { continue }
                 let angle = CGFloat(page.rotationAngle) * CGFloat.pi / -180
                 let rect = page.getBoxRect(.mediaBox)
                 let width = Int(abs((cos(angle) * rect.width + sin(angle) * rect.height) * scale))
@@ -283,7 +287,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
             }
 
             DispatchQueue.main.sync {
-                self.printing.onPageRasterEnd(printJob: self)
+                self.printing.onPageRasterEnd(printJob: self, error: nil)
             }
         }
     }
@@ -291,7 +295,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     public static func printingInfo() -> NSDictionary {
         let data: NSDictionary = [
             "directPrint": true,
-            "dynamicLayout": false,
+            "dynamicLayout": true,
             "canPrint": true,
             "canConvertHtml": true,
             "canShare": true,

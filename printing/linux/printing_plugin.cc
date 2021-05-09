@@ -161,9 +161,12 @@ void on_page_rasterized(print_job* job,
                                   nullptr, nullptr);
 }
 
-void on_page_raster_end(print_job* job) {
+void on_page_raster_end(print_job* job, const char* error) {
   g_autoptr(FlValue) map = fl_value_new_map();
   fl_value_set_string(map, "job", fl_value_new_int(job->get_id()));
+  if (error != nullptr) {
+    fl_value_set_string(map, "error", fl_value_new_string(error));
+  }
 
   fl_method_channel_invoke_method(channel, "onPageRasterEnd", map, nullptr,
                                   nullptr, nullptr);

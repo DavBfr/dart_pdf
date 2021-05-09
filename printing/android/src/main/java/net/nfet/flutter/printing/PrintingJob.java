@@ -434,8 +434,8 @@ public class PrintingJob extends PrintDocumentAdapter {
 
     void rasterPdf(final byte[] data, final ArrayList<Integer> pages, final Double scale) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-            Log.e("PDF", "PDF Raster available since Android 5.0 Lollipop (API 21)");
-            printing.onPageRasterEnd(this);
+            printing.onPageRasterEnd(
+                    this, "PDF Raster available since Android 5.0 Lollipop (API 21)");
             return;
         }
 
@@ -443,6 +443,7 @@ public class PrintingJob extends PrintDocumentAdapter {
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void run() {
+                String error = null;
                 try {
                     File file = File.createTempFile("printing", null, null);
                     FileOutputStream oStream = new FileOutputStream(file);
@@ -493,12 +494,14 @@ public class PrintingJob extends PrintDocumentAdapter {
 
                 } catch (IOException e) {
                     e.printStackTrace();
+                    error = e.getMessage();
                 }
 
+                final String finalError = error;
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        printing.onPageRasterEnd(PrintingJob.this);
+                        printing.onPageRasterEnd(PrintingJob.this, finalError);
                     }
                 });
             }

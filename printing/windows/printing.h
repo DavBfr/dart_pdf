@@ -40,7 +40,7 @@ class Printing {
                         int height,
                         PrintJob* job);
 
-  void onPageRasterEnd(PrintJob* job);
+  void onPageRasterEnd(PrintJob* job, const char* error);
 
   void onLayout(PrintJob* job,
                 double pageWidth,

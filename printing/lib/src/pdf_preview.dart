@@ -225,36 +225,56 @@ class _PdfPreviewState extends State<PdfPreview> {
       });
     }
 
-    var pageNum = 0;
-    await for (final PdfRaster page in Printing.raster(
-      _doc,
-      dpi: dpi,
-      pages: widget.pages,
-    )) {
-      if (!mounted) {
-        _rastering = false;
-        return;
-      }
-      setState(() {
-        if (pages.length <= pageNum) {
-          pages.add(_PdfPreviewPage(
-            page: page,
-            pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
-            pageMargin: widget.previewPageMargin,
-          ));
-        } else {
-          pages[pageNum] = _PdfPreviewPage(
-            page: page,
-            pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
-            pageMargin: widget.previewPageMargin,
-          );
+    try {
+      var pageNum = 0;
+      await for (final PdfRaster page in Printing.raster(
+        _doc,
+        dpi: dpi,
+        pages: widget.pages,
+      )) {
+        if (!mounted) {
+          _rastering = false;
+          return;
         }
-      });
+        setState(() {
+          if (pages.length <= pageNum) {
+            pages.add(_PdfPreviewPage(
+              page: page,
+              pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
+              pageMargin: widget.previewPageMargin,
+            ));
+          } else {
+            pages[pageNum] = _PdfPreviewPage(
+              page: page,
+              pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
+              pageMargin: widget.previewPageMargin,
+            );
+          }
+        });
 
-      pageNum++;
+        pageNum++;
+        pages.removeRange(pageNum, pages.length);
+      }
+    } catch (exception, stack) {
+      InformationCollector? collector;
+
+      assert(() {
+        collector = () sync* {
+          yield StringProperty('PageFormat', computedPageFormat.toString());
+        };
+        return true;
+      }());
+
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'printing',
+        context: ErrorDescription('while generating a PDF'),
+        informationCollector: collector,
+      ));
+      error = exception;
     }
 
-    pages.removeRange(pageNum, pages.length);
     _rastering = false;
   }
 
