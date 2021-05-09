@@ -7,6 +7,7 @@
 - Add LinearProgressIndicator
 - Add PdfOutline.toString()
 - Add equality operator to PdfPageFormat
+- Improve TextStyle decoration merging
 
 ## 3.3.0
 

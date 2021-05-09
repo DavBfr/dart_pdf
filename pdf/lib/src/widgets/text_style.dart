@@ -43,11 +43,6 @@ class TextDecoration {
 
   final int _mask;
 
-  /// Whether this decoration will paint at least as much decoration as the given decoration.
-  bool contains(TextDecoration other) {
-    return (_mask | other._mask) == _mask;
-  }
-
   /// Do not draw a decoration
   static const TextDecoration none = TextDecoration._(0x0);
 
@@ -59,6 +54,18 @@ class TextDecoration {
 
   /// Draw a line through each line of text
   static const TextDecoration lineThrough = TextDecoration._(0x4);
+
+  TextDecoration merge(TextDecoration? other) {
+    if (other == null) {
+      return this;
+    }
+    return TextDecoration._(_mask | other._mask);
+  }
+
+  /// Whether this decoration will paint at least as much decoration as the given decoration.
+  bool contains(TextDecoration other) {
+    return (_mask | other._mask) == _mask;
+  }
 
   @override
   bool operator ==(dynamic other) {
@@ -340,7 +347,7 @@ class TextStyle {
       lineSpacing: other.lineSpacing,
       height: other.height,
       background: other.background,
-      decoration: other.decoration,
+      decoration: decoration?.merge(other.decoration),
       decorationColor: other.decorationColor,
       decorationStyle: other.decorationStyle,
       decorationThickness: other.decorationThickness,
