@@ -44,7 +44,7 @@ void Printing::onPageRasterized(std::vector<uint8_t> data,
           })));
 }
 
-void Printing::onPageRasterEnd(PrintJob* job, const char* error) {
+void Printing::onPageRasterEnd(PrintJob* job, const std::string error) {
   auto map = flutter::EncodableMap{
       {flutter::EncodableValue("job"), flutter::EncodableValue(job->id())},
   };

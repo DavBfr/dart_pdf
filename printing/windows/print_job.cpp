@@ -347,7 +347,7 @@ void PrintJob::rasterPdf(std::vector<uint8_t> data,
 
   FPDF_DestroyLibrary();
 
-  printing->onPageRasterEnd(this, nullptr);
+  printing->onPageRasterEnd(this, "");
 }
 
 std::map<std::string, bool> PrintJob::printingInfo() {

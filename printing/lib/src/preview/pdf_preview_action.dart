@@ -14,12 +14,29 @@
  * limitations under the License.
  */
 
-export 'src/asset_utils.dart';
-export 'src/callback.dart';
-export 'src/preview/pdf_preview.dart';
-export 'src/preview/pdf_preview_action.dart';
-export 'src/printer.dart';
-export 'src/printing.dart';
-export 'src/printing_info.dart';
-export 'src/raster.dart';
-export 'src/widget_wrapper.dart';
+import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+
+import '../callback.dart';
+
+/// Base Action callback
+typedef OnPdfPreviewActionPressed = void Function(
+  BuildContext context,
+  LayoutCallback build,
+  PdfPageFormat pageFormat,
+);
+
+/// Action to add the the [PdfPreview] widget
+class PdfPreviewAction {
+  /// Represents an icon to add to [PdfPreview]
+  const PdfPreviewAction({
+    required this.icon,
+    required this.onPressed,
+  });
+
+  /// The icon to display
+  final Icon icon;
+
+  /// The callback called when the user tap on the icon
+  final OnPdfPreviewActionPressed? onPressed;
+}

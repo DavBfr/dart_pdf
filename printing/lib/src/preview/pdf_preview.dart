@@ -1,16 +1,32 @@
+/*
+ * Copyright (C) 2017, David PHAM-VAN <dev.nfet.net@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import 'dart:async';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-import 'callback.dart';
-import 'printing.dart';
-import 'printing_info.dart';
-import 'raster.dart';
+import '../callback.dart';
+import '../printing.dart';
+import '../printing_info.dart';
+import 'pdf_preview_action.dart';
+import 'pdf_preview_raster.dart';
 
 /// Flutter widget that uses the rasterized pdf pages to display a document.
 class PdfPreview extends StatefulWidget {
@@ -25,7 +41,7 @@ class PdfPreview extends StatefulWidget {
     this.canChangePageFormat = true,
     this.canChangeOrientation = true,
     this.actions,
-    this.pageFormats,
+    this.pageFormats = _defaultPageFormats,
     this.onError,
     this.onPrinted,
     this.onPrintError,
@@ -43,6 +59,11 @@ class PdfPreview extends StatefulWidget {
     this.padding,
     this.shouldRepaint = false,
   }) : super(key: key);
+
+  static const _defaultPageFormats = <String, PdfPageFormat>{
+    'A4': PdfPageFormat.a4,
+    'Letter': PdfPageFormat.letter,
+  };
 
   /// Called when a pdf document is needed
   final LayoutCallback build;
@@ -72,10 +93,10 @@ class PdfPreview extends StatefulWidget {
   final List<PdfPreviewAction>? actions;
 
   /// List of page formats the user can choose
-  final Map<String, PdfPageFormat>? pageFormats;
+  final Map<String, PdfPageFormat> pageFormats;
 
   /// Widget to display if the PDF document cannot be displayed
-  final Widget Function(BuildContext context)? onError;
+  final Widget Function(BuildContext context, Object error)? onError;
 
   /// Called if the user prints the pdf document
   final void Function(BuildContext context)? onPrinted;
@@ -129,22 +150,40 @@ class PdfPreview extends StatefulWidget {
   _PdfPreviewState createState() => _PdfPreviewState();
 }
 
-class _PdfPreviewState extends State<PdfPreview> {
+class _PdfPreviewState extends State<PdfPreview> with PdfPreviewRaster {
   final GlobalKey<State<StatefulWidget>> shareWidget = GlobalKey();
   final GlobalKey<State<StatefulWidget>> listView = GlobalKey();
 
-  final List<_PdfPreviewPage> pages = <_PdfPreviewPage>[];
+  PdfPageFormat? _pageFormat;
 
-  late PdfPageFormat pageFormat;
+  String get localPageFormat {
+    final locale = WidgetsBinding.instance!.window.locale;
+    // ignore: unnecessary_cast
+    final cc = (locale as Locale?)?.countryCode ?? 'US';
 
-  bool? horizontal;
+    if (cc == 'US' || cc == 'CA' || cc == 'MX') {
+      return 'Letter';
+    }
+    return 'A4';
+  }
 
-  PrintingInfo info = PrintingInfo.unavailable;
+  @override
+  PdfPageFormat get pageFormat {
+    _pageFormat ??= widget.initialPageFormat == null
+        ? widget.pageFormats[localPageFormat]
+        : _pageFormat = widget.initialPageFormat!;
+
+    if (!widget.pageFormats.containsValue(_pageFormat)) {
+      _pageFormat = widget.initialPageFormat ??
+          (widget.pageFormats.isNotEmpty
+              ? widget.pageFormats.values.first
+              : PdfPreview._defaultPageFormats[localPageFormat]);
+    }
+
+    return _pageFormat!;
+  }
+
   bool infoLoaded = false;
-
-  double dpi = 10;
-
-  Object? error;
 
   int? preview;
 
@@ -158,125 +197,7 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   Timer? previewUpdate;
 
-  var _rastering = false;
-
-  static const defaultPageFormats = <String, PdfPageFormat>{
-    'A4': PdfPageFormat.a4,
-    'Letter': PdfPageFormat.letter,
-  };
-
-  PdfPageFormat get computedPageFormat => horizontal != null
-      ? (horizontal! ? pageFormat.landscape : pageFormat.portrait)
-      : pageFormat;
-
-  Future<void> _raster() async {
-    if (_rastering) {
-      return;
-    }
-    _rastering = true;
-
-    Uint8List _doc;
-
-    if (!info.canRaster) {
-      assert(() {
-        if (kIsWeb) {
-          FlutterError.reportError(FlutterErrorDetails(
-            exception: Exception(
-                'Unable to find the `pdf.js` library.\nPlease follow the installation instructions at https://github.com/DavBfr/dart_pdf/tree/master/printing#installing'),
-            library: 'printing',
-            context: ErrorDescription('while rendering a PDF'),
-          ));
-        }
-
-        return true;
-      }());
-
-      _rastering = false;
-      return;
-    }
-
-    try {
-      _doc = await widget.build(computedPageFormat);
-    } catch (exception, stack) {
-      InformationCollector? collector;
-
-      assert(() {
-        collector = () sync* {
-          yield StringProperty('PageFormat', computedPageFormat.toString());
-        };
-        return true;
-      }());
-
-      FlutterError.reportError(FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'printing',
-        context: ErrorDescription('while generating a PDF'),
-        informationCollector: collector,
-      ));
-      error = exception;
-      _rastering = false;
-      return;
-    }
-
-    if (error != null) {
-      setState(() {
-        error = null;
-      });
-    }
-
-    try {
-      var pageNum = 0;
-      await for (final PdfRaster page in Printing.raster(
-        _doc,
-        dpi: dpi,
-        pages: widget.pages,
-      )) {
-        if (!mounted) {
-          _rastering = false;
-          return;
-        }
-        setState(() {
-          if (pages.length <= pageNum) {
-            pages.add(_PdfPreviewPage(
-              page: page,
-              pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
-              pageMargin: widget.previewPageMargin,
-            ));
-          } else {
-            pages[pageNum] = _PdfPreviewPage(
-              page: page,
-              pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
-              pageMargin: widget.previewPageMargin,
-            );
-          }
-        });
-
-        pageNum++;
-        pages.removeRange(pageNum, pages.length);
-      }
-    } catch (exception, stack) {
-      InformationCollector? collector;
-
-      assert(() {
-        collector = () sync* {
-          yield StringProperty('PageFormat', computedPageFormat.toString());
-        };
-        return true;
-      }());
-
-      FlutterError.reportError(FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'printing',
-        context: ErrorDescription('while generating a PDF'),
-        informationCollector: collector,
-      ));
-      error = exception;
-    }
-
-    _rastering = false;
-  }
+  static const _errorMessage = 'Unable to display the document';
 
   @override
   void initState() {
@@ -286,17 +207,17 @@ class _PdfPreviewState extends State<PdfPreview> {
       final cc = (locale as Locale?)?.countryCode ?? 'US';
 
       if (cc == 'US' || cc == 'CA' || cc == 'MX') {
-        pageFormat = PdfPageFormat.letter;
+        _pageFormat = PdfPageFormat.letter;
       } else {
-        pageFormat = PdfPageFormat.a4;
+        _pageFormat = PdfPageFormat.a4;
       }
     } else {
-      pageFormat = widget.initialPageFormat!;
+      _pageFormat = widget.initialPageFormat!;
     }
 
-    final _pageFormats = widget.pageFormats ?? defaultPageFormats;
+    final _pageFormats = widget.pageFormats;
     if (!_pageFormats.containsValue(pageFormat)) {
-      pageFormat = _pageFormats.values.first;
+      _pageFormat = _pageFormats.values.first;
     }
 
     super.initState();
@@ -310,16 +231,19 @@ class _PdfPreviewState extends State<PdfPreview> {
 
   @override
   void reassemble() {
-    _raster();
+    raster();
     super.reassemble();
   }
 
   @override
   void didUpdateWidget(covariant PdfPreview oldWidget) {
-    if (oldWidget.build != widget.build || widget.shouldRepaint) {
+    if (oldWidget.build != widget.build ||
+        widget.shouldRepaint ||
+        widget.pageFormats != oldWidget.pageFormats) {
       preview = null;
       updatePosition = null;
-      _raster();
+
+      raster();
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -327,54 +251,35 @@ class _PdfPreviewState extends State<PdfPreview> {
   @override
   void didChangeDependencies() {
     if (!infoLoaded) {
+      infoLoaded = true;
       Printing.info().then((PrintingInfo _info) {
         setState(() {
-          infoLoaded = true;
           info = _info;
+          raster();
         });
       });
     }
 
-    previewUpdate?.cancel();
-    previewUpdate = Timer(const Duration(seconds: 1), () {
-      final mq = MediaQuery.of(context);
-      dpi = (min(mq.size.width - 16, widget.maxPageWidth ?? double.infinity)) *
-          mq.devicePixelRatio /
-          computedPageFormat.width *
-          72;
-
-      _raster();
-    });
+    raster();
     super.didChangeDependencies();
   }
 
-  Widget _showError() {
+  Widget _showError(Object error) {
     if (widget.onError != null) {
-      return widget.onError!(context);
+      return widget.onError!(context, error);
     }
 
-    return const Center(
-      child: Text(
-        'Unable to display the document',
-        style: TextStyle(
-          fontSize: 20,
-        ),
-      ),
-    );
+    return ErrorWidget(error);
   }
 
   Widget _createPreview() {
     if (error != null) {
-      var content = _showError();
-      assert(() {
-        content = ErrorWidget(error!);
-        return true;
-      }());
-      return content;
+      return _showError(error!);
     }
 
-    if (!info.canRaster) {
-      return _showError();
+    final _info = info;
+    if (_info != null && !_info.canRaster) {
+      return _showError(_errorMessage);
     }
 
     if (pages.isEmpty) {
@@ -454,7 +359,7 @@ class _PdfPreviewState extends State<PdfPreview> {
 
     final actions = <Widget>[];
 
-    if (widget.allowPrinting && info.canPrint) {
+    if (widget.allowPrinting && info?.canPrint == true) {
       actions.add(
         IconButton(
           icon: const Icon(Icons.print),
@@ -463,7 +368,7 @@ class _PdfPreviewState extends State<PdfPreview> {
       );
     }
 
-    if (widget.allowSharing && info.canShare) {
+    if (widget.allowSharing && info?.canShare == true) {
       actions.add(
         IconButton(
           key: shareWidget,
@@ -474,8 +379,7 @@ class _PdfPreviewState extends State<PdfPreview> {
     }
 
     if (widget.canChangePageFormat) {
-      final _pageFormats = widget.pageFormats ?? defaultPageFormats;
-      final keys = _pageFormats.keys.toList();
+      final keys = widget.pageFormats.keys.toList();
       actions.add(
         DropdownButton<PdfPageFormat>(
           dropdownColor: theme.primaryColor,
@@ -485,21 +389,21 @@ class _PdfPreviewState extends State<PdfPreview> {
           ),
           value: pageFormat,
           items: List<DropdownMenuItem<PdfPageFormat>>.generate(
-            _pageFormats.length,
+            widget.pageFormats.length,
             (int index) {
               final key = keys[index];
-              final val = _pageFormats[key];
+              final val = widget.pageFormats[key];
               return DropdownMenuItem<PdfPageFormat>(
                 value: val,
                 child: Text(key, style: TextStyle(color: iconColor)),
               );
             },
           ),
-          onChanged: (PdfPageFormat? _pageFormat) {
+          onChanged: (PdfPageFormat? pageFormat) {
             setState(() {
-              if (_pageFormat != null) {
-                pageFormat = _pageFormat;
-                _raster();
+              if (pageFormat != null) {
+                _pageFormat = pageFormat;
+                raster();
               }
             });
           },
@@ -520,7 +424,7 @@ class _PdfPreviewState extends State<PdfPreview> {
             onPressed: (int index) {
               setState(() {
                 horizontal = index == 1;
-                _raster();
+                raster();
               });
             },
             isSelected: <bool>[horizontal == false, horizontal == true],
@@ -561,7 +465,7 @@ class _PdfPreviewState extends State<PdfPreview> {
               setState(
                 () {
                   pw.Document.debug = value;
-                  _raster();
+                  raster();
                 },
               );
             },
@@ -624,9 +528,26 @@ class _PdfPreviewState extends State<PdfPreview> {
       if (result && widget.onPrinted != null) {
         widget.onPrinted!(context);
       }
-    } catch (e) {
+    } catch (exception, stack) {
+      InformationCollector? collector;
+
+      assert(() {
+        collector = () sync* {
+          yield StringProperty('PageFormat', computedPageFormat.toString());
+        };
+        return true;
+      }());
+
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'printing',
+        context: ErrorDescription('while printing a PDF'),
+        informationCollector: collector,
+      ));
+
       if (widget.onPrintError != null) {
-        widget.onPrintError!(context, e);
+        widget.onPrintError!(context, exception);
       }
     }
   }
@@ -655,77 +576,4 @@ class _PdfPreviewState extends State<PdfPreview> {
       widget.onShared!(context);
     }
   }
-}
-
-class _PdfPreviewPage extends StatelessWidget {
-  const _PdfPreviewPage({
-    Key? key,
-    this.page,
-    this.pdfPreviewPageDecoration,
-    this.pageMargin,
-  }) : super(key: key);
-
-  final PdfRaster? page;
-  final Decoration? pdfPreviewPageDecoration;
-  final EdgeInsets? pageMargin;
-
-  @override
-  Widget build(BuildContext context) {
-    final im = PdfRasterImage(page!);
-    final scrollbarTrack = Theme.of(context)
-            .scrollbarTheme
-            .thickness
-            ?.resolve({MaterialState.hovered}) ??
-        12;
-
-    return Container(
-      margin: pageMargin ??
-          EdgeInsets.only(
-            left: 8 + scrollbarTrack,
-            top: 8,
-            right: 8 + scrollbarTrack,
-            bottom: 12,
-          ),
-      decoration: pdfPreviewPageDecoration ??
-          const BoxDecoration(
-            color: Colors.white,
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                offset: Offset(0, 3),
-                blurRadius: 5,
-                color: Color(0xFF000000),
-              ),
-            ],
-          ),
-      child: AspectRatio(
-        aspectRatio: page!.width / page!.height,
-        child: Image(
-          image: im,
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
-  }
-}
-
-/// Action callback
-typedef OnPdfPreviewActionPressed = void Function(
-  BuildContext context,
-  LayoutCallback build,
-  PdfPageFormat pageFormat,
-);
-
-/// Action to add the the [PdfPreview] widget
-class PdfPreviewAction {
-  /// Represents an icon to add to [PdfPreview]
-  const PdfPreviewAction({
-    required this.icon,
-    required this.onPressed,
-  });
-
-  /// The icon to display
-  final Icon icon;
-
-  /// The callback called when the user tap on the icon
-  final OnPdfPreviewActionPressed? onPressed;
 }

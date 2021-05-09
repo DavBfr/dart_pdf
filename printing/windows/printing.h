@@ -40,7 +40,7 @@ class Printing {
                         int height,
                         PrintJob* job);
 
-  void onPageRasterEnd(PrintJob* job, const char* error);
+  void onPageRasterEnd(PrintJob* job, const std::string error);
 
   void onLayout(PrintJob* job,
                 double pageWidth,
@@ -50,7 +50,9 @@ class Printing {
                 double marginRight,
                 double marginBottom);
 
-  void Printing::onCompleted(PrintJob* job, bool completed, std::string error);
+  void Printing::onCompleted(PrintJob* job,
+                             bool completed,
+                             const std::string error);
 };
 
 }  // namespace nfet

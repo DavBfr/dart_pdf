@@ -1,8 +1,9 @@
 # Changelog
 
-## 5.2.2
+## 5.3.0
 
 - Fix raster crash on all OS.
+- Improve PdfPreview widget
 
 ## 5.2.1
 
