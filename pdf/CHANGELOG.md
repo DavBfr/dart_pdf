@@ -9,6 +9,7 @@
 - Add equality operator to PdfPageFormat
 - Improve TextStyle decoration merging
 - Add PdfColor.flatten
+- Add A6 page format
 
 ## 3.3.0
 

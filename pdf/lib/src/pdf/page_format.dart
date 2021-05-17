@@ -38,6 +38,8 @@ class PdfPageFormat {
       PdfPageFormat(21.0 * cm, 29.7 * cm, marginAll: 2.0 * cm);
   static const PdfPageFormat a5 =
       PdfPageFormat(14.8 * cm, 21.0 * cm, marginAll: 2.0 * cm);
+  static const PdfPageFormat a6 =
+      PdfPageFormat(105 * mm, 148 * mm, marginAll: 1.0 * cm);
   static const PdfPageFormat letter =
       PdfPageFormat(8.5 * inch, 11.0 * inch, marginAll: inch);
   static const PdfPageFormat legal =
