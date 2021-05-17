@@ -228,6 +228,17 @@ class PdfColor {
   /// Returns a list of analagous colors
   List<PdfColor> get analagous => toHsv().analagous;
 
+  /// Apply the color transparency by updating the color values according to a
+  /// background color.
+  PdfColor flatten({PdfColor background = const PdfColor(1, 1, 1)}) {
+    return PdfColor(
+      alpha * red + (1 - alpha) * background.red,
+      alpha * green + (1 - alpha) * background.green,
+      alpha * blue + (1 - alpha) * background.blue,
+      background.alpha,
+    );
+  }
+
   @override
   String toString() => '$runtimeType($red, $green, $blue, $alpha)';
 

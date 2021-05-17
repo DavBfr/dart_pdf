@@ -8,6 +8,7 @@
 - Add PdfOutline.toString()
 - Add equality operator to PdfPageFormat
 - Improve TextStyle decoration merging
+- Add PdfColor.flatten
 
 ## 3.3.0
 
