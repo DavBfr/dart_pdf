@@ -69,7 +69,7 @@ class PdfSignature extends PdfObjectDict {
   int get flagsValue => flags.isEmpty
       ? 0
       : flags
-          .map<int>((PdfSigFlags e) => 1 >> e.index)
+          .map<int>((PdfSigFlags e) => 1 << e.index)
           .reduce((int a, int b) => a | b);
 
   final crl = <PdfObjectStream>[];

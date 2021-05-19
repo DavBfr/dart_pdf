@@ -11,6 +11,7 @@
 - Add PdfColor.flatten
 - Add A6 page format
 - Apply Flutter 2.2 format
+- Fix Signature Flags
 
 ## 3.3.0
 
