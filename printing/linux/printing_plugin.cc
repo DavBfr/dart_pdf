@@ -16,6 +16,7 @@
 
 #include "include/printing/printing_plugin.h"
 
+#include <cstring>
 #include <memory>
 
 #include <flutter_linux/flutter_linux.h>

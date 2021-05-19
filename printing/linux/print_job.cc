@@ -20,6 +20,7 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <cstring>
 #include <string>
 
 #include <fpdfview.h>

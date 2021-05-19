@@ -4,6 +4,7 @@
 
 - Fix raster crash on all OS.
 - Improve PdfPreview widget
+- Fix Linux build on Debian 9
 
 ## 5.2.1
 

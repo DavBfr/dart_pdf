@@ -17,6 +17,10 @@
 #ifndef PRINTING_PLUGIN_PRINT_JOB_H_
 #define PRINTING_PLUGIN_PRINT_JOB_H_
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE 1
+#endif
+
 #include <flutter_linux/flutter_linux.h>
 #include <gtk/gtk.h>
 #include <gtk/gtkunixprint.h>
