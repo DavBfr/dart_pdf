@@ -608,7 +608,7 @@ class ListView extends StatelessWidget {
     this.padding,
     required this.itemBuilder,
     required this.itemCount,
-  })   : children = null,
+  })  : children = null,
         separatorBuilder = null,
         super();
 
@@ -619,7 +619,7 @@ class ListView extends StatelessWidget {
     required this.itemBuilder,
     required this.separatorBuilder,
     required this.itemCount,
-  })   : children = null,
+  })  : children = null,
         spacing = null,
         super();
 

@@ -10,6 +10,7 @@
 - Improve TextStyle decoration merging
 - Add PdfColor.flatten
 - Add A6 page format
+- Apply Flutter 2.2 format
 
 ## 3.3.0
 
