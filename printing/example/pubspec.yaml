@@ -18,5 +18,8 @@ dependency_overrides:
   printing:
     path: ../
 
+dev_dependencies:
+  pedantic:
+
 flutter:
   uses-material-design: true
