@@ -37,3 +37,18 @@ jobs:
         run: cd printing/example; flutter build -v apk
       - name: Build demo for Web
         run: cd demo; flutter build -v web
+
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: stable
+      - name: Enable Windows for flutter
+        run: flutter config --enable-windows-desktop
+      - name: Prepare build
+        run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
+      - name: Build example for Windows
+        run: cd printing/example; flutter build -v windows
