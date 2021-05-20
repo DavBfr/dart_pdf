@@ -52,3 +52,20 @@ jobs:
         run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
       - name: Build example for Windows
         run: cd printing/example; flutter build -v windows
+
+  macos:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: stable
+      - name: Enable macOS for flutter
+        run: flutter config --enable-macos-desktop
+      - name: Prepare build
+        run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
+      - name: Build example for macOS
+        run: cd printing/example; flutter build -v macos
+      # - name: Build example for iOS
+      #   run: cd printing/example; flutter build -v ios
