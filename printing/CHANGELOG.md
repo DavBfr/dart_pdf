@@ -1,6 +1,7 @@
 # Changelog
 
 ## 5.3.1
+
 - Added a boolean toggle to show/hide debug switch
 
 ## 5.3.0
