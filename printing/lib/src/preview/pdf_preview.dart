@@ -40,6 +40,7 @@ class PdfPreview extends StatefulWidget {
     this.maxPageWidth,
     this.canChangePageFormat = true,
     this.canChangeOrientation = true,
+    this.canDebug = true,
     this.actions,
     this.pageFormats = _defaultPageFormats,
     this.onError,
@@ -58,7 +59,6 @@ class PdfPreview extends StatefulWidget {
     this.previewPageMargin,
     this.padding,
     this.shouldRepaint = false,
-    this.canDebug = true,
   }) : super(key: key);
 
   static const _defaultPageFormats = <String, PdfPageFormat>{
@@ -89,6 +89,9 @@ class PdfPreview extends StatefulWidget {
 
   /// Add a switch to change the page orientation
   final bool canChangeOrientation;
+
+  /// Add a switch to show debug view
+  final bool canDebug;
 
   /// Additionnal actions to add to the widget
   final List<PdfPreviewAction>? actions;
@@ -147,8 +150,7 @@ class PdfPreview extends StatefulWidget {
   /// Force repainting the PDF document
   final bool shouldRepaint;
 
-  /// Add a switch to show debug view
-  final bool canDebug;
+
 
   @override
   _PdfPreviewState createState() => _PdfPreviewState();
