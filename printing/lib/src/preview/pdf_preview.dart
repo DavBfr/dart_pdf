@@ -40,6 +40,7 @@ class PdfPreview extends StatefulWidget {
     this.maxPageWidth,
     this.canChangePageFormat = true,
     this.canChangeOrientation = true,
+    this.canDebug = true,
     this.actions,
     this.pageFormats = _defaultPageFormats,
     this.onError,
@@ -88,6 +89,9 @@ class PdfPreview extends StatefulWidget {
 
   /// Add a switch to change the page orientation
   final bool canChangeOrientation;
+
+  /// Add a switch to show debug view
+  final bool canDebug;
 
   /// Additionnal actions to add to the widget
   final List<PdfPreviewAction>? actions;
@@ -456,7 +460,7 @@ class _PdfPreviewState extends State<PdfPreview> with PdfPreviewRaster {
     }
 
     assert(() {
-      if (actions.isNotEmpty) {
+      if (actions.isNotEmpty && widget.canDebug) {
         actions.add(
           Switch(
             activeColor: Colors.red,

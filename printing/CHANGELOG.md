@@ -5,6 +5,7 @@
 - Fix raster crash on all OS.
 - Improve PdfPreview widget
 - Fix Linux build on Debian 9
+- Added a boolean toggle to show/hide debug switch
 
 ## 5.2.1
 
