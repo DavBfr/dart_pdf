@@ -40,6 +40,7 @@ class PdfPreview extends StatefulWidget {
     this.maxPageWidth,
     this.canChangePageFormat = true,
     this.canChangeOrientation = true,
+    this.canDebug = true,
     this.actions,
     this.pageFormats = _defaultPageFormats,
     this.onError,
@@ -88,6 +89,9 @@ class PdfPreview extends StatefulWidget {
 
   /// Add a switch to change the page orientation
   final bool canChangeOrientation;
+
+  /// Add a switch to show debug view
+  final bool canDebug;
 
   /// Additionnal actions to add to the widget
   final List<PdfPreviewAction>? actions;
@@ -329,9 +333,8 @@ class _PdfPreviewState extends State<PdfPreview> with PdfPreviewRaster {
       page = _zoomPreview();
     } else {
       page = Container(
-        constraints: widget.maxPageWidth != null
-            ? BoxConstraints(maxWidth: widget.maxPageWidth!)
-            : null,
+        constraints:
+            widget.maxPageWidth != null ? BoxConstraints(maxWidth: widget.maxPageWidth!) : null,
         child: _createPreview(),
       );
 
@@ -429,8 +432,7 @@ class _PdfPreviewState extends State<PdfPreview> with PdfPreviewRaster {
             },
             isSelected: <bool>[horizontal == false, horizontal == true],
             children: <Widget>[
-              Transform.rotate(
-                  angle: -pi / 2, child: const Icon(Icons.note_outlined)),
+              Transform.rotate(angle: -pi / 2, child: const Icon(Icons.note_outlined)),
               const Icon(Icons.note_outlined),
             ],
           ),
@@ -456,7 +458,7 @@ class _PdfPreviewState extends State<PdfPreview> with PdfPreviewRaster {
     }
 
     assert(() {
-      if (actions.isNotEmpty) {
+      if (actions.isNotEmpty && widget.canDebug) {
         actions.add(
           Switch(
             activeColor: Colors.red,
@@ -554,12 +556,9 @@ class _PdfPreviewState extends State<PdfPreview> with PdfPreviewRaster {
 
   Future<void> _share() async {
     // Calculate the widget center for iPad sharing popup position
-    final referenceBox =
-        shareWidget.currentContext!.findRenderObject() as RenderBox;
-    final topLeft =
-        referenceBox.localToGlobal(referenceBox.paintBounds.topLeft);
-    final bottomRight =
-        referenceBox.localToGlobal(referenceBox.paintBounds.bottomRight);
+    final referenceBox = shareWidget.currentContext!.findRenderObject() as RenderBox;
+    final topLeft = referenceBox.localToGlobal(referenceBox.paintBounds.topLeft);
+    final bottomRight = referenceBox.localToGlobal(referenceBox.paintBounds.bottomRight);
     final bounds = Rect.fromPoints(topLeft, bottomRight);
 
     final bytes = await widget.build(computedPageFormat);
