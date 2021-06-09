@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+#if __has_include(<printing/printing-Swift.h>)
 #import <printing/printing-Swift.h>
+#else
+#import "printing-Swift.h"
+#endif
 
 // Dart:ffi API
 

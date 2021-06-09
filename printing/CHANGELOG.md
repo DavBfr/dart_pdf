@@ -6,6 +6,7 @@
 - Improve PdfPreview widget
 - Fix Linux build on Debian 9
 - Added a boolean toggle to show/hide debug switch
+- Fix iOS build when not using use_framework!
 
 ## 5.2.1
 
