@@ -78,8 +78,18 @@ class WidgetWraper extends pw.ImageProvider {
     final wrappedWidget =
         key.currentContext!.findRenderObject() as RenderRepaintBoundary;
     final image = await wrappedWidget.toImage(pixelRatio: pixelRatio);
-    final byteData = await (image.toByteData(format: ui.ImageByteFormat.rawRgba)
-        as FutureOr<ByteData>);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+
+    if (byteData == null) {
+      return WidgetWraper._(
+        Uint8List(0),
+        0,
+        0,
+        PdfImageOrientation.topLeft,
+        dpi,
+      );
+    }
+
     final imageData = byteData.buffer.asUint8List();
     return WidgetWraper._(
       imageData,

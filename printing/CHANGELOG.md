@@ -7,6 +7,7 @@
 - Fix Linux build on Debian 9
 - Added a boolean toggle to show/hide debug switch
 - Fix iOS build when not using use_framework!
+- Fix WidgetWraper
 
 ## 5.2.1
 
