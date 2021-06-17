@@ -7,7 +7,7 @@ issue_tracker: https://github.com/DavBfr/dart_pdf/issues
 version: 3.4.0
 
 environment:
-  sdk: ">=2.12.0-0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   archive: ^3.1.0
