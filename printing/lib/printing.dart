@@ -15,7 +15,9 @@
  */
 
 export 'src/asset_utils.dart';
+export 'src/cache.dart';
 export 'src/callback.dart';
+export 'src/fonts/gfonts.dart';
 export 'src/preview/pdf_preview.dart';
 export 'src/preview/pdf_preview_action.dart';
 export 'src/printer.dart';

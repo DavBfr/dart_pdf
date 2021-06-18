@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.4.0
+
+- Add Google Fonts support
+
 ## 5.3.0
 
 - Fix raster crash on all OS.

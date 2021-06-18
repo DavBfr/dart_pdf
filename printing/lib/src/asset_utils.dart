@@ -15,14 +15,14 @@
  */
 
 import 'dart:async';
-import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart' as rdr;
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
+
+import 'cache.dart';
 
 /// Loads an image from a Flutter [ImageProvider]
 /// into an [ImageProvider] instance
@@ -66,77 +66,35 @@ Future<ImageProvider> flutterImageProvider(
 
 /// Loads a font from an asset bundle key. If used multiple times with the same font name,
 /// it will be included multiple times in the pdf file
-Future<TtfFont> fontFromAssetBundle(String key, [AssetBundle? bundle]) async {
+Future<TtfFont> fontFromAssetBundle(
+  String key, {
+  AssetBundle? bundle,
+  bool cache = true,
+  PdfBaseCache? pdfCache,
+  bool protect = false,
+}) async {
   bundle ??= rootBundle;
-  final data = await bundle.load(key);
-  return TtfFont(data);
+  final bytes = await bundle.load(key);
+  return TtfFont(bytes, protect: protect);
 }
 
 /// Load an image from an asset bundle key.
-Future<ImageProvider> imageFromAssetBundle(String key,
-    [AssetBundle? bundle]) async {
+Future<ImageProvider> imageFromAssetBundle(
+  String key, {
+  AssetBundle? bundle,
+  bool cache = true,
+  PdfImageOrientation? orientation,
+  double? dpi,
+  PdfBaseCache? pdfCache,
+}) async {
   bundle ??= rootBundle;
-  final data = await bundle.load(key);
-  return MemoryImage(data.buffer.asUint8List());
-}
+  final bytes = await bundle.load(key);
 
-final HttpClient _sharedHttpClient = HttpClient();
-
-/// Store network images in a cache
-abstract class PdfBaseImageCache {
-  /// Create a network image cache
-  const PdfBaseImageCache();
-
-  /// The default cache used when none specified
-  static final defaultCache = PdfMemoryImageCache();
-
-  /// Add an image to the cache
-  Future<void> add(String key, Uint8List bytes);
-
-  /// Retrieve an image from the cache
-  Future<Uint8List?> get(String key);
-
-  /// Does the cache contains this image?
-  Future<bool> contains(String key);
-
-  /// Remove an image from the cache
-  Future<void> remove(String key);
-
-  /// Clear the cache
-  Future<void> clear();
-}
-
-/// Memory image cache
-class PdfMemoryImageCache extends PdfBaseImageCache {
-  /// Create a memory image cache
-  PdfMemoryImageCache();
-
-  final _imageCache = <String, Uint8List>{};
-
-  @override
-  Future<void> add(String key, Uint8List bytes) async {
-    _imageCache[key] = bytes;
-  }
-
-  @override
-  Future<Uint8List?> get(String key) async {
-    return _imageCache[key];
-  }
-
-  @override
-  Future<void> clear() async {
-    _imageCache.clear();
-  }
-
-  @override
-  Future<bool> contains(String key) async {
-    return _imageCache.containsKey(key);
-  }
-
-  @override
-  Future<void> remove(String key) async {
-    _imageCache.remove(key);
-  }
+  return MemoryImage(
+    bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes),
+    orientation: orientation,
+    dpi: dpi,
+  );
 }
 
 /// Download an image from the network.
@@ -146,28 +104,15 @@ Future<ImageProvider> networkImage(
   Map<String, String>? headers,
   PdfImageOrientation? orientation,
   double? dpi,
-  PdfBaseImageCache? imageCache,
+  PdfBaseCache? pdfCache,
 }) async {
-  imageCache ??= PdfBaseImageCache.defaultCache;
-
-  if (cache && await imageCache.contains(url)) {
-    return MemoryImage((await imageCache.get(url))!,
-        orientation: orientation, dpi: dpi);
-  }
-
-  final request = await _sharedHttpClient.getUrl(Uri.parse(url));
-  headers?.forEach((String name, String value) {
-    request.headers.add(name, value);
-  });
-  final response = await request.close();
-  final builder = await response.fold(
-      BytesBuilder(), (BytesBuilder b, List<int> d) => b..add(d));
-  final List<int> data = builder.takeBytes();
-  final bytes = Uint8List.fromList(data);
-
-  if (cache) {
-    await imageCache.add(url, bytes);
-  }
+  pdfCache ??= PdfBaseCache.defaultCache;
+  final bytes = await pdfCache.resolve(
+    name: url,
+    uri: Uri.parse(url),
+    cache: cache,
+    headers: headers,
+  );
 
   return MemoryImage(bytes, orientation: orientation, dpi: dpi);
 }
