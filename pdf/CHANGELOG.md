@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.4.1
+
+- Fix Nunito font parsing
+
 ## 3.4.0
 
 - Fix Text.softWrap behavior

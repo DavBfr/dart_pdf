@@ -358,7 +358,6 @@ class TtfParser {
 
       if (flag & REPEAT != 0) {
         var repeatCount = bytes.getUint8(offset++);
-        assert(repeatCount > 0);
         i += repeatCount;
         while (repeatCount-- > 0) {
           flags.add(flag);
