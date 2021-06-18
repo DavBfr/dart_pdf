@@ -128,13 +128,10 @@ class Font {
   PdfFont? _pdfFont;
 
   PdfFont? getFont(Context context) {
-    if (_pdfFont == null) {
+    if (_pdfFont == null || _pdfFont!.pdfDocument != context.document) {
       final pdfDocument = context.document;
       _pdfFont = buildFont(pdfDocument);
     }
-
-    assert(_pdfFont!.pdfDocument == context.document,
-        'Do not reuse a Font object across multiple documents');
 
     return _pdfFont;
   }

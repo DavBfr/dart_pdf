@@ -57,8 +57,10 @@ abstract class ImageProvider {
     if (effectiveDpi == null || _cache[0] != null) {
       _cache[0] ??= buildImage(context);
 
-      assert(_cache[0]!.pdfDocument == context.document,
-          'Do not reuse an ImageProvider object across multiple documents');
+      if (_cache[0]!.pdfDocument != context.document) {
+        _cache[0] = buildImage(context);
+      }
+
       return _cache[0]!;
     }
 
@@ -69,8 +71,10 @@ abstract class ImageProvider {
       _cache[width] ??= buildImage(context, width: width, height: height);
     }
 
-    assert(_cache[width]!.pdfDocument == context.document,
-        'Do not reuse an ImageProvider object across multiple documents');
+    if (_cache[width]!.pdfDocument != context.document) {
+      _cache[width] = buildImage(context, width: width, height: height);
+    }
+
     return _cache[width]!;
   }
 }
