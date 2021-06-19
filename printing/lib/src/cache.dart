@@ -70,7 +70,7 @@ abstract class PdfBaseCache {
     final bytes = await _download(uri, headers: headers);
 
     if (bytes == null) {
-      throw FlutterError('Unable to find the asset $name');
+      throw FlutterError('Unable to download $uri');
     }
 
     if (cache) {

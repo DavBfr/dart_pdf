@@ -19,7 +19,7 @@ class DownloadbleFont {
   static var cache = PdfBaseCache.defaultCache;
 
   /// Get the font to use in a Pdf document
-  Future<TtfFont> getFont({
+  Future<Font> getFont({
     PdfBaseCache? pdfCache,
     bool protect = false,
     Map<String, String>? headers,
@@ -38,16 +38,22 @@ class DownloadbleFont {
     }
 
     pdfCache ??= PdfBaseCache.defaultCache;
-    final bytes = await pdfCache.resolve(
-      name: name,
-      uri: Uri.parse(url),
-      headers: headers,
-      cache: cache,
-    );
 
-    return TtfFont(
-      bytes.buffer.asByteData(bytes.offsetInBytes, bytes.lengthInBytes),
-      protect: protect,
-    );
+    try {
+      final bytes = await pdfCache.resolve(
+        name: name,
+        uri: Uri.parse(url),
+        headers: headers,
+        cache: cache,
+      );
+
+      return TtfFont(
+        bytes.buffer.asByteData(bytes.offsetInBytes, bytes.lengthInBytes),
+        protect: protect,
+      );
+    } catch (e) {
+      print('$e\nError loading $name, fallback to Helvetica.');
+      return Font.helvetica();
+    }
   }
 }
