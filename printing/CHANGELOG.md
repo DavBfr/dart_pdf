@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.4.1
+
+- Always use HTTPS to download Google Fonts
+
 ## 5.4.0
 
 - Add Google Fonts support

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2017, David PHAM-VAN <dev.nfet.net@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -35,9 +51,34 @@ void main(List<String> args) async {
   print('Converting...');
   final Map m = json.decode(d.toString());
 
-  final output =
-      await File('../printing/lib/src/fonts/gfonts.dart').openWrite();
+  final file = File('../printing/lib/src/fonts/gfonts.dart');
+  final output = await file.openWrite();
 
+  output.writeln('/*');
+  output.writeln(
+      ' * Copyright (C) 2017, David PHAM-VAN <dev.nfet.net@gmail.com>');
+  output.writeln(' *');
+  output.writeln(
+      ' * Licensed under the Apache License, Version 2.0 (the "License");');
+  output.writeln(
+      ' * you may not use this file except in compliance with the License.');
+  output.writeln(' * You may obtain a copy of the License at');
+  output.writeln(' *');
+  output.writeln(' *     http://www.apache.org/licenses/LICENSE-2.0');
+  output.writeln(' *');
+  output.writeln(
+      ' * Unless required by applicable law or agreed to in writing, software');
+  output.writeln(
+      ' * distributed under the License is distributed on an "AS IS" BASIS,');
+  output.writeln(
+      ' * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.');
+  output.writeln(
+      ' * See the License for the specific language governing permissions and');
+  output.writeln(' * limitations under the License.');
+  output.writeln(' */');
+  output.writeln('');
+  output.writeln('// Generated file');
+  output.writeln('');
   output.writeln('import \'package:pdf/widgets.dart\';');
   output.writeln('');
   output.writeln('import \'font.dart\';');
@@ -68,11 +109,15 @@ void main(List<String> args) async {
 
       final name = _capitalize(family) + '-' + sub;
 
+      var uri = Uri.parse(s.value);
+      if (uri.isScheme('http')) {
+        uri = uri.replace(scheme: 'https');
+      }
+
       output.writeln('');
       output.writeln('/// ${f['family']} ${s.key}');
       output.writeln('static Future<Font> $family$sub() {');
-      output.writeln(
-          'const font = PdfGoogleFonts._(\'${s.value}\', \'$name\',);');
+      output.writeln('const font = PdfGoogleFonts._(\'$uri\', \'$name\',);');
       output.writeln('return font.getFont();');
       output.writeln('}');
     }
@@ -94,5 +139,7 @@ void main(List<String> args) async {
   output.writeln('}');
 
   await output.close();
+
+  await Process.run('dart', ['format', '--fix', file.absolute.path]);
   print('Done');
 }
