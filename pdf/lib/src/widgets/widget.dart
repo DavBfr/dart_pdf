@@ -46,7 +46,7 @@ class Context {
     PdfPage? page,
     PdfGraphics? canvas,
     required HashMap<Type, Inherited> inherited,
-  })  : _page = page,
+  })   : _page = page,
         _canvas = canvas,
         _inherited = inherited;
 

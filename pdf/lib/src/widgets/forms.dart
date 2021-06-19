@@ -106,7 +106,7 @@ class FlatButton extends SingleChildWidget {
     this.flags,
     required Widget child,
     required this.name,
-  })  : _childDown = Container(
+  })   : _childDown = Container(
           child: DefaultTextStyle(
             style: TextStyle(color: textColor),
             child: child,
