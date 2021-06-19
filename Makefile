@@ -29,7 +29,6 @@ pdf/open-sans.ttf:
 
 pdf/open-sans-bold.ttf:
 	curl -L "https://fonts.gstatic.com/s/opensans/v17/mem5YaGs126MiZpBA-UN7rg-VQ.ttf" > $@
-	cp $@ demo/assets/
 
 pdf/roboto.ttf:
 	curl -L "https://fonts.gstatic.com/s/robotomono/v7/L0x5DF4xlVMF-BfR8bXMIghM.ttf" > $@
