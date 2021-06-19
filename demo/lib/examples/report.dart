@@ -17,9 +17,9 @@
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 import '../data.dart';
 
@@ -51,8 +51,8 @@ Future<Uint8List> generateReport(
   final document = pw.Document();
 
   final theme = pw.ThemeData.withFont(
-    base: pw.Font.ttf(await rootBundle.load('assets/open-sans.ttf')),
-    bold: pw.Font.ttf(await rootBundle.load('assets/open-sans-bold.ttf')),
+    base: await PdfGoogleFonts.openSansRegular(),
+    bold: await PdfGoogleFonts.openSansBold(),
   );
 
   // Top bar chart

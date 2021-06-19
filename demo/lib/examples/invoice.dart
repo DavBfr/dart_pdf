@@ -20,6 +20,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 import '../data.dart';
 
@@ -100,10 +101,6 @@ class Invoice {
     // Create a PDF document.
     final doc = pw.Document();
 
-    final font1 = await rootBundle.load('assets/roboto1.ttf');
-    final font2 = await rootBundle.load('assets/roboto2.ttf');
-    final font3 = await rootBundle.load('assets/roboto3.ttf');
-
     _logo = await rootBundle.loadString('assets/logo.svg');
     _bgShape = await rootBundle.loadString('assets/invoice.svg');
 
@@ -112,9 +109,9 @@ class Invoice {
       pw.MultiPage(
         pageTheme: _buildTheme(
           pageFormat,
-          pw.Font.ttf(font1),
-          pw.Font.ttf(font2),
-          pw.Font.ttf(font3),
+          await PdfGoogleFonts.robotoRegular(),
+          await PdfGoogleFonts.robotoBold(),
+          await PdfGoogleFonts.robotoItalic(),
         ),
         header: _buildHeader,
         footer: _buildFooter,

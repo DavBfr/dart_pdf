@@ -21,6 +21,7 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:printing_demo/data.dart';
 
 const PdfColor green = PdfColor.fromInt(0xff9ce5d0);
@@ -168,9 +169,9 @@ Future<pw.PageTheme> _myPageTheme(PdfPageFormat format) async {
   return pw.PageTheme(
     pageFormat: format,
     theme: pw.ThemeData.withFont(
-      base: pw.Font.ttf(await rootBundle.load('assets/open-sans.ttf')),
-      bold: pw.Font.ttf(await rootBundle.load('assets/open-sans-bold.ttf')),
-      icons: pw.Font.ttf(await rootBundle.load('assets/material.ttf')),
+      base: await PdfGoogleFonts.openSansRegular(),
+      bold: await PdfGoogleFonts.openSansBold(),
+      icons: await PdfGoogleFonts.materialIcons(),
     ),
     buildBackground: (pw.Context context) {
       return pw.FullPage(

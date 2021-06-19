@@ -20,6 +20,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
+import 'package:printing/printing.dart';
 
 import '../data.dart';
 
@@ -197,8 +198,8 @@ Future<Uint8List> generateCalendar(
         pageFormat: pageFormat,
         orientation: PageOrientation.landscape,
         theme: ThemeData.withFont(
-          base: Font.ttf(await rootBundle.load('assets/open-sans.ttf')),
-          bold: Font.ttf(await rootBundle.load('assets/open-sans-bold.ttf')),
+          base: await PdfGoogleFonts.openSansRegular(),
+          bold: await PdfGoogleFonts.openSansBold(),
         ),
         buildForeground: bg == null
             ? null

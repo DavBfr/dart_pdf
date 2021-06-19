@@ -19,6 +19,7 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 import '../data.dart';
 
@@ -26,8 +27,8 @@ Future<Uint8List> generateDocument(
     PdfPageFormat format, CustomData data) async {
   final doc = pw.Document(pageMode: PdfPageMode.outlines);
 
-  final font1 = await rootBundle.load('assets/open-sans.ttf');
-  final font2 = await rootBundle.load('assets/open-sans-bold.ttf');
+  final font1 = await PdfGoogleFonts.openSansRegular();
+  final font2 = await PdfGoogleFonts.openSansBold();
   final shape = await rootBundle.loadString('assets/document.svg');
   final swirls = await rootBundle.loadString('assets/swirls2.svg');
 
@@ -43,6 +44,10 @@ Future<Uint8List> generateDocument(
         orientation: pw.PageOrientation.portrait,
         buildBackground: (context) =>
             pw.SvgImage(svg: shape, fit: pw.BoxFit.fill),
+        theme: pw.ThemeData.withFont(
+          base: font1,
+          bold: font2,
+        ),
       ),
       build: (context) {
         return pw.Padding(
@@ -100,6 +105,10 @@ Future<Uint8List> generateDocument(
 
   doc.addPage(
     pw.Page(
+      theme: pw.ThemeData.withFont(
+        base: font1,
+        bold: font2,
+      ),
       pageFormat: format.copyWith(marginBottom: 1.5 * PdfPageFormat.cm),
       orientation: pw.PageOrientation.portrait,
       build: (context) {
@@ -124,8 +133,8 @@ Future<Uint8List> generateDocument(
 
   doc.addPage(pw.MultiPage(
       theme: pw.ThemeData.withFont(
-        base: pw.Font.ttf(font1),
-        bold: pw.Font.ttf(font2),
+        base: font1,
+        bold: font2,
       ),
       pageFormat: format.copyWith(marginBottom: 1.5 * PdfPageFormat.cm),
       orientation: pw.PageOrientation.portrait,

@@ -18,7 +18,7 @@ DART_BIN=$(FLUTTER)/bin/dart
 DART_SRC=$(shell find . -name '*.dart')
 CLNG_SRC=$(shell find printing/ios printing/macos printing/windows printing/linux printing/android -name '*.cpp' -o -name '*.cc' -o -name '*.m' -o -name '*.h' -o -name '*.java')
 SWFT_SRC=$(shell find printing/ios printing/macos -name '*.swift')
-FONTS=pdf/open-sans.ttf pdf/open-sans-bold.ttf pdf/roboto.ttf pdf/noto-sans.ttf pdf/genyomintw.ttf demo/assets/roboto1.ttf demo/assets/roboto2.ttf demo/assets/roboto3.ttf demo/assets/open-sans.ttf demo/assets/open-sans-bold.ttf pdf/hacen-tunisia.ttf pdf/material.ttf demo/assets/material.ttf
+FONTS=pdf/open-sans.ttf pdf/open-sans-bold.ttf pdf/roboto.ttf pdf/noto-sans.ttf pdf/genyomintw.ttf pdf/hacen-tunisia.ttf pdf/material.ttf
 COV_PORT=9292
 SVG=blend_and_mask blend_mode_devil clip_path clip_path_2 clip_path_2 clip_path_3  clip_path_3  dash_path ellipse empty_defs equation fill-rule-inherit group_composite_opacity group_fill_opacity group_mask group_opacity group_opacity_transform hidden href-fill image image_def implicit_fill_with_opacity linear_gradient linear_gradient_2 linear_gradient_absolute_user_space_translate linear_gradient_percentage_bounding_translate linear_gradient_percentage_user_space_translate linear_gradient_xlink male mask mask_with_gradient mask_with_use mask_with_use2 nested_group opacity_on_path radial_gradient radial_gradient_absolute_user_space_translate radial_gradient_focal radial_gradient_percentage_bounding_translate radial_gradient_percentage_user_space_translate radial_gradient_xlink radial_ref_linear_gradient rect_rrect rect_rrect_no_ry stroke_inherit_circles style_attr text text_2 text_3 use_circles use_circles_def use_emc2 use_fill use_opacity_grid width_height_viewbox flutter_logo emoji_u1f600 text_transform dart new-pause-button new-send-circle new-gif new-camera new-image numeric_25 new-mention new-gif-button new-action-expander new-play-button aa alphachannel Ghostscript_Tiger Firefox_Logo_2017 chess_knight Flag_of_the_United_States
 
@@ -26,16 +26,6 @@ all: $(FONTS) demo/assets/logo.svg demo/assets/profile.jpg format printing/examp
 
 pdf/open-sans.ttf:
 	curl -L "https://fonts.gstatic.com/s/opensans/v17/mem8YaGs126MiZpBA-U1Ug.ttf" > $@
-
-demo/assets/open-sans.ttf: pdf/open-sans.ttf
-	cp $^ $@
-
-pdf/open-sans-bold.ttf:
-	curl -L "https://fonts.gstatic.com/s/opensans/v17/mem5YaGs126MiZpBA-UN7rg-VQ.ttf" > $@
-	cp $@ demo/assets/
-
-demo/assets/open-sans-bold.ttf: pdf/open-sans-bold.ttf
-	cp $^ $@
 
 pdf/roboto.ttf:
 	curl -L "https://fonts.gstatic.com/s/robotomono/v7/L0x5DF4xlVMF-BfR8bXMIghM.ttf" > $@
@@ -49,20 +39,8 @@ pdf/genyomintw.ttf:
 pdf/material.ttf:
 	curl -L "https://github.com/google/material-design-icons/raw/master/font/MaterialIcons-Regular.ttf" > $@
 
-demo/assets/roboto1.ttf:
-	curl -L "https://fonts.gstatic.com/s/roboto/v20/KFOlCnqEu92Fr1MmSU5vAw.ttf" > $@
-
-demo/assets/roboto2.ttf:
-	curl -L "https://fonts.gstatic.com/s/roboto/v20/KFOlCnqEu92Fr1MmWUlvAw.ttf" > $@
-
-demo/assets/roboto3.ttf:
-	curl -L "https://fonts.gstatic.com/s/roboto/v20/KFOkCnqEu92Fr1MmgWxP.ttf" > $@
-
 demo/assets/logo.svg:
 	curl -L "http://pigment.github.io/fake-logos/logos/vector/color/auto-speed.svg" > $@
-
-demo/assets/material.ttf: pdf/material.ttf
-	cp $< $@
 
 demo/assets/profile.jpg:
 	curl -L "https://www.fakepersongenerator.com/Face/female/female20151024334209870.jpg" > $@

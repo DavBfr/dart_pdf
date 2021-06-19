@@ -18,43 +18,22 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../data.dart';
-
-final _cache = <String, Uint8List>{};
-
-Future<Uint8List> _download(String url) async {
-  if (!_cache.containsKey(url)) {
-    print('Downloading $url');
-    final response = await http.get(Uri.parse(url));
-    final data = response.bodyBytes;
-    _cache[url] = Uint8List.fromList(data);
-  }
-
-  return _cache[url]!;
-}
-
-Future<pw.Font> _downloadFont(String url) async {
-  final data = await _download(url);
-  return pw.Font.ttf(data.buffer.asByteData());
-}
 
 Future<Uint8List> generateCertificate(
     PdfPageFormat pageFormat, CustomData data) async {
   final lorem = pw.LoremText();
   final pdf = pw.Document();
 
-  final libreBaskerville = await _downloadFont(
-      'https://fonts.gstatic.com/s/librebaskerville/v9/kmKnZrc3Hgbbcjq75U4uslyuy4kn0pNe.ttf');
-  final libreBaskervilleItalic = await _downloadFont(
-      'https://fonts.gstatic.com/s/librebaskerville/v9/kmKhZrc3Hgbbcjq75U4uslyuy4kn0qNcaxY.ttf');
-  final libreBaskervilleBold = await _downloadFont(
-      'https://fonts.gstatic.com/s/librebaskerville/v9/kmKiZrc3Hgbbcjq75U4uslyuy4kn0qviTjYw.ttf');
-  final robotoLight = pw.Font.ttf(await rootBundle.load('assets/roboto3.ttf'));
+  final libreBaskerville = await PdfGoogleFonts.libreBaskervilleRegular();
+  final libreBaskervilleItalic = await PdfGoogleFonts.libreBaskervilleItalic();
+  final libreBaskervilleBold = await PdfGoogleFonts.libreBaskervilleBold();
+  final robotoLight = await PdfGoogleFonts.robotoLight();
   final medail = await rootBundle.loadString('assets/medail.svg');
   final swirls = await rootBundle.loadString('assets/swirls.svg');
   final swirls1 = await rootBundle.loadString('assets/swirls1.svg');
