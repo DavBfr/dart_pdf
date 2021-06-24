@@ -99,7 +99,8 @@ class PrintingPlugin extends PrintingPlatform {
 
     final String userAgent = js.context['navigator']['userAgent'];
     final isChrome = js.context['chrome'] != null;
-    final isSafari = js.context['safari'] != null;
+    final isSafari = js.context['safari'] != null &&
+        !userAgent.contains(RegExp(r'Version/14\.1\.'));
     final isMobile = userAgent.contains('Mobile');
     final isFirefox = userAgent.contains('Firefox');
 

@@ -3,6 +3,7 @@
 ## 5.4.2
 
 - Use proper print dialog on Firefox
+- Mitigate Safari 14.1.1 print() bug
 
 ## 5.4.1
 
