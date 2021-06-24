@@ -37,8 +37,7 @@ for documentation.
 4. For MacOS add printing capability by opening macos directory in XCode
 
 5. For the web, a javascript library and a small script has to be added to
-   your `web/index.html` file, just before
-   `<script src="main.dart.js" type="application/javascript"></script>`:
+   your `web/index.html` file, just before `</head>`:
 
    ```html
    <script src="//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.8.335/pdf.min.js"></script>

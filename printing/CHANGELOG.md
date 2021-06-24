@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.4.2
+
+- Use proper print dialog on Firefox
+
 ## 5.4.1
 
 - Always use HTTPS to download Google Fonts
