@@ -17,7 +17,7 @@ set(PROJECT_NAME "printing")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
 set(ARCH "x64")
-set(PDFIUM_VERSION "4503")
+set(PDFIUM_VERSION "4549")
 
 if(${PDFIUM_VERSION} STREQUAL "latest")
   set(PDFIUM_URL "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-windows-${ARCH}.zip")

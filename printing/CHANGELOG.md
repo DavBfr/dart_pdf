@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.4.3
+
+- Update Pdfium libraries
+
 ## 5.4.2
 
 - Use proper print dialog on Firefox

@@ -16,7 +16,7 @@ cmake_minimum_required(VERSION 3.10)
 set(PROJECT_NAME "printing")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
-set(PDFIUM_VERSION "latest")
+set(PDFIUM_VERSION "4542")
 
 if(${PDFIUM_VERSION} STREQUAL "latest")
   set(PDFIUM_URL "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-linux.tgz")
