@@ -247,8 +247,10 @@ ref: svg
 	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/pdf/adobe_supplement_iso32000.pdf'
 	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_reference_1-7.pdf'
 
-gh-pages: all
+gh-social: all
 	cd test; $(DART_BIN) --enable-asserts github_social_preview.dart
+
+gh-pages: all
 	cd demo; $(FLUTTER_BIN) build web
 	git checkout gh-pages
 	rm -rf assets icons
