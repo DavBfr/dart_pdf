@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.5.0
+
+- Add annotations [John Harris]
+
 ## 3.4.2
 
 - Revert dart format

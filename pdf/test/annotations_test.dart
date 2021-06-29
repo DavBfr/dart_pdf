@@ -17,59 +17,103 @@
 import 'dart:io';
 
 import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
+late Document pdf;
+
 void main() {
-  test('Pdf Annotations', () async {
-    final pdf = PdfDocument();
-    final page = PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
-    final page1 = PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
+  setUpAll(() {
+    Document.debug = true;
+    pdf = Document();
+  });
 
-    pdf.pdfNames.addDest('target', page1, posY: 100);
-
-    final g = page.getGraphics();
-
-    PdfAnnot(
-      page,
-      PdfAnnotText(
-        rect: const PdfRect(100, 100, 50, 50),
-        content: 'Hello',
+  test('Pdf Link Annotations', () async {
+    pdf.addPage(
+      Page(
+        build: (context) => Column(
+          children: [
+            Link(child: Text('A link'), destination: 'destination'),
+            UrlLink(
+                child: Text('GitHub'),
+                destination: 'https://github.com/DavBfr/dart_pdf/'),
+          ],
+        ),
       ),
     );
+  });
 
-    PdfAnnot(
-      page,
-      PdfAnnotNamedLink(
-        dest: 'target',
-        rect: const PdfRect(100, 150, 50, 50),
+  test('Pdf Shape Annotations', () async {
+    pdf.addPage(
+      Page(
+        build: (context) => Wrap(
+          spacing: 20,
+          runSpacing: 20,
+          children: [
+            SizedBox(
+              width: 200,
+              height: 200,
+              child: CircleAnnotation(
+                color: PdfColors.blue,
+                author: 'David PHAM-VAN',
+              ),
+            ),
+            SizedBox(
+              width: 200,
+              height: 200,
+              child: SquareAnnotation(
+                color: PdfColors.red,
+              ),
+            ),
+            SizedBox(
+              width: 200,
+              height: 100,
+              child: PolyLineAnnotation(
+                points: const [
+                  PdfPoint(10, 10),
+                  PdfPoint(10, 30),
+                  PdfPoint(50, 70)
+                ],
+                color: PdfColors.purple,
+              ),
+            ),
+            SizedBox(
+              width: 200,
+              height: 100,
+              child: PolygonAnnotation(
+                points: const [
+                  PdfPoint(10, 10),
+                  PdfPoint(10, 30),
+                  PdfPoint(50, 70)
+                ],
+                color: PdfColors.orange,
+              ),
+            ),
+            SizedBox(
+              width: 200,
+              height: 100,
+              child: InkAnnotation(
+                points: const [
+                  [PdfPoint(10, 10), PdfPoint(10, 30), PdfPoint(50, 70)],
+                  [PdfPoint(100, 10), PdfPoint(100, 30), PdfPoint(150, 70)],
+                ],
+                color: PdfColors.green,
+              ),
+            ),
+          ],
+        ),
       ),
     );
-    g.drawRect(100, 150, 50, 50);
-    g.strokePath();
+  });
 
-    PdfAnnot(
-      page,
-      PdfAnnotUrlLink(
-        rect: const PdfRect(100, 250, 50, 50),
-        url: 'https://github.com/DavBfr/dart_pdf/',
-      ),
-    );
-    g.drawRect(100, 250, 50, 50);
-    g.strokePath();
+  test('Pdf Anchor Annotation', () async {
+    pdf.addPage(Page(
+      build: (context) =>
+          Anchor(child: Text('The destination'), name: 'destination'),
+    ));
+  });
 
-    PdfAnnot(
-      page,
-      PdfTextField(
-        rect: const PdfRect(100, 50, 50, 20),
-        fieldName: 'test',
-        font: PdfFont.helvetica(pdf),
-        fontSize: 10,
-        textColor: PdfColors.blue,
-      ),
-    );
-    // g.drawRect(100, 50, 50, 20);
-    g.strokePath();
-
+  tearDownAll(() async {
     final file = File('annotations.pdf');
     await file.writeAsBytes(await pdf.save());
   });

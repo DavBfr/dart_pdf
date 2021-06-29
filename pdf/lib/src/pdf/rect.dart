@@ -57,4 +57,13 @@ class PdfRect {
   PdfPoint get topRight => PdfPoint(right, y);
   PdfPoint get bottomLeft => PdfPoint(x, top);
   PdfPoint get bottomRight => PdfPoint(right, top);
+
+  /// Returns a new rectangle with edges moved outwards by the given delta.
+  PdfRect inflate(double delta) {
+    return PdfRect.fromLTRB(
+        left - delta, top - delta, right + delta, bottom + delta);
+  }
+
+  /// Returns a new rectangle with edges moved inwards by the given delta.
+  PdfRect deflate(double delta) => inflate(-delta);
 }

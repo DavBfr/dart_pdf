@@ -99,6 +99,8 @@ abstract class PdfAnnotBase {
     this.flags,
     this.date,
     this.color,
+    this.subject,
+    this.author,
   });
 
   /// The subtype of the outline, ie text, note, etc
@@ -114,6 +116,12 @@ abstract class PdfAnnotBase {
 
   /// The internal name for a link
   final String? name;
+
+  /// The author of the annotation
+  final String? author;
+
+  /// The subject of the annotation
+  final String? subject;
 
   /// Flags specifying various characteristics of the annotation
   final Set<PdfAnnotFlags>? flags;
@@ -223,6 +231,14 @@ abstract class PdfAnnotBase {
       params['/C'] = PdfColorType(color!);
     }
 
+    if (subject != null) {
+      params['/Subj'] = PdfSecString.fromString(object, subject!);
+    }
+
+    if (author != null) {
+      params['/T'] = PdfSecString.fromString(object, author!);
+    }
+
     if (_appearances.isNotEmpty) {
       params['/AP'] = PdfDict(_appearances);
       if (_as != null) {
@@ -242,6 +258,8 @@ class PdfAnnotText extends PdfAnnotBase {
     Set<PdfAnnotFlags>? flags,
     DateTime? date,
     PdfColor? color,
+    String? subject,
+    String? author,
   }) : super(
           subtype: '/Text',
           rect: rect,
@@ -251,6 +269,8 @@ class PdfAnnotText extends PdfAnnotBase {
           flags: flags,
           date: date,
           color: color,
+          subject: subject,
+          author: author,
         );
 }
 
@@ -263,6 +283,8 @@ class PdfAnnotNamedLink extends PdfAnnotBase {
     Set<PdfAnnotFlags>? flags,
     DateTime? date,
     PdfColor? color,
+    String? subject,
+    String? author,
   }) : super(
           subtype: '/Link',
           rect: rect,
@@ -270,6 +292,8 @@ class PdfAnnotNamedLink extends PdfAnnotBase {
           flags: flags,
           date: date,
           color: color,
+          subject: subject,
+          author: author,
         );
 
   final String dest;
@@ -295,6 +319,8 @@ class PdfAnnotUrlLink extends PdfAnnotBase {
     Set<PdfAnnotFlags>? flags,
     DateTime? date,
     PdfColor? color,
+    String? subject,
+    String? author,
   }) : super(
           subtype: '/Link',
           rect: rect,
@@ -302,6 +328,8 @@ class PdfAnnotUrlLink extends PdfAnnotBase {
           flags: flags,
           date: date,
           color: color,
+          subject: subject,
+          author: author,
         );
 
   final String url;
@@ -315,6 +343,177 @@ class PdfAnnotUrlLink extends PdfAnnotBase {
         '/URI': PdfSecString.fromString(object, url),
       },
     );
+  }
+}
+
+class PdfAnnotSquare extends PdfAnnotBase {
+  /// Create an Square annotation
+  PdfAnnotSquare({
+    required PdfRect rect,
+    PdfBorder? border,
+    Set<PdfAnnotFlags>? flags,
+    DateTime? date,
+    PdfColor? color,
+    this.interiorColor,
+    String? subject,
+    String? author,
+  }) : super(
+          subtype: '/Square',
+          rect: rect,
+          border: border,
+          flags: flags,
+          date: date,
+          color: color,
+          subject: subject,
+          author: author,
+        );
+
+  final PdfColor? interiorColor;
+
+  @override
+  void build(PdfPage page, PdfObject object, PdfDict params) {
+    super.build(page, object, params);
+    if (interiorColor != null) {
+      params['/IC'] = PdfColorType(interiorColor!);
+    }
+  }
+}
+
+class PdfAnnotCircle extends PdfAnnotBase {
+  /// Create an Circle annotation
+  PdfAnnotCircle({
+    required PdfRect rect,
+    PdfBorder? border,
+    Set<PdfAnnotFlags>? flags,
+    DateTime? date,
+    PdfColor? color,
+    this.interiorColor,
+    String? subject,
+    String? author,
+  }) : super(
+          subtype: '/Circle',
+          rect: rect,
+          border: border,
+          flags: flags,
+          date: date,
+          color: color,
+          subject: subject,
+          author: author,
+        );
+
+  final PdfColor? interiorColor;
+
+  @override
+  void build(PdfPage page, PdfObject object, PdfDict params) {
+    super.build(page, object, params);
+    if (interiorColor != null) {
+      params['/IC'] = PdfColorType(interiorColor!);
+    }
+  }
+}
+
+class PdfAnnotPolygon extends PdfAnnotBase {
+  /// Create an Polygon annotation
+  PdfAnnotPolygon(this.document, this.points,
+      {required PdfRect rect,
+      PdfBorder? border,
+      Set<PdfAnnotFlags>? flags,
+      DateTime? date,
+      PdfColor? color,
+      this.interiorColor,
+      String? subject,
+      String? author,
+      bool closed = true})
+      : super(
+          subtype: closed ? '/PolyLine' : '/Polygon',
+          rect: rect,
+          border: border,
+          flags: flags,
+          date: date,
+          color: color,
+          subject: subject,
+          author: author,
+        );
+
+  final PdfDocument document;
+
+  final List<PdfPoint> points;
+
+  final PdfColor? interiorColor;
+
+  @override
+  void build(PdfPage page, PdfObject object, PdfDict params) {
+    super.build(page, object, params);
+
+    // Flip the points on the Y axis.
+    final flippedPoints =
+        points.map((e) => PdfPoint(e.x, rect.height - e.y)).toList();
+
+    final verticies = <num>[];
+    for (var i = 0; i < flippedPoints.length; i++) {
+      verticies.add(flippedPoints[i].x);
+      verticies.add(flippedPoints[i].y);
+    }
+
+    params['/Vertices'] = PdfArray.fromNum(verticies);
+
+    if (interiorColor != null) {
+      params['/IC'] = PdfColorType(interiorColor!);
+    }
+  }
+}
+
+class PdfAnnotInk extends PdfAnnotBase {
+  /// Create an Ink List annotation
+  PdfAnnotInk(
+    this.document,
+    this.points, {
+    required PdfRect rect,
+    PdfBorder? border,
+    Set<PdfAnnotFlags>? flags,
+    DateTime? date,
+    PdfColor? color,
+    String? subject,
+    String? author,
+    String? content,
+  }) : super(
+          subtype: '/Ink',
+          rect: rect,
+          border: border,
+          flags: flags,
+          date: date,
+          color: color,
+          subject: subject,
+          author: author,
+          content: content,
+        );
+
+  final PdfDocument document;
+
+  final List<List<PdfPoint>> points;
+
+  @override
+  void build(
+    PdfPage page,
+    PdfObject object,
+    PdfDict params,
+  ) {
+    super.build(page, object, params);
+
+    final verticies = List<List<num>>.filled(points.length, <num>[]);
+    for (var listIndex = 0; listIndex < points.length; listIndex++) {
+      // Flip the points on the Y axis.
+      final flippedPoints = points[listIndex]
+          .map((e) => PdfPoint(e.x, rect.height - e.y))
+          .toList();
+      for (var i = 0; i < flippedPoints.length; i++) {
+        verticies[listIndex].add(flippedPoints[i].x);
+        verticies[listIndex].add(flippedPoints[i].y);
+      }
+    }
+
+    params['/InkList'] =
+        PdfArray(verticies.map((v) => PdfArray.fromNum(v)).toList());
   }
 }
 
@@ -332,6 +531,8 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
     PdfColor? color,
     this.backgroundColor,
     this.highlighting,
+    String? subject,
+    String? author,
   }) : super(
           subtype: '/Widget',
           rect: rect,
@@ -339,6 +540,8 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
           flags: flags,
           date: date,
           color: color,
+          subject: subject,
+          author: author,
         );
 
   final String fieldType;
@@ -531,6 +734,8 @@ class PdfFormField extends PdfAnnotWidget {
     PdfBorder? border,
     Set<PdfAnnotFlags>? flags,
     DateTime? date,
+    String? subject,
+    String? author,
     PdfColor? color,
     PdfColor? backgroundColor,
     PdfAnnotHighlighting? highlighting,
@@ -542,6 +747,8 @@ class PdfFormField extends PdfAnnotWidget {
           border: border,
           flags: flags,
           date: date,
+          subject: subject,
+          author: author,
           backgroundColor: backgroundColor,
           color: color,
           highlighting: highlighting,
@@ -588,6 +795,8 @@ class PdfTextField extends PdfFormField {
     PdfBorder? border,
     Set<PdfAnnotFlags>? flags,
     DateTime? date,
+    String? subject,
+    String? author,
     PdfColor? color,
     PdfColor? backgroundColor,
     PdfAnnotHighlighting? highlighting,
@@ -606,6 +815,8 @@ class PdfTextField extends PdfFormField {
           border: border,
           flags: flags,
           date: date,
+          subject: subject,
+          author: author,
           color: color,
           backgroundColor: backgroundColor,
           highlighting: highlighting,

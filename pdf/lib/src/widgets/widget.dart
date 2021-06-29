@@ -112,6 +112,12 @@ class Context {
       y.reduce(math.max),
     );
   }
+
+  PdfPoint localToGlobalPoint(PdfPoint point) {
+    final mat = canvas.getTransform();
+    final xy = mat.transform3(Vector3(point.x, point.y, 0));
+    return PdfPoint(xy.x, xy.y);
+  }
 }
 
 class Inherited {

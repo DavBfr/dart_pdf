@@ -49,6 +49,7 @@ export 'src/widgets/page_theme.dart';
 export 'src/widgets/partitions.dart';
 export 'src/widgets/placeholders.dart';
 export 'src/widgets/progress.dart';
+export 'src/widgets/shape.dart';
 export 'src/widgets/stack.dart';
 export 'src/widgets/svg.dart';
 export 'src/widgets/table.dart';
