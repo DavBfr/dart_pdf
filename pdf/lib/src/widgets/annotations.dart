@@ -78,15 +78,22 @@ class AnnotationLink extends AnnotationBuilder {
       PdfAnnotNamedLink(
         rect: context.localToGlobal(box!),
         dest: destination,
+        
       ),
     );
   }
 }
 
 class AnnotationUrl extends AnnotationBuilder {
-  AnnotationUrl(this.destination);
+  AnnotationUrl(this.destination, {this.date, this.subject, this.author});
 
   final String destination;
+
+  final DateTime? date;
+
+  final String? author;
+  
+  final String? subject;
 
   @override
   void build(Context context, PdfRect? box) {
@@ -95,6 +102,41 @@ class AnnotationUrl extends AnnotationBuilder {
       PdfAnnotUrlLink(
         rect: context.localToGlobal(box!),
         url: destination,
+        date: date,
+        author: author,
+        subject: subject
+      ),
+    );
+  }
+}
+
+class AnnotationSquare extends AnnotationBuilder {
+  AnnotationSquare({this.color, this.interiorColor, this.border, this.date, this.subject, this.author});
+
+  final PdfColor? color;
+
+  final PdfColor? interiorColor;
+
+  final PdfBorder? border;
+
+  final DateTime? date;
+
+  final String? author;
+  
+  final String? subject;
+
+  @override
+  void build(Context context, PdfRect? box) {
+    PdfAnnot(
+      context.page,
+      PdfAnnotSquare(
+        rect: context.localToGlobal(box!),
+        border: border,
+        color: color,
+        interiorColor: interiorColor,
+        date: date,
+        author: author,
+        subject: subject
       ),
     );
   }
@@ -106,6 +148,8 @@ class AnnotationTextField extends AnnotationBuilder {
     this.border,
     this.flags,
     this.date,
+    this.subject,
+    this.author,
     this.color,
     this.backgroundColor,
     this.highlighting,
@@ -146,6 +190,10 @@ class AnnotationTextField extends AnnotationBuilder {
 
   final Set<PdfFieldFlags>? fieldFlags;
 
+  final String? author;
+  
+  final String? subject;
+
   @override
   void build(Context context, PdfRect? box) {
     final _textStyle = Theme.of(context).defaultTextStyle.merge(textStyle);
@@ -158,6 +206,8 @@ class AnnotationTextField extends AnnotationBuilder {
         border: border,
         flags: flags,
         date: date,
+        author: author,
+        subject: subject,
         color: color,
         backgroundColor: backgroundColor,
         highlighting: highlighting,
@@ -206,6 +256,11 @@ class UrlLink extends Annotation {
     required Widget child,
     required String destination,
   }) : super(child: child, builder: AnnotationUrl(destination));
+}
+
+class SquareAnnotation extends Annotation {
+  SquareAnnotation({required Widget child, PdfColor? color, PdfColor? interiorColor, PdfBorder? border})
+    : super(child: child, builder: AnnotationSquare(color: color, interiorColor: interiorColor, border: border));
 }
 
 class Outline extends Anchor {
