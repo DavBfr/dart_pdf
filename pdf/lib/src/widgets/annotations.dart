@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import 'dart:math';
+
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -78,7 +80,7 @@ class AnnotationLink extends AnnotationBuilder {
       PdfAnnotNamedLink(
         rect: context.localToGlobal(box!),
         dest: destination,
-        
+
       ),
     );
   }
@@ -92,7 +94,7 @@ class AnnotationUrl extends AnnotationBuilder {
   final DateTime? date;
 
   final String? author;
-  
+
   final String? subject;
 
   @override
@@ -100,11 +102,11 @@ class AnnotationUrl extends AnnotationBuilder {
     PdfAnnot(
       context.page,
       PdfAnnotUrlLink(
-        rect: context.localToGlobal(box!),
-        url: destination,
-        date: date,
-        author: author,
-        subject: subject
+          rect: context.localToGlobal(box!),
+          url: destination,
+          date: date,
+          author: author,
+          subject: subject
       ),
     );
   }
@@ -122,7 +124,7 @@ class AnnotationSquare extends AnnotationBuilder {
   final DateTime? date;
 
   final String? author;
-  
+
   final String? subject;
 
   @override
@@ -130,14 +132,94 @@ class AnnotationSquare extends AnnotationBuilder {
     PdfAnnot(
       context.page,
       PdfAnnotSquare(
-        rect: context.localToGlobal(box!),
+          rect: context.localToGlobal(box!),
+          border: border,
+          color: color,
+          interiorColor: interiorColor,
+          date: date,
+          author: author,
+          subject: subject
+      ),
+    );
+  }
+}
+
+class AnnotationCircle extends AnnotationBuilder {
+  AnnotationCircle({this.color, this.interiorColor, this.border, this.date, this.subject, this.author});
+
+  final PdfColor? color;
+
+  final PdfColor? interiorColor;
+
+  final PdfBorder? border;
+
+  final DateTime? date;
+
+  final String? author;
+
+  final String? subject;
+
+  @override
+  void build(Context context, PdfRect? box) {
+    PdfAnnot(
+      context.page,
+      PdfAnnotCircle(
+          rect: context.localToGlobal(box!),
+          border: border,
+          color: color,
+          interiorColor: interiorColor,
+          date: date,
+          author: author,
+          subject: subject
+      ),
+    );
+  }
+}
+
+class AnnotationPolygon extends AnnotationBuilder {
+  AnnotationPolygon(this.points, {this.color, this.interiorColor, this.border, this.date, this.subject, this.author});
+
+  final List<PdfPoint> points;
+
+  final PdfColor? color;
+
+  final PdfColor? interiorColor;
+
+  final PdfBorder? border;
+
+  final DateTime? date;
+
+  final String? author;
+
+  final String? subject;
+
+  @override
+  void build(Context context, PdfRect? box) {
+    final globalPoints = points.map((e) => context.localToGlobalPoint(e)).toList();
+
+    final rect = context.localToGlobal(PdfRect(
+        points.map((point) => point.x).reduce(min),
+        points.map((point) => point.y).reduce(min),
+        points.map((point) => point.x).reduce(max) - points.map((point) => point.x).reduce(min),
+        points.map((point) => point.y).reduce(max) - points.map((point) => point.y).reduce(min)));
+
+    final pdfAnnotPolygon = PdfAnnotPolygon(
+        context.document,
+        globalPoints,
+        rect: rect,
         border: border,
         color: color,
         interiorColor: interiorColor,
         date: date,
         author: author,
         subject: subject
-      ),
+    );
+
+    pdfAnnotPolygon.addAppearance();
+
+    PdfAnnot(
+        context.page,
+        pdfAnnotPolygon
     );
   }
 }
@@ -191,12 +273,15 @@ class AnnotationTextField extends AnnotationBuilder {
   final Set<PdfFieldFlags>? fieldFlags;
 
   final String? author;
-  
+
   final String? subject;
 
   @override
   void build(Context context, PdfRect? box) {
-    final _textStyle = Theme.of(context).defaultTextStyle.merge(textStyle);
+    final _textStyle = Theme
+        .of(context)
+        .defaultTextStyle
+        .merge(textStyle);
 
     PdfAnnot(
       context.page,
@@ -260,7 +345,17 @@ class UrlLink extends Annotation {
 
 class SquareAnnotation extends Annotation {
   SquareAnnotation({required Widget child, PdfColor? color, PdfColor? interiorColor, PdfBorder? border})
-    : super(child: child, builder: AnnotationSquare(color: color, interiorColor: interiorColor, border: border));
+      : super(child: child, builder: AnnotationSquare(color: color, interiorColor: interiorColor, border: border));
+}
+
+class CircleAnnotation extends Annotation {
+  CircleAnnotation({required Widget child, PdfColor? color, PdfColor? interiorColor, PdfBorder? border})
+      : super(child: child, builder: AnnotationCircle(color: color, interiorColor: interiorColor, border: border));
+}
+
+class PolygonAnnotation extends Annotation {
+  PolygonAnnotation({required Widget child, required List<PdfPoint> points, PdfColor? color, PdfColor? interiorColor, PdfBorder? border})
+      : super(child: child, builder: AnnotationPolygon(points, color: color, interiorColor: interiorColor, border: border));
 }
 
 class Outline extends Anchor {
@@ -271,7 +366,8 @@ class Outline extends Anchor {
     this.level = 0,
     this.color,
     this.style = PdfOutlineStyle.normal,
-  })  : assert(level >= 0),
+  })
+      : assert(level >= 0),
         super(child: child, name: name, setX: true);
 
   final String title;
