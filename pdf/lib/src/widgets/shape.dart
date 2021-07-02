@@ -14,34 +14,200 @@
  * limitations under the License.
  */
 
-import 'package:pdf/src/widgets/basic.dart';
 import 'package:pdf/src/widgets/geometry.dart';
+import 'package:pdf/src/pdf/point.dart';
 import 'package:pdf/src/widgets/widget.dart';
 
 import '../../pdf.dart';
 
 class Circle extends Widget {
-  Circle({required this.width, required this.height});
+  Circle({this.fillColor, this.strokeColor, this.strokeWidth = 1.0});
 
-  final double width;
-  final double height;
+  final PdfColor? fillColor;
+  final PdfColor? strokeColor;
+  final double strokeWidth;
 
   @override
-  void layout(Context context, BoxConstraints constraints, {bool parentUsesSize = false}) {
-    final sizes = applyBoxFit(BoxFit.contain, PdfPoint(width, height), PdfPoint(width, height));
-    box = PdfRect.fromPoints(PdfPoint.zero, sizes.destination!);
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
   }
 
   @override
   void paint(Context context) {
     super.paint(context);
 
-    context.canvas
-      ..saveContext()
-      ..setStrokeColor(PdfColors.amber)
-      ..setFillColor(PdfColors.orange)
-      ..drawEllipse(box!.width / 2, box!.height / 2, box!.width / 2, box!.height / 2)
-      ..fillAndStrokePath()
-      ..restoreContext();
+    final canvas = context.canvas;
+
+    canvas.saveContext();
+
+    if (fillColor != null) {
+      canvas.setFillColor(fillColor!);
+    }
+    if (strokeColor != null) {
+      canvas.setStrokeColor(strokeColor);
+    }
+
+    canvas.setLineWidth(strokeWidth);
+
+    canvas.drawEllipse(
+        box!.width / 2, box!.height / 2, box!.width / 2, box!.height / 2);
+
+    if (strokeColor != null && fillColor != null) {
+      canvas.fillAndStrokePath();
+    } else if (strokeColor != null) {
+      canvas.strokePath();
+    } else {
+      canvas.fillPath();
+    }
+
+    canvas.restoreContext();
+  }
+}
+
+class Rectangle extends Widget {
+  Rectangle({this.fillColor, this.strokeColor, this.strokeWidth = 1.0});
+
+  final PdfColor? fillColor;
+  final PdfColor? strokeColor;
+  final double strokeWidth;
+
+  @override
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
+  }
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+
+    final canvas = context.canvas;
+
+    canvas.saveContext();
+
+    if (fillColor != null) {
+      canvas.setFillColor(fillColor!);
+    }
+    if (strokeColor != null) {
+      canvas.setStrokeColor(strokeColor);
+    }
+
+    canvas.setLineWidth(strokeWidth);
+
+    canvas.drawRect(0, 0, box!.width, box!.height);
+
+    if (strokeColor != null && fillColor != null) {
+      canvas.fillAndStrokePath();
+    } else if (strokeColor != null) {
+      canvas.strokePath();
+    } else {
+      canvas.fillPath();
+    }
+
+    canvas.restoreContext();
+  }
+}
+
+class Polygon extends Widget {
+  Polygon(
+      {required this.points,
+      this.fillColor,
+      this.strokeColor,
+      this.strokeWidth = 1.0,
+      this.close = true});
+
+  final List<PdfPoint> points;
+  final PdfColor? fillColor;
+  final PdfColor? strokeColor;
+  final double strokeWidth;
+  final bool close;
+
+  @override
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
+  }
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+
+    // Make sure there are enough points to draw anything
+    if (points.length < 3) {
+      return;
+    }
+
+    final canvas = context.canvas;
+
+    canvas.saveContext();
+
+    if (fillColor != null) {
+      canvas.setFillColor(fillColor!);
+    }
+    if (strokeColor != null) {
+      canvas.setStrokeColor(strokeColor);
+    }
+
+    canvas.setLineWidth(strokeWidth);
+
+    canvas.moveTo(points[0].x, points[0].y);
+    for (var i = 0; i < points.length; i++) {
+      canvas.lineTo(points[i].x, points[i].y);
+    }
+
+    if (close) {
+      canvas.closePath();
+    }
+
+    if (strokeColor != null && fillColor != null) {
+      canvas.fillAndStrokePath();
+    } else if (strokeColor != null) {
+      canvas.strokePath();
+    } else {
+      canvas.fillPath();
+    }
+
+    canvas.restoreContext();
+  }
+}
+
+class InkList extends Widget {
+  InkList({required this.points, this.strokeColor, this.strokeWidth = 1.0});
+
+  final List<List<PdfPoint>> points;
+  final PdfColor? strokeColor;
+  final double strokeWidth;
+
+  @override
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
+  }
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+
+    final canvas = context.canvas;
+
+    canvas.saveContext();
+
+    if (strokeColor != null) {
+      canvas.setStrokeColor(strokeColor);
+    }
+
+    canvas.setLineWidth(strokeWidth);
+
+    for (var subLineIndex = 0; subLineIndex < points.length; subLineIndex++) {
+      canvas.moveTo(points[subLineIndex][0].x, points[subLineIndex][0].y);
+      for (var i = 0; i < points[subLineIndex].length; i++) {
+        canvas.lineTo(points[subLineIndex][i].x, points[subLineIndex][i].y);
+      }
+    }
+
+    canvas.strokePath();
+
+    canvas.restoreContext();
   }
 }
