@@ -247,60 +247,6 @@ class AnnotationPolygon extends AnnotationBuilder {
   }
 }
 
-class AnnotationPolyLine extends AnnotationBuilder {
-  AnnotationPolyLine(
-    this.points, {
-    this.color,
-    this.border,
-    this.author,
-    this.date,
-    this.subject,
-    this.content,
-  });
-
-  final List<PdfPoint> points;
-
-  final PdfColor? color;
-
-  final PdfBorder? border;
-
-  final String? author;
-
-  final DateTime? date;
-
-  final String? subject;
-
-  final String? content;
-
-  @override
-  void build(Context context, PdfRect? box) {
-    final globalPoints =
-        points.map((e) => context.localToGlobalPoint(e)).toList();
-
-    final rect = context.localToGlobal(PdfRect(
-        points.map((point) => point.x).reduce(min),
-        points.map((point) => point.y).reduce(min),
-        points.map((point) => point.x).reduce(max) -
-            points.map((point) => point.x).reduce(min),
-        points.map((point) => point.y).reduce(max) -
-            points.map((point) => point.y).reduce(min)));
-
-    final pdfAnnotPolyLine = PdfAnnotPolyLine(
-      context.document,
-      globalPoints,
-      rect: rect,
-      border: border,
-      color: color,
-      date: date,
-      author: author,
-      subject: subject,
-      content: content,
-    );
-
-    PdfAnnot(context.page, pdfAnnotPolyLine);
-  }
-}
-
 class AnnotationInkList extends AnnotationBuilder {
   AnnotationInkList(
     this.points, {
@@ -478,6 +424,7 @@ class UrlLink extends Annotation {
 
 class SquareAnnotation extends Annotation {
   SquareAnnotation({
+    Widget? child,
     PdfColor? color,
     PdfColor? interiorColor,
     PdfBorder? border,
@@ -486,7 +433,7 @@ class SquareAnnotation extends Annotation {
     String? subject,
     String? content,
   }) : super(
-            child: Rectangle(
+            child: child ?? Rectangle(
                 fillColor: interiorColor,
                 strokeWidth: border?.width ?? 1.0,
                 strokeColor: color),
@@ -503,6 +450,7 @@ class SquareAnnotation extends Annotation {
 
 class CircleAnnotation extends Annotation {
   CircleAnnotation({
+    Widget? child,
     PdfColor? color,
     PdfColor? interiorColor,
     PdfBorder? border,
@@ -511,7 +459,7 @@ class CircleAnnotation extends Annotation {
     String? subject,
     String? content,
   }) : super(
-            child: Circle(
+            child: child ?? Circle(
                 fillColor: interiorColor,
                 strokeWidth: border?.width ?? 1.0,
                 strokeColor: color),
@@ -529,6 +477,7 @@ class CircleAnnotation extends Annotation {
 class PolygonAnnotation extends Annotation {
   PolygonAnnotation({
     required List<PdfPoint> points,
+    Widget? child,
     PdfColor? color,
     PdfColor? interiorColor,
     PdfBorder? border,
@@ -537,7 +486,7 @@ class PolygonAnnotation extends Annotation {
     String? subject,
     String? content,
   }) : super(
-            child: Polygon(
+            child: child ?? Polygon(
                 points: points,
                 strokeColor: color,
                 fillColor: interiorColor,
@@ -569,7 +518,7 @@ class PolyLineAnnotation extends Annotation {
                 strokeColor: color,
                 close: false,
                 strokeWidth: border?.width ?? 1.0),
-            builder: AnnotationPolyLine(
+            builder: AnnotationPolygon(
               points,
               color: color,
               border: border,
@@ -583,6 +532,7 @@ class PolyLineAnnotation extends Annotation {
 class InkAnnotation extends Annotation {
   InkAnnotation({
     required List<List<PdfPoint>> points,
+    Widget? child,
     PdfColor? color,
     PdfBorder? border,
     String? author,
@@ -590,7 +540,7 @@ class InkAnnotation extends Annotation {
     String? content,
     String? subject,
   }) : super(
-            child: InkList(
+            child: child ?? InkList(
                 points: points,
                 strokeColor: color,
                 strokeWidth: border?.width ?? 1.0),

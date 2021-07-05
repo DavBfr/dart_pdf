@@ -416,9 +416,10 @@ class PdfAnnotPolygon extends PdfAnnotBase {
       PdfColor? color,
       this.interiorColor,
       String? subject,
-      String? author,})
+      String? author,
+      bool closed = true})
       : super(
-            subtype: '/Polygon',
+            subtype: closed ? "/PolyLine" : '/Polygon',
             rect: rect,
             border: border,
             flags: flags,
@@ -451,49 +452,8 @@ class PdfAnnotPolygon extends PdfAnnotBase {
   }
 }
 
-class PdfAnnotPolyLine extends PdfAnnotBase {
-  /// Create an PolyLine annotation
-  PdfAnnotPolyLine(this.document, this.points,
-      {required PdfRect rect,
-      PdfBorder? border,
-      Set<PdfAnnotFlags>? flags,
-      DateTime? date,
-      PdfColor? color,
-      String? subject,
-      String? author,
-      String? content,})
-      : super(
-          subtype: '/PolyLine',
-          rect: rect,
-          border: border,
-          flags: flags,
-          date: date,
-          color: color,
-          subject: subject,
-          author: author,
-          content: content,
-        );
-
-  final PdfDocument document;
-
-  final List<PdfPoint> points;
-
-  @override
-  void build(PdfPage page, PdfObject object, PdfDict params) {
-    super.build(page, object, params);
-
-    final verticies = <num>[];
-    for (var i = 0; i < points.length; i++) {
-      verticies.add(points[i].x);
-      verticies.add(points[i].y);
-    }
-
-    params['/Vertices'] = PdfArray.fromNum(verticies);
-  }
-}
-
 class PdfAnnotInkList extends PdfAnnotBase {
-  /// Create an PolyLine annotation
+  /// Create an Ink List annotation
   PdfAnnotInkList(this.document, this.points,
       {required PdfRect rect,
       PdfBorder? border,
