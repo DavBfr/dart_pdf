@@ -106,7 +106,7 @@ class AnnotationUrl extends AnnotationBuilder {
           url: destination,
           date: date,
           author: author,
-          subject: subject),
+          subject: subject,),
     );
   }
 }
@@ -147,7 +147,7 @@ class AnnotationSquare extends AnnotationBuilder {
           interiorColor: interiorColor,
           date: date,
           author: author,
-          subject: subject),
+          subject: subject,),
     );
   }
 }
@@ -188,7 +188,7 @@ class AnnotationCircle extends AnnotationBuilder {
           interiorColor: interiorColor,
           date: date,
           author: author,
-          subject: subject),
+          subject: subject,),
     );
   }
 }
@@ -241,7 +241,7 @@ class AnnotationPolygon extends AnnotationBuilder {
         interiorColor: interiorColor,
         date: date,
         author: author,
-        subject: subject);
+        subject: subject,);
 
     PdfAnnot(context.page, pdfAnnotPolygon);
   }
@@ -288,7 +288,7 @@ class AnnotationInkList extends AnnotationBuilder {
     final maxX = allPoints.map((point) => point.x).reduce(max);
     final maxY = allPoints.map((point) => point.y).reduce(max);
     final rect =
-        context.localToGlobal(PdfRect(minX, minY, maxX - minX, maxY - maxX));
+        context.localToGlobal(PdfRect(minX, minY, maxX - minX, maxY - minY));
 
     final pdfAnnotInkList = PdfAnnotInkList(
       context.document,

@@ -269,7 +269,7 @@ class PdfAnnotText extends PdfAnnotBase {
             date: date,
             color: color,
             subject: subject,
-            author: author);
+            author: author,);
 }
 
 class PdfAnnotNamedLink extends PdfAnnotBase {
@@ -291,7 +291,7 @@ class PdfAnnotNamedLink extends PdfAnnotBase {
             date: date,
             color: color,
             subject: subject,
-            author: author);
+            author: author,);
 
   final String dest;
 
@@ -326,7 +326,7 @@ class PdfAnnotUrlLink extends PdfAnnotBase {
             date: date,
             color: color,
             subject: subject,
-            author: author);
+            author: author,);
 
   final String url;
 
@@ -361,7 +361,7 @@ class PdfAnnotSquare extends PdfAnnotBase {
             date: date,
             color: color,
             subject: subject,
-            author: author);
+            author: author,);
 
   final PdfColor? interiorColor;
 
@@ -393,7 +393,7 @@ class PdfAnnotCircle extends PdfAnnotBase {
             date: date,
             color: color,
             subject: subject,
-            author: author);
+            author: author,);
 
   final PdfColor? interiorColor;
 
@@ -419,14 +419,14 @@ class PdfAnnotPolygon extends PdfAnnotBase {
       String? author,
       bool closed = true})
       : super(
-            subtype: closed ? "/PolyLine" : '/Polygon',
+            subtype: closed ? '/PolyLine' : '/Polygon',
             rect: rect,
             border: border,
             flags: flags,
             date: date,
             color: color,
             subject: subject,
-            author: author);
+            author: author,);
 
   final PdfDocument document;
 
@@ -438,10 +438,13 @@ class PdfAnnotPolygon extends PdfAnnotBase {
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
 
+    // Flip the points on the Y axis.
+    final flippedPoints = points.map((e) => PdfPoint(e.x, rect.height - e.y)).toList();
+
     final verticies = <num>[];
-    for (var i = 0; i < points.length; i++) {
-      verticies.add(points[i].x);
-      verticies.add(points[i].y);
+    for (var i = 0; i < flippedPoints.length; i++) {
+      verticies.add(flippedPoints[i].x);
+      verticies.add(flippedPoints[i].y);
     }
 
     params['/Vertices'] = PdfArray.fromNum(verticies);
@@ -485,9 +488,11 @@ class PdfAnnotInkList extends PdfAnnotBase {
 
     final verticies = List<List<num>>.filled(points.length, <num>[]);
     for (var listIndex = 0; listIndex < points.length; listIndex++) {
-      for (var i = 0; i < points[listIndex].length; i++) {
-        verticies[listIndex].add(points[listIndex][i].x);
-        verticies[listIndex].add(points[listIndex][i].y);
+        // Flip the points on the Y axis.
+        final flippedPoints = points[listIndex].map((e) => PdfPoint(e.x, rect.height - e.y)).toList();
+      for (var i = 0; i < flippedPoints.length; i++) {
+        verticies[listIndex].add(flippedPoints[i].x);
+        verticies[listIndex].add(flippedPoints[i].y);
       }
     }
 
@@ -520,7 +525,7 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
             date: date,
             color: color,
             subject: subject,
-            author: author);
+            author: author,);
 
   final String fieldType;
 

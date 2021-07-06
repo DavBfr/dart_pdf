@@ -151,9 +151,12 @@ class Polygon extends Widget {
 
     canvas.setLineWidth(strokeWidth);
 
-    canvas.moveTo(points[0].x, points[0].y);
-    for (var i = 0; i < points.length; i++) {
-      canvas.lineTo(points[i].x, points[i].y);
+    // Flip the points on the Y axis.
+    final flippedPoints = points.map((e) => PdfPoint(e.x, box!.height - e.y)).toList();
+
+    canvas.moveTo(flippedPoints[0].x, flippedPoints[0].y);
+    for (var i = 0; i < flippedPoints.length; i++) {
+      canvas.lineTo(flippedPoints[i].x, flippedPoints[i].y);
     }
 
     if (close) {
@@ -199,10 +202,13 @@ class InkList extends Widget {
 
     canvas.setLineWidth(strokeWidth);
 
+    // Flip the points on the Y axis.
+
     for (var subLineIndex = 0; subLineIndex < points.length; subLineIndex++) {
-      canvas.moveTo(points[subLineIndex][0].x, points[subLineIndex][0].y);
-      for (var i = 0; i < points[subLineIndex].length; i++) {
-        canvas.lineTo(points[subLineIndex][i].x, points[subLineIndex][i].y);
+      final flippedPoints = points[subLineIndex].map((e) => PdfPoint(e.x, box!.height - e.y)).toList();
+      canvas.moveTo(flippedPoints[0].x, flippedPoints[0].y);
+      for (var i = 0; i < flippedPoints.length; i++) {
+        canvas.lineTo(flippedPoints[i].x, flippedPoints[i].y);
       }
     }
 
