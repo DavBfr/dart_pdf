@@ -59,6 +59,7 @@ class PdfPreview extends StatefulWidget {
     this.previewPageMargin,
     this.padding,
     this.shouldRepaint = false,
+    this.loadingWidget,
   }) : super(key: key);
 
   static const _defaultPageFormats = <String, PdfPageFormat>{
@@ -149,6 +150,10 @@ class PdfPreview extends StatefulWidget {
 
   /// Force repainting the PDF document
   final bool shouldRepaint;
+
+  /// Custom loading widget to use that is shown while PDF is being generated.
+  /// If null, a [CircularProgressIndicator] is used instead.
+  final Widget? loadingWidget;
 
   @override
   _PdfPreviewState createState() => _PdfPreviewState();
@@ -287,7 +292,10 @@ class _PdfPreviewState extends State<PdfPreview> with PdfPreviewRaster {
     }
 
     if (pages.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return widget.loadingWidget ??
+          const Center(
+            child: CircularProgressIndicator(),
+          );
     }
 
     return ListView.builder(
