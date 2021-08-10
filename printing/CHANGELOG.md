@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.5.0
+
+- Add custom loading widget to PdfPreview widget
+
 ## 5.4.3
 
 - Update Pdfium libraries
