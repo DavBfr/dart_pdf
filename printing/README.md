@@ -143,7 +143,7 @@ PdfPreview(
 );
 ```
 
-This widget is compatible with Android, iOS, macOS, Linau, Windows and web.
+This widget is compatible with Android, iOS, macOS, Linux, Windows and web.
 
 ## Designing your PDF document
 

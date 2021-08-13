@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.5.1
+
+- Fix typo in README.
+
 ## 5.5.0
 
 - Add custom loading widget to PdfPreview widget

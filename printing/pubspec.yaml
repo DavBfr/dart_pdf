@@ -7,7 +7,7 @@ description: >
 homepage: https://github.com/DavBfr/dart_pdf/tree/master/printing
 repository: https://github.com/DavBfr/dart_pdf
 issue_tracker: https://github.com/DavBfr/dart_pdf/issues
-version: 5.5.0
+version: 5.5.1
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
