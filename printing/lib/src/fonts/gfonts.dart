@@ -226,7 +226,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Akaya Telivigala regular
   static Future<Font> akayaTelivigalaRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/akayatelivigala/v9/lJwc-oo_iG9wXqU3rCTD395tp0uifdLdsIH0YH8.ttf',
+      'https://fonts.gstatic.com/s/akayatelivigala/v13/lJwc-oo_iG9wXqU3rCTD395tp0uifdLdsIH0YH8.ttf',
       'AkayaTelivigala-Regular',
     );
     return font.getFont();
@@ -802,7 +802,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Alex Brush regular
   static Future<Font> alexBrushRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/alexbrush/v12/SZc83FzrJKuqFbwMKk6EtUL57DtOmCc.ttf',
+      'https://fonts.gstatic.com/s/alexbrush/v13/SZc83FzrJKuqFbwMKk6EtUL57DtOmCc.ttf',
       'AlexBrush-Regular',
     );
     return font.getFont();
@@ -880,10 +880,19 @@ class PdfGoogleFonts extends DownloadbleFont {
     return font.getFont();
   }
 
+  /// Allison regular
+  static Future<Font> allisonRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/allison/v1/X7nl4b88AP2nkbvZOCaQ4MTgAgk.ttf',
+      'Allison-Regular',
+    );
+    return font.getFont();
+  }
+
   /// Allura regular
   static Future<Font> alluraRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/allura/v9/9oRPNYsQpS4zjuAPjAIXPtrrGA.ttf',
+      'https://fonts.gstatic.com/s/allura/v10/9oRPNYsQpS4zjuAPjAIXPtrrGA.ttf',
       'Allura-Regular',
     );
     return font.getFont();
@@ -975,6 +984,168 @@ class PdfGoogleFonts extends DownloadbleFont {
     const font = PdfGoogleFonts._(
       'https://fonts.gstatic.com/s/almendrasc/v13/Iure6Yx284eebowr7hbyTZZJprVA4XQ0.ttf',
       'AlmendraSC-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 100
+  static Future<Font> alumniSansThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpHtKqkOwdO2aOIwhWudEWpx_zq_Xna-Xd9OO5QqFsJ3C8qng.ttf',
+      'AlumniSans-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 200
+  static Future<Font> alumniSansExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpHtKqkOwdO2aOIwhWudEWpx_zq_Xna-Xd9uO9QqFsJ3C8qng.ttf',
+      'AlumniSans-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 300
+  static Future<Font> alumniSansLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpHtKqkOwdO2aOIwhWudEWpx_zq_Xna-Xd9Zu9QqFsJ3C8qng.ttf',
+      'AlumniSans-Light',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans regular
+  static Future<Font> alumniSansRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpHtKqkOwdO2aOIwhWudEWpx_zq_Xna-Xd9OO9QqFsJ3C8qng.ttf',
+      'AlumniSans-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 500
+  static Future<Font> alumniSansMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpHtKqkOwdO2aOIwhWudEWpx_zq_Xna-Xd9Cu9QqFsJ3C8qng.ttf',
+      'AlumniSans-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 600
+  static Future<Font> alumniSansSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpHtKqkOwdO2aOIwhWudEWpx_zq_Xna-Xd95uhQqFsJ3C8qng.ttf',
+      'AlumniSans-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 700
+  static Future<Font> alumniSansBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpHtKqkOwdO2aOIwhWudEWpx_zq_Xna-Xd93-hQqFsJ3C8qng.ttf',
+      'AlumniSans-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 800
+  static Future<Font> alumniSansExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpHtKqkOwdO2aOIwhWudEWpx_zq_Xna-Xd9uOhQqFsJ3C8qng.ttf',
+      'AlumniSans-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 900
+  static Future<Font> alumniSansBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpHtKqkOwdO2aOIwhWudEWpx_zq_Xna-Xd9kehQqFsJ3C8qng.ttf',
+      'AlumniSans-Black',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 100italic
+  static Future<Font> alumniSansThinItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpBtKqkOwdO2aOIwhWudG-g9QMylBJAV3Bo8Ky46lEN_io6npfB.ttf',
+      'AlumniSans-ThinItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 200italic
+  static Future<Font> alumniSansExtraLightItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpBtKqkOwdO2aOIwhWudG-g9QMylBJAV3Bo8Kw461EN_io6npfB.ttf',
+      'AlumniSans-ExtraLightItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 300italic
+  static Future<Font> alumniSansLightItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpBtKqkOwdO2aOIwhWudG-g9QMylBJAV3Bo8Kzm61EN_io6npfB.ttf',
+      'AlumniSans-LightItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans italic
+  static Future<Font> alumniSansItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpBtKqkOwdO2aOIwhWudG-g9QMylBJAV3Bo8Ky461EN_io6npfB.ttf',
+      'AlumniSans-Italic',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 500italic
+  static Future<Font> alumniSansMediumItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpBtKqkOwdO2aOIwhWudG-g9QMylBJAV3Bo8KyK61EN_io6npfB.ttf',
+      'AlumniSans-MediumItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 600italic
+  static Future<Font> alumniSansSemiBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpBtKqkOwdO2aOIwhWudG-g9QMylBJAV3Bo8Kxm7FEN_io6npfB.ttf',
+      'AlumniSans-SemiBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 700italic
+  static Future<Font> alumniSansBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpBtKqkOwdO2aOIwhWudG-g9QMylBJAV3Bo8Kxf7FEN_io6npfB.ttf',
+      'AlumniSans-BoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 800italic
+  static Future<Font> alumniSansExtraBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpBtKqkOwdO2aOIwhWudG-g9QMylBJAV3Bo8Kw47FEN_io6npfB.ttf',
+      'AlumniSans-ExtraBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Alumni Sans 900italic
+  static Future<Font> alumniSansBlackItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/alumnisans/v1/nwpBtKqkOwdO2aOIwhWudG-g9QMylBJAV3Bo8KwR7FEN_io6npfB.ttf',
+      'AlumniSans-BlackItalic',
     );
     return font.getFont();
   }
@@ -1146,6 +1317,96 @@ class PdfGoogleFonts extends DownloadbleFont {
     const font = PdfGoogleFonts._(
       'https://fonts.gstatic.com/s/andada/v12/uK_y4riWaego3w9RCh0TMv6EXw.ttf',
       'Andada-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Andada Pro regular
+  static Future<Font> andadaProRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/andadapro/v1/HhyEU5Qi9-SuOEhPe4LtKoVCuWGURPcg3DPJBY8cFLzvIt2S.ttf',
+      'AndadaPro-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Andada Pro 500
+  static Future<Font> andadaProMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/andadapro/v1/HhyEU5Qi9-SuOEhPe4LtKoVCuWGURPcg3DP7BY8cFLzvIt2S.ttf',
+      'AndadaPro-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Andada Pro 600
+  static Future<Font> andadaProSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/andadapro/v1/HhyEU5Qi9-SuOEhPe4LtKoVCuWGURPcg3DMXAo8cFLzvIt2S.ttf',
+      'AndadaPro-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Andada Pro 700
+  static Future<Font> andadaProBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/andadapro/v1/HhyEU5Qi9-SuOEhPe4LtKoVCuWGURPcg3DMuAo8cFLzvIt2S.ttf',
+      'AndadaPro-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Andada Pro 800
+  static Future<Font> andadaProExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/andadapro/v1/HhyEU5Qi9-SuOEhPe4LtKoVCuWGURPcg3DNJAo8cFLzvIt2S.ttf',
+      'AndadaPro-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Andada Pro italic
+  static Future<Font> andadaProItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/andadapro/v1/HhyGU5Qi9-SuOEhPe4LtAIxwRrn9L22O2yYBRmdfHrjNJ82Stjw.ttf',
+      'AndadaPro-Italic',
+    );
+    return font.getFont();
+  }
+
+  /// Andada Pro 500italic
+  static Future<Font> andadaProMediumItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/andadapro/v1/HhyGU5Qi9-SuOEhPe4LtAIxwRrn9L22O2yYBRlVfHrjNJ82Stjw.ttf',
+      'AndadaPro-MediumItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Andada Pro 600italic
+  static Future<Font> andadaProSemiBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/andadapro/v1/HhyGU5Qi9-SuOEhPe4LtAIxwRrn9L22O2yYBRrlYHrjNJ82Stjw.ttf',
+      'AndadaPro-SemiBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Andada Pro 700italic
+  static Future<Font> andadaProBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/andadapro/v1/HhyGU5Qi9-SuOEhPe4LtAIxwRrn9L22O2yYBRoBYHrjNJ82Stjw.ttf',
+      'AndadaPro-BoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Andada Pro 800italic
+  static Future<Font> andadaProExtraBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/andadapro/v1/HhyGU5Qi9-SuOEhPe4LtAIxwRrn9L22O2yYBRudYHrjNJ82Stjw.ttf',
+      'AndadaPro-ExtraBoldItalic',
     );
     return font.getFont();
   }
@@ -1396,7 +1657,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 100
   static Future<Font> archivoThin() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTTNDJp8B1oJ0vyVQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTTNDJp8B1oJ0vyVQ.ttf',
       'Archivo-Thin',
     );
     return font.getFont();
@@ -1405,7 +1666,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 200
   static Future<Font> archivoExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTTtDNp8B1oJ0vyVQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTTtDNp8B1oJ0vyVQ.ttf',
       'Archivo-ExtraLight',
     );
     return font.getFont();
@@ -1414,7 +1675,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 300
   static Future<Font> archivoLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTTajNp8B1oJ0vyVQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTTajNp8B1oJ0vyVQ.ttf',
       'Archivo-Light',
     );
     return font.getFont();
@@ -1423,7 +1684,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo regular
   static Future<Font> archivoRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTTNDNp8B1oJ0vyVQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTTNDNp8B1oJ0vyVQ.ttf',
       'Archivo-Regular',
     );
     return font.getFont();
@@ -1432,7 +1693,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 500
   static Future<Font> archivoMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTTBjNp8B1oJ0vyVQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTTBjNp8B1oJ0vyVQ.ttf',
       'Archivo-Medium',
     );
     return font.getFont();
@@ -1441,7 +1702,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 600
   static Future<Font> archivoSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTT6jRp8B1oJ0vyVQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTT6jRp8B1oJ0vyVQ.ttf',
       'Archivo-SemiBold',
     );
     return font.getFont();
@@ -1450,7 +1711,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 700
   static Future<Font> archivoBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTT0zRp8B1oJ0vyVQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTT0zRp8B1oJ0vyVQ.ttf',
       'Archivo-Bold',
     );
     return font.getFont();
@@ -1459,7 +1720,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 800
   static Future<Font> archivoExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTTtDRp8B1oJ0vyVQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTTtDRp8B1oJ0vyVQ.ttf',
       'Archivo-ExtraBold',
     );
     return font.getFont();
@@ -1468,7 +1729,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 900
   static Future<Font> archivoBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTTnTRp8B1oJ0vyVQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k6o8UDI-1M0wlSV9XAw6lQkqWY8Q82sJaRE-NWIDdgffTTnTRp8B1oJ0vyVQ.ttf',
       'Archivo-Black',
     );
     return font.getFont();
@@ -1477,7 +1738,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 100italic
   static Future<Font> archivoThinItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HCBshdsBU7iVdxQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HCBshdsBU7iVdxQ.ttf',
       'Archivo-ThinItalic',
     );
     return font.getFont();
@@ -1486,7 +1747,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 200italic
   static Future<Font> archivoExtraLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HABsxdsBU7iVdxQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HABsxdsBU7iVdxQ.ttf',
       'Archivo-ExtraLightItalic',
     );
     return font.getFont();
@@ -1495,7 +1756,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 300italic
   static Future<Font> archivoLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HDfsxdsBU7iVdxQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HDfsxdsBU7iVdxQ.ttf',
       'Archivo-LightItalic',
     );
     return font.getFont();
@@ -1504,7 +1765,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo italic
   static Future<Font> archivoItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HCBsxdsBU7iVdxQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HCBsxdsBU7iVdxQ.ttf',
       'Archivo-Italic',
     );
     return font.getFont();
@@ -1513,7 +1774,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 500italic
   static Future<Font> archivoMediumItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HCzsxdsBU7iVdxQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HCzsxdsBU7iVdxQ.ttf',
       'Archivo-MediumItalic',
     );
     return font.getFont();
@@ -1522,7 +1783,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 600italic
   static Future<Font> archivoSemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HBftBdsBU7iVdxQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HBftBdsBU7iVdxQ.ttf',
       'Archivo-SemiBoldItalic',
     );
     return font.getFont();
@@ -1531,7 +1792,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 700italic
   static Future<Font> archivoBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HBmtBdsBU7iVdxQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HBmtBdsBU7iVdxQ.ttf',
       'Archivo-BoldItalic',
     );
     return font.getFont();
@@ -1540,7 +1801,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 800italic
   static Future<Font> archivoExtraBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HABtBdsBU7iVdxQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HABtBdsBU7iVdxQ.ttf',
       'Archivo-ExtraBoldItalic',
     );
     return font.getFont();
@@ -1549,7 +1810,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Archivo 900italic
   static Future<Font> archivoBlackItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/archivo/v8/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HAotBdsBU7iVdxQ.ttf',
+      'https://fonts.gstatic.com/s/archivo/v9/k3k8o8UDI-1M0wlSfdzyIEkpwTM29hr-8mTYIRyOSVz60_PG_HAotBdsBU7iVdxQ.ttf',
       'Archivo-BlackItalic',
     );
     return font.getFont();
@@ -1639,7 +1900,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Aref Ruqaa regular
   static Future<Font> arefRuqaaRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/arefruqaa/v15/WwkbxPW1E165rajQKDulEIAiVNo5xNY.ttf',
+      'https://fonts.gstatic.com/s/arefruqaa/v16/WwkbxPW1E165rajQKDulEIAiVNo5xNY.ttf',
       'ArefRuqaa-Regular',
     );
     return font.getFont();
@@ -1648,7 +1909,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Aref Ruqaa 700
   static Future<Font> arefRuqaaBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/arefruqaa/v15/WwkYxPW1E165rajQKDulKDwNcNIS2N_7Bdk.ttf',
+      'https://fonts.gstatic.com/s/arefruqaa/v16/WwkYxPW1E165rajQKDulKDwNcNIS2N_7Bdk.ttf',
       'ArefRuqaa-Bold',
     );
     return font.getFont();
@@ -2080,7 +2341,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Assistant 200
   static Future<Font> assistantExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/assistant/v7/2sDPZGJYnIjSi6H75xkZZE1I0yCmYzzQtmZnEGGf3qGuvM4.ttf',
+      'https://fonts.gstatic.com/s/assistant/v8/2sDPZGJYnIjSi6H75xkZZE1I0yCmYzzQtmZnEGGf3qGuvM4.ttf',
       'Assistant-ExtraLight',
     );
     return font.getFont();
@@ -2089,7 +2350,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Assistant 300
   static Future<Font> assistantLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/assistant/v7/2sDPZGJYnIjSi6H75xkZZE1I0yCmYzzQtrhnEGGf3qGuvM4.ttf',
+      'https://fonts.gstatic.com/s/assistant/v8/2sDPZGJYnIjSi6H75xkZZE1I0yCmYzzQtrhnEGGf3qGuvM4.ttf',
       'Assistant-Light',
     );
     return font.getFont();
@@ -2098,7 +2359,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Assistant regular
   static Future<Font> assistantRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/assistant/v7/2sDPZGJYnIjSi6H75xkZZE1I0yCmYzzQtuZnEGGf3qGuvM4.ttf',
+      'https://fonts.gstatic.com/s/assistant/v8/2sDPZGJYnIjSi6H75xkZZE1I0yCmYzzQtuZnEGGf3qGuvM4.ttf',
       'Assistant-Regular',
     );
     return font.getFont();
@@ -2107,7 +2368,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Assistant 500
   static Future<Font> assistantMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/assistant/v7/2sDPZGJYnIjSi6H75xkZZE1I0yCmYzzQttRnEGGf3qGuvM4.ttf',
+      'https://fonts.gstatic.com/s/assistant/v8/2sDPZGJYnIjSi6H75xkZZE1I0yCmYzzQttRnEGGf3qGuvM4.ttf',
       'Assistant-Medium',
     );
     return font.getFont();
@@ -2116,7 +2377,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Assistant 600
   static Future<Font> assistantSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/assistant/v7/2sDPZGJYnIjSi6H75xkZZE1I0yCmYzzQtjhgEGGf3qGuvM4.ttf',
+      'https://fonts.gstatic.com/s/assistant/v8/2sDPZGJYnIjSi6H75xkZZE1I0yCmYzzQtjhgEGGf3qGuvM4.ttf',
       'Assistant-SemiBold',
     );
     return font.getFont();
@@ -2125,7 +2386,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Assistant 700
   static Future<Font> assistantBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/assistant/v7/2sDPZGJYnIjSi6H75xkZZE1I0yCmYzzQtgFgEGGf3qGuvM4.ttf',
+      'https://fonts.gstatic.com/s/assistant/v8/2sDPZGJYnIjSi6H75xkZZE1I0yCmYzzQtgFgEGGf3qGuvM4.ttf',
       'Assistant-Bold',
     );
     return font.getFont();
@@ -2134,7 +2395,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Assistant 800
   static Future<Font> assistantExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/assistant/v7/2sDPZGJYnIjSi6H75xkZZE1I0yCmYzzQtmZgEGGf3qGuvM4.ttf',
+      'https://fonts.gstatic.com/s/assistant/v8/2sDPZGJYnIjSi6H75xkZZE1I0yCmYzzQtmZgEGGf3qGuvM4.ttf',
       'Assistant-ExtraBold',
     );
     return font.getFont();
@@ -2226,6 +2487,42 @@ class PdfGoogleFonts extends DownloadbleFont {
     const font = PdfGoogleFonts._(
       'https://fonts.gstatic.com/s/athiti/v5/pe0sMISdLIZIv1wAsDdyAv2-C99ycg.ttf',
       'Athiti-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Atkinson Hyperlegible regular
+  static Future<Font> atkinsonHyperlegibleRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/atkinsonhyperlegible/v1/9Bt23C1KxNDXMspQ1lPyU89-1h6ONRlW45GE5ZgpewSSbQ.ttf',
+      'AtkinsonHyperlegible-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Atkinson Hyperlegible italic
+  static Future<Font> atkinsonHyperlegibleItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/atkinsonhyperlegible/v1/9Bt43C1KxNDXMspQ1lPyU89-1h6ONRlW45G055ItWQGCbUWn.ttf',
+      'AtkinsonHyperlegible-Italic',
+    );
+    return font.getFont();
+  }
+
+  /// Atkinson Hyperlegible 700
+  static Future<Font> atkinsonHyperlegibleBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/atkinsonhyperlegible/v1/9Bt73C1KxNDXMspQ1lPyU89-1h6ONRlW45G8WbcNcy-OZFy-FA.ttf',
+      'AtkinsonHyperlegible-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Atkinson Hyperlegible 700italic
+  static Future<Font> atkinsonHyperlegibleBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/atkinsonhyperlegible/v1/9Bt93C1KxNDXMspQ1lPyU89-1h6ONRlW45G056qRdiWKRlmuFH24.ttf',
+      'AtkinsonHyperlegible-BoldItalic',
     );
     return font.getFont();
   }
@@ -2496,6 +2793,168 @@ class PdfGoogleFonts extends DownloadbleFont {
     const font = PdfGoogleFonts._(
       'https://fonts.gstatic.com/s/averiaseriflibre/v10/neIbzD2ms4wxr6GvjeD0X88SHPyX2xYOpzM2xK0uVLe_bXHq.ttf',
       'AveriaSerifLibre-BoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 100
+  static Future<Font> azeretMonoThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF5ErsiyJsY9O_Gepph-FvtTQgMQUdNekSfnPRh0raa-5s3AA.ttf',
+      'AzeretMono-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 200
+  static Future<Font> azeretMonoExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF5ErsiyJsY9O_Gepph-FvtTQgMQUdNekSfHPVh0raa-5s3AA.ttf',
+      'AzeretMono-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 300
+  static Future<Font> azeretMonoLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF5ErsiyJsY9O_Gepph-FvtTQgMQUdNekSfwvVh0raa-5s3AA.ttf',
+      'AzeretMono-Light',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono regular
+  static Future<Font> azeretMonoRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF5ErsiyJsY9O_Gepph-FvtTQgMQUdNekSfnPVh0raa-5s3AA.ttf',
+      'AzeretMono-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 500
+  static Future<Font> azeretMonoMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF5ErsiyJsY9O_Gepph-FvtTQgMQUdNekSfrvVh0raa-5s3AA.ttf',
+      'AzeretMono-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 600
+  static Future<Font> azeretMonoSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF5ErsiyJsY9O_Gepph-FvtTQgMQUdNekSfQvJh0raa-5s3AA.ttf',
+      'AzeretMono-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 700
+  static Future<Font> azeretMonoBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF5ErsiyJsY9O_Gepph-FvtTQgMQUdNekSfe_Jh0raa-5s3AA.ttf',
+      'AzeretMono-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 800
+  static Future<Font> azeretMonoExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF5ErsiyJsY9O_Gepph-FvtTQgMQUdNekSfHPJh0raa-5s3AA.ttf',
+      'AzeretMono-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 900
+  static Future<Font> azeretMonoBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF5ErsiyJsY9O_Gepph-FvtTQgMQUdNekSfNfJh0raa-5s3AA.ttf',
+      'AzeretMono-Black',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 100italic
+  static Future<Font> azeretMonoThinItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF_ErsiyJsY9O_Gepph-HHkf_fUKCzX1EOKVLaJkLye2Z4nAN7J.ttf',
+      'AzeretMono-ThinItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 200italic
+  static Future<Font> azeretMonoExtraLightItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF_ErsiyJsY9O_Gepph-HHkf_fUKCzX1EOKVLYJkbye2Z4nAN7J.ttf',
+      'AzeretMono-ExtraLightItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 300italic
+  static Future<Font> azeretMonoLightItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF_ErsiyJsY9O_Gepph-HHkf_fUKCzX1EOKVLbXkbye2Z4nAN7J.ttf',
+      'AzeretMono-LightItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono italic
+  static Future<Font> azeretMonoItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF_ErsiyJsY9O_Gepph-HHkf_fUKCzX1EOKVLaJkbye2Z4nAN7J.ttf',
+      'AzeretMono-Italic',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 500italic
+  static Future<Font> azeretMonoMediumItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF_ErsiyJsY9O_Gepph-HHkf_fUKCzX1EOKVLa7kbye2Z4nAN7J.ttf',
+      'AzeretMono-MediumItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 600italic
+  static Future<Font> azeretMonoSemiBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF_ErsiyJsY9O_Gepph-HHkf_fUKCzX1EOKVLZXlrye2Z4nAN7J.ttf',
+      'AzeretMono-SemiBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 700italic
+  static Future<Font> azeretMonoBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF_ErsiyJsY9O_Gepph-HHkf_fUKCzX1EOKVLZulrye2Z4nAN7J.ttf',
+      'AzeretMono-BoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 800italic
+  static Future<Font> azeretMonoExtraBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF_ErsiyJsY9O_Gepph-HHkf_fUKCzX1EOKVLYJlrye2Z4nAN7J.ttf',
+      'AzeretMono-ExtraBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Azeret Mono 900italic
+  static Future<Font> azeretMonoBlackItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/azeretmono/v1/3XF_ErsiyJsY9O_Gepph-HHkf_fUKCzX1EOKVLYglrye2Z4nAN7J.ttf',
+      'AzeretMono-BlackItalic',
     );
     return font.getFont();
   }
@@ -3502,7 +3961,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 100
   static Future<Font> barlowSemiCondensedThin() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlphgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRfG4qvKk8ogoSP.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlphgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRfG4qvKk8ogoSP.ttf',
       'BarlowSemiCondensed-Thin',
     );
     return font.getFont();
@@ -3511,7 +3970,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 100italic
   static Future<Font> barlowSemiCondensedThinItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpjgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbLLIEsKh5SPZWs.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpjgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbLLIEsKh5SPZWs.ttf',
       'BarlowSemiCondensed-ThinItalic',
     );
     return font.getFont();
@@ -3520,7 +3979,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 200
   static Future<Font> barlowSemiCondensedExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpigxjLBV1hqnzfr-F8sEYMB0Yybp0mudRft6uPAGEki52WfA.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpigxjLBV1hqnzfr-F8sEYMB0Yybp0mudRft6uPAGEki52WfA.ttf',
       'BarlowSemiCondensed-ExtraLight',
     );
     return font.getFont();
@@ -3529,7 +3988,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 200italic
   static Future<Font> barlowSemiCondensedExtraLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpkgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbJnAWsgqZiGfHK5.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpkgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbJnAWsgqZiGfHK5.ttf',
       'BarlowSemiCondensed-ExtraLightItalic',
     );
     return font.getFont();
@@ -3538,7 +3997,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 300
   static Future<Font> barlowSemiCondensedLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpigxjLBV1hqnzfr-F8sEYMB0Yybp0mudRf06iPAGEki52WfA.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpigxjLBV1hqnzfr-F8sEYMB0Yybp0mudRf06iPAGEki52WfA.ttf',
       'BarlowSemiCondensed-Light',
     );
     return font.getFont();
@@ -3547,7 +4006,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 300italic
   static Future<Font> barlowSemiCondensedLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpkgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbIDAmsgqZiGfHK5.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpkgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbIDAmsgqZiGfHK5.ttf',
       'BarlowSemiCondensed-LightItalic',
     );
     return font.getFont();
@@ -3556,7 +4015,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed regular
   static Future<Font> barlowSemiCondensedRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpvgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRnf4CrCEo4gg.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpvgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRnf4CrCEo4gg.ttf',
       'BarlowSemiCondensed-Regular',
     );
     return font.getFont();
@@ -3565,7 +4024,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed italic
   static Future<Font> barlowSemiCondensedItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlphgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfYqvKk8ogoSP.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlphgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfYqvKk8ogoSP.ttf',
       'BarlowSemiCondensed-Italic',
     );
     return font.getFont();
@@ -3574,7 +4033,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 500
   static Future<Font> barlowSemiCondensedMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpigxjLBV1hqnzfr-F8sEYMB0Yybp0mudRfi6mPAGEki52WfA.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpigxjLBV1hqnzfr-F8sEYMB0Yybp0mudRfi6mPAGEki52WfA.ttf',
       'BarlowSemiCondensed-Medium',
     );
     return font.getFont();
@@ -3583,7 +4042,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 500italic
   static Future<Font> barlowSemiCondensedMediumItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpkgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbJbA2sgqZiGfHK5.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpkgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbJbA2sgqZiGfHK5.ttf',
       'BarlowSemiCondensed-MediumItalic',
     );
     return font.getFont();
@@ -3592,7 +4051,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 600
   static Future<Font> barlowSemiCondensedSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpigxjLBV1hqnzfr-F8sEYMB0Yybp0mudRfp66PAGEki52WfA.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpigxjLBV1hqnzfr-F8sEYMB0Yybp0mudRfp66PAGEki52WfA.ttf',
       'BarlowSemiCondensed-SemiBold',
     );
     return font.getFont();
@@ -3601,7 +4060,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 600italic
   static Future<Font> barlowSemiCondensedSemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpkgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbJ3BGsgqZiGfHK5.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpkgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbJ3BGsgqZiGfHK5.ttf',
       'BarlowSemiCondensed-SemiBoldItalic',
     );
     return font.getFont();
@@ -3610,7 +4069,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 700
   static Future<Font> barlowSemiCondensedBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpigxjLBV1hqnzfr-F8sEYMB0Yybp0mudRfw6-PAGEki52WfA.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpigxjLBV1hqnzfr-F8sEYMB0Yybp0mudRfw6-PAGEki52WfA.ttf',
       'BarlowSemiCondensed-Bold',
     );
     return font.getFont();
@@ -3619,7 +4078,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 700italic
   static Future<Font> barlowSemiCondensedBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpkgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbITBWsgqZiGfHK5.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpkgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbITBWsgqZiGfHK5.ttf',
       'BarlowSemiCondensed-BoldItalic',
     );
     return font.getFont();
@@ -3628,7 +4087,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 800
   static Future<Font> barlowSemiCondensedExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpigxjLBV1hqnzfr-F8sEYMB0Yybp0mudRf36yPAGEki52WfA.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpigxjLBV1hqnzfr-F8sEYMB0Yybp0mudRf36yPAGEki52WfA.ttf',
       'BarlowSemiCondensed-ExtraBold',
     );
     return font.getFont();
@@ -3637,7 +4096,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 800italic
   static Future<Font> barlowSemiCondensedExtraBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpkgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbIPBmsgqZiGfHK5.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpkgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbIPBmsgqZiGfHK5.ttf',
       'BarlowSemiCondensed-ExtraBoldItalic',
     );
     return font.getFont();
@@ -3646,7 +4105,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 900
   static Future<Font> barlowSemiCondensedBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpigxjLBV1hqnzfr-F8sEYMB0Yybp0mudRf-62PAGEki52WfA.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpigxjLBV1hqnzfr-F8sEYMB0Yybp0mudRf-62PAGEki52WfA.ttf',
       'BarlowSemiCondensed-Black',
     );
     return font.getFont();
@@ -3655,7 +4114,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Barlow Semi Condensed 900italic
   static Future<Font> barlowSemiCondensedBlackItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/barlowsemicondensed/v6/wlpkgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbIrB2sgqZiGfHK5.ttf',
+      'https://fonts.gstatic.com/s/barlowsemicondensed/v7/wlpkgxjLBV1hqnzfr-F8sEYMB0Yybp0mudRXfbIrB2sgqZiGfHK5.ttf',
       'BarlowSemiCondensed-BlackItalic',
     );
     return font.getFont();
@@ -4062,6 +4521,114 @@ class PdfGoogleFonts extends DownloadbleFont {
     const font = PdfGoogleFonts._(
       'https://fonts.gstatic.com/s/berkshireswash/v9/ptRRTi-cavZOGqCvnNJDl5m5XmNPrcQybX4pQA.ttf',
       'BerkshireSwash-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Besley regular
+  static Future<Font> besleyRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/besley/v1/PlIhFlO1MaNwaNGWUC92IOH_mtG4fbbBSdRoFPOl8-E.ttf',
+      'Besley-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Besley 500
+  static Future<Font> besleyMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/besley/v1/PlIhFlO1MaNwaNGWUC92IOH_mtG4fYTBSdRoFPOl8-E.ttf',
+      'Besley-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Besley 600
+  static Future<Font> besleySemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/besley/v1/PlIhFlO1MaNwaNGWUC92IOH_mtG4fWjGSdRoFPOl8-E.ttf',
+      'Besley-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Besley 700
+  static Future<Font> besleyBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/besley/v1/PlIhFlO1MaNwaNGWUC92IOH_mtG4fVHGSdRoFPOl8-E.ttf',
+      'Besley-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Besley 800
+  static Future<Font> besleyExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/besley/v1/PlIhFlO1MaNwaNGWUC92IOH_mtG4fTbGSdRoFPOl8-E.ttf',
+      'Besley-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Besley 900
+  static Future<Font> besleyBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/besley/v1/PlIhFlO1MaNwaNGWUC92IOH_mtG4fR_GSdRoFPOl8-E.ttf',
+      'Besley-Black',
+    );
+    return font.getFont();
+  }
+
+  /// Besley italic
+  static Future<Font> besleyItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/besley/v1/PlIjFlO1MaNwaNG8WR2J-IiUAH-_aH6CoZdiENGg4-E04A.ttf',
+      'Besley-Italic',
+    );
+    return font.getFont();
+  }
+
+  /// Besley 500italic
+  static Future<Font> besleyMediumItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/besley/v1/PlIjFlO1MaNwaNG8WR2J-IiUAH-_aH6Ck5diENGg4-E04A.ttf',
+      'Besley-MediumItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Besley 600italic
+  static Future<Font> besleySemiBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/besley/v1/PlIjFlO1MaNwaNG8WR2J-IiUAH-_aH6Cf5BiENGg4-E04A.ttf',
+      'Besley-SemiBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Besley 700italic
+  static Future<Font> besleyBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/besley/v1/PlIjFlO1MaNwaNG8WR2J-IiUAH-_aH6CRpBiENGg4-E04A.ttf',
+      'Besley-BoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Besley 800italic
+  static Future<Font> besleyExtraBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/besley/v1/PlIjFlO1MaNwaNG8WR2J-IiUAH-_aH6CIZBiENGg4-E04A.ttf',
+      'Besley-ExtraBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Besley 900italic
+  static Future<Font> besleyBlackItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/besley/v1/PlIjFlO1MaNwaNG8WR2J-IiUAH-_aH6CCJBiENGg4-E04A.ttf',
+      'Besley-BlackItalic',
     );
     return font.getFont();
   }
@@ -4537,7 +5104,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bilbo regular
   static Future<Font> bilboRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bilbo/v12/o-0EIpgpwWwZ210hpIRz4wxE.ttf',
+      'https://fonts.gstatic.com/s/bilbo/v13/o-0EIpgpwWwZ210hpIRz4wxE.ttf',
       'Bilbo-Regular',
     );
     return font.getFont();
@@ -4708,7 +5275,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 100
   static Future<Font> bitterThin() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8fbeCL_EXFh2reU.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8fbeCL_EXFh2reU.ttf',
       'Bitter-Thin',
     );
     return font.getFont();
@@ -4717,7 +5284,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 200
   static Future<Font> bitterExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8XbfCL_EXFh2reU.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8XbfCL_EXFh2reU.ttf',
       'Bitter-ExtraLight',
     );
     return font.getFont();
@@ -4726,7 +5293,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 300
   static Future<Font> bitterLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8ajfCL_EXFh2reU.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8ajfCL_EXFh2reU.ttf',
       'Bitter-Light',
     );
     return font.getFont();
@@ -4735,7 +5302,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter regular
   static Future<Font> bitterRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8fbfCL_EXFh2reU.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8fbfCL_EXFh2reU.ttf',
       'Bitter-Regular',
     );
     return font.getFont();
@@ -4744,7 +5311,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 500
   static Future<Font> bitterMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8cTfCL_EXFh2reU.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8cTfCL_EXFh2reU.ttf',
       'Bitter-Medium',
     );
     return font.getFont();
@@ -4753,7 +5320,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 600
   static Future<Font> bitterSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8SjYCL_EXFh2reU.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8SjYCL_EXFh2reU.ttf',
       'Bitter-SemiBold',
     );
     return font.getFont();
@@ -4762,7 +5329,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 700
   static Future<Font> bitterBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8RHYCL_EXFh2reU.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8RHYCL_EXFh2reU.ttf',
       'Bitter-Bold',
     );
     return font.getFont();
@@ -4771,7 +5338,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 800
   static Future<Font> bitterExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8XbYCL_EXFh2reU.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8XbYCL_EXFh2reU.ttf',
       'Bitter-ExtraBold',
     );
     return font.getFont();
@@ -4780,7 +5347,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 900
   static Future<Font> bitterBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8V_YCL_EXFh2reU.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8V_YCL_EXFh2reU.ttf',
       'Bitter-Black',
     );
     return font.getFont();
@@ -4789,7 +5356,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 100italic
   static Future<Font> bitterThinItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6c4P3OWHpzveWxBw.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6c4P3OWHpzveWxBw.ttf',
       'Bitter-ThinItalic',
     );
     return font.getFont();
@@ -4798,7 +5365,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 200italic
   static Future<Font> bitterExtraLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6cYPzOWHpzveWxBw.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6cYPzOWHpzveWxBw.ttf',
       'Bitter-ExtraLightItalic',
     );
     return font.getFont();
@@ -4807,7 +5374,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 300italic
   static Future<Font> bitterLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6cvvzOWHpzveWxBw.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6cvvzOWHpzveWxBw.ttf',
       'Bitter-LightItalic',
     );
     return font.getFont();
@@ -4816,7 +5383,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter italic
   static Future<Font> bitterItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6c4PzOWHpzveWxBw.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6c4PzOWHpzveWxBw.ttf',
       'Bitter-Italic',
     );
     return font.getFont();
@@ -4825,7 +5392,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 500italic
   static Future<Font> bitterMediumItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6c0vzOWHpzveWxBw.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6c0vzOWHpzveWxBw.ttf',
       'Bitter-MediumItalic',
     );
     return font.getFont();
@@ -4834,7 +5401,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 600italic
   static Future<Font> bitterSemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6cPvvOWHpzveWxBw.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6cPvvOWHpzveWxBw.ttf',
       'Bitter-SemiBoldItalic',
     );
     return font.getFont();
@@ -4843,7 +5410,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 700italic
   static Future<Font> bitterBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6cB_vOWHpzveWxBw.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6cB_vOWHpzveWxBw.ttf',
       'Bitter-BoldItalic',
     );
     return font.getFont();
@@ -4852,7 +5419,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 800italic
   static Future<Font> bitterExtraBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6cYPvOWHpzveWxBw.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6cYPvOWHpzveWxBw.ttf',
       'Bitter-ExtraBoldItalic',
     );
     return font.getFont();
@@ -4861,7 +5428,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Bitter 900italic
   static Future<Font> bitterBlackItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/bitter/v17/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6cSfvOWHpzveWxBw.ttf',
+      'https://fonts.gstatic.com/s/bitter/v19/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6cSfvOWHpzveWxBw.ttf',
       'Bitter-BlackItalic',
     );
     return font.getFont();
@@ -5083,6 +5650,33 @@ class PdfGoogleFonts extends DownloadbleFont {
     return font.getFont();
   }
 
+  /// Bona Nova regular
+  static Future<Font> bonaNovaRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/bonanova/v1/B50NF7ZCpX7fcHfvIUBJi6hqHK-CLA.ttf',
+      'BonaNova-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Bona Nova italic
+  static Future<Font> bonaNovaItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/bonanova/v1/B50LF7ZCpX7fcHfvIUB5iaJuPqqSLJYf.ttf',
+      'BonaNova-Italic',
+    );
+    return font.getFont();
+  }
+
+  /// Bona Nova 700
+  static Future<Font> bonaNovaBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/bonanova/v1/B50IF7ZCpX7fcHfvIUBxN4dOFISeJY8GgQ.ttf',
+      'BonaNova-Bold',
+    );
+    return font.getFont();
+  }
+
   /// Bonbon regular
   static Future<Font> bonbonRegular() {
     const font = PdfGoogleFonts._(
@@ -5140,7 +5734,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Brygada 1918 regular
   static Future<Font> brygada1918Regular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/brygada1918/v3/pe08MI6eKpdGqlF5LANrM--ACNaeo8mTUIR_y2-f-V8Wu5O3gbo.ttf',
+      'https://fonts.gstatic.com/s/brygada1918/v8/pe08MI6eKpdGqlF5LANrM--ACNaeo8mTUIR_y2-f-V8Wu5O3gbo.ttf',
       'Brygada1918-Regular',
     );
     return font.getFont();
@@ -5149,7 +5743,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Brygada 1918 500
   static Future<Font> brygada1918Medium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/brygada1918/v3/pe08MI6eKpdGqlF5LANrM--ACNaeo8mTUIR_y12f-V8Wu5O3gbo.ttf',
+      'https://fonts.gstatic.com/s/brygada1918/v8/pe08MI6eKpdGqlF5LANrM--ACNaeo8mTUIR_y12f-V8Wu5O3gbo.ttf',
       'Brygada1918-Medium',
     );
     return font.getFont();
@@ -5158,7 +5752,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Brygada 1918 600
   static Future<Font> brygada1918SemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/brygada1918/v3/pe08MI6eKpdGqlF5LANrM--ACNaeo8mTUIR_y7GY-V8Wu5O3gbo.ttf',
+      'https://fonts.gstatic.com/s/brygada1918/v8/pe08MI6eKpdGqlF5LANrM--ACNaeo8mTUIR_y7GY-V8Wu5O3gbo.ttf',
       'Brygada1918-SemiBold',
     );
     return font.getFont();
@@ -5167,7 +5761,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Brygada 1918 700
   static Future<Font> brygada1918Bold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/brygada1918/v3/pe08MI6eKpdGqlF5LANrM--ACNaeo8mTUIR_y4iY-V8Wu5O3gbo.ttf',
+      'https://fonts.gstatic.com/s/brygada1918/v8/pe08MI6eKpdGqlF5LANrM--ACNaeo8mTUIR_y4iY-V8Wu5O3gbo.ttf',
       'Brygada1918-Bold',
     );
     return font.getFont();
@@ -5176,7 +5770,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Brygada 1918 italic
   static Future<Font> brygada1918Italic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/brygada1918/v3/pe06MI6eKpdGqlF5LANrM--qAeRhe6D4yip43qfcERwcv7GykboaLg.ttf',
+      'https://fonts.gstatic.com/s/brygada1918/v8/pe06MI6eKpdGqlF5LANrM--qAeRhe6D4yip43qfcERwcv7GykboaLg.ttf',
       'Brygada1918-Italic',
     );
     return font.getFont();
@@ -5185,7 +5779,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Brygada 1918 500italic
   static Future<Font> brygada1918MediumItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/brygada1918/v3/pe06MI6eKpdGqlF5LANrM--qAeRhe6D4yip43qfcIxwcv7GykboaLg.ttf',
+      'https://fonts.gstatic.com/s/brygada1918/v8/pe06MI6eKpdGqlF5LANrM--qAeRhe6D4yip43qfcIxwcv7GykboaLg.ttf',
       'Brygada1918-MediumItalic',
     );
     return font.getFont();
@@ -5194,7 +5788,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Brygada 1918 600italic
   static Future<Font> brygada1918SemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/brygada1918/v3/pe06MI6eKpdGqlF5LANrM--qAeRhe6D4yip43qfczxscv7GykboaLg.ttf',
+      'https://fonts.gstatic.com/s/brygada1918/v8/pe06MI6eKpdGqlF5LANrM--qAeRhe6D4yip43qfczxscv7GykboaLg.ttf',
       'Brygada1918-SemiBoldItalic',
     );
     return font.getFont();
@@ -5203,7 +5797,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Brygada 1918 700italic
   static Future<Font> brygada1918BoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/brygada1918/v3/pe06MI6eKpdGqlF5LANrM--qAeRhe6D4yip43qfc9hscv7GykboaLg.ttf',
+      'https://fonts.gstatic.com/s/brygada1918/v8/pe06MI6eKpdGqlF5LANrM--qAeRhe6D4yip43qfc9hscv7GykboaLg.ttf',
       'Brygada1918-BoldItalic',
     );
     return font.getFont();
@@ -6166,7 +6760,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Chathura 100
   static Future<Font> chathuraThin() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/chathura/v10/_gP91R7-rzUuVjim42dEq0SbTvZyuDo.ttf',
+      'https://fonts.gstatic.com/s/chathura/v13/_gP91R7-rzUuVjim42dEq0SbTvZyuDo.ttf',
       'Chathura-Thin',
     );
     return font.getFont();
@@ -6175,7 +6769,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Chathura 300
   static Future<Font> chathuraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/chathura/v10/_gP81R7-rzUuVjim42eMiWSxYPp7oSNy.ttf',
+      'https://fonts.gstatic.com/s/chathura/v13/_gP81R7-rzUuVjim42eMiWSxYPp7oSNy.ttf',
       'Chathura-Light',
     );
     return font.getFont();
@@ -6184,7 +6778,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Chathura regular
   static Future<Font> chathuraRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/chathura/v10/_gP71R7-rzUuVjim418goUC5S-Zy.ttf',
+      'https://fonts.gstatic.com/s/chathura/v13/_gP71R7-rzUuVjim418goUC5S-Zy.ttf',
       'Chathura-Regular',
     );
     return font.getFont();
@@ -6193,7 +6787,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Chathura 700
   static Future<Font> chathuraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/chathura/v10/_gP81R7-rzUuVjim42ecjmSxYPp7oSNy.ttf',
+      'https://fonts.gstatic.com/s/chathura/v13/_gP81R7-rzUuVjim42ecjmSxYPp7oSNy.ttf',
       'Chathura-Bold',
     );
     return font.getFont();
@@ -6202,7 +6796,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Chathura 800
   static Future<Font> chathuraExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/chathura/v10/_gP81R7-rzUuVjim42eAjWSxYPp7oSNy.ttf',
+      'https://fonts.gstatic.com/s/chathura/v13/_gP81R7-rzUuVjim42eAjWSxYPp7oSNy.ttf',
       'Chathura-ExtraBold',
     );
     return font.getFont();
@@ -6589,7 +7183,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Comic Neue 300
   static Future<Font> comicNeueLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/comicneue/v2/4UaErEJDsxBrF37olUeD_wHLwpteLwtHJlc.ttf',
+      'https://fonts.gstatic.com/s/comicneue/v3/4UaErEJDsxBrF37olUeD_wHLwpteLwtHJlc.ttf',
       'ComicNeue-Light',
     );
     return font.getFont();
@@ -6598,7 +7192,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Comic Neue 300italic
   static Future<Font> comicNeueLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/comicneue/v2/4UaarEJDsxBrF37olUeD96_RTplUKylCNlcw_Q.ttf',
+      'https://fonts.gstatic.com/s/comicneue/v3/4UaarEJDsxBrF37olUeD96_RTplUKylCNlcw_Q.ttf',
       'ComicNeue-LightItalic',
     );
     return font.getFont();
@@ -6607,7 +7201,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Comic Neue regular
   static Future<Font> comicNeueRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/comicneue/v2/4UaHrEJDsxBrF37olUeDx63j5pN1MwI.ttf',
+      'https://fonts.gstatic.com/s/comicneue/v3/4UaHrEJDsxBrF37olUeDx63j5pN1MwI.ttf',
       'ComicNeue-Regular',
     );
     return font.getFont();
@@ -6616,7 +7210,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Comic Neue italic
   static Future<Font> comicNeueItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/comicneue/v2/4UaFrEJDsxBrF37olUeD96_p4rFwIwJePw.ttf',
+      'https://fonts.gstatic.com/s/comicneue/v3/4UaFrEJDsxBrF37olUeD96_p4rFwIwJePw.ttf',
       'ComicNeue-Italic',
     );
     return font.getFont();
@@ -6625,7 +7219,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Comic Neue 700
   static Future<Font> comicNeueBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/comicneue/v2/4UaErEJDsxBrF37olUeD_xHMwpteLwtHJlc.ttf',
+      'https://fonts.gstatic.com/s/comicneue/v3/4UaErEJDsxBrF37olUeD_xHMwpteLwtHJlc.ttf',
       'ComicNeue-Bold',
     );
     return font.getFont();
@@ -6634,7 +7228,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Comic Neue 700italic
   static Future<Font> comicNeueBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/comicneue/v2/4UaarEJDsxBrF37olUeD96_RXp5UKylCNlcw_Q.ttf',
+      'https://fonts.gstatic.com/s/comicneue/v3/4UaarEJDsxBrF37olUeD96_RXp5UKylCNlcw_Q.ttf',
       'ComicNeue-BoldItalic',
     );
     return font.getFont();
@@ -6733,7 +7327,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Concert One regular
   static Future<Font> concertOneRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/concertone/v11/VEM1Ro9xs5PjtzCu-srDqRTlhv-CuVAQ.ttf',
+      'https://fonts.gstatic.com/s/concertone/v12/VEM1Ro9xs5PjtzCu-srDqRTlhv-CuVAQ.ttf',
       'ConcertOne-Regular',
     );
     return font.getFont();
@@ -6778,7 +7372,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Convergence regular
   static Future<Font> convergenceRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/convergence/v9/rax5HiePvdgXPmmMHcIPYRhasU7Q8Cad.ttf',
+      'https://fonts.gstatic.com/s/convergence/v10/rax5HiePvdgXPmmMHcIPYRhasU7Q8Cad.ttf',
       'Convergence-Regular',
     );
     return font.getFont();
@@ -7948,7 +8542,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// David Libre regular
   static Future<Font> davidLibreRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/davidlibre/v5/snfus0W_99N64iuYSvp4W_l86p6TYS-Y.ttf',
+      'https://fonts.gstatic.com/s/davidlibre/v6/snfus0W_99N64iuYSvp4W_l86p6TYS-Y.ttf',
       'DavidLibre-Regular',
     );
     return font.getFont();
@@ -7957,7 +8551,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// David Libre 500
   static Future<Font> davidLibreMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/davidlibre/v5/snfzs0W_99N64iuYSvp4W8GIw7qbSjORSo9W.ttf',
+      'https://fonts.gstatic.com/s/davidlibre/v6/snfzs0W_99N64iuYSvp4W8GIw7qbSjORSo9W.ttf',
       'DavidLibre-Medium',
     );
     return font.getFont();
@@ -7966,7 +8560,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// David Libre 700
   static Future<Font> davidLibreBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/davidlibre/v5/snfzs0W_99N64iuYSvp4W8HAxbqbSjORSo9W.ttf',
+      'https://fonts.gstatic.com/s/davidlibre/v6/snfzs0W_99N64iuYSvp4W8HAxbqbSjORSo9W.ttf',
       'DavidLibre-Bold',
     );
     return font.getFont();
@@ -8827,6 +9421,87 @@ class PdfGoogleFonts extends DownloadbleFont {
     return font.getFont();
   }
 
+  /// Encode Sans SC 100
+  static Future<Font> encodeSansSCThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/encodesanssc/v1/jVyp7nLwCGzQ9zE7ZyRg0QRXHPZc_uUA6Kb3VJWLE_Pdtm7lcD6qvXT1HHhn8c9NOEEClIc.ttf',
+      'EncodeSansSC-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Encode Sans SC 200
+  static Future<Font> encodeSansSCExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/encodesanssc/v1/jVyp7nLwCGzQ9zE7ZyRg0QRXHPZc_uUA6Kb3VJWLE_Pdtm7lcD6qvXT1HPhm8c9NOEEClIc.ttf',
+      'EncodeSansSC-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// Encode Sans SC 300
+  static Future<Font> encodeSansSCLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/encodesanssc/v1/jVyp7nLwCGzQ9zE7ZyRg0QRXHPZc_uUA6Kb3VJWLE_Pdtm7lcD6qvXT1HCZm8c9NOEEClIc.ttf',
+      'EncodeSansSC-Light',
+    );
+    return font.getFont();
+  }
+
+  /// Encode Sans SC regular
+  static Future<Font> encodeSansSCRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/encodesanssc/v1/jVyp7nLwCGzQ9zE7ZyRg0QRXHPZc_uUA6Kb3VJWLE_Pdtm7lcD6qvXT1HHhm8c9NOEEClIc.ttf',
+      'EncodeSansSC-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Encode Sans SC 500
+  static Future<Font> encodeSansSCMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/encodesanssc/v1/jVyp7nLwCGzQ9zE7ZyRg0QRXHPZc_uUA6Kb3VJWLE_Pdtm7lcD6qvXT1HEpm8c9NOEEClIc.ttf',
+      'EncodeSansSC-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Encode Sans SC 600
+  static Future<Font> encodeSansSCSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/encodesanssc/v1/jVyp7nLwCGzQ9zE7ZyRg0QRXHPZc_uUA6Kb3VJWLE_Pdtm7lcD6qvXT1HKZh8c9NOEEClIc.ttf',
+      'EncodeSansSC-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Encode Sans SC 700
+  static Future<Font> encodeSansSCBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/encodesanssc/v1/jVyp7nLwCGzQ9zE7ZyRg0QRXHPZc_uUA6Kb3VJWLE_Pdtm7lcD6qvXT1HJ9h8c9NOEEClIc.ttf',
+      'EncodeSansSC-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Encode Sans SC 800
+  static Future<Font> encodeSansSCExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/encodesanssc/v1/jVyp7nLwCGzQ9zE7ZyRg0QRXHPZc_uUA6Kb3VJWLE_Pdtm7lcD6qvXT1HPhh8c9NOEEClIc.ttf',
+      'EncodeSansSC-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Encode Sans SC 900
+  static Future<Font> encodeSansSCBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/encodesanssc/v1/jVyp7nLwCGzQ9zE7ZyRg0QRXHPZc_uUA6Kb3VJWLE_Pdtm7lcD6qvXT1HNFh8c9NOEEClIc.ttf',
+      'EncodeSansSC-Black',
+    );
+    return font.getFont();
+  }
+
   /// Encode Sans Semi Condensed 100
   static Future<Font> encodeSansSemiCondensedThin() {
     const font = PdfGoogleFonts._(
@@ -9235,7 +9910,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Ewert regular
   static Future<Font> ewertRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ewert/v10/va9I4kzO2tFODYBvS-J3kbDP.ttf',
+      'https://fonts.gstatic.com/s/ewert/v14/va9I4kzO2tFODYBvS-J3kbDP.ttf',
       'Ewert-Regular',
     );
     return font.getFont();
@@ -9961,6 +10636,15 @@ class PdfGoogleFonts extends DownloadbleFont {
     return font.getFont();
   }
 
+  /// Festive regular
+  static Future<Font> festiveRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/festive/v1/cY9Ffj6KX1xcoDWhFtfgy9HTkak.ttf',
+      'Festive-Regular',
+    );
+    return font.getFont();
+  }
+
   /// Finger Paint regular
   static Future<Font> fingerPaintRegular() {
     const font = PdfGoogleFonts._(
@@ -9973,7 +10657,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Fira Code 300
   static Future<Font> firaCodeLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/firacode/v10/uU9eCBsR6Z2vfE9aq3bL0fxyUs4tcw4W_GNsFVfxN87gsj0.ttf',
+      'https://fonts.gstatic.com/s/firacode/v12/uU9dCBsR6Z2vfE9aq3bpdva8iVtipIat--AvNcGYE8bLrjQFMJs.ttf',
       'FiraCode-Light',
     );
     return font.getFont();
@@ -9982,7 +10666,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Fira Code regular
   static Future<Font> firaCodeRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/firacode/v10/uU9eCBsR6Z2vfE9aq3bL0fxyUs4tcw4W_D1sFVfxN87gsj0.ttf',
+      'https://fonts.gstatic.com/s/firacode/v12/uU9dCBsR6Z2vfE9aq3bpdva8iVtipIat--AvNZ-YE8bLrjQFMJs.ttf',
       'FiraCode-Regular',
     );
     return font.getFont();
@@ -9991,7 +10675,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Fira Code 500
   static Future<Font> firaCodeMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/firacode/v10/uU9eCBsR6Z2vfE9aq3bL0fxyUs4tcw4W_A9sFVfxN87gsj0.ttf',
+      'https://fonts.gstatic.com/s/firacode/v12/uU9dCBsR6Z2vfE9aq3bpdva8iVtipIat--AvNa2YE8bLrjQFMJs.ttf',
       'FiraCode-Medium',
     );
     return font.getFont();
@@ -10000,7 +10684,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Fira Code 600
   static Future<Font> firaCodeSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/firacode/v10/uU9eCBsR6Z2vfE9aq3bL0fxyUs4tcw4W_ONrFVfxN87gsj0.ttf',
+      'https://fonts.gstatic.com/s/firacode/v12/uU9dCBsR6Z2vfE9aq3bpdva8iVtipIat--AvNUGfE8bLrjQFMJs.ttf',
       'FiraCode-SemiBold',
     );
     return font.getFont();
@@ -10009,7 +10693,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Fira Code 700
   static Future<Font> firaCodeBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/firacode/v10/uU9eCBsR6Z2vfE9aq3bL0fxyUs4tcw4W_NprFVfxN87gsj0.ttf',
+      'https://fonts.gstatic.com/s/firacode/v12/uU9dCBsR6Z2vfE9aq3bpdva8iVtipIat--AvNXifE8bLrjQFMJs.ttf',
       'FiraCode-Bold',
     );
     return font.getFont();
@@ -10897,6 +11581,15 @@ class PdfGoogleFonts extends DownloadbleFont {
     return font.getFont();
   }
 
+  /// Fuggles regular
+  static Future<Font> fugglesRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/fuggles/v1/k3kQo8UEJOlD1hpOTd7iL0nAMaM.ttf',
+      'Fuggles-Regular',
+    );
+    return font.getFont();
+  }
+
   /// GFS Didot regular
   static Future<Font> gFSDidotRegular() {
     const font = PdfGoogleFonts._(
@@ -10990,7 +11683,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Galada regular
   static Future<Font> galadaRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/galada/v8/H4cmBXyGmcjXlUX-8iw-4Lqggw.ttf',
+      'https://fonts.gstatic.com/s/galada/v9/H4cmBXyGmcjXlUX-8iw-4Lqggw.ttf',
       'Galada-Regular',
     );
     return font.getFont();
@@ -11212,6 +11905,168 @@ class PdfGoogleFonts extends DownloadbleFont {
     return font.getFont();
   }
 
+  /// Georama 100
+  static Future<Font> georamaThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo5zAn438bIEyxFf6swMnNpvPcUwW4u4yRcDh-ZjxApn9K5GvktmQsL5_tgbg.ttf',
+      'Georama-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Georama 200
+  static Future<Font> georamaExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo5zAn438bIEyxFf6swMnNpvPcUwW4u4yRcDh-ZjxApn9K5mvgtmQsL5_tgbg.ttf',
+      'Georama-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// Georama 300
+  static Future<Font> georamaLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo5zAn438bIEyxFf6swMnNpvPcUwW4u4yRcDh-ZjxApn9K5RPgtmQsL5_tgbg.ttf',
+      'Georama-Light',
+    );
+    return font.getFont();
+  }
+
+  /// Georama regular
+  static Future<Font> georamaRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo5zAn438bIEyxFf6swMnNpvPcUwW4u4yRcDh-ZjxApn9K5GvgtmQsL5_tgbg.ttf',
+      'Georama-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Georama 500
+  static Future<Font> georamaMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo5zAn438bIEyxFf6swMnNpvPcUwW4u4yRcDh-ZjxApn9K5KPgtmQsL5_tgbg.ttf',
+      'Georama-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Georama 600
+  static Future<Font> georamaSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo5zAn438bIEyxFf6swMnNpvPcUwW4u4yRcDh-ZjxApn9K5xP8tmQsL5_tgbg.ttf',
+      'Georama-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Georama 700
+  static Future<Font> georamaBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo5zAn438bIEyxFf6swMnNpvPcUwW4u4yRcDh-ZjxApn9K5_f8tmQsL5_tgbg.ttf',
+      'Georama-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Georama 800
+  static Future<Font> georamaExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo5zAn438bIEyxFf6swMnNpvPcUwW4u4yRcDh-ZjxApn9K5mv8tmQsL5_tgbg.ttf',
+      'Georama-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Georama 900
+  static Future<Font> georamaBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo5zAn438bIEyxFf6swMnNpvPcUwW4u4yRcDh-ZjxApn9K5s_8tmQsL5_tgbg.ttf',
+      'Georama-Black',
+    );
+    return font.getFont();
+  }
+
+  /// Georama 100italic
+  static Future<Font> georamaThinItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo_zAn438bIEyxFVaIC0ZMQ72G6xnvmodYVPOBB5nuzMdWs0rvF2wEPxf5wbh3T.ttf',
+      'Georama-ThinItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Georama 200italic
+  static Future<Font> georamaExtraLightItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo_zAn438bIEyxFVaIC0ZMQ72G6xnvmodYVPOBB5nuzMdWs0rtF2gEPxf5wbh3T.ttf',
+      'Georama-ExtraLightItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Georama 300italic
+  static Future<Font> georamaLightItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo_zAn438bIEyxFVaIC0ZMQ72G6xnvmodYVPOBB5nuzMdWs0rub2gEPxf5wbh3T.ttf',
+      'Georama-LightItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Georama italic
+  static Future<Font> georamaItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo_zAn438bIEyxFVaIC0ZMQ72G6xnvmodYVPOBB5nuzMdWs0rvF2gEPxf5wbh3T.ttf',
+      'Georama-Italic',
+    );
+    return font.getFont();
+  }
+
+  /// Georama 500italic
+  static Future<Font> georamaMediumItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo_zAn438bIEyxFVaIC0ZMQ72G6xnvmodYVPOBB5nuzMdWs0rv32gEPxf5wbh3T.ttf',
+      'Georama-MediumItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Georama 600italic
+  static Future<Font> georamaSemiBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo_zAn438bIEyxFVaIC0ZMQ72G6xnvmodYVPOBB5nuzMdWs0rsb3QEPxf5wbh3T.ttf',
+      'Georama-SemiBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Georama 700italic
+  static Future<Font> georamaBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo_zAn438bIEyxFVaIC0ZMQ72G6xnvmodYVPOBB5nuzMdWs0rsi3QEPxf5wbh3T.ttf',
+      'Georama-BoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Georama 800italic
+  static Future<Font> georamaExtraBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo_zAn438bIEyxFVaIC0ZMQ72G6xnvmodYVPOBB5nuzMdWs0rtF3QEPxf5wbh3T.ttf',
+      'Georama-ExtraBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Georama 900italic
+  static Future<Font> georamaBlackItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/georama/v1/MCo_zAn438bIEyxFVaIC0ZMQ72G6xnvmodYVPOBB5nuzMdWs0rts3QEPxf5wbh3T.ttf',
+      'Georama-BlackItalic',
+    );
+    return font.getFont();
+  }
+
   /// Geostar regular
   static Future<Font> geostarRegular() {
     const font = PdfGoogleFonts._(
@@ -11307,6 +12162,150 @@ class PdfGoogleFonts extends DownloadbleFont {
     const font = PdfGoogleFonts._(
       'https://fonts.gstatic.com/s/gloriahallelujah/v12/LYjYdHv3kUk9BMV96EIswT9DIbW-MLSy3TKEvkCF.ttf',
       'GloriaHallelujah-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Glory 100
+  static Future<Font> gloryThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uasoi9Lf1w5t3Est24nq9blIRQwIiDpn-dDi9EOQ.ttf',
+      'Glory-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Glory 200
+  static Future<Font> gloryExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uasoi9Lf1w5t3Est24nq9blIRQQImDpn-dDi9EOQ.ttf',
+      'Glory-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// Glory 300
+  static Future<Font> gloryLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uasoi9Lf1w5t3Est24nq9blIRQnomDpn-dDi9EOQ.ttf',
+      'Glory-Light',
+    );
+    return font.getFont();
+  }
+
+  /// Glory regular
+  static Future<Font> gloryRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uasoi9Lf1w5t3Est24nq9blIRQwImDpn-dDi9EOQ.ttf',
+      'Glory-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Glory 500
+  static Future<Font> gloryMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uasoi9Lf1w5t3Est24nq9blIRQ8omDpn-dDi9EOQ.ttf',
+      'Glory-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Glory 600
+  static Future<Font> glorySemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uasoi9Lf1w5t3Est24nq9blIRQHo6Dpn-dDi9EOQ.ttf',
+      'Glory-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Glory 700
+  static Future<Font> gloryBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uasoi9Lf1w5t3Est24nq9blIRQJ46Dpn-dDi9EOQ.ttf',
+      'Glory-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Glory 800
+  static Future<Font> gloryExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uasoi9Lf1w5t3Est24nq9blIRQQI6Dpn-dDi9EOQ.ttf',
+      'Glory-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Glory 100italic
+  static Future<Font> gloryThinItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uYsoi9Lf1w5vfNgCJg98TBOoNFCMpr5HWZLCpUOaM6.ttf',
+      'Glory-ThinItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Glory 200italic
+  static Future<Font> gloryExtraLightItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uYsoi9Lf1w5vfNgCJg98TBOoNFCMrr5XWZLCpUOaM6.ttf',
+      'Glory-ExtraLightItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Glory 300italic
+  static Future<Font> gloryLightItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uYsoi9Lf1w5vfNgCJg98TBOoNFCMo15XWZLCpUOaM6.ttf',
+      'Glory-LightItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Glory italic
+  static Future<Font> gloryItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uYsoi9Lf1w5vfNgCJg98TBOoNFCMpr5XWZLCpUOaM6.ttf',
+      'Glory-Italic',
+    );
+    return font.getFont();
+  }
+
+  /// Glory 500italic
+  static Future<Font> gloryMediumItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uYsoi9Lf1w5vfNgCJg98TBOoNFCMpZ5XWZLCpUOaM6.ttf',
+      'Glory-MediumItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Glory 600italic
+  static Future<Font> glorySemiBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uYsoi9Lf1w5vfNgCJg98TBOoNFCMq14nWZLCpUOaM6.ttf',
+      'Glory-SemiBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Glory 700italic
+  static Future<Font> gloryBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uYsoi9Lf1w5vfNgCJg98TBOoNFCMqM4nWZLCpUOaM6.ttf',
+      'Glory-BoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Glory 800italic
+  static Future<Font> gloryExtraBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/glory/v2/q5uYsoi9Lf1w5vfNgCJg98TBOoNFCMrr4nWZLCpUOaM6.ttf',
+      'Glory-ExtraBoldItalic',
     );
     return font.getFont();
   }
@@ -11460,6 +12459,33 @@ class PdfGoogleFonts extends DownloadbleFont {
     const font = PdfGoogleFonts._(
       'https://fonts.gstatic.com/s/goudybookletter1911/v10/sykt-z54laciWfKv-kX8krex0jDiD2HbY6I5tRbXZ4IXAA.ttf',
       'GoudyBookletter1911-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Gowun Batang regular
+  static Future<Font> gowunBatangRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/gowunbatang/v1/ijwSs5nhRMIjYsdSgcMa3wRhXLH-yuAtLw.ttf',
+      'GowunBatang-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Gowun Batang 700
+  static Future<Font> gowunBatangBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/gowunbatang/v1/ijwNs5nhRMIjYsdSgcMa3wRZ4J7awssxJii23w.ttf',
+      'GowunBatang-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Gowun Dodum regular
+  static Future<Font> gowunDodumRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/gowundodum/v1/3Jn5SD_00GqwlBnWc1TUJF0FfORL0fNy.ttf',
+      'GowunDodum-Regular',
     );
     return font.getFont();
   }
@@ -11656,7 +12682,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Great Vibes regular
   static Future<Font> greatVibesRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/greatvibes/v8/RWmMoKWR9v4ksMfaWd_JN-XCg6UKDXlq.ttf',
+      'https://fonts.gstatic.com/s/greatvibes/v9/RWmMoKWR9v4ksMfaWd_JN-XCg6UKDXlq.ttf',
       'GreatVibes-Regular',
     );
     return font.getFont();
@@ -12007,8 +13033,89 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Hachi Maru Pop regular
   static Future<Font> hachiMaruPopRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/hachimarupop/v6/HI_TiYoRLqpLrEiMAuO9Ysfz7rW1EM_btd8u.ttf',
+      'https://fonts.gstatic.com/s/hachimarupop/v10/~ChAKDkhhY2hpIE1hcnUgUG9wIAAqBAgBGAE=.ttf',
       'HachiMaruPop-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Hahmlet 100
+  static Future<Font> hahmletThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/hahmlet/v1/BngXUXpCQ3nKpIo0TfPyfCdXfaeU4RhKOdjobsO-aVxn.ttf',
+      'Hahmlet-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Hahmlet 200
+  static Future<Font> hahmletExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/hahmlet/v1/BngXUXpCQ3nKpIo0TfPyfCdXfaeU4RjKONjobsO-aVxn.ttf',
+      'Hahmlet-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// Hahmlet 300
+  static Future<Font> hahmletLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/hahmlet/v1/BngXUXpCQ3nKpIo0TfPyfCdXfaeU4RgUONjobsO-aVxn.ttf',
+      'Hahmlet-Light',
+    );
+    return font.getFont();
+  }
+
+  /// Hahmlet regular
+  static Future<Font> hahmletRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/hahmlet/v1/BngXUXpCQ3nKpIo0TfPyfCdXfaeU4RhKONjobsO-aVxn.ttf',
+      'Hahmlet-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Hahmlet 500
+  static Future<Font> hahmletMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/hahmlet/v1/BngXUXpCQ3nKpIo0TfPyfCdXfaeU4Rh4ONjobsO-aVxn.ttf',
+      'Hahmlet-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Hahmlet 600
+  static Future<Font> hahmletSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/hahmlet/v1/BngXUXpCQ3nKpIo0TfPyfCdXfaeU4RiUP9jobsO-aVxn.ttf',
+      'Hahmlet-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Hahmlet 700
+  static Future<Font> hahmletBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/hahmlet/v1/BngXUXpCQ3nKpIo0TfPyfCdXfaeU4RitP9jobsO-aVxn.ttf',
+      'Hahmlet-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Hahmlet 800
+  static Future<Font> hahmletExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/hahmlet/v1/BngXUXpCQ3nKpIo0TfPyfCdXfaeU4RjKP9jobsO-aVxn.ttf',
+      'Hahmlet-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Hahmlet 900
+  static Future<Font> hahmletBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/hahmlet/v1/BngXUXpCQ3nKpIo0TfPyfCdXfaeU4RjjP9jobsO-aVxn.ttf',
+      'Hahmlet-Black',
     );
     return font.getFont();
   }
@@ -12151,7 +13258,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Heebo 100
   static Future<Font> heeboThin() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/heebo/v10/NGSpv5_NC0k9P_v6ZUCbLRAHxK1EiS2cckOnz02SXQ.ttf',
+      'https://fonts.gstatic.com/s/heebo/v12/NGSpv5_NC0k9P_v6ZUCbLRAHxK1EiS2cckOnz02SXQ.ttf',
       'Heebo-Thin',
     );
     return font.getFont();
@@ -12160,7 +13267,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Heebo 200
   static Future<Font> heeboExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/heebo/v10/NGSpv5_NC0k9P_v6ZUCbLRAHxK1ECSycckOnz02SXQ.ttf',
+      'https://fonts.gstatic.com/s/heebo/v12/NGSpv5_NC0k9P_v6ZUCbLRAHxK1ECSycckOnz02SXQ.ttf',
       'Heebo-ExtraLight',
     );
     return font.getFont();
@@ -12169,7 +13276,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Heebo 300
   static Future<Font> heeboLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/heebo/v10/NGSpv5_NC0k9P_v6ZUCbLRAHxK1E1yycckOnz02SXQ.ttf',
+      'https://fonts.gstatic.com/s/heebo/v12/NGSpv5_NC0k9P_v6ZUCbLRAHxK1E1yycckOnz02SXQ.ttf',
       'Heebo-Light',
     );
     return font.getFont();
@@ -12178,7 +13285,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Heebo regular
   static Future<Font> heeboRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/heebo/v10/NGSpv5_NC0k9P_v6ZUCbLRAHxK1EiSycckOnz02SXQ.ttf',
+      'https://fonts.gstatic.com/s/heebo/v12/NGSpv5_NC0k9P_v6ZUCbLRAHxK1EiSycckOnz02SXQ.ttf',
       'Heebo-Regular',
     );
     return font.getFont();
@@ -12187,7 +13294,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Heebo 500
   static Future<Font> heeboMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/heebo/v10/NGSpv5_NC0k9P_v6ZUCbLRAHxK1EuyycckOnz02SXQ.ttf',
+      'https://fonts.gstatic.com/s/heebo/v12/NGSpv5_NC0k9P_v6ZUCbLRAHxK1EuyycckOnz02SXQ.ttf',
       'Heebo-Medium',
     );
     return font.getFont();
@@ -12196,7 +13303,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Heebo 600
   static Future<Font> heeboSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/heebo/v10/NGSpv5_NC0k9P_v6ZUCbLRAHxK1EVyucckOnz02SXQ.ttf',
+      'https://fonts.gstatic.com/s/heebo/v12/NGSpv5_NC0k9P_v6ZUCbLRAHxK1EVyucckOnz02SXQ.ttf',
       'Heebo-SemiBold',
     );
     return font.getFont();
@@ -12205,7 +13312,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Heebo 700
   static Future<Font> heeboBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/heebo/v10/NGSpv5_NC0k9P_v6ZUCbLRAHxK1EbiucckOnz02SXQ.ttf',
+      'https://fonts.gstatic.com/s/heebo/v12/NGSpv5_NC0k9P_v6ZUCbLRAHxK1EbiucckOnz02SXQ.ttf',
       'Heebo-Bold',
     );
     return font.getFont();
@@ -12214,7 +13321,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Heebo 800
   static Future<Font> heeboExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/heebo/v10/NGSpv5_NC0k9P_v6ZUCbLRAHxK1ECSucckOnz02SXQ.ttf',
+      'https://fonts.gstatic.com/s/heebo/v12/NGSpv5_NC0k9P_v6ZUCbLRAHxK1ECSucckOnz02SXQ.ttf',
       'Heebo-ExtraBold',
     );
     return font.getFont();
@@ -12223,7 +13330,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Heebo 900
   static Future<Font> heeboBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/heebo/v10/NGSpv5_NC0k9P_v6ZUCbLRAHxK1EICucckOnz02SXQ.ttf',
+      'https://fonts.gstatic.com/s/heebo/v12/NGSpv5_NC0k9P_v6ZUCbLRAHxK1EICucckOnz02SXQ.ttf',
       'Heebo-Black',
     );
     return font.getFont();
@@ -12333,6 +13440,15 @@ class PdfGoogleFonts extends DownloadbleFont {
     const font = PdfGoogleFonts._(
       'https://fonts.gstatic.com/s/himelody/v8/46ktlbP8Vnz0pJcqCTbEf29E31BBGA.ttf',
       'HiMelody-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Hina Mincho regular
+  static Future<Font> hinaMinchoRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/hinamincho/v2/2sDaZGBRhpXa2Jjz5w5LAGW8KbkVZTHR.ttf',
+      'HinaMincho-Regular',
     );
     return font.getFont();
   }
@@ -12583,7 +13699,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Homenaje regular
   static Future<Font> homenajeRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/homenaje/v10/FwZY7-Q-xVAi_l-6Ld6A4sijpFu_.ttf',
+      'https://fonts.gstatic.com/s/homenaje/v11/FwZY7-Q-xVAi_l-6Ld6A4sijpFu_.ttf',
       'Homenaje-Regular',
     );
     return font.getFont();
@@ -12592,7 +13708,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Mono 100
   static Future<Font> iBMPlexMonoThin() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexmono/v6/-F6pfjptAgt5VM-kVkqdyU8n3kwq0n1hj-sNFQ.ttf',
+      'https://fonts.gstatic.com/s/ibmplexmono/v7/-F6pfjptAgt5VM-kVkqdyU8n3kwq0n1hj-sNFQ.ttf',
       'IBMPlexMono-Thin',
     );
     return font.getFont();
@@ -12601,7 +13717,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Mono 100italic
   static Future<Font> iBMPlexMonoThinItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexmono/v6/-F6rfjptAgt5VM-kVkqdyU8n1ioStndlre4dFcFh.ttf',
+      'https://fonts.gstatic.com/s/ibmplexmono/v7/-F6rfjptAgt5VM-kVkqdyU8n1ioStndlre4dFcFh.ttf',
       'IBMPlexMono-ThinItalic',
     );
     return font.getFont();
@@ -12610,7 +13726,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Mono 200
   static Future<Font> iBMPlexMonoExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexmono/v6/-F6qfjptAgt5VM-kVkqdyU8n3uAL8ldPg-IUDNg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexmono/v7/-F6qfjptAgt5VM-kVkqdyU8n3uAL8ldPg-IUDNg.ttf',
       'IBMPlexMono-ExtraLight',
     );
     return font.getFont();
@@ -12619,7 +13735,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Mono 200italic
   static Future<Font> iBMPlexMonoExtraLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexmono/v6/-F6sfjptAgt5VM-kVkqdyU8n1ioSGlZFh8ARHNh4zg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexmono/v7/-F6sfjptAgt5VM-kVkqdyU8n1ioSGlZFh8ARHNh4zg.ttf',
       'IBMPlexMono-ExtraLightItalic',
     );
     return font.getFont();
@@ -12628,7 +13744,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Mono 300
   static Future<Font> iBMPlexMonoLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexmono/v6/-F6qfjptAgt5VM-kVkqdyU8n3oQI8ldPg-IUDNg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexmono/v7/-F6qfjptAgt5VM-kVkqdyU8n3oQI8ldPg-IUDNg.ttf',
       'IBMPlexMono-Light',
     );
     return font.getFont();
@@ -12637,7 +13753,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Mono 300italic
   static Future<Font> iBMPlexMonoLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexmono/v6/-F6sfjptAgt5VM-kVkqdyU8n1ioSflVFh8ARHNh4zg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexmono/v7/-F6sfjptAgt5VM-kVkqdyU8n1ioSflVFh8ARHNh4zg.ttf',
       'IBMPlexMono-LightItalic',
     );
     return font.getFont();
@@ -12646,7 +13762,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Mono regular
   static Future<Font> iBMPlexMonoRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexmono/v6/-F63fjptAgt5VM-kVkqdyU8n5igg1l9kn-s.ttf',
+      'https://fonts.gstatic.com/s/ibmplexmono/v7/-F63fjptAgt5VM-kVkqdyU8n5igg1l9kn-s.ttf',
       'IBMPlexMono-Regular',
     );
     return font.getFont();
@@ -12655,7 +13771,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Mono italic
   static Future<Font> iBMPlexMonoItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexmono/v6/-F6pfjptAgt5VM-kVkqdyU8n1ioq0n1hj-sNFQ.ttf',
+      'https://fonts.gstatic.com/s/ibmplexmono/v7/-F6pfjptAgt5VM-kVkqdyU8n1ioq0n1hj-sNFQ.ttf',
       'IBMPlexMono-Italic',
     );
     return font.getFont();
@@ -12664,7 +13780,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Mono 500
   static Future<Font> iBMPlexMonoMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexmono/v6/-F6qfjptAgt5VM-kVkqdyU8n3twJ8ldPg-IUDNg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexmono/v7/-F6qfjptAgt5VM-kVkqdyU8n3twJ8ldPg-IUDNg.ttf',
       'IBMPlexMono-Medium',
     );
     return font.getFont();
@@ -12673,7 +13789,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Mono 500italic
   static Future<Font> iBMPlexMonoMediumItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexmono/v6/-F6sfjptAgt5VM-kVkqdyU8n1ioSJlRFh8ARHNh4zg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexmono/v7/-F6sfjptAgt5VM-kVkqdyU8n1ioSJlRFh8ARHNh4zg.ttf',
       'IBMPlexMono-MediumItalic',
     );
     return font.getFont();
@@ -12682,7 +13798,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Mono 600
   static Future<Font> iBMPlexMonoSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexmono/v6/-F6qfjptAgt5VM-kVkqdyU8n3vAO8ldPg-IUDNg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexmono/v7/-F6qfjptAgt5VM-kVkqdyU8n3vAO8ldPg-IUDNg.ttf',
       'IBMPlexMono-SemiBold',
     );
     return font.getFont();
@@ -12691,7 +13807,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Mono 600italic
   static Future<Font> iBMPlexMonoSemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexmono/v6/-F6sfjptAgt5VM-kVkqdyU8n1ioSClNFh8ARHNh4zg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexmono/v7/-F6sfjptAgt5VM-kVkqdyU8n1ioSClNFh8ARHNh4zg.ttf',
       'IBMPlexMono-SemiBoldItalic',
     );
     return font.getFont();
@@ -12700,7 +13816,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Mono 700
   static Future<Font> iBMPlexMonoBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexmono/v6/-F6qfjptAgt5VM-kVkqdyU8n3pQP8ldPg-IUDNg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexmono/v7/-F6qfjptAgt5VM-kVkqdyU8n3pQP8ldPg-IUDNg.ttf',
       'IBMPlexMono-Bold',
     );
     return font.getFont();
@@ -12709,7 +13825,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Mono 700italic
   static Future<Font> iBMPlexMonoBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexmono/v6/-F6sfjptAgt5VM-kVkqdyU8n1ioSblJFh8ARHNh4zg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexmono/v7/-F6sfjptAgt5VM-kVkqdyU8n1ioSblJFh8ARHNh4zg.ttf',
       'IBMPlexMono-BoldItalic',
     );
     return font.getFont();
@@ -12718,7 +13834,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans 100
   static Future<Font> iBMPlexSansThin() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsans/v8/zYX-KVElMYYaJe8bpLHnCwDKjbLeEKxIedbzDw.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsans/v9/zYX-KVElMYYaJe8bpLHnCwDKjbLeEKxIedbzDw.ttf',
       'IBMPlexSans-Thin',
     );
     return font.getFont();
@@ -12727,7 +13843,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans 100italic
   static Future<Font> iBMPlexSansThinItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsans/v8/zYX8KVElMYYaJe8bpLHnCwDKhdTmdKZMW9PjD3N8.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsans/v9/zYX8KVElMYYaJe8bpLHnCwDKhdTmdKZMW9PjD3N8.ttf',
       'IBMPlexSans-ThinItalic',
     );
     return font.getFont();
@@ -12736,7 +13852,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans 200
   static Future<Font> iBMPlexSansExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsans/v8/zYX9KVElMYYaJe8bpLHnCwDKjR7_MIZmdd_qFmo.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsans/v9/zYX9KVElMYYaJe8bpLHnCwDKjR7_MIZmdd_qFmo.ttf',
       'IBMPlexSans-ExtraLight',
     );
     return font.getFont();
@@ -12745,7 +13861,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans 200italic
   static Future<Font> iBMPlexSansExtraLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsans/v8/zYX7KVElMYYaJe8bpLHnCwDKhdTm2Idscf3vBmpl8A.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsans/v9/zYX7KVElMYYaJe8bpLHnCwDKhdTm2Idscf3vBmpl8A.ttf',
       'IBMPlexSans-ExtraLightItalic',
     );
     return font.getFont();
@@ -12754,7 +13870,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans 300
   static Future<Font> iBMPlexSansLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsans/v8/zYX9KVElMYYaJe8bpLHnCwDKjXr8MIZmdd_qFmo.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsans/v9/zYX9KVElMYYaJe8bpLHnCwDKjXr8MIZmdd_qFmo.ttf',
       'IBMPlexSans-Light',
     );
     return font.getFont();
@@ -12763,7 +13879,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans 300italic
   static Future<Font> iBMPlexSansLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsans/v8/zYX7KVElMYYaJe8bpLHnCwDKhdTmvIRscf3vBmpl8A.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsans/v9/zYX7KVElMYYaJe8bpLHnCwDKhdTmvIRscf3vBmpl8A.ttf',
       'IBMPlexSans-LightItalic',
     );
     return font.getFont();
@@ -12772,7 +13888,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans regular
   static Future<Font> iBMPlexSansRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsans/v8/zYXgKVElMYYaJe8bpLHnCwDKtdbUFI5NadY.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsans/v9/zYXgKVElMYYaJe8bpLHnCwDKtdbUFI5NadY.ttf',
       'IBMPlexSans-Regular',
     );
     return font.getFont();
@@ -12781,7 +13897,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans italic
   static Future<Font> iBMPlexSansItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsans/v8/zYX-KVElMYYaJe8bpLHnCwDKhdTeEKxIedbzDw.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsans/v9/zYX-KVElMYYaJe8bpLHnCwDKhdTeEKxIedbzDw.ttf',
       'IBMPlexSans-Italic',
     );
     return font.getFont();
@@ -12790,7 +13906,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans 500
   static Future<Font> iBMPlexSansMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsans/v8/zYX9KVElMYYaJe8bpLHnCwDKjSL9MIZmdd_qFmo.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsans/v9/zYX9KVElMYYaJe8bpLHnCwDKjSL9MIZmdd_qFmo.ttf',
       'IBMPlexSans-Medium',
     );
     return font.getFont();
@@ -12799,7 +13915,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans 500italic
   static Future<Font> iBMPlexSansMediumItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsans/v8/zYX7KVElMYYaJe8bpLHnCwDKhdTm5IVscf3vBmpl8A.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsans/v9/zYX7KVElMYYaJe8bpLHnCwDKhdTm5IVscf3vBmpl8A.ttf',
       'IBMPlexSans-MediumItalic',
     );
     return font.getFont();
@@ -12808,7 +13924,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans 600
   static Future<Font> iBMPlexSansSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsans/v8/zYX9KVElMYYaJe8bpLHnCwDKjQ76MIZmdd_qFmo.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsans/v9/zYX9KVElMYYaJe8bpLHnCwDKjQ76MIZmdd_qFmo.ttf',
       'IBMPlexSans-SemiBold',
     );
     return font.getFont();
@@ -12817,7 +13933,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans 600italic
   static Future<Font> iBMPlexSansSemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsans/v8/zYX7KVElMYYaJe8bpLHnCwDKhdTmyIJscf3vBmpl8A.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsans/v9/zYX7KVElMYYaJe8bpLHnCwDKhdTmyIJscf3vBmpl8A.ttf',
       'IBMPlexSans-SemiBoldItalic',
     );
     return font.getFont();
@@ -12826,7 +13942,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans 700
   static Future<Font> iBMPlexSansBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsans/v8/zYX9KVElMYYaJe8bpLHnCwDKjWr7MIZmdd_qFmo.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsans/v9/zYX9KVElMYYaJe8bpLHnCwDKjWr7MIZmdd_qFmo.ttf',
       'IBMPlexSans-Bold',
     );
     return font.getFont();
@@ -12835,8 +13951,71 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans 700italic
   static Future<Font> iBMPlexSansBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsans/v8/zYX7KVElMYYaJe8bpLHnCwDKhdTmrINscf3vBmpl8A.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsans/v9/zYX7KVElMYYaJe8bpLHnCwDKhdTmrINscf3vBmpl8A.ttf',
       'IBMPlexSans-BoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Arabic 100
+  static Future<Font> iBMPlexSansArabicThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansarabic/v1/Qw3MZRtWPQCuHme67tEYUIx3Kh0PHR9N6YNe3PC5eMlAMg0.ttf',
+      'IBMPlexSansArabic-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Arabic 200
+  static Future<Font> iBMPlexSansArabicExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansarabic/v1/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPy_dCTVsVJKxTs.ttf',
+      'IBMPlexSansArabic-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Arabic 300
+  static Future<Font> iBMPlexSansArabicLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansarabic/v1/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YOW_tCTVsVJKxTs.ttf',
+      'IBMPlexSansArabic-Light',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Arabic regular
+  static Future<Font> iBMPlexSansArabicRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansarabic/v1/Qw3CZRtWPQCuHme67tEYUIx3Kh0PHR9N6bs61vSbfdlA.ttf',
+      'IBMPlexSansArabic-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Arabic 500
+  static Future<Font> iBMPlexSansArabicMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansarabic/v1/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPO_9CTVsVJKxTs.ttf',
+      'IBMPlexSansArabic-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Arabic 600
+  static Future<Font> iBMPlexSansArabicSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansarabic/v1/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPi-NCTVsVJKxTs.ttf',
+      'IBMPlexSansArabic-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Arabic 700
+  static Future<Font> iBMPlexSansArabicBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansarabic/v1/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YOG-dCTVsVJKxTs.ttf',
+      'IBMPlexSansArabic-Bold',
     );
     return font.getFont();
   }
@@ -12844,7 +14023,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans Condensed 100
   static Future<Font> iBMPlexSansCondensedThin() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v7/Gg8nN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHY7KyKvBgYsMDhM.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v8/Gg8nN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHY7KyKvBgYsMDhM.ttf',
       'IBMPlexSansCondensed-Thin',
     );
     return font.getFont();
@@ -12853,7 +14032,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans Condensed 100italic
   static Future<Font> iBMPlexSansCondensedThinItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v7/Gg8hN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHYas8M_LhakJHhOgBg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v8/Gg8hN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHYas8M_LhakJHhOgBg.ttf',
       'IBMPlexSansCondensed-ThinItalic',
     );
     return font.getFont();
@@ -12862,7 +14041,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans Condensed 200
   static Future<Font> iBMPlexSansCondensedExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v7/Gg8gN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHY5m6Yvrr4cFFwq5.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v8/Gg8gN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHY5m6Yvrr4cFFwq5.ttf',
       'IBMPlexSansCondensed-ExtraLight',
     );
     return font.getFont();
@@ -12871,7 +14050,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans Condensed 200italic
   static Future<Font> iBMPlexSansCondensedExtraLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v7/Gg8iN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHYas8GPqpYMnEhq5H1w.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v8/Gg8iN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHYas8GPqpYMnEhq5H1w.ttf',
       'IBMPlexSansCondensed-ExtraLightItalic',
     );
     return font.getFont();
@@ -12880,7 +14059,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans Condensed 300
   static Future<Font> iBMPlexSansCondensedLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v7/Gg8gN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHY4C6ovrr4cFFwq5.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v8/Gg8gN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHY4C6ovrr4cFFwq5.ttf',
       'IBMPlexSansCondensed-Light',
     );
     return font.getFont();
@@ -12889,7 +14068,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans Condensed 300italic
   static Future<Font> iBMPlexSansCondensedLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v7/Gg8iN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHYas8AfppYMnEhq5H1w.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v8/Gg8iN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHYas8AfppYMnEhq5H1w.ttf',
       'IBMPlexSansCondensed-LightItalic',
     );
     return font.getFont();
@@ -12898,7 +14077,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans Condensed regular
   static Future<Font> iBMPlexSansCondensedRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v7/Gg8lN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHbauwq_jhJsM.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v8/Gg8lN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHbauwq_jhJsM.ttf',
       'IBMPlexSansCondensed-Regular',
     );
     return font.getFont();
@@ -12907,7 +14086,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans Condensed italic
   static Future<Font> iBMPlexSansCondensedItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v7/Gg8nN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHYasyKvBgYsMDhM.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v8/Gg8nN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHYasyKvBgYsMDhM.ttf',
       'IBMPlexSansCondensed-Italic',
     );
     return font.getFont();
@@ -12916,7 +14095,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans Condensed 500
   static Future<Font> iBMPlexSansCondensedMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v7/Gg8gN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHY5a64vrr4cFFwq5.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v8/Gg8gN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHY5a64vrr4cFFwq5.ttf',
       'IBMPlexSansCondensed-Medium',
     );
     return font.getFont();
@@ -12925,7 +14104,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans Condensed 500italic
   static Future<Font> iBMPlexSansCondensedMediumItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v7/Gg8iN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHYas8F_opYMnEhq5H1w.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v8/Gg8iN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHYas8F_opYMnEhq5H1w.ttf',
       'IBMPlexSansCondensed-MediumItalic',
     );
     return font.getFont();
@@ -12934,7 +14113,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans Condensed 600
   static Future<Font> iBMPlexSansCondensedSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v7/Gg8gN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHY527Ivrr4cFFwq5.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v8/Gg8gN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHY527Ivrr4cFFwq5.ttf',
       'IBMPlexSansCondensed-SemiBold',
     );
     return font.getFont();
@@ -12943,7 +14122,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans Condensed 600italic
   static Future<Font> iBMPlexSansCondensedSemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v7/Gg8iN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHYas8HPvpYMnEhq5H1w.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v8/Gg8iN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHYas8HPvpYMnEhq5H1w.ttf',
       'IBMPlexSansCondensed-SemiBoldItalic',
     );
     return font.getFont();
@@ -12952,7 +14131,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans Condensed 700
   static Future<Font> iBMPlexSansCondensedBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v7/Gg8gN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHY4S7Yvrr4cFFwq5.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v8/Gg8gN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHY4S7Yvrr4cFFwq5.ttf',
       'IBMPlexSansCondensed-Bold',
     );
     return font.getFont();
@@ -12961,8 +14140,323 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Sans Condensed 700italic
   static Future<Font> iBMPlexSansCondensedBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v7/Gg8iN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHYas8BfupYMnEhq5H1w.ttf',
+      'https://fonts.gstatic.com/s/ibmplexsanscondensed/v8/Gg8iN4UfRSqiPg7Jn2ZI12V4DCEwkj1E4LVeHYas8BfupYMnEhq5H1w.ttf',
       'IBMPlexSansCondensed-BoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Devanagari 100
+  static Future<Font> iBMPlexSansDevanagariThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansdevanagari/v1/XRXB3JCMvG4IDoS9SubXB6W-UX5iehIMBFR2-O_HMUjwUcjwCEQq.ttf',
+      'IBMPlexSansDevanagari-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Devanagari 200
+  static Future<Font> iBMPlexSansDevanagariExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansdevanagari/v1/XRXA3JCMvG4IDoS9SubXB6W-UX5iehIMBFR2-O_HnWnQe-b8AV0z0w.ttf',
+      'IBMPlexSansDevanagari-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Devanagari 300
+  static Future<Font> iBMPlexSansDevanagariLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansdevanagari/v1/XRXA3JCMvG4IDoS9SubXB6W-UX5iehIMBFR2-O_H-WrQe-b8AV0z0w.ttf',
+      'IBMPlexSansDevanagari-Light',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Devanagari regular
+  static Future<Font> iBMPlexSansDevanagariRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansdevanagari/v1/XRXH3JCMvG4IDoS9SubXB6W-UX5iehIMBFR2-O__VUL0c83gCA.ttf',
+      'IBMPlexSansDevanagari-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Devanagari 500
+  static Future<Font> iBMPlexSansDevanagariMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansdevanagari/v1/XRXA3JCMvG4IDoS9SubXB6W-UX5iehIMBFR2-O_HoWvQe-b8AV0z0w.ttf',
+      'IBMPlexSansDevanagari-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Devanagari 600
+  static Future<Font> iBMPlexSansDevanagariSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansdevanagari/v1/XRXA3JCMvG4IDoS9SubXB6W-UX5iehIMBFR2-O_HjWzQe-b8AV0z0w.ttf',
+      'IBMPlexSansDevanagari-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Devanagari 700
+  static Future<Font> iBMPlexSansDevanagariBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansdevanagari/v1/XRXA3JCMvG4IDoS9SubXB6W-UX5iehIMBFR2-O_H6W3Qe-b8AV0z0w.ttf',
+      'IBMPlexSansDevanagari-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Hebrew 100
+  static Future<Font> iBMPlexSansHebrewThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsanshebrew/v1/BCa4qYENg9Kw1mpLpO0bGM5lfHAAZHhDXEXB-l0VqDaM7C4.ttf',
+      'IBMPlexSansHebrew-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Hebrew 200
+  static Future<Font> iBMPlexSansHebrewExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsanshebrew/v1/BCa5qYENg9Kw1mpLpO0bGM5lfHAAZHhDXEVt230_hjqF9Tc2.ttf',
+      'IBMPlexSansHebrew-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Hebrew 300
+  static Future<Font> iBMPlexSansHebrewLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsanshebrew/v1/BCa5qYENg9Kw1mpLpO0bGM5lfHAAZHhDXEUJ2H0_hjqF9Tc2.ttf',
+      'IBMPlexSansHebrew-Light',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Hebrew regular
+  static Future<Font> iBMPlexSansHebrewRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsanshebrew/v1/BCa2qYENg9Kw1mpLpO0bGM5lfHAAZHhDXH2l8Fk3rSaM.ttf',
+      'IBMPlexSansHebrew-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Hebrew 500
+  static Future<Font> iBMPlexSansHebrewMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsanshebrew/v1/BCa5qYENg9Kw1mpLpO0bGM5lfHAAZHhDXEVR2X0_hjqF9Tc2.ttf',
+      'IBMPlexSansHebrew-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Hebrew 600
+  static Future<Font> iBMPlexSansHebrewSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsanshebrew/v1/BCa5qYENg9Kw1mpLpO0bGM5lfHAAZHhDXEV93n0_hjqF9Tc2.ttf',
+      'IBMPlexSansHebrew-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Hebrew 700
+  static Future<Font> iBMPlexSansHebrewBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsanshebrew/v1/BCa5qYENg9Kw1mpLpO0bGM5lfHAAZHhDXEUZ330_hjqF9Tc2.ttf',
+      'IBMPlexSansHebrew-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans KR 100
+  static Future<Font> iBMPlexSansKRThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsanskr/v1/vEFM2-VJISZe3O_rc3ZVYh4aTwNOyra_X5zCpMrMfA.ttf',
+      'IBMPlexSansKR-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans KR 200
+  static Future<Font> iBMPlexSansKRExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsanskr/v1/vEFN2-VJISZe3O_rc3ZVYh4aTwNOyhqef7bsqMPVZb4.ttf',
+      'IBMPlexSansKR-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans KR 300
+  static Future<Font> iBMPlexSansKRLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsanskr/v1/vEFN2-VJISZe3O_rc3ZVYh4aTwNOyn6df7bsqMPVZb4.ttf',
+      'IBMPlexSansKR-Light',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans KR regular
+  static Future<Font> iBMPlexSansKRRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsanskr/v1/vEFK2-VJISZe3O_rc3ZVYh4aTwNO8tK1W77HtMo.ttf',
+      'IBMPlexSansKR-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans KR 500
+  static Future<Font> iBMPlexSansKRMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsanskr/v1/vEFN2-VJISZe3O_rc3ZVYh4aTwNOyiacf7bsqMPVZb4.ttf',
+      'IBMPlexSansKR-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans KR 600
+  static Future<Font> iBMPlexSansKRSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsanskr/v1/vEFN2-VJISZe3O_rc3ZVYh4aTwNOygqbf7bsqMPVZb4.ttf',
+      'IBMPlexSansKR-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans KR 700
+  static Future<Font> iBMPlexSansKRBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsanskr/v1/vEFN2-VJISZe3O_rc3ZVYh4aTwNOym6af7bsqMPVZb4.ttf',
+      'IBMPlexSansKR-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Thai 100
+  static Future<Font> iBMPlexSansThaiThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansthai/v1/m8JNje1VVIzcq1HzJq2AEdo2Tj_qvLqEatYlR8ZKUqcX.ttf',
+      'IBMPlexSansThai-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Thai 200
+  static Future<Font> iBMPlexSansThaiExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansthai/v1/m8JMje1VVIzcq1HzJq2AEdo2Tj_qvLqExvcFbehGW74OXw.ttf',
+      'IBMPlexSansThai-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Thai 300
+  static Future<Font> iBMPlexSansThaiLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansthai/v1/m8JMje1VVIzcq1HzJq2AEdo2Tj_qvLqEovQFbehGW74OXw.ttf',
+      'IBMPlexSansThai-Light',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Thai regular
+  static Future<Font> iBMPlexSansThaiRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansthai/v1/m8JPje1VVIzcq1HzJq2AEdo2Tj_qvLq8DtwhZcNaUg.ttf',
+      'IBMPlexSansThai-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Thai 500
+  static Future<Font> iBMPlexSansThaiMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansthai/v1/m8JMje1VVIzcq1HzJq2AEdo2Tj_qvLqE-vUFbehGW74OXw.ttf',
+      'IBMPlexSansThai-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Thai 600
+  static Future<Font> iBMPlexSansThaiSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansthai/v1/m8JMje1VVIzcq1HzJq2AEdo2Tj_qvLqE1vIFbehGW74OXw.ttf',
+      'IBMPlexSansThai-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Thai 700
+  static Future<Font> iBMPlexSansThaiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansthai/v1/m8JMje1VVIzcq1HzJq2AEdo2Tj_qvLqEsvMFbehGW74OXw.ttf',
+      'IBMPlexSansThai-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Thai Looped 100
+  static Future<Font> iBMPlexSansThaiLoopedThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansthailooped/v1/tss5AoJJRAhL3BTrK3r2xxbFhvKfyBB6l7hHT30L_HaKpHOtFCQ76Q.ttf',
+      'IBMPlexSansThaiLooped-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Thai Looped 200
+  static Future<Font> iBMPlexSansThaiLoopedExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansthailooped/v1/tss6AoJJRAhL3BTrK3r2xxbFhvKfyBB6l7hHT30L_NqrhFmDGC0i8Cc.ttf',
+      'IBMPlexSansThaiLooped-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Thai Looped 300
+  static Future<Font> iBMPlexSansThaiLoopedLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansthailooped/v1/tss6AoJJRAhL3BTrK3r2xxbFhvKfyBB6l7hHT30L_L6ohFmDGC0i8Cc.ttf',
+      'IBMPlexSansThaiLooped-Light',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Thai Looped regular
+  static Future<Font> iBMPlexSansThaiLoopedRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansthailooped/v1/tss_AoJJRAhL3BTrK3r2xxbFhvKfyBB6l7hHT30LxBKAoFGoBCQ.ttf',
+      'IBMPlexSansThaiLooped-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Thai Looped 500
+  static Future<Font> iBMPlexSansThaiLoopedMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansthailooped/v1/tss6AoJJRAhL3BTrK3r2xxbFhvKfyBB6l7hHT30L_OaphFmDGC0i8Cc.ttf',
+      'IBMPlexSansThaiLooped-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Thai Looped 600
+  static Future<Font> iBMPlexSansThaiLoopedSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansthailooped/v1/tss6AoJJRAhL3BTrK3r2xxbFhvKfyBB6l7hHT30L_MquhFmDGC0i8Cc.ttf',
+      'IBMPlexSansThaiLooped-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// IBM Plex Sans Thai Looped 700
+  static Future<Font> iBMPlexSansThaiLoopedBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/ibmplexsansthailooped/v1/tss6AoJJRAhL3BTrK3r2xxbFhvKfyBB6l7hHT30L_K6vhFmDGC0i8Cc.ttf',
+      'IBMPlexSansThaiLooped-Bold',
     );
     return font.getFont();
   }
@@ -12970,7 +14464,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Serif 100
   static Future<Font> iBMPlexSerifThin() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexserif/v9/jizBREVNn1dOx-zrZ2X3pZvkTi182zIZj1bIkNo.ttf',
+      'https://fonts.gstatic.com/s/ibmplexserif/v10/jizBREVNn1dOx-zrZ2X3pZvkTi182zIZj1bIkNo.ttf',
       'IBMPlexSerif-Thin',
     );
     return font.getFont();
@@ -12979,7 +14473,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Serif 100italic
   static Future<Font> iBMPlexSerifThinItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexserif/v9/jizHREVNn1dOx-zrZ2X3pZvkTiUa41YTi3TNgNq55w.ttf',
+      'https://fonts.gstatic.com/s/ibmplexserif/v10/jizHREVNn1dOx-zrZ2X3pZvkTiUa41YTi3TNgNq55w.ttf',
       'IBMPlexSerif-ThinItalic',
     );
     return font.getFont();
@@ -12988,7 +14482,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Serif 200
   static Future<Font> iBMPlexSerifExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexserif/v9/jizAREVNn1dOx-zrZ2X3pZvkTi3Q-hIzoVrBicOg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexserif/v10/jizAREVNn1dOx-zrZ2X3pZvkTi3Q-hIzoVrBicOg.ttf',
       'IBMPlexSerif-ExtraLight',
     );
     return font.getFont();
@@ -12997,7 +14491,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Serif 200italic
   static Future<Font> iBMPlexSerifExtraLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexserif/v9/jizGREVNn1dOx-zrZ2X3pZvkTiUa4_oyq17jjNOg_oc.ttf',
+      'https://fonts.gstatic.com/s/ibmplexserif/v10/jizGREVNn1dOx-zrZ2X3pZvkTiUa4_oyq17jjNOg_oc.ttf',
       'IBMPlexSerif-ExtraLightItalic',
     );
     return font.getFont();
@@ -13006,7 +14500,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Serif 300
   static Future<Font> iBMPlexSerifLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexserif/v9/jizAREVNn1dOx-zrZ2X3pZvkTi20-RIzoVrBicOg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexserif/v10/jizAREVNn1dOx-zrZ2X3pZvkTi20-RIzoVrBicOg.ttf',
       'IBMPlexSerif-Light',
     );
     return font.getFont();
@@ -13015,7 +14509,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Serif 300italic
   static Future<Font> iBMPlexSerifLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexserif/v9/jizGREVNn1dOx-zrZ2X3pZvkTiUa454xq17jjNOg_oc.ttf',
+      'https://fonts.gstatic.com/s/ibmplexserif/v10/jizGREVNn1dOx-zrZ2X3pZvkTiUa454xq17jjNOg_oc.ttf',
       'IBMPlexSerif-LightItalic',
     );
     return font.getFont();
@@ -13024,7 +14518,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Serif regular
   static Future<Font> iBMPlexSerifRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexserif/v9/jizDREVNn1dOx-zrZ2X3pZvkThUY0TY7ikbI.ttf',
+      'https://fonts.gstatic.com/s/ibmplexserif/v10/jizDREVNn1dOx-zrZ2X3pZvkThUY0TY7ikbI.ttf',
       'IBMPlexSerif-Regular',
     );
     return font.getFont();
@@ -13033,7 +14527,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Serif italic
   static Future<Font> iBMPlexSerifItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexserif/v9/jizBREVNn1dOx-zrZ2X3pZvkTiUa2zIZj1bIkNo.ttf',
+      'https://fonts.gstatic.com/s/ibmplexserif/v10/jizBREVNn1dOx-zrZ2X3pZvkTiUa2zIZj1bIkNo.ttf',
       'IBMPlexSerif-Italic',
     );
     return font.getFont();
@@ -13042,7 +14536,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Serif 500
   static Future<Font> iBMPlexSerifMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexserif/v9/jizAREVNn1dOx-zrZ2X3pZvkTi3s-BIzoVrBicOg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexserif/v10/jizAREVNn1dOx-zrZ2X3pZvkTi3s-BIzoVrBicOg.ttf',
       'IBMPlexSerif-Medium',
     );
     return font.getFont();
@@ -13051,7 +14545,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Serif 500italic
   static Future<Font> iBMPlexSerifMediumItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexserif/v9/jizGREVNn1dOx-zrZ2X3pZvkTiUa48Ywq17jjNOg_oc.ttf',
+      'https://fonts.gstatic.com/s/ibmplexserif/v10/jizGREVNn1dOx-zrZ2X3pZvkTiUa48Ywq17jjNOg_oc.ttf',
       'IBMPlexSerif-MediumItalic',
     );
     return font.getFont();
@@ -13060,7 +14554,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Serif 600
   static Future<Font> iBMPlexSerifSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexserif/v9/jizAREVNn1dOx-zrZ2X3pZvkTi3A_xIzoVrBicOg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexserif/v10/jizAREVNn1dOx-zrZ2X3pZvkTi3A_xIzoVrBicOg.ttf',
       'IBMPlexSerif-SemiBold',
     );
     return font.getFont();
@@ -13069,7 +14563,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Serif 600italic
   static Future<Font> iBMPlexSerifSemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexserif/v9/jizGREVNn1dOx-zrZ2X3pZvkTiUa4-o3q17jjNOg_oc.ttf',
+      'https://fonts.gstatic.com/s/ibmplexserif/v10/jizGREVNn1dOx-zrZ2X3pZvkTiUa4-o3q17jjNOg_oc.ttf',
       'IBMPlexSerif-SemiBoldItalic',
     );
     return font.getFont();
@@ -13078,7 +14572,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Serif 700
   static Future<Font> iBMPlexSerifBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexserif/v9/jizAREVNn1dOx-zrZ2X3pZvkTi2k_hIzoVrBicOg.ttf',
+      'https://fonts.gstatic.com/s/ibmplexserif/v10/jizAREVNn1dOx-zrZ2X3pZvkTi2k_hIzoVrBicOg.ttf',
       'IBMPlexSerif-Bold',
     );
     return font.getFont();
@@ -13087,7 +14581,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// IBM Plex Serif 700italic
   static Future<Font> iBMPlexSerifBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ibmplexserif/v9/jizGREVNn1dOx-zrZ2X3pZvkTiUa4442q17jjNOg_oc.ttf',
+      'https://fonts.gstatic.com/s/ibmplexserif/v10/jizGREVNn1dOx-zrZ2X3pZvkTiUa4442q17jjNOg_oc.ttf',
       'IBMPlexSerif-BoldItalic',
     );
     return font.getFont();
@@ -13825,7 +15319,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Italianno regular
   static Future<Font> italiannoRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/italianno/v10/dg4n_p3sv6gCJkwzT6Rnj5YpQwM-gg.ttf',
+      'https://fonts.gstatic.com/s/italianno/v11/dg4n_p3sv6gCJkwzT6Rnj5YpQwM-gg.ttf',
       'Italianno-Regular',
     );
     return font.getFont();
@@ -14776,6 +16270,123 @@ class PdfGoogleFonts extends DownloadbleFont {
     return font.getFont();
   }
 
+  /// Kaisei Decol regular
+  static Future<Font> kaiseiDecolRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kaiseidecol/v1/bMrwmSqP45sidWf3QmfFW6iyW1EP22OjoA.ttf',
+      'KaiseiDecol-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Kaisei Decol 500
+  static Future<Font> kaiseiDecolMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kaiseidecol/v1/bMrvmSqP45sidWf3QmfFW6iKr3gr00i_qb57kA.ttf',
+      'KaiseiDecol-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Kaisei Decol 700
+  static Future<Font> kaiseiDecolBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kaiseidecol/v1/bMrvmSqP45sidWf3QmfFW6iK534r00i_qb57kA.ttf',
+      'KaiseiDecol-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Kaisei HarunoUmi regular
+  static Future<Font> kaiseiHarunoUmiRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kaiseiharunoumi/v1/HI_RiZQSLqBQoAHhK_C6N_nzy_jcGsv5sM8u3mk.ttf',
+      'KaiseiHarunoUmi-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Kaisei HarunoUmi 500
+  static Future<Font> kaiseiHarunoUmiMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kaiseiharunoumi/v1/HI_WiZQSLqBQoAHhK_C6N_nzy_jcIj_QlMcFwmC9FAU.ttf',
+      'KaiseiHarunoUmi-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Kaisei HarunoUmi 700
+  static Future<Font> kaiseiHarunoUmiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kaiseiharunoumi/v1/HI_WiZQSLqBQoAHhK_C6N_nzy_jcInfWlMcFwmC9FAU.ttf',
+      'KaiseiHarunoUmi-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Kaisei Opti regular
+  static Future<Font> kaiseiOptiRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kaiseiopti/v1/QldKNThJphYb8_g6c2nlIFle7KlmxuHx.ttf',
+      'KaiseiOpti-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Kaisei Opti 500
+  static Future<Font> kaiseiOptiMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kaiseiopti/v1/QldXNThJphYb8_g6c2nlIGGqxY1u7f34DYwn.ttf',
+      'KaiseiOpti-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Kaisei Opti 700
+  static Future<Font> kaiseiOptiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kaiseiopti/v1/QldXNThJphYb8_g6c2nlIGHiw41u7f34DYwn.ttf',
+      'KaiseiOpti-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Kaisei Tokumin regular
+  static Future<Font> kaiseiTokuminRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kaiseitokumin/v1/Gg8sN5wdZg7xCwuMsylww2ZiQkJf1l0pj946.ttf',
+      'KaiseiTokumin-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Kaisei Tokumin 500
+  static Future<Font> kaiseiTokuminMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kaiseitokumin/v1/Gg8vN5wdZg7xCwuMsylww2ZiQnqr_3khpMIzeI6v.ttf',
+      'KaiseiTokumin-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Kaisei Tokumin 700
+  static Future<Font> kaiseiTokuminBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kaiseitokumin/v1/Gg8vN5wdZg7xCwuMsylww2ZiQnrj-XkhpMIzeI6v.ttf',
+      'KaiseiTokumin-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Kaisei Tokumin 800
+  static Future<Font> kaiseiTokuminExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kaiseitokumin/v1/Gg8vN5wdZg7xCwuMsylww2ZiQnr_-nkhpMIzeI6v.ttf',
+      'KaiseiTokumin-ExtraBold',
+    );
+    return font.getFont();
+  }
+
   /// Kalam 300
   static Future<Font> kalamLight() {
     const font = PdfGoogleFonts._(
@@ -15400,7 +17011,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kiwi Maru 300
   static Future<Font> kiwiMaruLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kiwimaru/v4/R70djykGkuuDep-hRg6gNCi0Vxn9R5ShnA.ttf',
+      'https://fonts.gstatic.com/s/kiwimaru/v7/R70djykGkuuDep-hRg6gNCi0Vxn9R5ShnA.ttf',
       'KiwiMaru-Light',
     );
     return font.getFont();
@@ -15409,7 +17020,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kiwi Maru regular
   static Future<Font> kiwiMaruRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kiwimaru/v4/R70YjykGkuuDep-hRg6YmACQXzLhTg.ttf',
+      'https://fonts.gstatic.com/s/kiwimaru/v7/R70YjykGkuuDep-hRg6YmACQXzLhTg.ttf',
       'KiwiMaru-Regular',
     );
     return font.getFont();
@@ -15418,8 +17029,26 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kiwi Maru 500
   static Future<Font> kiwiMaruMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kiwimaru/v4/R70djykGkuuDep-hRg6gbCm0Vxn9R5ShnA.ttf',
+      'https://fonts.gstatic.com/s/kiwimaru/v7/R70djykGkuuDep-hRg6gbCm0Vxn9R5ShnA.ttf',
       'KiwiMaru-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Klee One regular
+  static Future<Font> kleeOneRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kleeone/v1/LDIxapCLNRc6A8oT4q4AOeekWPrP.ttf',
+      'KleeOne-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Klee One 600
+  static Future<Font> kleeOneSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kleeone/v1/LDI2apCLNRc6A8oT4pbYF8Osc-bGkqIw.ttf',
+      'KleeOne-SemiBold',
     );
     return font.getFont();
   }
@@ -15868,7 +17497,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kufam regular
   static Future<Font> kufamRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kufam/v6/C8c-4cY7pG7w_oSJDszBXsKCcBH3lqk7qQCJHvIwYg.ttf',
+      'https://fonts.gstatic.com/s/kufam/v11/C8c-4cY7pG7w_oSJDszBXsKCcBH3lqk7qQCJHvIwYg.ttf',
       'Kufam-Regular',
     );
     return font.getFont();
@@ -15877,7 +17506,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kufam 500
   static Future<Font> kufamMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kufam/v6/C8c-4cY7pG7w_oSJDszBXsKCcBH3pKk7qQCJHvIwYg.ttf',
+      'https://fonts.gstatic.com/s/kufam/v11/C8c-4cY7pG7w_oSJDszBXsKCcBH3pKk7qQCJHvIwYg.ttf',
       'Kufam-Medium',
     );
     return font.getFont();
@@ -15886,7 +17515,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kufam 600
   static Future<Font> kufamSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kufam/v6/C8c-4cY7pG7w_oSJDszBXsKCcBH3SK47qQCJHvIwYg.ttf',
+      'https://fonts.gstatic.com/s/kufam/v11/C8c-4cY7pG7w_oSJDszBXsKCcBH3SK47qQCJHvIwYg.ttf',
       'Kufam-SemiBold',
     );
     return font.getFont();
@@ -15895,7 +17524,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kufam 700
   static Future<Font> kufamBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kufam/v6/C8c-4cY7pG7w_oSJDszBXsKCcBH3ca47qQCJHvIwYg.ttf',
+      'https://fonts.gstatic.com/s/kufam/v11/C8c-4cY7pG7w_oSJDszBXsKCcBH3ca47qQCJHvIwYg.ttf',
       'Kufam-Bold',
     );
     return font.getFont();
@@ -15904,7 +17533,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kufam 800
   static Future<Font> kufamExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kufam/v6/C8c-4cY7pG7w_oSJDszBXsKCcBH3Fq47qQCJHvIwYg.ttf',
+      'https://fonts.gstatic.com/s/kufam/v11/C8c-4cY7pG7w_oSJDszBXsKCcBH3Fq47qQCJHvIwYg.ttf',
       'Kufam-ExtraBold',
     );
     return font.getFont();
@@ -15913,7 +17542,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kufam 900
   static Future<Font> kufamBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kufam/v6/C8c-4cY7pG7w_oSJDszBXsKCcBH3P647qQCJHvIwYg.ttf',
+      'https://fonts.gstatic.com/s/kufam/v11/C8c-4cY7pG7w_oSJDszBXsKCcBH3P647qQCJHvIwYg.ttf',
       'Kufam-Black',
     );
     return font.getFont();
@@ -15922,7 +17551,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kufam italic
   static Future<Font> kufamItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kufam/v6/C8c84cY7pG7w_q6APDMZN6kY3hbiXurT6gqNPPcgYp0i.ttf',
+      'https://fonts.gstatic.com/s/kufam/v11/C8c84cY7pG7w_q6APDMZN6kY3hbiXurT6gqNPPcgYp0i.ttf',
       'Kufam-Italic',
     );
     return font.getFont();
@@ -15931,7 +17560,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kufam 500italic
   static Future<Font> kufamMediumItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kufam/v6/C8c84cY7pG7w_q6APDMZN6kY3hbiXurh6gqNPPcgYp0i.ttf',
+      'https://fonts.gstatic.com/s/kufam/v11/C8c84cY7pG7w_q6APDMZN6kY3hbiXurh6gqNPPcgYp0i.ttf',
       'Kufam-MediumItalic',
     );
     return font.getFont();
@@ -15940,7 +17569,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kufam 600italic
   static Future<Font> kufamSemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kufam/v6/C8c84cY7pG7w_q6APDMZN6kY3hbiXuoN7QqNPPcgYp0i.ttf',
+      'https://fonts.gstatic.com/s/kufam/v11/C8c84cY7pG7w_q6APDMZN6kY3hbiXuoN7QqNPPcgYp0i.ttf',
       'Kufam-SemiBoldItalic',
     );
     return font.getFont();
@@ -15949,7 +17578,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kufam 700italic
   static Future<Font> kufamBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kufam/v6/C8c84cY7pG7w_q6APDMZN6kY3hbiXuo07QqNPPcgYp0i.ttf',
+      'https://fonts.gstatic.com/s/kufam/v11/C8c84cY7pG7w_q6APDMZN6kY3hbiXuo07QqNPPcgYp0i.ttf',
       'Kufam-BoldItalic',
     );
     return font.getFont();
@@ -15958,7 +17587,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kufam 800italic
   static Future<Font> kufamExtraBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kufam/v6/C8c84cY7pG7w_q6APDMZN6kY3hbiXupT7QqNPPcgYp0i.ttf',
+      'https://fonts.gstatic.com/s/kufam/v11/C8c84cY7pG7w_q6APDMZN6kY3hbiXupT7QqNPPcgYp0i.ttf',
       'Kufam-ExtraBoldItalic',
     );
     return font.getFont();
@@ -15967,7 +17596,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kufam 900italic
   static Future<Font> kufamBlackItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kufam/v6/C8c84cY7pG7w_q6APDMZN6kY3hbiXup67QqNPPcgYp0i.ttf',
+      'https://fonts.gstatic.com/s/kufam/v11/C8c84cY7pG7w_q6APDMZN6kY3hbiXup67QqNPPcgYp0i.ttf',
       'Kufam-BlackItalic',
     );
     return font.getFont();
@@ -16081,10 +17710,28 @@ class PdfGoogleFonts extends DownloadbleFont {
     return font.getFont();
   }
 
+  /// Kumbh Sans 100
+  static Future<Font> kumbhSansThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kumbhsans/v6/c4mw1n92AsfhuCq6tVsaoIx1CHIi4kToNorqSyNIXIwSP0XD.ttf',
+      'KumbhSans-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Kumbh Sans 200
+  static Future<Font> kumbhSansExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kumbhsans/v6/c4mw1n92AsfhuCq6tVsaoIx1CHIi4kToNopqSiNIXIwSP0XD.ttf',
+      'KumbhSans-ExtraLight',
+    );
+    return font.getFont();
+  }
+
   /// Kumbh Sans 300
   static Future<Font> kumbhSansLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kumbhsans/v5/c4mm1n92AsfhuCq6tVsagit_3KKVXUv8Los.ttf',
+      'https://fonts.gstatic.com/s/kumbhsans/v6/c4mw1n92AsfhuCq6tVsaoIx1CHIi4kToNoq0SiNIXIwSP0XD.ttf',
       'KumbhSans-Light',
     );
     return font.getFont();
@@ -16093,8 +17740,26 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kumbh Sans regular
   static Future<Font> kumbhSansRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kumbhsans/v5/c4ml1n92AsfhuCq6tVsauodX-Kq-QUI.ttf',
+      'https://fonts.gstatic.com/s/kumbhsans/v6/c4mw1n92AsfhuCq6tVsaoIx1CHIi4kToNorqSiNIXIwSP0XD.ttf',
       'KumbhSans-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Kumbh Sans 500
+  static Future<Font> kumbhSansMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kumbhsans/v6/c4mw1n92AsfhuCq6tVsaoIx1CHIi4kToNorYSiNIXIwSP0XD.ttf',
+      'KumbhSans-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Kumbh Sans 600
+  static Future<Font> kumbhSansSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kumbhsans/v6/c4mw1n92AsfhuCq6tVsaoIx1CHIi4kToNoo0TSNIXIwSP0XD.ttf',
+      'KumbhSans-SemiBold',
     );
     return font.getFont();
   }
@@ -16102,8 +17767,26 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Kumbh Sans 700
   static Future<Font> kumbhSansBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/kumbhsans/v5/c4mm1n92AsfhuCq6tVsagjt43KKVXUv8Los.ttf',
+      'https://fonts.gstatic.com/s/kumbhsans/v6/c4mw1n92AsfhuCq6tVsaoIx1CHIi4kToNooNTSNIXIwSP0XD.ttf',
       'KumbhSans-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Kumbh Sans 800
+  static Future<Font> kumbhSansExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kumbhsans/v6/c4mw1n92AsfhuCq6tVsaoIx1CHIi4kToNopqTSNIXIwSP0XD.ttf',
+      'KumbhSans-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Kumbh Sans 900
+  static Future<Font> kumbhSansBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/kumbhsans/v6/c4mw1n92AsfhuCq6tVsaoIx1CHIi4kToNopDTSNIXIwSP0XD.ttf',
+      'KumbhSans-Black',
     );
     return font.getFont();
   }
@@ -16228,7 +17911,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lato 100
   static Future<Font> latoThin() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lato/v17/S6u8w4BMUTPHh30wWyWrFCbw7A.ttf',
+      'https://fonts.gstatic.com/s/lato/v20/S6u8w4BMUTPHh30wWyWrFCbw7A.ttf',
       'Lato-Thin',
     );
     return font.getFont();
@@ -16237,7 +17920,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lato 100italic
   static Future<Font> latoThinItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lato/v17/S6u-w4BMUTPHjxsIPy-vNiPg7MU0.ttf',
+      'https://fonts.gstatic.com/s/lato/v20/S6u-w4BMUTPHjxsIPy-vNiPg7MU0.ttf',
       'Lato-ThinItalic',
     );
     return font.getFont();
@@ -16246,7 +17929,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lato 300
   static Future<Font> latoLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lato/v17/S6u9w4BMUTPHh7USew-FGC_p9dw.ttf',
+      'https://fonts.gstatic.com/s/lato/v20/S6u9w4BMUTPHh7USew-FGC_p9dw.ttf',
       'Lato-Light',
     );
     return font.getFont();
@@ -16255,7 +17938,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lato 300italic
   static Future<Font> latoLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lato/v17/S6u_w4BMUTPHjxsI9w2PHA3s5dwt7w.ttf',
+      'https://fonts.gstatic.com/s/lato/v20/S6u_w4BMUTPHjxsI9w2PHA3s5dwt7w.ttf',
       'Lato-LightItalic',
     );
     return font.getFont();
@@ -16264,7 +17947,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lato regular
   static Future<Font> latoRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lato/v17/S6uyw4BMUTPHvxk6XweuBCY.ttf',
+      'https://fonts.gstatic.com/s/lato/v20/S6uyw4BMUTPHvxk6XweuBCY.ttf',
       'Lato-Regular',
     );
     return font.getFont();
@@ -16273,7 +17956,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lato italic
   static Future<Font> latoItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lato/v17/S6u8w4BMUTPHjxswWyWrFCbw7A.ttf',
+      'https://fonts.gstatic.com/s/lato/v20/S6u8w4BMUTPHjxswWyWrFCbw7A.ttf',
       'Lato-Italic',
     );
     return font.getFont();
@@ -16282,7 +17965,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lato 700
   static Future<Font> latoBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lato/v17/S6u9w4BMUTPHh6UVew-FGC_p9dw.ttf',
+      'https://fonts.gstatic.com/s/lato/v20/S6u9w4BMUTPHh6UVew-FGC_p9dw.ttf',
       'Lato-Bold',
     );
     return font.getFont();
@@ -16291,7 +17974,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lato 700italic
   static Future<Font> latoBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lato/v17/S6u_w4BMUTPHjxsI5wqPHA3s5dwt7w.ttf',
+      'https://fonts.gstatic.com/s/lato/v20/S6u_w4BMUTPHjxsI5wqPHA3s5dwt7w.ttf',
       'Lato-BoldItalic',
     );
     return font.getFont();
@@ -16300,7 +17983,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lato 900
   static Future<Font> latoBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lato/v17/S6u9w4BMUTPHh50Xew-FGC_p9dw.ttf',
+      'https://fonts.gstatic.com/s/lato/v20/S6u9w4BMUTPHh50Xew-FGC_p9dw.ttf',
       'Lato-Black',
     );
     return font.getFont();
@@ -16309,7 +17992,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lato 900italic
   static Future<Font> latoBlackItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lato/v17/S6u_w4BMUTPHjxsI3wiPHA3s5dwt7w.ttf',
+      'https://fonts.gstatic.com/s/lato/v20/S6u_w4BMUTPHjxsI3wiPHA3s5dwt7w.ttf',
       'Lato-BlackItalic',
     );
     return font.getFont();
@@ -16345,7 +18028,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lekton regular
   static Future<Font> lektonRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lekton/v11/SZc43FDmLaWmWpBeXxfonUPL6Q.ttf',
+      'https://fonts.gstatic.com/s/lekton/v12/SZc43FDmLaWmWpBeXxfonUPL6Q.ttf',
       'Lekton-Regular',
     );
     return font.getFont();
@@ -16354,7 +18037,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lekton italic
   static Future<Font> lektonItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lekton/v11/SZc63FDmLaWmWpBuXR3sv0bb6StO.ttf',
+      'https://fonts.gstatic.com/s/lekton/v12/SZc63FDmLaWmWpBuXR3sv0bb6StO.ttf',
       'Lekton-Italic',
     );
     return font.getFont();
@@ -16363,7 +18046,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lekton 700
   static Future<Font> lektonBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lekton/v11/SZc73FDmLaWmWpBm4zjMlWjX4DJXgQ.ttf',
+      'https://fonts.gstatic.com/s/lekton/v12/SZc73FDmLaWmWpBm4zjMlWjX4DJXgQ.ttf',
       'Lekton-Bold',
     );
     return font.getFont();
@@ -16426,8 +18109,17 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lexend 100
   static Future<Font> lexendThin() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lexend/v5/wlpygwvFAVdoq2_nmKQR82JHaTBX.ttf',
+      'https://fonts.gstatic.com/s/lexend/v7/~ChUKBkxleGVuZDoLCPTQnbsHFQAAyEIgACoECAEYAQ==.ttf',
       'Lexend-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend 200
+  static Future<Font> lexendExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexend/v7/~ChUKBkxleGVuZDoLCPTQnbsHFQAASEMgACoECAEYAQ==.ttf',
+      'Lexend-ExtraLight',
     );
     return font.getFont();
   }
@@ -16435,7 +18127,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lexend 300
   static Future<Font> lexendLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lexend/v5/wlpzgwvFAVdoq2_nUIYx2UxLYClOCg.ttf',
+      'https://fonts.gstatic.com/s/lexend/v7/~ChUKBkxleGVuZDoLCPTQnbsHFQAAlkMgACoECAEYAQ==.ttf',
       'Lexend-Light',
     );
     return font.getFont();
@@ -16444,7 +18136,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lexend regular
   static Future<Font> lexendRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lexend/v5/wlpwgwvFAVdoq2_f_K4V0WdXaQ.ttf',
+      'https://fonts.gstatic.com/s/lexend/v7/~ChUKBkxleGVuZDoLCPTQnbsHFQAAyEMgACoECAEYAQ==.ttf',
       'Lexend-Regular',
     );
     return font.getFont();
@@ -16453,7 +18145,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lexend 500
   static Future<Font> lexendMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lexend/v5/wlpzgwvFAVdoq2_nCIcx2UxLYClOCg.ttf',
+      'https://fonts.gstatic.com/s/lexend/v7/~ChUKBkxleGVuZDoLCPTQnbsHFQAA-kMgACoECAEYAQ==.ttf',
       'Lexend-Medium',
     );
     return font.getFont();
@@ -16462,7 +18154,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lexend 600
   static Future<Font> lexendSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lexend/v5/wlpzgwvFAVdoq2_nJIAx2UxLYClOCg.ttf',
+      'https://fonts.gstatic.com/s/lexend/v7/~ChUKBkxleGVuZDoLCPTQnbsHFQAAFkQgACoECAEYAQ==.ttf',
       'Lexend-SemiBold',
     );
     return font.getFont();
@@ -16471,7 +18163,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lexend 700
   static Future<Font> lexendBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lexend/v5/wlpzgwvFAVdoq2_nQIEx2UxLYClOCg.ttf',
+      'https://fonts.gstatic.com/s/lexend/v7/~ChUKBkxleGVuZDoLCPTQnbsHFQAAL0QgACoECAEYAQ==.ttf',
       'Lexend-Bold',
     );
     return font.getFont();
@@ -16480,8 +18172,44 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lexend 800
   static Future<Font> lexendExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lexend/v5/wlpzgwvFAVdoq2_nXIIx2UxLYClOCg.ttf',
+      'https://fonts.gstatic.com/s/lexend/v7/~ChUKBkxleGVuZDoLCPTQnbsHFQAASEQgACoECAEYAQ==.ttf',
       'Lexend-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend 900
+  static Future<Font> lexendBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexend/v7/~ChUKBkxleGVuZDoLCPTQnbsHFQAAYUQgACoECAEYAQ==.ttf',
+      'Lexend-Black',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Deca 100
+  static Future<Font> lexendDecaThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexenddeca/v10/K2FifZFYk-dHSE0UPPuwQ7CrD94i-NCKm-U48MxArBPCqLNflg.ttf',
+      'LexendDeca-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Deca 200
+  static Future<Font> lexendDecaExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexenddeca/v10/K2FifZFYk-dHSE0UPPuwQ7CrD94i-NCKm-U4cM1ArBPCqLNflg.ttf',
+      'LexendDeca-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Deca 300
+  static Future<Font> lexendDecaLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexenddeca/v10/K2FifZFYk-dHSE0UPPuwQ7CrD94i-NCKm-U4rs1ArBPCqLNflg.ttf',
+      'LexendDeca-Light',
     );
     return font.getFont();
   }
@@ -16489,8 +18217,80 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lexend Deca regular
   static Future<Font> lexendDecaRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lexenddeca/v7/K2F1fZFYk-dHSE0UPPuwQ6qgLS76ZHOM.ttf',
+      'https://fonts.gstatic.com/s/lexenddeca/v10/K2FifZFYk-dHSE0UPPuwQ7CrD94i-NCKm-U48M1ArBPCqLNflg.ttf',
       'LexendDeca-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Deca 500
+  static Future<Font> lexendDecaMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexenddeca/v10/K2FifZFYk-dHSE0UPPuwQ7CrD94i-NCKm-U4ws1ArBPCqLNflg.ttf',
+      'LexendDeca-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Deca 600
+  static Future<Font> lexendDecaSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexenddeca/v10/K2FifZFYk-dHSE0UPPuwQ7CrD94i-NCKm-U4LspArBPCqLNflg.ttf',
+      'LexendDeca-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Deca 700
+  static Future<Font> lexendDecaBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexenddeca/v10/K2FifZFYk-dHSE0UPPuwQ7CrD94i-NCKm-U4F8pArBPCqLNflg.ttf',
+      'LexendDeca-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Deca 800
+  static Future<Font> lexendDecaExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexenddeca/v10/K2FifZFYk-dHSE0UPPuwQ7CrD94i-NCKm-U4cMpArBPCqLNflg.ttf',
+      'LexendDeca-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Deca 900
+  static Future<Font> lexendDecaBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexenddeca/v10/K2FifZFYk-dHSE0UPPuwQ7CrD94i-NCKm-U4WcpArBPCqLNflg.ttf',
+      'LexendDeca-Black',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Exa 100
+  static Future<Font> lexendExaThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendexa/v15/UMBCrPdOoHOnxExyjdBeQCH18mulUxBvI9r7T6bHHJ8BRq0b.ttf',
+      'LexendExa-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Exa 200
+  static Future<Font> lexendExaExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendexa/v15/UMBCrPdOoHOnxExyjdBeQCH18mulUxBvI9p7TqbHHJ8BRq0b.ttf',
+      'LexendExa-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Exa 300
+  static Future<Font> lexendExaLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendexa/v15/UMBCrPdOoHOnxExyjdBeQCH18mulUxBvI9qlTqbHHJ8BRq0b.ttf',
+      'LexendExa-Light',
     );
     return font.getFont();
   }
@@ -16498,8 +18298,80 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lexend Exa regular
   static Future<Font> lexendExaRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lexendexa/v10/UMBXrPdOoHOnxExyjdBeWirXArM58BY.ttf',
+      'https://fonts.gstatic.com/s/lexendexa/v15/UMBCrPdOoHOnxExyjdBeQCH18mulUxBvI9r7TqbHHJ8BRq0b.ttf',
       'LexendExa-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Exa 500
+  static Future<Font> lexendExaMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendexa/v15/UMBCrPdOoHOnxExyjdBeQCH18mulUxBvI9rJTqbHHJ8BRq0b.ttf',
+      'LexendExa-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Exa 600
+  static Future<Font> lexendExaSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendexa/v15/UMBCrPdOoHOnxExyjdBeQCH18mulUxBvI9olSabHHJ8BRq0b.ttf',
+      'LexendExa-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Exa 700
+  static Future<Font> lexendExaBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendexa/v15/UMBCrPdOoHOnxExyjdBeQCH18mulUxBvI9ocSabHHJ8BRq0b.ttf',
+      'LexendExa-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Exa 800
+  static Future<Font> lexendExaExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendexa/v15/UMBCrPdOoHOnxExyjdBeQCH18mulUxBvI9p7SabHHJ8BRq0b.ttf',
+      'LexendExa-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Exa 900
+  static Future<Font> lexendExaBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendexa/v15/UMBCrPdOoHOnxExyjdBeQCH18mulUxBvI9pSSabHHJ8BRq0b.ttf',
+      'LexendExa-Black',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Giga 100
+  static Future<Font> lexendGigaThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendgiga/v15/PlIuFl67Mah5Y8yMHE7lkUZPlTBo4MWFfNRC2LmE68oo6eepYQ.ttf',
+      'LexendGiga-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Giga 200
+  static Future<Font> lexendGigaExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendgiga/v15/PlIuFl67Mah5Y8yMHE7lkUZPlTBo4MWFfNRCWLiE68oo6eepYQ.ttf',
+      'LexendGiga-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Giga 300
+  static Future<Font> lexendGigaLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendgiga/v15/PlIuFl67Mah5Y8yMHE7lkUZPlTBo4MWFfNRChriE68oo6eepYQ.ttf',
+      'LexendGiga-Light',
     );
     return font.getFont();
   }
@@ -16507,8 +18379,80 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lexend Giga regular
   static Future<Font> lexendGigaRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lexendgiga/v10/PlI5Fl67Mah5Y8yMHE7lkVxEt8CwfGaD.ttf',
+      'https://fonts.gstatic.com/s/lexendgiga/v15/PlIuFl67Mah5Y8yMHE7lkUZPlTBo4MWFfNRC2LiE68oo6eepYQ.ttf',
       'LexendGiga-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Giga 500
+  static Future<Font> lexendGigaMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendgiga/v15/PlIuFl67Mah5Y8yMHE7lkUZPlTBo4MWFfNRC6riE68oo6eepYQ.ttf',
+      'LexendGiga-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Giga 600
+  static Future<Font> lexendGigaSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendgiga/v15/PlIuFl67Mah5Y8yMHE7lkUZPlTBo4MWFfNRCBr-E68oo6eepYQ.ttf',
+      'LexendGiga-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Giga 700
+  static Future<Font> lexendGigaBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendgiga/v15/PlIuFl67Mah5Y8yMHE7lkUZPlTBo4MWFfNRCP7-E68oo6eepYQ.ttf',
+      'LexendGiga-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Giga 800
+  static Future<Font> lexendGigaExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendgiga/v15/PlIuFl67Mah5Y8yMHE7lkUZPlTBo4MWFfNRCWL-E68oo6eepYQ.ttf',
+      'LexendGiga-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Giga 900
+  static Future<Font> lexendGigaBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendgiga/v15/PlIuFl67Mah5Y8yMHE7lkUZPlTBo4MWFfNRCcb-E68oo6eepYQ.ttf',
+      'LexendGiga-Black',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Mega 100
+  static Future<Font> lexendMegaThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendmega/v15/qFdX35aBi5JtHD41zSTFEuTByuvYFuE9IbDL8fivveyiq9EqQw.ttf',
+      'LexendMega-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Mega 200
+  static Future<Font> lexendMegaExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendmega/v15/qFdX35aBi5JtHD41zSTFEuTByuvYFuE9IbDLcfmvveyiq9EqQw.ttf',
+      'LexendMega-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Mega 300
+  static Future<Font> lexendMegaLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendmega/v15/qFdX35aBi5JtHD41zSTFEuTByuvYFuE9IbDLr_mvveyiq9EqQw.ttf',
+      'LexendMega-Light',
     );
     return font.getFont();
   }
@@ -16516,8 +18460,80 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lexend Mega regular
   static Future<Font> lexendMegaRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lexendmega/v10/qFdA35aBi5JtHD41zSTFEv7K6BsAikI7.ttf',
+      'https://fonts.gstatic.com/s/lexendmega/v15/qFdX35aBi5JtHD41zSTFEuTByuvYFuE9IbDL8fmvveyiq9EqQw.ttf',
       'LexendMega-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Mega 500
+  static Future<Font> lexendMegaMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendmega/v15/qFdX35aBi5JtHD41zSTFEuTByuvYFuE9IbDLw_mvveyiq9EqQw.ttf',
+      'LexendMega-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Mega 600
+  static Future<Font> lexendMegaSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendmega/v15/qFdX35aBi5JtHD41zSTFEuTByuvYFuE9IbDLL_6vveyiq9EqQw.ttf',
+      'LexendMega-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Mega 700
+  static Future<Font> lexendMegaBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendmega/v15/qFdX35aBi5JtHD41zSTFEuTByuvYFuE9IbDLFv6vveyiq9EqQw.ttf',
+      'LexendMega-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Mega 800
+  static Future<Font> lexendMegaExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendmega/v15/qFdX35aBi5JtHD41zSTFEuTByuvYFuE9IbDLcf6vveyiq9EqQw.ttf',
+      'LexendMega-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Mega 900
+  static Future<Font> lexendMegaBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendmega/v15/qFdX35aBi5JtHD41zSTFEuTByuvYFuE9IbDLWP6vveyiq9EqQw.ttf',
+      'LexendMega-Black',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Peta 100
+  static Future<Font> lexendPetaThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendpeta/v15/BXR4vFPGjeLPh0kCfI4OkFX-UTQHSCaxvBgR6SFyW1YuRTsnfw.ttf',
+      'LexendPeta-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Peta 200
+  static Future<Font> lexendPetaExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendpeta/v15/BXR4vFPGjeLPh0kCfI4OkFX-UTQHSCaxvBgRaSByW1YuRTsnfw.ttf',
+      'LexendPeta-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Peta 300
+  static Future<Font> lexendPetaLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendpeta/v15/BXR4vFPGjeLPh0kCfI4OkFX-UTQHSCaxvBgRtyByW1YuRTsnfw.ttf',
+      'LexendPeta-Light',
     );
     return font.getFont();
   }
@@ -16525,8 +18541,80 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lexend Peta regular
   static Future<Font> lexendPetaRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lexendpeta/v10/BXRvvFPGjeLPh0kCfI4OkE_1c8Tf1IW3.ttf',
+      'https://fonts.gstatic.com/s/lexendpeta/v15/BXR4vFPGjeLPh0kCfI4OkFX-UTQHSCaxvBgR6SByW1YuRTsnfw.ttf',
       'LexendPeta-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Peta 500
+  static Future<Font> lexendPetaMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendpeta/v15/BXR4vFPGjeLPh0kCfI4OkFX-UTQHSCaxvBgR2yByW1YuRTsnfw.ttf',
+      'LexendPeta-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Peta 600
+  static Future<Font> lexendPetaSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendpeta/v15/BXR4vFPGjeLPh0kCfI4OkFX-UTQHSCaxvBgRNydyW1YuRTsnfw.ttf',
+      'LexendPeta-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Peta 700
+  static Future<Font> lexendPetaBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendpeta/v15/BXR4vFPGjeLPh0kCfI4OkFX-UTQHSCaxvBgRDidyW1YuRTsnfw.ttf',
+      'LexendPeta-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Peta 800
+  static Future<Font> lexendPetaExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendpeta/v15/BXR4vFPGjeLPh0kCfI4OkFX-UTQHSCaxvBgRaSdyW1YuRTsnfw.ttf',
+      'LexendPeta-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Peta 900
+  static Future<Font> lexendPetaBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendpeta/v15/BXR4vFPGjeLPh0kCfI4OkFX-UTQHSCaxvBgRQCdyW1YuRTsnfw.ttf',
+      'LexendPeta-Black',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Tera 100
+  static Future<Font> lexendTeraThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendtera/v15/RrQDbo98_jt_IXnBPwCWtYJLZ3P4hnaGKFiM5zITdpz0fYxcrQ.ttf',
+      'LexendTera-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Tera 200
+  static Future<Font> lexendTeraExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendtera/v15/RrQDbo98_jt_IXnBPwCWtYJLZ3P4hnaGKFiMZzMTdpz0fYxcrQ.ttf',
+      'LexendTera-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Tera 300
+  static Future<Font> lexendTeraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendtera/v15/RrQDbo98_jt_IXnBPwCWtYJLZ3P4hnaGKFiMuTMTdpz0fYxcrQ.ttf',
+      'LexendTera-Light',
     );
     return font.getFont();
   }
@@ -16534,8 +18622,80 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lexend Tera regular
   static Future<Font> lexendTeraRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lexendtera/v10/RrQUbo98_jt_IXnBPwCWtZhARYMgGtWA.ttf',
+      'https://fonts.gstatic.com/s/lexendtera/v15/RrQDbo98_jt_IXnBPwCWtYJLZ3P4hnaGKFiM5zMTdpz0fYxcrQ.ttf',
       'LexendTera-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Tera 500
+  static Future<Font> lexendTeraMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendtera/v15/RrQDbo98_jt_IXnBPwCWtYJLZ3P4hnaGKFiM1TMTdpz0fYxcrQ.ttf',
+      'LexendTera-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Tera 600
+  static Future<Font> lexendTeraSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendtera/v15/RrQDbo98_jt_IXnBPwCWtYJLZ3P4hnaGKFiMOTQTdpz0fYxcrQ.ttf',
+      'LexendTera-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Tera 700
+  static Future<Font> lexendTeraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendtera/v15/RrQDbo98_jt_IXnBPwCWtYJLZ3P4hnaGKFiMADQTdpz0fYxcrQ.ttf',
+      'LexendTera-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Tera 800
+  static Future<Font> lexendTeraExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendtera/v15/RrQDbo98_jt_IXnBPwCWtYJLZ3P4hnaGKFiMZzQTdpz0fYxcrQ.ttf',
+      'LexendTera-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Tera 900
+  static Future<Font> lexendTeraBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendtera/v15/RrQDbo98_jt_IXnBPwCWtYJLZ3P4hnaGKFiMTjQTdpz0fYxcrQ.ttf',
+      'LexendTera-Black',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Zetta 100
+  static Future<Font> lexendZettaThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendzetta/v15/ll8uK2KYXje7CdOFnEWcU8synQbuVYjYB3BCy9bH0z5jbs8qbts.ttf',
+      'LexendZetta-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Zetta 200
+  static Future<Font> lexendZettaExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendzetta/v15/ll8uK2KYXje7CdOFnEWcU8synQbuVYjYB3BCy1bG0z5jbs8qbts.ttf',
+      'LexendZetta-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Zetta 300
+  static Future<Font> lexendZettaLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendzetta/v15/ll8uK2KYXje7CdOFnEWcU8synQbuVYjYB3BCy4jG0z5jbs8qbts.ttf',
+      'LexendZetta-Light',
     );
     return font.getFont();
   }
@@ -16543,8 +18703,53 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lexend Zetta regular
   static Future<Font> lexendZettaRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/lexendzetta/v10/ll87K2KYXje7CdOFnEWcU8soliQejRR7AQ.ttf',
+      'https://fonts.gstatic.com/s/lexendzetta/v15/ll8uK2KYXje7CdOFnEWcU8synQbuVYjYB3BCy9bG0z5jbs8qbts.ttf',
       'LexendZetta-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Zetta 500
+  static Future<Font> lexendZettaMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendzetta/v15/ll8uK2KYXje7CdOFnEWcU8synQbuVYjYB3BCy-TG0z5jbs8qbts.ttf',
+      'LexendZetta-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Zetta 600
+  static Future<Font> lexendZettaSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendzetta/v15/ll8uK2KYXje7CdOFnEWcU8synQbuVYjYB3BCywjB0z5jbs8qbts.ttf',
+      'LexendZetta-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Zetta 700
+  static Future<Font> lexendZettaBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendzetta/v15/ll8uK2KYXje7CdOFnEWcU8synQbuVYjYB3BCyzHB0z5jbs8qbts.ttf',
+      'LexendZetta-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Zetta 800
+  static Future<Font> lexendZettaExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendzetta/v15/ll8uK2KYXje7CdOFnEWcU8synQbuVYjYB3BCy1bB0z5jbs8qbts.ttf',
+      'LexendZetta-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Lexend Zetta 900
+  static Future<Font> lexendZettaBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/lexendzetta/v15/ll8uK2KYXje7CdOFnEWcU8synQbuVYjYB3BCy3_B0z5jbs8qbts.ttf',
+      'LexendZetta-Black',
     );
     return font.getFont();
   }
@@ -17416,7 +19621,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Lovers Quarrel regular
   static Future<Font> loversQuarrelRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/loversquarrel/v10/Yq6N-LSKXTL-5bCy8ksBzpQ_-zAsY7pO6siz.ttf',
+      'https://fonts.gstatic.com/s/loversquarrel/v14/~ChAKDkxvdmVycyBRdWFycmVsIAAqBAgBGAE=.ttf',
       'LoversQuarrel-Regular',
     );
     return font.getFont();
@@ -18109,7 +20314,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Markazi Text regular
   static Future<Font> markaziTextRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/markazitext/v13/sykh-ydym6AtQaiEtX7yhqb_rV1k_81ZVYYZtfSQT4MlBekmJLo.ttf',
+      'https://fonts.gstatic.com/s/markazitext/v16/sykh-ydym6AtQaiEtX7yhqb_rV1k_81ZVYYZtfSQT4MlBekmJLo.ttf',
       'MarkaziText-Regular',
     );
     return font.getFont();
@@ -18118,7 +20323,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Markazi Text 500
   static Future<Font> markaziTextMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/markazitext/v13/sykh-ydym6AtQaiEtX7yhqb_rV1k_81ZVYYZtcaQT4MlBekmJLo.ttf',
+      'https://fonts.gstatic.com/s/markazitext/v16/sykh-ydym6AtQaiEtX7yhqb_rV1k_81ZVYYZtcaQT4MlBekmJLo.ttf',
       'MarkaziText-Medium',
     );
     return font.getFont();
@@ -18127,7 +20332,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Markazi Text 600
   static Future<Font> markaziTextSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/markazitext/v13/sykh-ydym6AtQaiEtX7yhqb_rV1k_81ZVYYZtSqXT4MlBekmJLo.ttf',
+      'https://fonts.gstatic.com/s/markazitext/v16/sykh-ydym6AtQaiEtX7yhqb_rV1k_81ZVYYZtSqXT4MlBekmJLo.ttf',
       'MarkaziText-SemiBold',
     );
     return font.getFont();
@@ -18136,7 +20341,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Markazi Text 700
   static Future<Font> markaziTextBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/markazitext/v13/sykh-ydym6AtQaiEtX7yhqb_rV1k_81ZVYYZtROXT4MlBekmJLo.ttf',
+      'https://fonts.gstatic.com/s/markazitext/v16/sykh-ydym6AtQaiEtX7yhqb_rV1k_81ZVYYZtROXT4MlBekmJLo.ttf',
       'MarkaziText-Bold',
     );
     return font.getFont();
@@ -18460,7 +20665,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Meie Script regular
   static Future<Font> meieScriptRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/meiescript/v10/_LOImzDK7erRjhunIspaMjxn5IXg0WDz.ttf',
+      'https://fonts.gstatic.com/s/meiescript/v14/_LOImzDK7erRjhunIspaMjxn5IXg0WDz.ttf',
       'MeieScript-Regular',
     );
     return font.getFont();
@@ -18496,7 +20701,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Merriweather 300
   static Future<Font> merriweatherLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/merriweather/v22/u-4n0qyriQwlOrhSvowK_l521wRpX837pvjxPA.ttf',
+      'https://fonts.gstatic.com/s/merriweather/v25/u-4n0qyriQwlOrhSvowK_l521wRpX837pvjxPA.ttf',
       'Merriweather-Light',
     );
     return font.getFont();
@@ -18505,7 +20710,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Merriweather 300italic
   static Future<Font> merriweatherLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/merriweather/v22/u-4l0qyriQwlOrhSvowK_l5-eR7lXcf_hP3hPGWH.ttf',
+      'https://fonts.gstatic.com/s/merriweather/v25/u-4l0qyriQwlOrhSvowK_l5-eR7lXcf_hP3hPGWH.ttf',
       'Merriweather-LightItalic',
     );
     return font.getFont();
@@ -18514,7 +20719,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Merriweather regular
   static Future<Font> merriweatherRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/merriweather/v22/u-440qyriQwlOrhSvowK_l5OeyxNV-bnrw.ttf',
+      'https://fonts.gstatic.com/s/merriweather/v25/u-440qyriQwlOrhSvowK_l5OeyxNV-bnrw.ttf',
       'Merriweather-Regular',
     );
     return font.getFont();
@@ -18523,7 +20728,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Merriweather italic
   static Future<Font> merriweatherItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/merriweather/v22/u-4m0qyriQwlOrhSvowK_l5-eSZJdeP3r-Ho.ttf',
+      'https://fonts.gstatic.com/s/merriweather/v25/u-4m0qyriQwlOrhSvowK_l5-eSZJdeP3r-Ho.ttf',
       'Merriweather-Italic',
     );
     return font.getFont();
@@ -18532,7 +20737,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Merriweather 700
   static Future<Font> merriweatherBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/merriweather/v22/u-4n0qyriQwlOrhSvowK_l52xwNpX837pvjxPA.ttf',
+      'https://fonts.gstatic.com/s/merriweather/v25/u-4n0qyriQwlOrhSvowK_l52xwNpX837pvjxPA.ttf',
       'Merriweather-Bold',
     );
     return font.getFont();
@@ -18541,7 +20746,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Merriweather 700italic
   static Future<Font> merriweatherBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/merriweather/v22/u-4l0qyriQwlOrhSvowK_l5-eR71Wsf_hP3hPGWH.ttf',
+      'https://fonts.gstatic.com/s/merriweather/v25/u-4l0qyriQwlOrhSvowK_l5-eR71Wsf_hP3hPGWH.ttf',
       'Merriweather-BoldItalic',
     );
     return font.getFont();
@@ -18550,7 +20755,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Merriweather 900
   static Future<Font> merriweatherBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/merriweather/v22/u-4n0qyriQwlOrhSvowK_l52_wFpX837pvjxPA.ttf',
+      'https://fonts.gstatic.com/s/merriweather/v25/u-4n0qyriQwlOrhSvowK_l52_wFpX837pvjxPA.ttf',
       'Merriweather-Black',
     );
     return font.getFont();
@@ -18559,7 +20764,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Merriweather 900italic
   static Future<Font> merriweatherBlackItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/merriweather/v22/u-4l0qyriQwlOrhSvowK_l5-eR7NWMf_hP3hPGWH.ttf',
+      'https://fonts.gstatic.com/s/merriweather/v25/u-4l0qyriQwlOrhSvowK_l5-eR7NWMf_hP3hPGWH.ttf',
       'Merriweather-BlackItalic',
     );
     return font.getFont();
@@ -18988,6 +21193,15 @@ class PdfGoogleFonts extends DownloadbleFont {
     return font.getFont();
   }
 
+  /// MonteCarlo regular
+  static Future<Font> monteCarloRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/montecarlo/v1/buEzpo6-f9X01GadLA0G0CoV_NxLeiw.ttf',
+      'MonteCarlo-Regular',
+    );
+    return font.getFont();
+  }
+
   /// Montez regular
   static Future<Font> montezRegular() {
     const font = PdfGoogleFonts._(
@@ -19000,7 +21214,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 100
   static Future<Font> montserratThin() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTUQjIg1_i6t8kCHKm45_QphziTn89dtpQ.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTUQjIg1_i6t8kCHKm45_QphziTn89dtpQ.ttf',
       'Montserrat-Thin',
     );
     return font.getFont();
@@ -19009,7 +21223,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 100italic
   static Future<Font> montserratThinItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTUOjIg1_i6t8kCHKm459WxZqi7j0dJ9pTOi.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTUOjIg1_i6t8kCHKm459WxZqi7j0dJ9pTOi.ttf',
       'Montserrat-ThinItalic',
     );
     return font.getFont();
@@ -19018,7 +21232,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 200
   static Future<Font> montserratExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTURjIg1_i6t8kCHKm45_aZA7g7J_950vCo.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTURjIg1_i6t8kCHKm45_aZA7g7J_950vCo.ttf',
       'Montserrat-ExtraLight',
     );
     return font.getFont();
@@ -19027,7 +21241,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 200italic
   static Future<Font> montserratExtraLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTUPjIg1_i6t8kCHKm459WxZBg_D-_xxrCq7qg.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTUPjIg1_i6t8kCHKm459WxZBg_D-_xxrCq7qg.ttf',
       'Montserrat-ExtraLightItalic',
     );
     return font.getFont();
@@ -19036,7 +21250,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 300
   static Future<Font> montserratLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTURjIg1_i6t8kCHKm45_cJD7g7J_950vCo.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTURjIg1_i6t8kCHKm45_cJD7g7J_950vCo.ttf',
       'Montserrat-Light',
     );
     return font.getFont();
@@ -19045,7 +21259,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 300italic
   static Future<Font> montserratLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTUPjIg1_i6t8kCHKm459WxZYgzD-_xxrCq7qg.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTUPjIg1_i6t8kCHKm459WxZYgzD-_xxrCq7qg.ttf',
       'Montserrat-LightItalic',
     );
     return font.getFont();
@@ -19054,7 +21268,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat regular
   static Future<Font> montserratRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTUSjIg1_i6t8kCHKm45xW5rygbi49c.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTUSjIg1_i6t8kCHKm45xW5rygbi49c.ttf',
       'Montserrat-Regular',
     );
     return font.getFont();
@@ -19063,7 +21277,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat italic
   static Future<Font> montserratItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTUQjIg1_i6t8kCHKm459WxhziTn89dtpQ.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTUQjIg1_i6t8kCHKm459WxhziTn89dtpQ.ttf',
       'Montserrat-Italic',
     );
     return font.getFont();
@@ -19072,7 +21286,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 500
   static Future<Font> montserratMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTURjIg1_i6t8kCHKm45_ZpC7g7J_950vCo.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTURjIg1_i6t8kCHKm45_ZpC7g7J_950vCo.ttf',
       'Montserrat-Medium',
     );
     return font.getFont();
@@ -19081,7 +21295,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 500italic
   static Future<Font> montserratMediumItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTUPjIg1_i6t8kCHKm459WxZOg3D-_xxrCq7qg.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTUPjIg1_i6t8kCHKm459WxZOg3D-_xxrCq7qg.ttf',
       'Montserrat-MediumItalic',
     );
     return font.getFont();
@@ -19090,7 +21304,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 600
   static Future<Font> montserratSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTURjIg1_i6t8kCHKm45_bZF7g7J_950vCo.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTURjIg1_i6t8kCHKm45_bZF7g7J_950vCo.ttf',
       'Montserrat-SemiBold',
     );
     return font.getFont();
@@ -19099,7 +21313,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 600italic
   static Future<Font> montserratSemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTUPjIg1_i6t8kCHKm459WxZFgrD-_xxrCq7qg.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTUPjIg1_i6t8kCHKm459WxZFgrD-_xxrCq7qg.ttf',
       'Montserrat-SemiBoldItalic',
     );
     return font.getFont();
@@ -19108,7 +21322,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 700
   static Future<Font> montserratBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTURjIg1_i6t8kCHKm45_dJE7g7J_950vCo.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTURjIg1_i6t8kCHKm45_dJE7g7J_950vCo.ttf',
       'Montserrat-Bold',
     );
     return font.getFont();
@@ -19117,7 +21331,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 700italic
   static Future<Font> montserratBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTUPjIg1_i6t8kCHKm459WxZcgvD-_xxrCq7qg.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTUPjIg1_i6t8kCHKm459WxZcgvD-_xxrCq7qg.ttf',
       'Montserrat-BoldItalic',
     );
     return font.getFont();
@@ -19126,7 +21340,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 800
   static Future<Font> montserratExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTURjIg1_i6t8kCHKm45_c5H7g7J_950vCo.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTURjIg1_i6t8kCHKm45_c5H7g7J_950vCo.ttf',
       'Montserrat-ExtraBold',
     );
     return font.getFont();
@@ -19135,7 +21349,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 800italic
   static Future<Font> montserratExtraBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTUPjIg1_i6t8kCHKm459WxZbgjD-_xxrCq7qg.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTUPjIg1_i6t8kCHKm459WxZbgjD-_xxrCq7qg.ttf',
       'Montserrat-ExtraBoldItalic',
     );
     return font.getFont();
@@ -19144,7 +21358,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 900
   static Future<Font> montserratBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTURjIg1_i6t8kCHKm45_epG7g7J_950vCo.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTURjIg1_i6t8kCHKm45_epG7g7J_950vCo.ttf',
       'Montserrat-Black',
     );
     return font.getFont();
@@ -19153,7 +21367,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Montserrat 900italic
   static Future<Font> montserratBlackItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/montserrat/v15/JTUPjIg1_i6t8kCHKm459WxZSgnD-_xxrCq7qg.ttf',
+      'https://fonts.gstatic.com/s/montserrat/v18/JTUPjIg1_i6t8kCHKm459WxZSgnD-_xxrCq7qg.ttf',
       'Montserrat-BlackItalic',
     );
     return font.getFont();
@@ -19684,7 +21898,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish 200
   static Future<Font> mulishExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptyg83HX_SGhgqO0yLcmjzUAuWexRNRwaClGrw-PTY.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptyg83HX_SGhgqO0yLcmjzUAuWexRNRwaClGrw-PTY.ttf',
       'Mulish-ExtraLight',
     );
     return font.getFont();
@@ -19693,7 +21907,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish 300
   static Future<Font> mulishLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptyg83HX_SGhgqO0yLcmjzUAuWexc1RwaClGrw-PTY.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptyg83HX_SGhgqO0yLcmjzUAuWexc1RwaClGrw-PTY.ttf',
       'Mulish-Light',
     );
     return font.getFont();
@@ -19702,7 +21916,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish regular
   static Future<Font> mulishRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptyg83HX_SGhgqO0yLcmjzUAuWexZNRwaClGrw-PTY.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptyg83HX_SGhgqO0yLcmjzUAuWexZNRwaClGrw-PTY.ttf',
       'Mulish-Regular',
     );
     return font.getFont();
@@ -19711,7 +21925,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish 500
   static Future<Font> mulishMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptyg83HX_SGhgqO0yLcmjzUAuWexaFRwaClGrw-PTY.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptyg83HX_SGhgqO0yLcmjzUAuWexaFRwaClGrw-PTY.ttf',
       'Mulish-Medium',
     );
     return font.getFont();
@@ -19720,7 +21934,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish 600
   static Future<Font> mulishSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptyg83HX_SGhgqO0yLcmjzUAuWexU1WwaClGrw-PTY.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptyg83HX_SGhgqO0yLcmjzUAuWexU1WwaClGrw-PTY.ttf',
       'Mulish-SemiBold',
     );
     return font.getFont();
@@ -19729,7 +21943,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish 700
   static Future<Font> mulishBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptyg83HX_SGhgqO0yLcmjzUAuWexXRWwaClGrw-PTY.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptyg83HX_SGhgqO0yLcmjzUAuWexXRWwaClGrw-PTY.ttf',
       'Mulish-Bold',
     );
     return font.getFont();
@@ -19738,7 +21952,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish 800
   static Future<Font> mulishExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptyg83HX_SGhgqO0yLcmjzUAuWexRNWwaClGrw-PTY.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptyg83HX_SGhgqO0yLcmjzUAuWexRNWwaClGrw-PTY.ttf',
       'Mulish-ExtraBold',
     );
     return font.getFont();
@@ -19747,7 +21961,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish 900
   static Future<Font> mulishBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptyg83HX_SGhgqO0yLcmjzUAuWexTpWwaClGrw-PTY.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptyg83HX_SGhgqO0yLcmjzUAuWexTpWwaClGrw-PTY.ttf',
       'Mulish-Black',
     );
     return font.getFont();
@@ -19756,7 +21970,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish 200italic
   static Future<Font> mulishExtraLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsSqeOvHp47LTZFwA.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsSqeOvHp47LTZFwA.ttf',
       'Mulish-ExtraLightItalic',
     );
     return font.getFont();
@@ -19765,7 +21979,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish 300italic
   static Future<Font> mulishLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsSd-OvHp47LTZFwA.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsSd-OvHp47LTZFwA.ttf',
       'Mulish-LightItalic',
     );
     return font.getFont();
@@ -19774,7 +21988,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish italic
   static Future<Font> mulishItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsSKeOvHp47LTZFwA.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsSKeOvHp47LTZFwA.ttf',
       'Mulish-Italic',
     );
     return font.getFont();
@@ -19783,7 +21997,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish 500italic
   static Future<Font> mulishMediumItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsSG-OvHp47LTZFwA.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsSG-OvHp47LTZFwA.ttf',
       'Mulish-MediumItalic',
     );
     return font.getFont();
@@ -19792,7 +22006,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish 600italic
   static Future<Font> mulishSemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsS9-SvHp47LTZFwA.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsS9-SvHp47LTZFwA.ttf',
       'Mulish-SemiBoldItalic',
     );
     return font.getFont();
@@ -19801,7 +22015,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish 700italic
   static Future<Font> mulishBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsSzuSvHp47LTZFwA.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsSzuSvHp47LTZFwA.ttf',
       'Mulish-BoldItalic',
     );
     return font.getFont();
@@ -19810,7 +22024,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish 800italic
   static Future<Font> mulishExtraBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsSqeSvHp47LTZFwA.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsSqeSvHp47LTZFwA.ttf',
       'Mulish-ExtraBoldItalic',
     );
     return font.getFont();
@@ -19819,7 +22033,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Mulish 900italic
   static Future<Font> mulishBlackItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/mulish/v3/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsSgOSvHp47LTZFwA.ttf',
+      'https://fonts.gstatic.com/s/mulish/v5/1Ptwg83HX_SGhgqk2hAjQlW_mEuZ0FsSgOSvHp47LTZFwA.ttf',
       'Mulish-BlackItalic',
     );
     return font.getFont();
@@ -20521,7 +22735,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Noto Sans regular
   static Future<Font> notoSansRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/notosans/v12/o-0IIpQlx3QUlC5A4PNb4j5Ba_2c7A.ttf',
+      'https://fonts.gstatic.com/s/notosans/v14/o-0IIpQlx3QUlC5A4PNb4j5Ba_2c7A.ttf',
       'NotoSans-Regular',
     );
     return font.getFont();
@@ -20530,7 +22744,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Noto Sans italic
   static Future<Font> notoSansItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/notosans/v12/o-0OIpQlx3QUlC5A4PNr4DRFSfiM7HBj.ttf',
+      'https://fonts.gstatic.com/s/notosans/v14/o-0OIpQlx3QUlC5A4PNr4DRFSfiM7HBj.ttf',
       'NotoSans-Italic',
     );
     return font.getFont();
@@ -20539,7 +22753,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Noto Sans 700
   static Future<Font> notoSansBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/notosans/v12/o-0NIpQlx3QUlC5A4PNjXhFlY9aA5Wl6PQ.ttf',
+      'https://fonts.gstatic.com/s/notosans/v14/o-0NIpQlx3QUlC5A4PNjXhFlY9aA5Wl6PQ.ttf',
       'NotoSans-Bold',
     );
     return font.getFont();
@@ -20548,7 +22762,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Noto Sans 700italic
   static Future<Font> notoSansBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/notosans/v12/o-0TIpQlx3QUlC5A4PNr4Az5ZtyEx2xqPaif.ttf',
+      'https://fonts.gstatic.com/s/notosans/v14/o-0TIpQlx3QUlC5A4PNr4Az5ZtyEx2xqPaif.ttf',
       'NotoSans-BoldItalic',
     );
     return font.getFont();
@@ -20827,7 +23041,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Noto Serif regular
   static Future<Font> notoSerifRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/notoserif/v9/ga6Iaw1J5X9T9RW6j9bNTFAcaRi_bMQ.ttf',
+      'https://fonts.gstatic.com/s/notoserif/v11/ga6Iaw1J5X9T9RW6j9bNTFAcaRi_bMQ.ttf',
       'NotoSerif-Regular',
     );
     return font.getFont();
@@ -20836,7 +23050,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Noto Serif italic
   static Future<Font> notoSerifItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/notoserif/v9/ga6Kaw1J5X9T9RW6j9bNfFIWbTq6fMRRMw.ttf',
+      'https://fonts.gstatic.com/s/notoserif/v11/ga6Kaw1J5X9T9RW6j9bNfFIWbTq6fMRRMw.ttf',
       'NotoSerif-Italic',
     );
     return font.getFont();
@@ -20845,7 +23059,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Noto Serif 700
   static Future<Font> notoSerifBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/notoserif/v9/ga6Law1J5X9T9RW6j9bNdOwzTRCUcM1IKoY.ttf',
+      'https://fonts.gstatic.com/s/notoserif/v11/ga6Law1J5X9T9RW6j9bNdOwzTRCUcM1IKoY.ttf',
       'NotoSerif-Bold',
     );
     return font.getFont();
@@ -20854,7 +23068,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Noto Serif 700italic
   static Future<Font> notoSerifBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/notoserif/v9/ga6Vaw1J5X9T9RW6j9bNfFIu0RWedO9NOoYIDg.ttf',
+      'https://fonts.gstatic.com/s/notoserif/v11/ga6Vaw1J5X9T9RW6j9bNfFIu0RWedO9NOoYIDg.ttf',
       'NotoSerif-BoldItalic',
     );
     return font.getFont();
@@ -21556,7 +23770,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Open Sans 300
   static Future<Font> openSansLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/opensans/v20/mem5YaGs126MiZpBA-UN_r8-VeJoCqeDjg.ttf',
+      'https://fonts.gstatic.com/s/opensans/v23/mem5YaGs126MiZpBA-UN_r8-VeJoCqeDjg.ttf',
       'OpenSans-Light',
     );
     return font.getFont();
@@ -21565,7 +23779,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Open Sans 300italic
   static Future<Font> openSansLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/opensans/v20/memnYaGs126MiZpBA-UFUKWyV-hsKKKTjrPW.ttf',
+      'https://fonts.gstatic.com/s/opensans/v23/memnYaGs126MiZpBA-UFUKWyV-hsKKKTjrPW.ttf',
       'OpenSans-LightItalic',
     );
     return font.getFont();
@@ -21574,7 +23788,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Open Sans regular
   static Future<Font> openSansRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/opensans/v20/mem8YaGs126MiZpBA-U1UpcaXcl0Aw.ttf',
+      'https://fonts.gstatic.com/s/opensans/v23/mem8YaGs126MiZpBA-U1UpcaXcl0Aw.ttf',
       'OpenSans-Regular',
     );
     return font.getFont();
@@ -21583,7 +23797,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Open Sans italic
   static Future<Font> openSansItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/opensans/v20/mem6YaGs126MiZpBA-UFUJ0ef8xkA76a.ttf',
+      'https://fonts.gstatic.com/s/opensans/v23/mem6YaGs126MiZpBA-UFUJ0ef8xkA76a.ttf',
       'OpenSans-Italic',
     );
     return font.getFont();
@@ -21592,7 +23806,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Open Sans 600
   static Future<Font> openSansSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/opensans/v20/mem5YaGs126MiZpBA-UNirk-VeJoCqeDjg.ttf',
+      'https://fonts.gstatic.com/s/opensans/v23/mem5YaGs126MiZpBA-UNirk-VeJoCqeDjg.ttf',
       'OpenSans-SemiBold',
     );
     return font.getFont();
@@ -21601,7 +23815,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Open Sans 600italic
   static Future<Font> openSansSemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/opensans/v20/memnYaGs126MiZpBA-UFUKXGUehsKKKTjrPW.ttf',
+      'https://fonts.gstatic.com/s/opensans/v23/memnYaGs126MiZpBA-UFUKXGUehsKKKTjrPW.ttf',
       'OpenSans-SemiBoldItalic',
     );
     return font.getFont();
@@ -21610,7 +23824,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Open Sans 700
   static Future<Font> openSansBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/opensans/v20/mem5YaGs126MiZpBA-UN7rg-VeJoCqeDjg.ttf',
+      'https://fonts.gstatic.com/s/opensans/v23/mem5YaGs126MiZpBA-UN7rg-VeJoCqeDjg.ttf',
       'OpenSans-Bold',
     );
     return font.getFont();
@@ -21619,7 +23833,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Open Sans 700italic
   static Future<Font> openSansBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/opensans/v20/memnYaGs126MiZpBA-UFUKWiUOhsKKKTjrPW.ttf',
+      'https://fonts.gstatic.com/s/opensans/v23/memnYaGs126MiZpBA-UFUKWiUOhsKKKTjrPW.ttf',
       'OpenSans-BoldItalic',
     );
     return font.getFont();
@@ -21628,7 +23842,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Open Sans 800
   static Future<Font> openSansExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/opensans/v20/mem5YaGs126MiZpBA-UN8rs-VeJoCqeDjg.ttf',
+      'https://fonts.gstatic.com/s/opensans/v23/mem5YaGs126MiZpBA-UN8rs-VeJoCqeDjg.ttf',
       'OpenSans-ExtraBold',
     );
     return font.getFont();
@@ -21637,7 +23851,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Open Sans 800italic
   static Future<Font> openSansExtraBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/opensans/v20/memnYaGs126MiZpBA-UFUKW-U-hsKKKTjrPW.ttf',
+      'https://fonts.gstatic.com/s/opensans/v23/memnYaGs126MiZpBA-UFUKW-U-hsKKKTjrPW.ttf',
       'OpenSans-ExtraBoldItalic',
     );
     return font.getFont();
@@ -21673,7 +23887,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Oranienbaum regular
   static Future<Font> oranienbaumRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/oranienbaum/v9/OZpHg_txtzZKMuXLIVrx-3zn7kz3dpHc.ttf',
+      'https://fonts.gstatic.com/s/oranienbaum/v10/OZpHg_txtzZKMuXLIVrx-3zn7kz3dpHc.ttf',
       'Oranienbaum-Regular',
     );
     return font.getFont();
@@ -21781,7 +23995,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Oswald 200
   static Future<Font> oswaldExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/oswald/v36/TK3_WkUHHAIjg75cFRf3bXL8LICs13FvgUFoZAaRliE.ttf',
+      'https://fonts.gstatic.com/s/oswald/v40/TK3_WkUHHAIjg75cFRf3bXL8LICs13FvgUFoZAaRliE.ttf',
       'Oswald-ExtraLight',
     );
     return font.getFont();
@@ -21790,7 +24004,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Oswald 300
   static Future<Font> oswaldLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/oswald/v36/TK3_WkUHHAIjg75cFRf3bXL8LICs169vgUFoZAaRliE.ttf',
+      'https://fonts.gstatic.com/s/oswald/v40/TK3_WkUHHAIjg75cFRf3bXL8LICs169vgUFoZAaRliE.ttf',
       'Oswald-Light',
     );
     return font.getFont();
@@ -21799,7 +24013,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Oswald regular
   static Future<Font> oswaldRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/oswald/v36/TK3_WkUHHAIjg75cFRf3bXL8LICs1_FvgUFoZAaRliE.ttf',
+      'https://fonts.gstatic.com/s/oswald/v40/TK3_WkUHHAIjg75cFRf3bXL8LICs1_FvgUFoZAaRliE.ttf',
       'Oswald-Regular',
     );
     return font.getFont();
@@ -21808,7 +24022,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Oswald 500
   static Future<Font> oswaldMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/oswald/v36/TK3_WkUHHAIjg75cFRf3bXL8LICs18NvgUFoZAaRliE.ttf',
+      'https://fonts.gstatic.com/s/oswald/v40/TK3_WkUHHAIjg75cFRf3bXL8LICs18NvgUFoZAaRliE.ttf',
       'Oswald-Medium',
     );
     return font.getFont();
@@ -21817,7 +24031,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Oswald 600
   static Future<Font> oswaldSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/oswald/v36/TK3_WkUHHAIjg75cFRf3bXL8LICs1y9ogUFoZAaRliE.ttf',
+      'https://fonts.gstatic.com/s/oswald/v40/TK3_WkUHHAIjg75cFRf3bXL8LICs1y9ogUFoZAaRliE.ttf',
       'Oswald-SemiBold',
     );
     return font.getFont();
@@ -21826,8 +24040,17 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Oswald 700
   static Future<Font> oswaldBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/oswald/v36/TK3_WkUHHAIjg75cFRf3bXL8LICs1xZogUFoZAaRliE.ttf',
+      'https://fonts.gstatic.com/s/oswald/v40/TK3_WkUHHAIjg75cFRf3bXL8LICs1xZogUFoZAaRliE.ttf',
       'Oswald-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Otomanopee One regular
+  static Future<Font> otomanopeeOneRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/otomanopeeone/v1/xMQNuFtEVKCbvGxme-rSATGm_Aea91uCCB9o.ttf',
+      'OtomanopeeOne-Regular',
     );
     return font.getFont();
   }
@@ -22453,6 +24676,15 @@ class PdfGoogleFonts extends DownloadbleFont {
     return font.getFont();
   }
 
+  /// Palette Mosaic regular
+  static Future<Font> paletteMosaicRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/palettemosaic/v1/AMOIz4aBvWuBFe3TohdW6YZ9MFiy4dxL4jSr.ttf',
+      'PaletteMosaic-Regular',
+    );
+    return font.getFont();
+  }
+
   /// Pangolin regular
   static Future<Font> pangolinRegular() {
     const font = PdfGoogleFonts._(
@@ -22546,7 +24778,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Pattaya regular
   static Future<Font> pattayaRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/pattaya/v6/ea8ZadcqV_zkHY-XNdCn92ZEmVs.ttf',
+      'https://fonts.gstatic.com/s/pattaya/v7/ea8ZadcqV_zkHY-XNdCn92ZEmVs.ttf',
       'Pattaya-Regular',
     );
     return font.getFont();
@@ -22564,7 +24796,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Pavanam regular
   static Future<Font> pavanamRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/pavanam/v5/BXRrvF_aiezLh0xPDOtQ9Wf0QcE.ttf',
+      'https://fonts.gstatic.com/s/pavanam/v6/BXRrvF_aiezLh0xPDOtQ9Wf0QcE.ttf',
       'Pavanam-Regular',
     );
     return font.getFont();
@@ -22996,7 +25228,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Pirata One regular
   static Future<Font> pirataOneRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/pirataone/v11/I_urMpiDvgLdLh0fAtoftiiEr5_BdZ8.ttf',
+      'https://fonts.gstatic.com/s/pirataone/v15/I_urMpiDvgLdLh0fAtoftiiEr5_BdZ8.ttf',
       'PirataOne-Regular',
     );
     return font.getFont();
@@ -23032,7 +25264,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Playball regular
   static Future<Font> playballRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/playball/v10/TK3gWksYAxQ7jbsKcj8Dl-tPKo2t.ttf',
+      'https://fonts.gstatic.com/s/playball/v11/TK3gWksYAxQ7jbsKcj8Dl-tPKo2t.ttf',
       'Playball-Regular',
     );
     return font.getFont();
@@ -23779,7 +26011,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Prosto One regular
   static Future<Font> prostoOneRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/prostoone/v11/OpNJno4VhNfK-RgpwWWxpipfWhXD00c.ttf',
+      'https://fonts.gstatic.com/s/prostoone/v12/OpNJno4VhNfK-RgpwWWxpipfWhXD00c.ttf',
       'ProstoOne-Regular',
     );
     return font.getFont();
@@ -23878,7 +26110,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 100
   static Future<Font> publicSansThin() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymuFpi5ww0pX189fg.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymuFpi5ww0pX189fg.ttf',
       'PublicSans-Thin',
     );
     return font.getFont();
@@ -23887,7 +26119,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 200
   static Future<Font> publicSansExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymulpm5ww0pX189fg.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymulpm5ww0pX189fg.ttf',
       'PublicSans-ExtraLight',
     );
     return font.getFont();
@@ -23896,7 +26128,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 300
   static Future<Font> publicSansLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymuSJm5ww0pX189fg.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymuSJm5ww0pX189fg.ttf',
       'PublicSans-Light',
     );
     return font.getFont();
@@ -23905,7 +26137,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans regular
   static Future<Font> publicSansRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymuFpm5ww0pX189fg.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymuFpm5ww0pX189fg.ttf',
       'PublicSans-Regular',
     );
     return font.getFont();
@@ -23914,7 +26146,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 500
   static Future<Font> publicSansMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymuJJm5ww0pX189fg.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymuJJm5ww0pX189fg.ttf',
       'PublicSans-Medium',
     );
     return font.getFont();
@@ -23923,7 +26155,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 600
   static Future<Font> publicSansSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymuyJ65ww0pX189fg.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymuyJ65ww0pX189fg.ttf',
       'PublicSans-SemiBold',
     );
     return font.getFont();
@@ -23932,7 +26164,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 700
   static Future<Font> publicSansBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymu8Z65ww0pX189fg.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymu8Z65ww0pX189fg.ttf',
       'PublicSans-Bold',
     );
     return font.getFont();
@@ -23941,7 +26173,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 800
   static Future<Font> publicSansExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymulp65ww0pX189fg.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymulp65ww0pX189fg.ttf',
       'PublicSans-ExtraBold',
     );
     return font.getFont();
@@ -23950,7 +26182,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 900
   static Future<Font> publicSansBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymuv565ww0pX189fg.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwGs572Xtc6ZYQws9YVwllKVG8qX1oyOymuv565ww0pX189fg.ttf',
       'PublicSans-Black',
     );
     return font.getFont();
@@ -23959,7 +26191,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 100italic
   static Future<Font> publicSansThinItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673tpRgQctfVotfj7j.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673tpRgQctfVotfj7j.ttf',
       'PublicSans-ThinItalic',
     );
     return font.getFont();
@@ -23968,7 +26200,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 200italic
   static Future<Font> publicSansExtraLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673trRgActfVotfj7j.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673trRgActfVotfj7j.ttf',
       'PublicSans-ExtraLightItalic',
     );
     return font.getFont();
@@ -23977,7 +26209,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 300italic
   static Future<Font> publicSansLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673toPgActfVotfj7j.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673toPgActfVotfj7j.ttf',
       'PublicSans-LightItalic',
     );
     return font.getFont();
@@ -23986,7 +26218,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans italic
   static Future<Font> publicSansItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673tpRgActfVotfj7j.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673tpRgActfVotfj7j.ttf',
       'PublicSans-Italic',
     );
     return font.getFont();
@@ -23995,7 +26227,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 500italic
   static Future<Font> publicSansMediumItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673tpjgActfVotfj7j.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673tpjgActfVotfj7j.ttf',
       'PublicSans-MediumItalic',
     );
     return font.getFont();
@@ -24004,7 +26236,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 600italic
   static Future<Font> publicSansSemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673tqPhwctfVotfj7j.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673tqPhwctfVotfj7j.ttf',
       'PublicSans-SemiBoldItalic',
     );
     return font.getFont();
@@ -24013,7 +26245,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 700italic
   static Future<Font> publicSansBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673tq2hwctfVotfj7j.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673tq2hwctfVotfj7j.ttf',
       'PublicSans-BoldItalic',
     );
     return font.getFont();
@@ -24022,7 +26254,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 800italic
   static Future<Font> publicSansExtraBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673trRhwctfVotfj7j.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673trRhwctfVotfj7j.ttf',
       'PublicSans-ExtraBoldItalic',
     );
     return font.getFont();
@@ -24031,7 +26263,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Public Sans 900italic
   static Future<Font> publicSansBlackItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/publicsans/v5/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673tr4hwctfVotfj7j.ttf',
+      'https://fonts.gstatic.com/s/publicsans/v7/ijwAs572Xtc6ZYQws9YVwnNDZpDyNjGolS673tr4hwctfVotfj7j.ttf',
       'PublicSans-BlackItalic',
     );
     return font.getFont();
@@ -24078,6 +26310,15 @@ class PdfGoogleFonts extends DownloadbleFont {
     const font = PdfGoogleFonts._(
       'https://fonts.gstatic.com/s/purplepurse/v11/qWctB66gv53iAp-Vfs4My6qyeBb_ujA4ug.ttf',
       'PurplePurse-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Qahiri regular
+  static Future<Font> qahiriRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/qahiri/v1/tsssAp1RZy0C_hGuU3Chrnmupw.ttf',
+      'Qahiri-Regular',
     );
     return font.getFont();
   }
@@ -24193,7 +26434,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Quicksand 300
   static Future<Font> quicksandLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/quicksand/v22/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkKEo18G0wx40QDw.ttf',
+      'https://fonts.gstatic.com/s/quicksand/v24/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkKEo18G0wx40QDw.ttf',
       'Quicksand-Light',
     );
     return font.getFont();
@@ -24202,7 +26443,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Quicksand regular
   static Future<Font> quicksandRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/quicksand/v22/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkP8o18G0wx40QDw.ttf',
+      'https://fonts.gstatic.com/s/quicksand/v24/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkP8o18G0wx40QDw.ttf',
       'Quicksand-Regular',
     );
     return font.getFont();
@@ -24211,7 +26452,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Quicksand 500
   static Future<Font> quicksandMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/quicksand/v22/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkM0o18G0wx40QDw.ttf',
+      'https://fonts.gstatic.com/s/quicksand/v24/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkM0o18G0wx40QDw.ttf',
       'Quicksand-Medium',
     );
     return font.getFont();
@@ -24220,7 +26461,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Quicksand 600
   static Future<Font> quicksandSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/quicksand/v22/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkCEv18G0wx40QDw.ttf',
+      'https://fonts.gstatic.com/s/quicksand/v24/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkCEv18G0wx40QDw.ttf',
       'Quicksand-SemiBold',
     );
     return font.getFont();
@@ -24229,7 +26470,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Quicksand 700
   static Future<Font> quicksandBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/quicksand/v22/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkBgv18G0wx40QDw.ttf',
+      'https://fonts.gstatic.com/s/quicksand/v24/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkBgv18G0wx40QDw.ttf',
       'Quicksand-Bold',
     );
     return font.getFont();
@@ -24247,7 +26488,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Qwigley regular
   static Future<Font> qwigleyRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/qwigley/v10/1cXzaU3UGJb5tGoCuVxsi1mBmcE.ttf',
+      'https://fonts.gstatic.com/s/qwigley/v11/1cXzaU3UGJb5tGoCuVxsi1mBmcE.ttf',
       'Qwigley-Regular',
     );
     return font.getFont();
@@ -24337,7 +26578,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 100
   static Future<Font> ralewayThin() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVvao4CPNLA3JC9c.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVvao4CPNLA3JC9c.ttf',
       'Raleway-Thin',
     );
     return font.getFont();
@@ -24346,7 +26587,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 200
   static Future<Font> ralewayExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVtaooCPNLA3JC9c.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVtaooCPNLA3JC9c.ttf',
       'Raleway-ExtraLight',
     );
     return font.getFont();
@@ -24355,7 +26596,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 300
   static Future<Font> ralewayLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVuEooCPNLA3JC9c.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVuEooCPNLA3JC9c.ttf',
       'Raleway-Light',
     );
     return font.getFont();
@@ -24364,7 +26605,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway regular
   static Future<Font> ralewayRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVvaooCPNLA3JC9c.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVvaooCPNLA3JC9c.ttf',
       'Raleway-Regular',
     );
     return font.getFont();
@@ -24373,7 +26614,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 500
   static Future<Font> ralewayMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVvoooCPNLA3JC9c.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVvoooCPNLA3JC9c.ttf',
       'Raleway-Medium',
     );
     return font.getFont();
@@ -24382,7 +26623,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 600
   static Future<Font> ralewaySemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVsEpYCPNLA3JC9c.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVsEpYCPNLA3JC9c.ttf',
       'Raleway-SemiBold',
     );
     return font.getFont();
@@ -24391,7 +26632,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 700
   static Future<Font> ralewayBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVs9pYCPNLA3JC9c.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVs9pYCPNLA3JC9c.ttf',
       'Raleway-Bold',
     );
     return font.getFont();
@@ -24400,7 +26641,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 800
   static Future<Font> ralewayExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVtapYCPNLA3JC9c.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVtapYCPNLA3JC9c.ttf',
       'Raleway-ExtraBold',
     );
     return font.getFont();
@@ -24409,7 +26650,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 900
   static Future<Font> ralewayBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVtzpYCPNLA3JC9c.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Ptxg8zYS_SKggPN4iEgvnHyvveLxVtzpYCPNLA3JC9c.ttf',
       'Raleway-Black',
     );
     return font.getFont();
@@ -24418,7 +26659,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 100italic
   static Future<Font> ralewayThinItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4WjNPrQVIT9c2c8.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4WjNPrQVIT9c2c8.ttf',
       'Raleway-ThinItalic',
     );
     return font.getFont();
@@ -24427,7 +26668,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 200italic
   static Future<Font> ralewayExtraLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4ejMPrQVIT9c2c8.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4ejMPrQVIT9c2c8.ttf',
       'Raleway-ExtraLightItalic',
     );
     return font.getFont();
@@ -24436,7 +26677,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 300italic
   static Future<Font> ralewayLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4TbMPrQVIT9c2c8.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4TbMPrQVIT9c2c8.ttf',
       'Raleway-LightItalic',
     );
     return font.getFont();
@@ -24445,7 +26686,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway italic
   static Future<Font> ralewayItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4WjMPrQVIT9c2c8.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4WjMPrQVIT9c2c8.ttf',
       'Raleway-Italic',
     );
     return font.getFont();
@@ -24454,7 +26695,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 500italic
   static Future<Font> ralewayMediumItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4VrMPrQVIT9c2c8.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4VrMPrQVIT9c2c8.ttf',
       'Raleway-MediumItalic',
     );
     return font.getFont();
@@ -24463,7 +26704,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 600italic
   static Future<Font> ralewaySemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4bbLPrQVIT9c2c8.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4bbLPrQVIT9c2c8.ttf',
       'Raleway-SemiBoldItalic',
     );
     return font.getFont();
@@ -24472,7 +26713,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 700italic
   static Future<Font> ralewayBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4Y_LPrQVIT9c2c8.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4Y_LPrQVIT9c2c8.ttf',
       'Raleway-BoldItalic',
     );
     return font.getFont();
@@ -24481,7 +26722,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 800italic
   static Future<Font> ralewayExtraBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4ejLPrQVIT9c2c8.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4ejLPrQVIT9c2c8.ttf',
       'Raleway-ExtraBoldItalic',
     );
     return font.getFont();
@@ -24490,7 +26731,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway 900italic
   static Future<Font> ralewayBlackItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/raleway/v19/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4cHLPrQVIT9c2c8.ttf',
+      'https://fonts.gstatic.com/s/raleway/v22/1Pt_g8zYS_SKggPNyCgSQamb1W0lwk4S4cHLPrQVIT9c2c8.ttf',
       'Raleway-BlackItalic',
     );
     return font.getFont();
@@ -24499,7 +26740,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Raleway Dots regular
   static Future<Font> ralewayDotsRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ralewaydots/v8/6NUR8FifJg6AfQvzpshgwJ8kyf9Fdty2ew.ttf',
+      'https://fonts.gstatic.com/s/ralewaydots/v9/6NUR8FifJg6AfQvzpshgwJ8kyf9Fdty2ew.ttf',
       'RalewayDots-Regular',
     );
     return font.getFont();
@@ -24568,6 +26809,15 @@ class PdfGoogleFonts extends DownloadbleFont {
     return font.getFont();
   }
 
+  /// Rampart One regular
+  static Future<Font> rampartOneRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/rampartone/v1/K2F1fZFGl_JSR1tAWNG9R6qgLS76ZHOM.ttf',
+      'RampartOne-Regular',
+    );
+    return font.getFont();
+  }
+
   /// Ranchers regular
   static Future<Font> ranchersRegular() {
     const font = PdfGoogleFonts._(
@@ -24607,7 +26857,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rasa 300
   static Future<Font> rasaLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rasa/v6/xn7gYHIn1mWmdg52sgC7S9XdZN8.ttf',
+      'https://fonts.gstatic.com/s/rasa/v8/xn76YHIn1mWmVKl8ZtAM9NrJfN4YJW41fcvN2KT4.ttf',
       'Rasa-Light',
     );
     return font.getFont();
@@ -24616,7 +26866,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rasa regular
   static Future<Font> rasaRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rasa/v6/xn7vYHIn1mWmTqJelgiQV9w.ttf',
+      'https://fonts.gstatic.com/s/rasa/v8/xn76YHIn1mWmVKl8ZtAM9NrJfN5GJW41fcvN2KT4.ttf',
       'Rasa-Regular',
     );
     return font.getFont();
@@ -24625,7 +26875,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rasa 500
   static Future<Font> rasaMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rasa/v6/xn7gYHIn1mWmdlZ3sgC7S9XdZN8.ttf',
+      'https://fonts.gstatic.com/s/rasa/v8/xn76YHIn1mWmVKl8ZtAM9NrJfN50JW41fcvN2KT4.ttf',
       'Rasa-Medium',
     );
     return font.getFont();
@@ -24634,7 +26884,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rasa 600
   static Future<Font> rasaSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rasa/v6/xn7gYHIn1mWmdnpwsgC7S9XdZN8.ttf',
+      'https://fonts.gstatic.com/s/rasa/v8/xn76YHIn1mWmVKl8ZtAM9NrJfN6YIm41fcvN2KT4.ttf',
       'Rasa-SemiBold',
     );
     return font.getFont();
@@ -24643,8 +26893,53 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rasa 700
   static Future<Font> rasaBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rasa/v6/xn7gYHIn1mWmdh5xsgC7S9XdZN8.ttf',
+      'https://fonts.gstatic.com/s/rasa/v8/xn76YHIn1mWmVKl8ZtAM9NrJfN6hIm41fcvN2KT4.ttf',
       'Rasa-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Rasa 300italic
+  static Future<Font> rasaLightItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/rasa/v8/xn78YHIn1mWmfqBOmQhln0Bne8uOZth2d8_v3bT4Ycc.ttf',
+      'Rasa-LightItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Rasa italic
+  static Future<Font> rasaItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/rasa/v8/xn78YHIn1mWmfqBOmQhln0Bne8uOZoZ2d8_v3bT4Ycc.ttf',
+      'Rasa-Italic',
+    );
+    return font.getFont();
+  }
+
+  /// Rasa 500italic
+  static Future<Font> rasaMediumItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/rasa/v8/xn78YHIn1mWmfqBOmQhln0Bne8uOZrR2d8_v3bT4Ycc.ttf',
+      'Rasa-MediumItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Rasa 600italic
+  static Future<Font> rasaSemiBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/rasa/v8/xn78YHIn1mWmfqBOmQhln0Bne8uOZlhxd8_v3bT4Ycc.ttf',
+      'Rasa-SemiBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Rasa 700italic
+  static Future<Font> rasaBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/rasa/v8/xn78YHIn1mWmfqBOmQhln0Bne8uOZmFxd8_v3bT4Ycc.ttf',
+      'Rasa-BoldItalic',
     );
     return font.getFont();
   }
@@ -24670,7 +26965,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Recursive 300
   static Future<Font> recursiveLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/recursive/v23/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbYrFMk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadDck018vwxjDJCL.ttf',
+      'https://fonts.gstatic.com/s/recursive/v26/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbYrFMk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadDck018vwxjDJCL.ttf',
       'Recursive-Light',
     );
     return font.getFont();
@@ -24679,7 +26974,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Recursive regular
   static Future<Font> recursiveRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/recursive/v23/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbYrFMk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadCCk018vwxjDJCL.ttf',
+      'https://fonts.gstatic.com/s/recursive/v26/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbYrFMk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadCCk018vwxjDJCL.ttf',
       'Recursive-Regular',
     );
     return font.getFont();
@@ -24688,7 +26983,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Recursive 500
   static Future<Font> recursiveMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/recursive/v23/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbYrFMk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadCwk018vwxjDJCL.ttf',
+      'https://fonts.gstatic.com/s/recursive/v26/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbYrFMk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadCwk018vwxjDJCL.ttf',
       'Recursive-Medium',
     );
     return font.getFont();
@@ -24697,7 +26992,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Recursive 600
   static Future<Font> recursiveSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/recursive/v23/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbYrFMk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadBclE18vwxjDJCL.ttf',
+      'https://fonts.gstatic.com/s/recursive/v26/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbYrFMk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadBclE18vwxjDJCL.ttf',
       'Recursive-SemiBold',
     );
     return font.getFont();
@@ -24706,7 +27001,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Recursive 700
   static Future<Font> recursiveBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/recursive/v23/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbYrFMk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadBllE18vwxjDJCL.ttf',
+      'https://fonts.gstatic.com/s/recursive/v26/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbYrFMk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadBllE18vwxjDJCL.ttf',
       'Recursive-Bold',
     );
     return font.getFont();
@@ -24715,7 +27010,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Recursive 800
   static Future<Font> recursiveExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/recursive/v23/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbYrFMk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadAClE18vwxjDJCL.ttf',
+      'https://fonts.gstatic.com/s/recursive/v26/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbYrFMk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadAClE18vwxjDJCL.ttf',
       'Recursive-ExtraBold',
     );
     return font.getFont();
@@ -24724,7 +27019,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Recursive 900
   static Future<Font> recursiveBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/recursive/v23/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbYrFMk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadArlE18vwxjDJCL.ttf',
+      'https://fonts.gstatic.com/s/recursive/v26/8vJN7wMr0mhh-RQChyHEH06TlXhq_gukbYrFMk1QuAIcyEwG_X-dpEfaE5YaERmK-CImKsvxvU-MXGX2fSqasNfUvz2xbXfn1uEQadArlE18vwxjDJCL.ttf',
       'Recursive-Black',
     );
     return font.getFont();
@@ -24913,8 +27208,35 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Reem Kufi regular
   static Future<Font> reemKufiRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/reemkufi/v10/2sDcZGJLip7W2J7v7wQDb2-4C7wFZQ.ttf',
+      'https://fonts.gstatic.com/s/reemkufi/v11/2sDPZGJLip7W2J7v7wQZZE1I0yCmYzzQtuZnEGGf3qGuvM4.ttf',
       'ReemKufi-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Reem Kufi 500
+  static Future<Font> reemKufiMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/reemkufi/v11/2sDPZGJLip7W2J7v7wQZZE1I0yCmYzzQttRnEGGf3qGuvM4.ttf',
+      'ReemKufi-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Reem Kufi 600
+  static Future<Font> reemKufiSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/reemkufi/v11/2sDPZGJLip7W2J7v7wQZZE1I0yCmYzzQtjhgEGGf3qGuvM4.ttf',
+      'ReemKufi-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Reem Kufi 700
+  static Future<Font> reemKufiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/reemkufi/v11/2sDPZGJLip7W2J7v7wQZZE1I0yCmYzzQtgFgEGGf3qGuvM4.ttf',
+      'ReemKufi-Bold',
     );
     return font.getFont();
   }
@@ -24940,7 +27262,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Revalia regular
   static Future<Font> revaliaRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/revalia/v9/WwkexPimBE2-4ZPEeVruNIgJSNM.ttf',
+      'https://fonts.gstatic.com/s/revalia/v13/WwkexPimBE2-4ZPEeVruNIgJSNM.ttf',
       'Revalia-Regular',
     );
     return font.getFont();
@@ -25651,7 +27973,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rubik 300
   static Future<Font> rubikLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rubik/v12/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-WYi1UE80V4bVkA.ttf',
+      'https://fonts.gstatic.com/s/rubik/v14/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-WYi1UE80V4bVkA.ttf',
       'Rubik-Light',
     );
     return font.getFont();
@@ -25660,7 +27982,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rubik regular
   static Future<Font> rubikRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rubik/v12/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-B4i1UE80V4bVkA.ttf',
+      'https://fonts.gstatic.com/s/rubik/v14/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-B4i1UE80V4bVkA.ttf',
       'Rubik-Regular',
     );
     return font.getFont();
@@ -25669,7 +27991,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rubik 500
   static Future<Font> rubikMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rubik/v12/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-NYi1UE80V4bVkA.ttf',
+      'https://fonts.gstatic.com/s/rubik/v14/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-NYi1UE80V4bVkA.ttf',
       'Rubik-Medium',
     );
     return font.getFont();
@@ -25678,7 +28000,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rubik 600
   static Future<Font> rubikSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rubik/v12/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-2Y-1UE80V4bVkA.ttf',
+      'https://fonts.gstatic.com/s/rubik/v14/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-2Y-1UE80V4bVkA.ttf',
       'Rubik-SemiBold',
     );
     return font.getFont();
@@ -25687,7 +28009,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rubik 700
   static Future<Font> rubikBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rubik/v12/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-4I-1UE80V4bVkA.ttf',
+      'https://fonts.gstatic.com/s/rubik/v14/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-4I-1UE80V4bVkA.ttf',
       'Rubik-Bold',
     );
     return font.getFont();
@@ -25696,7 +28018,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rubik 800
   static Future<Font> rubikExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rubik/v12/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-h4-1UE80V4bVkA.ttf',
+      'https://fonts.gstatic.com/s/rubik/v14/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-h4-1UE80V4bVkA.ttf',
       'Rubik-ExtraBold',
     );
     return font.getFont();
@@ -25705,7 +28027,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rubik 900
   static Future<Font> rubikBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rubik/v12/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-ro-1UE80V4bVkA.ttf',
+      'https://fonts.gstatic.com/s/rubik/v14/iJWZBXyIfDnIV5PNhY1KTN7Z-Yh-ro-1UE80V4bVkA.ttf',
       'Rubik-Black',
     );
     return font.getFont();
@@ -25714,7 +28036,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rubik 300italic
   static Future<Font> rubikLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rubik/v12/iJWbBXyIfDnIV7nEt3KSJbVDV49rz8sDE0UwdYPFkJ1O.ttf',
+      'https://fonts.gstatic.com/s/rubik/v14/iJWbBXyIfDnIV7nEt3KSJbVDV49rz8sDE0UwdYPFkJ1O.ttf',
       'Rubik-LightItalic',
     );
     return font.getFont();
@@ -25723,7 +28045,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rubik italic
   static Future<Font> rubikItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rubik/v12/iJWbBXyIfDnIV7nEt3KSJbVDV49rz8tdE0UwdYPFkJ1O.ttf',
+      'https://fonts.gstatic.com/s/rubik/v14/iJWbBXyIfDnIV7nEt3KSJbVDV49rz8tdE0UwdYPFkJ1O.ttf',
       'Rubik-Italic',
     );
     return font.getFont();
@@ -25732,7 +28054,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rubik 500italic
   static Future<Font> rubikMediumItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rubik/v12/iJWbBXyIfDnIV7nEt3KSJbVDV49rz8tvE0UwdYPFkJ1O.ttf',
+      'https://fonts.gstatic.com/s/rubik/v14/iJWbBXyIfDnIV7nEt3KSJbVDV49rz8tvE0UwdYPFkJ1O.ttf',
       'Rubik-MediumItalic',
     );
     return font.getFont();
@@ -25741,7 +28063,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rubik 600italic
   static Future<Font> rubikSemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rubik/v12/iJWbBXyIfDnIV7nEt3KSJbVDV49rz8uDFEUwdYPFkJ1O.ttf',
+      'https://fonts.gstatic.com/s/rubik/v14/iJWbBXyIfDnIV7nEt3KSJbVDV49rz8uDFEUwdYPFkJ1O.ttf',
       'Rubik-SemiBoldItalic',
     );
     return font.getFont();
@@ -25750,7 +28072,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rubik 700italic
   static Future<Font> rubikBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rubik/v12/iJWbBXyIfDnIV7nEt3KSJbVDV49rz8u6FEUwdYPFkJ1O.ttf',
+      'https://fonts.gstatic.com/s/rubik/v14/iJWbBXyIfDnIV7nEt3KSJbVDV49rz8u6FEUwdYPFkJ1O.ttf',
       'Rubik-BoldItalic',
     );
     return font.getFont();
@@ -25759,7 +28081,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rubik 800italic
   static Future<Font> rubikExtraBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rubik/v12/iJWbBXyIfDnIV7nEt3KSJbVDV49rz8vdFEUwdYPFkJ1O.ttf',
+      'https://fonts.gstatic.com/s/rubik/v14/iJWbBXyIfDnIV7nEt3KSJbVDV49rz8vdFEUwdYPFkJ1O.ttf',
       'Rubik-ExtraBoldItalic',
     );
     return font.getFont();
@@ -25768,7 +28090,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Rubik 900italic
   static Future<Font> rubikBlackItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/rubik/v12/iJWbBXyIfDnIV7nEt3KSJbVDV49rz8v0FEUwdYPFkJ1O.ttf',
+      'https://fonts.gstatic.com/s/rubik/v14/iJWbBXyIfDnIV7nEt3KSJbVDV49rz8v0FEUwdYPFkJ1O.ttf',
       'Rubik-BlackItalic',
     );
     return font.getFont();
@@ -25786,7 +28108,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Ruda regular
   static Future<Font> rudaRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ruda/v14/k3kKo8YQJOpFgHQ1mQ5VkEbUKaJFsi_-2KiSGg-H.ttf',
+      'https://fonts.gstatic.com/s/ruda/v17/k3kKo8YQJOpFgHQ1mQ5VkEbUKaJFsi_-2KiSGg-H.ttf',
       'Ruda-Regular',
     );
     return font.getFont();
@@ -25795,7 +28117,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Ruda 500
   static Future<Font> rudaMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ruda/v14/k3kKo8YQJOpFgHQ1mQ5VkEbUKaJ3si_-2KiSGg-H.ttf',
+      'https://fonts.gstatic.com/s/ruda/v17/k3kKo8YQJOpFgHQ1mQ5VkEbUKaJ3si_-2KiSGg-H.ttf',
       'Ruda-Medium',
     );
     return font.getFont();
@@ -25804,7 +28126,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Ruda 600
   static Future<Font> rudaSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ruda/v14/k3kKo8YQJOpFgHQ1mQ5VkEbUKaKbtS_-2KiSGg-H.ttf',
+      'https://fonts.gstatic.com/s/ruda/v17/k3kKo8YQJOpFgHQ1mQ5VkEbUKaKbtS_-2KiSGg-H.ttf',
       'Ruda-SemiBold',
     );
     return font.getFont();
@@ -25813,7 +28135,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Ruda 700
   static Future<Font> rudaBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ruda/v14/k3kKo8YQJOpFgHQ1mQ5VkEbUKaKitS_-2KiSGg-H.ttf',
+      'https://fonts.gstatic.com/s/ruda/v17/k3kKo8YQJOpFgHQ1mQ5VkEbUKaKitS_-2KiSGg-H.ttf',
       'Ruda-Bold',
     );
     return font.getFont();
@@ -25822,7 +28144,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Ruda 800
   static Future<Font> rudaExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ruda/v14/k3kKo8YQJOpFgHQ1mQ5VkEbUKaLFtS_-2KiSGg-H.ttf',
+      'https://fonts.gstatic.com/s/ruda/v17/k3kKo8YQJOpFgHQ1mQ5VkEbUKaLFtS_-2KiSGg-H.ttf',
       'Ruda-ExtraBold',
     );
     return font.getFont();
@@ -25831,7 +28153,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Ruda 900
   static Future<Font> rudaBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ruda/v14/k3kKo8YQJOpFgHQ1mQ5VkEbUKaLstS_-2KiSGg-H.ttf',
+      'https://fonts.gstatic.com/s/ruda/v17/k3kKo8YQJOpFgHQ1mQ5VkEbUKaLstS_-2KiSGg-H.ttf',
       'Ruda-Black',
     );
     return font.getFont();
@@ -25867,7 +28189,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Ruluko regular
   static Future<Font> rulukoRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ruluko/v10/xMQVuFNZVaODtm0pC6WzKX_QmA.ttf',
+      'https://fonts.gstatic.com/s/ruluko/v14/xMQVuFNZVaODtm0pC6WzKX_QmA.ttf',
       'Ruluko-Regular',
     );
     return font.getFont();
@@ -25903,7 +28225,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Ruthie regular
   static Future<Font> ruthieRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/ruthie/v13/gokvH63sGkdqXuU9lD53Q2u_mQ.ttf',
+      'https://fonts.gstatic.com/s/ruthie/v17/~CggKBlJ1dGhpZSAAKgQIARgB.ttf',
       'Ruthie-Regular',
     );
     return font.getFont();
@@ -25914,6 +28236,87 @@ class PdfGoogleFonts extends DownloadbleFont {
     const font = PdfGoogleFonts._(
       'https://fonts.gstatic.com/s/rye/v8/r05XGLJT86YDFpTsXOqx4w.ttf',
       'Rye-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// STIX Two Math regular
+  static Future<Font> sTIXTwoMathRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/stixtwomath/v1/pONg1hwwL_6M9EkZySr_yteUi1rADEcF1pY.ttf',
+      'STIXTwoMath-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// STIX Two Text regular
+  static Future<Font> sTIXTwoTextRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/stixtwotext/v1/YA9Gr02F12Xkf5whdwKf11l0jbKkeidMTtZ5Yihg2SOYWxFMN1WD.ttf',
+      'STIXTwoText-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// STIX Two Text 500
+  static Future<Font> sTIXTwoTextMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/stixtwotext/v1/YA9Gr02F12Xkf5whdwKf11l0jbKkeidMTtZ5YihS2SOYWxFMN1WD.ttf',
+      'STIXTwoText-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// STIX Two Text 600
+  static Future<Font> sTIXTwoTextSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/stixtwotext/v1/YA9Gr02F12Xkf5whdwKf11l0jbKkeidMTtZ5Yii-3iOYWxFMN1WD.ttf',
+      'STIXTwoText-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// STIX Two Text 700
+  static Future<Font> sTIXTwoTextBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/stixtwotext/v1/YA9Gr02F12Xkf5whdwKf11l0jbKkeidMTtZ5YiiH3iOYWxFMN1WD.ttf',
+      'STIXTwoText-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// STIX Two Text italic
+  static Future<Font> sTIXTwoTextItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/stixtwotext/v1/YA9Er02F12Xkf5whdwKf11l0p7uWhf8lJUzXZT2omsvbURVuMkWDmSo.ttf',
+      'STIXTwoText-Italic',
+    );
+    return font.getFont();
+  }
+
+  /// STIX Two Text 500italic
+  static Future<Font> sTIXTwoTextMediumItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/stixtwotext/v1/YA9Er02F12Xkf5whdwKf11l0p7uWhf8lJUzXZT2omvnbURVuMkWDmSo.ttf',
+      'STIXTwoText-MediumItalic',
+    );
+    return font.getFont();
+  }
+
+  /// STIX Two Text 600italic
+  static Future<Font> sTIXTwoTextSemiBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/stixtwotext/v1/YA9Er02F12Xkf5whdwKf11l0p7uWhf8lJUzXZT2omhXcURVuMkWDmSo.ttf',
+      'STIXTwoText-SemiBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// STIX Two Text 700italic
+  static Future<Font> sTIXTwoTextBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/stixtwotext/v1/YA9Er02F12Xkf5whdwKf11l0p7uWhf8lJUzXZT2omizcURVuMkWDmSo.ttf',
+      'STIXTwoText-BoldItalic',
     );
     return font.getFont();
   }
@@ -26884,7 +29287,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Sedgwick Ave regular
   static Future<Font> sedgwickAveRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/sedgwickave/v6/uK_04rKEYuguzAcSYRdWTJq8Xmg1Vcf5JA.ttf',
+      'https://fonts.gstatic.com/s/sedgwickave/v7/uK_04rKEYuguzAcSYRdWTJq8Xmg1Vcf5JA.ttf',
       'SedgwickAve-Regular',
     );
     return font.getFont();
@@ -26893,7 +29296,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Sedgwick Ave Display regular
   static Future<Font> sedgwickAveDisplayRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/sedgwickavedisplay/v8/xfuu0XPgU3jZPUoUo3ScvmPi-NapQ8OxM2czd-YnOzUD.ttf',
+      'https://fonts.gstatic.com/s/sedgwickavedisplay/v12/xfuu0XPgU3jZPUoUo3ScvmPi-NapQ8OxM2czd-YnOzUD.ttf',
       'SedgwickAveDisplay-Regular',
     );
     return font.getFont();
@@ -27028,7 +29431,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Shippori Mincho regular
   static Future<Font> shipporiMinchoRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/shipporimincho/v6/VdGGAZweH5EbgHY6YExcZfDoj0BA2_-C7LoS7g.ttf',
+      'https://fonts.gstatic.com/s/shipporimincho/v7/VdGGAZweH5EbgHY6YExcZfDoj0BA2_-C7LoS7g.ttf',
       'ShipporiMincho-Regular',
     );
     return font.getFont();
@@ -27037,7 +29440,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Shippori Mincho 500
   static Future<Font> shipporiMinchoMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/shipporimincho/v6/VdGDAZweH5EbgHY6YExcZfDoj0B4L9am5JEO5--2zg.ttf',
+      'https://fonts.gstatic.com/s/shipporimincho/v7/VdGDAZweH5EbgHY6YExcZfDoj0B4L9am5JEO5--2zg.ttf',
       'ShipporiMincho-Medium',
     );
     return font.getFont();
@@ -27046,7 +29449,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Shippori Mincho 600
   static Future<Font> shipporiMinchoSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/shipporimincho/v6/VdGDAZweH5EbgHY6YExcZfDoj0B4A9Gm5JEO5--2zg.ttf',
+      'https://fonts.gstatic.com/s/shipporimincho/v7/VdGDAZweH5EbgHY6YExcZfDoj0B4A9Gm5JEO5--2zg.ttf',
       'ShipporiMincho-SemiBold',
     );
     return font.getFont();
@@ -27055,7 +29458,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Shippori Mincho 700
   static Future<Font> shipporiMinchoBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/shipporimincho/v6/VdGDAZweH5EbgHY6YExcZfDoj0B4Z9Cm5JEO5--2zg.ttf',
+      'https://fonts.gstatic.com/s/shipporimincho/v7/VdGDAZweH5EbgHY6YExcZfDoj0B4Z9Cm5JEO5--2zg.ttf',
       'ShipporiMincho-Bold',
     );
     return font.getFont();
@@ -27064,7 +29467,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Shippori Mincho 800
   static Future<Font> shipporiMinchoExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/shipporimincho/v6/VdGDAZweH5EbgHY6YExcZfDoj0B4e9Om5JEO5--2zg.ttf',
+      'https://fonts.gstatic.com/s/shipporimincho/v7/VdGDAZweH5EbgHY6YExcZfDoj0B4e9Om5JEO5--2zg.ttf',
       'ShipporiMincho-ExtraBold',
     );
     return font.getFont();
@@ -27073,7 +29476,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Shippori Mincho B1 regular
   static Future<Font> shipporiMinchoB1Regular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/shipporiminchob1/v9/wXK2E2wCr44tulPdnn-xbIpJ9RgT9-nyjqBr1lO97Q.ttf',
+      'https://fonts.gstatic.com/s/shipporiminchob1/v10/~ChQKElNoaXBwb3JpIE1pbmNobyBCMSAAKgQIARgB.ttf',
       'ShipporiMinchoB1-Regular',
     );
     return font.getFont();
@@ -27082,7 +29485,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Shippori Mincho B1 500
   static Future<Font> shipporiMinchoB1Medium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/shipporiminchob1/v9/wXK1E2wCr44tulPdnn-xbIpJ9RgT9-nKeolP3nih5H4Uug.ttf',
+      'https://fonts.gstatic.com/s/shipporiminchob1/v10/~ChcKElNoaXBwb3JpIE1pbmNobyBCMRj0AyAAKgQIARgB.ttf',
       'ShipporiMinchoB1-Medium',
     );
     return font.getFont();
@@ -27091,7 +29494,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Shippori Mincho B1 600
   static Future<Font> shipporiMinchoB1SemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/shipporiminchob1/v9/wXK1E2wCr44tulPdnn-xbIpJ9RgT9-nKVo5P3nih5H4Uug.ttf',
+      'https://fonts.gstatic.com/s/shipporiminchob1/v10/~ChcKElNoaXBwb3JpIE1pbmNobyBCMRjYBCAAKgQIARgB.ttf',
       'ShipporiMinchoB1-SemiBold',
     );
     return font.getFont();
@@ -27100,7 +29503,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Shippori Mincho B1 700
   static Future<Font> shipporiMinchoB1Bold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/shipporiminchob1/v9/wXK1E2wCr44tulPdnn-xbIpJ9RgT9-nKMo9P3nih5H4Uug.ttf',
+      'https://fonts.gstatic.com/s/shipporiminchob1/v10/~ChcKElNoaXBwb3JpIE1pbmNobyBCMRi8BSAAKgQIARgB.ttf',
       'ShipporiMinchoB1-Bold',
     );
     return font.getFont();
@@ -27109,7 +29512,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Shippori Mincho B1 800
   static Future<Font> shipporiMinchoB1ExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/shipporiminchob1/v9/wXK1E2wCr44tulPdnn-xbIpJ9RgT9-nKLoxP3nih5H4Uug.ttf',
+      'https://fonts.gstatic.com/s/shipporiminchob1/v10/~ChcKElNoaXBwb3JpIE1pbmNobyBCMRigBiAAKgQIARgB.ttf',
       'ShipporiMinchoB1-ExtraBold',
     );
     return font.getFont();
@@ -27937,7 +30340,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Space Grotesk 300
   static Future<Font> spaceGroteskLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/spacegrotesk/v5/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj62UUsjNsFjTDJK.ttf',
+      'https://fonts.gstatic.com/s/spacegrotesk/v6/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj62UUsjNsFjTDJK.ttf',
       'SpaceGrotesk-Light',
     );
     return font.getFont();
@@ -27946,7 +30349,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Space Grotesk regular
   static Future<Font> spaceGroteskRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/spacegrotesk/v5/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj7oUUsjNsFjTDJK.ttf',
+      'https://fonts.gstatic.com/s/spacegrotesk/v6/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj7oUUsjNsFjTDJK.ttf',
       'SpaceGrotesk-Regular',
     );
     return font.getFont();
@@ -27955,7 +30358,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Space Grotesk 500
   static Future<Font> spaceGroteskMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/spacegrotesk/v5/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj7aUUsjNsFjTDJK.ttf',
+      'https://fonts.gstatic.com/s/spacegrotesk/v6/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj7aUUsjNsFjTDJK.ttf',
       'SpaceGrotesk-Medium',
     );
     return font.getFont();
@@ -27964,7 +30367,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Space Grotesk 600
   static Future<Font> spaceGroteskSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/spacegrotesk/v5/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj42VksjNsFjTDJK.ttf',
+      'https://fonts.gstatic.com/s/spacegrotesk/v6/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj42VksjNsFjTDJK.ttf',
       'SpaceGrotesk-SemiBold',
     );
     return font.getFont();
@@ -27973,7 +30376,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Space Grotesk 700
   static Future<Font> spaceGroteskBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/spacegrotesk/v5/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVksjNsFjTDJK.ttf',
+      'https://fonts.gstatic.com/s/spacegrotesk/v6/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVksjNsFjTDJK.ttf',
       'SpaceGrotesk-Bold',
     );
     return font.getFont();
@@ -28396,7 +30799,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Sree Krushnadevaraya regular
   static Future<Font> sreeKrushnadevarayaRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/sreekrushnadevaraya/v10/R70FjzQeifmPepmyQQjQ9kvwMkWYPfTA_EWb2FhQuXir.ttf',
+      'https://fonts.gstatic.com/s/sreekrushnadevaraya/v14/~ChYKFFNyZWUgS3J1c2huYWRldmFyYXlhIAAqBAgBGAE=.ttf',
       'SreeKrushnadevaraya-Regular',
     );
     return font.getFont();
@@ -28450,7 +30853,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Stalinist One regular
   static Future<Font> stalinistOneRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/stalinistone/v28/MQpS-WezM9W4Dd7D3B7I-UT7eZ-UPyacPbo.ttf',
+      'https://fonts.gstatic.com/s/stalinistone/v33/MQpS-WezM9W4Dd7D3B7I-UT7eZ-UPyacPbo.ttf',
       'StalinistOne-Regular',
     );
     return font.getFont();
@@ -28524,6 +30927,15 @@ class PdfGoogleFonts extends DownloadbleFont {
     const font = PdfGoogleFonts._(
       'https://fonts.gstatic.com/s/strait/v8/DtViJxy6WaEr1LZzeDhtkl0U7w.ttf',
       'Strait-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Style Script regular
+  static Future<Font> styleScriptRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/stylescript/v1/vm8xdRX3SV7Z0aPa88xzW5npeFT76NZnMw.ttf',
+      'StyleScript-Regular',
     );
     return font.getFont();
   }
@@ -29458,7 +31870,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Titillium Web 200
   static Future<Font> titilliumWebExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/titilliumweb/v9/NaPDcZTIAOhVxoMyOr9n_E7ffAzHKIx5YrSYqWM.ttf',
+      'https://fonts.gstatic.com/s/titilliumweb/v10/NaPDcZTIAOhVxoMyOr9n_E7ffAzHKIx5YrSYqWM.ttf',
       'TitilliumWeb-ExtraLight',
     );
     return font.getFont();
@@ -29467,7 +31879,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Titillium Web 200italic
   static Future<Font> titilliumWebExtraLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/titilliumweb/v9/NaPFcZTIAOhVxoMyOr9n_E7fdMbewI1zZpaduWMmxA.ttf',
+      'https://fonts.gstatic.com/s/titilliumweb/v10/NaPFcZTIAOhVxoMyOr9n_E7fdMbewI1zZpaduWMmxA.ttf',
       'TitilliumWeb-ExtraLightItalic',
     );
     return font.getFont();
@@ -29476,7 +31888,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Titillium Web 300
   static Future<Font> titilliumWebLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/titilliumweb/v9/NaPDcZTIAOhVxoMyOr9n_E7ffGjEKIx5YrSYqWM.ttf',
+      'https://fonts.gstatic.com/s/titilliumweb/v10/NaPDcZTIAOhVxoMyOr9n_E7ffGjEKIx5YrSYqWM.ttf',
       'TitilliumWeb-Light',
     );
     return font.getFont();
@@ -29485,7 +31897,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Titillium Web 300italic
   static Future<Font> titilliumWebLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/titilliumweb/v9/NaPFcZTIAOhVxoMyOr9n_E7fdMbepI5zZpaduWMmxA.ttf',
+      'https://fonts.gstatic.com/s/titilliumweb/v10/NaPFcZTIAOhVxoMyOr9n_E7fdMbepI5zZpaduWMmxA.ttf',
       'TitilliumWeb-LightItalic',
     );
     return font.getFont();
@@ -29494,7 +31906,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Titillium Web regular
   static Future<Font> titilliumWebRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/titilliumweb/v9/NaPecZTIAOhVxoMyOr9n_E7fRMTsDIRSfr0.ttf',
+      'https://fonts.gstatic.com/s/titilliumweb/v10/NaPecZTIAOhVxoMyOr9n_E7fRMTsDIRSfr0.ttf',
       'TitilliumWeb-Regular',
     );
     return font.getFont();
@@ -29503,7 +31915,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Titillium Web italic
   static Future<Font> titilliumWebItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/titilliumweb/v9/NaPAcZTIAOhVxoMyOr9n_E7fdMbmCKZXbr2BsA.ttf',
+      'https://fonts.gstatic.com/s/titilliumweb/v10/NaPAcZTIAOhVxoMyOr9n_E7fdMbmCKZXbr2BsA.ttf',
       'TitilliumWeb-Italic',
     );
     return font.getFont();
@@ -29512,7 +31924,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Titillium Web 600
   static Future<Font> titilliumWebSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/titilliumweb/v9/NaPDcZTIAOhVxoMyOr9n_E7ffBzCKIx5YrSYqWM.ttf',
+      'https://fonts.gstatic.com/s/titilliumweb/v10/NaPDcZTIAOhVxoMyOr9n_E7ffBzCKIx5YrSYqWM.ttf',
       'TitilliumWeb-SemiBold',
     );
     return font.getFont();
@@ -29521,7 +31933,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Titillium Web 600italic
   static Future<Font> titilliumWebSemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/titilliumweb/v9/NaPFcZTIAOhVxoMyOr9n_E7fdMbe0IhzZpaduWMmxA.ttf',
+      'https://fonts.gstatic.com/s/titilliumweb/v10/NaPFcZTIAOhVxoMyOr9n_E7fdMbe0IhzZpaduWMmxA.ttf',
       'TitilliumWeb-SemiBoldItalic',
     );
     return font.getFont();
@@ -29530,7 +31942,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Titillium Web 700
   static Future<Font> titilliumWebBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/titilliumweb/v9/NaPDcZTIAOhVxoMyOr9n_E7ffHjDKIx5YrSYqWM.ttf',
+      'https://fonts.gstatic.com/s/titilliumweb/v10/NaPDcZTIAOhVxoMyOr9n_E7ffHjDKIx5YrSYqWM.ttf',
       'TitilliumWeb-Bold',
     );
     return font.getFont();
@@ -29539,7 +31951,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Titillium Web 700italic
   static Future<Font> titilliumWebBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/titilliumweb/v9/NaPFcZTIAOhVxoMyOr9n_E7fdMbetIlzZpaduWMmxA.ttf',
+      'https://fonts.gstatic.com/s/titilliumweb/v10/NaPFcZTIAOhVxoMyOr9n_E7fdMbetIlzZpaduWMmxA.ttf',
       'TitilliumWeb-BoldItalic',
     );
     return font.getFont();
@@ -29548,7 +31960,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Titillium Web 900
   static Future<Font> titilliumWebBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/titilliumweb/v9/NaPDcZTIAOhVxoMyOr9n_E7ffEDBKIx5YrSYqWM.ttf',
+      'https://fonts.gstatic.com/s/titilliumweb/v10/NaPDcZTIAOhVxoMyOr9n_E7ffEDBKIx5YrSYqWM.ttf',
       'TitilliumWeb-Black',
     );
     return font.getFont();
@@ -29716,6 +32128,168 @@ class PdfGoogleFonts extends DownloadbleFont {
     return font.getFont();
   }
 
+  /// Tourney 100
+  static Future<Font> tourneyThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZa_ztDtYzv1tzq1wcJnbVt7xseomk-tNs7qrzTWbyt8n7GOQByZTp1I1LcGA.ttf',
+      'Tourney-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney 200
+  static Future<Font> tourneyExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZa_ztDtYzv1tzq1wcJnbVt7xseomk-tNs7qrzTWbyt8n7GuQFyZTp1I1LcGA.ttf',
+      'Tourney-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney 300
+  static Future<Font> tourneyLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZa_ztDtYzv1tzq1wcJnbVt7xseomk-tNs7qrzTWbyt8n7GZwFyZTp1I1LcGA.ttf',
+      'Tourney-Light',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney regular
+  static Future<Font> tourneyRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZa_ztDtYzv1tzq1wcJnbVt7xseomk-tNs7qrzTWbyt8n7GOQFyZTp1I1LcGA.ttf',
+      'Tourney-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney 500
+  static Future<Font> tourneyMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZa_ztDtYzv1tzq1wcJnbVt7xseomk-tNs7qrzTWbyt8n7GCwFyZTp1I1LcGA.ttf',
+      'Tourney-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney 600
+  static Future<Font> tourneySemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZa_ztDtYzv1tzq1wcJnbVt7xseomk-tNs7qrzTWbyt8n7G5wZyZTp1I1LcGA.ttf',
+      'Tourney-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney 700
+  static Future<Font> tourneyBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZa_ztDtYzv1tzq1wcJnbVt7xseomk-tNs7qrzTWbyt8n7G3gZyZTp1I1LcGA.ttf',
+      'Tourney-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney 800
+  static Future<Font> tourneyExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZa_ztDtYzv1tzq1wcJnbVt7xseomk-tNs7qrzTWbyt8n7GuQZyZTp1I1LcGA.ttf',
+      'Tourney-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney 900
+  static Future<Font> tourneyBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZa_ztDtYzv1tzq1wcJnbVt7xseomk-tNs7qrzTWbyt8n7GkAZyZTp1I1LcGA.ttf',
+      'Tourney-Black',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney 100italic
+  static Future<Font> tourneyThinItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZc_ztDtYzv1tzq_Q47flUUvI2wpXz29ilymEMLMNc3XHnT8UKaJzBxAVfMGOPb.ttf',
+      'Tourney-ThinItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney 200italic
+  static Future<Font> tourneyExtraLightItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZc_ztDtYzv1tzq_Q47flUUvI2wpXz29ilymEMLMNc3XHnT8UIaJjBxAVfMGOPb.ttf',
+      'Tourney-ExtraLightItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney 300italic
+  static Future<Font> tourneyLightItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZc_ztDtYzv1tzq_Q47flUUvI2wpXz29ilymEMLMNc3XHnT8ULEJjBxAVfMGOPb.ttf',
+      'Tourney-LightItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney italic
+  static Future<Font> tourneyItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZc_ztDtYzv1tzq_Q47flUUvI2wpXz29ilymEMLMNc3XHnT8UKaJjBxAVfMGOPb.ttf',
+      'Tourney-Italic',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney 500italic
+  static Future<Font> tourneyMediumItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZc_ztDtYzv1tzq_Q47flUUvI2wpXz29ilymEMLMNc3XHnT8UKoJjBxAVfMGOPb.ttf',
+      'Tourney-MediumItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney 600italic
+  static Future<Font> tourneySemiBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZc_ztDtYzv1tzq_Q47flUUvI2wpXz29ilymEMLMNc3XHnT8UJEITBxAVfMGOPb.ttf',
+      'Tourney-SemiBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney 700italic
+  static Future<Font> tourneyBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZc_ztDtYzv1tzq_Q47flUUvI2wpXz29ilymEMLMNc3XHnT8UJ9ITBxAVfMGOPb.ttf',
+      'Tourney-BoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney 800italic
+  static Future<Font> tourneyExtraBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZc_ztDtYzv1tzq_Q47flUUvI2wpXz29ilymEMLMNc3XHnT8UIaITBxAVfMGOPb.ttf',
+      'Tourney-ExtraBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Tourney 900italic
+  static Future<Font> tourneyBlackItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/tourney/v1/AlZc_ztDtYzv1tzq_Q47flUUvI2wpXz29ilymEMLMNc3XHnT8UIzITBxAVfMGOPb.ttf',
+      'Tourney-BlackItalic',
+    );
+    return font.getFont();
+  }
+
   /// Trade Winds regular
   static Future<Font> tradeWindsRegular() {
     const font = PdfGoogleFonts._(
@@ -29728,7 +32302,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Train One regular
   static Future<Font> trainOneRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/trainone/v4/gyB-hwkiNtc6KnxUVjWHOqbZRY7JVQ.ttf',
+      'https://fonts.gstatic.com/s/trainone/v6/~CgsKCVRyYWluIE9uZSAAKgQIARgB.ttf',
       'TrainOne-Regular',
     );
     return font.getFont();
@@ -30274,6 +32848,15 @@ class PdfGoogleFonts extends DownloadbleFont {
     return font.getFont();
   }
 
+  /// Uchen regular
+  static Future<Font> uchenRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/uchen/v1/nKKZ-GokGZ1baIaSEQGodLxA.ttf',
+      'Uchen-Regular',
+    );
+    return font.getFont();
+  }
+
   /// Ultra regular
   static Future<Font> ultraRegular() {
     const font = PdfGoogleFonts._(
@@ -30295,7 +32878,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Underdog regular
   static Future<Font> underdogRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/underdog/v11/CHygV-jCElj7diMroVSiU14GN2Il.ttf',
+      'https://fonts.gstatic.com/s/underdog/v15/CHygV-jCElj7diMroVSiU14GN2Il.ttf',
       'Underdog-Regular',
     );
     return font.getFont();
@@ -30387,6 +32970,168 @@ class PdfGoogleFonts extends DownloadbleFont {
     const font = PdfGoogleFonts._(
       'https://fonts.gstatic.com/s/unna/v16/AYCJpXzofN0NOpozLGzjQHhuzvef5Q.ttf',
       'Unna-BoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 100
+  static Future<Font> urbanistThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xjDF02iFML4hGCyOCpRdycFsGxSrqDyx8fFpOrS8SlKw.ttf',
+      'Urbanist-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 200
+  static Future<Font> urbanistExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xjDF02iFML4hGCyOCpRdycFsGxSrqDSx4fFpOrS8SlKw.ttf',
+      'Urbanist-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 300
+  static Future<Font> urbanistLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xjDF02iFML4hGCyOCpRdycFsGxSrqDlR4fFpOrS8SlKw.ttf',
+      'Urbanist-Light',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist regular
+  static Future<Font> urbanistRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xjDF02iFML4hGCyOCpRdycFsGxSrqDyx4fFpOrS8SlKw.ttf',
+      'Urbanist-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 500
+  static Future<Font> urbanistMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xjDF02iFML4hGCyOCpRdycFsGxSrqD-R4fFpOrS8SlKw.ttf',
+      'Urbanist-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 600
+  static Future<Font> urbanistSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xjDF02iFML4hGCyOCpRdycFsGxSrqDFRkfFpOrS8SlKw.ttf',
+      'Urbanist-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 700
+  static Future<Font> urbanistBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xjDF02iFML4hGCyOCpRdycFsGxSrqDLBkfFpOrS8SlKw.ttf',
+      'Urbanist-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 800
+  static Future<Font> urbanistExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xjDF02iFML4hGCyOCpRdycFsGxSrqDSxkfFpOrS8SlKw.ttf',
+      'Urbanist-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 900
+  static Future<Font> urbanistBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xjDF02iFML4hGCyOCpRdycFsGxSrqDYhkfFpOrS8SlKw.ttf',
+      'Urbanist-Black',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 100italic
+  static Future<Font> urbanistThinItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xtDF02iFML4hGCyMqgdyNEf6or5L2WA133VJmvacG1K4S1.ttf',
+      'Urbanist-ThinItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 200italic
+  static Future<Font> urbanistExtraLightItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xtDF02iFML4hGCyMqgdyNEf6or5L2WA113VZmvacG1K4S1.ttf',
+      'Urbanist-ExtraLightItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 300italic
+  static Future<Font> urbanistLightItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xtDF02iFML4hGCyMqgdyNEf6or5L2WA12pVZmvacG1K4S1.ttf',
+      'Urbanist-LightItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist italic
+  static Future<Font> urbanistItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xtDF02iFML4hGCyMqgdyNEf6or5L2WA133VZmvacG1K4S1.ttf',
+      'Urbanist-Italic',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 500italic
+  static Future<Font> urbanistMediumItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xtDF02iFML4hGCyMqgdyNEf6or5L2WA13FVZmvacG1K4S1.ttf',
+      'Urbanist-MediumItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 600italic
+  static Future<Font> urbanistSemiBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xtDF02iFML4hGCyMqgdyNEf6or5L2WA10pUpmvacG1K4S1.ttf',
+      'Urbanist-SemiBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 700italic
+  static Future<Font> urbanistBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xtDF02iFML4hGCyMqgdyNEf6or5L2WA10QUpmvacG1K4S1.ttf',
+      'Urbanist-BoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 800italic
+  static Future<Font> urbanistExtraBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xtDF02iFML4hGCyMqgdyNEf6or5L2WA113UpmvacG1K4S1.ttf',
+      'Urbanist-ExtraBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Urbanist 900italic
+  static Future<Font> urbanistBlackItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/urbanist/v1/L0xtDF02iFML4hGCyMqgdyNEf6or5L2WA11eUpmvacG1K4S1.ttf',
+      'Urbanist-BlackItalic',
     );
     return font.getFont();
   }
@@ -30565,7 +33310,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Voces regular
   static Future<Font> vocesRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/voces/v12/-F6_fjJyLyU8d4PBBG7YpzlJ.ttf',
+      'https://fonts.gstatic.com/s/voces/v15/-F6_fjJyLyU8d4PBBG7YpzlJ.ttf',
       'Voces-Regular',
     );
     return font.getFont();
@@ -30814,6 +33559,24 @@ class PdfGoogleFonts extends DownloadbleFont {
     return font.getFont();
   }
 
+  /// WindSong regular
+  static Future<Font> windSongRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/windsong/v1/KR1WBsyu-P-GFEW57r95HdG6vjH3.ttf',
+      'WindSong-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// WindSong 500
+  static Future<Font> windSongMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/windsong/v1/KR1RBsyu-P-GFEW57oeNNPWylS3-jVXm.ttf',
+      'WindSong-Medium',
+    );
+    return font.getFont();
+  }
+
   /// Wire One regular
   static Future<Font> wireOneRegular() {
     const font = PdfGoogleFonts._(
@@ -30826,7 +33589,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 100
   static Future<Font> workSansThin() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K0nWNigDp6_cOyA.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K0nWNigDp6_cOyA.ttf',
       'WorkSans-Thin',
     );
     return font.getFont();
@@ -30835,7 +33598,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 200
   static Future<Font> workSansExtraLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K8nXNigDp6_cOyA.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K8nXNigDp6_cOyA.ttf',
       'WorkSans-ExtraLight',
     );
     return font.getFont();
@@ -30844,7 +33607,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 300
   static Future<Font> workSansLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32KxfXNigDp6_cOyA.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32KxfXNigDp6_cOyA.ttf',
       'WorkSans-Light',
     );
     return font.getFont();
@@ -30853,7 +33616,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans regular
   static Future<Font> workSansRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K0nXNigDp6_cOyA.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K0nXNigDp6_cOyA.ttf',
       'WorkSans-Regular',
     );
     return font.getFont();
@@ -30862,7 +33625,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 500
   static Future<Font> workSansMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K3vXNigDp6_cOyA.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K3vXNigDp6_cOyA.ttf',
       'WorkSans-Medium',
     );
     return font.getFont();
@@ -30871,7 +33634,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 600
   static Future<Font> workSansSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K5fQNigDp6_cOyA.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K5fQNigDp6_cOyA.ttf',
       'WorkSans-SemiBold',
     );
     return font.getFont();
@@ -30880,7 +33643,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 700
   static Future<Font> workSansBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K67QNigDp6_cOyA.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K67QNigDp6_cOyA.ttf',
       'WorkSans-Bold',
     );
     return font.getFont();
@@ -30889,7 +33652,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 800
   static Future<Font> workSansExtraBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K8nQNigDp6_cOyA.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K8nQNigDp6_cOyA.ttf',
       'WorkSans-ExtraBold',
     );
     return font.getFont();
@@ -30898,7 +33661,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 900
   static Future<Font> workSansBlack() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K-DQNigDp6_cOyA.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY_z_wNahGAdqQ43RhVcIgYT2Xz5u32K-DQNigDp6_cOyA.ttf',
       'WorkSans-Black',
     );
     return font.getFont();
@@ -30907,7 +33670,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 100italic
   static Future<Font> workSansThinItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGU3moJo43ZKyDSQQ.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGU3moJo43ZKyDSQQ.ttf',
       'WorkSans-ThinItalic',
     );
     return font.getFont();
@@ -30916,7 +33679,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 200italic
   static Future<Font> workSansExtraLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGUXmsJo43ZKyDSQQ.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGUXmsJo43ZKyDSQQ.ttf',
       'WorkSans-ExtraLightItalic',
     );
     return font.getFont();
@@ -30925,7 +33688,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 300italic
   static Future<Font> workSansLightItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGUgGsJo43ZKyDSQQ.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGUgGsJo43ZKyDSQQ.ttf',
       'WorkSans-LightItalic',
     );
     return font.getFont();
@@ -30934,7 +33697,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans italic
   static Future<Font> workSansItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGU3msJo43ZKyDSQQ.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGU3msJo43ZKyDSQQ.ttf',
       'WorkSans-Italic',
     );
     return font.getFont();
@@ -30943,7 +33706,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 500italic
   static Future<Font> workSansMediumItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGU7GsJo43ZKyDSQQ.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGU7GsJo43ZKyDSQQ.ttf',
       'WorkSans-MediumItalic',
     );
     return font.getFont();
@@ -30952,7 +33715,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 600italic
   static Future<Font> workSansSemiBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGUAGwJo43ZKyDSQQ.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGUAGwJo43ZKyDSQQ.ttf',
       'WorkSans-SemiBoldItalic',
     );
     return font.getFont();
@@ -30961,7 +33724,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 700italic
   static Future<Font> workSansBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGUOWwJo43ZKyDSQQ.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGUOWwJo43ZKyDSQQ.ttf',
       'WorkSans-BoldItalic',
     );
     return font.getFont();
@@ -30970,7 +33733,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 800italic
   static Future<Font> workSansExtraBoldItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGUXmwJo43ZKyDSQQ.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGUXmwJo43ZKyDSQQ.ttf',
       'WorkSans-ExtraBoldItalic',
     );
     return font.getFont();
@@ -30979,7 +33742,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Work Sans 900italic
   static Future<Font> workSansBlackItalic() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/worksans/v9/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGUd2wJo43ZKyDSQQ.ttf',
+      'https://fonts.gstatic.com/s/worksans/v11/QGY9z_wNahGAdqQ43Rh_ebrnlwyYfEPxPoGUd2wJo43ZKyDSQQ.ttf',
       'WorkSans-BlackItalic',
     );
     return font.getFont();
@@ -31156,10 +33919,19 @@ class PdfGoogleFonts extends DownloadbleFont {
     return font.getFont();
   }
 
+  /// Yomogi regular
+  static Future<Font> yomogiRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/yomogi/v2/VuJwdNrS2ZL7rpoPWIz5NIh-YA.ttf',
+      'Yomogi-Regular',
+    );
+    return font.getFont();
+  }
+
   /// Yrsa 300
   static Future<Font> yrsaLight() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/yrsa/v6/wlpxgwnQFlxs3af93IQ73W5OcCk.ttf',
+      'https://fonts.gstatic.com/s/yrsa/v8/wlprgwnQFlxs_wD3CFSMYmFaaCjASNNV9rRPfrKu.ttf',
       'Yrsa-Light',
     );
     return font.getFont();
@@ -31168,7 +33940,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Yrsa regular
   static Future<Font> yrsaRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/yrsa/v6/wlp-gwnQFlxs5QvV-IwQwWc.ttf',
+      'https://fonts.gstatic.com/s/yrsa/v8/wlprgwnQFlxs_wD3CFSMYmFaaCieSNNV9rRPfrKu.ttf',
       'Yrsa-Regular',
     );
     return font.getFont();
@@ -31177,7 +33949,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Yrsa 500
   static Future<Font> yrsaMedium() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/yrsa/v6/wlpxgwnQFlxs3f_83IQ73W5OcCk.ttf',
+      'https://fonts.gstatic.com/s/yrsa/v8/wlprgwnQFlxs_wD3CFSMYmFaaCisSNNV9rRPfrKu.ttf',
       'Yrsa-Medium',
     );
     return font.getFont();
@@ -31186,7 +33958,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Yrsa 600
   static Future<Font> yrsaSemiBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/yrsa/v6/wlpxgwnQFlxs3dP73IQ73W5OcCk.ttf',
+      'https://fonts.gstatic.com/s/yrsa/v8/wlprgwnQFlxs_wD3CFSMYmFaaChAT9NV9rRPfrKu.ttf',
       'Yrsa-SemiBold',
     );
     return font.getFont();
@@ -31195,8 +33967,53 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Yrsa 700
   static Future<Font> yrsaBold() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/yrsa/v6/wlpxgwnQFlxs3bf63IQ73W5OcCk.ttf',
+      'https://fonts.gstatic.com/s/yrsa/v8/wlprgwnQFlxs_wD3CFSMYmFaaCh5T9NV9rRPfrKu.ttf',
       'Yrsa-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// Yrsa 300italic
+  static Future<Font> yrsaLightItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/yrsa/v8/wlptgwnQFlxs1QnF94zlCfv0bz1WC2UW_LBte6KuGEo.ttf',
+      'Yrsa-LightItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Yrsa italic
+  static Future<Font> yrsaItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/yrsa/v8/wlptgwnQFlxs1QnF94zlCfv0bz1WCzsW_LBte6KuGEo.ttf',
+      'Yrsa-Italic',
+    );
+    return font.getFont();
+  }
+
+  /// Yrsa 500italic
+  static Future<Font> yrsaMediumItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/yrsa/v8/wlptgwnQFlxs1QnF94zlCfv0bz1WCwkW_LBte6KuGEo.ttf',
+      'Yrsa-MediumItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Yrsa 600italic
+  static Future<Font> yrsaSemiBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/yrsa/v8/wlptgwnQFlxs1QnF94zlCfv0bz1WC-UR_LBte6KuGEo.ttf',
+      'Yrsa-SemiBoldItalic',
+    );
+    return font.getFont();
+  }
+
+  /// Yrsa 700italic
+  static Future<Font> yrsaBoldItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/yrsa/v8/wlptgwnQFlxs1QnF94zlCfv0bz1WC9wR_LBte6KuGEo.ttf',
+      'Yrsa-BoldItalic',
     );
     return font.getFont();
   }
@@ -31204,7 +34021,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// Yusei Magic regular
   static Future<Font> yuseiMagicRegular() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/yuseimagic/v5/yYLt0hbAyuCmoo5wlhPkpjHR-tdfcIT_.ttf',
+      'https://fonts.gstatic.com/s/yuseimagic/v6/yYLt0hbAyuCmoo5wlhPkpjHR-tdfcIT_.ttf',
       'YuseiMagic-Regular',
     );
     return font.getFont();
@@ -31242,6 +34059,33 @@ class PdfGoogleFonts extends DownloadbleFont {
     const font = PdfGoogleFonts._(
       'https://fonts.gstatic.com/s/zendots/v1/XRXX3ICfm00IGoesQeaETM_FcCIG.ttf',
       'ZenDots-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Zen Loop regular
+  static Future<Font> zenLoopRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/zenloop/v1/h0GrssK16UsnJwHsEK9zqwzX5vOG.ttf',
+      'ZenLoop-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// Zen Loop italic
+  static Future<Font> zenLoopItalic() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/zenloop/v1/h0GtssK16UsnJwHsEJ9xoQj14-OGJ0w.ttf',
+      'ZenLoop-Italic',
+    );
+    return font.getFont();
+  }
+
+  /// Zen Tokyo Zoo regular
+  static Future<Font> zenTokyoZooRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/zentokyozoo/v1/NGSyv5ffC0J_BK6aFNtr6sRv8a1uRWe9amg.ttf',
+      'ZenTokyoZoo-Regular',
     );
     return font.getFont();
   }
@@ -31375,7 +34219,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// MaterialIcons
   static Future<Font> materialIcons() {
     const font = PdfGoogleFonts._(
-      'https://fonts.gstatic.com/s/materialicons/v90/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf',
+      'https://fonts.gstatic.com/s/materialicons/v98/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf',
       'MaterialIcons',
     );
     return font.getFont();

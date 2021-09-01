@@ -125,7 +125,7 @@ void main(List<String> args) async {
 
   for (final entry in <String, String>{
     'MaterialIcons':
-        'https://fonts.gstatic.com/s/materialicons/v90/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf'
+        'https://fonts.gstatic.com/s/materialicons/v98/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf',
   }.entries) {
     output.writeln('');
     output.writeln('/// ${entry.key}');

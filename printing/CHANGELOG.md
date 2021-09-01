@@ -2,7 +2,8 @@
 
 ## 5.5.1
 
-- Fix typo in README.
+- Update Google fonts
+- Fix typo in README
 
 ## 5.5.0
 
