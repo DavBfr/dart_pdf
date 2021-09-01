@@ -17,6 +17,8 @@ jobs:
           channel: stable
       - name: Enable Linux for flutter
         run: flutter config --enable-linux-desktop
+      - name: Update repo
+        run: sudo apt update
       - name: Install utils
         run: sudo apt install poppler-utils imagemagick clang cmake ninja-build pkg-config libgtk-3-dev
       - name: Run analysis
