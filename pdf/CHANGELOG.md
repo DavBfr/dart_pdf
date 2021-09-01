@@ -3,6 +3,7 @@
 ## 3.5.0
 
 - Add annotations [John Harris]
+- Improve image decoding error messages
 
 ## 3.4.2
 

@@ -98,7 +98,11 @@ class MemoryImage extends ImageProvider {
     PdfImageOrientation? orientation,
     double? dpi,
   }) {
-    final decoder = im.findDecoderForData(bytes)!;
+    final decoder = im.findDecoderForData(bytes);
+    if (decoder == null) {
+      throw Exception('Unable to guess the image type ${bytes.length} bytes');
+    }
+
     if (decoder is im.JpegDecoder) {
       final info = PdfJpegInfo(bytes);
 
@@ -111,7 +115,12 @@ class MemoryImage extends ImageProvider {
       );
     }
 
-    final info = decoder.startDecode(bytes)!;
+    final info = decoder.startDecode(bytes);
+
+    if (info == null) {
+      throw Exception('Unable decode the image');
+    }
+
     return MemoryImage._(
       bytes,
       info.width,
@@ -138,7 +147,12 @@ class MemoryImage extends ImageProvider {
       return PdfImage.file(context.document, bytes: bytes);
     }
 
-    final image = im.decodeImage(bytes)!;
+    final image = im.decodeImage(bytes);
+
+    if (image == null) {
+      throw Exception('Unable decode the image');
+    }
+
     final resized = im.copyResize(image, width: width);
     return PdfImage.fromImage(context.document, image: resized);
   }
