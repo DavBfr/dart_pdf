@@ -4,6 +4,7 @@
 
 - Add annotations [John Harris]
 - Improve image decoding error messages
+- Fix Exif decoding
 
 ## 3.4.2
 

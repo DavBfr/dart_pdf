@@ -23,12 +23,15 @@ import 'image.dart';
 class PdfJpegInfo {
   /// Load a Jpeg image's metadata
   factory PdfJpegInfo(Uint8List image) {
-    final buffer = image.buffer.asByteData();
+    final buffer = image.buffer.asByteData(
+      image.offsetInBytes,
+      image.lengthInBytes,
+    );
 
     int? width;
     int? height;
     int? color;
-    var offset = image.offsetInBytes;
+    var offset = 0;
     while (offset < buffer.lengthInBytes) {
       while (buffer.getUint8(offset) == 0xff) {
         offset++;
