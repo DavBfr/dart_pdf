@@ -4,7 +4,8 @@
 
 - Update Google fonts
 - Fix typo in README
-- Fix an iOS build warning
+- Fix iOS build warning
+- Fix pdfium memory leak
 
 ## 5.5.0
 

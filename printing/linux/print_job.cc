@@ -245,7 +245,12 @@ void print_job::raster_pdf(const uint8_t data[],
                            const int32_t pages[],
                            size_t pages_count,
                            double scale) {
-  FPDF_InitLibraryWithConfig(nullptr);
+  FPDF_LIBRARY_CONFIG config;
+  config.version = 2;
+  config.m_pUserFontPaths = NULL;
+  config.m_pIsolate = NULL;
+  config.m_v8EmbedderSlot = 0;
+  FPDF_InitLibraryWithConfig(&config);
 
   auto doc = FPDF_LoadMemDocument64(data, size, nullptr);
   if (!doc) {
@@ -302,6 +307,7 @@ void print_job::raster_pdf(const uint8_t data[],
     on_page_rasterized(this, p, l, bWidth, bHeight);
 
     FPDFBitmap_Destroy(bitmap);
+    FPDF_ClosePage(page);
   }
 
   FPDF_CloseDocument(doc);

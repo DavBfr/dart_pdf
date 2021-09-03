@@ -204,7 +204,12 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
 
   auto r = StartDoc(hDC, &docInfo);
 
-  FPDF_InitLibraryWithConfig(nullptr);
+  FPDF_LIBRARY_CONFIG config;
+  config.version = 2;
+  config.m_pUserFontPaths = NULL;
+  config.m_pIsolate = NULL;
+  config.m_v8EmbedderSlot = 0;
+  FPDF_InitLibraryWithConfig(&config);
 
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
@@ -230,7 +235,7 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
     int bHeight = static_cast<int>(pdfHeight * dpiY);
 
     FPDF_RenderPage(hDC, page, 0, 0, bWidth, bHeight, 0, FPDF_ANNOT);
-
+    FPDF_ClosePage(page);
     r = EndPage(hDC);
   }
 
@@ -284,7 +289,12 @@ void PrintJob::pickPrinter(void* result) {}
 void PrintJob::rasterPdf(std::vector<uint8_t> data,
                          std::vector<int> pages,
                          double scale) {
-  FPDF_InitLibraryWithConfig(nullptr);
+  FPDF_LIBRARY_CONFIG config;
+  config.version = 2;
+  config.m_pUserFontPaths = NULL;
+  config.m_pIsolate = NULL;
+  config.m_v8EmbedderSlot = 0;
+  FPDF_InitLibraryWithConfig(&config);
 
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
@@ -320,7 +330,8 @@ void PrintJob::rasterPdf(std::vector<uint8_t> data,
     auto bitmap = FPDFBitmap_Create(bWidth, bHeight, 0);
     FPDFBitmap_FillRect(bitmap, 0, 0, bWidth, bHeight, 0xffffffff);
 
-    FPDF_RenderPageBitmap(bitmap, page, 0, 0, bWidth, bHeight, 0, FPDF_ANNOT);
+    FPDF_RenderPageBitmap(bitmap, page, 0, 0, bWidth, bHeight, 0,
+                          FPDF_ANNOT | FPDF_LCD_TEXT);
 
     uint8_t* p = static_cast<uint8_t*>(FPDFBitmap_GetBuffer(bitmap));
     auto stride = FPDFBitmap_GetStride(bitmap);
@@ -341,6 +352,7 @@ void PrintJob::rasterPdf(std::vector<uint8_t> data,
                                this);
 
     FPDFBitmap_Destroy(bitmap);
+    FPDF_ClosePage(page);
   }
 
   FPDF_CloseDocument(doc);
