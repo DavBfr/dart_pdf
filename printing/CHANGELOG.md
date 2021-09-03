@@ -4,6 +4,7 @@
 
 - Update Google fonts
 - Fix typo in README
+- Fix an iOS build warning
 
 ## 5.5.0
 

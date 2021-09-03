@@ -197,7 +197,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             return
         }
 
-        let activityViewController = UIActivityViewController(activityItems: [fileURL, body], applicationActivities: nil)
+        let activityViewController = UIActivityViewController(activityItems: [fileURL, body as Any], applicationActivities: nil)
         activityViewController.setValue(subject, forKey: "subject")
         if UI_USER_INTERFACE_IDIOM() == .pad {
             let controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController
