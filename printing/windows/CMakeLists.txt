@@ -20,19 +20,23 @@ set(ARCH "x64")
 set(PDFIUM_VERSION "4627")
 
 if(${PDFIUM_VERSION} STREQUAL "latest")
-  set(PDFIUM_URL "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-windows-${ARCH}.zip")
+  set(
+    PDFIUM_URL
+    "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-windows-${ARCH}.zip"
+    )
 else()
-  set(PDFIUM_URL "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F${PDFIUM_VERSION}/pdfium-windows-${ARCH}.zip")
+  set(
+    PDFIUM_URL
+    "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F${PDFIUM_VERSION}/pdfium-windows-${ARCH}.zip"
+    )
 endif()
 
 # Download pdfium
 include(../windows/DownloadProject.cmake)
-download_project(
-  PROJ
-  pdfium
-  URL
-  ${PDFIUM_URL}
-  )
+download_project(PROJ
+                 pdfium
+                 URL
+                 ${PDFIUM_URL})
 
 # This value is used when generating builds using this plugin, so it must not be
 # changed
@@ -57,6 +61,4 @@ target_link_libraries(${PLUGIN_NAME}
                       PRIVATE pdfium flutter flutter_wrapper_plugin)
 
 # List of absolute paths to libraries that should be bundled with the plugin
-set(printing_bundled_libraries
-    "${PDFium_LIBRARY}"
-    PARENT_SCOPE)
+set(printing_bundled_libraries "${PDFium_LIBRARY}" PARENT_SCOPE)

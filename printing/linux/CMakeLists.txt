@@ -19,19 +19,23 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 set(PDFIUM_VERSION "4627")
 
 if(${PDFIUM_VERSION} STREQUAL "latest")
-  set(PDFIUM_URL "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-linux.tgz")
+  set(
+    PDFIUM_URL
+    "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-linux.tgz"
+    )
 else()
-  set(PDFIUM_URL "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F${PDFIUM_VERSION}/pdfium-linux.tgz")
+  set(
+    PDFIUM_URL
+    "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F${PDFIUM_VERSION}/pdfium-linux.tgz"
+    )
 endif()
 
 # Download pdfium
 include(../windows/DownloadProject.cmake)
-download_project(
-  PROJ
-  pdfium
-  URL
-  ${PDFIUM_URL}
-  )
+download_project(PROJ
+                 pdfium
+                 URL
+                 ${PDFIUM_URL})
 
 # This value is used when generating builds using this plugin, so it must not be
 # changed
@@ -41,14 +45,16 @@ include(${pdfium_SOURCE_DIR}/PDFiumConfig.cmake)
 
 # System-level dependencies.
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTKUnixPrint REQUIRED IMPORTED_TARGET gtk+-unix-print-3.0)
+pkg_check_modules(GTKUnixPrint
+                  REQUIRED
+                  IMPORTED_TARGET
+                  gtk+-unix-print-3.0)
 
 add_library(${PLUGIN_NAME} SHARED
             "printing_plugin.cc"
             "include/printing/printing_plugin.h"
             "print_job.cc"
-            "print_job.h"
-            )
+            "print_job.h")
 
 apply_standard_settings(${PLUGIN_NAME})
 set_target_properties(${PLUGIN_NAME} PROPERTIES CXX_VISIBILITY_PRESET hidden)
@@ -56,7 +62,8 @@ target_compile_definitions(${PLUGIN_NAME} PRIVATE FLUTTER_PLUGIN_IMPL)
 target_include_directories(${PLUGIN_NAME}
                            INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(${PLUGIN_NAME} PRIVATE flutter)
-target_link_libraries(${PLUGIN_NAME} PRIVATE PkgConfig::GTK PkgConfig::GTKUnixPrint)
+target_link_libraries(${PLUGIN_NAME}
+                      PRIVATE PkgConfig::GTK PkgConfig::GTKUnixPrint)
 target_link_libraries(${PLUGIN_NAME} PRIVATE pdfium)
 get_filename_component(PDFium_lib_path "${PDFium_LIBRARY}" DIRECTORY)
 set_target_properties(${PLUGIN_NAME}
@@ -68,6 +75,4 @@ set_target_properties(${PLUGIN_NAME}
                                  "$ORIGIN:${PDFium_lib_path}")
 
 # List of absolute paths to libraries that should be bundled with the plugin
-set(printing_bundled_libraries
-    "${PDFium_LIBRARY}"
-    PARENT_SCOPE)
+set(printing_bundled_libraries "${PDFium_LIBRARY}" PARENT_SCOPE)
