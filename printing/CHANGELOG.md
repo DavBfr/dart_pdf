@@ -7,6 +7,7 @@
 - Fix iOS build warning
 - Fix pdfium memory leak
 - Fix error while loading shared libraries on Linux
+- Update pdfium library to 4627
 
 ## 5.5.0
 
