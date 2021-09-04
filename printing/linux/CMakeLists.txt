@@ -58,6 +58,14 @@ target_include_directories(${PLUGIN_NAME}
 target_link_libraries(${PLUGIN_NAME} PRIVATE flutter)
 target_link_libraries(${PLUGIN_NAME} PRIVATE PkgConfig::GTK PkgConfig::GTKUnixPrint)
 target_link_libraries(${PLUGIN_NAME} PRIVATE pdfium)
+get_filename_component(PDFium_lib_path "${PDFium_LIBRARY}" DIRECTORY)
+set_target_properties(${PLUGIN_NAME}
+                      PROPERTIES SKIP_BUILD_RPATH
+                                 FALSE
+                                 BUILD_WITH_INSTALL_RPATH
+                                 TRUE
+                                 INSTALL_RPATH
+                                 "$ORIGIN:${PDFium_lib_path}")
 
 # List of absolute paths to libraries that should be bundled with the plugin
 set(printing_bundled_libraries

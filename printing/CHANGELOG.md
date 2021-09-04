@@ -6,6 +6,7 @@
 - Fix typo in README
 - Fix iOS build warning
 - Fix pdfium memory leak
+- Fix error while loading shared libraries on Linux
 
 ## 5.5.0
 
