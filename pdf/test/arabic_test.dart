@@ -16,7 +16,7 @@
 
 import 'dart:io';
 
-import 'package:pdf/pdf.dart';
+import 'package:pdf/src/pdf/arabic.dart' as arabic;
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
@@ -51,11 +51,11 @@ void main() {
         <int>[1612, 65249, 1618, 1614, 65276, 1614, 65204, 65247, 65165]);
 
     expect(
-      PdfArabic.convert(a.original).codeUnits,
+      arabic.convert(a.original).codeUnits,
       equals(a.reshaped),
     );
     expect(
-      PdfArabic.convert(b.original).codeUnits,
+      arabic.convert(b.original).codeUnits,
       equals(b.reshaped),
     );
   });
@@ -453,7 +453,7 @@ void main() {
     for (var item in cases) {
       try {
         expect(
-          PdfArabic.convert(item.original).codeUnits,
+          arabic.convert(item.original).codeUnits,
           equals(item.reshaped),
         );
       } catch (e) {

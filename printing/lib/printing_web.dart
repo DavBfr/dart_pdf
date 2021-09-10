@@ -152,7 +152,11 @@ class PrintingPlugin extends PrintingPlatform {
             stopWatch.stop();
             completer.complete(true);
           } catch (e) {
-            print(e);
+            assert(() {
+              // ignore: avoid_print
+              print('Error: $e');
+              return true;
+            }());
             completer.complete(_getPdf(result));
           }
         });

@@ -7,7 +7,7 @@ import 'package:printing_demo/examples/document.dart';
 
 void main() {
   testWidgets('Pdf Generate the document', (WidgetTester tester) async {
-    final data = CustomData();
+    const data = CustomData();
     final doc = await generateDocument(PdfPageFormat.a4, data);
 
     final file = File('document.pdf');

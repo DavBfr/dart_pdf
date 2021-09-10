@@ -139,7 +139,7 @@ class PdfGraphicState {
 
   @override
   bool operator ==(dynamic other) {
-    if (!(other is PdfGraphicState)) {
+    if (other is! PdfGraphicState) {
       return false;
     }
     return other.fillOpacity == fillOpacity &&

@@ -19,10 +19,12 @@ import 'package:flutter/material.dart';
 import 'app.dart';
 
 void main() {
-  runApp(App());
+  runApp(const App());
 }
 
 class App extends StatelessWidget {
+  const App({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     const scrollbarTheme =
@@ -32,7 +34,7 @@ class App extends StatelessWidget {
       theme: ThemeData.light().copyWith(scrollbarTheme: scrollbarTheme),
       darkTheme: ThemeData.dark().copyWith(scrollbarTheme: scrollbarTheme),
       title: 'Flutter PDF Demo',
-      home: MyApp(),
+      home: const MyApp(),
     );
   }
 }

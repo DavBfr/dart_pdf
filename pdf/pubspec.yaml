@@ -1,5 +1,4 @@
 name: pdf
-author: David PHAM-VAN <dev.nfet.net@gmail.com>
 description: A pdf producer for Dart. It can create pdf files for both web or flutter.
 homepage: https://github.com/DavBfr/dart_pdf/tree/master/pdf
 repository: https://github.com/DavBfr/dart_pdf
@@ -20,5 +19,5 @@ dependencies:
   xml: ^5.1.0
 
 dev_dependencies:
-  pedantic: ^1.11.0
+  flutter_lints: ^1.0.4
   test: ^1.16.0

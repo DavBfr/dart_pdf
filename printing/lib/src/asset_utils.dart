@@ -50,7 +50,7 @@ Future<ImageProvider> flutterImageProvider(
     stream.removeListener(listener);
   }, onError: (dynamic exception, StackTrace? stackTrace) {
     if (!completer.isCompleted) {
-      completer.complete(null);
+      completer.completeError('image failed to load');
     }
     if (onError != null) {
       onError(exception, stackTrace);

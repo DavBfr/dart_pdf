@@ -49,7 +49,7 @@ class PdfCatalog extends PdfObjectDict {
   final PdfNames names;
 
   /// These map the page modes just defined to the pagemodes setting of Pdf.
-  static const List<String> _PdfPageModes = <String>[
+  static const List<String> _pdfPageModes = <String>[
     '/UseNone',
     '/UseOutlines',
     '/UseThumbs',
@@ -78,7 +78,7 @@ class PdfCatalog extends PdfObjectDict {
     params['/Names'] = names.ref();
 
     // the /PageMode setting
-    params['/PageMode'] = PdfName(_PdfPageModes[pageMode.index]);
+    params['/PageMode'] = PdfName(_pdfPageModes[pageMode.index]);
 
     if (pdfDocument.sign != null) {
       if (pdfDocument.sign!.value.hasMDP) {

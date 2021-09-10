@@ -42,7 +42,12 @@ mixin AssetManifest {
           final jsonData = json.decode(jsonString) as Map<String, dynamic>;
           _assets.addAll(jsonData.keys);
         } catch (e) {
-          print('Error loading AssetManifest.json $e');
+          assert(() {
+            // ignore: avoid_print
+            print('Error loading AssetManifest.json $e');
+            return true;
+          }());
+
           rootBundle.evict('AssetManifest.json');
           _failed = true;
           _ready = true;

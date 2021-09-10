@@ -15,7 +15,6 @@
  */
 
 export 'src/pdf/annotation.dart';
-export 'src/pdf/arabic.dart';
 export 'src/pdf/border.dart';
 export 'src/pdf/color.dart';
 export 'src/pdf/colors.dart';

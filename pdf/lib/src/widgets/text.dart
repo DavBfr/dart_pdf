@@ -18,6 +18,7 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
+import 'package:pdf/src/pdf/arabic.dart' as arabic;
 
 import 'annotations.dart';
 import 'document.dart';
@@ -682,7 +683,7 @@ class RichText extends Widget with SpanningWidget {
             font.stringMetrics(' ') * (style.fontSize! * textScaleFactor);
 
         final spanLines = (_textDirection == TextDirection.rtl
-                ? PdfArabic.convert(span.text!)
+                ? arabic.convert(span.text!)
                 : span.text)!
             .split('\n');
 

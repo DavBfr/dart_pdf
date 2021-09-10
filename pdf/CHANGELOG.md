@@ -3,6 +3,7 @@
 ## 3.6.0
 
 - Fix text justify with multiple paragraphs
+- Apply Flutter 2.5 coding style
 
 ## 3.5.0
 

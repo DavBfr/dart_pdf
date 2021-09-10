@@ -17,7 +17,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'arabic.dart';
+import 'arabic.dart' as arabic;
 import 'array.dart';
 import 'data_types.dart';
 import 'document.dart';
@@ -74,7 +74,7 @@ class PdfTtfFont extends PdfFont {
       return PdfFontMetrics.zero;
     }
 
-    if (PdfArabic.isArabicDiacriticValue(charCode)) {
+    if (arabic.isArabicDiacriticValue(charCode)) {
       final metric = font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
       return metric.copyWith(advanceWidth: 0);
     }

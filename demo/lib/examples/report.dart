@@ -288,7 +288,7 @@ Future<Uint8List> generateReport(
                     legend: '${data[0]}\n$pct%',
                     value: value,
                     color: color,
-                    legendStyle: pw.TextStyle(fontSize: 10),
+                    legendStyle: const pw.TextStyle(fontSize: 10),
                   );
                 }),
               ),

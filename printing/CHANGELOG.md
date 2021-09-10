@@ -8,6 +8,7 @@
 - Fix pdfium memory leak
 - Fix error while loading shared libraries on Linux
 - Update pdfium library to 4627
+- Apply Flutter 2.5 coding style
 
 ## 5.5.0
 

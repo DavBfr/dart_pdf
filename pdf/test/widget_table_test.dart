@@ -55,7 +55,7 @@ List<TableRow> buildTable(
           height: Theme.of(context).tableCell.fontSize),
       Container(
           margin: const EdgeInsets.all(5),
-          child: Text('${color.toHex()}', style: Theme.of(context).tableCell)),
+          child: Text(color.toHex(), style: Theme.of(context).tableCell)),
     ];
     rows.add(TableRow(children: tableRow));
   }

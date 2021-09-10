@@ -33,6 +33,7 @@ class PdfType1Font extends PdfFont {
   PdfType1Font.create(PdfDocument pdfDocument, this.fontName, this.ascent,
       this.descent, this.widths)
       : assert(() {
+          // ignore: avoid_print
           print(
               '$fontName has no Unicode support see https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management');
           return true;

@@ -152,7 +152,12 @@ class MethodChannelPrinting extends PrintingPlatform {
         <String, dynamic>{},
       );
     } catch (e) {
-      print('Error getting printing info: $e');
+      assert(() {
+        // ignore: avoid_print
+        print('Error getting printing info: $e');
+        return true;
+      }());
+
       return PrintingInfo.unavailable;
     }
 

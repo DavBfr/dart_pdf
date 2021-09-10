@@ -48,7 +48,7 @@ void main() {
         .where((file) => file.path.endsWith('.svg'))
         .map<String>((file) => file.path)
         .toList()
-          ..sort();
+      ..sort();
 
     pdf.addPage(
       MultiPage(

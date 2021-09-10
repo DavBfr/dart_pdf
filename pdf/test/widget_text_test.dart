@@ -220,7 +220,7 @@ void main() {
     for (var word in para.split(' ')) {
       spans.add(
         TextSpan(
-          text: '$word',
+          text: word,
           style: TextStyle(
               font: ttf,
               fontSize: rnd.nextDouble() * 20 + 20,

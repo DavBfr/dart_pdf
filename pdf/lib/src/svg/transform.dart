@@ -101,5 +101,5 @@ class SvgTransform {
   static const none = SvgTransform(null);
 
   static final _transformRegExp =
-      RegExp('(matrix|translate|scale|rotate|skewX|skewY)\s*\(([^)]*)\)\s*');
+      RegExp(r'(matrix|translate|scale|rotate|skewX|skewY)\s*\(([^)]*)\)\s*');
 }

@@ -24,6 +24,7 @@ import 'dart:typed_data';
 
 import 'package:js/js.dart';
 
+// ignore: avoid_classes_with_only_static_members
 @JS('pdfjsLib')
 class PdfJs {
   external static PdfJsDocLoader getDocument(Settings data);

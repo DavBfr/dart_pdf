@@ -68,7 +68,12 @@ class DownloadbleFont {
         protect: protect,
       );
     } catch (e) {
-      print('$e\nError loading $name, fallback to Helvetica.');
+      assert(() {
+        // ignore: avoid_print
+        print('$e\nError loading $name, fallback to Helvetica.');
+        return true;
+      }());
+
       return Font.helvetica();
     }
   }

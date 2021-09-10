@@ -105,7 +105,8 @@ class ColorWheel extends Widget {
           large: false, sweep: true)
       ..lineTo(endBottom.x, endBottom.y)
       ..bezierArc(endBottom.x, endBottom.y, radius2, radius2, startBottom.x,
-          startBottom.y, large: false)
+          startBottom.y,
+          large: false)
       ..lineTo(startTop.x, startTop.y)
       ..fillPath()
       ..moveTo(startTop.x, startTop.y)

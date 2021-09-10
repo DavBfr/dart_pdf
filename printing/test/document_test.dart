@@ -32,6 +32,7 @@ void main() {
 
   setUp(() {
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
+      // ignore: avoid_print
       print(methodCall);
       return '1';
     });

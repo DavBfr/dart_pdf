@@ -51,7 +51,7 @@ Future<Uint8List> generateDocument(
       ),
       build: (context) {
         return pw.Padding(
-          padding: pw.EdgeInsets.only(
+          padding: const pw.EdgeInsets.only(
             left: 60,
             right: 60,
             bottom: 30,
@@ -90,7 +90,7 @@ Future<Uint8List> generateDocument(
                   destination: 'https://wikipedia.org/wiki/PDF',
                   child: pw.Text(
                     'https://wikipedia.org/wiki/PDF',
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       color: PdfColors.pink100,
                     ),
                   ),

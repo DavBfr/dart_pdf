@@ -53,7 +53,7 @@ Future<Uint8List> generateCertificate(
                   fontSize: 25,
                 ),
                 children: [
-                  pw.TextSpan(text: 'CERTIFICATE '),
+                  const pw.TextSpan(text: 'CERTIFICATE '),
                   pw.TextSpan(
                     text: 'of',
                     style: pw.TextStyle(
@@ -61,7 +61,7 @@ Future<Uint8List> generateCertificate(
                       fontWeight: pw.FontWeight.normal,
                     ),
                   ),
-                  pw.TextSpan(text: ' ACHIEVEMENT'),
+                  const pw.TextSpan(text: ' ACHIEVEMENT'),
                 ]),
           ),
           pw.Spacer(),
@@ -108,10 +108,10 @@ Future<Uint8List> generateCertificate(
                 height: 10,
               ),
               pw.Padding(
-                padding: pw.EdgeInsets.symmetric(horizontal: 10),
+                padding: const pw.EdgeInsets.symmetric(horizontal: 10),
                 child: pw.Text(
                   'Flutter PDF Demo',
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                     fontSize: 10,
                   ),
                 ),
@@ -138,7 +138,7 @@ Future<Uint8List> generateCertificate(
               pw.Flexible(
                 child: pw.Text(
                   lorem.paragraph(40),
-                  style: pw.TextStyle(fontSize: 6),
+                  style: const pw.TextStyle(fontSize: 6),
                   textAlign: pw.TextAlign.justify,
                 ),
               ),
@@ -161,16 +161,16 @@ Future<Uint8List> generateCertificate(
         buildBackground: (context) => pw.FullPage(
           ignoreMargins: true,
           child: pw.Container(
-            margin: pw.EdgeInsets.all(10),
+            margin: const pw.EdgeInsets.all(10),
             decoration: pw.BoxDecoration(
-              border:
-                  pw.Border.all(color: PdfColor.fromInt(0xffe435), width: 1),
+              border: pw.Border.all(
+                  color: const PdfColor.fromInt(0xffe435), width: 1),
             ),
             child: pw.Container(
-              margin: pw.EdgeInsets.all(5),
+              margin: const pw.EdgeInsets.all(5),
               decoration: pw.BoxDecoration(
-                border:
-                    pw.Border.all(color: PdfColor.fromInt(0xffe435), width: 5),
+                border: pw.Border.all(
+                    color: const PdfColor.fromInt(0xffe435), width: 5),
               ),
               width: double.infinity,
               height: double.infinity,
@@ -240,7 +240,7 @@ Future<Uint8List> generateCertificate(
                     ),
                   ),
                   pw.Padding(
-                    padding: pw.EdgeInsets.only(
+                    padding: const pw.EdgeInsets.only(
                       top: 120,
                       left: 80,
                       right: 80,

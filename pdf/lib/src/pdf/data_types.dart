@@ -199,10 +199,10 @@ class PdfString extends PdfDataType {
 
     final encoding = <int>[];
 
-    final add = (int unit) {
+    void add(int unit) {
       encoding.add((unit & UNICODE_BYTE_ONE_MASK) >> 8);
       encoding.add(unit & UNICODE_BYTE_ZERO_MASK);
-    };
+    }
 
     for (var unit in str.codeUnits) {
       if ((unit >= 0 && unit < UNICODE_UTF16_RESERVED_LO) ||
