@@ -340,6 +340,23 @@ void main() {
     );
   });
 
+  test('Text Widgets Justify multiple paragraphs', () {
+    const para =
+        'This is the first paragraph with a small nice text.\nHere is a new line.\nAnother one.\nAnd finally a long paragraph to finish this test with a three lines text that finishes well.';
+
+    pdf.addPage(
+      Page(
+        build: (Context context) => SizedBox(
+          width: 200,
+          child: Text(
+            para,
+            textAlign: TextAlign.justify,
+          ),
+        ),
+      ),
+    );
+  });
+
   tearDownAll(() async {
     final file = File('widgets-text.pdf');
     await file.writeAsBytes(await pdf.save());

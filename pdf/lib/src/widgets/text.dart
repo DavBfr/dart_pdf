@@ -483,6 +483,7 @@ class _Line {
     this.baseline,
     this.wordsWidth,
     this.textDirection,
+    this.justify,
   );
 
   final RichText parent;
@@ -499,6 +500,8 @@ class _Line {
 
   final TextDirection textDirection;
 
+  final bool justify;
+
   double get height => parent._spans
       .sublist(firstSpan, lastSpan)
       .reduce((a, b) => a.height > b.height ? a : b)
@@ -508,7 +511,7 @@ class _Line {
   String toString() =>
       '$runtimeType $firstSpan-$lastSpan baseline: $baseline width:$wordsWidth';
 
-  void realign(double totalWidth, bool isLast) {
+  void realign(double totalWidth) {
     final spans = parent._spans.sublist(firstSpan, lastSpan);
 
     var delta = 0.0;
@@ -522,7 +525,7 @@ class _Line {
         delta = (totalWidth - wordsWidth) / 2.0;
         break;
       case TextAlign.justify:
-        if (isLast) {
+        if (!justify) {
           totalWidth = wordsWidth;
           break;
         }
@@ -712,6 +715,7 @@ class RichText extends Widget with SpanningWidget {
                       space.advanceWidth * style.wordSpacing! -
                       style.letterSpacing!,
                   _textDirection,
+                  true,
                 ));
 
                 spanStart += spanCount;
@@ -778,14 +782,16 @@ class RichText extends Widget with SpanningWidget {
 
           if (line < spanLines.length - 1) {
             lines.add(_Line(
-                this,
-                spanStart,
-                spanCount,
-                bottom,
-                offsetX -
-                    space.advanceWidth * style.wordSpacing! -
-                    style.letterSpacing!,
-                _textDirection));
+              this,
+              spanStart,
+              spanCount,
+              bottom,
+              offsetX -
+                  space.advanceWidth * style.wordSpacing! -
+                  style.letterSpacing!,
+              _textDirection,
+              false,
+            ));
 
             spanStart += spanCount;
 
@@ -834,6 +840,7 @@ class RichText extends Widget with SpanningWidget {
             bottom,
             offsetX,
             _textDirection,
+            true,
           ));
 
           spanStart += spanCount;
@@ -890,6 +897,7 @@ class RichText extends Widget with SpanningWidget {
         bottom,
         offsetX,
         _textDirection,
+        false,
       ));
       offsetY += bottom - top;
     }
@@ -906,10 +914,9 @@ class RichText extends Widget with SpanningWidget {
       }
 
       // Realign all the lines
-      for (final line in lines.sublist(0, lines.length - 1)) {
-        line.realign(width, false);
+      for (final line in lines) {
+        line.realign(width);
       }
-      lines.last.realign(width, true);
     }
 
     box = PdfRect(0, 0, constraints.constrainWidth(width),

@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.0
+
+- Fix text justify with multiple paragraphs
+
 ## 3.5.0
 
 - Add annotations [John Harris]
