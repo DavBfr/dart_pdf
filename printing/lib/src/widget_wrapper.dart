@@ -20,6 +20,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -100,6 +101,118 @@ class WidgetWraper extends pw.ImageProvider {
     );
   }
 
+  /// Wrap a Flutter Widget to an ImageProvider.
+  ///
+  /// ```
+  /// final wrapped = await WidgetWraper.fromWidget(
+  ///   widget: Container(
+  ///     color: Colors.white,
+  ///     child: Text(
+  ///       'Hello world !',
+  ///       style: TextStyle(color: Colors.amber),
+  ///     ),
+  ///   ),
+  ///   constraints: BoxConstraints(maxWidth: 100, maxHeight: 400),
+  ///   pixelRatio: 3,
+  /// );
+  ///
+  /// pdf.addPage(
+  ///   pw.Page(
+  ///     pageFormat: format,
+  ///     build: (context) {
+  ///       return pw.Image(wrapped, width: 100);
+  ///     },
+  ///   ),
+  /// );
+  /// ```
+  static Future<WidgetWraper> fromWidget({
+    required Widget widget,
+    required BoxConstraints constraints,
+    double pixelRatio = 1.0,
+    PdfImageOrientation? orientation,
+    double? dpi,
+  }) async {
+    assert(pixelRatio > 0);
+
+    if (!constraints.hasBoundedHeight || !constraints.hasBoundedHeight) {
+      throw Exception(
+          'Unable to convert an unbounded widget. Add maxWidth and maxHeight to the constraints.');
+    }
+
+    widget = ConstrainedBox(
+      constraints: constraints,
+      child: widget,
+    );
+
+    final _properties = DiagnosticPropertiesBuilder();
+    widget.debugFillProperties(_properties);
+
+    if (_properties.properties.isEmpty) {
+      throw ErrorDescription('Unable to get the widget properties');
+    }
+
+    final _constraints = _properties.properties
+        .whereType<DiagnosticsProperty<BoxConstraints>>()
+        .first
+        .value;
+
+    if (_constraints == null ||
+        !_constraints.hasBoundedWidth ||
+        !_constraints.hasBoundedWidth) {
+      throw Exception('Unable to convert an unbounded widget.');
+    }
+
+    final _repaintBoundary = RenderRepaintBoundary();
+
+    final renderView = RenderView(
+      child: RenderPositionedBox(
+          alignment: Alignment.center, child: _repaintBoundary),
+      configuration: ViewConfiguration(
+          size: Size(_constraints.maxWidth, _constraints.maxHeight),
+          devicePixelRatio: ui.window.devicePixelRatio),
+      window: _FlutterView(
+        configuration: ui.ViewConfiguration(
+          devicePixelRatio: ui.window.devicePixelRatio,
+        ),
+      ),
+    );
+
+    final pipelineOwner = PipelineOwner()..rootNode = renderView;
+    renderView.prepareInitialFrame();
+
+    final buildOwner = BuildOwner(focusManager: FocusManager());
+    final _rootElement = RenderObjectToWidgetAdapter<RenderBox>(
+      container: _repaintBoundary,
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: IntrinsicHeight(child: IntrinsicWidth(child: widget)),
+      ),
+    ).attachToRenderTree(buildOwner);
+
+    buildOwner
+      ..buildScope(_rootElement)
+      ..finalizeTree();
+
+    pipelineOwner
+      ..flushLayout()
+      ..flushCompositingBits()
+      ..flushPaint();
+
+    final image = await _repaintBoundary.toImage(pixelRatio: pixelRatio);
+    final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+    if (bytes == null) {
+      throw Exception('Unable to read image data');
+    }
+
+    return WidgetWraper._(
+      bytes.buffer.asUint8List(),
+      image.width,
+      image.height,
+      orientation ?? PdfImageOrientation.topLeft,
+      dpi,
+    );
+  }
+
   /// The image data
   final Uint8List bytes;
 
@@ -113,4 +226,17 @@ class WidgetWraper extends pw.ImageProvider {
       orientation: orientation,
     );
   }
+}
+
+class _FlutterView extends ui.FlutterView {
+  _FlutterView({required this.configuration});
+
+  final ui.ViewConfiguration configuration;
+
+  @override
+  ui.PlatformDispatcher get platformDispatcher =>
+      ui.PlatformDispatcher.instance;
+
+  @override
+  ui.ViewConfiguration get viewConfiguration => configuration;
 }

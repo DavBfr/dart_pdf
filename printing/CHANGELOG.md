@@ -1,6 +1,6 @@
 # Changelog
 
-## 5.5.1
+## 5.6.0
 
 - Update Google fonts
 - Fix typo in README
@@ -9,6 +9,7 @@
 - Fix error while loading shared libraries on Linux
 - Update pdfium library to 4627
 - Apply Flutter 2.5 coding style
+- Add WidgetWraper.fromWidget()
 
 ## 5.5.0
 
