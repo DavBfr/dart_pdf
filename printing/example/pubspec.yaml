@@ -19,7 +19,7 @@ dependency_overrides:
     path: ../
 
 dev_dependencies:
-  pedantic:
+  flutter_lints:
 
 flutter:
   uses-material-design: true

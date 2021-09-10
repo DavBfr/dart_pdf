@@ -12,7 +12,7 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp(this.title);
+  const MyApp(this.title, {Key? key}) : super(key: key);
 
   final String title;
 
