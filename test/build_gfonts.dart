@@ -114,6 +114,10 @@ void main(List<String> args) async {
         uri = uri.replace(scheme: 'https');
       }
 
+      if (!uri.path.endsWith('.ttf')) {
+        continue;
+      }
+
       output.writeln('');
       output.writeln('/// ${f['family']} ${s.key}');
       output.writeln('static Future<Font> $family$sub() {');
