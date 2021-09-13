@@ -55,7 +55,7 @@ class PdfTtfFont extends PdfFont {
   final TtfParser font;
 
   @override
-  String get fontName => font.fontName!;
+  String get fontName => font.fontName;
 
   @override
   double get ascent => font.ascent.toDouble() / font.unitsPerEm;

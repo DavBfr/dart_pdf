@@ -4,6 +4,7 @@
 
 - Fix text justify with multiple paragraphs
 - Apply Flutter 2.5 coding style
+- Prefere unicode FontName
 
 ## 3.5.0
 

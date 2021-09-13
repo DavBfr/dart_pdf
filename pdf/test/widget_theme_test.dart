@@ -58,7 +58,7 @@ void main() {
       build: (Context context) => ListView(
         children: <Widget>[
           Text(
-            style.font!.fontName!,
+            style.font!.fontName,
             style: style,
           ),
         ],

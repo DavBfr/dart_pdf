@@ -22,6 +22,32 @@ import 'package:meta/meta.dart';
 
 import 'font_metrics.dart';
 
+enum TtfParserName {
+  copyright,
+  fontFamily,
+  fontSubfamily,
+  uniqueID,
+  fullName,
+  version,
+  postScriptName,
+  trademark,
+  manufacturer,
+  designer,
+  description,
+  manufacturerURL,
+  designerURL,
+  license,
+  licenseURL,
+  reserved,
+  preferredFamily,
+  preferredSubfamily,
+  compatibleFullName,
+  sampleText,
+  postScriptFindFontName,
+  wwsFamily,
+  wwsSubfamily,
+}
+
 @immutable
 class TtfGlyphInfo {
   const TtfGlyphInfo(this.index, this.data, this.compounds);
@@ -71,7 +97,6 @@ class TtfParser {
     assert(tableOffsets.containsKey(glyf_table),
         'Unable to find the `glyf` table. This file is not a supported TTF font');
 
-    _parseFontName();
     _parseCMap();
     _parseIndexes();
     _parseGlyphs();
@@ -89,7 +114,7 @@ class TtfParser {
   final UnmodifiableByteDataView bytes;
   final Map<String, int> tableOffsets = <String, int>{};
   final Map<String, int> tableSize = <String, int>{};
-  String? _fontName;
+
   final Map<int, int> charToGlyphIndexMap = <int, int>{};
   final List<int> glyphOffsets = <int>[];
   final Map<int, PdfFontMetrics> glyphInfoMap = <int, PdfFontMetrics>{};
@@ -115,42 +140,46 @@ class TtfParser {
 
   int get numGlyphs => bytes.getUint16(tableOffsets[maxp_table]! + 4);
 
-  String? get fontName => _fontName;
+  String get fontName =>
+      getNameID(TtfParserName.postScriptName) ?? hashCode.toString();
 
   bool get unicode => bytes.getUint32(0) == 0x10000;
 
   // https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6name.html
-  void _parseFontName() {
+  String? getNameID(TtfParserName fontNameID) {
     final basePosition = tableOffsets[name_table]!;
+    // final format = bytes.getUint16(basePosition);
     final count = bytes.getUint16(basePosition + 2);
     final stringOffset = bytes.getUint16(basePosition + 4);
     var pos = basePosition + 6;
+    String? _fontName;
+
     for (var i = 0; i < count; i++) {
       final platformID = bytes.getUint16(pos);
       final nameID = bytes.getUint16(pos + 6);
       final length = bytes.getUint16(pos + 8);
       final offset = bytes.getUint16(pos + 10);
       pos += 12;
-      if (platformID == 1 && nameID == 6) {
+
+      if (platformID == 1 && nameID == fontNameID.index) {
         try {
           _fontName = utf8.decode(bytes.buffer
               .asUint8List(basePosition + stringOffset + offset, length));
-          return;
         } catch (a) {
           print('Error: $platformID $nameID $a');
         }
       }
-      if (platformID == 3 && nameID == 6) {
+
+      if (platformID == 3 && nameID == fontNameID.index) {
         try {
-          _fontName = _decodeUtf16(bytes.buffer
+          return _decodeUtf16(bytes.buffer
               .asUint8List(basePosition + stringOffset + offset, length));
-          return;
         } catch (a) {
           print('Error: $platformID $nameID $a');
         }
       }
     }
-    _fontName = hashCode.toString();
+    return _fontName;
   }
 
   void _parseCMap() {

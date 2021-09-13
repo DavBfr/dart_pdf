@@ -82,7 +82,7 @@ class Font {
     Type1Fonts.zapfDingbats: 'ZapfDingbats'
   };
 
-  String? get fontName => _type1Map[font];
+  String get fontName => _type1Map[font]!;
 
   @protected
   PdfFont buildFont(PdfDocument pdfDocument) {
@@ -153,13 +153,25 @@ class TtfFont extends Font {
   }
 
   @override
-  String? get fontName {
+  String get fontName {
     if (_pdfFont != null) {
       return _pdfFont!.fontName;
     }
 
     final font = TtfParser(data);
     return font.fontName;
+  }
+
+  String? fontNameID(TtfParserName nameID) {
+    final pdfFont = _pdfFont;
+    if (pdfFont != null) {
+      if (pdfFont is PdfTtfFont) {
+        return pdfFont.font.getNameID(nameID);
+      }
+    }
+
+    final font = TtfParser(data);
+    return font.getNameID(nameID);
   }
 
   @override
