@@ -10,6 +10,7 @@
 - Update pdfium library to 4627
 - Apply Flutter 2.5 coding style
 - Add WidgetWraper.fromWidget()
+- Allow overriding defaultCache
 
 ## 5.5.0
 

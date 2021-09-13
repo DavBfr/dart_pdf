@@ -26,7 +26,7 @@ abstract class PdfBaseCache {
   const PdfBaseCache();
 
   /// The default cache used when none specified
-  static final defaultCache = PdfMemoryCache();
+  static PdfBaseCache defaultCache = PdfMemoryCache();
 
   /// Add some data to the cache
   Future<void> add(String key, Uint8List bytes);
