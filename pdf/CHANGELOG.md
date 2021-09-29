@@ -3,6 +3,7 @@
 ## 3.6.1
 
 - Fixes crash when array is empty [Kondamon]
+- Fix arabic word issues [Mohamedfaroouk]
 
 ## 3.6.0
 

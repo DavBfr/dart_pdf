@@ -46,9 +46,9 @@ void main() {
   });
 
   test('Arabic Diacritics', () {
-    final a = ArabicText('السلام', <int>[65249, 65276, 65204, 65247, 65165]);
+    final a = ArabicText('السلام', <int>[1605, 65276, 65204, 65247, 1575]);
     final b = ArabicText('السَلَاْمٌ',
-        <int>[1612, 65249, 1618, 1614, 65276, 1614, 65204, 65247, 65165]);
+        <int>[1612, 1605, 1618, 1614, 65276, 1614, 65204, 65247, 1575]);
 
     expect(
       arabic.convert(a.original).codeUnits,
