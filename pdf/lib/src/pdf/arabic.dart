@@ -322,7 +322,7 @@ Iterable<String> _parse(String text) sync* {
   var first = true;
   for (var word in words) {
     final newWord = <int>[];
-    var isNewWordArabic = true;
+    var isNewWordArabic = false;
 
     var prevLetter = 0;
 
