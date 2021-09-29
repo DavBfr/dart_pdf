@@ -93,7 +93,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                 }
 
                 let printer = UIPrinter(url: printerURL!)
-                printer.contactPrinter { available -> Void in
+                printer.contactPrinter { available in
                     if !available {
                         printing.onCompleted(printJob: self, completed: false, error: "Printer not available")
                         return

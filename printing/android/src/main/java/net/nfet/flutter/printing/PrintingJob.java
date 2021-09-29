@@ -507,6 +507,19 @@ public class PrintingJob extends PrintDocumentAdapter {
             }
         });
 
+        thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                final String finalError = e.getMessage();
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        printing.onPageRasterEnd(PrintingJob.this, finalError);
+                    }
+                });
+            }
+        });
+
         thread.start();
     }
 }
