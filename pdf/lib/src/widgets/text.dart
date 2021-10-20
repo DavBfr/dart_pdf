@@ -505,13 +505,9 @@ class _Line {
 
   double get height {
     final list = parent._spans.sublist(firstSpan, lastSpan);
-    if (list.length > 0) {
-      return list
-          .reduce((a, b) => a.height > b.height ? a : b)
-          .height;
-    } else {
-      return 0;
-    }
+    return list.isEmpty
+        ? 0
+        : list.reduce((a, b) => a.height > b.height ? a : b).height;
   }
 
   @override
