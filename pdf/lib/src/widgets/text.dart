@@ -503,10 +503,16 @@ class _Line {
 
   final bool justify;
 
-  double get height => parent._spans
-      .sublist(firstSpan, lastSpan)
-      .reduce((a, b) => a.height > b.height ? a : b)
-      .height;
+  double get height {
+    final list = parent._spans.sublist(firstSpan, lastSpan);
+    if (list.length > 0) {
+      return list
+          .reduce((a, b) => a.height > b.height ? a : b)
+          .height;
+    } else {
+      return 0;
+    }
+  }
 
   @override
   String toString() =>
