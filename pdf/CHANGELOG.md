@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.1
+
+- Fixes crash when array is empty [Kondamon]
+
 ## 3.6.0
 
 - Fix text justify with multiple paragraphs
