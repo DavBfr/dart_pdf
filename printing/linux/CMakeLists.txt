@@ -16,7 +16,7 @@ cmake_minimum_required(VERSION 3.10)
 set(PROJECT_NAME "printing")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
-set(PDFIUM_VERSION "4627")
+set(PDFIUM_VERSION "4627" CACHE STRING "Version of pdfium used")
 
 if(${PDFIUM_VERSION} STREQUAL "latest")
   set(
@@ -26,7 +26,7 @@ if(${PDFIUM_VERSION} STREQUAL "latest")
 else()
   set(
     PDFIUM_URL
-    "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F${PDFIUM_VERSION}/pdfium-linux.tgz"
+    "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/${PDFIUM_VERSION}/pdfium-linux.tgz"
     )
 endif()
 
