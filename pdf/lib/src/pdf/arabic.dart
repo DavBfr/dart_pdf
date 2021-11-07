@@ -183,8 +183,14 @@ bool _isInArabicSubstitutionA(int letter) {
 bool _isArabicLetter(int letter) {
   return (letter >= 0x0600 && letter <= 0x06FF) ||
       (letter >= 0x0750 && letter <= 0x077F) ||
-      (letter >= 0x08FF && letter <= 0xFB50) ||
-      (letter >= 0xFDFF && letter <= 0xFEFF);
+      (letter >= 0x0870 && letter <= 0x089F) ||
+      (letter >= 0x08A0 && letter <= 0x08FF) ||
+      (letter >= 0xFB50 && letter <= 0xFDFF) ||
+      (letter >= 0xFE70 && letter <= 0xFEFF) ||
+      (letter >= 0x10E60 && letter <= 0x10E7F) ||
+      (letter >= 0x1EC70 && letter <= 0x1ECBF) ||
+      (letter >= 0x1ED00 && letter <= 0x1ED4F) ||
+      (letter >= 0x1EE00 && letter <= 0x1EEFF);
 }
 
 bool _isArabicEndLetter(int letter) {
