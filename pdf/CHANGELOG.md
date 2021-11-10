@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.2
+
+- Fix arabic ranges according to Wikipedia [elibyy]
+
 ## 3.6.1
 
 - Fixes crash when array is empty [Kondamon]

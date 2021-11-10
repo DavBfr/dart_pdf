@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.6.1
+
+- Allow host app to override pdfium version [Jon Salmon]
+
 ## 5.6.0
 
 - Update Google fonts
