@@ -491,10 +491,7 @@ class _PdfPreviewState extends State<PdfPreview> with PdfPreviewRaster {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Expanded(
-            child: scrollController.hasClients
-                ? Scrollbar(controller: scrollController, child: scrollView)
-                : scrollView),
+        Expanded(child: scrollView),
         if (actions.isNotEmpty && widget.useActions)
           IconTheme.merge(
             data: IconThemeData(
