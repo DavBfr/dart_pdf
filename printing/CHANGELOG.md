@@ -3,6 +3,7 @@
 ## 5.6.2
 
 - Update Linux and Windows pdfium libraries to 4706
+- Remove extra scroll bars on desktop [Jonathan Salmon]
 
 ## 5.6.1
 
