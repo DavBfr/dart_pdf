@@ -16,18 +16,18 @@ cmake_minimum_required(VERSION 3.15)
 set(PROJECT_NAME "printing")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
-set(ARCH "x64")
-set(PDFIUM_VERSION "4627" CACHE STRING "Version of pdfium used")
+set(PDFIUM_VERSION "4706" CACHE STRING "Version of pdfium used")
+set(PDFIUM_ARCH "x64" CACHE STRING "Architecture of pdfium used")
 
 if(${PDFIUM_VERSION} STREQUAL "latest")
   set(
     PDFIUM_URL
-    "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-windows-${ARCH}.zip"
+    "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-win-${PDFIUM_ARCH}.tgz"
     )
 else()
   set(
     PDFIUM_URL
-    "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/${PDFIUM_VERSION}/pdfium-windows-${ARCH}.zip"
+    "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/${PDFIUM_VERSION}/pdfium-win-${PDFIUM_ARCH}.tgz"
     )
 endif()
 

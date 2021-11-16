@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.6.2
+
+- Update Linux and Windows pdfium libraries to 4706
+
 ## 5.6.1
 
 - Allow host app to override pdfium version [Jon Salmon]
