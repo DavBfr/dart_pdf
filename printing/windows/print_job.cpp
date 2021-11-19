@@ -56,7 +56,7 @@ std::string toUtf8(TCHAR* tstr) {
 }
 
 std::wstring fromUtf8(std::string str) {
-  auto len = MultiByteToWideChar(CP_ACP, 0, str.c_str(),
+  auto len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(),
                                  static_cast<int>(str.length()), nullptr, 0);
   if (len <= 0) {
     return false;
@@ -64,7 +64,7 @@ std::wstring fromUtf8(std::string str) {
 
   auto wstr = std::wstring{};
   wstr.resize(len);
-  MultiByteToWideChar(CP_ACP, 0, str.c_str(), static_cast<int>(str.length()),
+  MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.length()),
                       &wstr[0], len);
 
   return wstr;
