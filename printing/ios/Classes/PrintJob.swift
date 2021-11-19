@@ -262,25 +262,25 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
 
         let pickPrinterCompletionHandler: UIPrinterPickerController.CompletionHandler = {
             (printerPickerController: UIPrinterPickerController, completed: Bool, error: Error?) in
-            if !completed, error != nil {
-                print("Unable to pick printer: \(error?.localizedDescription ?? "unknown error")")
-                result(nil)
-                return
-            }
+                if !completed, error != nil {
+                    print("Unable to pick printer: \(error?.localizedDescription ?? "unknown error")")
+                    result(nil)
+                    return
+                }
 
-            if printerPickerController.selectedPrinter == nil {
-                result(nil)
-                return
-            }
+                if printerPickerController.selectedPrinter == nil {
+                    result(nil)
+                    return
+                }
 
-            let printer = printerPickerController.selectedPrinter!
-            let data: NSDictionary = [
-                "url": printer.url.absoluteString as Any,
-                "name": printer.displayName as Any,
-                "model": printer.makeAndModel as Any,
-                "location": printer.displayLocation as Any,
-            ]
-            result(data)
+                let printer = printerPickerController.selectedPrinter!
+                let data: NSDictionary = [
+                    "url": printer.url.absoluteString as Any,
+                    "name": printer.displayName as Any,
+                    "model": printer.makeAndModel as Any,
+                    "location": printer.displayLocation as Any,
+                ]
+                result(data)
         }
 
         if UI_USER_INTERFACE_IDIOM() == .pad {
