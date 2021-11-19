@@ -256,7 +256,9 @@ abstract class StatelessWidget extends Widget with SpanningWidget {
 
   @override
   bool get canSpan =>
-      _child is SpanningWidget && (_child as SpanningWidget).canSpan;
+      _child != null &&
+      _child is SpanningWidget &&
+      (_child as SpanningWidget).canSpan;
 
   @override
   bool get hasMoreWidgets =>

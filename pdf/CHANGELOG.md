@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.3
+
+- Fix some Spanning Widgets issues
+
 ## 3.6.2
 
 - Fix arabic ranges according to Wikipedia [elibyy]
@@ -105,7 +109,7 @@
 - A borderRadius can only be given for a uniform Border
 - Add LayoutWidgetBuilder
 - Add GridPaper widget
-- Improve internal sructure
+- Improve internal structure
 - Add some asserts on the TtfParser
 - Add document loading
 - Remove deprecated methods
@@ -117,7 +121,7 @@
 
 ## 1.13.0
 
-- Implement different border radius on all corners
+- Implement different border-radius on all corners
 - Add AcroForm widgets
 - Add document outline support
 - Update analysis options
@@ -130,7 +134,7 @@
 - Automatically calculate Shape() bounding box
 - Improve gradient functions
 - Add blend mode
-- Add soft mask
+- Add soft-mask support
 - Remove dependency to the deprecated utf library
 - Fix RichText.maxLines with multiple TextSpan
 - Fix Exif parsing
@@ -171,7 +175,7 @@
 
 ## 1.9.0
 
-- Allow MultiPage to relayout individual pages with support for flex
+- Allow MultiPage to re-layout individual pages with support for flex
 - Implement BoxShadow for rect and circle BoxDecorations
 - Implement TextStyle.letterSpacing
 - Implement Arabic writing support [Anas Altair]

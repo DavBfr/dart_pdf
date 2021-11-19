@@ -96,7 +96,7 @@ class _PartitionsContext extends WidgetContext {
   WidgetContext clone() {
     final context = _PartitionsContext(partitionContext.length);
     for (var index = 0; index < partitionContext.length; index++) {
-      context.partitionContext[index] = partitionContext[index]!.clone();
+      context.partitionContext[index] = partitionContext[index]?.clone();
     }
 
     return context;
@@ -224,7 +224,9 @@ class Partitions extends Widget with SpanningWidget {
     _context.apply(context);
     var index = 0;
     for (final child in children) {
-      child.restoreContext(_context.partitionContext[index]!);
+      if (child.canSpan) {
+        child.restoreContext(_context.partitionContext[index]!);
+      }
       index++;
     }
   }
@@ -233,7 +235,9 @@ class Partitions extends Widget with SpanningWidget {
   WidgetContext saveContext() {
     var index = 0;
     for (final child in children) {
-      _context.partitionContext[index] = child.saveContext();
+      if (child.canSpan) {
+        _context.partitionContext[index] = child.saveContext();
+      }
       index++;
     }
     return _context;

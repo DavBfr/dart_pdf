@@ -393,6 +393,7 @@ class Wrap extends MultiChildWidget with SpanningWidget {
 
   @override
   void restoreContext(_WrapContext context) {
+    _context.apply(context);
     _context.firstChild = context.lastChild;
   }
 

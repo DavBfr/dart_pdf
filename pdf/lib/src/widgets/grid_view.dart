@@ -336,6 +336,7 @@ class GridView extends MultiChildWidget with SpanningWidget {
 
   @override
   void restoreContext(_GridViewContext context) {
+    _context.apply(context);
     _context.firstChild = context.lastChild;
   }
 
