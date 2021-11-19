@@ -59,7 +59,7 @@ std::wstring fromUtf8(std::string str) {
   auto len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(),
                                  static_cast<int>(str.length()), nullptr, 0);
   if (len <= 0) {
-    return false;
+    return L"";
   }
 
   auto wstr = std::wstring{};
