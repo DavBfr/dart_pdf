@@ -3,6 +3,7 @@
 ## 3.6.3
 
 - Fix some Spanning Widgets issues
+- Fix Arabic unit tests
 
 ## 3.6.2
 
