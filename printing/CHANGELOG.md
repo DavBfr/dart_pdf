@@ -1,6 +1,6 @@
 # Changelog
 
-## 5.6.2
+## 5.6.3
 
 - Fix Windows string encoding
 - Fix Windows print margins
