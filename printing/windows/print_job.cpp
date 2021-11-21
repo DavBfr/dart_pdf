@@ -218,6 +218,8 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
   }
 
   auto pages = FPDF_GetPageCount(doc);
+  auto marginLeft = GetDeviceCaps(hDC, PHYSICALOFFSETX);
+  auto marginTop = GetDeviceCaps(hDC, PHYSICALOFFSETY);
 
   for (auto pageNum = 0; pageNum < pages; pageNum++) {
     r = StartPage(hDC);
@@ -234,7 +236,8 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
     int bWidth = static_cast<int>(pdfWidth * dpiX);
     int bHeight = static_cast<int>(pdfHeight * dpiY);
 
-    FPDF_RenderPage(hDC, page, 0, 0, bWidth, bHeight, 0, FPDF_ANNOT);
+    FPDF_RenderPage(hDC, page, -marginLeft, -marginTop, bWidth, bHeight, 0,
+                    FPDF_ANNOT | FPDF_PRINTING);
     FPDF_ClosePage(page);
     r = EndPage(hDC);
   }

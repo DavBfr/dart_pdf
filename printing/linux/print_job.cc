@@ -287,7 +287,8 @@ void print_job::raster_pdf(const uint8_t data[],
     auto bitmap = FPDFBitmap_Create(bWidth, bHeight, 0);
     FPDFBitmap_FillRect(bitmap, 0, 0, bWidth, bHeight, 0xffffffff);
 
-    FPDF_RenderPageBitmap(bitmap, page, 0, 0, bWidth, bHeight, 0, FPDF_ANNOT);
+    FPDF_RenderPageBitmap(bitmap, page, 0, 0, bWidth, bHeight, 0,
+                          FPDF_ANNOT | FPDF_LCD_TEXT | FPDF_NO_NATIVETEXT);
 
     uint8_t* p = static_cast<uint8_t*>(FPDFBitmap_GetBuffer(bitmap));
     auto stride = FPDFBitmap_GetStride(bitmap);

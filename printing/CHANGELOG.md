@@ -3,6 +3,7 @@
 ## 5.6.2
 
 - Fix Windows string encoding
+- Fix Windows print margins
 
 ## 5.6.2
 
