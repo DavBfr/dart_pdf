@@ -4,6 +4,7 @@
 
 - Fix Windows string encoding
 - Fix Windows print margins
+- Fix macOS printing
 
 ## 5.6.2
 

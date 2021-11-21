@@ -31,6 +31,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     private var page: CGPDFPage?
     private let semaphore = DispatchSemaphore(value: 0)
     private var dynamic = false
+    private var _window: NSWindow?
 
     public init(printing: PrintingPlugin, index: Int) {
         self.printing = printing
@@ -100,8 +101,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         }
 
         DispatchQueue.main.async {
-            let window = NSApplication.shared.mainWindow!
-            self.printOperation!.runModal(for: window, delegate: self, didRun: #selector(self.printOperationDidRun(printOperation:success:contextInfo:)), contextInfo: nil)
+            self.printOperation!.runModal(for: self._window!, delegate: self, didRun: #selector(self.printOperationDidRun(printOperation:success:contextInfo:)), contextInfo: nil)
         }
     }
 
@@ -130,8 +130,9 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         return printers
     }
 
-    public func printPdf(name: String, withPageSize size: CGSize, andMargin _: CGRect, withPrinter printer: String?, dynamically dyn: Bool) {
+    public func printPdf(name: String, withPageSize size: CGSize, andMargin _: CGRect, withPrinter printer: String?, dynamically dyn: Bool, andWindow window: NSWindow) {
         dynamic = dyn
+        _window = window
         let sharedInfo = NSPrintInfo.shared
         let sharedDict = sharedInfo.dictionary()
         let printInfoDict = NSMutableDictionary(dictionary: sharedDict)
@@ -153,9 +154,8 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         }
 
         if dynamic {
-            let window = NSApplication.shared.mainWindow!
             printOperation!.printPanel.options = [.showsPreview, .showsPaperSize, .showsOrientation]
-            printOperation!.runModal(for: window, delegate: self, didRun: #selector(printOperationDidRun(printOperation:success:contextInfo:)), contextInfo: nil)
+            printOperation!.runModal(for: _window!, delegate: self, didRun: #selector(printOperationDidRun(printOperation:success:contextInfo:)), contextInfo: nil)
             return
         }
 
@@ -179,7 +179,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         }
     }
 
-    public static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String) {
+    public static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String, andWindow view: NSView) {
         let tempFile = NSTemporaryDirectory() + name
         let file = NSURL(fileURLWithPath: tempFile)
 
@@ -190,7 +190,6 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
             return
         }
 
-        let view = NSApplication.shared.mainWindow!.contentView!
         let sharingServicePicker = NSSharingServicePicker(items: [file])
         sharingServicePicker.show(relativeTo: rect, of: view, preferredEdge: NSRectEdge.maxY)
 

@@ -22,9 +22,11 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
     private static var instance: PrintingPlugin?
     private var channel: FlutterMethodChannel
     public var jobs = [UInt32: PrintJob]()
+    private var registrar: FlutterPluginRegistrar
 
-    init(_ channel: FlutterMethodChannel) {
+    init(_ channel: FlutterMethodChannel, _ registrar: FlutterPluginRegistrar) {
         self.channel = channel
+        self.registrar = registrar
         super.init()
         PrintingPlugin.instance = self
     }
@@ -42,7 +44,7 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
     /// Entry point
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "net.nfet.printing", binaryMessenger: registrar.messenger)
-        let instance = PrintingPlugin(channel)
+        let instance = PrintingPlugin(channel, registrar)
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
 
@@ -61,6 +63,13 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             let printJob = PrintJob(printing: self, index: args["job"] as! Int)
             let dynamic = args["dynamic"] as! Bool
             jobs[args["job"] as! UInt32] = printJob
+
+            guard let window = registrar.view?.window else {
+                result(NSNumber(value: 0))
+                onCompleted(printJob: printJob, completed: false, error: "Unable to find the main window")
+                return
+            }
+
             printJob.printPdf(name: name,
                               withPageSize: CGSize(
                                   width: width,
@@ -72,7 +81,7 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
                                   width: width - marginRight - marginLeft,
                                   height: height - marginBottom - marginTop
                               ), withPrinter: printer,
-                              dynamically: dynamic)
+                              dynamically: dynamic, andWindow: window)
             result(NSNumber(value: 1))
         } else if call.method == "listPrinters" {
             let printJob = PrintJob(printing: self, index: -1)
@@ -80,6 +89,12 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             result(r)
         } else if call.method == "sharePdf" {
             let object = args["doc"] as! FlutterStandardTypedData
+
+            guard let view = registrar.view else {
+                result(NSNumber(value: 0))
+                return
+            }
+
             PrintJob.sharePdf(
                 data: object.data,
                 withSourceRect: CGRect(
@@ -88,7 +103,7 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
                     width: CGFloat((args["w"] as? NSNumber)?.floatValue ?? 0.0),
                     height: CGFloat((args["h"] as? NSNumber)?.floatValue ?? 0.0)
                 ),
-                andName: args["name"] as! String
+                andName: args["name"] as! String, andWindow: view
             )
             result(NSNumber(value: 1))
         } else if call.method == "convertHtml" {
