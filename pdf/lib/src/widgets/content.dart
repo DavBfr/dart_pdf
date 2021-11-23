@@ -144,7 +144,7 @@ class TableOfContent extends StatelessWidget {
             child: Row(
               children: [
                 SizedBox(width: 10.0 * l),
-                Text('${c.title}'),
+                Text(c.title!),
                 SizedBox(width: 8),
                 Expanded(
                     child: Divider(
