@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.6.4
+
+- Fix Windows initial page format
+
 ## 5.6.3
 
 - Fix Windows string encoding

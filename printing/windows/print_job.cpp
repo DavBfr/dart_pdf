@@ -73,15 +73,29 @@ std::wstring fromUtf8(std::string str) {
 PrintJob::PrintJob(Printing* printing, int index)
     : printing{printing}, index{index} {}
 
-bool PrintJob::printPdf(std::string name, std::string printer) {
+bool PrintJob::printPdf(std::string name,
+                        std::string printer,
+                        double width,
+                        double height) {
   documentName = name;
+
+  auto dm = static_cast<DEVMODE*>(GlobalAlloc(0, sizeof(DEVMODE)));
+  ZeroMemory(dm, sizeof(DEVMODE));
+  dm->dmSize = sizeof(DEVMODE);
+  dm->dmFields = DM_ORIENTATION | DM_PAPERSIZE | DM_PAPERLENGTH | DM_PAPERWIDTH;
+  dm->dmPaperSize = 0;
+  if (width > height) {
+    dm->dmOrientation = DMORIENT_LANDSCAPE;
+    dm->dmPaperWidth = static_cast<short>(round(height * 254 / 72));
+    dm->dmPaperLength = static_cast<short>(round(width * 254 / 72));
+  } else {
+    dm->dmOrientation = DMORIENT_PORTRAIT;
+    dm->dmPaperWidth = static_cast<short>(round(width * 254 / 72));
+    dm->dmPaperLength = static_cast<short>(round(height * 254 / 72));
+  }
 
   if (printer.empty()) {
     PRINTDLG pd;
-    DEVMODE* dm = static_cast<DEVMODE*>(GlobalAlloc(0, sizeof(DEVMODE)));
-    ZeroMemory(dm, sizeof(DEVMODE));
-    dm->dmFields = DM_ORIENTATION;
-    dm->dmOrientation = 2;
 
     // Initialize PRINTDLG
     ZeroMemory(&pd, sizeof(pd));
@@ -115,11 +129,11 @@ bool PrintJob::printPdf(std::string name, std::string printer) {
     hDevNames = pd.hDevNames;
 
   } else {
-    hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), NULL, NULL);
+    hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), NULL, dm);
     if (!hDC) {
       return false;
     }
-    hDevMode = nullptr;
+    hDevMode = dm;
     hDevNames = nullptr;
   }
 

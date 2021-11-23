@@ -74,10 +74,14 @@ class PrintingPlugin : public flutter::Plugin {
       auto printer = vPrinter != arguments->end()
                          ? std::get<std::string>(vPrinter->second)
                          : std::string{};
+      auto width = std::get<double>(
+          arguments->find(flutter::EncodableValue("width"))->second);
+      auto height = std::get<double>(
+          arguments->find(flutter::EncodableValue("height"))->second);
       auto vJob = arguments->find(flutter::EncodableValue("job"));
       auto jobNum = vJob != arguments->end() ? std::get<int>(vJob->second) : -1;
       auto job = new PrintJob{&printing, jobNum};
-      auto res = job->printPdf(name, printer);
+      auto res = job->printPdf(name, printer, width, height);
       if (!res) {
         delete job;
       }
