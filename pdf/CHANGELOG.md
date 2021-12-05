@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.4
+
+- Update README
+
 ## 3.6.3
 
 - Fix some Spanning Widgets issues

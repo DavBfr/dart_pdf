@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.5
+
+- Update README
+
 ## 5.6.4
 
 - Fix Windows initial page format

@@ -186,4 +186,4 @@ Encryption using RC4-40, RC4-128, AES-128, and AES-256 is fully supported using 
 This library also provides SHA1 or SHA-256 Digital Signature using your x509 certificate. The graphic signature is represented by a clickable widget that shows Digital Signature information.
 It implememts a PDF parser to load an existing document and add pages, change pages, and add a signature.
 
-Drop me an email for availability and more information.
+More information here: <https://pub.nfet.net/pdf_crypto/>
