@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.5
+
+- Update dependencies
+
 ## 3.6.4
 
 - Update README
