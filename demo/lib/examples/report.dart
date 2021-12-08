@@ -45,7 +45,7 @@ Future<Uint8List> generateReport(
       .map((e) => e[2] as num)
       .reduce((value, element) => value + element);
 
-  final baseColor = PdfColors.cyan;
+  const baseColor = PdfColors.cyan;
 
   // Create a PDF document.
   final document = pw.Document();
@@ -166,10 +166,10 @@ Future<Uint8List> generateReport(
       color: PdfColors.white,
       fontWeight: pw.FontWeight.bold,
     ),
-    headerDecoration: pw.BoxDecoration(
+    headerDecoration: const pw.BoxDecoration(
       color: baseColor,
     ),
-    rowDecoration: pw.BoxDecoration(
+    rowDecoration: const pw.BoxDecoration(
       border: pw.Border(
         bottom: pw.BorderSide(
           color: baseColor,
@@ -191,7 +191,7 @@ Future<Uint8List> generateReport(
         return pw.Column(
           children: [
             pw.Text('Budget Report',
-                style: pw.TextStyle(
+                style: const pw.TextStyle(
                   color: baseColor,
                   fontSize: 40,
                 )),
@@ -210,7 +210,7 @@ Future<Uint8List> generateReport(
                     padding: const pw.EdgeInsets.only(bottom: 10),
                     child: pw.Text(
                       'Expense By Sub-Categories',
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         color: baseColor,
                         fontSize: 16,
                       ),
@@ -230,7 +230,7 @@ Future<Uint8List> generateReport(
                         padding: const pw.EdgeInsets.only(bottom: 10),
                         child: pw.Text(
                           'Spent vs. Saved',
-                          style: pw.TextStyle(
+                          style: const pw.TextStyle(
                             color: baseColor,
                             fontSize: 16,
                           ),
@@ -273,7 +273,7 @@ Future<Uint8List> generateReport(
               child: pw.Chart(
                 title: pw.Text(
                   'Expense breakdown',
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                     color: baseColor,
                     fontSize: 20,
                   ),

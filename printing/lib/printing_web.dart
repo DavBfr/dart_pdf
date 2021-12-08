@@ -17,14 +17,12 @@
 import 'dart:async';
 import 'dart:html' as html;
 import 'dart:html';
-import 'dart:io';
 import 'dart:js' as js;
 import 'dart:js_util';
 import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart' show Rect;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:image/image.dart' as im;
 import 'package:pdf/pdf.dart';

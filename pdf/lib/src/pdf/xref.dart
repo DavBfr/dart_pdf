@@ -16,10 +16,9 @@
 
 import 'dart:typed_data';
 
-import 'package:pdf/src/pdf/stream.dart';
-
 import 'data_types.dart';
 import 'object.dart';
+import 'stream.dart';
 
 enum PdfCrossRefEntryType { free, inUse }
 

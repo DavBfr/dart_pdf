@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.6
+
+- Fix imports for Dart 2.15
+
 ## 3.6.5
 
 - Update dependencies

@@ -19,11 +19,11 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'document.dart';
 import 'geometry.dart';
+import 'multi_page.dart';
 import 'page.dart';
 import 'theme.dart';
 

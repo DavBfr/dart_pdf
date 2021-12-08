@@ -16,12 +16,11 @@
 
 import 'dart:typed_data';
 
-import 'package:pdf/src/pdf/object_stream.dart';
-
 import 'data_types.dart';
 import 'document.dart';
 import 'object.dart';
 import 'object_dict.dart';
+import 'object_stream.dart';
 import 'stream.dart';
 
 /// Signature flags

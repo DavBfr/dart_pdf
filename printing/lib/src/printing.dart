@@ -18,7 +18,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show Rect, Offset;
 import 'package:pdf/pdf.dart';
 
 import 'callback.dart';

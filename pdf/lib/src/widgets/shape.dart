@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import 'package:pdf/src/pdf/point.dart';
-import 'package:pdf/src/widgets/geometry.dart';
-import 'package:pdf/src/widgets/widget.dart';
+import 'package:pdf/pdf.dart';
 
-import '../../pdf.dart';
+import 'geometry.dart';
+import 'widget.dart';
 
 class Circle extends Widget {
   Circle({this.fillColor, this.strokeColor, this.strokeWidth = 1.0});
