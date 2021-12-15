@@ -3,6 +3,7 @@
 ## 5.6.8
 
 - Fix print dialog crash on Linux
+- Fix directPrint printer selection on macOS
 
 ## 5.6.7
 

@@ -119,6 +119,9 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
 
         for name in NSPrinter.printerNames {
             let printer = NSPrinter(name: name)
+            if printer == nil {
+                continue
+            }
             let pr: NSDictionary = [
                 "url": name,
                 "name": name,
@@ -143,12 +146,21 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
             printInfo.orientation = NSPrintInfo.PaperOrientation.landscape
         }
 
-        // Print the custom view
+        // A printer is specified
+        if printer != nil {
+            let pr = NSPrinter(name: printer!)
+            if pr == nil {
+                printing.onCompleted(printJob: self, completed: false, error: "Unable to find the printer")
+                return
+            }
+            printInfo.printer = pr!
+        }
+
+        // The custom print view
         printOperation = NSPrintOperation(view: self, printInfo: printInfo)
         printOperation!.jobTitle = name
         printOperation!.printPanel.options = [.showsPreview]
         if printer != nil {
-            printInfo.printer = NSPrinter(name: printer!)!
             printOperation!.showsPrintPanel = false
             printOperation!.showsProgressPanel = false
         }
