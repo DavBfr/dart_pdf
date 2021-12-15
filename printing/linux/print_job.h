@@ -31,6 +31,8 @@ class print_job {
   GtkPrintJob* printJob;
 
  public:
+  GtkPrintUnixDialog* dialog = nullptr;
+
   print_job(int index);
 
   ~print_job();

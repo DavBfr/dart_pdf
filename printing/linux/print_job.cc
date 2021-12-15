@@ -105,6 +105,9 @@ static void job_completed(GtkPrintJob* gtk_print_job,
                           gpointer user_data,
                           const GError* error) {
   auto job = static_cast<print_job*>(user_data);
+  if (job->dialog) {
+    gtk_widget_destroy(GTK_WIDGET(job->dialog));
+  }
   on_completed(job, error == nullptr,
                error != nullptr ? error->message : nullptr);
 }
@@ -135,8 +138,7 @@ bool print_job::print_pdf(const gchar* name,
     setup = gtk_page_setup_new();
 
   } else {
-    auto dialog =
-        GTK_PRINT_UNIX_DIALOG(gtk_print_unix_dialog_new(name, nullptr));
+    dialog = GTK_PRINT_UNIX_DIALOG(gtk_print_unix_dialog_new(name, nullptr));
     gtk_print_unix_dialog_set_manual_capabilities(
         dialog, (GtkPrintCapabilities)(GTK_PRINT_CAPABILITY_GENERATE_PDF));
     gtk_print_unix_dialog_set_embed_page_setup(dialog, true);
@@ -157,7 +159,7 @@ bool print_job::print_pdf(const gchar* name,
               gtk_print_unix_dialog_get_settings(GTK_PRINT_UNIX_DIALOG(dialog));
           setup = gtk_print_unix_dialog_get_page_setup(
               GTK_PRINT_UNIX_DIALOG(dialog));
-          gtk_widget_destroy(GTK_WIDGET(dialog));
+          gtk_widget_hide(GTK_WIDGET(dialog));
           loop = false;
         } break;
         case GTK_RESPONSE_APPLY:  // Preview

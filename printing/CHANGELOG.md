@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.6.8
+
+- Fix print dialog crash on Linux
+
 ## 5.6.7
 
 - Fix imports for Dart 2.15
