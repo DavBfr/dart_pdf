@@ -4,6 +4,7 @@
 
 - Fix print dialog crash on Linux
 - Fix directPrint printer selection on macOS
+- Fix TTF font parser for NewsCycle-Regular.ttf
 
 ## 5.6.7
 

@@ -417,9 +417,12 @@ class TtfParser {
   }
 
   TtfGlyphInfo _readCompoundGlyph(int glyph, int start, int offset) {
-    const ARG_1_AND_2_ARE_WORDS = 1;
-    const MORE_COMPONENTS = 32;
-    const WE_HAVE_INSTRUCTIONS = 256;
+    const ARG_1_AND_2_ARE_WORDS = 0x0001;
+    const HAS_SCALE = 0x008;
+    const MORE_COMPONENTS = 0x0020;
+    const HAS_X_Y_SCALE = 0x0040;
+    const HAS_TRANFORMATION_MATRIX = 0x0080;
+    const WE_HAVE_INSTRUCTIONS = 0x0100;
 
     final components = <int>[];
     var hasInstructions = false;
@@ -429,6 +432,13 @@ class TtfParser {
       flags = bytes.getUint16(offset);
       final glyphIndex = bytes.getUint16(offset + 2);
       offset += (flags & ARG_1_AND_2_ARE_WORDS != 0) ? 8 : 6;
+      if (flags & HAS_SCALE != 0) {
+        offset += 2;
+      } else if (flags & HAS_X_Y_SCALE != 0) {
+        offset += 4;
+      } else if (flags & HAS_TRANFORMATION_MATRIX != 0) {
+        offset += 8;
+      }
 
       components.add(glyphIndex);
       if (flags & WE_HAVE_INSTRUCTIONS != 0) {
