@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.7.0
+
+- Move files
+
 ## 3.6.6
 
 - Fix imports for Dart 2.15

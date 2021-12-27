@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-export 'src/pdf/annotation.dart';
-export 'src/pdf/border.dart';
 export 'src/pdf/color.dart';
 export 'src/pdf/colors.dart';
 export 'src/pdf/document.dart';
 export 'src/pdf/document_parser.dart';
-export 'src/pdf/encryption.dart';
 export 'src/pdf/exif.dart';
-export 'src/pdf/font.dart';
-export 'src/pdf/font_metrics.dart';
-export 'src/pdf/function.dart';
+export 'src/pdf/font/font_metrics.dart';
+export 'src/pdf/font/ttf_parser.dart';
 export 'src/pdf/graphic_state.dart';
 export 'src/pdf/graphics.dart';
-export 'src/pdf/image.dart';
-export 'src/pdf/info.dart';
-export 'src/pdf/metadata.dart';
-export 'src/pdf/outline.dart';
-export 'src/pdf/page.dart';
+export 'src/pdf/obj/annotation.dart';
+export 'src/pdf/obj/border.dart';
+export 'src/pdf/obj/encryption.dart';
+export 'src/pdf/obj/font.dart';
+export 'src/pdf/obj/function.dart';
+export 'src/pdf/obj/image.dart';
+export 'src/pdf/obj/info.dart';
+export 'src/pdf/obj/metadata.dart';
+export 'src/pdf/obj/outline.dart';
+export 'src/pdf/obj/page.dart';
+export 'src/pdf/obj/pattern.dart';
+export 'src/pdf/obj/shading.dart';
+export 'src/pdf/obj/signature.dart';
+export 'src/pdf/obj/smask.dart';
+export 'src/pdf/obj/ttffont.dart';
 export 'src/pdf/page_format.dart';
-export 'src/pdf/pattern.dart';
 export 'src/pdf/point.dart';
 export 'src/pdf/rect.dart';
-export 'src/pdf/shading.dart';
-export 'src/pdf/signature.dart';
-export 'src/pdf/smask.dart';
-export 'src/pdf/ttf_parser.dart';
-export 'src/pdf/ttffont.dart';

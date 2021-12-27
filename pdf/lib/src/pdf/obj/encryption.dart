@@ -16,7 +16,7 @@
 
 import 'dart:typed_data';
 
-import 'document.dart';
+import '../document.dart';
 import 'object.dart';
 import 'object_dict.dart';
 

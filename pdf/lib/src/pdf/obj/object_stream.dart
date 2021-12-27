@@ -14,31 +14,33 @@
  * limitations under the License.
  */
 
-import 'data_types.dart';
-import 'document.dart';
-import 'object.dart';
-import 'stream.dart';
+import '../data_types.dart';
+import '../document.dart';
+import '../stream.dart';
+import 'object_dict.dart';
 
-/// Object with a PdfDict used in the PDF file
-class PdfObjectDict extends PdfObject<PdfDict> {
-  /// This is usually called by extensors to this class, and sets the
-  /// Pdf Object Type
-  PdfObjectDict(
+/// Stream Object
+class PdfObjectStream extends PdfObjectDict {
+  /// Constructs a stream object to store some data
+  PdfObjectStream(
     PdfDocument pdfDocument, {
     String? type,
-    int objgen = 0,
-    int? objser,
-  }) : super(pdfDocument, params: PdfDict(), objgen: objgen, objser: objser) {
-    if (type != null) {
-      params['/Type'] = PdfName(type);
-    }
-  }
+    this.isBinary = false,
+  }) : super(pdfDocument, type: type);
+
+  /// This holds the stream's content.
+  final PdfStream buf = PdfStream();
+
+  /// defines if the stream needs to be converted to ascii85
+  final bool isBinary;
 
   @override
   void writeContent(PdfStream os) {
-    if (params.isNotEmpty) {
-      params.output(os);
-      os.putByte(0x0a);
-    }
+    PdfDictStream.values(
+      object: this,
+      isBinary: isBinary,
+      values: params.values,
+      data: buf.output(),
+    ).output(os);
   }
 }

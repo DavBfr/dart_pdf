@@ -19,20 +19,20 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 
-import 'catalog.dart';
 import 'document_parser.dart';
-import 'encryption.dart';
-import 'font.dart';
 import 'graphic_state.dart';
-import 'info.dart';
 import 'io/vm.dart' if (dart.library.js) 'io/js.dart';
-import 'names.dart';
-import 'object.dart';
-import 'outline.dart';
+import 'obj/catalog.dart';
+import 'obj/encryption.dart';
+import 'obj/font.dart';
+import 'obj/info.dart';
+import 'obj/names.dart';
+import 'obj/object.dart';
+import 'obj/outline.dart';
+import 'obj/page.dart';
+import 'obj/page_list.dart';
+import 'obj/signature.dart';
 import 'output.dart';
-import 'page.dart';
-import 'page_list.dart';
-import 'signature.dart';
 import 'stream.dart';
 
 /// PDF version to generate

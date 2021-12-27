@@ -16,12 +16,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-import 'data_types.dart';
-import 'document.dart';
+import '../data_types.dart';
+import '../document.dart';
+import '../graphics.dart';
+import '../rect.dart';
 import 'function.dart';
 import 'graphic_stream.dart';
-import 'graphics.dart';
-import 'rect.dart';
 
 class PdfSoftMask {
   PdfSoftMask(this.document,

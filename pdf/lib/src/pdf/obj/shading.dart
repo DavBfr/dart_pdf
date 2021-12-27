@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import 'data_types.dart';
-import 'document.dart';
+import '../data_types.dart';
+import '../document.dart';
+import '../point.dart';
+import '../rect.dart';
 import 'function.dart';
 import 'object_dict.dart';
-import 'point.dart';
-import 'rect.dart';
 
 enum PdfShadingType { axial, radial }
 

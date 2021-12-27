@@ -23,14 +23,14 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'color.dart';
 import 'data_types.dart';
-import 'font.dart';
 import 'graphic_state.dart';
-import 'graphic_stream.dart';
-import 'image.dart';
-import 'page.dart';
-import 'pattern.dart';
+import 'obj/font.dart';
+import 'obj/graphic_stream.dart';
+import 'obj/image.dart';
+import 'obj/page.dart';
+import 'obj/pattern.dart';
+import 'obj/shading.dart';
 import 'rect.dart';
-import 'shading.dart';
 import 'stream.dart';
 
 /// Shape to be used at the corners of paths that are stroked

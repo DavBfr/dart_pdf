@@ -22,7 +22,7 @@ import 'package:meta/meta.dart';
 
 import 'ascii85.dart';
 import 'color.dart';
-import 'object.dart';
+import 'obj/object.dart';
 import 'stream.dart';
 
 abstract class PdfDataType {

@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import 'data_types.dart';
-import 'document.dart';
-import 'object.dart';
+import '../data_types.dart';
+import '../document.dart';
+import 'object_stream.dart';
 
-/// An array object
-class PdfArrayObject extends PdfObject<PdfArray> {
-  /// Creates an array object
-  PdfArrayObject(
-    PdfDocument pdfDocument,
-    PdfArray array,
-  ) : super(pdfDocument, params: array);
+class PdfXObject extends PdfObjectStream {
+  PdfXObject(PdfDocument pdfDocument, String? subtype, {bool isBinary = false})
+      : super(pdfDocument, type: '/XObject', isBinary: isBinary) {
+    if (subtype != null) {
+      params['/Subtype'] = PdfName(subtype);
+    }
+  }
 
-  /// The array
-  PdfArray get array => params;
+  String get name => 'X$objser';
 }

@@ -19,8 +19,8 @@ import 'dart:typed_data';
 
 import 'package:xml/xml.dart';
 
-import 'data_types.dart';
-import 'document.dart';
+import '../data_types.dart';
+import '../document.dart';
 import 'object.dart';
 
 /// Pdf Metadata

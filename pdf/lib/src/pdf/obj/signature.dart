@@ -16,12 +16,12 @@
 
 import 'dart:typed_data';
 
-import 'data_types.dart';
-import 'document.dart';
+import '../data_types.dart';
+import '../document.dart';
+import '../stream.dart';
 import 'object.dart';
 import 'object_dict.dart';
 import 'object_stream.dart';
-import 'stream.dart';
 
 /// Signature flags
 enum PdfSigFlags {

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import '../data_types.dart';
+import '../document.dart';
+import '../graphics.dart';
+import '../page_format.dart';
 import 'annotation.dart';
-import 'data_types.dart';
-import 'document.dart';
 import 'graphic_stream.dart';
-import 'graphics.dart';
 import 'object_dict.dart';
 import 'object_stream.dart';
-import 'page_format.dart';
 
 /// Page rotation
 enum PdfPageRotation {

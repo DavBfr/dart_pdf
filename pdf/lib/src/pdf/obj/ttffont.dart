@@ -17,17 +17,17 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'arabic.dart' as arabic;
+import '../data_types.dart';
+import '../document.dart';
+import '../font/arabic.dart' as arabic;
+import '../font/font_metrics.dart';
+import '../font/ttf_parser.dart';
+import '../font/ttf_writer.dart';
+import '../stream.dart';
 import 'array.dart';
-import 'data_types.dart';
-import 'document.dart';
 import 'font.dart';
 import 'font_descriptor.dart';
-import 'font_metrics.dart';
 import 'object_stream.dart';
-import 'stream.dart';
-import 'ttf_parser.dart';
-import 'ttf_writer.dart';
 import 'unicode_cmap.dart';
 
 class PdfTtfFont extends PdfFont {

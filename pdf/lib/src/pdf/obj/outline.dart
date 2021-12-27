@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import 'color.dart';
-import 'data_types.dart';
-import 'document.dart';
+import '../color.dart';
+import '../data_types.dart';
+import '../document.dart';
+import '../rect.dart';
 import 'object_dict.dart';
 import 'page.dart';
-import 'rect.dart';
 
 /// Outline mode
 enum PdfOutlineMode {

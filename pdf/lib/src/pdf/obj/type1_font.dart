@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import 'data_types.dart';
-import 'document.dart';
+import '../data_types.dart';
+import '../document.dart';
+import '../font/font_metrics.dart';
 import 'font.dart';
-import 'font_metrics.dart';
 import 'ttffont.dart';
 
 /// Type 1 font object.

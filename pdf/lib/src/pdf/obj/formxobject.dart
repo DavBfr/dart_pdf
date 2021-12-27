@@ -16,8 +16,8 @@
 
 import 'package:vector_math/vector_math_64.dart';
 
-import 'data_types.dart';
-import 'document.dart';
+import '../data_types.dart';
+import '../document.dart';
 import 'font.dart';
 import 'xobject.dart';
 

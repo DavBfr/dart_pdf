@@ -16,9 +16,9 @@
 
 import 'package:meta/meta.dart';
 
-import 'data_types.dart';
-import 'document.dart';
-import 'stream.dart';
+import '../data_types.dart';
+import '../document.dart';
+import '../stream.dart';
 
 /// Base Object used in the PDF file
 abstract class PdfObject<T extends PdfDataType> {

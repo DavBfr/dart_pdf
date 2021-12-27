@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import 'data_types.dart';
-import 'document.dart';
+import '../data_types.dart';
+import '../document.dart';
+import '../graphic_state.dart';
 import 'font.dart';
-import 'graphic_state.dart';
 import 'object_dict.dart';
 import 'pattern.dart';
 import 'shading.dart';

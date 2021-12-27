@@ -16,14 +16,14 @@
 
 import 'dart:convert';
 
-import 'data_types.dart';
-import 'document.dart';
-import 'font_metrics.dart';
+import '../data_types.dart';
+import '../document.dart';
+import '../font/font_metrics.dart';
+import '../font/type1_fonts.dart';
+import '../point.dart';
+import '../stream.dart';
 import 'object_dict.dart';
-import 'point.dart';
-import 'stream.dart';
 import 'type1_font.dart';
-import 'type1_fonts.dart';
 
 /// Pdf font object
 abstract class PdfFont extends PdfObjectDict {

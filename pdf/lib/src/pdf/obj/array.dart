@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-import 'data_types.dart';
-import 'document.dart';
-import 'object_dict.dart';
-import 'page.dart';
+import '../data_types.dart';
+import '../document.dart';
+import 'object.dart';
 
-/// PdfPageList object
-class PdfPageList extends PdfObjectDict {
-  /// This constructs a [PdfPageList] object.
-  PdfPageList(PdfDocument pdfDocument) : super(pdfDocument, type: '/Pages');
+/// An array object
+class PdfArrayObject extends PdfObject<PdfArray> {
+  /// Creates an array object
+  PdfArrayObject(
+    PdfDocument pdfDocument,
+    PdfArray array,
+  ) : super(pdfDocument, params: array);
 
-  /// This holds the pages
-  final pages = <PdfPage>[];
-
-  @override
-  void prepare() {
-    super.prepare();
-
-    params['/Kids'] = PdfArray.fromObjects(pages);
-    params['/Count'] = PdfNum(pages.length);
-  }
+  /// The array
+  PdfArray get array => params;
 }

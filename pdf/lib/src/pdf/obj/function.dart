@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import 'color.dart';
-import 'data_types.dart';
-import 'document.dart';
+import '../color.dart';
+import '../data_types.dart';
+import '../document.dart';
 import 'object_dict.dart';
 import 'object_stream.dart';
 

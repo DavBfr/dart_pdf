@@ -17,19 +17,19 @@
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../color.dart';
+import '../data_types.dart';
+import '../document.dart';
+import '../graphics.dart';
+import '../point.dart';
+import '../rect.dart';
+import '../stream.dart';
 import 'border.dart';
-import 'color.dart';
-import 'data_types.dart';
-import 'document.dart';
 import 'font.dart';
 import 'graphic_stream.dart';
-import 'graphics.dart';
 import 'object.dart';
 import 'object_dict.dart';
 import 'page.dart';
-import 'point.dart';
-import 'rect.dart';
-import 'stream.dart';
 
 class PdfAnnot extends PdfObjectDict {
   PdfAnnot(this.pdfPage, this.annot)

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import 'document.dart';
+import '../document.dart';
 import 'object_stream.dart';
 
 /// Unicode character map object

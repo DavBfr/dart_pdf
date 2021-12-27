@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import 'catalog.dart';
 import 'data_types.dart';
 import 'document.dart';
-import 'encryption.dart';
-import 'info.dart';
-import 'object.dart';
-import 'signature.dart';
+import 'obj/catalog.dart';
+import 'obj/encryption.dart';
+import 'obj/info.dart';
+import 'obj/object.dart';
+import 'obj/signature.dart';
 import 'stream.dart';
 import 'xref.dart';
 

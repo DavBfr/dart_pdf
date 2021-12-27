@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-import 'data_types.dart';
-import 'document.dart';
-import 'object_stream.dart';
+import '../data_types.dart';
+import '../document.dart';
+import 'object_dict.dart';
+import 'page.dart';
 
-class PdfXObject extends PdfObjectStream {
-  PdfXObject(PdfDocument pdfDocument, String? subtype, {bool isBinary = false})
-      : super(pdfDocument, type: '/XObject', isBinary: isBinary) {
-    if (subtype != null) {
-      params['/Subtype'] = PdfName(subtype);
-    }
+/// PdfPageList object
+class PdfPageList extends PdfObjectDict {
+  /// This constructs a [PdfPageList] object.
+  PdfPageList(PdfDocument pdfDocument) : super(pdfDocument, type: '/Pages');
+
+  /// This holds the pages
+  final pages = <PdfPage>[];
+
+  @override
+  void prepare() {
+    super.prepare();
+
+    params['/Kids'] = PdfArray.fromObjects(pages);
+    params['/Count'] = PdfNum(pages.length);
   }
-
-  String get name => 'X$objser';
 }
