@@ -7,6 +7,7 @@
 - Fix directPrint printer selection on macOS
 - Fix TTF font parser for NewsCycle-Regular.ttf
 - Fix AssetManifest
+- Update Google Fonts
 
 ## 5.6.6
 
