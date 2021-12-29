@@ -108,7 +108,7 @@ class TableBorder extends Border {
     if (verticalInside.style.paint) {
       verticalInside.style.setStyle(context);
       var offset = box.x;
-      for (var width in widths!.sublist(0, widths.length - 1)) {
+      for (final width in widths!.sublist(0, widths.length - 1)) {
         offset += width!;
         context.canvas.moveTo(offset, box.y);
         context.canvas.lineTo(offset, box.top);
@@ -123,7 +123,7 @@ class TableBorder extends Border {
     if (horizontalInside.style.paint) {
       horizontalInside.style.setStyle(context);
       var offset = box.top;
-      for (var height in heights!.sublist(0, heights.length - 1)) {
+      for (final height in heights!.sublist(0, heights.length - 1)) {
         offset -= height;
         context.canvas.moveTo(box.x, offset);
         context.canvas.lineTo(box.right, offset);
@@ -437,9 +437,9 @@ class Table extends Widget with SpanningWidget {
     _heights.clear();
     var index = 0;
 
-    for (var row in children) {
+    for (final row in children) {
       var n = 0;
-      for (var child in row.children) {
+      for (final child in row.children) {
         final columnWidth = columnWidths != null && columnWidths![n] != null
             ? columnWidths![n]!
             : defaultColumnWidth;
@@ -495,7 +495,7 @@ class Table extends Widget with SpanningWidget {
     // Compute final widths
     var totalHeight = 0.0;
     index = 0;
-    for (var row in children) {
+    for (final row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
@@ -504,7 +504,7 @@ class Table extends Widget with SpanningWidget {
       var x = 0.0;
 
       var lineHeight = 0.0;
-      for (var child in row.children) {
+      for (final child in row.children) {
         final childConstraints = BoxConstraints.tightFor(width: _widths[n]);
         child.layout(context, childConstraints);
         assert(child.box != null);
@@ -521,7 +521,7 @@ class Table extends Widget with SpanningWidget {
         // Compute the layout again to give the full height to all cells
         n = 0;
         x = 0;
-        for (var child in row.children) {
+        for (final child in row.children) {
           final childConstraints =
               BoxConstraints.tightFor(width: _widths[n], height: lineHeight);
           child.layout(context, childConstraints);
@@ -545,14 +545,14 @@ class Table extends Widget with SpanningWidget {
     // Compute final y position
     index = 0;
     var heightIndex = 0;
-    for (var row in children) {
+    for (final row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
 
       final align = row.verticalAlignment ?? defaultVerticalAlignment;
 
-      for (var child in row.children) {
+      for (final child in row.children) {
         double? childY;
 
         switch (align) {
@@ -602,7 +602,7 @@ class Table extends Widget with SpanningWidget {
       ..setTransform(mat);
 
     var index = 0;
-    for (var row in children) {
+    for (final row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
@@ -610,7 +610,7 @@ class Table extends Widget with SpanningWidget {
       if (row.decoration != null) {
         var y = double.infinity;
         var h = 0.0;
-        for (var child in row.children) {
+        for (final child in row.children) {
           y = math.min(y, child.box!.y);
           h = math.max(h, child.box!.height);
         }
@@ -621,7 +621,7 @@ class Table extends Widget with SpanningWidget {
         );
       }
 
-      for (var child in row.children) {
+      for (final child in row.children) {
         context.canvas
           ..saveContext()
           ..drawRect(
@@ -636,7 +636,7 @@ class Table extends Widget with SpanningWidget {
     }
 
     index = 0;
-    for (var row in children) {
+    for (final row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
@@ -644,7 +644,7 @@ class Table extends Widget with SpanningWidget {
       if (row.decoration != null) {
         var y = double.infinity;
         var h = 0.0;
-        for (var child in row.children) {
+        for (final child in row.children) {
           y = math.min(y, child.box!.y);
           h = math.max(h, child.box!.height);
         }

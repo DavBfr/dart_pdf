@@ -458,16 +458,16 @@ class TextSpan extends InlineSpan {
     AnnotationBuilder? annotation,
   ) {
     final _style = parentStyle?.merge(style);
-    final _a = this.annotation ?? annotation;
+    final _annotation = this.annotation ?? annotation;
 
     if (text != null) {
-      if (!visitor(this, _style, _a)) {
+      if (!visitor(this, _style, _annotation)) {
         return false;
       }
     }
     if (children != null) {
-      for (var child in children!) {
-        if (!child.visitChildren(visitor, _style, _a)) {
+      for (final child in children!) {
+        if (!child.visitChildren(visitor, _style, _annotation)) {
           return false;
         }
       }
@@ -534,7 +534,7 @@ class _Line {
         }
         delta = (totalWidth - wordsWidth) / (spans.length - 1);
         var x = 0.0;
-        for (var span in spans) {
+        for (final span in spans) {
           span.offset = span.offset.translate(x, -baseline);
           x += delta;
         }
@@ -542,7 +542,7 @@ class _Line {
     }
 
     if (textDirection == TextDirection.rtl) {
-      for (var span in spans) {
+      for (final span in spans) {
         span.offset = PdfPoint(
           totalWidth - (span.offset.x + span.width) - delta,
           span.offset.y - baseline,
@@ -552,7 +552,7 @@ class _Line {
       return;
     }
 
-    for (var span in spans) {
+    for (final span in spans) {
       span.offset = span.offset.translate(delta, -baseline);
     }
 
@@ -978,7 +978,7 @@ class RichText extends Widget with SpanningWidget {
         ..clipPath();
     }
 
-    for (var decoration in _decorations) {
+    for (final decoration in _decorations) {
       assert(() {
         if (Document.debug && RichText.debug) {
           decoration.debugPaint(context, textScaleFactor, box!, _spans);
@@ -994,7 +994,7 @@ class RichText extends Widget with SpanningWidget {
       );
     }
 
-    for (var span in _spans.sublist(_context.spanStart, _context.spanEnd)) {
+    for (final span in _spans.sublist(_context.spanStart, _context.spanEnd)) {
       assert(() {
         if (Document.debug && RichText.debug) {
           span.debugPaint(context, textScaleFactor, box);
@@ -1018,7 +1018,7 @@ class RichText extends Widget with SpanningWidget {
       );
     }
 
-    for (var decoration in _decorations) {
+    for (final decoration in _decorations) {
       decoration.foregroundPaint(
         context,
         textScaleFactor,

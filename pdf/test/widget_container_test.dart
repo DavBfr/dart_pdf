@@ -54,8 +54,8 @@ void main() {
     final image = generateBitmap(100, 200);
 
     final widgets = <Widget>[];
-    for (var shape in BoxShape.values) {
-      for (var fit in BoxFit.values) {
+    for (final shape in BoxShape.values) {
+      for (final fit in BoxFit.values) {
         widgets.add(
           Container(
             alignment: Alignment.center,

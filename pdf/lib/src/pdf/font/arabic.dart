@@ -326,7 +326,7 @@ Iterable<String> _parse(String text) sync* {
   final notArabicWords = <List<int>>[];
 
   var first = true;
-  for (var word in words) {
+  for (final word in words) {
     final newWord = <int>[];
     var isNewWordArabic = false;
 
@@ -375,7 +375,7 @@ Iterable<String> _parse(String text) sync* {
 
     if (isNewWordArabic) {
       isNewWordArabic = false;
-      for (var notArabicNewWord in notArabicWords) {
+      for (final notArabicNewWord in notArabicWords) {
         yield '${String.fromCharCodes(notArabicNewWord)} ';
       }
       notArabicWords.clear();

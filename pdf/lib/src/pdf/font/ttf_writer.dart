@@ -78,14 +78,14 @@ class TtfWriter {
 
       final glyph =
           ttf.readGlyph(ttf.charToGlyphIndexMap[chars[index]] ?? 0).copy();
-      for (var g in glyph.compounds) {
+      for (final g in glyph.compounds) {
         compounds[g] = -1;
       }
       glyphsInfo.add(glyph);
     }
 
     // Add compound glyphs
-    for (var compound in compounds.keys) {
+    for (final compound in compounds.keys) {
       final index = glyphsInfo.firstWhere(
         (TtfGlyphInfo glyph) => glyph.index == compound,
         orElse: () {
@@ -106,14 +106,14 @@ class TtfWriter {
     glyphsInfo.add(glyph);
 
     // update compound indices
-    for (var glyph in glyphsInfo) {
+    for (final glyph in glyphsInfo) {
       if (glyph.compounds.isNotEmpty) {
         _updateCompoundGlyph(glyph, compounds);
       }
     }
 
     var glyphsTableLength = 0;
-    for (var glyph in glyphsInfo) {
+    for (final glyph in glyphsInfo) {
       glyphsTableLength =
           _wordAlign(glyphsTableLength + glyph.data.lengthInBytes);
     }
@@ -136,7 +136,7 @@ class TtfWriter {
     {
       final loca = tables[TtfParser.loca_table]!.buffer.asByteData();
       var index = 0;
-      for (var glyph in glyphsInfo) {
+      for (final glyph in glyphsInfo) {
         if (ttf.indexToLocFormat == 0) {
           loca.setUint16(index, offset ~/ 2);
           index += 2;
@@ -195,7 +195,7 @@ class TtfWriter {
       final defaultadvanceWidth =
           ttf.bytes.getUint16(hmtxOffset + (numOfLongHorMetrics - 1) * 4);
       var index = 0;
-      for (var glyph in glyphsInfo) {
+      for (final glyph in glyphsInfo) {
         final advanceWidth = glyph.index < numOfLongHorMetrics
             ? ttf.bytes.getUint16(hmtxOffset + glyph.index * 4)
             : defaultadvanceWidth;

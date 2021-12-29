@@ -118,7 +118,7 @@ class Flex extends MultiChildWidget with SpanningWidget {
       var inflexibleSpace = 0.0;
       var maxFlexFractionSoFar = 0.0;
 
-      for (var child in children) {
+      for (final child in children) {
         final flex = child is Flexible ? child.flex : 0;
         totalFlex += flex;
         if (flex > 0) {
@@ -140,7 +140,7 @@ class Flex extends MultiChildWidget with SpanningWidget {
       var totalFlex = 0;
       var inflexibleSpace = 0.0;
       var maxCrossSize = 0.0;
-      for (var child in children) {
+      for (final child in children) {
         final flex = child is Flexible ? child.flex : 0;
         totalFlex += flex;
         double? mainSize;
@@ -167,7 +167,7 @@ class Flex extends MultiChildWidget with SpanningWidget {
           math.max(0.0, (availableMainSpace! - inflexibleSpace) / totalFlex);
 
       // Size remaining (flexible) items, find the maximum cross size.
-      for (var child in children) {
+      for (final child in children) {
         final flex = child is Flexible ? child.flex : 0;
         if (flex > 0) {
           maxCrossSize =
@@ -241,7 +241,7 @@ class Flex extends MultiChildWidget with SpanningWidget {
     var allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
     var index = _context.firstChild;
 
-    for (var child in children.sublist(_context.firstChild)) {
+    for (final child in children.sublist(_context.firstChild)) {
       final flex = child is Flexible ? child.flex : 0;
       final fit = child is Flexible ? child.fit : FlexFit.loose;
       if (flex > 0) {
@@ -305,7 +305,7 @@ class Flex extends MultiChildWidget with SpanningWidget {
       final spacePerFlex =
           canFlex && totalFlex > 0 ? (freeSpace / totalFlex) : double.nan;
 
-      for (var child in children) {
+      for (final child in children) {
         final flex = child is Flexible ? child.flex : 0;
         final fit = child is Flexible ? child.fit : FlexFit.loose;
         if (flex > 0) {

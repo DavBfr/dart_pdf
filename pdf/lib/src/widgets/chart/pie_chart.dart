@@ -88,19 +88,19 @@ class PieGrid extends ChartGrid {
         Matrix4.translationValues(box!.width / 2, box!.height / 2, 0),
       );
 
-    for (var dataSet in datasets) {
+    for (final dataSet in datasets) {
       if (dataSet is PieDataSet) {
         dataSet.paintBackground(context);
       }
     }
 
-    for (var dataSet in datasets) {
+    for (final dataSet in datasets) {
       if (dataSet is PieDataSet) {
         dataSet.paint(context);
       }
     }
 
-    for (var dataSet in datasets) {
+    for (final dataSet in datasets) {
       if (dataSet is PieDataSet) {
         dataSet.paintLegend(context);
       }

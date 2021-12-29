@@ -31,9 +31,9 @@ void main() {
 
   test('Wrap Widget Horizontal 1', () {
     final wraps = <Widget>[];
-    for (var direction in VerticalDirection.values) {
+    for (final direction in VerticalDirection.values) {
       wraps.add(Text('$direction'));
-      for (var alignment in WrapAlignment.values) {
+      for (final alignment in WrapAlignment.values) {
         wraps.add(Text('$alignment'));
         wraps.add(
           Wrap(
@@ -63,9 +63,9 @@ void main() {
 
   test('Wrap Widget Vertical 1', () {
     final wraps = <Widget>[];
-    for (var direction in VerticalDirection.values) {
+    for (final direction in VerticalDirection.values) {
       wraps.add(Transform.rotateBox(child: Text('$direction'), angle: 1.57));
-      for (var alignment in WrapAlignment.values) {
+      for (final alignment in WrapAlignment.values) {
         wraps.add(Transform.rotateBox(child: Text('$alignment'), angle: 1.57));
         wraps.add(
           Wrap(
@@ -95,7 +95,7 @@ void main() {
 
   test('Wrap Widget Horizontal 2', () {
     final wraps = <Widget>[];
-    for (var alignment in WrapCrossAlignment.values) {
+    for (final alignment in WrapCrossAlignment.values) {
       final rnd = math.Random(42);
       wraps.add(Text('$alignment'));
       wraps.add(
@@ -129,7 +129,7 @@ void main() {
 
   test('Wrap Widget Vertical 2', () {
     final wraps = <Widget>[];
-    for (var alignment in WrapCrossAlignment.values) {
+    for (final alignment in WrapCrossAlignment.values) {
       final rnd = math.Random(42);
       wraps.add(Transform.rotateBox(child: Text('$alignment'), angle: 1.57));
       wraps.add(
@@ -163,7 +163,7 @@ void main() {
 
   test('Wrap Widget Horizontal 3', () {
     final wraps = <Widget>[];
-    for (var alignment in WrapAlignment.values) {
+    for (final alignment in WrapAlignment.values) {
       final rnd = math.Random(42);
       wraps.add(Text('$alignment'));
       wraps.add(
@@ -199,7 +199,7 @@ void main() {
 
   test('Wrap Widget Vertical 3', () {
     final wraps = <Widget>[];
-    for (var alignment in WrapAlignment.values) {
+    for (final alignment in WrapAlignment.values) {
       final rnd = math.Random(42);
       wraps.add(Transform.rotateBox(child: Text('$alignment'), angle: 1.57));
       wraps.add(

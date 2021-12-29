@@ -107,7 +107,7 @@ void main() {
     final fontData = ttfFont.readAsBytesSync();
     final font = PdfTtfFont(pdf.document, fontData.buffer.asByteData());
 
-    for (var letter in
+    for (final letter in
         //font.font.charToGlyphIndexMap.keys
         'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz&%!?0123456789'
             .codeUnits) {

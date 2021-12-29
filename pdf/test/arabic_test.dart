@@ -460,7 +460,7 @@ void main() {
       ),
     );
 
-    for (var item in cases) {
+    for (final item in cases) {
       expect(
         arabic.convert(item.original).codeUnits,
         equals(item.reshaped),

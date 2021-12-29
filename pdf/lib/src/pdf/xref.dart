@@ -100,7 +100,7 @@ class PdfXrefTable extends PdfDataType {
   void _writeblock(PdfStream s, int firstid, List<PdfXref> block) {
     s.putString('$firstid ${block.length}\n');
 
-    for (var x in block) {
+    for (final x in block) {
       s.putString(x.ref());
       s.putByte(0x0a);
     }
@@ -125,7 +125,7 @@ class PdfXrefTable extends PdfDataType {
       type: PdfCrossRefEntryType.free,
     ));
 
-    for (var x in offsets) {
+    for (final x in offsets) {
       // check to see if block is in range
       if (x.id != (lastid + 1)) {
         // no, so write this block, and reset
@@ -165,7 +165,7 @@ class PdfXrefTable extends PdfDataType {
     // We need block 0 to exist
     blocks.add(firstid);
 
-    for (var x in offsets) {
+    for (final x in offsets) {
       // check to see if block is in range
       if (x.id != (lastid + 1)) {
         // no, so store this block, and reset
@@ -195,7 +195,7 @@ class PdfXrefTable extends PdfDataType {
     // Write offset zero, all zeros
     ofs += wl;
 
-    for (var x in offsets) {
+    for (final x in offsets) {
       ofs = x.cref(o, ofs, w);
     }
 

@@ -189,7 +189,7 @@ class PdfOutline extends PdfObjectDict {
     var c = outlines.length; // initially the number of kids
 
     // now call each one for their descendants
-    for (var o in outlines) {
+    for (final o in outlines) {
       c += o.descendants();
     }
 

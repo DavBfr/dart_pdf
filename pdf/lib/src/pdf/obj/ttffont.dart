@@ -163,7 +163,7 @@ class PdfTtfFont extends PdfFont {
     final runes = text.runes;
 
     stream.putByte(0x3c);
-    for (var rune in runes) {
+    for (final rune in runes) {
       var char = unicodeCMap.cmap.indexOf(rune);
       if (char == -1) {
         char = unicodeCMap.cmap.length;

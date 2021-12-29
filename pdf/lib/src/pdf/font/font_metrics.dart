@@ -57,7 +57,7 @@ class PdfFontMetrics {
     double? firstBearing;
     late double spacing;
 
-    for (var metric in metrics) {
+    for (final metric in metrics) {
       firstBearing ??= metric.leftBearing;
       left ??= metric.left;
       spacing = metric.advanceWidth > 0 ? letterSpacing : 0.0;

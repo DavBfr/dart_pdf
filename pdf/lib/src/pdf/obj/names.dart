@@ -55,7 +55,7 @@ class PdfNames extends PdfObjectDict {
 
     final keys = _dests.keys.toList()..sort();
 
-    for (var name in keys) {
+    for (final name in keys) {
       dests.add(PdfSecString.fromString(this, name));
       dests.add(_dests[name]!);
     }

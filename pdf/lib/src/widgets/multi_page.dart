@@ -368,7 +368,7 @@ class MultiPage extends Page {
     final pageWidthMargin = _mustRotate ? _margin.vertical : _margin.horizontal;
     final availableWidth = pageWidth - pageWidthMargin;
 
-    for (var page in _pages) {
+    for (final page in _pages) {
       var offsetStart = pageHeight -
           (_mustRotate ? pageHeightMargin - _margin.bottom : _margin.top);
       var offsetEnd =
@@ -386,7 +386,7 @@ class MultiPage extends Page {
       var totalFlex = 0;
       var allocatedSize = 0.0;
       Widget? lastFlexChild;
-      for (var widget in page.widgets) {
+      for (final widget in page.widgets) {
         final child = widget.child;
         final flex = child is Flexible ? child.flex : 0;
         if (flex > 0) {
@@ -467,7 +467,7 @@ class MultiPage extends Page {
         }
       }
 
-      for (var widget in page.widgets) {
+      for (final widget in page.widgets) {
         final child = widget.child;
 
         final flex = child is Flexible ? child.flex : 0;
@@ -505,7 +505,7 @@ class MultiPage extends Page {
       }
 
       var pos = offsetStart - leadingSpace;
-      for (var widget in page.widgets) {
+      for (final widget in page.widgets) {
         pos -= widget.child.box!.height;
         late double x;
         switch (crossAxisAlignment) {

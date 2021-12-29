@@ -303,15 +303,15 @@ class TtfParser {
 
   /// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
   void _parseGlyphs() {
-    final baseOffset = tableOffsets[glyf_table];
+    final baseOffset = tableOffsets[glyf_table]!;
     final hmtxOffset = tableOffsets[hmtx_table]!;
     final unitsPerEm = this.unitsPerEm;
     final numOfLongHorMetrics = this.numOfLongHorMetrics;
     final defaultadvanceWidth =
         bytes.getUint16(hmtxOffset + (numOfLongHorMetrics - 1) * 4);
     var glyphIndex = 0;
-    for (var offset in glyphOffsets) {
-      final xMin = bytes.getInt16(baseOffset! + offset + 2); // 2
+    for (final offset in glyphOffsets) {
+      final xMin = bytes.getInt16(baseOffset + offset + 2); // 2
       final yMin = bytes.getInt16(baseOffset + offset + 4); // 4
       final xMax = bytes.getInt16(baseOffset + offset + 6); // 6
       final yMax = bytes.getInt16(baseOffset + offset + 8); // 8

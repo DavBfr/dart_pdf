@@ -162,7 +162,7 @@ class GridView extends MultiChildWidget with SpanningWidget {
     var c = 0;
     _context.lastChild = _context.firstChild;
 
-    for (var child in children.sublist(
+    for (final child in children.sublist(
         _context.firstChild,
         math.min(children.length,
             _context.firstChild + crossAxisCount * _mainAxisCount!))) {

@@ -192,7 +192,7 @@ class Wrap extends MultiChildWidget with SpanningWidget {
     var runCrossAxisExtent = 0.0;
     var childCount = 0;
 
-    for (var child in children.sublist(_context.firstChild)) {
+    for (final child in children.sublist(_context.firstChild)) {
       child.layout(context, childConstraints, parentUsesSize: true);
 
       final childMainAxisExtent = _getMainAxisExtent(child)!;
@@ -339,7 +339,7 @@ class Wrap extends MultiChildWidget with SpanningWidget {
       }
 
       var currentWidget = _context.lastChild;
-      for (var child in children.sublist(currentWidget)) {
+      for (final child in children.sublist(currentWidget)) {
         final runIndex = childRunMetrics[child];
         if (runIndex != i) {
           break;

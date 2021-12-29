@@ -204,7 +204,7 @@ class PdfString extends PdfDataType {
       encoding.add(unit & UNICODE_BYTE_ZERO_MASK);
     }
 
-    for (var unit in str.codeUnits) {
+    for (final unit in str.codeUnits) {
       if ((unit >= 0 && unit < UNICODE_UTF16_RESERVED_LO) ||
           (unit > UNICODE_UTF16_RESERVED_HI && unit <= UNICODE_PLANE_ONE_MAX)) {
         add(unit);
@@ -225,7 +225,7 @@ class PdfString extends PdfDataType {
   /// Escape special characters
   /// \ddd Character code ddd (octal)
   void _putTextBytes(PdfStream s, List<int> b) {
-    for (var c in b) {
+    for (final c in b) {
       switch (c) {
         case 0x0a: // \n Line feed (LF)
           s.putByte(0x5c);
@@ -274,7 +274,7 @@ class PdfString extends PdfDataType {
     switch (format) {
       case PdfStringFormat.binary:
         s.putByte(0x3c);
-        for (var byte in value) {
+        for (final byte in value) {
           s.putByte(_codeUnitForDigit((byte & 0xF0) >> 4));
           s.putByte(_codeUnitForDigit(byte & 0x0F));
         }

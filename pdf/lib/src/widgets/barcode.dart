@@ -64,7 +64,7 @@ class _BarcodeWidget extends Widget {
 
     final textList = <BarcodeText>[];
 
-    for (var element in barcode!.makeBytes(
+    for (final element in barcode!.makeBytes(
       data,
       width: box!.width,
       height: box!.height,
@@ -93,7 +93,7 @@ class _BarcodeWidget extends Widget {
     if (drawText!) {
       final font = textStyle!.font!.getFont(context);
 
-      for (var text in textList) {
+      for (final text in textList) {
         final metrics = font!.stringMetrics(text.text);
 
         final top = box!.top -
@@ -136,7 +136,7 @@ class _BarcodeWidget extends Widget {
     super.debugPaint(context);
 
     if (drawText!) {
-      for (var element in barcode!.makeBytes(
+      for (final element in barcode!.makeBytes(
         data,
         width: box!.width,
         height: box!.height,

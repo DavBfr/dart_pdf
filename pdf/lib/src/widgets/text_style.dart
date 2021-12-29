@@ -35,7 +35,7 @@ class TextDecoration {
   /// Creates a decoration that paints the union of all the given decorations.
   factory TextDecoration.combine(List<TextDecoration> decorations) {
     var mask = 0;
-    for (var decoration in decorations) {
+    for (final decoration in decorations) {
       mask |= decoration._mask;
     }
     return TextDecoration._(mask);

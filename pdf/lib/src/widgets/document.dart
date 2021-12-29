@@ -121,7 +121,7 @@ class Document {
 
   Future<Uint8List> save() async {
     if (!_paint) {
-      for (var page in _pages) {
+      for (final page in _pages) {
         page.postProcess(this);
       }
       _paint = true;

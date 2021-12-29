@@ -135,7 +135,7 @@ class Partitions extends Widget with SpanningWidget {
 
     // Calculate fixed width columns
     var index = 0;
-    for (var child in children) {
+    for (final child in children) {
       if (child.flex > 0) {
         assert(() {
           if (!canFlex) {
@@ -160,7 +160,7 @@ class Partitions extends Widget with SpanningWidget {
       final spacePerFlex = freeSpace / totalFlex;
 
       index = 0;
-      for (var child in children) {
+      for (final child in children) {
         if (child.flex > 0) {
           final childExtent = spacePerFlex * child.flex;
           allocatedSize += childExtent;
@@ -173,7 +173,7 @@ class Partitions extends Widget with SpanningWidget {
     // Layout the columns and compute the total height
     var totalHeight = 0.0;
     index = 0;
-    for (var child in children) {
+    for (final child in children) {
       if (widths[index]! > 0) {
         final innerConstraints = BoxConstraints(
             minWidth: widths[index]!,
@@ -190,7 +190,7 @@ class Partitions extends Widget with SpanningWidget {
     // Update Y positions
     index = 0;
     allocatedSize = 0.0;
-    for (var child in children) {
+    for (final child in children) {
       if (widths[index]! > 0) {
         final offsetY = totalHeight - child.box!.height;
         child.box = PdfRect.fromPoints(
@@ -213,7 +213,7 @@ class Partitions extends Widget with SpanningWidget {
     context.canvas
       ..saveContext()
       ..setTransform(mat);
-    for (var child in children) {
+    for (final child in children) {
       child.paint(context);
     }
     context.canvas.restoreContext();

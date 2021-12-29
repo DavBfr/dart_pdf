@@ -104,8 +104,8 @@ class PdfCatalog extends PdfObjectDict {
     }
 
     final widgets = <PdfAnnot>[];
-    for (var page in pdfDocument.pdfPageList.pages) {
-      for (var annot in page.annotations) {
+    for (final page in pdfDocument.pdfPageList.pages) {
+      for (final annot in page.annotations) {
         if (annot.annot.subtype == '/Widget') {
           widgets.add(annot);
         }

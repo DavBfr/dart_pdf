@@ -147,7 +147,7 @@ class Stack extends MultiChildWidget {
         break;
     }
 
-    for (var child in children) {
+    for (final child in children) {
       if (child is! Positioned) {
         hasNonPositionedChildren = true;
 
@@ -168,7 +168,7 @@ class Stack extends MultiChildWidget {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
     }
 
-    for (var child in children) {
+    for (final child in children) {
       if (child is! Positioned) {
         child.box = PdfRect.fromPoints(
             alignment.inscribe(child.box!.size, box!).offset, child.box!.size);
@@ -232,7 +232,7 @@ class Stack extends MultiChildWidget {
         ..drawRect(0, 0, box!.width, box!.height)
         ..clipPath();
     }
-    for (var child in children) {
+    for (final child in children) {
       child.paint(context);
     }
     context.canvas.restoreContext();
