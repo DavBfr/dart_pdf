@@ -1,14 +1,12 @@
 # Changelog
 
-## 5.6.8
-
-- Fix print dialog crash on Linux
-- Fix directPrint printer selection on macOS
-- Fix TTF font parser for NewsCycle-Regular.ttf
-
 ## 5.6.7
 
 - Fix imports for Dart 2.15
+- Fix print dialog crash on Linux
+- Fix directPrint printer selection on macOS
+- Fix TTF font parser for NewsCycle-Regular.ttf
+- Fix AssetManifest
 
 ## 5.6.6
 

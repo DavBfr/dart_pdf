@@ -44,7 +44,8 @@ mixin AssetManifest {
         } catch (e) {
           assert(() {
             // ignore: avoid_print
-            print('Error loading AssetManifest.json $e');
+            print(
+                'Error loading AssetManifest.json $e Try to call first:\nWidgetsFlutterBinding.ensureInitialized();');
             return true;
           }());
 
@@ -85,5 +86,6 @@ class Mutex {
     for (final e in _waiting) {
       e.complete();
     }
+    _waiting.clear();
   }
 }
