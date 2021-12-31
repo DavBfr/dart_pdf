@@ -70,11 +70,11 @@ pdf.addPage(pw.Page(build: (pw.Context context) {
 To load an image from the network using the `printing` package:
 
 ```dart
-final image = await networkImage('https://www.nfet.net/nfet.jpg');
+final netImage = await networkImage('https://www.nfet.net/nfet.jpg');
 
 pdf.addPage(pw.Page(build: (pw.Context context) {
   return pw.Center(
-    child: pw.Image(image),
+    child: pw.Image(netImage),
   ); // Center
 })); // Page
 ```

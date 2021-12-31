@@ -56,8 +56,8 @@ void buildFile(String src, String dest, bool flutter) {
     st.writeln('import \'package:flutter/services.dart\' show rootBundle;');
     st.writeln('import \'package:flutter/widgets.dart\' show AssetImage;');
     st.writeln('import \'package:path_provider/path_provider.dart\';');
-    st.writeln('import \'package:printing/printing.dart\';');
   }
+  st.writeln('import \'package:printing/printing.dart\';');
   st.writeln('import \'package:pdf/pdf.dart\';');
   st.writeln('import \'package:pdf/widgets.dart\' as pw;');
 

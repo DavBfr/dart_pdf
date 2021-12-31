@@ -52,7 +52,7 @@ void main(List<String> args) async {
   final Map m = json.decode(d.toString());
 
   final file = File('../printing/lib/src/fonts/gfonts.dart');
-  final output = await file.openWrite();
+  final output = file.openWrite();
 
   output.writeln('/*');
   output.writeln(
