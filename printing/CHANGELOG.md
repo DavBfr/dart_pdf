@@ -8,6 +8,7 @@
 - Fix TTF font parser for NewsCycle-Regular.ttf
 - Fix AssetManifest
 - Update Google Fonts
+- Add a default theme initializer
 
 ## 5.6.6
 
