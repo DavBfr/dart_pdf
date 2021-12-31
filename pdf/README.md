@@ -67,6 +67,18 @@ pdf.addPage(pw.Page(build: (pw.Context context) {
 })); // Page
 ```
 
+To load an image from the network using the `printing` package:
+
+```dart
+final image = await networkImage('https://www.nfet.net/nfet.jpg');
+
+pdf.addPage(pw.Page(build: (pw.Context context) {
+  return pw.Center(
+    child: pw.Image(image),
+  ); // Center
+})); // Page
+```
+
 To use a TrueType font:
 
 ```dart
@@ -78,6 +90,40 @@ pdf.addPage(pw.Page(
     build: (pw.Context context) {
       return pw.Center(
         child: pw.Text('Hello World', style: pw.TextStyle(font: ttf, fontSize: 40)),
+      ); // Center
+    })); // Page
+```
+
+Or using the `printing` package's `PdfGoogleFonts`:
+
+```dart
+final font = await PdfGoogleFonts.nunitoExtraLight();
+
+pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    build: (pw.Context context) {
+      return pw.Center(
+        child: pw.Text('Hello World', style: pw.TextStyle(font: font, fontSize: 40)),
+      ); // Center
+    })); // Page
+```
+
+To display emojis:
+
+```dart
+final emoji = await PdfGoogleFonts.notoColorEmoji();
+
+pdf.addPage(pw.Page(
+    pageFormat: PdfPageFormat.a4,
+    build: (pw.Context context) {
+      return pw.Center(
+        child: pw.Text(
+          'Hello 🐒💁👌🎍😍🦊👨 world!',
+          style: pw.TextStyle(
+            fontFallback: [emoji],
+            fontSize: 25,
+          ),
+        ),
       ); // Center
     })); // Page
 ```
