@@ -9,6 +9,7 @@
 - Fix AssetManifest
 - Update Google Fonts
 - Add a default theme initializer
+- Use RENDER_MODE_FOR_DISPLAY on Android
 
 ## 5.6.6
 

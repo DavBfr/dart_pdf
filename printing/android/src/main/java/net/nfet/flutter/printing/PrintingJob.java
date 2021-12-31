@@ -472,7 +472,7 @@ public class PrintingJob extends PrintDocumentAdapter {
                         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
                         page.render(
-                                bitmap, null, transform, PdfRenderer.Page.RENDER_MODE_FOR_PRINT);
+                                bitmap, null, transform, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
 
                         page.close();
 
