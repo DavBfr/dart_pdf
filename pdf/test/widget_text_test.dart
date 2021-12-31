@@ -27,6 +27,7 @@ late Document pdf;
 late Font ttf;
 late Font ttfBold;
 late Font asian;
+late Font emoji;
 
 Iterable<TextDecoration> permute(
     List<TextDecoration> prefix, List<TextDecoration> remaining) sync* {
@@ -48,6 +49,7 @@ void main() {
     ttf = loadFont('open-sans.ttf');
     ttfBold = loadFont('open-sans-bold.ttf');
     asian = loadFont('genyomintw.ttf');
+    emoji = loadFont('emoji.ttf');
     pdf = Document();
   });
 
@@ -351,6 +353,20 @@ void main() {
           child: Text(
             para,
             textAlign: TextAlign.justify,
+          ),
+        ),
+      ),
+    );
+  });
+
+  test('Text Widgets Emojis', () {
+    pdf.addPage(
+      Page(
+        build: (Context context) => Text(
+          'Hello 🐈! Dancing 💃🏃',
+          style: TextStyle(
+            fontSize: 30,
+            fontFallback: [emoji],
           ),
         ),
       ),

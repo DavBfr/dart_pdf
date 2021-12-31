@@ -24,6 +24,8 @@ import 'annotations.dart';
 import 'basic.dart';
 import 'document.dart';
 import 'geometry.dart';
+import 'image.dart';
+import 'image_provider.dart';
 import 'multi_page.dart';
 import 'placeholders.dart';
 import 'text_style.dart';
@@ -690,6 +692,25 @@ class RichText extends Widget with SpanningWidget {
     _decorations.add(td);
   }
 
+  InlineSpan _addEmoji({
+    required TtfBitmapInfo bitmap,
+    double baseline = 0,
+    required TextStyle style,
+    AnnotationBuilder? annotation,
+  }) {
+    final metrics = bitmap.metrics * style.fontSize!;
+
+    return WidgetSpan(
+      child: SizedBox(
+        height: style.fontSize,
+        child: Image(MemoryImage(bitmap.data)),
+      ),
+      style: style,
+      baseline: baseline + metrics.ascent + metrics.descent - metrics.height,
+      annotation: annotation,
+    );
+  }
+
   InlineSpan _addText({
     required List<int> text,
     int start = 0,
@@ -770,6 +791,19 @@ class RichText extends Widget with SpanningWidget {
           for (final fb in style.fontFallback) {
             final font = fb.getFont(context);
             if (font.isRuneSupported(rune)) {
+              if (font is PdfTtfFont) {
+                final bitmap = font.font.getBitmap(rune);
+                if (bitmap != null) {
+                  spans.add(_addEmoji(
+                    bitmap: bitmap,
+                    style: style,
+                    baseline: span.baseline,
+                    annotation: annotation,
+                  ));
+                  found = true;
+                  break;
+                }
+              }
               spans.add(_addText(
                 text: [rune],
                 style: style.copyWith(

@@ -5,6 +5,7 @@
 - Move files
 - Depreciate Font.stringSize
 - Implement fallback font
+- Implement Emoji support
 
 ## 3.6.6
 

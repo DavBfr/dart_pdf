@@ -23,7 +23,7 @@ class PdfUnicodeCmap extends PdfObjectStream {
   PdfUnicodeCmap(PdfDocument pdfDocument, this.protect) : super(pdfDocument);
 
   /// List of characters
-  final List<int> cmap = <int>[0];
+  final cmap = <int>[];
 
   /// Protects the text from being "seen" by the PDF reader.
   final bool protect;

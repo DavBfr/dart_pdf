@@ -68,6 +68,52 @@ class TtfGlyphInfo {
   String toString() => 'Glyph $index $compounds';
 }
 
+class TtfBitmapInfo {
+  const TtfBitmapInfo(
+    this.data,
+    this.height,
+    this.width,
+    this.horiBearingX,
+    this.horiBearingY,
+    this.horiAdvance,
+    this.vertBearingX,
+    this.vertBearingY,
+    this.vertAdvance,
+    this.ascent,
+    this.descent,
+  );
+
+  final Uint8List data;
+  final int height;
+  final int width;
+  final int horiBearingX;
+  final int horiBearingY;
+  final int horiAdvance;
+  final int vertBearingX;
+  final int vertBearingY;
+  final int vertAdvance;
+  final int ascent;
+  final int descent;
+
+  PdfFontMetrics get metrics {
+    final coef = 1.0 / height;
+    return PdfFontMetrics(
+      bottom: horiBearingY * coef,
+      left: horiBearingX * coef,
+      top: horiBearingY * coef - height * coef,
+      right: horiAdvance * coef,
+      ascent: ascent * coef,
+      descent: horiBearingY * coef,
+      advanceWidth: horiAdvance * coef,
+      leftBearing: horiBearingX * coef,
+    );
+  }
+
+  @override
+  String toString() =>
+      'Bitmap Glyph ${width}x$height horiBearingX:$horiBearingX horiBearingY:$horiBearingY horiAdvance:$horiAdvance ascender:$ascent descender:$descent';
+}
+
 class TtfParser {
   TtfParser(ByteData bytes) : bytes = UnmodifiableByteDataView(bytes) {
     final numTables = bytes.getUint16(4);
@@ -92,14 +138,17 @@ class TtfParser {
         'Unable to find the `cmap` table. This file is not a supported TTF font');
     assert(tableOffsets.containsKey(maxp_table),
         'Unable to find the `maxp` table. This file is not a supported TTF font');
-    assert(tableOffsets.containsKey(loca_table),
-        'Unable to find the `loca` table. This file is not a supported TTF font');
-    assert(tableOffsets.containsKey(glyf_table),
-        'Unable to find the `glyf` table. This file is not a supported TTF font');
 
     _parseCMap();
-    _parseIndexes();
-    _parseGlyphs();
+    if (tableOffsets.containsKey(loca_table) &&
+        tableOffsets.containsKey(glyf_table)) {
+      _parseIndexes();
+      _parseGlyphs();
+    }
+    if (tableOffsets.containsKey(cblc_table) &&
+        tableOffsets.containsKey(cbdt_table)) {
+      _parseBitmaps();
+    }
   }
 
   static const String head_table = 'head';
@@ -110,14 +159,17 @@ class TtfParser {
   static const String maxp_table = 'maxp';
   static const String loca_table = 'loca';
   static const String glyf_table = 'glyf';
+  static const String cblc_table = 'CBLC';
+  static const String cbdt_table = 'CBDT';
 
   final UnmodifiableByteDataView bytes;
-  final Map<String, int> tableOffsets = <String, int>{};
-  final Map<String, int> tableSize = <String, int>{};
+  final tableOffsets = <String, int>{};
+  final tableSize = <String, int>{};
 
-  final Map<int, int> charToGlyphIndexMap = <int, int>{};
-  final List<int> glyphOffsets = <int>[];
-  final Map<int, PdfFontMetrics> glyphInfoMap = <int, PdfFontMetrics>{};
+  final charToGlyphIndexMap = <int, int>{};
+  final glyphOffsets = <int>[];
+  final glyphInfoMap = <int, PdfFontMetrics>{};
+  final bitmapOffsets = <int, TtfBitmapInfo>{};
 
   int get unitsPerEm => bytes.getUint16(tableOffsets[head_table]! + 18);
 
@@ -145,9 +197,14 @@ class TtfParser {
 
   bool get unicode => bytes.getUint32(0) == 0x10000;
 
+  bool get isBitmap => bitmapOffsets.isNotEmpty && glyphOffsets.isEmpty;
+
   // https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6name.html
   String? getNameID(TtfParserName fontNameID) {
-    final basePosition = tableOffsets[name_table]!;
+    final basePosition = tableOffsets[name_table];
+    if (basePosition == null) {
+      return null;
+    }
     // final format = bytes.getUint16(basePosition);
     final count = bytes.getUint16(basePosition + 2);
     final stringOffset = bytes.getUint16(basePosition + 4);
@@ -288,15 +345,15 @@ class TtfParser {
   }
 
   void _parseIndexes() {
-    final basePosition = tableOffsets[loca_table];
+    final basePosition = tableOffsets[loca_table]!;
     final numGlyphs = this.numGlyphs;
     if (indexToLocFormat == 0) {
       for (var i = 0; i < numGlyphs; i++) {
-        glyphOffsets.add(bytes.getUint16(basePosition! + i * 2) * 2);
+        glyphOffsets.add(bytes.getUint16(basePosition + i * 2) * 2);
       }
     } else {
       for (var i = 0; i < numGlyphs; i++) {
-        glyphOffsets.add(bytes.getUint32(basePosition! + i * 4));
+        glyphOffsets.add(bytes.getUint32(basePosition + i * 4));
       }
     }
   }
@@ -465,4 +522,92 @@ class TtfParser {
     }
     return String.fromCharCodes(charCodes);
   }
+
+  // https://docs.microsoft.com/en-us/typography/opentype/spec/ebdt
+  void _parseBitmaps() {
+    final baseOffset = tableOffsets[cblc_table]!;
+    final pngOffset = tableOffsets[cbdt_table]!;
+
+    // CBLC Header
+    final numSizes = bytes.getUint32(baseOffset + 4);
+    var bitmapSize = baseOffset + 8;
+
+    for (var bitmapSizeIndex = 0;
+        bitmapSizeIndex < numSizes;
+        bitmapSizeIndex++) {
+      // BitmapSize Record
+      final indexSubTableArrayOffset = baseOffset + bytes.getUint32(bitmapSize);
+      // final indexTablesSize = bytes.getUint32(bitmapSize + 4);
+      final numberOfIndexSubTables = bytes.getUint32(bitmapSize + 8);
+
+      final ascender = bytes.getInt8(bitmapSize + 12);
+      final descender = bytes.getInt8(bitmapSize + 13);
+
+      // final startGlyphIndex = bytes.getUint16(bitmapSize + 16 + 12 * 2);
+      // final endGlyphIndex = bytes.getUint16(bitmapSize + 16 + 12 * 2 + 2);
+      // final ppemX = bytes.getUint8(bitmapSize + 16 + 12 * 2 + 4);
+      // final ppemY = bytes.getUint8(bitmapSize + 16 + 12 * 2 + 5);
+      // final bitDepth = bytes.getUint8(bitmapSize + 16 + 12 * 2 + 6);
+      // final flags = bytes.getUint8(bitmapSize + 16 + 12 * 2 + 7);
+
+      var subTableArrayOffset = indexSubTableArrayOffset;
+      for (var indexSubTable = 0;
+          indexSubTable < numberOfIndexSubTables;
+          indexSubTable++) {
+        // IndexSubTableArray
+        final firstGlyphIndex = bytes.getUint16(subTableArrayOffset);
+        final lastGlyphIndex = bytes.getUint16(subTableArrayOffset + 2);
+        final additionalOffsetToIndexSubtable =
+            indexSubTableArrayOffset + bytes.getUint32(subTableArrayOffset + 4);
+
+        // IndexSubHeader
+        final indexFormat = bytes.getUint16(additionalOffsetToIndexSubtable);
+        final imageFormat =
+            bytes.getUint16(additionalOffsetToIndexSubtable + 2);
+        final imageDataOffset =
+            pngOffset + bytes.getUint32(additionalOffsetToIndexSubtable + 4);
+
+        if (indexFormat == 1) {
+          // IndexSubTable1
+
+          for (var glyph = firstGlyphIndex; glyph <= lastGlyphIndex; glyph++) {
+            final sbitOffset = imageDataOffset +
+                bytes.getUint32(additionalOffsetToIndexSubtable +
+                    (glyph - firstGlyphIndex + 2) * 4);
+
+            if (imageFormat == 17) {
+              final height = bytes.getUint8(sbitOffset);
+              final width = bytes.getUint8(sbitOffset + 1);
+              final bearingX = bytes.getInt8(sbitOffset + 2);
+              final bearingY = bytes.getInt8(sbitOffset + 3);
+              final advance = bytes.getUint8(sbitOffset + 4);
+              final dataLen = bytes.getUint32(sbitOffset + 5);
+
+              bitmapOffsets[glyph] = TtfBitmapInfo(
+                  bytes.buffer.asUint8List(
+                    bytes.offsetInBytes + sbitOffset + 9,
+                    dataLen,
+                  ),
+                  height,
+                  width,
+                  bearingX,
+                  bearingY,
+                  advance,
+                  0,
+                  0,
+                  0,
+                  ascender,
+                  descender);
+            }
+          }
+        }
+
+        subTableArrayOffset += 8;
+      }
+      bitmapSize += 16 + 12 * 2 + 8;
+    }
+  }
+
+  TtfBitmapInfo? getBitmap(int charcode) =>
+      bitmapOffsets[charToGlyphIndexMap[charcode]];
 }
