@@ -18,6 +18,7 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
+import '../point.dart';
 import '../rect.dart';
 
 /// Describe dimensions for glyphs in a font
@@ -129,6 +130,9 @@ class PdfFontMetrics {
 
   /// Ending point
   double get rightBearing => advanceWidth - right;
+
+  /// Get the unit size of this string
+  PdfPoint get size => PdfPoint(width, height);
 
   @override
   String toString() =>

@@ -3,6 +3,7 @@
 ## 3.7.0
 
 - Move files
+- Depreciate Font.stringSize
 
 ## 3.6.6
 

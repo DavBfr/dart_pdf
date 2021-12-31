@@ -181,11 +181,9 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
     }
   }
 
-  /// Calculage the unit size of this string
-  PdfPoint stringSize(String s) {
-    final metrics = stringMetrics(s);
-    return PdfPoint(metrics.width, metrics.height);
-  }
+  /// Calculate the unit size of this string
+  @Deprecated('Use stringMetrics(s).size instead.')
+  PdfPoint stringSize(String s) => stringMetrics(s).size;
 
   @override
   String toString() => 'Font($fontName)';
