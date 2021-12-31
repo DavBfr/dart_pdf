@@ -278,7 +278,7 @@ class TextField extends StatelessWidget {
       fieldFlags: fieldFlags,
       value: value,
       defaultValue: defaultValue,
-      font: _textStyle.font!.getFont(context)!,
+      font: _textStyle.font!.getFont(context),
       fontSize: _textStyle.fontSize!,
       textColor: _textStyle.color!,
     );

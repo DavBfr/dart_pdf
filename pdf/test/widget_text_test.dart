@@ -24,9 +24,9 @@ import 'package:test/test.dart';
 import 'utils.dart';
 
 late Document pdf;
-Font? ttf;
-Font? ttfBold;
-Font? asian;
+late Font ttf;
+late Font ttfBold;
+late Font asian;
 
 Iterable<TextDecoration> permute(
     List<TextDecoration> prefix, List<TextDecoration> remaining) sync* {

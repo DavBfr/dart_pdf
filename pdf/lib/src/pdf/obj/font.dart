@@ -161,6 +161,9 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
   /// Calculate the [PdfFontMetrics] for this glyph
   PdfFontMetrics glyphMetrics(int charCode);
 
+  /// is this Rune supported by this font
+  bool isRuneSupported(int charCode);
+
   /// Calculate the [PdfFontMetrics] for this string
   PdfFontMetrics stringMetrics(String s, {double letterSpacing = 0}) {
     if (s.isEmpty) {

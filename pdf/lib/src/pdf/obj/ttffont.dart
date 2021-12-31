@@ -188,4 +188,9 @@ class PdfTtfFont extends PdfFont {
     final metrics = bytes.map(glyphMetrics);
     return PdfFontMetrics.append(metrics, letterSpacing: letterSpacing);
   }
+
+  @override
+  bool isRuneSupported(int charCode) {
+    return font.charToGlyphIndexMap.containsKey(charCode);
+  }
 }

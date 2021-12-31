@@ -64,6 +64,11 @@ class PdfType1Font extends PdfFont {
 
   @override
   PdfFontMetrics glyphMetrics(int charCode) {
+    if (!isRuneSupported(charCode)) {
+      throw Exception(
+          'Unable to display U+${charCode.toRadixString(16)} with $fontName');
+    }
+
     return PdfFontMetrics(
         left: 0,
         top: descent,
@@ -71,5 +76,10 @@ class PdfType1Font extends PdfFont {
             ? widths[charCode]
             : PdfFont.defaultGlyphWidth,
         bottom: ascent);
+  }
+
+  @override
+  bool isRuneSupported(int charCode) {
+    return charCode >= 0x00 && charCode <= 0xff;
   }
 }

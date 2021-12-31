@@ -66,7 +66,7 @@ class SvgText extends SvgOperation {
 
     final font = painter.getFontCache(
         _brush.fontFamily!, _brush.fontStyle!, _brush.fontWeight!)!;
-    final pdfFont = font.getFont(Context(document: painter.document))!;
+    final pdfFont = font.getFont(Context(document: painter.document));
     final metrics = pdfFont.stringMetrics(text) * _brush.fontSize!.sizeValue;
     offset = PdfPoint((x ?? offset.x) + dx, (y ?? offset.y) + dy);
 

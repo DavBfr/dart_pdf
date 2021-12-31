@@ -4,6 +4,7 @@
 
 - Move files
 - Depreciate Font.stringSize
+- Implement fallback font
 
 ## 3.6.6
 

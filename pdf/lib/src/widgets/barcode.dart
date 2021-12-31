@@ -94,7 +94,7 @@ class _BarcodeWidget extends Widget {
       final font = textStyle!.font!.getFont(context);
 
       for (final text in textList) {
-        final metrics = font!.stringMetrics(text.text);
+        final metrics = font.stringMetrics(text.text);
 
         final top = box!.top -
             text.top -

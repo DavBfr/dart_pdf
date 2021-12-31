@@ -43,7 +43,7 @@ enum Type1Fonts {
 class Font {
   Font() : font = null;
 
-  Font.type1(Type1Fonts this.font);
+  Font.type1(this.font);
 
   factory Font.courier() => Font.type1(Type1Fonts.courier);
   factory Font.courierBold() => Font.type1(Type1Fonts.courierBold);
@@ -127,13 +127,13 @@ class Font {
 
   PdfFont? _pdfFont;
 
-  PdfFont? getFont(Context context) {
+  PdfFont getFont(Context context) {
     if (_pdfFont == null || _pdfFont!.pdfDocument != context.document) {
       final pdfDocument = context.document;
       _pdfFont = buildFont(pdfDocument);
     }
 
-    return _pdfFont;
+    return _pdfFont!;
   }
 
   @override
