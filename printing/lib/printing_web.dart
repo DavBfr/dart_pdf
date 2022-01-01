@@ -279,6 +279,11 @@ class PrintingPlugin extends PrintingPlatform {
       );
     }
   }
+
+  @override
+  Future<List<String>> systemFonts() async {
+    return const [];
+  }
 }
 
 class _WebPdfRaster extends PdfRaster {

@@ -103,6 +103,10 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     result.success(1);
                     break;
                 }
+                case "systemFonts": {
+                    result.success(PrintingJob.systemFonts());
+                    break;
+                }
                 default:
                     result.notImplemented();
                     break;

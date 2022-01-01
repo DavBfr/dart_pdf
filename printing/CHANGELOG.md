@@ -1,6 +1,6 @@
 # Changelog
 
-## 5.6.7
+## 5.7.0
 
 - Fix imports for Dart 2.15
 - Fix print dialog crash on Linux
@@ -10,6 +10,7 @@
 - Update Google Fonts
 - Add a default theme initializer
 - Use RENDER_MODE_FOR_DISPLAY on Android
+- Add System fonts loader
 
 ## 5.6.6
 

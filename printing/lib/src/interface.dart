@@ -52,6 +52,9 @@ abstract class PrintingPlatform extends PlatformInterface {
   /// supported for the current platform
   Future<PrintingInfo> info();
 
+  /// Returns a list of the available system fonts
+  Future<List<String>> systemFonts();
+
   /// Prints a Pdf document to a local printer using the platform UI
   /// the Pdf document is re-built in a [LayoutCallback] each time the
   /// user changes a setting like the page format or orientation.

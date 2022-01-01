@@ -165,6 +165,20 @@ class MethodChannelPrinting extends PrintingPlatform {
   }
 
   @override
+  Future<List<String>> systemFonts() async {
+    try {
+      final result = await _channel.invokeMethod<List>('systemFonts');
+      if (result == null) {
+        return const [];
+      }
+      return result.map((dynamic e) => e.toString()).toList();
+    } catch (_) {
+      print(_);
+      return const [];
+    }
+  }
+
+  @override
   Future<bool> layoutPdf(
     Printer? printer,
     LayoutCallback onLayout,

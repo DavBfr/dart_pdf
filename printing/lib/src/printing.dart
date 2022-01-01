@@ -189,6 +189,12 @@ mixin Printing {
     return PrintingPlatform.instance.info();
   }
 
+  static Future<Set<String>> systemFonts() async {
+    final fonts = await PrintingPlatform.instance.systemFonts();
+    fonts.retainWhere((e) => e.endsWith('.ttf'));
+    return fonts.toSet();
+  }
+
   /// Convert a PDF to a list of images.
   /// ```dart
   /// await for (final page in Printing.raster(content)) {

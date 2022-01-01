@@ -16,6 +16,8 @@
 
 package net.nfet.flutter.printing;
 
+import static android.graphics.fonts.SystemFonts.getAvailableFonts;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -23,6 +25,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.graphics.fonts.Font;
 import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Build;
@@ -56,6 +59,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * PrintJob
@@ -89,6 +93,17 @@ public class PrintingJob extends PrintDocumentAdapter {
         result.put("canConvertHtml", canRaster);
         result.put("canShare", true);
         result.put("canRaster", canRaster);
+        return result;
+    }
+
+    static ArrayList<String> systemFonts() {
+        ArrayList<String> result = new ArrayList<>();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            Set<Font> fonts = getAvailableFonts();
+            for (Font font : fonts) {
+                result.add(font.getFile().getAbsolutePath());
+            }
+        }
         return result;
     }
 

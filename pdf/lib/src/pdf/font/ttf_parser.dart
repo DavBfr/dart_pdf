@@ -116,6 +116,11 @@ class TtfBitmapInfo {
 
 class TtfParser {
   TtfParser(ByteData bytes) : bytes = UnmodifiableByteDataView(bytes) {
+    final tag = bytes.getUint32(0);
+    if (tag != 0x00010000) {
+      throw Exception('Not a TrueType Font');
+    }
+
     final numTables = bytes.getUint16(4);
 
     for (var i = 0; i < numTables; i++) {
