@@ -23,9 +23,9 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
-Document pdf;
-Font font;
-TextStyle style;
+late Document pdf;
+late Font font;
+late TextStyle style;
 
 void main() {
   setUpAll(() {
@@ -50,8 +50,8 @@ void main() {
     );
   });
 
-  tearDownAll(() {
+  tearDownAll(() async {
     final File file = File('indic.pdf');
-    file.writeAsBytesSync(pdf.save());
+    await file.writeAsBytes(await pdf.save());
   });
 }
