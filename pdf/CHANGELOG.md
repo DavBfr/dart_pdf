@@ -6,6 +6,7 @@
 - Depreciate Font.stringSize
 - Implement fallback font
 - Implement Emoji support
+- Improve outlines containing non-sequential level increments [Roel Spilker]
 
 ## 3.6.6
 

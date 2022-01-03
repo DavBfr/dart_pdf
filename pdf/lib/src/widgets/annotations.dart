@@ -623,24 +623,28 @@ class Outline extends Anchor {
       color: color,
       style: style,
       page: context.pageNumber,
-    );
+    )..effectiveLevel = level;
 
-    var parent = context.document.outline;
-    var l = level;
+    final root = context.document.outline;
 
-    while (l > 0) {
-      if (parent.effectiveLevel == l) {
-        break;
-      }
-
-      if (parent.outlines.isEmpty) {
-        parent.effectiveLevel = level;
-        break;
-      }
-      parent = parent.outlines.last;
-      l--;
+    // find the most recently added outline
+    var actualLevel= -1;
+    var candidate = root;
+    while (candidate.outlines.isNotEmpty) {
+      candidate = candidate.outlines.last;
+      actualLevel++;
     }
 
-    parent.add(_outline!);
+    // find the latest added outline with a level lower than ours
+    while (candidate != root) {
+      final candidateLevel = candidate.effectiveLevel ?? actualLevel;
+      if (candidateLevel < level) {
+        break;
+      }
+      candidate = candidate.parent!;
+      actualLevel--;
+    }
+
+    candidate.add(_outline!);
   }
 }
