@@ -83,8 +83,146 @@ void main() {
     );
   });
 
+  group('Levels', () {
+    test('Well-formed', () {
+      final generated = _OutlineBuilder()
+          .add('Part 1', 0)
+          .add('Chapter 1', 1)
+          .add('Paragraph 1.1', 2)
+          .add('Paragraph 1.2', 2)
+          .add('Paragraph 1.3', 2)
+          .add('Chapter 2', 1)
+          .add('Paragraph 2.1', 2)
+          .add('Paragraph 2.2', 2)
+          .render()
+          .join('\n');
+      const expected = '''null
+  Part 1
+    Chapter 1
+      Paragraph 1.1
+      Paragraph 1.2
+      Paragraph 1.3
+    Chapter 2
+      Paragraph 2.1
+      Paragraph 2.2''';
+
+      expect(generated, expected);
+    });
+
+    test('Does not start with level 0', () {
+      final generated = _OutlineBuilder()
+          .add('Part 1', 1)
+          .add('Chapter 1', 2)
+          .add('Chapter 2', 2)
+          .render()
+          .join('\n');
+      const expected = '''null
+  Part 1
+    Chapter 1
+    Chapter 2''';
+
+      expect(generated, expected);
+    });
+
+    test('Contains non-sequential level increment', () {
+      final generated = _OutlineBuilder()
+          .add('Part 1', 0)
+          .add('Chapter 1', 2)
+          .add('Paragraph 1.1', 4)
+          .add('Paragraph 1.2', 4)
+          .add('Paragraph 1.3', 4)
+          .add('Chapter 2', 2)
+          .add('Paragraph 2.1', 4)
+          .add('Paragraph 2.2', 4)
+          .render()
+          .join('\n');
+
+      const expected = '''null
+  Part 1
+    Chapter 1
+      Paragraph 1.1
+      Paragraph 1.2
+      Paragraph 1.3
+    Chapter 2
+      Paragraph 2.1
+      Paragraph 2.2''';
+
+      expect(generated, expected);
+    });
+
+    test('Reverse leveling', () {
+      final generated = _OutlineBuilder()
+          .add('Paragraph 2.2', 2)
+          .add('Paragraph 2.1', 2)
+          .add('Chapter 2', 1)
+          .add('Paragraph 1.3', 2)
+          .add('Paragraph 1.2', 2)
+          .add('Paragraph 1.1', 2)
+          .add('Chapter 1', 1)
+          .add('Part 1', 0)
+          .render()
+          .join('\n');
+
+      const expected = '''null
+  Paragraph 2.2
+  Paragraph 2.1
+  Chapter 2
+    Paragraph 1.3
+    Paragraph 1.2
+    Paragraph 1.1
+  Chapter 1
+  Part 1''';
+
+      expect(generated, expected);
+    });
+  });
+
   tearDownAll(() async {
     final file = File('widgets-outline.pdf');
     await file.writeAsBytes(await pdf.save());
   });
+}
+
+class _OutlineBuilder {
+  final List<String> _titles = <String>[];
+  final List<int> _levels = <int>[];
+
+  _OutlineBuilder add(String text, int level) {
+    _titles.add(text);
+    _levels.add(level);
+    return this;
+  }
+
+  List<String> render() {
+    final pdf = Document();
+    pdf.addPage(
+      MultiPage(
+        build: (Context context) => <Widget>[
+          for (int i = 0; i < _titles.length; i++)
+            Outline(
+              name: 'anchor$i',
+              title: _titles[i],
+              level: _levels[i],
+            )
+        ],
+      ),
+    );
+    return _collectOutlines(pdf.document.catalog.outlines!);
+  }
+}
+
+List<String> _collectOutlines(
+  PdfOutline outline, [
+  List<String>? output,
+  int indent = 0,
+]) {
+  final result = output ?? <String>[];
+  final intentation = List.filled(indent, '  ').join();
+  result.add('$intentation${outline.title}');
+  outline.outlines.forEach((child) => _collectOutlines(
+        child,
+        result,
+        indent + 1,
+      ));
+  return result;
 }
