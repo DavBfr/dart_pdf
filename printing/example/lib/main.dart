@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
 
   Future<Uint8List> _generatePdf(PdfPageFormat format, String title) async {
     final pdf = pw.Document(version: PdfVersion.pdf_1_5, compress: true);
-    final font = await PdfGoogleFonts.nunitoExtraLight();
+    final font = await PdfGoogleFonts.notoSansBengaliRegular();
 
     pdf.addPage(
       pw.Page(
@@ -41,11 +41,10 @@ class MyApp extends StatelessWidget {
               pw.SizedBox(
                 width: double.infinity,
                 child: pw.FittedBox(
-                  child: pw.Text(title, style: pw.TextStyle(font: font)),
+                  child: pw.Text('পরীক্ষার রুটিন ও সময়সূচী',
+                      style: pw.TextStyle(font: font)),
                 ),
               ),
-              pw.SizedBox(height: 20),
-              pw.Flexible(child: pw.FlutterLogo())
             ],
           );
         },

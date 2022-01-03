@@ -626,58 +626,10 @@ class TtfParser {
   TtfBitmapInfo? getBitmap(int charcode) =>
       bitmapOffsets[charToGlyphIndexMap[charcode]];
 
-  void _hexDump(int offset, int length,
-      [int? highlight, int? highlightLength]) {
-    const reset = '\x1B[0m';
-    const red = '\x1B[1;31m';
-    String s = '';
-    String t = '';
-    int n = 0;
-    bool hl = false;
-    for (int i = 0; i < length; i++) {
-      final int b = bytes.getUint8(offset + i);
-      if (highlight != null && highlightLength != null) {
-        if (offset + i >= highlight &&
-            offset + i < highlight + highlightLength) {
-          if (!hl) {
-            hl = true;
-            s += red;
-            t += red;
-          }
-        } else {
-          if (hl) {
-            hl = false;
-            s += reset;
-            t += reset;
-          }
-        }
-      }
-      s += b.toRadixString(16).padLeft(2, '0') + ' ';
-      if (b > 31 && b < 128) {
-        t += String.fromCharCode(b);
-      } else {
-        t += '.';
-      }
-
-      n++;
-      if (n % 16 == 0) {
-        if (hl) {
-          s += reset;
-          t += reset;
-          hl = false;
-        }
-        print('$s   $t');
-        s = '';
-        t = '';
-      }
-    }
-    print('$s   $t');
-  }
-
   void _parseGsub() {
-    final int basePosition = tableOffsets[gsub_table]!;
-    final int majorVersion = bytes.getUint16(basePosition);
-    final int minorVersion = bytes.getUint16(basePosition + 2);
+    final basePosition = tableOffsets[gsub_table]!;
+    final majorVersion = bytes.getUint16(basePosition);
+    final minorVersion = bytes.getUint16(basePosition + 2);
 
     print('GSUB Version: $majorVersion.$minorVersion');
 
@@ -685,71 +637,68 @@ class TtfParser {
       return;
     }
 
-    final int scriptListOffset =
-        bytes.getUint16(basePosition + 4) + basePosition;
-    final int featureListOffset =
-        bytes.getUint16(basePosition + 6) + basePosition;
-    final int lookupListOffset =
-        bytes.getUint16(basePosition + 8) + basePosition;
+    final scriptListOffset = bytes.getUint16(basePosition + 4) + basePosition;
+    final featureListOffset = bytes.getUint16(basePosition + 6) + basePosition;
+    final lookupListOffset = bytes.getUint16(basePosition + 8) + basePosition;
     print(
         'GSUB Offsets: $scriptListOffset $featureListOffset $lookupListOffset');
 
-    final int scriptCount = bytes.getUint16(scriptListOffset);
+    final scriptCount = bytes.getUint16(scriptListOffset);
 
-    for (int i = 0; i < scriptCount; i++) {
-      final String tag = utf8
+    for (var i = 0; i < scriptCount; i++) {
+      final tag = utf8
           .decode(bytes.buffer.asUint8List(scriptListOffset + 2 + 6 * i, 4));
-      final int scriptOffset =
+      final scriptOffset =
           bytes.getUint16(scriptListOffset + 6 + 6 * i) + scriptListOffset;
       print('Script $tag => $scriptOffset');
 
-      final int defaultLangSys = bytes.getUint16(scriptOffset) + scriptOffset;
+      final defaultLangSys = bytes.getUint16(scriptOffset) + scriptOffset;
       print('   defaultLangSys: $defaultLangSys');
 
       print('   default:');
-      final int requiredFeatureIndex = bytes.getUint16(defaultLangSys + 2);
+      final requiredFeatureIndex = bytes.getUint16(defaultLangSys + 2);
       if (requiredFeatureIndex != 0xffff) {
         print('      requiredFeatureIndex: $requiredFeatureIndex');
       }
-      final int featureIndexCount = bytes.getUint16(defaultLangSys + 4);
+      final featureIndexCount = bytes.getUint16(defaultLangSys + 4);
       print('      featureIndexCount: $featureIndexCount');
-      final List<int> features = List<int>(featureIndexCount);
-      for (int j = 0; j < featureIndexCount; j++) {
-        features[j] = bytes.getUint16(defaultLangSys + 6 + j * 2);
+      final features = <int>[];
+      for (var j = 0; j < featureIndexCount; j++) {
+        features.add(bytes.getUint16(defaultLangSys + 6 + j * 2));
       }
       print('      features: $features');
 
-      final int langSysCount = bytes.getUint16(scriptOffset + 2);
+      final langSysCount = bytes.getUint16(scriptOffset + 2);
       print('   langSysCount: $langSysCount');
     }
 
-    return;
+    // return;
 
     // Read lookup table
-    final int lookupCount = bytes.getUint16(lookupListOffset);
+    final lookupCount = bytes.getUint16(lookupListOffset);
     print('lookupCount: $lookupCount');
-    final List<int> lookups = List<int>(lookupCount);
-    for (int i = 0; i < lookupCount; i++) {
-      final int offset =
+    final lookups = <int>[];
+    for (var i = 0; i < lookupCount; i++) {
+      final offset =
           bytes.getUint16(lookupListOffset + 2 + 2 * i) + lookupListOffset;
-      lookups[i] = offset;
+      lookups.add(offset);
       print('Lookup Table $i $offset');
 
-      final int lookupType =
+      final lookupType =
           bytes.getUint16(offset); //	Different enumerations for GSUB and GPOS
       print('   lookupType $lookupType');
-      final int lookupFlag = bytes.getUint16(offset + 2); // Lookup qualifiers
+      final lookupFlag = bytes.getUint16(offset + 2); // Lookup qualifiers
       print('   lookupFlag $lookupFlag');
-      final int subTableCount =
+      final subTableCount =
           bytes.getUint16(offset + 4); //	Number of subtables for this lookup
-      final List<int> subTables = List<int>(subTableCount);
+      final subTables = <int>[];
 
       print('   subTableCount $subTableCount');
 
-      for (int j = 0; j < subTableCount; j++) {
-        final int subTableOffset =
+      for (var j = 0; j < subTableCount; j++) {
+        final subTableOffset =
             bytes.getUint16(offset + 6 + 2 * j) + lookupListOffset;
-        subTables[j] = subTableOffset;
+        subTables.add(subTableOffset);
         //	Array of offsets to lookup subtables, from beginning of Lookup table
         print('      subTable $j $subTableOffset');
       }
