@@ -75,7 +75,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
 
         let printInfo = UIPrintInfo.printInfo()
         printInfo.jobName = jobName!
-        printInfo.outputType = .general
+        DispatchQueue.main.async { printInfo.outputType = .general }
         if orientation != nil {
             printInfo.orientation = orientation!
             orientation = nil
