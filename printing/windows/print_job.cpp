@@ -80,11 +80,11 @@ bool PrintJob::printPdf(std::string name,
                         bool usePrinterSettings) {
   documentName = name;
 
-  auto dm;
+  auto dm = static_cast<DEVMODE*>(GlobalAlloc(0, sizeof(DEVMODE)));
+  
   if (usePrinterSettings){
     dm = NULL; // to use default driver config
   } else {
-    dm = static_cast<DEVMODE*>(GlobalAlloc(0, sizeof(DEVMODE)));
     ZeroMemory(dm, sizeof(DEVMODE));
     dm->dmSize = sizeof(DEVMODE);
     dm->dmFields = DM_ORIENTATION | DM_PAPERSIZE | DM_PAPERLENGTH | DM_PAPERWIDTH;
