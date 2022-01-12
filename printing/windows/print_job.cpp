@@ -33,11 +33,12 @@ namespace nfet {
 const auto pdfDpi = 72;
 
 std::string toUtf8(std::wstring wstr) {
-  int cbMultiByte =
-      WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
+  int cbMultiByte = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, nullptr,
+                                        0, nullptr, nullptr);
   LPSTR lpMultiByteStr = (LPSTR)malloc(cbMultiByte);
-  cbMultiByte = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1,
-                                    lpMultiByteStr, cbMultiByte, NULL, NULL);
+  cbMultiByte =
+      WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, lpMultiByteStr,
+                          cbMultiByte, nullptr, nullptr);
   std::string ret = lpMultiByteStr;
   free(lpMultiByteStr);
   return ret;
@@ -73,7 +74,7 @@ std::wstring fromUtf8(std::string str) {
 PrintJob::PrintJob(Printing* printing, int index)
     : printing{printing}, index{index} {}
 
-bool PrintJob::printPdf(std::string name,
+bool PrintJob::printPdf(const std::string& name,
                         std::string printer,
                         double width,
                         double height,
@@ -81,13 +82,14 @@ bool PrintJob::printPdf(std::string name,
   documentName = name;
 
   auto dm = static_cast<DEVMODE*>(GlobalAlloc(0, sizeof(DEVMODE)));
-  
-  if (usePrinterSettings){
-    dm = NULL; // to use default driver config
+
+  if (usePrinterSettings) {
+    dm = nullptr;  // to use default driver config
   } else {
     ZeroMemory(dm, sizeof(DEVMODE));
     dm->dmSize = sizeof(DEVMODE);
-    dm->dmFields = DM_ORIENTATION | DM_PAPERSIZE | DM_PAPERLENGTH | DM_PAPERWIDTH;
+    dm->dmFields =
+        DM_ORIENTATION | DM_PAPERSIZE | DM_PAPERLENGTH | DM_PAPERWIDTH;
     dm->dmPaperSize = 0;
     if (width > height) {
       dm->dmOrientation = DMORIENT_LANDSCAPE;
@@ -99,7 +101,6 @@ bool PrintJob::printPdf(std::string name,
       dm->dmPaperLength = static_cast<short>(round(height * 254 / 72));
     }
   }
-  
 
   if (printer.empty()) {
     PRINTDLG pd;
@@ -136,7 +137,7 @@ bool PrintJob::printPdf(std::string name,
     hDevNames = pd.hDevNames;
 
   } else {
-    hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), NULL, dm);
+    hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), nullptr, dm);
     if (!hDC) {
       return false;
     }
@@ -227,8 +228,8 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
 
   FPDF_LIBRARY_CONFIG config;
   config.version = 2;
-  config.m_pUserFontPaths = NULL;
-  config.m_pIsolate = NULL;
+  config.m_pUserFontPaths = nullptr;
+  config.m_pIsolate = nullptr;
   config.m_v8EmbedderSlot = 0;
   FPDF_InitLibraryWithConfig(&config);
 
@@ -243,7 +244,7 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
   auto marginTop = GetDeviceCaps(hDC, PHYSICALOFFSETY);
 
   for (auto pageNum = 0; pageNum < pages; pageNum++) {
-    r = StartPage(hDC);
+    StartPage(hDC);
 
     auto page = FPDF_LoadPage(doc, pageNum);
     if (!page) {
@@ -266,7 +267,7 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
   FPDF_CloseDocument(doc);
   FPDF_DestroyLibrary();
 
-  r = EndDoc(hDC);
+  EndDoc(hDC);
 
   DeleteDC(hDC);
   GlobalFree(hDevNames);
@@ -275,9 +276,9 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
   printing->onCompleted(this, true, "");
 }
 
-void PrintJob::cancelJob(std::string error) {}
+void PrintJob::cancelJob(const std::string& error) {}
 
-bool PrintJob::sharePdf(std::vector<uint8_t> data, std::string name) {
+bool PrintJob::sharePdf(std::vector<uint8_t> data, const std::string& name) {
   TCHAR lpTempPathBuffer[MAX_PATH];
 
   auto ret = GetTempPath(MAX_PATH, lpTempPathBuffer);
@@ -294,14 +295,14 @@ bool PrintJob::sharePdf(std::vector<uint8_t> data, std::string name) {
 
   SHELLEXECUTEINFO ShExecInfo;
   ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
-  ShExecInfo.fMask = NULL;
-  ShExecInfo.hwnd = NULL;
+  ShExecInfo.fMask = 0;
+  ShExecInfo.hwnd = nullptr;
   ShExecInfo.lpVerb = TEXT("open");
   ShExecInfo.lpFile = filename.c_str();
-  ShExecInfo.lpParameters = NULL;
-  ShExecInfo.lpDirectory = NULL;
+  ShExecInfo.lpParameters = nullptr;
+  ShExecInfo.lpDirectory = nullptr;
   ShExecInfo.nShow = SW_SHOWDEFAULT;
-  ShExecInfo.hInstApp = NULL;
+  ShExecInfo.hInstApp = nullptr;
 
   ret = ShellExecuteEx(&ShExecInfo);
 
@@ -315,8 +316,8 @@ void PrintJob::rasterPdf(std::vector<uint8_t> data,
                          double scale) {
   FPDF_LIBRARY_CONFIG config;
   config.version = 2;
-  config.m_pUserFontPaths = NULL;
-  config.m_pIsolate = NULL;
+  config.m_pUserFontPaths = nullptr;
+  config.m_pIsolate = nullptr;
   config.m_v8EmbedderSlot = 0;
   FPDF_InitLibraryWithConfig(&config);
 

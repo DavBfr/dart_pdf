@@ -202,7 +202,7 @@ bool print_job::print_pdf(const gchar* name,
 void print_job::write_job(const uint8_t data[], size_t size) {
   auto fd = memfd_create("printing", 0);
   size_t offset = 0;
-  size_t n;
+  ssize_t n;
   while ((n = write(fd, data + offset, size - offset)) >= 0 &&
          size - offset > 0) {
     offset += n;
@@ -249,8 +249,8 @@ void print_job::raster_pdf(const uint8_t data[],
                            double scale) {
   FPDF_LIBRARY_CONFIG config;
   config.version = 2;
-  config.m_pUserFontPaths = NULL;
-  config.m_pIsolate = NULL;
+  config.m_pUserFontPaths = nullptr;
+  config.m_pIsolate = nullptr;
   config.m_v8EmbedderSlot = 0;
   FPDF_InitLibraryWithConfig(&config);
 

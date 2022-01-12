@@ -39,11 +39,11 @@ struct Printer {
   const bool default;
   const bool available;
 
-  Printer(std::string name,
-          std::string url,
-          std::string model,
-          std::string location,
-          std::string comment,
+  Printer(const std::string& name,
+          const std::string& url,
+          const std::string& model,
+          const std::string& location,
+          const std::string& comment,
           bool default,
           bool available)
       : name(name),
@@ -71,7 +71,7 @@ class PrintJob {
 
   std::vector<Printer> listPrinters();
 
-  bool printPdf(std::string name,
+  bool printPdf(const std::string& name,
                 std::string printer,
                 double width,
                 double height,
@@ -79,9 +79,9 @@ class PrintJob {
 
   void writeJob(std::vector<uint8_t> data);
 
-  void cancelJob(std::string error);
+  void cancelJob(const std::string& error);
 
-  bool sharePdf(std::vector<uint8_t> data, std::string name);
+  bool sharePdf(std::vector<uint8_t> data, const std::string& name);
 
   void pickPrinter(void* result);
 

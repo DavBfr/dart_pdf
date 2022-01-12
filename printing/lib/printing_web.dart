@@ -65,6 +65,7 @@ class PrintingPlugin extends PrintingPlatform {
     String name,
     PdfPageFormat format,
     bool dynamicLayout,
+    bool usePrinterSettings,
   ) async {
     late Uint8List result;
     try {

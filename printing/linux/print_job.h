@@ -33,7 +33,7 @@ class print_job {
  public:
   GtkPrintUnixDialog* dialog = nullptr;
 
-  print_job(int index);
+  explicit print_job(int index);
 
   ~print_job();
 

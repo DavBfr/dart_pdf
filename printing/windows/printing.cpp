@@ -44,7 +44,7 @@ void Printing::onPageRasterized(std::vector<uint8_t> data,
           })));
 }
 
-void Printing::onPageRasterEnd(PrintJob* job, const std::string error) {
+void Printing::onPageRasterEnd(PrintJob* job, const std::string& error) {
   auto map = flutter::EncodableMap{
       {flutter::EncodableValue("job"), flutter::EncodableValue(job->id())},
   };
@@ -111,7 +111,9 @@ void Printing::onLayout(PrintJob* job,
 }
 
 // send completion status to flutter
-void Printing::onCompleted(PrintJob* job, bool completed, std::string error) {
+void Printing::onCompleted(PrintJob* job,
+                           bool completed,
+                           const std::string& error) {
   auto map = flutter::EncodableMap{
       {flutter::EncodableValue("job"), flutter::EncodableValue(job->id())},
       {flutter::EncodableValue("completed"),

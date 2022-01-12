@@ -628,7 +628,7 @@ class Outline extends Anchor {
     final root = context.document.outline;
 
     // find the most recently added outline
-    var actualLevel= -1;
+    var actualLevel = -1;
     var candidate = root;
     while (candidate.outlines.isNotEmpty) {
       candidate = candidate.outlines.last;
