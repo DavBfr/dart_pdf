@@ -74,7 +74,8 @@ class PrintJob {
   bool printPdf(std::string name,
                 std::string printer,
                 double width,
-                double height);
+                double height,
+                bool usePrinterSettings);
 
   void writeJob(std::vector<uint8_t> data);
 

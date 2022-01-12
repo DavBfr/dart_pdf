@@ -65,6 +65,7 @@ abstract class PrintingPlatform extends PlatformInterface {
     String name,
     PdfPageFormat format,
     bool dynamicLayout,
+    bool usePrinterSettings,
   );
 
   /// Enumerate the available printers on the system.
