@@ -114,6 +114,7 @@ class MockPrinting extends Mock
     String name,
     PdfPageFormat format,
     bool dynamicLayout,
+    bool usePrinterSettings,
   ) async =>
       true;
 
