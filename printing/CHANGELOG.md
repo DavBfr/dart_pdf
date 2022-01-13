@@ -11,6 +11,7 @@
 - Add a default theme initializer
 - Use RENDER_MODE_FOR_DISPLAY on Android
 - Enable usage of printer's settings on Windows [Alban Lecuivre]
+- Update android projects (mavenCentral, compileSdkVersion 30, gradle:4.1.0)
 
 ## 5.6.6
 
