@@ -17,9 +17,11 @@
 #include "print_job.h"
 
 #include <stdlib.h>
-#include <sys/mman.h>
+#include <unistd.h>
+#include <sys/syscall.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <linux/memfd.h>
 #include <cstring>
 #include <string>
 
@@ -200,7 +202,7 @@ bool print_job::print_pdf(const gchar* name,
 }
 
 void print_job::write_job(const uint8_t data[], size_t size) {
-  auto fd = memfd_create("printing", 0);
+  auto fd = syscall(SYS_memfd_create, "printing", 0);
   size_t offset = 0;
   ssize_t n;
   while ((n = write(fd, data + offset, size - offset)) >= 0 &&
