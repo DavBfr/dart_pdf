@@ -2,15 +2,12 @@
 
 ## 3.7.0
 
+- Fix imports for Dart 2.15
 - Move files
 - Depreciate Font.stringSize
 - Implement fallback font
 - Implement Emoji support
 - Improve outlines containing non-sequential level increments [Roel Spilker]
-
-## 3.6.6
-
-- Fix imports for Dart 2.15
 
 ## 3.6.5
 
