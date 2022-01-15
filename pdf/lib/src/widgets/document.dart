@@ -27,7 +27,8 @@ class Document {
     PdfPageMode pageMode = PdfPageMode.none,
     DeflateCallback? deflate,
     bool compress = true,
-    PdfVersion version = PdfVersion.pdf_1_4,
+    bool verbose = false,
+    PdfVersion version = PdfVersion.pdf_1_5,
     this.theme,
     String? title,
     String? author,
@@ -40,6 +41,7 @@ class Document {
           pageMode: pageMode,
           deflate: deflate,
           compress: compress,
+          verbose: verbose,
           version: version,
         ) {
     if (title != null ||
@@ -68,6 +70,7 @@ class Document {
     PdfPageMode pageMode = PdfPageMode.none,
     DeflateCallback? deflate,
     bool compress = true,
+    bool verbose = false,
     this.theme,
     String? title,
     String? author,
@@ -80,6 +83,7 @@ class Document {
           pageMode: pageMode,
           deflate: deflate,
           compress: compress,
+          verbose: verbose,
         ) {
     if (title != null ||
         author != null ||

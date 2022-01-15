@@ -27,7 +27,7 @@ import 'xref.dart';
 /// PDF document writer
 class PdfOutput {
   /// This creates a Pdf [PdfStream]
-  PdfOutput(this.os, this.version, bool compress) {
+  PdfOutput(this.os, this.version, this.verbose) {
     String v;
     switch (version) {
       case PdfVersion.pdf_1_4:
@@ -41,7 +41,7 @@ class PdfOutput {
     os.putString('%PDF-$v\n');
     os.putBytes(const <int>[0x25, 0xC2, 0xA5, 0xC2, 0xB1, 0xC3, 0xAB, 0x0A]);
     assert(() {
-      if (!compress) {
+      if (verbose) {
         _stopwatch = Stopwatch()..start();
         os.putComment('');
         os.putComment('Verbose dart_pdf');
@@ -79,6 +79,9 @@ class PdfOutput {
 
   /// Generate a compressed cross reference table
   bool get isCompressed => version.index > PdfVersion.pdf_1_4.index;
+
+  /// Verbose output
+  final bool verbose;
 
   /// This method writes a [PdfObject] to the stream.
   void write(PdfObject ob) {
@@ -133,18 +136,26 @@ class PdfOutput {
     if (isCompressed) {
       xref.outputCompressed(rootID!, os, params);
     } else {
+      assert(() {
+        os.putComment('');
+        os.putComment('-' * 78);
+        return true;
+      }());
       xref.output(os);
-    }
 
-    if (!isCompressed) {
       // the trailer object
+      assert(() {
+        os.putComment('');
+        os.putComment('-' * 78);
+        return true;
+      }());
       os.putString('trailer\n');
-      params.output(os);
+      params.output(os, verbose ? 0 : null);
       os.putByte(0x0a);
     }
 
     assert(() {
-      if (!rootID!.pdfDocument.compress) {
+      if (rootID!.pdfDocument.verbose) {
         os.putComment('');
         os.putComment('-' * 78);
       }
@@ -155,7 +166,7 @@ class PdfOutput {
     os.putString('startxref\n$_xref\n%%EOF\n');
 
     assert(() {
-      if (!rootID!.pdfDocument.compress) {
+      if (verbose) {
         _stopwatch.stop();
         final h = PdfStream();
         h.putComment(

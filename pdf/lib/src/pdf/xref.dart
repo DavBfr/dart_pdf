@@ -199,7 +199,7 @@ class PdfXrefTable extends PdfDataType {
 
     // Write the object
     assert(() {
-      if (!object.pdfDocument.compress) {
+      if (object.pdfDocument.verbose) {
         s.putComment('');
         s.putComment('-' * 78);
         s.putComment('$runtimeType $this');
@@ -214,6 +214,6 @@ class PdfXrefTable extends PdfDataType {
       isBinary: false,
       encrypt: false,
       values: params.values,
-    ).output(s, object.pdfDocument.compress ? null : 0);
+    ).output(s, object.pdfDocument.verbose ? 0 : null);
   }
 }

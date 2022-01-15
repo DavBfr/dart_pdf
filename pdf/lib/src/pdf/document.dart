@@ -78,7 +78,8 @@ class PdfDocument {
     PdfPageMode pageMode = PdfPageMode.none,
     DeflateCallback? deflate,
     bool compress = true,
-    this.version = PdfVersion.pdf_1_4,
+    this.verbose = false,
+    this.version = PdfVersion.pdf_1_5,
   })  : deflate = compress ? (deflate ?? defaultDeflate) : null,
         prev = null,
         _objser = 1 {
@@ -93,6 +94,7 @@ class PdfDocument {
     PdfPageMode pageMode = PdfPageMode.none,
     DeflateCallback? deflate,
     bool compress = true,
+    this.verbose = false,
   })  : deflate = compress ? (deflate ?? defaultDeflate) : null,
         _objser = prev!.size,
         version = prev.version {
@@ -163,6 +165,8 @@ class PdfDocument {
 
   bool get compress => deflate != null;
 
+  final bool verbose;
+
   /// Generates the document ID
   Uint8List get documentID {
     if (_documentID == null) {
@@ -205,7 +209,7 @@ class PdfDocument {
 
   /// This writes the document to an OutputStream.
   Future<void> _write(PdfStream os) async {
-    final pos = PdfOutput(os, version, compress);
+    final pos = PdfOutput(os, version, verbose);
 
     // Write each object to the [PdfStream]. We call via the output
     // as that builds the xref table
