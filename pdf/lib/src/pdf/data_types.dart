@@ -16,6 +16,7 @@
 
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -25,10 +26,12 @@ import 'color.dart';
 import 'obj/object.dart';
 import 'stream.dart';
 
+const _kIndentSize = 2;
+
 abstract class PdfDataType {
   const PdfDataType();
 
-  void output(PdfStream s);
+  void output(PdfStream s, [int? indent]);
 
   PdfStream _toStream() {
     final s = PdfStream();
@@ -53,7 +56,7 @@ class PdfBool extends PdfDataType {
   final bool value;
 
   @override
-  void output(PdfStream s) {
+  void output(PdfStream s, [int? indent]) {
     s.putString(value ? 'true' : 'false');
   }
 
@@ -81,7 +84,7 @@ class PdfNum extends PdfDataType {
   final num value;
 
   @override
-  void output(PdfStream s) {
+  void output(PdfStream s, [int? indent]) {
     if (value is int) {
       s.putString(value.toInt().toString());
     } else {
@@ -119,12 +122,12 @@ class PdfNumList extends PdfDataType {
   final List<num> values;
 
   @override
-  void output(PdfStream s) {
+  void output(PdfStream s, [int? indent]) {
     for (var n = 0; n < values.length; n++) {
       if (n > 0) {
         s.putByte(0x20);
       }
-      PdfNum(values[n]).output(s);
+      PdfNum(values[n]).output(s, indent);
     }
   }
 
@@ -289,7 +292,7 @@ class PdfString extends PdfDataType {
   }
 
   @override
-  void output(PdfStream s) {
+  void output(PdfStream s, [int? indent]) {
     _output(s, value);
   }
 
@@ -346,9 +349,9 @@ class PdfSecString extends PdfString {
   final PdfObject object;
 
   @override
-  void output(PdfStream s) {
+  void output(PdfStream s, [int? indent]) {
     if (object.pdfDocument.encryption == null) {
-      return super.output(s);
+      return super.output(s, indent);
     }
 
     final enc = object.pdfDocument.encryption!.encrypt(value, object);
@@ -362,7 +365,7 @@ class PdfName extends PdfDataType {
   final String value;
 
   @override
-  void output(PdfStream s) {
+  void output(PdfStream s, [int? indent]) {
     assert(value[0] == '/');
     final bytes = <int>[];
     for (final c in value.codeUnits) {
@@ -404,7 +407,7 @@ class PdfNull extends PdfDataType {
   const PdfNull();
 
   @override
-  void output(PdfStream s) {
+  void output(PdfStream s, [int? indent]) {
     s.putString('null');
   }
 
@@ -425,7 +428,7 @@ class PdfIndirect extends PdfDataType {
   final int gen;
 
   @override
-  void output(PdfStream s) {
+  void output(PdfStream s, [int? indent]) {
     s.putString('$ser $gen R');
   }
 
@@ -465,20 +468,38 @@ class PdfArray<T extends PdfDataType> extends PdfDataType {
   }
 
   @override
-  void output(PdfStream s) {
+  void output(PdfStream s, [int? indent]) {
+    if (indent != null) {
+      s.putBytes(List<int>.filled(indent, 0x20));
+      indent += _kIndentSize;
+    }
     s.putString('[');
     if (values.isNotEmpty) {
       for (var n = 0; n < values.length; n++) {
         final val = values[n];
-        if (n > 0 &&
-            !(val is PdfName ||
-                val is PdfString ||
-                val is PdfArray ||
-                val is PdfDict)) {
-          s.putByte(0x20);
+        if (indent != null) {
+          s.putByte(0x0a);
+          if (val is! PdfDict && val is! PdfArray) {
+            s.putBytes(List<int>.filled(indent, 0x20));
+          }
+        } else {
+          if (n > 0 &&
+              !(val is PdfName ||
+                  val is PdfString ||
+                  val is PdfArray ||
+                  val is PdfDict)) {
+            s.putByte(0x20);
+          }
         }
-        val.output(s);
+        val.output(s, indent);
       }
+      if (indent != null) {
+        s.putByte(0x0a);
+      }
+    }
+    if (indent != null) {
+      indent -= _kIndentSize;
+      s.putBytes(List<int>.filled(indent, 0x20));
     }
     s.putString(']');
   }
@@ -544,15 +565,44 @@ class PdfDict<T extends PdfDataType> extends PdfDataType {
   }
 
   @override
-  void output(PdfStream s) {
+  void output(PdfStream s, [int? indent]) {
+    if (indent != null) {
+      s.putBytes(List<int>.filled(indent, 0x20));
+    }
     s.putBytes(const <int>[0x3c, 0x3c]);
+    var len = 0;
+    var n = 1;
+    if (indent != null) {
+      s.putByte(0x0a);
+      indent += _kIndentSize;
+      len = values.keys.fold<int>(0, (p, e) => math.max(p, e.length));
+    }
     values.forEach((String k, T v) {
-      s.putString(k);
-      if (v is PdfNum || v is PdfBool || v is PdfNull || v is PdfIndirect) {
-        s.putByte(0x20);
+      if (indent != null) {
+        s.putBytes(List<int>.filled(indent, 0x20));
+        n = len - k.length + 1;
       }
-      v.output(s);
+      s.putString(k);
+      if (indent != null) {
+        if (v is PdfDict || v is PdfArray) {
+          s.putByte(0x0a);
+        } else {
+          s.putBytes(List<int>.filled(n, 0x20));
+        }
+      } else {
+        if (v is PdfNum || v is PdfBool || v is PdfNull || v is PdfIndirect) {
+          s.putByte(0x20);
+        }
+      }
+      v.output(s, indent);
+      if (indent != null) {
+        s.putByte(0x0a);
+      }
     });
+    if (indent != null) {
+      indent -= _kIndentSize;
+      s.putBytes(List<int>.filled(indent, 0x20));
+    }
     s.putBytes(const <int>[0x3e, 0x3e]);
   }
 
@@ -633,7 +683,7 @@ class PdfDictStream extends PdfDict<PdfDataType> {
   final bool compress;
 
   @override
-  void output(PdfStream s) {
+  void output(PdfStream s, [int? indent]) {
     final _values = PdfDict(values);
 
     Uint8List? _data;
@@ -641,7 +691,7 @@ class PdfDictStream extends PdfDict<PdfDataType> {
     if (_values.containsKey('/Filter')) {
       // The data is already in the right format
       _data = data;
-    } else if (compress && object.pdfDocument.deflate != null) {
+    } else if (compress && object.pdfDocument.compress) {
       // Compress the data
       final newData = Uint8List.fromList(object.pdfDocument.deflate!(data));
       if (newData.lengthInBytes < data.lengthInBytes) {
@@ -668,7 +718,10 @@ class PdfDictStream extends PdfDict<PdfDataType> {
 
     _values['/Length'] = PdfNum(_data.length);
 
-    _values.output(s);
+    _values.output(s, indent);
+    if (indent != null) {
+      s.putByte(0x0a);
+    }
     s.putString('stream\n');
     s.putBytes(_data);
     s.putString('\nendstream\n');
@@ -681,7 +734,7 @@ class PdfColorType extends PdfDataType {
   final PdfColor color;
 
   @override
-  void output(PdfStream s) {
+  void output(PdfStream s, [int? indent]) {
     if (color is PdfColorCmyk) {
       final k = color as PdfColorCmyk;
       PdfArray.fromNum(<double>[
@@ -689,13 +742,13 @@ class PdfColorType extends PdfDataType {
         k.magenta,
         k.yellow,
         k.black,
-      ]).output(s);
+      ]).output(s, indent);
     } else {
       PdfArray.fromNum(<double>[
         color.red,
         color.green,
         color.blue,
-      ]).output(s);
+      ]).output(s, indent);
     }
   }
 

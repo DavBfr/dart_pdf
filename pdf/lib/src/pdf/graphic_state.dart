@@ -109,6 +109,10 @@ class PdfGraphicState {
   /// Color transfer function
   final PdfFunction? transferFunction;
 
+  @override
+  String toString() =>
+      '$runtimeType fillOpacity:$fillOpacity strokeOpacity:$strokeOpacity blendMode:$blendMode softMask:$softMask transferFunction:$transferFunction';
+
   PdfDict output() {
     final params = PdfDict();
 

@@ -8,6 +8,7 @@
 - Implement fallback font
 - Implement Emoji support
 - Improve outlines containing non-sequential level increments [Roel Spilker]
+- Add debugging information
 
 ## 3.6.5
 

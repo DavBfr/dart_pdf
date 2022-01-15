@@ -161,6 +161,8 @@ class PdfDocument {
 
   Uint8List? _documentID;
 
+  bool get compress => deflate != null;
+
   /// Generates the document ID
   Uint8List get documentID {
     if (_documentID == null) {
@@ -203,7 +205,7 @@ class PdfDocument {
 
   /// This writes the document to an OutputStream.
   Future<void> _write(PdfStream os) async {
-    final pos = PdfOutput(os, version);
+    final pos = PdfOutput(os, version, compress);
 
     // Write each object to the [PdfStream]. We call via the output
     // as that builds the xref table

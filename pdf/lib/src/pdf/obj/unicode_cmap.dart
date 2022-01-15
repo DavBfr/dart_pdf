@@ -34,7 +34,7 @@ class PdfUnicodeCmap extends PdfObjectStream {
       cmap.fillRange(1, cmap.length, 0x20);
     }
 
-    buf.putString('/CIDInit/ProcSet findresource begin\n'
+    buf.putString('/CIDInit/ProcSet\nfindresource begin\n'
         '12 dict begin\n'
         'begincmap\n'
         '/CIDSystemInfo<<\n'

@@ -107,7 +107,7 @@ class PdfXrefTable extends PdfDataType {
   }
 
   @override
-  void output(PdfStream s) {
+  void output(PdfStream s, [int? indent]) {
     s.putString('xref\n');
 
     // Now scan through the offsets list. They should be in sequence.
@@ -152,8 +152,6 @@ class PdfXrefTable extends PdfDataType {
 
     // Sort all references
     offsets.sort((a, b) => a.id.compareTo(b.id));
-
-    s.putString('$id 0 obj\n');
 
     params['/Type'] = const PdfName('/XRef');
     params['/Size'] = PdfNum(id + 1);
@@ -200,12 +198,22 @@ class PdfXrefTable extends PdfDataType {
     }
 
     // Write the object
+    assert(() {
+      if (!object.pdfDocument.compress) {
+        s.putComment('');
+        s.putComment('-' * 78);
+        s.putComment('$runtimeType $this');
+      }
+      return true;
+    }());
+    s.putString('$id 0 obj\n');
+
     PdfDictStream(
       object: object,
       data: o.buffer.asUint8List(),
       isBinary: false,
       encrypt: false,
       values: params.values,
-    ).output(s);
+    ).output(s, object.pdfDocument.compress ? null : 0);
   }
 }

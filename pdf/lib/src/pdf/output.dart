@@ -27,7 +27,7 @@ import 'xref.dart';
 /// PDF document writer
 class PdfOutput {
   /// This creates a Pdf [PdfStream]
-  PdfOutput(this.os, this.version) {
+  PdfOutput(this.os, this.version, bool compress) {
     String v;
     switch (version) {
       case PdfVersion.pdf_1_4:
@@ -40,7 +40,21 @@ class PdfOutput {
 
     os.putString('%PDF-$v\n');
     os.putBytes(const <int>[0x25, 0xC2, 0xA5, 0xC2, 0xB1, 0xC3, 0xAB, 0x0A]);
+    assert(() {
+      if (!compress) {
+        _stopwatch = Stopwatch()..start();
+        os.putComment('');
+        os.putComment('Verbose dart_pdf');
+        os.putComment('Creation date: ${DateTime.now()}');
+        _comment = os.offset;
+        os.putBytes(List<int>.filled(120, 0x20));
+      }
+      return true;
+    }());
   }
+
+  late final Stopwatch _stopwatch;
+  var _comment = 0;
 
   /// Pdf version to output
   final PdfVersion version;
@@ -129,8 +143,31 @@ class PdfOutput {
       os.putByte(0x0a);
     }
 
+    assert(() {
+      if (!rootID!.pdfDocument.compress) {
+        os.putComment('');
+        os.putComment('-' * 78);
+      }
+      return true;
+    }());
+
     // the reference to the xref object
     os.putString('startxref\n$_xref\n%%EOF\n');
+
+    assert(() {
+      if (!rootID!.pdfDocument.compress) {
+        _stopwatch.stop();
+        final h = PdfStream();
+        h.putComment(
+            'Creation time: ${_stopwatch.elapsed.inMicroseconds / Duration.microsecondsPerSecond} seconds');
+        h.putComment('File size: ${os.offset} bytes');
+        h.putComment('Pages: ${rootID!.pdfDocument.pdfPageList.pages.length}');
+        h.putComment('Objects: ${xref.offsets.length}');
+
+        os.setBytes(_comment, h.output());
+      }
+      return true;
+    }());
 
     if (signatureID != null) {
       await signatureID!.writeSignature(os);

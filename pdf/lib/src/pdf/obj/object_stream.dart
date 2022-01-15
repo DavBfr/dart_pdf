@@ -41,6 +41,6 @@ class PdfObjectStream extends PdfObjectDict {
       isBinary: isBinary,
       values: params.values,
       data: buf.output(),
-    ).output(os);
+    ).output(os, pdfDocument.compress ? null : 0);
   }
 }

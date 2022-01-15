@@ -60,11 +60,20 @@ abstract class PdfObject<T extends PdfDataType> {
   /// The write method should call this before writing anything to the
   /// OutputStream. This will send the standard header for each object.
   void _writeStart(PdfStream os) {
+    assert(() {
+      if (!pdfDocument.compress) {
+        os.putComment('');
+        os.putComment('-' * 78);
+        os.putComment('$runtimeType');
+      }
+      return true;
+    }());
+
     os.putString('$objser $objgen obj\n');
   }
 
   void writeContent(PdfStream os) {
-    params.output(os);
+    params.output(os, pdfDocument.compress ? null : 0);
     os.putByte(0x0a);
   }
 

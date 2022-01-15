@@ -68,4 +68,16 @@ class PdfStream {
     }());
     putBytes(s!.codeUnits);
   }
+
+  void putComment(String s) {
+    if (s.isEmpty) {
+      putByte(0x0a);
+    } else {
+      for (final l in s.split('\n')) {
+        if (l.isNotEmpty) {
+          putBytes('% $l\n'.codeUnits);
+        }
+      }
+    }
+  }
 }

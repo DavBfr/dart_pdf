@@ -122,33 +122,75 @@ class PdfGraphics {
   /// Draw a surface on the previously defined shape
   /// set evenOdd to false to use the nonzero winding number rule to determine the region to fill and to true to use the even-odd rule to determine the region to fill
   void fillPath({bool evenOdd = false}) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('fillPath evenOdd:$evenOdd');
+      }
+      return true;
+    }());
+
     _buf.putString('f${evenOdd ? '*' : ''}\n');
   }
 
   /// Draw the contour of the previously defined shape
   void strokePath({bool close = false}) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('strokePath close:$close');
+      }
+      return true;
+    }());
+
     _buf.putString('${close ? 's' : 'S'}\n');
   }
 
   /// Close the path with a line
   void closePath() {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('closePath');
+      }
+      return true;
+    }());
+
     _buf.putString('h\n');
   }
 
   /// Create a clipping surface from the previously defined shape,
   /// to prevent any further drawing outside
   void clipPath({bool evenOdd = false, bool end = true}) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('clipPath evenOdd:$evenOdd end:$end');
+      }
+      return true;
+    }());
+
     _buf.putString('W${evenOdd ? '*' : ''}${end ? ' n' : ''}\n');
   }
 
   /// Draw a surface on the previously defined shape and then draw the contour
   /// set evenOdd to false to use the nonzero winding number rule to determine the region to fill and to true to use the even-odd rule to determine the region to fill
   void fillAndStrokePath({bool evenOdd = false, bool close = false}) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('fillAndStrokePath evenOdd:$evenOdd close:$close');
+      }
+      return true;
+    }());
+
     _buf.putString('${close ? 'b' : 'B'}${evenOdd ? '*' : ''}\n');
   }
 
   /// Apply a shader
   void applyShader(PdfShading shader) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('applyShader');
+      }
+      return true;
+    }());
+
     // The shader needs to be registered in the page resources
     _page.addShader(shader);
     _buf.putString('${shader.name} sh\n');
@@ -160,6 +202,13 @@ class PdfGraphics {
   /// When using [PdfPage], you can create another fresh Graphics instance,
   /// which will draw over this one.
   void restoreContext() {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('restoreContext');
+      }
+      return true;
+    }());
+
     if (_contextQueue.isNotEmpty) {
       // restore graphics context
       _buf.putString('Q\n');
@@ -169,12 +218,26 @@ class PdfGraphics {
 
   /// Save the graphc context
   void saveContext() {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('saveContext');
+      }
+      return true;
+    }());
+
     _buf.putString('q\n');
     _contextQueue.addLast(_context.copy());
   }
 
   /// Draws an image onto the page.
   void drawImage(PdfImage img, double x, double y, [double? w, double? h]) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('drawImage x:$x y:$y');
+      }
+      return true;
+    }());
+
     w ??= img.width.toDouble();
     h ??= img.height.toDouble() * w / img.width.toDouble();
 
@@ -215,6 +278,13 @@ class PdfGraphics {
 
   /// Draws a line between two coordinates.
   void drawLine(double x1, double y1, double x2, double y2) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('drawLine x1:$x1 y1:$y1 x2:$x2 y2:$y2');
+      }
+      return true;
+    }());
+
     moveTo(x1, y1);
     lineTo(x2, y2);
   }
@@ -224,6 +294,13 @@ class PdfGraphics {
   /// Use clockwise=false to draw the inside of a donnnut
   void drawEllipse(double x, double y, double r1, double r2,
       {bool clockwise = true}) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('drawEllipse x:$x y:$y r1:$r1 r2:$r2');
+      }
+      return true;
+    }());
+
     moveTo(x, y - r2);
     if (clockwise) {
       curveTo(x + _m4 * r1, y - r2, x + r1, y - _m4 * r2, x + r1, y);
@@ -245,6 +322,13 @@ class PdfGraphics {
     double w,
     double h,
   ) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('drawRect x:$x y:$y w:$w h:$h');
+      }
+      return true;
+    }());
+
     PdfNumList([x, y, w, h]).output(_buf);
     _buf.putString(' re\n');
   }
@@ -256,6 +340,13 @@ class PdfGraphics {
 
   /// Draws a Rounded Rectangle
   void drawRRect(double x, double y, double w, double h, double rv, double rh) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('drawRRect x:$x y:$y w:$w h:$h rv:$rv rh:$rh');
+      }
+      return true;
+    }());
+
     moveTo(x, y + rv);
     curveTo(x, y - _m4 * rv + rv, x - _m4 * rh + rh, y, x + rh, y);
     lineTo(x + w - rh, y);
@@ -278,6 +369,13 @@ class PdfGraphics {
     PdfTextRenderingMode? mode = PdfTextRenderingMode.fill,
     double? rise,
   }) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('setFont');
+      }
+      return true;
+    }());
+
     _buf.putString('${font.name} ');
     PdfNum(size).output(_buf);
     _buf.putString(' Tf\n');
@@ -315,6 +413,13 @@ class PdfGraphics {
     PdfTextRenderingMode mode = PdfTextRenderingMode.fill,
     double rise = 0,
   }) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('drawString x:$x y:$y size:$size "$s"');
+      }
+      return true;
+    }());
+
     _page.addFont(font);
 
     _buf.putString('BT ');
@@ -332,6 +437,13 @@ class PdfGraphics {
   }
 
   void reset() {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('reset');
+      }
+      return true;
+    }());
+
     _buf.putString('0 Tr\n');
   }
 
@@ -343,6 +455,13 @@ class PdfGraphics {
 
   /// Sets the fill color for drawing
   void setFillColor(PdfColor? color) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('setFillColor ${color?.toHex()}');
+      }
+      return true;
+    }());
+
     if (color is PdfColorCmyk) {
       PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
           .output(_buf);
@@ -355,6 +474,13 @@ class PdfGraphics {
 
   /// Sets the stroke color for drawing
   void setStrokeColor(PdfColor? color) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('setStrokeColor ${color?.toHex()}');
+      }
+      return true;
+    }());
+
     if (color is PdfColorCmyk) {
       PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
           .output(_buf);
@@ -367,6 +493,13 @@ class PdfGraphics {
 
   /// Sets the fill pattern for drawing
   void setFillPattern(PdfPattern pattern) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('setFillPattern');
+      }
+      return true;
+    }());
+
     // The shader needs to be registered in the page resources
     _page.addPattern(pattern);
     _buf.putString('/Pattern cs${pattern.name} scn\n');
@@ -374,6 +507,13 @@ class PdfGraphics {
 
   /// Sets the stroke pattern for drawing
   void setStrokePattern(PdfPattern pattern) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('setStrokePattern');
+      }
+      return true;
+    }());
+
     // The shader needs to be registered in the page resources
     _page.addPattern(pattern);
     _buf.putString('/Pattern CS${pattern.name} SCN\n');
@@ -381,12 +521,26 @@ class PdfGraphics {
 
   /// Set the graphic state for drawing
   void setGraphicState(PdfGraphicState state) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('setGraphicState $state');
+      }
+      return true;
+    }());
+
     final name = _page.stateName(state);
     _buf.putString('$name gs\n');
   }
 
   /// Set the transformation Matrix
   void setTransform(Matrix4 t) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('setTransform\n$t');
+      }
+      return true;
+    }());
+
     final s = t.storage;
     PdfNumList(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]).output(_buf);
     _buf.putString(' cm\n');
@@ -400,12 +554,26 @@ class PdfGraphics {
 
   /// This adds a line segment to the current path
   void lineTo(double x, double y) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('lineTo x:$x y:$y');
+      }
+      return true;
+    }());
+
     PdfNumList([x, y]).output(_buf);
     _buf.putString(' l\n');
   }
 
   /// This moves the current drawing point.
   void moveTo(double x, double y) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('moveTo x:$x y:$y');
+      }
+      return true;
+    }());
+
     PdfNumList([x, y]).output(_buf);
     _buf.putString(' m\n');
   }
@@ -415,6 +583,13 @@ class PdfGraphics {
   /// and (x2,y2) as the control point at the end of the curve.
   void curveTo(
       double x1, double y1, double x2, double y2, double x3, double y3) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('curveTo x1:$x1 y1:$y1 x2:$x2 y2:$y2 x3:$x3 y3:$y3');
+      }
+      return true;
+    }());
+
     PdfNumList([x1, y1, x2, y2, x3, y3]).output(_buf);
     _buf.putString(' c\n');
   }
@@ -576,22 +751,50 @@ class PdfGraphics {
 
   /// Set line starting and ending cap type
   void setLineCap(PdfLineCap cap) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('setLineCap $cap');
+      }
+      return true;
+    }());
+
     _buf.putString('${cap.index} J\n');
   }
 
   /// Set line join type
   void setLineJoin(PdfLineJoin join) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('setLineJoin $join');
+      }
+      return true;
+    }());
+
     _buf.putString('${join.index} j\n');
   }
 
   /// Set line width
   void setLineWidth(double width) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('setLineWidth $width');
+      }
+      return true;
+    }());
+
     PdfNum(width).output(_buf);
     _buf.putString(' w\n');
   }
 
   /// Set line joint miter limit, applies if the
   void setMiterLimit(double limit) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('setMiterLimit $limit');
+      }
+      return true;
+    }());
+
     assert(limit >= 1.0);
     PdfNum(limit).output(_buf);
     _buf.putString(' M\n');
@@ -602,16 +805,37 @@ class PdfGraphics {
   ///
   /// Example: [2 1] will create a dash pattern with 2 on, 1 off, 2 on, 1 off, ...
   void setLineDashPattern([List<num> array = const <num>[], int phase = 0]) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('setLineDashPattern $array phase:$phase');
+      }
+      return true;
+    }());
+
     PdfArray.fromNum(array).output(_buf);
     _buf.putString(' $phase d\n');
   }
 
   void markContentBegin(PdfName tag) {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('markContentBegin');
+      }
+      return true;
+    }());
+
     tag.output(_buf);
     _buf.putString(' BMC\n');
   }
 
   void markContentEnd() {
+    assert(() {
+      if (!_page.pdfDocument.compress) {
+        _buf.putComment('markContentEnd');
+      }
+      return true;
+    }());
+
     _buf.putString('EMC\n');
   }
 }
