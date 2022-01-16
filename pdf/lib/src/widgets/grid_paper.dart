@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import 'package:pdf/pdf.dart';
-
+import '../../pdf.dart';
 import 'box_border.dart';
 import 'geometry.dart';
-
 import 'widget.dart';
 
 /// A widget that draws a rectilinear grid of lines.

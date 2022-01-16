@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../../pdf.dart';
 import 'basic.dart';
 import 'geometry.dart';
 import 'image_provider.dart';

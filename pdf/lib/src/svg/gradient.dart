@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import 'package:pdf/pdf.dart';
 import 'package:xml/xml.dart';
 
+import '../../pdf.dart';
 import 'color.dart';
 import 'operation.dart';
 import 'painter.dart';

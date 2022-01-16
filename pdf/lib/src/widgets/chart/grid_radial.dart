@@ -17,8 +17,8 @@
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
-import 'package:pdf/pdf.dart';
 
+import '../../../pdf.dart';
 import '../geometry.dart';
 import '../widget.dart';
 import 'chart.dart';

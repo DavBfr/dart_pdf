@@ -16,9 +16,9 @@
 
 import 'dart:math' as math;
 
-import 'package:pdf/pdf.dart';
 import 'package:xml/xml.dart';
 
+import '../../pdf.dart';
 import 'brush.dart';
 import 'clip_path.dart';
 import 'operation.dart';

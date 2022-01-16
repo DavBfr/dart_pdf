@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import 'package:pdf/pdf.dart';
-
+import '../../pdf.dart';
 import 'widget.dart';
 
 /// A radius for either circular or elliptical shapes.

@@ -17,9 +17,9 @@
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/src/pdf/font/arabic.dart' as arabic;
 
+import '../../pdf.dart';
+import '../pdf/font/arabic.dart' as arabic;
 import 'annotations.dart';
 import 'basic.dart';
 import 'document.dart';

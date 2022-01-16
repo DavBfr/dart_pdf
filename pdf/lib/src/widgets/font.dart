@@ -17,8 +17,8 @@
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
-import 'package:pdf/pdf.dart';
 
+import '../../pdf.dart';
 import 'widget.dart';
 
 enum Type1Fonts {

@@ -15,8 +15,8 @@
  */
 
 import 'package:meta/meta.dart';
-import 'package:pdf/pdf.dart';
 
+import '../../pdf.dart';
 import 'border_radius.dart';
 import 'decoration.dart';
 import 'widget.dart';

@@ -16,9 +16,9 @@
 
 import 'dart:math' as math;
 
-import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../../pdf.dart';
 import 'flex.dart';
 import 'geometry.dart';
 import 'multi_page.dart';

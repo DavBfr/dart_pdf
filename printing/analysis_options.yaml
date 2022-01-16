@@ -30,6 +30,7 @@ linter:
     - prefer_final_locals
     - prefer_foreach
     - prefer_if_elements_to_conditional_expressions
+    - prefer_relative_imports
     - prefer_single_quotes
     - public_member_api_docs
     - sort_constructors_first

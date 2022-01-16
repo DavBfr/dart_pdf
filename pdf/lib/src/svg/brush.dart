@@ -15,9 +15,9 @@
  */
 
 import 'package:meta/meta.dart';
-import 'package:pdf/pdf.dart';
 import 'package:xml/xml.dart';
 
+import '../../pdf.dart';
 import 'color.dart';
 import 'mask_path.dart';
 import 'painter.dart';

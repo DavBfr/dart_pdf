@@ -17,10 +17,10 @@
 import 'dart:convert';
 
 import 'package:image/image.dart' as im;
-import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:xml/xml.dart';
 
+import '../../pdf.dart';
 import 'brush.dart';
 import 'clip_path.dart';
 import 'operation.dart';

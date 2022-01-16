@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import 'package:pdf/pdf.dart';
-
+import '../../../pdf.dart';
 import '../flex.dart';
 import '../geometry.dart';
 import '../widget.dart';

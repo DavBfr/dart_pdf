@@ -18,8 +18,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:barcode/barcode.dart';
-import 'package:pdf/pdf.dart';
 
+import '../../pdf.dart';
 import 'basic.dart';
 import 'container.dart';
 import 'decoration.dart';

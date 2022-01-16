@@ -16,10 +16,10 @@
 
 import 'dart:math';
 
-import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:xml/xml.dart';
 
+import '../../pdf.dart';
 import '../widgets/widget.dart';
 import 'brush.dart';
 import 'clip_path.dart';

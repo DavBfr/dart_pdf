@@ -15,11 +15,11 @@
  */
 
 import 'package:meta/meta.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:xml/xml.dart';
 
+import '../../pdf.dart';
+import '../../widgets.dart';
 import '../svg/painter.dart';
 import '../svg/parser.dart';
 

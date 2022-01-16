@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import 'package:pdf/pdf.dart';
 import 'package:xml/xml.dart';
 
+import '../../pdf.dart';
 import 'brush.dart';
 
 class SvgParser {

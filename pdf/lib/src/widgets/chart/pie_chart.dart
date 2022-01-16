@@ -3,9 +3,10 @@
 import 'dart:math';
 
 import 'package:meta/meta.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
+
+import '../../../pdf.dart';
+import '../../../widgets.dart';
 
 class PieGrid extends ChartGrid {
   PieGrid({this.startAngle = 0});

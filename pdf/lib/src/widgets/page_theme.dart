@@ -15,8 +15,8 @@
  */
 
 import 'package:meta/meta.dart';
-import 'package:pdf/pdf.dart';
 
+import '../../pdf.dart';
 import 'geometry.dart';
 import 'page.dart';
 import 'text.dart';

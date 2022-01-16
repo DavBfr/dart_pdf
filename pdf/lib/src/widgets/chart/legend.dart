@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import 'package:pdf/pdf.dart';
-
+import '../../../pdf.dart';
 import '../basic.dart';
 import '../container.dart';
 import '../decoration.dart';

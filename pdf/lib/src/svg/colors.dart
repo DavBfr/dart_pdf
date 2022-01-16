@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import 'package:pdf/pdf.dart';
+import '../../pdf.dart';
 
 const svgColors = <String, PdfColor>{
   'indigo': PdfColor.fromInt(0xff4b0082),

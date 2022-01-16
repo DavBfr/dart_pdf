@@ -16,8 +16,7 @@
 
 import 'dart:math' as math;
 
-import 'package:pdf/pdf.dart';
-
+import '../../../pdf.dart';
 import '../basic.dart';
 import '../flex.dart';
 import '../geometry.dart';

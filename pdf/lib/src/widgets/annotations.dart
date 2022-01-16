@@ -16,9 +16,9 @@
 
 import 'dart:math';
 
-import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../../pdf.dart';
 import 'geometry.dart';
 import 'shape.dart';
 import 'text_style.dart';

@@ -15,9 +15,9 @@
  */
 
 import 'package:meta/meta.dart';
-import 'package:pdf/pdf.dart';
 import 'package:xml/xml.dart';
 
+import '../../pdf.dart';
 import 'brush.dart';
 import 'clip_path.dart';
 import 'group.dart';

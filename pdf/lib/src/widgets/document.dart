@@ -16,9 +16,9 @@
 
 import 'dart:typed_data';
 
-import 'package:pdf/pdf.dart';
 import 'package:xml/xml.dart';
 
+import '../../pdf.dart';
 import 'page.dart';
 import 'theme.dart';
 

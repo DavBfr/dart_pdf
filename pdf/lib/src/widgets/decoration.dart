@@ -18,9 +18,9 @@ import 'dart:math' as math;
 
 import 'package:image/image.dart' as im;
 import 'package:meta/meta.dart';
-import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../../pdf.dart';
 import 'basic.dart';
 import 'border_radius.dart';
 import 'box_border.dart';
