@@ -137,16 +137,20 @@ class PdfOutput {
       xref.outputCompressed(rootID!, os, params);
     } else {
       assert(() {
-        os.putComment('');
-        os.putComment('-' * 78);
+        if (verbose) {
+          os.putComment('');
+          os.putComment('-' * 78);
+        }
         return true;
       }());
       xref.output(os);
 
       // the trailer object
       assert(() {
-        os.putComment('');
-        os.putComment('-' * 78);
+        if (verbose) {
+          os.putComment('');
+          os.putComment('-' * 78);
+        }
         return true;
       }());
       os.putString('trailer\n');
@@ -155,7 +159,7 @@ class PdfOutput {
     }
 
     assert(() {
-      if (rootID!.pdfDocument.verbose) {
+      if (verbose) {
         os.putComment('');
         os.putComment('-' * 78);
       }
