@@ -70,20 +70,20 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             return
         }
 
-        let controller = UIPrintInteractionController.shared
-        controller.delegate = self
+        DispatchQueue.main.async { [self] in
+            let controller = UIPrintInteractionController.shared
+            controller.delegate = self
 
-        let printInfo = UIPrintInfo.printInfo()
-        printInfo.jobName = jobName!
-        DispatchQueue.main.async { printInfo.outputType = .general }
-        if orientation != nil {
-            printInfo.orientation = orientation!
-            orientation = nil
-        }
-        controller.printInfo = printInfo
-        controller.printPageRenderer = self
+            let printInfo = UIPrintInfo.printInfo()
+            printInfo.jobName = jobName!
+            printInfo.outputType = .general
+            if orientation != nil {
+                printInfo.orientation = orientation!
+                orientation = nil
+            }
+            controller.printInfo = printInfo
+            controller.printPageRenderer = self
 
-        DispatchQueue.main.async {
             if self.printerName != nil {
                 let printerURL = URL(string: self.printerName!)
 
@@ -93,7 +93,14 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                 }
 
                 let printer = UIPrinter(url: printerURL!)
-                controller.print(to: printer, completionHandler: self.completionHandler)
+                printer.contactPrinter { available -> Void in
+                    if !available {
+                        printing.onCompleted(printJob: self, completed: false, error: "Printer not available")
+                        return
+                    }
+
+                    controller.print(to: printer, completionHandler: self.completionHandler)
+                }
             } else {
                 controller.present(animated: true, completionHandler: self.completionHandler)
             }
