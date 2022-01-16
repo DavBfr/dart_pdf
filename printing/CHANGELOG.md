@@ -14,6 +14,7 @@
 - Update android projects (mavenCentral, compileSdkVersion 30, gradle:4.1.0)
 - Use syscall(SYS_memfd_create) instead of glibc function memfd_create [Obezyan]
 - Fix directPrint issue with iOS 15
+- Improve PdfPreview actions
 
 ## 5.6.6
 

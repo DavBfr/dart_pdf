@@ -25,18 +25,15 @@ import 'package:pdf/pdf.dart';
 import '../printing.dart';
 import '../printing_info.dart';
 import '../raster.dart';
-import 'pdf_preview.dart';
-import 'pdf_preview_page.dart';
+import 'custom.dart';
+import 'page.dart';
 
 /// Raster PDF documents
-mixin PdfPreviewRaster on State<PdfPreview> {
+mixin PdfPreviewRaster on State<PdfPreviewCustom> {
   static const _updateTime = Duration(milliseconds: 300);
 
   /// Configured page format
-  PdfPageFormat get pageFormat;
-
-  /// Is the print horizontal
-  bool? horizontal;
+  PdfPageFormat get pageFormat => widget.pageFormat;
 
   /// Resulting pages
   final List<PdfPreviewPage> pages = <PdfPreviewPage>[];
@@ -60,11 +57,6 @@ mixin PdfPreviewRaster on State<PdfPreview> {
     super.dispose();
   }
 
-  /// Computed page format
-  PdfPageFormat get computedPageFormat => horizontal != null
-      ? (horizontal! ? pageFormat.landscape : pageFormat.portrait)
-      : pageFormat;
-
   /// Rasterize the document
   void raster() {
     _previewUpdate?.cancel();
@@ -72,7 +64,7 @@ mixin PdfPreviewRaster on State<PdfPreview> {
       final mq = MediaQuery.of(context);
       dpi = (min(mq.size.width - 16, widget.maxPageWidth ?? double.infinity)) *
           mq.devicePixelRatio /
-          computedPageFormat.width *
+          pageFormat.width *
           72;
 
       _raster();
@@ -107,13 +99,13 @@ mixin PdfPreviewRaster on State<PdfPreview> {
     }
 
     try {
-      _doc = await widget.build(computedPageFormat);
+      _doc = await widget.build(pageFormat);
     } catch (exception, stack) {
       InformationCollector? collector;
 
       assert(() {
         collector = () sync* {
-          yield StringProperty('PageFormat', computedPageFormat.toString());
+          yield StringProperty('PageFormat', pageFormat.toString());
         };
         return true;
       }());
@@ -174,7 +166,7 @@ mixin PdfPreviewRaster on State<PdfPreview> {
 
       assert(() {
         collector = () sync* {
-          yield StringProperty('PageFormat', computedPageFormat.toString());
+          yield StringProperty('PageFormat', pageFormat.toString());
         };
         return true;
       }());
