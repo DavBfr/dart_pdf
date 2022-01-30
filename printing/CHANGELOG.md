@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.7.1
+
+- Update Google Fonts, fixes documentation issues
+
 ## 5.7.0
 
 - Fix imports for Dart 2.15

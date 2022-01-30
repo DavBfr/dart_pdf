@@ -27,6 +27,81 @@ String _uncapitalize(String s) {
   return '${s[0].toLowerCase()}${s.substring(1)}';
 }
 
+class FontDesc {
+  FontDesc({
+    this.family,
+    required this.key,
+    this.sub,
+    required this.uri,
+    required this.name,
+  });
+
+  final String? family;
+  final String? sub;
+  final String key;
+  final Uri uri;
+  final String name;
+
+  String get dartFamily =>
+      _uncapitalize(family == null ? key : family!.replaceAll(' ', ''));
+
+  String get fontDartName => dartFamily + (sub ?? '');
+
+  String get fontName => family == null ? key : '$family $key';
+}
+
+Iterable<FontDesc> getFonts(Map m) sync* {
+  for (final f in m['items']) {
+    final family = _uncapitalize(f['family'].replaceAll(' ', ''));
+
+    for (final s in f['files'].entries) {
+      var sub = _capitalize(s.key);
+
+      sub = sub.replaceAll('100', 'Thin ');
+      sub = sub.replaceAll('200', 'ExtraLight ');
+      sub = sub.replaceAll('300', 'Light ');
+      sub = sub.replaceAll('400', 'Regular ');
+      sub = sub.replaceAll('500', 'Medium ');
+      sub = sub.replaceAll('600', 'SemiBold ');
+      sub = sub.replaceAll('700', 'Bold ');
+      sub = sub.replaceAll('800', 'ExtraBold ');
+      sub = sub.replaceAll('900', 'Black ');
+      sub = sub.split(' ').map<String>((String e) => _capitalize(e)).join('');
+
+      final name = _capitalize(family) + '-' + sub;
+
+      var uri = Uri.parse(s.value);
+      if (uri.isScheme('http')) {
+        uri = uri.replace(scheme: 'https');
+      }
+
+      if (!uri.path.endsWith('.ttf')) {
+        continue;
+      }
+
+      yield FontDesc(
+        family: f['family'],
+        key: s.key,
+        sub: sub,
+        uri: uri,
+        name: name,
+      );
+    }
+  }
+
+  for (final entry in <String, String>{
+    'CupertinoIcons':
+        'https://github.com/flutter/packages/blob/master/third_party/packages/cupertino_icons/assets/CupertinoIcons.ttf',
+    'MaterialIcons':
+        'https://fonts.gstatic.com/s/materialicons/v98/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf',
+    'NotoColorEmoji':
+        'https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf',
+  }.entries) {
+    yield FontDesc(
+        key: entry.key, uri: Uri.parse(entry.value), name: entry.key);
+  }
+}
+
 void main(List<String> args) async {
   final f = File('fonts.json');
   final d = StringBuffer();
@@ -84,62 +159,23 @@ void main(List<String> args) async {
   output.writeln('import \'font.dart\';');
   output.writeln('');
   output.writeln('/// Google Fonts');
+  output.writeln('///');
+  output.writeln('/// Available fonts:');
+  for (final f in getFonts(m)) {
+    output.writeln('/// - ${f.fontDartName} (${f.fontName})');
+  }
   output.writeln('class PdfGoogleFonts extends DownloadbleFont {');
   output.writeln('');
-  output.writeln('/// Create a Google Font');
   output.writeln(
       'const PdfGoogleFonts._(String url, String name) : super(url, name);');
 
-  for (final f in m['items']) {
-    final family = _uncapitalize(f['family'].replaceAll(' ', ''));
-
-    for (final s in f['files'].entries) {
-      var sub = _capitalize(s.key);
-
-      sub = sub.replaceAll('100', 'Thin ');
-      sub = sub.replaceAll('200', 'ExtraLight ');
-      sub = sub.replaceAll('300', 'Light ');
-      sub = sub.replaceAll('400', 'Regular ');
-      sub = sub.replaceAll('500', 'Medium ');
-      sub = sub.replaceAll('600', 'SemiBold ');
-      sub = sub.replaceAll('700', 'Bold ');
-      sub = sub.replaceAll('800', 'ExtraBold ');
-      sub = sub.replaceAll('900', 'Black ');
-      sub = sub.split(' ').map<String>((String e) => _capitalize(e)).join('');
-
-      final name = _capitalize(family) + '-' + sub;
-
-      var uri = Uri.parse(s.value);
-      if (uri.isScheme('http')) {
-        uri = uri.replace(scheme: 'https');
-      }
-
-      if (!uri.path.endsWith('.ttf')) {
-        continue;
-      }
-
-      output.writeln('');
-      output.writeln('/// ${f['family']} ${s.key}');
-      output.writeln('static Future<Font> $family$sub() {');
-      output.writeln('const font = PdfGoogleFonts._(\'$uri\', \'$name\',);');
-      output.writeln('return font.getFont();');
-      output.writeln('}');
-    }
-  }
-
-  for (final entry in <String, String>{
-    'CupertinoIcons':
-        'https://github.com/flutter/packages/blob/master/third_party/packages/cupertino_icons/assets/CupertinoIcons.ttf',
-    'MaterialIcons':
-        'https://fonts.gstatic.com/s/materialicons/v98/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf',
-    'NotoColorEmoji':
-        'https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf',
-  }.entries) {
+  for (final f in getFonts(m)) {
     output.writeln('');
-    output.writeln('/// ${entry.key}');
-    output.writeln('static Future<Font> ${_uncapitalize(entry.key)}() {');
+    output.writeln('/// @nodoc');
+    output.writeln('/// ${f.fontName}');
+    output.writeln('static Future<Font> ${f.fontDartName}() {');
     output.writeln(
-        'const font = PdfGoogleFonts._(\'${entry.value}\', \'${entry.key}\',);');
+        'const font = PdfGoogleFonts._(\'${f.uri}\', \'${f.name}\',);');
     output.writeln('return font.getFont();');
     output.writeln('}');
   }
