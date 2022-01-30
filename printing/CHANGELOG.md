@@ -5,7 +5,6 @@
 - Fix imports for Dart 2.15
 - Fix print dialog crash on Linux
 - Fix directPrint printer selection on macOS
-- Fix TTF font parser for NewsCycle-Regular.ttf
 - Fix AssetManifest
 - Update Google Fonts
 - Add a default theme initializer

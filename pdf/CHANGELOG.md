@@ -3,6 +3,7 @@
 ## 3.7.0
 
 - Fix imports for Dart 2.15
+- Fix TTF font parser for NewsCycle-Regular.ttf
 - Move files
 - Depreciate Font.stringSize
 - Implement fallback font
