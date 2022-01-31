@@ -59,6 +59,7 @@ class PdfPreview extends StatefulWidget {
     this.padding,
     this.shouldRepaint = false,
     this.loadingWidget,
+    this.onPageFormatChanged,
   }) : super(key: key);
 
   static const _defaultPageFormats = <String, PdfPageFormat>{
@@ -154,6 +155,9 @@ class PdfPreview extends StatefulWidget {
   /// If null, a [CircularProgressIndicator] is used instead.
   final Widget? loadingWidget;
 
+  /// The page format has changed
+  final ValueChanged<PdfPageFormat>? onPageFormatChanged;
+
   @override
   _PdfPreviewState createState() => _PdfPreviewState();
 }
@@ -198,6 +202,7 @@ class _PdfPreviewState extends State<PdfPreview> {
       if (mounted) {
         setState(() {});
       }
+      widget.onPageFormatChanged?.call(previewData.pageFormat);
     });
 
     super.initState();

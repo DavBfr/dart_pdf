@@ -3,6 +3,7 @@
 ## 5.7.2
 
 - Fix dispose state issue
+- Add onPageFormatChanged event
 
 ## 5.7.1
 
