@@ -237,7 +237,26 @@ class PdfPageFormatAction extends StatelessWidget {
     final theme = Theme.of(context);
     final iconColor = theme.primaryIconTheme.color ?? Colors.white;
     final data = PdfPreviewController.listen(context);
-    final keys = pageFormats.keys.toList();
+    final _pageFormats = <String, PdfPageFormat>{...pageFormats};
+
+    var format = data.pageFormat;
+    final orientation = data.horizontal;
+
+    if (!_pageFormats.values.contains(data.pageFormat)) {
+      var found = false;
+      for (final f in _pageFormats.values) {
+        if (format.portrait == f.portrait) {
+          format = f;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        _pageFormats['---'] = format;
+      }
+    }
+
+    final keys = _pageFormats.keys.toList()..sort();
 
     return DropdownButton<PdfPageFormat>(
       dropdownColor: theme.primaryColor,
@@ -245,12 +264,12 @@ class PdfPageFormatAction extends StatelessWidget {
         Icons.arrow_drop_down,
         color: iconColor,
       ),
-      value: data.pageFormat,
+      value: format,
       items: List<DropdownMenuItem<PdfPageFormat>>.generate(
-        pageFormats.length,
+        _pageFormats.length,
         (int index) {
           final key = keys[index];
-          final val = pageFormats[key];
+          final val = _pageFormats[key]!;
           return DropdownMenuItem<PdfPageFormat>(
             value: val,
             child: Text(key, style: TextStyle(color: iconColor)),
@@ -259,7 +278,8 @@ class PdfPageFormatAction extends StatelessWidget {
       ),
       onChanged: (PdfPageFormat? pageFormat) {
         if (pageFormat != null) {
-          data.pageFormat = pageFormat;
+          data.pageFormat =
+              orientation ? pageFormat.landscape : pageFormat.portrait;
         }
       },
     );

@@ -19,41 +19,52 @@ import 'package:pdf/pdf.dart';
 
 import '../callback.dart';
 
-mixin PdfPreviewData implements ChangeNotifier {
-  // PdfPreviewData(this.build);
+typedef ComputePageFormat = PdfPageFormat Function();
 
-  LayoutCallback get buildDocument;
-
-  PdfPageFormat? _pageFormat;
-
-  PdfPageFormat get initialPageFormat;
-
-  PdfPageFormat get pageFormat => _pageFormat ?? initialPageFormat;
-
-  set pageFormat(PdfPageFormat value) {
-    if (_pageFormat == value) {
-      return;
-    }
-    _pageFormat = value;
-    notifyListeners();
+class PdfPreviewData extends ChangeNotifier {
+  PdfPreviewData({
+    PdfPageFormat? initialPageFormat,
+    required this.buildDocument,
+    required Map<String, PdfPageFormat> pageFormats,
+    required ComputePageFormat onComputeActualPageFormat,
+  })  : assert(pageFormats.isNotEmpty),
+        _onComputeActualPageFormat = onComputeActualPageFormat {
+    _pageFormat = initialPageFormat ??
+        (pageFormats[localPageFormat] ?? pageFormats.values.first);
   }
 
-  bool? _horizontal;
+  late PdfPageFormat _pageFormat;
+
+  final LayoutCallback buildDocument;
+
+  final ComputePageFormat _onComputeActualPageFormat;
+
+  PdfPageFormat get pageFormat => _pageFormat;
+
+  set pageFormat(PdfPageFormat value) {
+    if (_pageFormat != value) {
+      _pageFormat = value;
+      notifyListeners();
+    }
+  }
 
   /// Is the print horizontal
-  bool get horizontal => _horizontal ?? pageFormat.width > pageFormat.height;
+  bool get horizontal => _pageFormat.width > _pageFormat.height;
 
   set horizontal(bool value) {
-    if (_horizontal == value) {
-      return;
+    final format = value ? _pageFormat.landscape : _pageFormat.portrait;
+    if (format != _pageFormat) {
+      _pageFormat = format;
+      notifyListeners();
     }
-    _horizontal = value;
-    notifyListeners();
   }
 
   /// Computed page format
-  PdfPageFormat get computedPageFormat =>
-      horizontal ? pageFormat.landscape : pageFormat.portrait;
+  @Deprecated('Use pageFormat instead')
+  PdfPageFormat get computedPageFormat => _pageFormat;
+
+  /// The page format of the document
+  PdfPageFormat get actualPageFormat => _onComputeActualPageFormat();
 
   String get localPageFormat {
     final locale = WidgetsBinding.instance!.window.locale;
@@ -65,8 +76,6 @@ mixin PdfPreviewData implements ChangeNotifier {
     }
     return 'A4';
   }
-
-  PdfPageFormat get actualPageFormat => pageFormat;
 }
 
 class PdfPreviewController extends InheritedNotifier {

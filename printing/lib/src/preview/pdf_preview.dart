@@ -158,41 +158,17 @@ class PdfPreview extends StatefulWidget {
   _PdfPreviewState createState() => _PdfPreviewState();
 }
 
-class _PdfPreviewState extends State<PdfPreview>
-    with PdfPreviewData, ChangeNotifier {
+class _PdfPreviewState extends State<PdfPreview> {
   final previewWidget = GlobalKey<PdfPreviewCustomState>();
+  late PdfPreviewData previewData;
 
   /// Printing subsystem information
   PrintingInfo? info;
+
   var infoLoaded = false;
 
-  @override
-  LayoutCallback get buildDocument => widget.build;
-
-  @override
-  PdfPageFormat get initialPageFormat =>
-      widget.initialPageFormat ??
-      (widget.pageFormats.isNotEmpty
-          ? (widget.pageFormats[localPageFormat] ??
-              widget.pageFormats.values.first)
-          : (PdfPreview._defaultPageFormats[localPageFormat]) ??
-              PdfPreview._defaultPageFormats.values.first);
-
-  @override
-  PdfPageFormat get pageFormat {
-    var _pageFormat = super.pageFormat;
-
-    if (!widget.pageFormats.containsValue(_pageFormat)) {
-      _pageFormat = initialPageFormat;
-      pageFormat = _pageFormat;
-    }
-
-    return _pageFormat;
-  }
-
-  @override
-  PdfPageFormat get actualPageFormat {
-    var format = pageFormat;
+  PdfPageFormat computeActualPageFormat() {
+    var format = previewData.pageFormat;
     final pages = previewWidget.currentState?.pages ?? const [];
     final dpi = previewWidget.currentState?.dpi ?? 72;
 
@@ -209,7 +185,16 @@ class _PdfPreviewState extends State<PdfPreview>
 
   @override
   void initState() {
-    addListener(() {
+    previewData = PdfPreviewData(
+      buildDocument: widget.build,
+      pageFormats: widget.pageFormats.isNotEmpty
+          ? widget.pageFormats
+          : PdfPreview._defaultPageFormats,
+      initialPageFormat: widget.initialPageFormat,
+      onComputeActualPageFormat: computeActualPageFormat,
+    );
+
+    previewData.addListener(() {
       if (mounted) {
         setState(() {});
       }
@@ -219,10 +204,24 @@ class _PdfPreviewState extends State<PdfPreview>
   }
 
   @override
+  void dispose() {
+    previewData.dispose();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(covariant PdfPreview oldWidget) {
     if (oldWidget.build != widget.build ||
         widget.shouldRepaint ||
         widget.pageFormats != oldWidget.pageFormats) {
+      previewData = PdfPreviewData(
+        buildDocument: widget.build,
+        pageFormats: widget.pageFormats.isNotEmpty
+            ? widget.pageFormats
+            : PdfPreview._defaultPageFormats,
+        initialPageFormat: previewData.pageFormat,
+        onComputeActualPageFormat: computeActualPageFormat,
+      );
       setState(() {});
     }
     super.didUpdateWidget(oldWidget);
@@ -301,7 +300,7 @@ class _PdfPreviewState extends State<PdfPreview>
     }());
 
     return PdfPreviewController(
-      data: this,
+      data: previewData,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -313,7 +312,7 @@ class _PdfPreviewState extends State<PdfPreview>
               maxPageWidth: widget.maxPageWidth,
               onError: widget.onError,
               padding: widget.padding,
-              pageFormat: computedPageFormat,
+              pageFormat: previewData.pageFormat,
               pages: widget.pages,
               pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
               previewPageMargin: widget.previewPageMargin,

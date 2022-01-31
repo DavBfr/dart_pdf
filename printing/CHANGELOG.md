@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.7.2
+
+- Fix dispose state issue
+
 ## 5.7.1
 
 - Update Google Fonts, fixes documentation issues
