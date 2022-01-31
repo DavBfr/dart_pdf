@@ -248,7 +248,8 @@ class PrintingPlugin extends PrintingPlatform {
 
     for (final i in _pages) {
       final page = await promiseToFuture<PdfJsPage>(d.getPage(i + 1));
-      final viewport = page.getViewport(Settings()..scale = 1.5);
+      final viewport =
+          page.getViewport(Settings()..scale = dpi / PdfPageFormat.inch);
 
       canvas.height = viewport.height.toInt();
       canvas.width = viewport.width.toInt();

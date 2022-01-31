@@ -4,6 +4,7 @@
 
 - Fix dispose state issue
 - Add onPageFormatChanged event
+- Fix raster quality on Android
 
 ## 5.7.1
 

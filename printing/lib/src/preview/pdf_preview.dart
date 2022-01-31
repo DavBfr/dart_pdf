@@ -174,12 +174,12 @@ class _PdfPreviewState extends State<PdfPreview> {
   PdfPageFormat computeActualPageFormat() {
     var format = previewData.pageFormat;
     final pages = previewWidget.currentState?.pages ?? const [];
-    final dpi = previewWidget.currentState?.dpi ?? 72;
+    final dpi = previewWidget.currentState?.dpi ?? PdfPageFormat.inch;
 
     if (!widget.canChangePageFormat && pages.isNotEmpty) {
       format = PdfPageFormat(
-        pages.first.page!.width * 72 / dpi,
-        pages.first.page!.height * 72 / dpi,
+        pages.first.page!.width * PdfPageFormat.inch / dpi,
+        pages.first.page!.height * PdfPageFormat.inch / dpi,
         marginAll: 5 * PdfPageFormat.mm,
       );
     }

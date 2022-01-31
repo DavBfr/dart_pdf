@@ -15,6 +15,7 @@
  */
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -62,10 +63,12 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
     _previewUpdate?.cancel();
     _previewUpdate = Timer(_updateTime, () {
       final mq = MediaQuery.of(context);
+      final maxDPR = !kIsWeb && Platform.isAndroid ? 2.0 : 1.0;
+      final dpr = max(maxDPR, mq.devicePixelRatio);
       dpi = (min(mq.size.width - 16, widget.maxPageWidth ?? double.infinity)) *
-          mq.devicePixelRatio /
+          dpr /
           pageFormat.width *
-          72;
+          PdfPageFormat.inch;
 
       _raster();
     });
