@@ -91,11 +91,11 @@ Iterable<FontDesc> getFonts(Map m) sync* {
 
   for (final entry in <String, String>{
     'CupertinoIcons':
-        'https://github.com/flutter/packages/blob/master/third_party/packages/cupertino_icons/assets/CupertinoIcons.ttf',
+        'https://rawcdn.githack.com/flutter/packages/ae209b1a361f6f46682f71a7fbf94dbe112553c9/third_party/packages/cupertino_icons/assets/CupertinoIcons.ttf',
     'MaterialIcons':
         'https://fonts.gstatic.com/s/materialicons/v98/flUhRq6tzZclQEJ-Vdg-IuiaDsNZ.ttf',
     'NotoColorEmoji':
-        'https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf',
+        'https://rawcdn.githack.com/googlefonts/noto-emoji/9a5261d871451f9b5183c93483cbd68ed916b1e9/fonts/NotoColorEmoji.ttf',
   }.entries) {
     yield FontDesc(
         key: entry.key, uri: Uri.parse(entry.value), name: entry.key);

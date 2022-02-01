@@ -51623,7 +51623,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// CupertinoIcons
   static Future<Font> cupertinoIcons() {
     const font = PdfGoogleFonts._(
-      'https://github.com/flutter/packages/blob/master/third_party/packages/cupertino_icons/assets/CupertinoIcons.ttf',
+      'https://rawcdn.githack.com/flutter/packages/ae209b1a361f6f46682f71a7fbf94dbe112553c9/third_party/packages/cupertino_icons/assets/CupertinoIcons.ttf',
       'CupertinoIcons',
     );
     return font.getFont();
@@ -51643,7 +51643,7 @@ class PdfGoogleFonts extends DownloadbleFont {
   /// NotoColorEmoji
   static Future<Font> notoColorEmoji() {
     const font = PdfGoogleFonts._(
-      'https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf',
+      'https://rawcdn.githack.com/googlefonts/noto-emoji/9a5261d871451f9b5183c93483cbd68ed916b1e9/fonts/NotoColorEmoji.ttf',
       'NotoColorEmoji',
     );
     return font.getFont();

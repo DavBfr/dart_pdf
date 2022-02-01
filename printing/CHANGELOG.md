@@ -5,6 +5,7 @@
 - Fix dispose state issue
 - Add onPageFormatChanged event
 - Fix raster quality on Android
+- Use a CDN for emoji and cupertino fonts
 
 ## 5.7.1
 
