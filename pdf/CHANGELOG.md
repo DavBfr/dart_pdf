@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.7.1
+
+- Fix missing chars with pdfjs
+
 ## 3.7.0
 
 - Fix imports for Dart 2.15
