@@ -46,7 +46,7 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
   Object? error;
 
   /// Dots per inch
-  double dpi = 10;
+  double dpi = PdfPageFormat.inch;
 
   var _rastering = false;
 
@@ -63,8 +63,16 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
     _previewUpdate?.cancel();
     _previewUpdate = Timer(_updateTime, () {
       final mq = MediaQuery.of(context);
-      final maxDPR = !kIsWeb && Platform.isAndroid ? 2.0 : 1.0;
-      final dpr = max(maxDPR, mq.devicePixelRatio);
+      final double dpr;
+      if (!kIsWeb && Platform.isAndroid) {
+        if (mq.size.shortestSide * mq.devicePixelRatio < 800) {
+          dpr = 2 * mq.devicePixelRatio;
+        } else {
+          dpr = mq.devicePixelRatio;
+        }
+      } else {
+        dpr = mq.devicePixelRatio;
+      }
       dpi = (min(mq.size.width - 16, widget.maxPageWidth ?? double.infinity)) *
           dpr /
           pageFormat.width *

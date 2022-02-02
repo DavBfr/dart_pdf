@@ -6,6 +6,7 @@
 - Add onPageFormatChanged event
 - Fix raster quality on Android
 - Use a CDN for emoji and cupertino fonts
+- Improved Android rendering
 
 ## 5.7.1
 
