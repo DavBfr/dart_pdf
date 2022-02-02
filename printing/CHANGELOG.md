@@ -7,6 +7,7 @@
 - Fix raster quality on Android
 - Use a CDN for emoji and cupertino fonts
 - Improved Android rendering
+- Add dpi attribute to PdfPreview
 
 ## 5.7.1
 

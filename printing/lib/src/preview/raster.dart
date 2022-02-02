@@ -48,6 +48,8 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
   /// Dots per inch
   double dpi = PdfPageFormat.inch;
 
+  double? get forcedDpi;
+
   var _rastering = false;
 
   Timer? _previewUpdate;
@@ -62,21 +64,26 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
   void raster() {
     _previewUpdate?.cancel();
     _previewUpdate = Timer(_updateTime, () {
-      final mq = MediaQuery.of(context);
-      final double dpr;
-      if (!kIsWeb && Platform.isAndroid) {
-        if (mq.size.shortestSide * mq.devicePixelRatio < 800) {
-          dpr = 2 * mq.devicePixelRatio;
+      if (forcedDpi != null) {
+        dpi = forcedDpi!;
+      } else {
+        final mq = MediaQuery.of(context);
+        final double dpr;
+        if (!kIsWeb && Platform.isAndroid) {
+          if (mq.size.shortestSide * mq.devicePixelRatio < 800) {
+            dpr = 2 * mq.devicePixelRatio;
+          } else {
+            dpr = mq.devicePixelRatio;
+          }
         } else {
           dpr = mq.devicePixelRatio;
         }
-      } else {
-        dpr = mq.devicePixelRatio;
+        dpi =
+            (min(mq.size.width - 16, widget.maxPageWidth ?? double.infinity)) *
+                dpr /
+                pageFormat.width *
+                PdfPageFormat.inch;
       }
-      dpi = (min(mq.size.width - 16, widget.maxPageWidth ?? double.infinity)) *
-          dpr /
-          pageFormat.width *
-          PdfPageFormat.inch;
 
       _raster();
     });

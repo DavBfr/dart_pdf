@@ -40,6 +40,7 @@ class PdfPreviewCustom extends StatefulWidget {
     this.padding,
     this.shouldRepaint = false,
     this.loadingWidget,
+    this.dpi,
   }) : super(key: key);
 
   /// Pdf paper page format
@@ -78,6 +79,10 @@ class PdfPreviewCustom extends StatefulWidget {
   /// If null, a [CircularProgressIndicator] is used instead.
   final Widget? loadingWidget;
 
+  /// The rendering dots per inch resolution
+  /// If not provided, this value is calculated.
+  final double? dpi;
+
   @override
   PdfPreviewCustomState createState() => PdfPreviewCustomState();
 }
@@ -101,6 +106,9 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
   Timer? previewUpdate;
 
   static const _errorMessage = 'Unable to display the document';
+
+  @override
+  double? get forcedDpi => widget.dpi;
 
   @override
   void dispose() {

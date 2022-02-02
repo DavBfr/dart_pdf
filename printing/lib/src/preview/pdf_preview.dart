@@ -60,6 +60,7 @@ class PdfPreview extends StatefulWidget {
     this.shouldRepaint = false,
     this.loadingWidget,
     this.onPageFormatChanged,
+    this.dpi,
   }) : super(key: key);
 
   static const _defaultPageFormats = <String, PdfPageFormat>{
@@ -157,6 +158,10 @@ class PdfPreview extends StatefulWidget {
 
   /// The page format has changed
   final ValueChanged<PdfPageFormat>? onPageFormatChanged;
+
+  /// The rendering dots per inch resolution
+  /// If not provided, this value is calculated.
+  final double? dpi;
 
   @override
   _PdfPreviewState createState() => _PdfPreviewState();
@@ -323,6 +328,7 @@ class _PdfPreviewState extends State<PdfPreview> {
               previewPageMargin: widget.previewPageMargin,
               scrollViewDecoration: widget.scrollViewDecoration,
               shouldRepaint: widget.shouldRepaint,
+              dpi: widget.dpi,
             ),
           ),
           if (actions.isNotEmpty && widget.useActions)
