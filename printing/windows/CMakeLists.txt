@@ -16,28 +16,24 @@ cmake_minimum_required(VERSION 3.15)
 set(PROJECT_NAME "printing")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
-set(PDFIUM_VERSION "4706" CACHE STRING "Version of pdfium used")
-set(PDFIUM_ARCH "x64" CACHE STRING "Architecture of pdfium used")
+set(ARCH "x64")
+set(PDFIUM_VERSION "4634" CACHE STRING "")
 
 if(${PDFIUM_VERSION} STREQUAL "latest")
-  set(
-    PDFIUM_URL
-    "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-win-${PDFIUM_ARCH}.tgz"
-    )
+  set(PDFIUM_URL "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-windows-${ARCH}.zip")
 else()
-  set(
-    PDFIUM_URL
-    "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/${PDFIUM_VERSION}/pdfium-win-${PDFIUM_ARCH}.tgz"
-    )
+  set(PDFIUM_URL "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/${PDFIUM_VERSION}/pdfium-windows-${ARCH}.zip")
 endif()
 
 # Download pdfium
 include(../windows/DownloadProject.cmake)
-download_project(PROJ
-                 pdfium
-                 URL
-                 ${PDFIUM_URL})
-
+download_project(
+  PROJ
+  pdfium
+  URL
+  ${PDFIUM_URL}
+  )
+  
 # This value is used when generating builds using this plugin, so it must not be
 # changed
 set(PLUGIN_NAME "printing_plugin")
