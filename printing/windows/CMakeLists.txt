@@ -34,12 +34,6 @@ download_project(
   ${PDFIUM_URL}
   )
 
-# Download pdfium
-include(../windows/DownloadProject.cmake)
-download_project(PROJ
-                 pdfium
-                 URL
-                 ${PDFIUM_URL})
 
 # This value is used when generating builds using this plugin, so it must not be
 # changed
