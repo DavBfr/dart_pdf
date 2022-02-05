@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.7.3
+
+- Update pdfium version to 4861
+
 ## 5.7.2
 
 - Fix dispose state issue
