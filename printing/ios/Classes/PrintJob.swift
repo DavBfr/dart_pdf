@@ -151,7 +151,6 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             return
         }
 
-        // Workaround
         currentSize = size
         
         if size.width > size.height {
