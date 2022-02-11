@@ -31,6 +31,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     private var orientation: UIPrintInfo.Orientation?
     private let semaphore = DispatchSemaphore(value: 0)
     private var dynamic = false
+    private var currentSize: CGSize?
 
     public init(printing: PrintingPlugin, index: Int) {
         self.printing = printing
@@ -133,6 +134,14 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
 
         printing.onCompleted(printJob: self, completed: completed, error: error?.localizedDescription as NSString?)
     }
+    
+    public func printInteractionController(_ printInteractionController: UIPrintInteractionController, choosePaper paperList: [UIPrintPaper]) -> UIPrintPaper {
+        if currentSize == nil {
+            return paperList[0]
+        }
+        
+        return UIPrintPaper.bestPaper(forPageSize: currentSize!, withPapersFrom: paperList)
+    }
 
     func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool) {
         dynamic = dyn
@@ -142,6 +151,9 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             return
         }
 
+        // Workaround
+        currentSize = size
+        
         if size.width > size.height {
             orientation = UIPrintInfo.Orientation.landscape
         }
