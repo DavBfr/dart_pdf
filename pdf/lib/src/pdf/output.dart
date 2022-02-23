@@ -17,6 +17,7 @@
 import 'data_types.dart';
 import 'document.dart';
 import 'obj/catalog.dart';
+import 'obj/diagnostic.dart';
 import 'obj/encryption.dart';
 import 'obj/info.dart';
 import 'obj/object.dart';
@@ -25,7 +26,7 @@ import 'stream.dart';
 import 'xref.dart';
 
 /// PDF document writer
-class PdfOutput {
+class PdfOutput with PdfDiagnostic {
   /// This creates a Pdf [PdfStream]
   PdfOutput(this.os, this.version, this.verbose) {
     String v;
@@ -42,19 +43,15 @@ class PdfOutput {
     os.putBytes(const <int>[0x25, 0xC2, 0xA5, 0xC2, 0xB1, 0xC3, 0xAB, 0x0A]);
     assert(() {
       if (verbose) {
-        _stopwatch = Stopwatch()..start();
-        os.putComment('');
-        os.putComment('Verbose dart_pdf');
-        os.putComment('Creation date: ${DateTime.now()}');
-        _comment = os.offset;
-        os.putBytes(List<int>.filled(120, 0x20));
+        setInsertion(os);
+        startStopwatch();
+        debugFill('Verbose dart_pdf');
+        debugFill('Producer https://github.com/DavBfr/dart_pdf');
+        debugFill('Creation date: ${DateTime.now()}');
       }
       return true;
     }());
   }
-
-  late final Stopwatch _stopwatch;
-  var _comment = 0;
 
   /// Pdf version to output
   final PdfVersion version;
@@ -98,7 +95,23 @@ class PdfOutput {
     }
 
     xref.add(PdfXref(ob.objser, os.offset));
+    assert(() {
+      if (verbose) {
+        ob.setInsertion(os);
+        ob.startStopwatch();
+      }
+      return true;
+    }());
     ob.write(os);
+    assert(() {
+      if (verbose) {
+        ob.stopStopwatch();
+        ob.debugFill(
+            'Creation time: ${ob.elapsedStopwatch / Duration.microsecondsPerSecond} seconds');
+        ob.writeDebug(os);
+      }
+      return true;
+    }());
   }
 
   /// This closes the Stream, writing the xref table
@@ -171,15 +184,13 @@ class PdfOutput {
 
     assert(() {
       if (verbose) {
-        _stopwatch.stop();
-        final h = PdfStream();
-        h.putComment(
-            'Creation time: ${_stopwatch.elapsed.inMicroseconds / Duration.microsecondsPerSecond} seconds');
-        h.putComment('File size: ${os.offset} bytes');
-        h.putComment('Pages: ${rootID!.pdfDocument.pdfPageList.pages.length}');
-        h.putComment('Objects: ${xref.offsets.length}');
-
-        os.setBytes(_comment, h.output());
+        stopStopwatch();
+        debugFill(
+            'Creation time: ${elapsedStopwatch / Duration.microsecondsPerSecond} seconds');
+        debugFill('File size: ${os.offset} bytes');
+        debugFill('Pages: ${rootID!.pdfDocument.pdfPageList.pages.length}');
+        debugFill('Objects: ${xref.offsets.length}');
+        writeDebug(os);
       }
       return true;
     }());

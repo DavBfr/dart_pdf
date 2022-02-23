@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.7.2
+
+- Improve debugging information
+
 ## 3.7.1
 
 - Fix missing chars with pdfjs

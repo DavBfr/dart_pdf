@@ -19,9 +19,10 @@ import 'package:meta/meta.dart';
 import '../data_types.dart';
 import '../document.dart';
 import '../stream.dart';
+import 'diagnostic.dart';
 
 /// Base Object used in the PDF file
-abstract class PdfObject<T extends PdfDataType> {
+abstract class PdfObject<T extends PdfDataType> with PdfDiagnostic {
   /// This is usually called by extensors to this class, and sets the
   /// Pdf Object Type
   PdfObject(
@@ -60,15 +61,6 @@ abstract class PdfObject<T extends PdfDataType> {
   /// The write method should call this before writing anything to the
   /// OutputStream. This will send the standard header for each object.
   void _writeStart(PdfStream os) {
-    assert(() {
-      if (pdfDocument.verbose) {
-        os.putComment('');
-        os.putComment('-' * 78);
-        os.putComment('$runtimeType');
-      }
-      return true;
-    }());
-
     os.putString('$objser $objgen obj\n');
   }
 

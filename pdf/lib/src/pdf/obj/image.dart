@@ -69,6 +69,12 @@ class PdfImage extends PdfXObject {
       orientation,
     );
 
+    assert(() {
+      im.startStopwatch();
+      im.debugFill('RAW RGB${alpha ? 'A' : ''} Image ${width}x$height');
+      return true;
+    }());
+
     im.params['/BitsPerComponent'] = const PdfNum(8);
     im.params['/Name'] = PdfName(im.name);
     im.params['/ColorSpace'] = const PdfName('/DeviceRGB');
@@ -95,6 +101,10 @@ class PdfImage extends PdfXObject {
     }
 
     im.buf.putBytes(out);
+    assert(() {
+      im.stopStopwatch();
+      return true;
+    }());
     return im;
   }
 
@@ -112,6 +122,11 @@ class PdfImage extends PdfXObject {
       orientation ?? info.orientation,
     );
 
+    assert(() {
+      im.startStopwatch();
+      im.debugFill('Jpeg Image ${info.width}x${info.height}');
+      return true;
+    }());
     im.params['/BitsPerComponent'] = const PdfNum(8);
     im.params['/Name'] = PdfName(im.name);
     im.params['/Intent'] = const PdfName('/RelativeColorimetric');
@@ -124,6 +139,10 @@ class PdfImage extends PdfXObject {
     }
 
     im.buf.putBytes(image);
+    assert(() {
+      im.stopStopwatch();
+      return true;
+    }());
     return im;
   }
 
@@ -178,6 +197,11 @@ class PdfImage extends PdfXObject {
       orientation,
     );
 
+    assert(() {
+      im.startStopwatch();
+      im.debugFill('Image alpha channel ${width}x$height');
+      return true;
+    }());
     im.params['/BitsPerComponent'] = const PdfNum(8);
     im.params['/Name'] = PdfName(im.name);
     im.params['/ColorSpace'] = const PdfName('/DeviceGray');
@@ -193,6 +217,10 @@ class PdfImage extends PdfXObject {
     }
 
     im.buf.putBytes(out);
+    assert(() {
+      im.stopStopwatch();
+      return true;
+    }());
     return im;
   }
 
@@ -204,6 +232,10 @@ class PdfImage extends PdfXObject {
   ) : super(pdfDocument, '/Image', isBinary: true) {
     params['/Width'] = PdfNum(_width);
     params['/Height'] = PdfNum(_height);
+    assert(() {
+      debugFill('Orientation: $orientation');
+      return true;
+    }());
   }
 
   final int _width;
