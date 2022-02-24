@@ -4,6 +4,7 @@
 
 - Update pdfium version to 4861
 - Fix crash when Android load a PDF file which had password
+- Fix parsing TTF fonts with zero-length glyphs
 
 ## 5.7.2
 
