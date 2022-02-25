@@ -315,21 +315,24 @@ class _PdfPreviewState extends State<PdfPreview> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Expanded(
-            child: PdfPreviewCustom(
-              key: previewWidget,
-              build: widget.build,
-              loadingWidget: widget.loadingWidget,
-              maxPageWidth: widget.maxPageWidth,
-              onError: widget.onError,
-              padding: widget.padding,
-              pageFormat: previewData.pageFormat,
-              pages: widget.pages,
-              pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
-              previewPageMargin: widget.previewPageMargin,
-              scrollViewDecoration: widget.scrollViewDecoration,
-              shouldRepaint: widget.shouldRepaint,
-              dpi: widget.dpi,
-            ),
+            child: Builder(builder: (context) {
+              final controller = PdfPreviewController.listen(context);
+              return PdfPreviewCustom(
+                key: previewWidget,
+                build: controller.buildDocument,
+                loadingWidget: widget.loadingWidget,
+                maxPageWidth: widget.maxPageWidth,
+                onError: widget.onError,
+                padding: widget.padding,
+                pageFormat: controller.pageFormat,
+                pages: widget.pages,
+                pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
+                previewPageMargin: widget.previewPageMargin,
+                scrollViewDecoration: widget.scrollViewDecoration,
+                shouldRepaint: widget.shouldRepaint,
+                dpi: widget.dpi,
+              );
+            }),
           ),
           if (actions.isNotEmpty && widget.useActions)
             IconTheme.merge(
