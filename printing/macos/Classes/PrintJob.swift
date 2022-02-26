@@ -159,14 +159,14 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         // The custom print view
         printOperation = NSPrintOperation(view: self, printInfo: printInfo)
         printOperation!.jobTitle = name
-        printOperation!.printPanel.options = [.showsPreview]
+        printOperation!.printPanel.options = [.showsPreview, .showsCopies]
         if printer != nil {
             printOperation!.showsPrintPanel = false
             printOperation!.showsProgressPanel = false
         }
 
         if dynamic {
-            printOperation!.printPanel.options = [.showsPreview, .showsPaperSize, .showsOrientation]
+            printOperation!.printPanel.options = [.showsPreview, .showsPaperSize, .showsOrientation, .showsCopies]
             printOperation!.runModal(for: _window!, delegate: self, didRun: #selector(printOperationDidRun(printOperation:success:contextInfo:)), contextInfo: nil)
             return
         }
