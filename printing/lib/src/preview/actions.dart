@@ -104,7 +104,7 @@ class PdfPrintAction extends StatelessWidget {
   /// Called if the user prints the pdf document
   final VoidCallback? onPrinted;
 
-  /// Called if an error creating the Pdf occured
+  /// Called if an error creating the Pdf occurred
   final void Function(dynamic error)? onPrintError;
 
   @override
@@ -189,7 +189,7 @@ class PdfShareAction extends StatelessWidget with PdfPreviewActionBounds {
   /// Called if the user prints the pdf document
   final VoidCallback? onShared;
 
-  /// Called if an error creating the Pdf occured
+  /// Called if an error creating the Pdf occurred
   final void Function(dynamic error)? onShareError;
 
   @override
