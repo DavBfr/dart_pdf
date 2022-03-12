@@ -46,6 +46,16 @@ for documentation.
    </script>
    ```
 
+6. For Windows and Linux, you can force the pdfium version and architecture
+   on your main `CMakeLists.txt` with:
+
+   ```dart
+   set(PDFIUM_VERSION "4929" CACHE STRING "" FORCE)
+   set(PDFIUM_ARCH "x64" CACHE STRING "" FORCE)
+   ```
+
+  See the releases here: <https://github.com/bblanchon/pdfium-binaries/releases>
+
 ## Examples
 
 ```dart

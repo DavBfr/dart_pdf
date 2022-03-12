@@ -2,10 +2,10 @@
 
 ## 5.7.3
 
-- Update pdfium version to 4861
 - Fix crash when Android load a PDF file which had password
 - Fix parsing TTF fonts with zero-length glyphs
 - Fix PdfPreview page format and orientation updates
+- Update Pdfium version to 4929
 
 ## 5.7.2
 
