@@ -254,10 +254,9 @@ gh-social: all
 	cd test; $(DART_BIN) --enable-asserts github_social_preview.dart
 
 gh-pages: all
-	cd demo; $(FLUTTER_BIN) build web
+	cd demo; $(FLUTTER_BIN) build web --base-href "/dart_pdf/"
 	git checkout gh-pages
 	rm -rf assets icons
 	mv -fv demo/build/web/* .
-	sed -e 's|<base href="/">|<base href="/dart_pdf/">|' -i index.html
 
 .PHONY: test format format-dart format-clang clean publish-pdf publish-printing analyze ref
