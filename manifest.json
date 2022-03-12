@@ -1,11 +1,11 @@
 {
-    "name": "printing_demo",
-    "short_name": "printing_demo",
+    "name": "Flutter PDF Demo",
+    "short_name": "Flutter PDF Demo",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Flutter PDF Demo.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
