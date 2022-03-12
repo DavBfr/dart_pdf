@@ -284,7 +284,8 @@ class _PdfPreviewState extends State<PdfPreview> {
       ));
 
       if (widget.canChangeOrientation) {
-        actions.add(const PdfPageOrientationAction());
+        // ignore: prefer_const_constructors
+        actions.add(PdfPageOrientationAction());
       }
     }
 

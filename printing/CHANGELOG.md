@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.7.4
+
+- Fix orientation not changing
+
 ## 5.7.3
 
 - Fix crash when Android load a PDF file which had password
