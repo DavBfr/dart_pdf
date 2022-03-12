@@ -19,6 +19,8 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
+import '../mutex.dart';
+
 /// Application asset manifest.
 mixin AssetManifest {
   static final _assets = <String>[];
@@ -61,31 +63,5 @@ mixin AssetManifest {
     }
 
     return _assets.contains(key);
-  }
-}
-
-/// Simple Mutex
-class Mutex {
-  final _waiting = <Completer>[];
-
-  bool _locked = false;
-
-  /// Lock the mutex
-  Future<void> acquire() async {
-    if (_locked) {
-      final c = Completer<void>();
-      _waiting.add(c);
-      await c.future;
-    }
-    _locked = true;
-  }
-
-  /// Release the mutex
-  void release() {
-    _locked = false;
-    for (final e in _waiting) {
-      e.complete();
-    }
-    _waiting.clear();
   }
 }

@@ -36,8 +36,9 @@ for documentation.
    ```
 4. For MacOS add printing capability by opening macos directory in XCode
 
-5. For the web, a javascript library and a small script has to be added to
-   your `web/index.html` file, just before `</head>`:
+5. If you want to manually set the PdfJs library version for the web, a javascript
+   library and a small script has to be added to your `web/index.html` file, just
+   before `</head>`. Otherwise it is loaded automatically:
 
    ```html
    <script src="//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.8.335/pdf.min.js"></script>

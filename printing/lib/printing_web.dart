@@ -29,12 +29,13 @@ import 'package:pdf/pdf.dart';
 
 import 'src/callback.dart';
 import 'src/interface.dart';
+import 'src/mutex.dart';
 import 'src/pdfjs.dart';
 import 'src/printer.dart';
 import 'src/printing_info.dart';
 import 'src/raster.dart';
 
-/// Print plugin targetting Flutter on the Web
+/// Print plugin targeting Flutter on the Web
 class PrintingPlugin extends PrintingPlatform {
   /// Registers this class as the default instance of [PrintingPlugin].
   static void registerWith(Registrar registrar) {
@@ -45,16 +46,67 @@ class PrintingPlugin extends PrintingPlatform {
 
   static const String _frameId = '__net_nfet_printing__';
 
+  static const _pdfJsVersion =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216';
+
+  final _loading = Mutex();
+
+  bool get _hasPdfJsLib => js.context.callMethod('eval', <String>[
+        'typeof pdfjsLib !== "undefined" && pdfjsLib.GlobalWorkerOptions.workerSrc!="";'
+      ]);
+
+  Future<void> _initPlugin() async {
+    await _loading.acquire();
+
+    if (!_hasPdfJsLib) {
+      final script = ScriptElement()
+        ..type = 'text/javascript'
+        ..async = true
+        ..src = '$_pdfJsVersion/pdf.min.js';
+      assert(document.head != null);
+      document.head!.append(script);
+      await script.onLoad.first;
+
+      if (js.context['pdfjsLib'] == null) {
+        // In dev, requireJs is loaded in
+        final require = js.JsObject.fromBrowserObject(js.context['require']);
+        require.callMethod('config', <dynamic>[
+          js.JsObject.jsify({
+            'paths': {
+              'pdfjs-dist/build/pdf': '$_pdfJsVersion/pdf.min',
+              'pdfjs-dist/build/pdf.worker': '$_pdfJsVersion/pdf.worker.min',
+            }
+          })
+        ]);
+
+        final completer = Completer<void>();
+
+        js.context.callMethod('require', <dynamic>[
+          js.JsObject.jsify(
+              ['pdfjs-dist/build/pdf', 'pdfjs-dist/build/pdf.worker']),
+          (dynamic app) {
+            js.context['pdfjsLib'] = app;
+            completer.complete();
+          }
+        ]);
+
+        await completer.future;
+      }
+
+      js.context['pdfjsLib']['GlobalWorkerOptions']['workerSrc'] =
+          '$_pdfJsVersion/pdf.worker.min.js';
+    }
+
+    _loading.release();
+  }
+
   @override
   Future<PrintingInfo> info() async {
-    final dynamic workerSrc = js.context.callMethod('eval', <String>[
-      'typeof pdfjsLib !== "undefined" && pdfjsLib.GlobalWorkerOptions.workerSrc!="";'
-    ]);
-
+    await _initPlugin();
     return PrintingInfo(
       canPrint: true,
       canShare: true,
-      canRaster: workerSrc,
+      canRaster: _hasPdfJsLib,
     );
   }
 
@@ -235,6 +287,8 @@ class PrintingPlugin extends PrintingPlatform {
     List<int>? pages,
     double dpi,
   ) async* {
+    await _initPlugin();
+
     final t = PdfJs.getDocument(Settings()..data = document);
 
     final d = await promiseToFuture<PdfJsDoc>(t.promise);

@@ -6,6 +6,7 @@
 - Fix parsing TTF fonts with zero-length glyphs
 - Fix PdfPreview page format and orientation updates
 - Update Pdfium version to 4929
+- Automatic pdf.js library loading
 
 ## 5.7.2
 
