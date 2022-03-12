@@ -3,6 +3,7 @@
 ## 3.7.2
 
 - Improve debugging information
+- Fix parsing TTF fonts with zero-length glyphs
 
 ## 3.7.1
 
