@@ -72,4 +72,14 @@ class Printer {
   comment:$comment
   isDefault:$isDefault
   isAvailable: $isAvailable''';
+
+  Map<String, Object?> toMap() => {
+        'url': url,
+        'name': name,
+        'model': model,
+        'location': location,
+        'comment': comment,
+        'default': isDefault,
+        'available': isAvailable,
+      };
 }
