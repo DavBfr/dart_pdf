@@ -3,6 +3,7 @@
 ## 3.7.3
 
 - Fix missing endobj with compressed xref
+- Fix missing smask subtype
 
 ## 3.7.2
 

@@ -29,7 +29,7 @@ class PdfSoftMask {
       bool isolated = false,
       bool knockout = false,
       bool invert = false}) {
-    _mask = PdfGraphicXObject(document);
+    _mask = PdfGraphicXObject(document, '/Form');
     _mask.params['/BBox'] = PdfArray.fromNum([
       boundingBox.x,
       boundingBox.y,
