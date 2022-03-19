@@ -4,6 +4,7 @@
 
 - Fix missing endobj with compressed xref
 - Fix missing smask subtype
+- Add missing final "~>" to Ascii85 encoder
 
 ## 3.7.2
 

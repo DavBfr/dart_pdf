@@ -21,7 +21,7 @@ import 'dart:typed_data';
 class Ascii85Encoder extends Converter<Uint8List, Uint8List> {
   @override
   Uint8List convert(Uint8List input) {
-    final output = Uint8List(_maxEncodedLen(input.length));
+    final output = Uint8List(_maxEncodedLen(input.length) + 2);
 
     var outputOffset = 0;
     var inputOffset = 0;
@@ -79,6 +79,10 @@ class Ascii85Encoder extends Converter<Uint8List, Uint8List> {
       inputOffset += 4;
       outputOffset += 5;
     }
+
+    // Add final "~>"
+    output[outputOffset++] = 126;
+    output[outputOffset++] = 62;
 
     return output.sublist(0, outputOffset);
   }
