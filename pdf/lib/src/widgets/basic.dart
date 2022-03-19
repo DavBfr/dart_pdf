@@ -341,16 +341,16 @@ class Align extends SingleChildWidget {
       final headSize = math.min(child!.box!.bottom * 0.2, 10);
       context.canvas
         ..moveTo(
-          box!.left + child!.box!.horizondalCenter,
+          box!.left + child!.box!.horizontalCenter,
           box!.bottom,
         )
-        ..lineTo(box!.left + child!.box!.horizondalCenter,
+        ..lineTo(box!.left + child!.box!.horizontalCenter,
             box!.bottom + child!.box!.bottom)
-        ..lineTo(box!.left + child!.box!.horizondalCenter - headSize,
+        ..lineTo(box!.left + child!.box!.horizontalCenter - headSize,
             box!.bottom + child!.box!.bottom - headSize)
-        ..moveTo(box!.left + child!.box!.horizondalCenter,
+        ..moveTo(box!.left + child!.box!.horizontalCenter,
             box!.bottom + child!.box!.bottom)
-        ..lineTo(box!.left + child!.box!.horizondalCenter + headSize,
+        ..lineTo(box!.left + child!.box!.horizontalCenter + headSize,
             box!.bottom + child!.box!.bottom - headSize);
     }
 
@@ -358,14 +358,14 @@ class Align extends SingleChildWidget {
       final headSize =
           math.min((box!.top - child!.box!.top - box!.bottom) * 0.2, 10);
       context.canvas
-        ..moveTo(box!.left + child!.box!.horizondalCenter, box!.top)
-        ..lineTo(box!.left + child!.box!.horizondalCenter,
+        ..moveTo(box!.left + child!.box!.horizontalCenter, box!.top)
+        ..lineTo(box!.left + child!.box!.horizontalCenter,
             box!.bottom + child!.box!.top)
-        ..lineTo(box!.left + child!.box!.horizondalCenter - headSize,
+        ..lineTo(box!.left + child!.box!.horizontalCenter - headSize,
             box!.bottom + child!.box!.top + headSize)
-        ..moveTo(box!.left + child!.box!.horizondalCenter,
+        ..moveTo(box!.left + child!.box!.horizontalCenter,
             box!.bottom + child!.box!.top)
-        ..lineTo(box!.left + child!.box!.horizondalCenter + headSize,
+        ..lineTo(box!.left + child!.box!.horizontalCenter + headSize,
             box!.bottom + child!.box!.top + headSize);
     }
 

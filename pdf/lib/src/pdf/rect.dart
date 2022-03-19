@@ -40,7 +40,10 @@ class PdfRect {
   double get right => x + width;
   double get top => y + height;
 
-  double get horizondalCenter => x + width / 2;
+  @Deprecated('type => horizontalCenter')
+  double get horizondalCenter => horizontalCenter;
+
+  double get horizontalCenter => x + width / 2;
   double get verticalCenter => y + height / 2;
 
   @override

@@ -5,6 +5,7 @@
 - Fix missing endobj with compressed xref
 - Fix missing smask subtype
 - Add missing final "~>" to Ascii85 encoder
+- Fix typo "horizontalCenter"
 
 ## 3.7.2
 
