@@ -215,5 +215,7 @@ class PdfXrefTable extends PdfDataType {
       encrypt: false,
       values: params.values,
     ).output(s, object.pdfDocument.verbose ? 0 : null);
+
+    s.putString('endobj\n');
   }
 }

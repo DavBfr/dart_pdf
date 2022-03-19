@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.7.3
+
+- Fix missing endobj with compressed xref
+
 ## 3.7.2
 
 - Improve debugging information
