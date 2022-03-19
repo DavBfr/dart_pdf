@@ -3,6 +3,7 @@
 ## 5.7.4
 
 - Fix orientation not changing
+- Fix compilation issues with Swift 6 [Cedric Tegenkamp]
 
 ## 5.7.3
 
