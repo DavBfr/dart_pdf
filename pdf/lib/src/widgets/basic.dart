@@ -135,6 +135,7 @@ class Transform extends SingleChildWidget {
     this.origin,
     this.alignment,
     this.adjustLayout = false,
+    this.unconstrained = false,
     Widget? child,
   }) : super(child: child);
 
@@ -147,6 +148,7 @@ class Transform extends SingleChildWidget {
     Widget? child,
   })  : transform = Matrix4.rotationZ(angle),
         adjustLayout = false,
+        unconstrained = false,
         super(child: child);
 
   /// Creates a widget that transforms its child using a rotation around the
@@ -154,6 +156,7 @@ class Transform extends SingleChildWidget {
   Transform.rotateBox({
     required double angle,
     Widget? child,
+    this.unconstrained = false,
   })  : transform = Matrix4.rotationZ(angle),
         adjustLayout = true,
         alignment = null,
@@ -168,6 +171,7 @@ class Transform extends SingleChildWidget {
         origin = null,
         alignment = null,
         adjustLayout = false,
+        unconstrained = false,
         super(child: child);
 
   /// Creates a widget that scales its child uniformly.
@@ -178,6 +182,7 @@ class Transform extends SingleChildWidget {
     Widget? child,
   })  : transform = Matrix4.diagonal3Values(scale, scale, 1),
         adjustLayout = false,
+        unconstrained = false,
         super(child: child);
 
   /// The matrix to transform the child by during painting.
@@ -190,6 +195,8 @@ class Transform extends SingleChildWidget {
   final Alignment? alignment;
 
   final bool adjustLayout;
+
+  final bool unconstrained;
 
   Matrix4 get _effectiveTransform {
     final result = Matrix4.identity();
@@ -220,7 +227,11 @@ class Transform extends SingleChildWidget {
     }
 
     if (child != null) {
-      child!.layout(context, constraints, parentUsesSize: parentUsesSize);
+      child!.layout(
+        context,
+        unconstrained ? const BoxConstraints() : constraints,
+        parentUsesSize: parentUsesSize,
+      );
       assert(child!.box != null);
 
       final mat = transform;
@@ -908,5 +919,64 @@ class VerticalDivider extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class OverflowBox extends SingleChildWidget {
+  /// Creates a widget that lets its child overflow itself.
+  OverflowBox({
+    this.alignment = Alignment.center,
+    this.minWidth,
+    this.maxWidth,
+    this.minHeight,
+    this.maxHeight,
+    Widget? child,
+  }) : super(child: child);
+
+  /// How to align the child.
+  final Alignment alignment;
+
+  /// The minimum width constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
+  final double? minWidth;
+
+  /// The maximum width constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
+  final double? maxWidth;
+
+  /// The minimum height constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
+  final double? minHeight;
+
+  /// The maximum height constraint to give the child. Set this to null (the
+  /// default) to use the constraint from the parent instead.
+  final double? maxHeight;
+
+  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
+    return BoxConstraints(
+      minWidth: minWidth ?? constraints.minWidth,
+      maxWidth: maxWidth ?? constraints.maxWidth,
+      minHeight: minHeight ?? constraints.minHeight,
+      maxHeight: maxHeight ?? constraints.maxHeight,
+    );
+  }
+
+  @override
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
+
+    if (child != null) {
+      child!.layout(context, _getInnerConstraints(constraints),
+          parentUsesSize: true);
+      assert(child!.box != null);
+      child!.box = alignment.inscribe(child!.box!.size, box!);
+    }
+  }
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+    paintChild(context);
   }
 }

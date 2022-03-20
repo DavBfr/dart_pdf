@@ -6,6 +6,7 @@
 - Fix missing smask subtype
 - Add missing final "~>" to Ascii85 encoder
 - Fix typo "horizontalCenter"
+- Add OverflowBox
 
 ## 3.7.2
 
