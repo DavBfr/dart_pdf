@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.7.5
+
+- Update SWIFT code formatter to version 5
+
 ## 5.7.4
 
 - Fix orientation not changing

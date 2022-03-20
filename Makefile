@@ -63,7 +63,7 @@ format-clang: $(CLNG_SRC)
 	clang-format -style=Chromium -i $^
 
 format-swift: $(SWFT_SRC)
-	which swiftformat && swiftformat --swiftversion 4.2 $^ || true
+	which swiftformat && swiftformat --swiftversion 5 $^ || true
 
 .coverage:
 	which coverage || $(DART_BIN) pub global activate coverage

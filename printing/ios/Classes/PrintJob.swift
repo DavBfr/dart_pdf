@@ -54,7 +54,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         if dynamic {
             semaphore.signal()
         } else {
-            self.printing.onCompleted(printJob: self, completed: false, error: error as NSString?)
+            printing.onCompleted(printJob: self, completed: false, error: error as NSString?)
         }
     }
 
@@ -109,7 +109,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
 
     override public var numberOfPages: Int {
         if dynamic {
-            self.printing.onLayout(
+            printing.onLayout(
                 printJob: self,
                 width: paperRect.size.width,
                 height: paperRect.size.height,
@@ -131,7 +131,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             print("Unable to print: \(error?.localizedDescription ?? "unknown error")")
         }
 
-        self.printing.onCompleted(printJob: self, completed: completed, error: error?.localizedDescription as NSString?)
+        printing.onCompleted(printJob: self, completed: completed, error: error?.localizedDescription as NSString?)
     }
 
     func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool) {
