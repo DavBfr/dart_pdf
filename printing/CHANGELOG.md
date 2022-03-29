@@ -3,6 +3,7 @@
 ## 5.7.5
 
 - Update SWIFT code formatter to version 5
+- Fix Xcode 13.3 out of memory issue
 
 ## 5.7.4
 

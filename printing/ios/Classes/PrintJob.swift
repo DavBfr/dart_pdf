@@ -206,7 +206,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
 
         let activityViewController = UIActivityViewController(activityItems: [fileURL, body as Any], applicationActivities: nil)
         activityViewController.setValue(subject, forKey: "subject")
-        if UI_USER_INTERFACE_IDIOM() == .pad {
+        if UIDevice.current.userInterfaceIdiom == .pad {
             let controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController
             activityViewController.popoverPresentationController?.sourceView = controller?.view
             activityViewController.popoverPresentationController?.sourceRect = rect
@@ -290,7 +290,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                 result(data)
         }
 
-        if UI_USER_INTERFACE_IDIOM() == .pad {
+        if UIDevice.current.userInterfaceIdiom == .pad {
             let viewController: UIViewController? = UIApplication.shared.keyWindow?.rootViewController
             if viewController != nil {
                 controller.present(from: rect, in: viewController!.view, animated: true, completionHandler: pickPrinterCompletionHandler)
