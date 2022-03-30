@@ -386,14 +386,22 @@ Iterable<String> _parse(String text) sync* {
   }
   // if notArabicWords.length != 0, that means all sentence doesn't contain Arabic.
   for (var i = 0; i < notArabicWords.length; i++) {
-    yield String.fromCharCodes(notArabicWords[i]);
-    if (i != notArabicWords.length - 1) {
+    if (!first) {
       yield ' ';
     }
+    yield String.fromCharCodes(notArabicWords[i]);
   }
 }
 
 /// Apply Arabic shape substitutions
 String convert(String input) {
-  return List<String>.from(_parse(input)).join('');
+  final lines = input.split('\n');
+  final parsed = <String>[];
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].isEmpty) {
+      continue;
+    }
+    parsed.addAll([..._parse(lines[i]), if (i != lines.length - 1) '\n']);
+  }
+  return parsed.join();
 }

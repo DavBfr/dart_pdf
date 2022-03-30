@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.7.4
+
+- Fix Bidirectional text (Arabic + Latin words) order and line breakers issue #990 [Milad]
+
 ## 3.7.3
 
 - Fix missing endobj with compressed xref
