@@ -17,7 +17,6 @@
 import 'dart:io';
 
 import 'package:pdf/src/pdf/font/arabic.dart' as arabic;
-import 'package:pdf/src/pdf/font/arabic.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
