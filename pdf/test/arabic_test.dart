@@ -17,6 +17,7 @@
 import 'dart:io';
 
 import 'package:pdf/src/pdf/font/arabic.dart' as arabic;
+import 'package:pdf/src/pdf/font/arabic.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
@@ -41,14 +42,13 @@ void main() {
     RichText.debug = true;
     pdf = Document();
 
-    arabicFont = loadFont('hacen-tunisia.ttf');
+    arabicFont = loadFont('/Users/milad/development/projects/dart_pdf/pdf/test/hacen-tunisia.ttf');
     style = TextStyle(font: arabicFont, fontSize: 30);
   });
 
   test('Arabic Diacritics', () {
     final a = ArabicText('السلام', <int>[1605, 65276, 65204, 65247, 1575]);
-    final b = ArabicText('السَلَاْمٌ',
-        <int>[1612, 1605, 1618, 1614, 65276, 1614, 65204, 65247, 1575]);
+    final b = ArabicText('السَلَاْمٌ', <int>[1612, 1605, 1618, 1614, 65276, 1614, 65204, 65247, 1575]);
 
     expect(
       arabic.convert(a.original).codeUnits,
@@ -158,22 +158,7 @@ void main() {
         1614,
         65251
       ]),
-      ArabicText('اللغات السامية', <int>[
-        1578,
-        65166,
-        65232,
-        65248,
-        65247,
-        1575,
-        32,
-        65172,
-        65268,
-        65251,
-        65166,
-        65204,
-        65247,
-        1575
-      ]),
+      ArabicText('اللغات السامية', <int>[1578, 65166, 65232, 65248, 65247, 1575, 32, 65172, 65268, 65251, 65166, 65204, 65247, 1575]),
       ArabicText('العربية لغةٌ رسميةٌ في', <int>[
         65172,
         65268,
@@ -439,7 +424,7 @@ void main() {
         65176,
         65252,
         65247,
-        1575
+        1575,
       ]),
     ];
 
@@ -484,6 +469,36 @@ void main() {
                   'القهوة مشروب يعد من بذور الب المحمصة، وينمو في أكثر من 70 لداً. خصوصاً في المناطق الاستوائية في أمريكا الشمالية والجنوبية وجنوب شرق آسيا وشبه القارة الهندية وأفريقيا. ويقال أن البن الأخضر هو ثاني أكثر السلع تداولاً في العالم بعد النفط الخام.',
               style: TextStyle(
                 fontSize: 20,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+  });
+
+  test('Text Widgets, Mixed Arabic and Latin words should be rendered in order ', () {
+    pdf.addPage(Page(
+      textDirection: TextDirection.rtl,
+      build: (Context context) => RichText(
+        text: TextSpan(
+          text: 'النصوص ثنائية الإتجاه Bidirectional Text\n',
+          style: TextStyle(
+            font: arabicFont,
+            fontSize: 30,
+          ),
+          children: const <TextSpan>[
+            TextSpan(
+              text: r'''
+الكلمات اللاتينية المضافة إلى نص عربي يجب أن توضع في الترتيب الصحيح Right Order مهما كان موضعها في النص.
+At the Beginning of the sentence في بداية الجملة
+أو في منتصفها In the middle of the sentence حيث يكون بعدها كلام عربي
+أو في نهاية النص At the end of the sentence
+أيضا ترتيب الأرقام والرموز يجب 1 أن 2 يكون 3 صحيحاً$.
+ولا ننسى أيضا فواصل السطور Line breakers حيث وجودها في موضعها الصحيح مهم جدا في النصوص ثنائية الاتجاه Bidirectional
+              ''',
+              style: TextStyle(
+                fontSize: 18,
               ),
             ),
           ],

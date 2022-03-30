@@ -24,12 +24,7 @@ const Map<int, dynamic> _arabicSubstitionA = <int, dynamic>{
   0x0623: <int>[1571, 0xFE84], // ARABIC LETTER ALEF WITH HAMZA ABOVE
   0x0624: <int>[1572, 0xFE86], // ARABIC LETTER WAW WITH HAMZA ABOVE
   0x0625: <int>[1573, 0xFE88], // ARABIC LETTER ALEF WITH HAMZA BELOW
-  0x0626: <int>[
-    1574,
-    0xFE8A,
-    0xFE8B,
-    0xFE8C
-  ], // ARABIC LETTER YEH WITH HAMZA ABOVE
+  0x0626: <int>[1574, 0xFE8A, 0xFE8B, 0xFE8C], // ARABIC LETTER YEH WITH HAMZA ABOVE
   0x0627: <int>[1575, 0xFE8E], // ARABIC LETTER ALEF
   0x0628: <int>[1576, 0xFE90, 0xFE91, 0xFE92], // ARABIC LETTER BEH
   0x0629: <int>[1577, 0xFE94], // ARABIC LETTER TEH MARBUTA
@@ -87,12 +82,7 @@ const Map<int, dynamic> _arabicSubstitionA = <int, dynamic>{
   0x06B3: <int>[0xFB96, 0xFB97, 0xFB98, 0xFB99], // ARABIC LETTER GUEH
   0x06BA: <int>[0xFB9E, 0xFB9F], // ARABIC LETTER NOON GHUNNA
   0x06BB: <int>[0xFBA0, 0xFBA1, 0xFBA2, 0xFBA3], // ARABIC LETTER RNOON
-  0x06BE: <int>[
-    0xFBAA,
-    0xFBAB,
-    0xFBAC,
-    0xFBAD
-  ], // ARABIC LETTER HEH DOACHASHMEE
+  0x06BE: <int>[0xFBAA, 0xFBAB, 0xFBAC, 0xFBAD], // ARABIC LETTER HEH DOACHASHMEE
   0x06C0: <int>[0xFBA4, 0xFBA5], // ARABIC LETTER HEH WITH YEH ABOVE
   0x06C1: <int>[0xFBA6, 0xFBA7, 0xFBA8, 0xFBA9], // ARABIC LETTER HEH GOAL
   0x06C5: <int>[0xFBE0, 0xFBE1], // ARABIC LETTER KIRGHIZ OE
@@ -126,12 +116,9 @@ const Map<int, dynamic> _diacriticLigatures = <int, dynamic>{
 
 const Map<int, dynamic> _ligatures = <int, dynamic>{
   0xFEDF: <int, int>{
-    0xFE82:
-        0xFEF5, // ARABIC LIGATURE LAM WITH ALEF WITH MADDA ABOVE ISOLATED FORM
-    0xFE84:
-        0xFEF7, // ARABIC LIGATURE LAM WITH ALEF WITH HAMZA ABOVE ISOLATED FORM
-    0xFE88:
-        0xFEF9, // ARABIC LIGATURE LAM WITH ALEF WITH HAMZA BELOW ISOLATED FORM
+    0xFE82: 0xFEF5, // ARABIC LIGATURE LAM WITH ALEF WITH MADDA ABOVE ISOLATED FORM
+    0xFE84: 0xFEF7, // ARABIC LIGATURE LAM WITH ALEF WITH HAMZA ABOVE ISOLATED FORM
+    0xFE88: 0xFEF9, // ARABIC LIGATURE LAM WITH ALEF WITH HAMZA BELOW ISOLATED FORM
     0xFE8E: 0xFEFB // ARABIC LIGATURE LAM WITH ALEF ISOLATED FORM
   },
   0xFEE0: <int, int>{
@@ -194,9 +181,7 @@ bool _isArabicLetter(int letter) {
 }
 
 bool _isArabicEndLetter(int letter) {
-  return _isArabicLetter(letter) &&
-      _isInArabicSubstitutionA(letter) &&
-      _arabicSubstitionA[letter].length <= 2;
+  return _isArabicLetter(letter) && _isInArabicSubstitutionA(letter) && _arabicSubstitionA[letter].length <= 2;
 }
 
 bool _isArabicAlfLetter(int letter) {
@@ -204,15 +189,11 @@ bool _isArabicAlfLetter(int letter) {
 }
 
 bool _arabicLetterHasFinalForm(int letter) {
-  return _isArabicLetter(letter) &&
-      _isInArabicSubstitutionA(letter) &&
-      (_arabicSubstitionA[letter].length >= 2);
+  return _isArabicLetter(letter) && _isInArabicSubstitutionA(letter) && (_arabicSubstitionA[letter].length >= 2);
 }
 
 bool _arabicLetterHasMedialForm(int letter) {
-  return _isArabicLetter(letter) &&
-      _isInArabicSubstitutionA(letter) &&
-      _arabicSubstitionA[letter].length == 4;
+  return _isArabicLetter(letter) && _isInArabicSubstitutionA(letter) && _arabicSubstitionA[letter].length == 4;
 }
 
 bool _isArabicDiacritic(int letter) {
@@ -339,11 +320,7 @@ Iterable<String> _parse(String text) sync* {
         newWord.insert(0, _arabicDiacritics[currentLetter]!);
         continue;
       }
-      final nextLetter = word
-          .split('')
-          .skip(j + 1)
-          .map((String e) => e.codeUnitAt(0))
-          .firstWhere(
+      final nextLetter = word.split('').skip(j + 1).map((String e) => e.codeUnitAt(0)).firstWhere(
             (int element) => !_isArabicDiacritic(element),
             orElse: () => 0,
           );
@@ -386,14 +363,19 @@ Iterable<String> _parse(String text) sync* {
   }
   // if notArabicWords.length != 0, that means all sentence doesn't contain Arabic.
   for (var i = 0; i < notArabicWords.length; i++) {
-    yield String.fromCharCodes(notArabicWords[i]);
-    if (i != notArabicWords.length - 1) {
+    if (!first) {
       yield ' ';
     }
+    yield String.fromCharCodes(notArabicWords[i]);
   }
 }
 
 /// Apply Arabic shape substitutions
 String convert(String input) {
-  return List<String>.from(_parse(input)).join('');
+  final lines = input.split('\n');
+  final parsed = <String>[];
+  for (var i = 0; i < lines.length; i++) {
+    parsed.addAll([..._parse(lines[i]), if (i != lines.length - 1) '\n']);
+  }
+  return parsed.join();
 }
