@@ -41,7 +41,7 @@ void main() {
     RichText.debug = true;
     pdf = Document();
 
-    arabicFont = loadFont('/Users/milad/development/projects/dart_pdf/pdf/test/hacen-tunisia.ttf');
+    arabicFont = loadFont('test/fonts/hacen-tunisia.ttf');
     style = TextStyle(font: arabicFont, fontSize: 30);
   });
 
