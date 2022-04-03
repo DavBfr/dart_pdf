@@ -390,6 +390,7 @@ Iterable<String> _parse(String text) sync* {
       yield ' ';
     }
     yield String.fromCharCodes(notArabicWords[i]);
+
   }
 }
 
@@ -398,6 +399,9 @@ String convert(String input) {
   final lines = input.split('\n');
   final parsed = <String>[];
   for (var i = 0; i < lines.length; i++) {
+    if(lines[i].isEmpty) {
+      continue;
+    }
     parsed.addAll([..._parse(lines[i]), if (i != lines.length - 1) '\n']);
   }
   return parsed.join();
