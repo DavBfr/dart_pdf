@@ -48,6 +48,7 @@ import 'widget_table_test.dart' as widget_table;
 import 'widget_test.dart' as widget;
 import 'widget_text_test.dart' as widget_text;
 import 'widget_theme_test.dart' as widget_theme;
+import 'widget_toc_test.dart' as widget_toc;
 import 'widget_watermark_test.dart' as widget_watermark;
 import 'widget_wrap_test.dart' as widget_wrap;
 
@@ -83,6 +84,7 @@ void main() {
   widget_table.main();
   widget_text.main();
   widget_theme.main();
+  widget_toc.main();
   widget_watermark.main();
   widget_wrap.main();
   widget.main();

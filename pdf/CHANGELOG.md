@@ -8,6 +8,7 @@
 - Typo: rename "litteral" with "literal"
 - Fix tabs and other spaces placeholder
 - Prevent modifying the document once saved
+- Improve Table Of Content
 
 ## 3.7.4
 

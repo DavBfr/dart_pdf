@@ -59,8 +59,8 @@ class Anchor extends SingleChildWidget {
 
     if (description != null) {
       final rb = mat.transform3(Vector3(box!.right, box!.top, 0));
-      final ibox = PdfRect.fromLTRB(lt.x, lt.y, rb.x, rb.y);
-      PdfAnnot(context.page, PdfAnnotText(rect: ibox, content: description!));
+      final iBox = PdfRect.fromLTRB(lt.x, lt.y, rb.x, rb.y);
+      PdfAnnot(context.page, PdfAnnotText(rect: iBox, content: description!));
     }
   }
 }
@@ -622,7 +622,7 @@ class Outline extends Anchor {
       anchor: name,
       color: color,
       style: style,
-      page: context.pageLabel,
+      page: context.page,
     )..effectiveLevel = level;
 
     final root = context.document.outline;

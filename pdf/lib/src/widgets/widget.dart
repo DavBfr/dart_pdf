@@ -380,3 +380,37 @@ class InheritedWidget extends SingleChildWidget {
     paintChild(_context!);
   }
 }
+
+class DelayedWidget extends SingleChildWidget {
+  DelayedWidget({required this.build}) : super();
+
+  final BuildCallback build;
+
+  @override
+  Widget? get child => _child;
+
+  Widget? _child;
+
+  @override
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    _child = build(context);
+    super.layout(context, constraints);
+  }
+
+  void delayedPaint(Context context) {
+    _child = build(context);
+    child!.layout(
+      context,
+      BoxConstraints.tight(box!.size),
+      parentUsesSize: false,
+    );
+    paintChild(context);
+  }
+
+  @override
+  void paint(Context context) {
+    delayedPaint(context);
+    super.paint(context);
+  }
+}
