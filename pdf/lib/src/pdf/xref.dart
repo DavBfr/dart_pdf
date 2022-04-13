@@ -20,7 +20,7 @@ import 'data_types.dart';
 import 'obj/object.dart';
 import 'stream.dart';
 
-enum PdfCrossRefEntryType { free, inUse }
+enum PdfCrossRefEntryType { free, inUse, compressed }
 
 /// Cross-reference for a Pdf Object
 class PdfXref {
@@ -29,6 +29,7 @@ class PdfXref {
     this.id,
     this.offset, {
     this.generation = 0,
+    this.object,
     this.type = PdfCrossRefEntryType.inUse,
   });
 
@@ -37,6 +38,9 @@ class PdfXref {
 
   /// The offset within the Pdf file
   final int offset;
+
+  /// The object ID containing this compressed object
+  final int? object;
 
   /// The generation of the object, usually 0
   final int generation;
@@ -50,6 +54,8 @@ class PdfXref {
         generation.toString().padLeft(5, '0') +
         (type == PdfCrossRefEntryType.inUse ? ' n ' : ' f ');
   }
+
+  PdfIndirect? get container => object == null ? null : PdfIndirect(object!, 0);
 
   /// The xref in the format of the compressed xref section in the Pdf file
   int cref(ByteData o, int ofs, List<int> w) {
