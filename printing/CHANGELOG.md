@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.8.0
+
+- PdfPreview supports generic Widgets as actions
+
 ## 5.7.5
 
 - Update SWIFT code formatter to version 5

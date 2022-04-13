@@ -95,8 +95,8 @@ class PdfPreview extends StatefulWidget {
   /// Add a switch to show debug view
   final bool canDebug;
 
-  /// Additionnal actions to add to the widget
-  final List<PdfPreviewAction>? actions;
+  /// Additional actions to add to the widget
+  final List<Widget>? actions;
 
   /// List of page formats the user can choose
   final Map<String, PdfPageFormat> pageFormats;
@@ -107,7 +107,7 @@ class PdfPreview extends StatefulWidget {
   /// Called if the user prints the pdf document
   final void Function(BuildContext context)? onPrinted;
 
-  /// Called if an error creating the Pdf occured
+  /// Called if an error creating the Pdf occurred
   final void Function(BuildContext context, dynamic error)? onPrintError;
 
   /// Called if the user shares the pdf document
@@ -258,7 +258,7 @@ class _PdfPreviewState extends State<PdfPreview> {
 
     final actions = <Widget>[];
 
-    if (widget.allowPrinting && info?.canPrint == true) {
+    if (widget.useActions && widget.allowPrinting && info?.canPrint == true) {
       actions.add(PdfPrintAction(
         jobName: widget.pdfFileName,
         dynamicLayout: widget.dynamicLayout,
@@ -270,7 +270,7 @@ class _PdfPreviewState extends State<PdfPreview> {
       ));
     }
 
-    if (widget.allowSharing && info?.canShare == true) {
+    if (widget.useActions && widget.allowSharing && info?.canShare == true) {
       actions.add(PdfShareAction(
         filename: widget.pdfFileName,
         onShared:
@@ -278,12 +278,12 @@ class _PdfPreviewState extends State<PdfPreview> {
       ));
     }
 
-    if (widget.canChangePageFormat) {
+    if (widget.useActions && widget.canChangePageFormat) {
       actions.add(PdfPageFormatAction(
         pageFormats: widget.pageFormats,
       ));
 
-      if (widget.canChangeOrientation) {
+      if (widget.useActions && widget.canChangeOrientation) {
         // ignore: prefer_const_constructors
         actions.add(PdfPageOrientationAction());
       }
@@ -335,7 +335,7 @@ class _PdfPreviewState extends State<PdfPreview> {
               );
             }),
           ),
-          if (actions.isNotEmpty && widget.useActions)
+          if (actions.isNotEmpty)
             IconTheme.merge(
               data: IconThemeData(
                 color: iconColor,
