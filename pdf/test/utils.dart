@@ -81,18 +81,21 @@ Font loadFont(String filename) {
 }
 
 void hexDump(
-  ByteData bytes,
-  int offset,
-  int length, [
+  ByteData bytes, {
+  int offset = 0,
+  int? length,
   int? highlight,
   int? highlightLength,
-]) {
+  int columns = 16,
+}) {
   const reset = '\x1B[0m';
   const red = '\x1B[1;31m';
   var s = '';
   var t = '';
   var n = 0;
   var hl = false;
+  length ??= bytes.lengthInBytes;
+
   for (var i = 0; i < length; i++) {
     final b = bytes.getUint8(offset + i);
     if (highlight != null && highlightLength != null) {
@@ -118,7 +121,7 @@ void hexDump(
     }
 
     n++;
-    if (n % 16 == 0) {
+    if (n % columns == 0) {
       if (hl) {
         s += reset;
         t += reset;
@@ -129,5 +132,5 @@ void hexDump(
       t = '';
     }
   }
-  print('$s   $t');
+  print('$s${' ' * (columns * 3 - s.length + 3)}$t');
 }
