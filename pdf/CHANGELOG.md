@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.7.5
+
+- Update xml dependency range
+
 ## 3.7.4
 
 - Fix Bidirectional text (Arabic + Latin words) order and line breakers issue #990 [Milad]
