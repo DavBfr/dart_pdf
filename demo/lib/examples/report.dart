@@ -96,11 +96,11 @@ Future<Uint8List> generateReport(
         width: 15,
         offset: -10,
         borderColor: baseColor,
-        data: List<pw.LineChartValue>.generate(
+        data: List<pw.PointChartValue>.generate(
           dataTable.length,
           (i) {
             final v = dataTable[i][2] as num;
-            return pw.LineChartValue(i.toDouble(), v.toDouble());
+            return pw.PointChartValue(i.toDouble(), v.toDouble());
           },
         ),
       ),
@@ -110,11 +110,11 @@ Future<Uint8List> generateReport(
         width: 15,
         offset: 10,
         borderColor: PdfColors.amber,
-        data: List<pw.LineChartValue>.generate(
+        data: List<pw.PointChartValue>.generate(
           dataTable.length,
           (i) {
             final v = dataTable[i][1] as num;
-            return pw.LineChartValue(i.toDouble(), v.toDouble());
+            return pw.PointChartValue(i.toDouble(), v.toDouble());
           },
         ),
       ),
@@ -138,11 +138,11 @@ Future<Uint8List> generateReport(
         isCurved: true,
         drawPoints: false,
         color: baseColor,
-        data: List<pw.LineChartValue>.generate(
+        data: List<pw.PointChartValue>.generate(
           dataTable.length,
           (i) {
             final v = dataTable[i][2] as num;
-            return pw.LineChartValue(i.toDouble(), v.toDouble());
+            return pw.PointChartValue(i.toDouble(), v.toDouble());
           },
         ),
       ),

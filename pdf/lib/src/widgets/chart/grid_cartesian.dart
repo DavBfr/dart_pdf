@@ -116,5 +116,9 @@ class CartesianGrid extends ChartGrid {
     context.canvas.restoreContext();
     _xAxis.paint(context);
     _yAxis.paint(context);
+
+    for (final dataSet in datasets) {
+      dataSet.paintForeground(context);
+    }
   }
 }

@@ -39,10 +39,10 @@ void main() {
           ),
           datasets: <Dataset>[
             LineDataSet(
-              data: const <LineChartValue>[
-                LineChartValue(1, 1),
-                LineChartValue(2, 3),
-                LineChartValue(3, 7),
+              data: const <PointChartValue>[
+                PointChartValue(1, 1),
+                PointChartValue(2, 3),
+                PointChartValue(3, 7),
               ],
             ),
           ],
@@ -60,10 +60,10 @@ void main() {
           ),
           datasets: <Dataset>[
             LineDataSet(
-              data: const <LineChartValue>[
-                LineChartValue(1, 1),
-                LineChartValue(2, 3),
-                LineChartValue(3, 7),
+              data: const <PointChartValue>[
+                PointChartValue(1, 1),
+                PointChartValue(2, 3),
+                PointChartValue(3, 7),
               ],
               drawLine: false,
             ),
@@ -81,10 +81,10 @@ void main() {
           ),
           datasets: <Dataset>[
             LineDataSet(
-              data: const <LineChartValue>[
-                LineChartValue(1, 1),
-                LineChartValue(2, 3),
-                LineChartValue(3, 7),
+              data: const <PointChartValue>[
+                PointChartValue(1, 1),
+                PointChartValue(2, 3),
+                PointChartValue(3, 7),
               ],
               drawPoints: false,
             ),
@@ -103,10 +103,10 @@ void main() {
           ),
           datasets: <Dataset>[
             LineDataSet(
-              data: const <LineChartValue>[
-                LineChartValue(1, 1),
-                LineChartValue(2, 3),
-                LineChartValue(3, 7),
+              data: const <PointChartValue>[
+                PointChartValue(1, 1),
+                PointChartValue(2, 3),
+                PointChartValue(3, 7),
               ],
               drawLine: false,
               pointColor: PdfColors.red,
@@ -132,10 +132,10 @@ void main() {
             ),
             datasets: <Dataset>[
               LineDataSet(
-                data: const <LineChartValue>[
-                  LineChartValue(1, 1),
-                  LineChartValue(2, 3),
-                  LineChartValue(3, 7),
+                data: const <PointChartValue>[
+                  PointChartValue(1, 1),
+                  PointChartValue(2, 3),
+                  PointChartValue(3, 7),
                 ],
               ),
             ],
@@ -156,10 +156,10 @@ void main() {
             LineDataSet(
               drawPoints: false,
               isCurved: true,
-              data: const <LineChartValue>[
-                LineChartValue(1, 1),
-                LineChartValue(3, 7),
-                LineChartValue(5, 3),
+              data: const <PointChartValue>[
+                PointChartValue(1, 1),
+                PointChartValue(3, 7),
+                PointChartValue(5, 3),
               ],
             ),
           ],
@@ -179,10 +179,10 @@ void main() {
           ),
           datasets: <Dataset>[
             BarDataSet(
-              data: const <LineChartValue>[
-                LineChartValue(1, 1),
-                LineChartValue(2, 3),
-                LineChartValue(3, 7),
+              data: const <PointChartValue>[
+                PointChartValue(1, 1),
+                PointChartValue(2, 3),
+                PointChartValue(3, 7),
               ],
             ),
           ],
@@ -201,10 +201,10 @@ void main() {
           datasets: <Dataset>[
             BarDataSet(
               axis: Axis.vertical,
-              data: const <LineChartValue>[
-                LineChartValue(1, 1),
-                LineChartValue(2, 3),
-                LineChartValue(3, 7),
+              data: const <PointChartValue>[
+                PointChartValue(1, 1),
+                PointChartValue(2, 3),
+                PointChartValue(3, 7),
               ],
             ),
           ],

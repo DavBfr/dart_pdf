@@ -17,14 +17,15 @@
 import '../../../pdf.dart';
 import '../flex.dart';
 import '../geometry.dart';
+import '../page.dart';
 import '../widget.dart';
 import 'chart.dart';
 import 'grid_cartesian.dart';
-import 'line_chart.dart';
+import 'point_chart.dart';
 
-class BarDataSet extends Dataset {
+class BarDataSet<T extends PointChartValue> extends PointDataSet<T> {
   BarDataSet({
-    required this.data,
+    required List<T> data,
     String? legend,
     this.borderColor,
     this.borderWidth = 1.5,
@@ -35,15 +36,25 @@ class BarDataSet extends Dataset {
     this.width = 10,
     this.offset = 0,
     this.axis = Axis.horizontal,
+    PdfColor? pointColor,
+    double pointSize = 3,
+    bool drawPoints = false,
+    BuildCallback? shape,
+    Widget Function(Context context, T value)? buildValue,
+    ValuePosition valuePosition = ValuePosition.auto,
   })  : drawBorder = drawBorder ?? borderColor != null && color != borderColor,
         assert((drawBorder ?? borderColor != null && color != borderColor) ||
             drawSurface),
         super(
           legend: legend,
-          color: color,
+          color: pointColor ?? color,
+          data: data,
+          buildValue: buildValue,
+          drawPoints: drawPoints,
+          pointSize: pointSize,
+          shape: shape,
+          valuePosition: valuePosition,
         );
-
-  final List<LineChartValue> data;
 
   final bool drawBorder;
   final PdfColor? borderColor;
@@ -58,7 +69,7 @@ class BarDataSet extends Dataset {
 
   final Axis axis;
 
-  void _drawSurface(Context context, ChartGrid grid, LineChartValue value) {
+  void _drawSurface(Context context, ChartGrid grid, T value) {
     switch (axis) {
       case Axis.horizontal:
         final y = (grid is CartesianGrid) ? grid.xAxisOffset : 0.0;
@@ -127,5 +138,20 @@ class BarDataSet extends Dataset {
         ..setLineWidth(borderWidth)
         ..strokePath();
     }
+  }
+
+  @override
+  ValuePosition automaticValuePosition(
+    PdfPoint point,
+    PdfPoint size,
+    PdfPoint? previous,
+    PdfPoint? next,
+  ) {
+    final pos = super.automaticValuePosition(point, size, previous, next);
+    if (pos == ValuePosition.right || pos == ValuePosition.left) {
+      return ValuePosition.top;
+    }
+
+    return pos;
   }
 }

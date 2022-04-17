@@ -1,8 +1,9 @@
 # Changelog
 
-## 3.7.5
+## 3.8.0
 
 - Update xml dependency range
+- Implement PointDataSet for Chart
 
 ## 3.7.4
 

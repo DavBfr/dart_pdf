@@ -16,28 +16,31 @@
 
 import '../../../pdf.dart';
 import '../geometry.dart';
+import '../page.dart';
 import '../widget.dart';
 import 'chart.dart';
 import 'grid_cartesian.dart';
+import 'point_chart.dart';
 
-class LineChartValue extends ChartValue {
-  const LineChartValue(this.x, this.y);
-  final double x;
-  final double y;
-
-  PdfPoint get point => PdfPoint(x, y);
+@Deprecated('Use PointChartValue')
+class LineChartValue extends PointChartValue {
+  const LineChartValue(double x, double y) : super(x, y);
 }
 
-class LineDataSet extends Dataset {
+class LineDataSet<T extends PointChartValue> extends PointDataSet<T> {
   LineDataSet({
-    required this.data,
+    required List<T> data,
     String? legend,
-    this.pointColor,
-    this.pointSize = 3,
+    PdfColor? pointColor,
+    double pointSize = 3,
     PdfColor color = PdfColors.blue,
     this.lineWidth = 2,
     this.drawLine = true,
-    this.drawPoints = true,
+    this.lineColor,
+    bool drawPoints = true,
+    BuildCallback? shape,
+    Widget Function(Context context, T value)? buildValue,
+    ValuePosition valuePosition = ValuePosition.auto,
     this.drawSurface = false,
     this.surfaceOpacity = .2,
     this.surfaceColor,
@@ -46,18 +49,18 @@ class LineDataSet extends Dataset {
   })  : assert(drawLine || drawPoints || drawSurface),
         super(
           legend: legend,
-          color: color,
+          color: pointColor ?? color,
+          data: data,
+          drawPoints: drawPoints,
+          pointSize: pointSize,
+          buildValue: buildValue,
+          shape: shape,
+          valuePosition: valuePosition,
         );
 
-  final List<LineChartValue> data;
-
   final bool drawLine;
-
+  final PdfColor? lineColor;
   final double lineWidth;
-
-  final bool drawPoints;
-  final PdfColor? pointColor;
-  final double pointSize;
 
   final bool drawSurface;
   final PdfColor? surfaceColor;
@@ -122,13 +125,6 @@ class LineDataSet extends Dataset {
     context.canvas.lineTo(pf.x, y);
   }
 
-  void _drawPoints(Context context, ChartGrid grid) {
-    for (final value in data) {
-      final p = grid.toChart(value.point);
-      context.canvas.drawEllipse(p.x, p.y, pointSize, pointSize);
-    }
-  }
-
   @override
   void paintBackground(Context context) {
     if (data.isEmpty) {
@@ -172,19 +168,46 @@ class LineDataSet extends Dataset {
       _drawLine(context, grid, true);
 
       context.canvas
-        ..setStrokeColor(color)
+        ..setStrokeColor(lineColor ?? color)
         ..setLineWidth(lineWidth)
         ..setLineCap(PdfLineCap.round)
         ..setLineJoin(PdfLineJoin.round)
         ..strokePath();
     }
+  }
 
-    if (drawPoints) {
-      _drawPoints(context, grid);
-
-      context.canvas
-        ..setColor(pointColor ?? color)
-        ..fillPath();
+  @override
+  ValuePosition automaticValuePosition(
+    PdfPoint point,
+    PdfPoint size,
+    PdfPoint? previous,
+    PdfPoint? next,
+  ) {
+    if (point.y - size.y - delta < box!.bottom) {
+      return ValuePosition.top;
     }
+
+    if (previous != null &&
+        previous.y > point.y &&
+        next != null &&
+        next.y > point.y) {
+      return ValuePosition.bottom;
+    }
+
+    if (previous != null &&
+        previous.y < point.y &&
+        next != null &&
+        next.y > point.y) {
+      return ValuePosition.left;
+    }
+
+    if (previous != null &&
+        previous.y > point.y &&
+        next != null &&
+        next.y < point.y) {
+      return ValuePosition.right;
+    }
+
+    return super.automaticValuePosition(point, size, previous, next);
   }
 }

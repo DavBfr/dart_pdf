@@ -56,7 +56,7 @@ class ChartLegend extends StatelessWidget {
           width: style.fontSize,
           height: style.fontSize,
           margin: const EdgeInsets.only(right: 5),
-          child: dataset.legendShape(),
+          child: dataset.legendShape(context),
         ),
         Text(
           dataset.legend!,

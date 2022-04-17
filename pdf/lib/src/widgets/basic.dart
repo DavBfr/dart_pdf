@@ -642,6 +642,11 @@ class SizedBox extends StatelessWidget {
       : width = size?.x,
         height = size?.y;
 
+  /// Creates a box whose width and height are equal.
+  SizedBox.square({this.child, double? dimension})
+      : width = dimension,
+        height = dimension;
+
   /// If non-null, requires the child to have exactly this width.
   final double? width;
 
