@@ -30,6 +30,7 @@ import 'obj/names.dart';
 import 'obj/object.dart';
 import 'obj/outline.dart';
 import 'obj/page.dart';
+import 'obj/page_label.dart';
 import 'obj/page_list.dart';
 import 'obj/signature.dart';
 import 'output.dart';
@@ -83,10 +84,8 @@ class PdfDocument {
   })  : deflate = compress ? (deflate ?? defaultDeflate) : null,
         prev = null,
         _objser = 1 {
-    // Now create some standard objects
-    pdfPageList = PdfPageList(this);
-    pdfNames = PdfNames(this);
-    catalog = PdfCatalog(this, pdfPageList, pageMode, pdfNames);
+    // create the catalog
+    catalog = PdfCatalog(this, PdfPageList(this), pageMode);
   }
 
   PdfDocument.load(
@@ -99,9 +98,7 @@ class PdfDocument {
         _objser = prev!.size,
         version = prev.version {
     // Now create some standard objects
-    pdfPageList = PdfPageList(this);
-    pdfNames = PdfNames(this);
-    catalog = PdfCatalog(this, pdfPageList, pageMode, pdfNames);
+    catalog = PdfCatalog(this, PdfPageList(this), pageMode);
 
     // Import the existing document
     prev!.mergeDocument(this);
@@ -118,7 +115,7 @@ class PdfDocument {
   final Set<PdfObject> objects = <PdfObject>{};
 
   /// This is the Catalog object, which is required by each Pdf Document
-  late PdfCatalog catalog;
+  late final PdfCatalog catalog;
 
   /// PDF version to generate
   final PdfVersion version;
@@ -129,13 +126,13 @@ class PdfDocument {
   PdfInfo? info;
 
   /// This is the Pages object, which is required by each Pdf Document
-  late PdfPageList pdfPageList;
+  PdfPageList get pdfPageList => catalog.pdfPageList;
 
-  /// The name dictionary
-  late PdfNames pdfNames;
-
-  /// This is the Outline object, which is optional
-  PdfOutline? _outline;
+  /// The anchor names dictionary
+  PdfNames get pdfNames {
+    catalog.names ??= PdfNames(this);
+    return catalog.names!;
+  }
 
   /// This holds a [PdfObject] describing the default border for annotations.
   /// It's only used when the document is being written.
@@ -191,11 +188,14 @@ class PdfDocument {
 
   /// The root outline
   PdfOutline get outline {
-    if (_outline == null) {
-      _outline = PdfOutline(this);
-      catalog.outlines = _outline;
-    }
-    return _outline!;
+    catalog.outlines ??= PdfOutline(this);
+    return catalog.outlines!;
+  }
+
+  /// The root page labels
+  PdfPageLabels get pageLabels {
+    catalog.pageLabels ??= PdfPageLabels(this);
+    return catalog.pageLabels!;
   }
 
   /// Graphic states for opacity and transfer modes

@@ -58,7 +58,7 @@ class PdfOutline extends PdfObjectDict {
     this.color,
     this.destMode = PdfOutlineMode.fitPage,
     this.style = PdfOutlineStyle.normal,
-    int? page,
+    String? page,
   })  : assert(anchor == null || (dest == null && rect == null)),
         _page = page,
         super(pdfDocument);
@@ -76,10 +76,12 @@ class PdfOutline extends PdfObjectDict {
   PdfPage? dest;
 
   /// Page number
-  int? get page =>
+  String? get page =>
       _page ??
-      (dest != null ? pdfDocument.pdfPageList.pages.indexOf(dest!) + 1 : null);
-  final int? _page;
+      (dest != null
+          ? (pdfDocument.pdfPageList.pages.indexOf(dest!) + 1).toString()
+          : null);
+  final String? _page;
 
   /// The region on the destination page
   final PdfRect? rect;

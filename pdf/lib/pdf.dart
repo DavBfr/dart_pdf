@@ -33,6 +33,7 @@ export 'src/pdf/obj/info.dart';
 export 'src/pdf/obj/metadata.dart';
 export 'src/pdf/obj/outline.dart';
 export 'src/pdf/obj/page.dart';
+export 'src/pdf/obj/page_label.dart';
 export 'src/pdf/obj/pattern.dart';
 export 'src/pdf/obj/shading.dart';
 export 'src/pdf/obj/signature.dart';

@@ -21,6 +21,7 @@ import 'metadata.dart';
 import 'names.dart';
 import 'object_dict.dart';
 import 'outline.dart';
+import 'page_label.dart';
 import 'page_list.dart';
 
 /// Pdf Catalog object
@@ -30,7 +31,6 @@ class PdfCatalog extends PdfObjectDict {
     PdfDocument pdfDocument,
     this.pdfPageList,
     this.pageMode,
-    this.names,
   ) : super(pdfDocument, type: '/Catalog');
 
   /// The pages of the document
@@ -45,8 +45,11 @@ class PdfCatalog extends PdfObjectDict {
   /// The initial page mode
   final PdfPageMode pageMode;
 
-  /// The initial page mode
-  final PdfNames names;
+  /// The anchor names
+  PdfNames? names;
+
+  /// The page labels of the document
+  PdfPageLabels? pageLabels;
 
   /// These map the page modes just defined to the pagemodes setting of Pdf.
   static const List<String> _pdfPageModes = <String>[
@@ -75,7 +78,14 @@ class PdfCatalog extends PdfObjectDict {
     }
 
     // the Names object
-    params['/Names'] = names.ref();
+    if (names != null) {
+      params['/Names'] = names!.ref();
+    }
+
+    // the PageLabels object
+    if (pageLabels != null && pageLabels!.labels.isNotEmpty) {
+      params['/PageLabels'] = pageLabels!.ref();
+    }
 
     // the /PageMode setting
     params['/PageMode'] = PdfName(_pdfPageModes[pageMode.index]);

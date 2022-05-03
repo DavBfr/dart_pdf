@@ -62,7 +62,16 @@ class Context {
 
   final PdfDocument document;
 
-  int get pageNumber => document.pdfPageList.pages.indexOf(page) + 1;
+  int get _pageNumber => document.pdfPageList.pages.indexOf(page);
+
+  int get pageNumber => _pageNumber + 1;
+
+  String get pageLabel => document.catalog.pageLabels == null
+      ? pageNumber.toString()
+      : document.pageLabels.pageLabel(_pageNumber);
+
+  set pageLabel(String value) =>
+      document.pageLabels.labels[_pageNumber] = PdfPageLabel(value);
 
   /// Number of pages in the document.
   /// This value is not available in a MultiPage body and will be equal to pageNumber.

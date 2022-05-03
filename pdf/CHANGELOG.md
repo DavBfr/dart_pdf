@@ -4,6 +4,7 @@
 
 - Update xml dependency range
 - Implement PointDataSet for Chart
+- Implement PdfPageLabels
 
 ## 3.7.4
 

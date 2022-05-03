@@ -622,7 +622,7 @@ class Outline extends Anchor {
       anchor: name,
       color: color,
       style: style,
-      page: context.pageNumber,
+      page: context.pageLabel,
     )..effectiveLevel = level;
 
     final root = context.document.outline;
