@@ -21,9 +21,9 @@ import '../cache.dart';
 import 'manifest.dart';
 
 /// Downloadable font object
-class DownloadbleFont {
+class DownloadableFont {
   /// Create a downloadable font object
-  const DownloadbleFont(this.url, this.name);
+  const DownloadableFont(this.url, this.name);
 
   /// The Url to get the font from
   final String url;

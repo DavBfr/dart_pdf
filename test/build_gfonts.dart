@@ -164,7 +164,7 @@ void main(List<String> args) async {
   for (final f in getFonts(m)) {
     output.writeln('/// - ${f.fontDartName} (${f.fontName})');
   }
-  output.writeln('class PdfGoogleFonts extends DownloadbleFont {');
+  output.writeln('class PdfGoogleFonts extends DownloadableFont {');
   output.writeln('');
   output.writeln(
       'const PdfGoogleFonts._(String url, String name) : super(url, name);');

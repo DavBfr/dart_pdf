@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.9.0
+
+- Typo: change "DownloadbleFont" to "DownloadableFont"
+
 ## 5.8.0
 
 - PdfPreview supports generic Widgets as actions

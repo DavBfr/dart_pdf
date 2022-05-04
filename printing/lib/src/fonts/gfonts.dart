@@ -4716,7 +4716,7 @@ import 'font.dart';
 /// - cupertinoIcons (CupertinoIcons)
 /// - materialIcons (MaterialIcons)
 /// - notoColorEmoji (NotoColorEmoji)
-class PdfGoogleFonts extends DownloadbleFont {
+class PdfGoogleFonts extends DownloadableFont {
   const PdfGoogleFonts._(String url, String name) : super(url, name);
 
   /// @nodoc
