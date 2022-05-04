@@ -144,17 +144,17 @@ class PdfNumList extends PdfDataType {
   int get hashCode => values.hashCode;
 }
 
-enum PdfStringFormat { binary, litteral }
+enum PdfStringFormat { binary, literal }
 
 class PdfString extends PdfDataType {
-  const PdfString(this.value, [this.format = PdfStringFormat.litteral]);
+  const PdfString(this.value, [this.format = PdfStringFormat.literal]);
 
   factory PdfString.fromString(String value) {
-    return PdfString(_string(value), PdfStringFormat.litteral);
+    return PdfString(_string(value), PdfStringFormat.literal);
   }
 
   factory PdfString.fromStream(PdfStream value,
-      [PdfStringFormat format = PdfStringFormat.litteral]) {
+      [PdfStringFormat format = PdfStringFormat.literal]) {
     return PdfString(value.output(), format);
   }
 
@@ -283,7 +283,7 @@ class PdfString extends PdfDataType {
         }
         s.putByte(0x3e);
         break;
-      case PdfStringFormat.litteral:
+      case PdfStringFormat.literal:
         s.putByte(40);
         _putTextBytes(s, value);
         s.putByte(41);
@@ -317,7 +317,7 @@ class PdfSecString extends PdfString {
   factory PdfSecString.fromString(
     PdfObject object,
     String value, [
-    PdfStringFormat format = PdfStringFormat.litteral,
+    PdfStringFormat format = PdfStringFormat.literal,
   ]) {
     return PdfSecString(
       object,
@@ -329,7 +329,7 @@ class PdfSecString extends PdfString {
   factory PdfSecString.fromStream(
     PdfObject object,
     PdfStream value, [
-    PdfStringFormat format = PdfStringFormat.litteral,
+    PdfStringFormat format = PdfStringFormat.literal,
   ]) {
     return PdfSecString(
       object,
@@ -342,7 +342,7 @@ class PdfSecString extends PdfString {
     return PdfSecString(
       object,
       PdfString._date(date),
-      PdfStringFormat.litteral,
+      PdfStringFormat.literal,
     );
   }
 

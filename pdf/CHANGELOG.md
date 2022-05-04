@@ -5,6 +5,7 @@
 - Update xml dependency range
 - Implement PointDataSet for Chart
 - Implement PdfPageLabels
+- Typo: rename "litteral" with "literal"
 
 ## 3.7.4
 
