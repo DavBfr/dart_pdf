@@ -3,6 +3,7 @@
 ## 5.9.0
 
 - Typo: change "DownloadbleFont" to "DownloadableFont"
+- Remove default .pdf extension added to the Android printJob
 
 ## 5.8.0
 

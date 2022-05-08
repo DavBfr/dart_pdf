@@ -424,7 +424,7 @@ public class PrintingJob extends PrintDocumentAdapter {
     void setDocument(byte[] data) {
         documentData = data;
 
-        PrintDocumentInfo info = new PrintDocumentInfo.Builder(jobName + ".pdf")
+        PrintDocumentInfo info = new PrintDocumentInfo.Builder(jobName)
                                          .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
                                          .build();
 
