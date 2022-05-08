@@ -749,9 +749,9 @@ class RichText extends Widget with SpanningWidget {
 
   /// Check available characters in the fonts
   /// use fallback if needed and replace emojis
-  List<InlineSpan> _preprocessSpans(Context context) {
+  List<InlineSpan> _preProcessSpans(Context context) {
     final theme = Theme.of(context);
-    final defaultstyle = theme.defaultTextStyle;
+    final defaultStyle = theme.defaultTextStyle;
     final spans = <InlineSpan>[];
 
     text.visitChildren((
@@ -849,7 +849,7 @@ class RichText extends Widget with SpanningWidget {
       ));
 
       return true;
-    }, defaultstyle, null);
+    }, defaultStyle, null);
 
     return spans;
   }
@@ -885,7 +885,7 @@ class RichText extends Widget with SpanningWidget {
     var spanStart = 0;
     var overflow = false;
 
-    _preprocessed ??= _preprocessSpans(context);
+    _preprocessed ??= _preProcessSpans(context);
 
     void _buildLines() {
       for (final span in _preprocessed!) {
@@ -909,7 +909,6 @@ class RichText extends Widget with SpanningWidget {
 
           for (var line = 0; line < spanLines.length; line++) {
             final words = spanLines[line].split(RegExp(r'\s'));
-            print(words);
             for (var index = 0; index < words.length; index++) {
               final word = words[index];
 
