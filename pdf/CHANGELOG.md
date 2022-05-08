@@ -6,6 +6,7 @@
 - Implement PointDataSet for Chart
 - Implement PdfPageLabels
 - Typo: rename "litteral" with "literal"
+- Fix tabs and other spaces placeholder
 
 ## 3.7.4
 
