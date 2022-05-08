@@ -7,6 +7,7 @@
 - Implement PdfPageLabels
 - Typo: rename "litteral" with "literal"
 - Fix tabs and other spaces placeholder
+- Prevent modifying the document once saved
 
 ## 3.7.4
 

@@ -114,11 +114,13 @@ class Document {
   bool _paint = false;
 
   void addPage(Page page, {int? index}) {
+    assert(!_paint, 'The document has already been saved.');
     page.generate(this, index: index);
     _pages.add(page);
   }
 
   void editPage(int index, Page page) {
+    assert(!_paint, 'The document has already been saved.');
     page.generate(this, index: index, insert: false);
     _pages.add(page);
   }
