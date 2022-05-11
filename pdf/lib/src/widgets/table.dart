@@ -277,6 +277,7 @@ class Table extends Widget with SpanningWidget {
     TableColumnWidth defaultColumnWidth = const IntrinsicColumnWidth(),
     TableWidth tableWidth = TableWidth.max,
     BoxDecoration? headerDecoration,
+    BoxDecoration? headerCellDecoration,
     BoxDecoration? rowDecoration,
     BoxDecoration? oddRowDecoration,
   }) {
@@ -306,6 +307,7 @@ class Table extends Widget with SpanningWidget {
           Container(
             alignment: headerAlignments[tableRow.length] ?? headerAlignment,
             padding: headerPadding,
+            decoration: headerCellDecoration,
             constraints: BoxConstraints(minHeight: headerHeight),
             child: Text(
               headerFormat == null
