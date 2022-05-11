@@ -4,6 +4,7 @@
 
 - Fix large PDF generation on web with compressed xref
 - Fix RangeError Exception When MultiPage Wraps Across Pages [scottdewald]
+- Add headerCellDecoration to Table.fromTextArray [Enrique Cardona]
 
 ## 3.8.0
 
