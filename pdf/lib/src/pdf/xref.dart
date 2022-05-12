@@ -186,7 +186,8 @@ class PdfXrefTable extends PdfDataType {
       params['/Index'] = PdfArray.fromNum(blocks);
     }
 
-    final bytes = (math.log(offset) ~/ math.ln2) ~/ 8;
+    final bytes = ((math.log(offset) / math.ln2).ceil() / 8).ceil();
+    print(bytes);
     final w = [1, bytes, 1];
     params['/W'] = PdfArray.fromNum(w);
     final wl = w.reduce((a, b) => a + b);
