@@ -31,7 +31,8 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     private var orientation: UIPrintInfo.Orientation?
     private let semaphore = DispatchSemaphore(value: 0)
     private var dynamic = false
-
+    private var currentSize: CGSize?
+    
     public init(printing: PrintingPlugin, index: Int) {
         self.printing = printing
         self.index = index
@@ -134,7 +135,17 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         printing.onCompleted(printJob: self, completed: completed, error: error?.localizedDescription as NSString?)
     }
 
+    public func printInteractionController(_ printInteractionController: UIPrintInteractionController, cutLengthFor paper: UIPrintPaper) -> CGFloat {
+        if currentSize == nil{
+            return  paper.paperSize.height
+        }
+
+        return currentSize!.height
+       
+    }
+    
     func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool) {
+        currentSize = size
         dynamic = dyn
         let printing = UIPrintInteractionController.isPrintingAvailable
         if !printing {
