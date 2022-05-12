@@ -52,7 +52,7 @@ demo/assets/profile.jpg:
 	curl -L "https://www.fakepersongenerator.com/Face/female/female20151024334209870.jpg" > $@
 
 pdf/hacen-tunisia.ttf:
-	curl -L "https://arbfonts.com/font_files/hacen/Hacen Tunisia.ttf" > $@
+	curl -L "https://arbfonts.com/font_files/hacen/Hacen%20Tunisia.ttf" > $@
 
 format: format-dart format-clang format-swift
 
@@ -97,7 +97,7 @@ get: $(FONTS) pdf/pubspec.lock printing/pubspec.lock demo/pubspec.lock test/pubs
 test-pdf: svg $(FONTS) pdf/pubspec.lock .coverage
 	cd pdf; $(DART_BIN) pub global run coverage:collect_coverage --port=$(COV_PORT) -o coverage.json --resume-isolates --wait-paused &\
 	$(DART_BIN) --enable-asserts --disable-service-auth-codes --enable-vm-service=$(COV_PORT) --pause-isolates-on-exit test/all_tests.dart
-	cd pdf; $(DART_BIN) pub global run coverage:format_coverage --packages=.packages -i coverage.json --report-on lib --lcov --out lcov.info
+	cd pdf; $(DART_BIN) pub global run coverage:format_coverage --package=. -i coverage.json --report-on lib --lcov --out lcov.info
 	cd pdf; for EXAMPLE in $(shell cd pdf; find example -name '*.dart'); do $(DART_BIN) $$EXAMPLE; done
 	test/compare-pdf.sh pdf test/golden
 
