@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.8.1
+
+- Fix large PDF generation on web with compressed xref
+
 ## 3.8.0
 
 - Update xml dependency range

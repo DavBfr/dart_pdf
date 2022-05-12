@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'data_types.dart';
@@ -185,11 +186,7 @@ class PdfXrefTable extends PdfDataType {
       params['/Index'] = PdfArray.fromNum(blocks);
     }
 
-    var bytes = 2; // A pdf less than 256 bytes is unlikely
-    while (1 << (bytes * 8) < offset) {
-      bytes++;
-    }
-
+    final bytes = (math.log(offset) ~/ math.ln2) ~/ 8;
     final w = [1, bytes, 1];
     params['/W'] = PdfArray.fromNum(w);
     final wl = w.reduce((a, b) => a + b);
