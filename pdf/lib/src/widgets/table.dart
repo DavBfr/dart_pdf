@@ -559,12 +559,12 @@ class Table extends Widget with SpanningWidget {
 
         switch (align) {
           case TableCellVerticalAlignment.bottom:
-            childY = totalHeight - child.box!.y - _heights[heightIndex];
+            childY = totalHeight - child.box!.y - _getHeight(heightIndex);
             break;
           case TableCellVerticalAlignment.middle:
             childY = totalHeight -
                 child.box!.y -
-                (_heights[heightIndex] + child.box!.height) / 2;
+                (_getHeight(heightIndex) + child.box!.height) / 2;
             break;
           case TableCellVerticalAlignment.top:
           case TableCellVerticalAlignment.full:
@@ -667,6 +667,10 @@ class Table extends Widget with SpanningWidget {
     if (border != null) {
       border!.paintTable(context, box!, _widths, _heights);
     }
+  }
+
+  double _getHeight(int heightIndex) {
+    return (heightIndex >= 0 && heightIndex < _heights.length) ? _heights[heightIndex] : 0.0;
   }
 
   static TextAlign _textAlign(Alignment align) {
