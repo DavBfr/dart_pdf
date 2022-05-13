@@ -43,6 +43,7 @@ class Settings {
 @JS()
 class PdfJsDocLoader {
   external Future<PdfJsDoc> get promise;
+  external Future<void> destroy();
 }
 
 @anonymous
