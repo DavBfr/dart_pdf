@@ -58,6 +58,7 @@ class PdfJsDoc {
 class PdfJsPage {
   external PdfJsViewport getViewport(Settings data);
   external PdfJsRender render(Settings data);
+  external bool cleanup();
 }
 
 @anonymous

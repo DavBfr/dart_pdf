@@ -259,7 +259,7 @@ class PrintingPlugin extends PrintingPlatform {
         ..viewport = viewport;
 
       await promiseToFuture<void>(page.render(renderContext).promise);
-
+      
       // Convert the image to PNG
       final completer = Completer<void>();
       final blob = await canvas.toBlob();
@@ -279,6 +279,7 @@ class PrintingPlugin extends PrintingPlatform {
         canvas.height!,
         data.toBytes(),
       );
+      page.cleanup();
     }
     t.destroy();
   }
