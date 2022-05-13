@@ -280,6 +280,7 @@ class PrintingPlugin extends PrintingPlatform {
         data.toBytes(),
       );
     }
+    t.destroy();
   }
 }
 
