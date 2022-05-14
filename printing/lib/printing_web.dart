@@ -313,7 +313,7 @@ class PrintingPlugin extends PrintingPlatform {
         ..viewport = viewport;
 
       await promiseToFuture<void>(page.render(renderContext).promise);
-      
+
       // Convert the image to PNG
       final completer = Completer<void>();
       final blob = await canvas.toBlob();
