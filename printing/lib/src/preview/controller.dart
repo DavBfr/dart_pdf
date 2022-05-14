@@ -68,6 +68,7 @@ class PdfPreviewData extends ChangeNotifier {
 
   String get localPageFormat {
     // Flutter 3 workaround
+    // ignore: omit_local_variable_types
     final WidgetsBinding? wbi = WidgetsBinding.instance;
     final locale = wbi!.window.locale;
     // ignore: unnecessary_cast
