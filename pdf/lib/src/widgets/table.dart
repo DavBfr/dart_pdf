@@ -670,7 +670,9 @@ class Table extends Widget with SpanningWidget {
   }
 
   double _getHeight(int heightIndex) {
-    return (heightIndex >= 0 && heightIndex < _heights.length) ? _heights[heightIndex] : 0.0;
+    return (heightIndex >= 0 && heightIndex < _heights.length)
+        ? _heights[heightIndex]
+        : 0.0;
   }
 
   static TextAlign _textAlign(Alignment align) {
