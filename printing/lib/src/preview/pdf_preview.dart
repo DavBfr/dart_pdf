@@ -183,8 +183,8 @@ class _PdfPreviewState extends State<PdfPreview> {
 
     if (!widget.canChangePageFormat && pages.isNotEmpty) {
       format = PdfPageFormat(
-        pages.first.page!.width * PdfPageFormat.inch / dpi,
-        pages.first.page!.height * PdfPageFormat.inch / dpi,
+        pages.first.width * PdfPageFormat.inch / dpi,
+        pages.first.height * PdfPageFormat.inch / dpi,
         marginAll: 5 * PdfPageFormat.mm,
       );
     }

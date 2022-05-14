@@ -16,20 +16,24 @@
 
 import 'package:flutter/material.dart';
 
-import '../raster.dart';
-
 /// Represents one PDF page
 class PdfPreviewPage extends StatelessWidget {
   /// Create a PDF page widget
   const PdfPreviewPage({
     Key? key,
-    this.page,
+    required this.image,
+    required this.width,
+    required this.height,
     this.pdfPreviewPageDecoration,
     this.pageMargin,
   }) : super(key: key);
 
   /// Image representing the content of the page
-  final PdfRaster? page;
+  final ImageProvider image;
+
+  final int width;
+
+  final int height;
 
   /// Decoration around the page
   final Decoration? pdfPreviewPageDecoration;
@@ -39,7 +43,6 @@ class PdfPreviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final im = PdfRasterImage(page!);
     final scrollbarTrack = Theme.of(context)
             .scrollbarTheme
             .thickness
@@ -66,9 +69,9 @@ class PdfPreviewPage extends StatelessWidget {
             ],
           ),
       child: AspectRatio(
-        aspectRatio: page!.width / page!.height,
+        aspectRatio: width / height,
         child: Image(
-          image: im,
+          image: image,
           fit: BoxFit.cover,
         ),
       ),

@@ -37,7 +37,7 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
   PdfPageFormat get pageFormat => widget.pageFormat;
 
   /// Resulting pages
-  final List<PdfPreviewPage> pages = <PdfPreviewPage>[];
+  final pages = <PdfPreviewPage>[];
 
   /// Printing subsystem information
   PrintingInfo? info;
@@ -57,6 +57,10 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
   @override
   void dispose() {
     _previewUpdate?.cancel();
+    for (final e in pages) {
+      e.image.evict();
+    }
+    pages.clear();
     super.dispose();
   }
 
@@ -159,26 +163,35 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
           _rastering = false;
           return;
         }
-        setState(() {
-          if (pages.length <= pageNum) {
-            pages.add(PdfPreviewPage(
-              page: page,
-              pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
-              pageMargin: widget.previewPageMargin,
-            ));
-          } else {
-            pages[pageNum] = PdfPreviewPage(
-              page: page,
-              pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
-              pageMargin: widget.previewPageMargin,
-            );
-          }
-        });
+
+        if (pages.length <= pageNum) {
+          pages.add(PdfPreviewPage(
+            image: MemoryImage(await page.toPng()),
+            width: page.width,
+            height: page.height,
+            pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
+            pageMargin: widget.previewPageMargin,
+          ));
+        } else {
+          pages[pageNum].image.evict();
+          pages[pageNum] = PdfPreviewPage(
+            image: MemoryImage(await page.toPng()),
+            width: page.width,
+            height: page.height,
+            pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
+            pageMargin: widget.previewPageMargin,
+          );
+        }
+        setState(() {});
 
         pageNum++;
       }
 
+      for (var index = pageNum; index < pages.length; index++) {
+        pages[index].image.evict();
+      }
       pages.removeRange(pageNum, pages.length);
+      setState(() {});
     } catch (exception, stack) {
       InformationCollector? collector;
 
