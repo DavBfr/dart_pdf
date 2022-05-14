@@ -1,5 +1,9 @@
 # Changelog
 
+# 5.9.1
+
+- iOS: Set cutLength to be currentSize.height [Liam Downey]
+
 ## 5.9.0
 
 - Typo: change "DownloadbleFont" to "DownloadableFont"

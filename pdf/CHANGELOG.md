@@ -3,6 +3,7 @@
 ## 3.8.1
 
 - Fix large PDF generation on web with compressed xref
+- Fix RangeError Exception When MultiPage Wraps Across Pages [scottdewald]
 
 ## 3.8.0
 
