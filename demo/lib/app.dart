@@ -164,8 +164,10 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   }
 
   void _showSources() {
-    ul.launch(
-      'https://github.com/DavBfr/dart_pdf/blob/master/demo/lib/examples/${examples[_tab].file}',
+    ul.launchUrl(
+      Uri.parse(
+        'https://github.com/DavBfr/dart_pdf/blob/master/demo/lib/examples/${examples[_tab].file}',
+      ),
     );
   }
 

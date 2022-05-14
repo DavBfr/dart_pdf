@@ -27,8 +27,9 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const scrollbarTheme =
-        ScrollbarThemeData(isAlwaysShown: true, showTrackOnHover: true);
+    final scrollbarTheme = ScrollbarThemeData(
+      thumbVisibility: MaterialStateProperty.all(true),
+    );
 
     return MaterialApp(
       theme: ThemeData.light().copyWith(scrollbarTheme: scrollbarTheme),
