@@ -3,6 +3,7 @@
 # 5.9.1
 
 - iOS: Set cutLength to be currentSize.height [Liam Downey]
+- Add Flutter 3 warning workaround
 
 ## 5.9.0
 
