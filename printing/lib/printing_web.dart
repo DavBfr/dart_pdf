@@ -236,52 +236,58 @@ class PrintingPlugin extends PrintingPlatform {
     double dpi,
   ) async* {
     final t = PdfJs.getDocument(Settings()..data = document);
+    try {
+      final d = await promiseToFuture<PdfJsDoc>(t.promise);
+      final numPages = d.numPages;
 
-    final d = await promiseToFuture<PdfJsDoc>(t.promise);
-    final numPages = d.numPages;
+      final html.CanvasElement canvas =
+          js.context['document'].createElement('canvas');
 
-    final html.CanvasElement canvas =
-        js.context['document'].createElement('canvas');
+      final context = canvas.getContext('2d') as html.CanvasRenderingContext2D?;
+      final _pages =
+          pages ?? Iterable<int>.generate(numPages, (index) => index);
 
-    final context = canvas.getContext('2d') as html.CanvasRenderingContext2D?;
-    final _pages = pages ?? Iterable<int>.generate(numPages, (index) => index);
+      for (final i in _pages) {
+        final page = await promiseToFuture<PdfJsPage>(d.getPage(i + 1));
+        try {
+          final viewport =
+              page.getViewport(Settings()..scale = dpi / PdfPageFormat.inch);
 
-    for (final i in _pages) {
-      final page = await promiseToFuture<PdfJsPage>(d.getPage(i + 1));
-      final viewport =
-          page.getViewport(Settings()..scale = dpi / PdfPageFormat.inch);
+          canvas.height = viewport.height.toInt();
+          canvas.width = viewport.width.toInt();
 
-      canvas.height = viewport.height.toInt();
-      canvas.width = viewport.width.toInt();
+          final renderContext = Settings()
+            ..canvasContext = context!
+            ..viewport = viewport;
 
-      final renderContext = Settings()
-        ..canvasContext = context!
-        ..viewport = viewport;
+          await promiseToFuture<void>(page.render(renderContext).promise);
 
-      await promiseToFuture<void>(page.render(renderContext).promise);
+          // Convert the image to PNG
+          final completer = Completer<void>();
+          final blob = await canvas.toBlob();
+          final data = BytesBuilder();
+          final r = FileReader();
+          r.readAsArrayBuffer(blob);
+          r.onLoadEnd.listen(
+            (ProgressEvent e) {
+              data.add(r.result as List<int>);
+              completer.complete();
+            },
+          );
+          await completer.future;
 
-      // Convert the image to PNG
-      final completer = Completer<void>();
-      final blob = await canvas.toBlob();
-      final data = BytesBuilder();
-      final r = FileReader();
-      r.readAsArrayBuffer(blob);
-      r.onLoadEnd.listen(
-        (ProgressEvent e) {
-          data.add(r.result as List<int>);
-          completer.complete();
-        },
-      );
-      await completer.future;
-
-      yield _WebPdfRaster(
-        canvas.width!,
-        canvas.height!,
-        data.toBytes(),
-      );
-      page.cleanup();
+          yield _WebPdfRaster(
+            canvas.width!,
+            canvas.height!,
+            data.toBytes(),
+          );
+        } finally {
+          page.cleanup();
+        }
+      }
+    } finally {
+      t.destroy();
     }
-    t.destroy();
   }
 }
 
