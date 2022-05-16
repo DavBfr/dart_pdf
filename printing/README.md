@@ -34,7 +34,14 @@ for documentation.
    target 'Runner' do
       use_frameworks!    # <-- Add this line
    ```
-4. For MacOS add printing capability by opening macos directory in XCode
+
+4. For macOS applications, add the following print entitlement to the files
+   `macos/Runner/Release.entitlements` and `macos/Runner/DebugProfile.entitlements`:
+
+   ```xml
+   <key>com.apple.security.print</key>
+   <true/>
+   ```
 
 5. If you want to manually set the PdfJs library version for the web, a javascript
    library and a small script has to be added to your `web/index.html` file, just
