@@ -445,7 +445,8 @@ public class PrintingJob extends PrintDocumentAdapter {
             public void run() {
                 String error = null;
                 try {
-                    File file = File.createTempFile("printing", null, null);
+                    File tempDir = context.getCacheDir();
+                    File file = File.createTempFile("printing", null, tempDir);
                     FileOutputStream oStream = new FileOutputStream(file);
                     oStream.write(data);
                     oStream.close();
