@@ -5,6 +5,8 @@
 - iOS: Set cutLength to be currentSize.height [Liam Downey]
 - Add Flutter 3 warning workaround
 - Improve PdfPreview memory consumption
+- Clean up memory usage when using pdf.js [Garrett]
+- Specify the device's temp folder on Android [Álvaro Claro]
 
 ## 5.9.0
 
