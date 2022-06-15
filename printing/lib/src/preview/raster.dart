@@ -139,14 +139,17 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         context: ErrorDescription('while generating a PDF'),
         informationCollector: collector,
       ));
-      setState(() {
-        error = exception;
-        _rastering = false;
-      });
+      if (mounted) {
+        setState(() {
+          error = exception;
+          _rastering = false;
+        });
+      }
+
       return;
     }
 
-    if (error != null) {
+    if (error != null && mounted) {
       setState(() {
         error = null;
       });
@@ -182,7 +185,10 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
             pageMargin: widget.previewPageMargin,
           );
         }
-        setState(() {});
+
+        if (mounted) {
+          setState(() {});
+        }
 
         pageNum++;
       }
@@ -191,7 +197,9 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         pages[index].image.evict();
       }
       pages.removeRange(pageNum, pages.length);
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     } catch (exception, stack) {
       InformationCollector? collector;
 
@@ -210,9 +218,11 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         informationCollector: collector,
       ));
 
-      setState(() {
-        error = exception;
-      });
+      if (mounted) {
+        setState(() {
+          error = exception;
+        });
+      }
     }
 
     _rastering = false;
