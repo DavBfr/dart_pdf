@@ -112,7 +112,12 @@ class PdfJpegInfo {
     }
 
     try {
-      return PdfImageOrientation.values[tags![PdfExifTag.Orientation] - 1];
+      final int index = tags![PdfExifTag.Orientation] - 1;
+      const orientations = PdfImageOrientation.values;
+      if (index >= 0 && index < orientations.length) {
+        return orientations[index];
+      }
+      return PdfImageOrientation.topLeft;
     } on RangeError {
       return PdfImageOrientation.topLeft;
     }
