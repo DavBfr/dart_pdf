@@ -1,5 +1,9 @@
 # Changelog
 
+# 5.9.2
+
+- Added mounted check for setState in printing>preview>raster [Julius Alibrown]
+
 # 5.9.1
 
 - iOS: Set cutLength to be currentSize.height [Liam Downey]

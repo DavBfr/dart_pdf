@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.8.2
+
+- Fix Compressed Cross-Reference ID
+- Fix exif orientation [deepak786]
+
 ## 3.8.1
 
 - Fix large PDF generation on web with compressed xref

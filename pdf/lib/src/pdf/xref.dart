@@ -152,13 +152,14 @@ class PdfXrefTable extends PdfDataType {
 
   /// Output a compressed cross-reference table
   void outputCompressed(PdfObject object, PdfStream s, PdfDict params) {
-    // Write this object too
-    final id = offsets.last.id + 1;
     final offset = s.offset;
-    offsets.add(PdfXref(id, offset));
 
     // Sort all references
     offsets.sort((a, b) => a.id.compareTo(b.id));
+
+    // Write this object too
+    final id = offsets.last.id + 1;
+    offsets.add(PdfXref(id, offset));
 
     params['/Type'] = const PdfName('/XRef');
     params['/Size'] = PdfNum(id + 1);
