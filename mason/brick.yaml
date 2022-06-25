@@ -1,0 +1,15 @@
+name: pdf
+description: Create a PDF document
+repository: https://github.com/DavBfr/dart_pdf
+
+version: 0.1.0+1
+
+environment:
+  mason: ">=0.1.0-dev.26 <0.1.0"
+
+vars:
+  name:
+    type: string
+    description: Document name
+    default: Invoice
+    prompt: What is the document name?
