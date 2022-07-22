@@ -42,7 +42,6 @@ mixin PdfDiagnostic {
       if (_offset != null) {
         final o = PdfStream();
         _properties.forEach(o.putComment);
-        _properties.forEach(print);
         final b = o.output();
         os.setBytes(
           _offset!,

@@ -4,6 +4,7 @@
 
 - Fix Compressed Cross-Reference ID
 - Fix exif orientation [deepak786]
+- Remove debug print statements
 
 ## 3.8.1
 
