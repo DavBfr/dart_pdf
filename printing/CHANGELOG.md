@@ -5,6 +5,7 @@
 - Added mounted check for setState in printing>preview>raster [Julius Alibrown]
 - Added showsCopies option to print panel [Benjamin Kraatz]
 - Support latest version of package:ffi [Xavier Hainaux]
+- Update Pdfium to version 5200
 
 ## 5.9.1
 
