@@ -1,10 +1,12 @@
 # Changelog
 
-# 5.9.2
+## 5.9.2
 
 - Added mounted check for setState in printing>preview>raster [Julius Alibrown]
+- Added showsCopies option to print panel [Benjamin Kraatz]
+- Support latest version of package:ffi [Xavier Hainaux]
 
-# 5.9.1
+## 5.9.1
 
 - iOS: Set cutLength to be currentSize.height [Liam Downey]
 - Add Flutter 3 warning workaround
