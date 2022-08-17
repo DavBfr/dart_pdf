@@ -80,8 +80,8 @@ class ThemeData extends Inherited {
     required this.tableCell,
     required this.softWrap,
     required this.overflow,
-    required this.textAlign,
     required this.iconTheme,
+    this.textAlign,
     this.maxLines,
   })  : assert(defaultTextStyle.inherit == false),
         assert(paragraphStyle.inherit == false),
@@ -129,7 +129,6 @@ class ThemeData extends Inherited {
       tableCell: defaultStyle.copyWith(fontSize: fontSize * 0.8),
       softWrap: true,
       overflow: TextOverflow.visible,
-      textAlign: TextAlign.left,
       iconTheme: IconThemeData.fallback(icons),
     );
   }
@@ -156,7 +155,7 @@ class ThemeData extends Inherited {
 
   final TextStyle tableCell;
 
-  final TextAlign textAlign;
+  final TextAlign? textAlign;
   final bool softWrap;
   final int? maxLines;
   final TextOverflow overflow;
