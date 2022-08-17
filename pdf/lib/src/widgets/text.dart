@@ -56,8 +56,11 @@ abstract class _Span {
   var offset = PdfPoint.zero;
 
   double get left;
+
   double get top;
+
   double get width;
+
   double get height;
 
   @override
@@ -544,6 +547,7 @@ class _Line {
 
   final int firstSpan;
   final int countSpan;
+
   int get lastSpan => firstSpan + countSpan;
 
   TextAlign get textAlign => parent._textAlign;
@@ -569,39 +573,46 @@ class _Line {
 
   void realign(double totalWidth) {
     final spans = parent._spans.sublist(firstSpan, lastSpan);
+    final isRTL = textDirection == TextDirection.rtl;
 
     var delta = 0.0;
     switch (textAlign) {
       case TextAlign.left:
+        delta = isRTL ? totalWidth - wordsWidth : 0;
         break;
       case TextAlign.right:
-        delta = totalWidth - wordsWidth;
+        delta = isRTL ? 0 : totalWidth - wordsWidth;
         break;
       case TextAlign.center:
         delta = (totalWidth - wordsWidth) / 2.0;
         break;
       case TextAlign.justify:
         if (!justify) {
-          totalWidth = wordsWidth;
           break;
         }
+
         delta = (totalWidth - wordsWidth) / (spans.length - 1);
         var x = 0.0;
         for (final span in spans) {
-          span.offset = span.offset.translate(x, -baseline);
+          if (isRTL) {
+            final xOffset = span.offset.x + span.width;
+            span.offset =
+                PdfPoint((totalWidth - xOffset) - x, span.offset.y - baseline);
+          } else {
+            span.offset = span.offset.translate(x, -baseline);
+          }
           x += delta;
         }
         return;
     }
 
-    if (textDirection == TextDirection.rtl) {
+    if (isRTL) {
       for (final span in spans) {
         span.offset = PdfPoint(
           totalWidth - (span.offset.x + span.width) - delta,
           span.offset.y - baseline,
         );
       }
-
       return;
     }
 
@@ -688,7 +699,6 @@ class RichText extends Widget with SpanningWidget {
         return;
       }
     }
-
     _decorations.add(td);
   }
 
@@ -863,8 +873,13 @@ class RichText extends Widget with SpanningWidget {
     final theme = Theme.of(context);
     final _softWrap = softWrap ?? theme.softWrap;
     final _maxLines = maxLines ?? theme.maxLines;
-    _textAlign = textAlign ?? theme.textAlign;
     final _textDirection = textDirection ?? Directionality.of(context);
+    _textAlign = textAlign ??
+        theme.textAlign ??
+        (_textDirection == TextDirection.rtl
+            ? TextAlign.right
+            : TextAlign.left);
+
     final _overflow = this.overflow ?? theme.overflow;
 
     final constraintWidth = constraints.hasBoundedWidth
