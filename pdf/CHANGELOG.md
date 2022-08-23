@@ -3,6 +3,8 @@
 ## 3.8.3
 
 - Fix Arabic TextAlign.justify issues Set default text align based on text direction [Milad akarie]
+- Bump barcode dependency to 2.2.3
+
 ## 3.8.2
 
 - Fix Compressed Cross-Reference ID
