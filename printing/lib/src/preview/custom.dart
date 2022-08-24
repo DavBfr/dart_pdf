@@ -41,6 +41,8 @@ class PdfPreviewCustom extends StatefulWidget {
     this.shouldRepaint = false,
     this.loadingWidget,
     this.dpi,
+    this.scrollPhysics,
+    this.shrinkWrap = false,
   }) : super(key: key);
 
   /// Pdf paper page format
@@ -57,6 +59,12 @@ class PdfPreviewCustom extends StatefulWidget {
 
   /// Decoration of scrollView
   final Decoration? scrollViewDecoration;
+
+  /// Whether the scrollView should be shrinkwrapped
+  final bool shrinkWrap;
+
+  /// The physics for the scrollView - e.g. use this to disable scrolling inside a scrollable
+  final ScrollPhysics? scrollPhysics;
 
   /// Decoration of PdfPreviewPage
   final Decoration? pdfPreviewPageDecoration;
@@ -177,6 +185,8 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
 
     return ListView.builder(
       controller: scrollController,
+      shrinkWrap: widget.shrinkWrap,
+      physics: widget.scrollPhysics,
       padding: widget.padding,
       itemCount: pages.length,
       itemBuilder: (BuildContext context, int index) => GestureDetector(
