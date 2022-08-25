@@ -1,5 +1,10 @@
 # Changelog
 
+## 5.9.3
+
+- Add an option to shrinkwrap preview and set scrollablePhysics [Damian Bast]
+- Resolve driver compatibility issues on Windows [Alban]
+
 ## 5.9.2
 
 - Added mounted check for setState in printing>preview>raster [Julius Alibrown]
