@@ -84,11 +84,9 @@ class _PartitionsContext extends WidgetContext {
   final List<WidgetContext?> partitionContext;
 
   @override
-  void apply(WidgetContext other) {
-    if (other is _PartitionsContext) {
-      for (var index = 0; index < partitionContext.length; index++) {
-        partitionContext[index]?.apply(other.partitionContext[index]!);
-      }
+  void apply(_PartitionsContext other) {
+    for (var index = 0; index < partitionContext.length; index++) {
+      partitionContext[index]?.apply(other.partitionContext[index]!);
     }
   }
 
@@ -220,7 +218,7 @@ class Partitions extends Widget with SpanningWidget {
   }
 
   @override
-  void restoreContext(WidgetContext context) {
+  void restoreContext(_PartitionsContext context) {
     _context.apply(context);
     var index = 0;
     for (final child in children) {

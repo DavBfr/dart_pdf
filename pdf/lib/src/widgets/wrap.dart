@@ -57,9 +57,7 @@ class _WrapContext extends WidgetContext {
 
   @override
   WidgetContext clone() {
-    return _WrapContext()
-      ..firstChild = firstChild
-      ..lastChild = lastChild;
+    return _WrapContext()..apply(this);
   }
 
   @override

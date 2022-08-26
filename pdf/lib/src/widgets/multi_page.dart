@@ -32,8 +32,11 @@ import 'theme.dart';
 import 'widget.dart';
 
 abstract class WidgetContext {
+  /// Called after layout to save the state
   WidgetContext clone();
 
+  /// Called before relayout to restore the saved state and
+  /// restart the layout in the same conditions
   void apply(covariant WidgetContext other);
 }
 
@@ -46,9 +49,20 @@ mixin SpanningWidget on Widget {
   @protected
   WidgetContext saveContext();
 
-  /// Apply the context for next layout
+  /// Apply the context for next page layout.
+  /// Called before layout to prepare for next page
   @protected
   void restoreContext(covariant WidgetContext context);
+
+  /// Called after layout to save the state
+  @protected
+  WidgetContext cloneContext() => saveContext().clone();
+
+  /// Called before relayout to restore the saved state and
+  /// restart the layout in the same conditions
+  @protected
+  void applyContext(covariant WidgetContext context) =>
+      saveContext().apply(context);
 }
 
 class NewPage extends Widget {
@@ -88,7 +102,7 @@ class _MultiPageInstance {
   final List<_MultiPageWidget> widgets = <_MultiPageWidget>[];
 }
 
-/// Create a mult-page section, with automatic overflow from one page to another
+/// Create a multi-page section, with automatic overflow from one page to another
 ///
 /// ```dart
 /// final pdf = Document();
@@ -101,7 +115,7 @@ class _MultiPageInstance {
 /// ```
 ///
 /// An inner widget tree cannot be bigger than a page: A [Widget] cannot be drawn
-/// partially on one page and the remaining on another page: It's insecable.
+/// partially on one page and the remaining on another page: It's unbreakable.
 ///
 /// A small set of [Widget] can automatically span over multiple pages, and can
 /// be used as a direct child of the build method: [Flex], [Partition], [Table], [Wrap],
@@ -288,9 +302,13 @@ class MultiPage extends Page {
       }
 
       // If we are processing a multi-page widget, we restore its context
-      if (widgetContext != null && child is SpanningWidget) {
-        child.restoreContext(widgetContext);
-        widgetContext = null;
+      WidgetContext? savedContext;
+      if (child is SpanningWidget && child.canSpan) {
+        if (widgetContext != null) {
+          child.restoreContext(widgetContext);
+          widgetContext = null;
+        }
+        savedContext = child.cloneContext();
       }
 
       child.layout(context, constraints, parentUsesSize: false);
@@ -307,7 +325,7 @@ class MultiPage extends Page {
           continue;
         }
 
-        // Else we crash if the widget is too big and cannot be splitted
+        // Else we crash if the widget is too big and cannot be separated
         if (!canSpan) {
           throw Exception(
               'Widget won\'t fit into the page as its height (${child.box!.height}) '
@@ -317,14 +335,19 @@ class MultiPage extends Page {
 
         final span = child as SpanningWidget;
 
+        if (savedContext != null) {
+          // Restore saved context
+          span.applyContext(savedContext);
+        }
+
         final localConstraints =
             constraints.copyWith(maxHeight: offsetStart - offsetEnd);
-        child.layout(context, localConstraints, parentUsesSize: false);
-        assert(child.box != null);
+        span.layout(context, localConstraints, parentUsesSize: false);
+        assert(span.box != null);
         widgetContext = span.saveContext();
         _pages.last.widgets.add(
           _MultiPageWidget(
-            child: child,
+            child: span,
             constraints: localConstraints,
             widgetContext: widgetContext.clone(),
           ),
@@ -345,9 +368,8 @@ class MultiPage extends Page {
         _MultiPageWidget(
           child: child,
           constraints: constraints,
-          widgetContext: child is SpanningWidget && canSpan
-              ? child.saveContext().clone()
-              : null,
+          widgetContext:
+              child is SpanningWidget && canSpan ? child.cloneContext() : null,
         ),
       );
 
@@ -394,8 +416,7 @@ class MultiPage extends Page {
           lastFlexChild = child;
         } else {
           if (child is SpanningWidget && child.canSpan) {
-            final context = child.saveContext();
-            context.apply(widget.widgetContext!);
+            child.applyContext(widget.widgetContext!);
           }
 
           child.layout(page.context, widget.constraints, parentUsesSize: false);
@@ -521,6 +542,10 @@ class MultiPage extends Page {
           case CrossAxisAlignment.stretch:
             x = 0;
             break;
+        }
+        final child = widget.child;
+        if (child is SpanningWidget && child.canSpan) {
+          child.applyContext(widget.widgetContext!);
         }
         _paintChild(page.context, widget.child, _margin.left + x, pos,
             pageFormat.height);

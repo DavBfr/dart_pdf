@@ -1294,7 +1294,7 @@ class RichText extends Widget with SpanningWidget {
   bool get canSpan => overflow == TextOverflow.span;
 
   @override
-  bool get hasMoreWidgets => overflow == TextOverflow.span;
+  bool get hasMoreWidgets => canSpan;
 
   @override
   void restoreContext(_RichTextContext context) {

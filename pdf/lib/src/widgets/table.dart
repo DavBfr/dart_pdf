@@ -148,9 +148,7 @@ class _TableContext extends WidgetContext {
 
   @override
   WidgetContext clone() {
-    return _TableContext()
-      ..firstLine = firstLine
-      ..lastLine = lastLine;
+    return _TableContext()..apply(this);
   }
 
   @override

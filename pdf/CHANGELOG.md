@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.8.4
+
+- Improve Multi-Page layout
+
 ## 3.8.3
 
 - Fix Arabic TextAlign.justify issues Set default text align based on text direction [Milad akarie]

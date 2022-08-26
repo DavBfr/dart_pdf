@@ -35,17 +35,13 @@ class _GridViewContext extends WidgetContext {
   void apply(_GridViewContext other) {
     firstChild = other.firstChild;
     lastChild = other.lastChild;
-    childCrossAxis = other.childCrossAxis;
-    childMainAxis = other.childMainAxis;
+    childCrossAxis = other.childCrossAxis ?? childCrossAxis;
+    childMainAxis = other.childMainAxis ?? childMainAxis;
   }
 
   @override
   WidgetContext clone() {
-    return _GridViewContext()
-      ..firstChild = firstChild
-      ..lastChild = lastChild
-      ..childCrossAxis = childCrossAxis
-      ..childMainAxis = childMainAxis;
+    return _GridViewContext()..apply(this);
   }
 
   @override
