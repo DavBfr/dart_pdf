@@ -5,6 +5,7 @@
 - Remove deprecated Android embedding
 - Add custom pages builder to PdfPreview widget [Milad akarie]
 - Update Image dependency
+- Fix canChangeOrientation option not appearing bug [Bilal Raja]
 
 ## 5.9.3
 
