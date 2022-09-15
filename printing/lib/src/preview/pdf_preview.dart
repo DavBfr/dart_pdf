@@ -282,12 +282,13 @@ class _PdfPreviewState extends State<PdfPreview> {
       actions.add(PdfPageFormatAction(
         pageFormats: widget.pageFormats,
       ));
-
-      if (widget.useActions && widget.canChangeOrientation) {
-        // ignore: prefer_const_constructors
-        actions.add(PdfPageOrientationAction());
-      }
     }
+    
+    if (widget.useActions && widget.canChangeOrientation) {
+      // ignore: prefer_const_constructors
+      actions.add(PdfPageOrientationAction());
+    }
+    
 
     widget.actions?.forEach(actions.add);
 
