@@ -3,6 +3,7 @@
 ## 3.8.4
 
 - Improve Multi-Page layout
+- Fix SVG stroke-dasharray parsing
 
 ## 3.8.3
 

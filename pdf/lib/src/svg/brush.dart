@@ -83,7 +83,9 @@ class SvgBrush {
           ? null
           : (strokeDashArray == 'none'
               ? []
-              : SvgParser.splitDoubles(strokeDashArray).toList()),
+              : SvgParser.splitNumeric(strokeDashArray, parent)
+                  .map((e) => e.value)
+                  .toList()),
       strokeDashOffset:
           SvgParser.getNumeric(element, 'stroke-dashoffset', parent)?.sizeValue,
       fontSize: SvgParser.getNumeric(element, 'font-size', parent),
