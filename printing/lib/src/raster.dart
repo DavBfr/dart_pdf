@@ -82,7 +82,7 @@ class PdfRasterImage extends ImageProvider<PdfRaster> {
   }
 
   @override
-  ImageStreamCompleter load(PdfRaster key, DecoderCallback decode) {
+  ImageStreamCompleter loadBuffer(PdfRaster key, DecoderBufferCallback decode) {
     return OneFrameImageStreamCompleter(_loadAsync());
   }
 

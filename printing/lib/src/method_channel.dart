@@ -17,9 +17,15 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart'
+    show
+        ErrorDescription,
+        FlutterError,
+        FlutterErrorDetails,
+        InformationCollector,
+        StringProperty;
 import 'package:flutter/rendering.dart' show Rect;
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' show MethodCall, MethodChannel;
 import 'package:pdf/pdf.dart';
 
 import 'callback.dart';
