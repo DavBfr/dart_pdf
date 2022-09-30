@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
   pdf:
   printing:
+  vector_math: ^2.1.0
+  xml: ">=5.1.0 <7.0.0"
 
 dependency_overrides:
   pdf:
