@@ -54,7 +54,7 @@ flutter run -d linux
 
 ...for macOS:
 ```bash
-flutter run -d linux
+flutter run -d macos
 ```
 
 
