@@ -94,6 +94,8 @@ test/pubspec.lock: test/pubspec.yaml
 
 get: $(FONTS) pdf/pubspec.lock printing/pubspec.lock demo/pubspec.lock test/pubspec.lock
 
+get-all: $(FONTS) demo/assets/logo.svg demo/assets/profile.jpg get
+
 test-pdf: svg $(FONTS) pdf/pubspec.lock .coverage
 	cd pdf; $(DART_BIN) pub global run coverage:collect_coverage --port=$(COV_PORT) -o coverage.json --resume-isolates --wait-paused &\
 	$(DART_BIN) --enable-asserts --disable-service-auth-codes --enable-vm-service=$(COV_PORT) --pause-isolates-on-exit test/all_tests.dart
