@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.nfet.printing_demo">
    <application
-        android:label="printing_demo"
+        android:label="Pdf Printing Demo"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

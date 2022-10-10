@@ -1,5 +1,65 @@
 # Pdf Printing Example
 
+This is a highly detailed example of the many features of the PDF library 
+embedded in a flutter application. This application shows among other things:
+* How to embed the PDF render in your application
+* How to enable printing, sharing, and saving PDFs from your application
+* How to do full page layout and content generation including:
+  * Embedding fonts
+  * Embedding graphics
+  * Generating QR codes
+  * Using drawing primitives
+  * Generating charts and tables
+
+
+### Instructions 
+The easiest way to run this on any of the
+available Flutter target platforms is to check out the main project repository,
+run the Makefile to get the needed assets, and then run the demo program.
+Linux and macOS should be configured with Make already. 
+To get this working on Windows you will need to install GNU Make if it isn't already. 
+The easiest way to get this setup is to 
+install [The Chocolatey Software Manager](https://chocolatey.org/) and then
+execute:
+
+```bash
+choco install make
+```
+
+With that installed the steps to get this running for your target platform 
+will be:
+
+Check out the source code from the repository:
+```bash
+git clone https://github.com/DavBfr/dart_pdf.git
+```
+
+Navigate to the directory and install the font and graphics assets:
+
+```bash
+cd dart_pdf
+make get-all
+```
+
+Next go into the demo source folder and run the program. Such as for Windows:
+
+```bash
+flutter run -d windows
+```
+
+...for Linux:
+```bash
+flutter run -d linux
+```
+
+...for macOS:
+```bash
+flutter run -d macos
+```
+
+
+### Dart PDF Hello World
+
 ```dart
 import 'package:flutter/material.dart';
 

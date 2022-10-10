@@ -17,6 +17,7 @@ dependencies:
   url_launcher: ^6.0.6
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.10.0
   flutter_lints: ^1.0.4
   flutter_test:
     sdk: flutter
@@ -32,3 +33,15 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+
+flutter_icons:
+  image_path: "app-logo.png"
+  remove_alpha_ios: true
+  android:
+    generate: true
+  ios:
+    generate: true
+  web:
+    generate: true
+  windows:
+    generate: true

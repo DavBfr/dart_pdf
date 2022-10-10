@@ -14,6 +14,10 @@ See an interactive demo here: <https://davbfr.github.io/dart_pdf/>.
 <img alt="Example document" src="https://raw.githubusercontent.com/DavBfr/dart_pdf/master/pdf/example.jpg">
 </a>
 
+The source code for a full demo that can run on any Flutter target, and how to build,
+it can be found here: 
+<https://github.com/DavBfr/dart_pdf/tree/master/demo/>
+
 Use the `printing` package <https://pub.dev/packages/printing>
 for full flutter print and share operation.
 
