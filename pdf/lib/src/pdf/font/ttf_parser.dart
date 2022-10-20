@@ -115,7 +115,7 @@ class TtfBitmapInfo {
 }
 
 class TtfParser {
-  TtfParser(ByteData bytes) : bytes = ByteData(bytes) {
+  TtfParser(ByteData bytes) {
     final numTables = bytes.getUint16(4);
 
     for (var i = 0; i < numTables; i++) {
