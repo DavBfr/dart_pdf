@@ -162,7 +162,7 @@ class TtfParser {
   static const String cblc_table = 'CBLC';
   static const String cbdt_table = 'CBDT';
 
-  final ByteData bytes = ByteData(0);
+  final UnmodifiableByteDataView bytes;
   final tableOffsets = <String, int>{};
   final tableSize = <String, int>{};
 
