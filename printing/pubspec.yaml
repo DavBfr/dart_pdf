@@ -25,6 +25,7 @@ dependencies:
   pdf:
     git: 
       url: https://github.com/Gopisekaran/dart_pdf.git
+      ref: master
       path: pdf
   plugin_platform_interface: ^2.0.0
 
