@@ -115,7 +115,7 @@ class TtfBitmapInfo {
 }
 
 class TtfParser {
-  TtfParser(ByteData bytes) {
+   TtfParser(ByteData bytes) {
     final numTables = bytes.getUint16(4);
 
     for (var i = 0; i < numTables; i++) {
@@ -162,7 +162,7 @@ class TtfParser {
   static const String cblc_table = 'CBLC';
   static const String cbdt_table = 'CBDT';
 
-  final ByteData bytes;
+  final ByteData bytes = ByteData(0);
   final tableOffsets = <String, int>{};
   final tableSize = <String, int>{};
 
