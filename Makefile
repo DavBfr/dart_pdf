@@ -52,7 +52,7 @@ demo/assets/profile.jpg:
 	curl -L "https://www.fakepersongenerator.com/Face/female/female20151024334209870.jpg" > $@
 
 pdf/hacen-tunisia.ttf:
-	curl -L "https://arbfonts.com/font_files/hacen/Hacen%20Tunisia.ttf" > $@
+	curl -L "http://www.aboaziz.net/misc/arabic%20fonts%20pack/%CE%D8%E6%D8%20%DA%D1%C8%ED%C9%20%CD%CF%ED%CB%C9%20%E6%E3%E3%ED%D2%C9/%CE%D8%E6%D8%20%DA%D1%C8%ED%C9%20%CD%CF%ED%CB%C9%20%E6%20%E3%E3%ED%D2%C9/Hacen%20Tunisia/Hacen%20Tunisia.ttf" > $@
 
 format: format-dart format-clang format-swift
 
