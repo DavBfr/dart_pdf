@@ -4,6 +4,7 @@
 
 - Improve Multi-Page layout
 - Fix SVG stroke-dasharray parsing
+- Fix PDF Generation in WEB release build [gopisekaran krd]
 
 ## 3.8.3
 
