@@ -372,13 +372,13 @@ class TtfParser {
     final hmtxOffset = tableOffsets[hmtx_table]!;
     final unitsPerEm = this.unitsPerEm;
     final numOfLongHorMetrics = this.numOfLongHorMetrics;
-    final defaultadvanceWidth =
+    final defaultAdvanceWidth =
         bytes.getUint16(hmtxOffset + (numOfLongHorMetrics - 1) * 4);
 
     for (var glyphIndex = 0; glyphIndex < numGlyphs; glyphIndex++) {
       final advanceWidth = glyphIndex < numOfLongHorMetrics
           ? bytes.getUint16(hmtxOffset + glyphIndex * 4)
-          : defaultadvanceWidth;
+          : defaultAdvanceWidth;
       final leftBearing = glyphIndex < numOfLongHorMetrics
           ? bytes.getInt16(hmtxOffset + glyphIndex * 4 + 2)
           : bytes.getInt16(hmtxOffset +
@@ -500,7 +500,7 @@ class TtfParser {
     const HAS_SCALE = 0x008;
     const MORE_COMPONENTS = 0x0020;
     const HAS_X_Y_SCALE = 0x0040;
-    const HAS_TRANFORMATION_MATRIX = 0x0080;
+    const HAS_TRANSFORMATION_MATRIX = 0x0080;
     const WE_HAVE_INSTRUCTIONS = 0x0100;
 
     final components = <int>[];
@@ -515,7 +515,7 @@ class TtfParser {
         offset += 2;
       } else if (flags & HAS_X_Y_SCALE != 0) {
         offset += 4;
-      } else if (flags & HAS_TRANFORMATION_MATRIX != 0) {
+      } else if (flags & HAS_TRANSFORMATION_MATRIX != 0) {
         offset += 8;
       }
 

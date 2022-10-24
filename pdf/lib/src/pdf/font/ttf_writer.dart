@@ -19,15 +19,16 @@ import 'dart:typed_data';
 
 import 'ttf_parser.dart';
 
-/// Generate a TTF font copy with the minimal number of glyph to embedd
+/// Generate a TTF font copy with the minimal number of glyph to embed
 /// into the PDF document
 ///
 /// https://opentype.js.org/
+/// https://github.com/HinTak/Font-Validator
 class TtfWriter {
-  /// Create a Truetype Writer object
+  /// Create a TrueType Writer object
   TtfWriter(this.ttf);
 
-  /// original truetype file
+  /// Original TrueType file
   final TtfParser ttf;
 
   int _calcTableChecksum(ByteData table) {
@@ -56,7 +57,7 @@ class TtfWriter {
     }
   }
 
-  int _wordAlign(int offset, [int align = 2]) {
+  int _wordAlign(int offset, [int align = 4]) {
     return offset + ((align - (offset % align)) % align);
   }
 
@@ -105,10 +106,6 @@ class TtfWriter {
       assert(compounds[compound]! >= 0, 'Unable to find the glyph');
     }
 
-    // Add one last empty glyph
-    final glyph = TtfGlyphInfo(32, Uint8List(0), const <int>[]);
-    glyphsInfo.add(glyph);
-
     // update compound indices
     for (final glyph in glyphsInfo) {
       if (glyph.compounds.isNotEmpty) {
@@ -122,19 +119,19 @@ class TtfWriter {
           _wordAlign(glyphsTableLength + glyph.data.lengthInBytes);
     }
     var offset = 0;
-    final glyphsTable = Uint8List(_wordAlign(glyphsTableLength, 4));
+    final glyphsTable = Uint8List(_wordAlign(glyphsTableLength));
     tables[TtfParser.glyf_table] = glyphsTable;
     tablesLength[TtfParser.glyf_table] = glyphsTableLength;
 
     // Loca
     if (ttf.indexToLocFormat == 0) {
       tables[TtfParser.loca_table] =
-          Uint8List(_wordAlign(glyphsInfo.length * 2, 4)); // uint16
-      tablesLength[TtfParser.loca_table] = glyphsInfo.length * 2;
+          Uint8List(_wordAlign((glyphsInfo.length + 1) * 2)); // uint16
+      tablesLength[TtfParser.loca_table] = (glyphsInfo.length + 1) * 2;
     } else {
       tables[TtfParser.loca_table] =
-          Uint8List(_wordAlign(glyphsInfo.length * 4, 4)); // uint32
-      tablesLength[TtfParser.loca_table] = glyphsInfo.length * 4;
+          Uint8List(_wordAlign((glyphsInfo.length + 1) * 4)); // uint32
+      tablesLength[TtfParser.loca_table] = (glyphsInfo.length + 1) * 4;
     }
 
     {
@@ -151,6 +148,11 @@ class TtfWriter {
         glyphsTable.setAll(offset, glyph.data);
         offset = _wordAlign(offset + glyph.data.lengthInBytes);
       }
+      if (ttf.indexToLocFormat == 0) {
+        loca.setUint16(index, offset ~/ 2);
+      } else {
+        loca.setUint32(index, offset);
+      }
     }
 
     {
@@ -158,7 +160,7 @@ class TtfWriter {
       final start = ttf.tableOffsets[TtfParser.head_table]!;
       final len = ttf.tableSize[TtfParser.head_table]!;
       final head = Uint8List.fromList(
-          ttf.bytes.buffer.asUint8List(start, _wordAlign(len, 4)));
+          ttf.bytes.buffer.asUint8List(start, _wordAlign(len)));
       head.buffer.asByteData().setUint32(8, 0); // checkSumAdjustment
       tables[TtfParser.head_table] = head;
       tablesLength[TtfParser.head_table] = len;
@@ -169,7 +171,7 @@ class TtfWriter {
       final start = ttf.tableOffsets[TtfParser.maxp_table]!;
       final len = ttf.tableSize[TtfParser.maxp_table]!;
       final maxp = Uint8List.fromList(
-          ttf.bytes.buffer.asUint8List(start, _wordAlign(len, 4)));
+          ttf.bytes.buffer.asUint8List(start, _wordAlign(len)));
       maxp.buffer.asByteData().setUint16(4, glyphsInfo.length);
       tables[TtfParser.maxp_table] = maxp;
       tablesLength[TtfParser.maxp_table] = len;
@@ -180,7 +182,7 @@ class TtfWriter {
       final start = ttf.tableOffsets[TtfParser.hhea_table]!;
       final len = ttf.tableSize[TtfParser.hhea_table]!;
       final hhea = Uint8List.fromList(
-          ttf.bytes.buffer.asUint8List(start, _wordAlign(len, 4)));
+          ttf.bytes.buffer.asUint8List(start, _wordAlign(len)));
       hhea.buffer
           .asByteData()
           .setUint16(34, glyphsInfo.length); // numOfLongHorMetrics
@@ -192,17 +194,17 @@ class TtfWriter {
     {
       // HMTX table
       final len = 4 * glyphsInfo.length;
-      final hmtx = Uint8List(_wordAlign(len, 4));
+      final hmtx = Uint8List(_wordAlign(len));
       final hmtxOffset = ttf.tableOffsets[TtfParser.hmtx_table]!;
       final hmtxData = hmtx.buffer.asByteData();
       final numOfLongHorMetrics = ttf.numOfLongHorMetrics;
-      final defaultadvanceWidth =
+      final defaultAdvanceWidth =
           ttf.bytes.getUint16(hmtxOffset + (numOfLongHorMetrics - 1) * 4);
       var index = 0;
       for (final glyph in glyphsInfo) {
         final advanceWidth = glyph.index < numOfLongHorMetrics
             ? ttf.bytes.getUint16(hmtxOffset + glyph.index * 4)
-            : defaultadvanceWidth;
+            : defaultAdvanceWidth;
         final leftBearing = glyph.index < numOfLongHorMetrics
             ? ttf.bytes.getInt16(hmtxOffset + glyph.index * 4 + 2)
             : ttf.bytes.getInt16(hmtxOffset +
@@ -219,12 +221,12 @@ class TtfWriter {
     {
       // CMAP table
       const len = 40;
-      final cmap = Uint8List(_wordAlign(len, 4));
+      final cmap = Uint8List(_wordAlign(len));
       final cmapData = cmap.buffer.asByteData();
       cmapData.setUint16(0, 0); // Table version number
       cmapData.setUint16(2, 1); // Number of encoding tables that follow.
       cmapData.setUint16(4, 3); // Platform ID
-      cmapData.setUint16(6, 1); // Platform-specific encoding ID
+      cmapData.setUint16(6, 10); // Platform-specific encoding ID
       cmapData.setUint32(8, 12); // Offset from beginning of table
       cmapData.setUint16(12, 12); // Table format
       cmapData.setUint32(16, 28); // Table length
@@ -239,7 +241,7 @@ class TtfWriter {
     }
 
     {
-      final bytes = <int>[];
+      final bytes = BytesBuilder();
 
       final numTables = tables.length;
 
@@ -258,7 +260,20 @@ class TtfWriter {
       // Create the table directory
       var count = 0;
       var offset = 12 + numTables * 16;
-      tables.forEach((String name, Uint8List data) {
+      var headOffset = 0;
+
+      final tableKeys = [
+        TtfParser.head_table,
+        TtfParser.hhea_table,
+        TtfParser.maxp_table,
+        TtfParser.hmtx_table,
+        TtfParser.cmap_table,
+        TtfParser.loca_table,
+        TtfParser.glyf_table,
+      ];
+
+      for (final name in tableKeys) {
+        final data = tables[name]!;
         final runes = name.runes.toList();
         start.setUint8(12 + count * 16, runes[0]);
         start.setUint8(12 + count * 16 + 1, runes[1]);
@@ -268,16 +283,28 @@ class TtfWriter {
             _calcTableChecksum(data.buffer.asByteData())); // checkSum
         start.setUint32(12 + count * 16 + 8, offset); // offset
         start.setUint32(12 + count * 16 + 12, tablesLength[name]!); // length
+
+        if (name == 'head') {
+          headOffset = offset;
+        }
         offset += data.lengthInBytes;
         count++;
-      });
-      bytes.addAll(start.buffer.asUint8List());
+      }
+      bytes.add(start.buffer.asUint8List());
 
-      tables.forEach((String name, Uint8List data) {
-        bytes.addAll(data.buffer.asUint8List());
-      });
+      for (final name in tableKeys) {
+        final data = tables[name]!;
+        bytes.add(data.buffer.asUint8List());
+      }
 
-      return Uint8List.fromList(bytes);
+      final output = bytes.toBytes();
+
+      final crc = 0xB1B0AFBA - _calcTableChecksum(output.buffer.asByteData());
+      output.buffer
+          .asByteData()
+          .setUint32(headOffset + 8, crc & 0xffffffff); // checkSumAdjustment
+
+      return output;
     }
   }
 }

@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.8.5
+
+- Improve TTF Writer compatibility
+
 ## 3.8.4
 
 - Improve Multi-Page layout
