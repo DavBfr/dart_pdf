@@ -161,6 +161,8 @@ class TtfParser {
   static const String glyf_table = 'glyf';
   static const String cblc_table = 'CBLC';
   static const String cbdt_table = 'CBDT';
+  static const String post_table = 'post';
+  static const String os_2_table = 'OS/2';
 
   final ByteData bytes;
   final tableOffsets = <String, int>{};

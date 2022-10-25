@@ -155,40 +155,46 @@ class TtfWriter {
       }
     }
 
-    {
-      // Head table
-      final start = ttf.tableOffsets[TtfParser.head_table]!;
-      final len = ttf.tableSize[TtfParser.head_table]!;
-      final head = Uint8List.fromList(
+    // Copy some tables from the original file
+    for (final tn in {
+      TtfParser.head_table,
+      TtfParser.maxp_table,
+      TtfParser.hhea_table,
+      TtfParser.os_2_table,
+    }) {
+      final start = ttf.tableOffsets[tn];
+      if (start == null) {
+        continue;
+      }
+      final len = ttf.tableSize[tn]!;
+      final data = Uint8List.fromList(
           ttf.bytes.buffer.asUint8List(start, _wordAlign(len)));
-      head.buffer.asByteData().setUint32(8, 0); // checkSumAdjustment
-      tables[TtfParser.head_table] = head;
-      tablesLength[TtfParser.head_table] = len;
+      tables[tn] = data;
+      tablesLength[tn] = len;
     }
 
-    {
-      // MaxP table
-      final start = ttf.tableOffsets[TtfParser.maxp_table]!;
-      final len = ttf.tableSize[TtfParser.maxp_table]!;
-      final maxp = Uint8List.fromList(
-          ttf.bytes.buffer.asUint8List(start, _wordAlign(len)));
-      maxp.buffer.asByteData().setUint16(4, glyphsInfo.length);
-      tables[TtfParser.maxp_table] = maxp;
-      tablesLength[TtfParser.maxp_table] = len;
-    }
+    tables[TtfParser.head_table]!
+        .buffer
+        .asByteData()
+        .setUint32(8, 0); // checkSumAdjustment
+    tables[TtfParser.maxp_table]!
+        .buffer
+        .asByteData()
+        .setUint16(4, glyphsInfo.length);
+    tables[TtfParser.hhea_table]!
+        .buffer
+        .asByteData()
+        .setUint16(34, glyphsInfo.length); // numOfLongHorMetrics
 
     {
-      // HHEA table
-      final start = ttf.tableOffsets[TtfParser.hhea_table]!;
-      final len = ttf.tableSize[TtfParser.hhea_table]!;
-      final hhea = Uint8List.fromList(
+      // post Table
+      final start = ttf.tableOffsets[TtfParser.post_table]!;
+      const len = 32;
+      final data = Uint8List.fromList(
           ttf.bytes.buffer.asUint8List(start, _wordAlign(len)));
-      hhea.buffer
-          .asByteData()
-          .setUint16(34, glyphsInfo.length); // numOfLongHorMetrics
-
-      tables[TtfParser.hhea_table] = hhea;
-      tablesLength[TtfParser.hhea_table] = len;
+      data.buffer.asByteData().setUint32(0, 0x00030000); // Version 3.0 no names
+      tables[TtfParser.post_table] = data;
+      tablesLength[TtfParser.post_table] = len;
     }
 
     {
@@ -241,6 +247,18 @@ class TtfWriter {
     }
 
     {
+      // name table
+      const len = 18;
+      final nameBuf = Uint8List(_wordAlign(len));
+      final nameData = nameBuf.buffer.asByteData();
+      nameData.setUint16(0, 0); // Table version number 0
+      nameData.setUint16(2, 0); // Count 0 -> no names
+      nameData.setUint16(4, 6); // Storage Offset
+      tables[TtfParser.name_table] = nameBuf;
+      tablesLength[TtfParser.name_table] = len;
+    }
+
+    {
       final bytes = BytesBuilder();
 
       final numTables = tables.length;
@@ -266,10 +284,13 @@ class TtfWriter {
         TtfParser.head_table,
         TtfParser.hhea_table,
         TtfParser.maxp_table,
+        TtfParser.os_2_table,
         TtfParser.hmtx_table,
         TtfParser.cmap_table,
         TtfParser.loca_table,
         TtfParser.glyf_table,
+        TtfParser.name_table,
+        TtfParser.post_table,
       ];
 
       for (final name in tableKeys) {
