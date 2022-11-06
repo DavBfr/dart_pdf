@@ -19,7 +19,7 @@ import 'dart:typed_data';
 
 import '../data_types.dart';
 import '../document.dart';
-import '../font/arabic.dart' as arabic;
+import '../font/bidi_utils.dart' as bidi;
 import '../font/font_metrics.dart';
 import '../font/ttf_parser.dart';
 import '../font/ttf_writer.dart';
@@ -74,7 +74,7 @@ class PdfTtfFont extends PdfFont {
       return PdfFontMetrics.zero;
     }
 
-    if (arabic.isArabicDiacriticValue(charCode)) {
+    if (bidi.isArabicDiacriticValue(charCode)) {
       final metric = font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
       return metric.copyWith(advanceWidth: 0);
     }

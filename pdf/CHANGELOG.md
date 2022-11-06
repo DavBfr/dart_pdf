@@ -3,6 +3,7 @@
 ## 3.8.5
 
 - Improve TTF Writer compatibility
+- Apply THE BIDIRECTIONAL ALGORITHM using dart_bidi [Milad akarie]
 
 ## 3.8.4
 
