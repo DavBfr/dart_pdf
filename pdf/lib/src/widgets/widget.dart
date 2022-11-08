@@ -414,3 +414,23 @@ class DelayedWidget extends SingleChildWidget {
     super.paint(context);
   }
 }
+
+class Inseparable extends SingleChildWidget {
+  Inseparable({required Widget child, bool canSpan = false})
+      : _canSpan = canSpan,
+        super(child: child);
+
+  final bool _canSpan;
+
+  @override
+  bool get canSpan => _canSpan && super.canSpan;
+
+  @override
+  bool get hasMoreWidgets => _canSpan && super.hasMoreWidgets;
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+    paintChild(context);
+  }
+}
