@@ -262,6 +262,8 @@ class Table extends Widget with SpanningWidget {
     Alignment headerAlignment = Alignment.center,
     Map<int, Alignment>? headerAlignments,
     TextStyle? headerStyle,
+    TextDirection? headerDirection,
+    TextDirection? tableDirection,
     OnCellFormat? headerFormat,
     TableBorder? border = const TableBorder(
       left: BorderSide(),
@@ -312,6 +314,8 @@ class Table extends Widget with SpanningWidget {
                   ? cell.toString()
                   : headerFormat(tableRow.length, cell),
               style: headerStyle,
+              textDirection: headerDirection,
+              //   textAlign:
             ),
           ),
         );
@@ -344,6 +348,7 @@ class Table extends Widget with SpanningWidget {
                     : headerFormat(tableRow.length, cell),
                 style: headerStyle,
                 textAlign: textAlign,
+                textDirection: tableDirection,
               ),
             ),
           );
@@ -366,6 +371,7 @@ class Table extends Widget with SpanningWidget {
                     : cellFormat(tableRow.length, cell),
                 style: isOdd ? oddCellStyle : cellStyle,
                 textAlign: textAlign,
+                textDirection: tableDirection,
               ),
             ),
           );
