@@ -1,8 +1,9 @@
 # Changelog
 
-## 5.9.4
+## 5.10.0
 
 - Remove deprecated Android embedding
+- Add custom pages builder to PdfPreview widget [Milad akarie]
 
 ## 5.9.3
 

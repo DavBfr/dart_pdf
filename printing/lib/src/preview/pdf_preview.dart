@@ -26,6 +26,7 @@ import 'controller.dart';
 import 'custom.dart';
 
 export 'custom.dart';
+export 'page.dart' show PdfPreviewPageData;
 
 /// Flutter widget that uses the rasterized pdf pages to display a document.
 class PdfPreview extends StatefulWidget {
@@ -61,7 +62,66 @@ class PdfPreview extends StatefulWidget {
     this.loadingWidget,
     this.onPageFormatChanged,
     this.dpi,
-  }) : super(key: key);
+  })  : _pagesBuilder = null,
+        super(key: key);
+
+  /// Build a custom layout.
+  ///
+  /// ```dart
+  /// PdfPreview.builder(
+  ///   build: (format) => _generatePdf(format, title),
+  ///   pagesBuilder: (context, pages) => SingleChildScrollView(
+  ///     child: Wrap(
+  ///       spacing: 8,
+  ///       runSpacing: 8,
+  ///       children: [
+  ///         for (final page in pages)
+  ///           Container(
+  ///             color: Colors.white,
+  ///             child: Image(
+  ///               image: page.image,
+  ///               width: 300,
+  ///             ),
+  ///           )
+  ///       ],
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
+  const PdfPreview.builder({
+    Key? key,
+    required this.build,
+    this.initialPageFormat,
+    this.allowPrinting = true,
+    this.allowSharing = true,
+    this.maxPageWidth,
+    this.canChangePageFormat = true,
+    this.canChangeOrientation = true,
+    this.canDebug = true,
+    this.actions,
+    this.pageFormats = _defaultPageFormats,
+    this.onError,
+    this.onPrinted,
+    this.onPrintError,
+    this.onShared,
+    this.scrollViewDecoration,
+    this.pdfPreviewPageDecoration,
+    this.pdfFileName,
+    this.useActions = true,
+    this.pages,
+    this.dynamicLayout = true,
+    this.shareActionExtraBody,
+    this.shareActionExtraSubject,
+    this.shareActionExtraEmails,
+    this.previewPageMargin,
+    this.padding,
+    this.shouldRepaint = false,
+    this.loadingWidget,
+    this.onPageFormatChanged,
+    this.dpi,
+    required CustomPdfPagesBuilder pagesBuilder,
+  })  : _pagesBuilder = pagesBuilder,
+        super(key: key);
 
   static const _defaultPageFormats = <String, PdfPageFormat>{
     'A4': PdfPageFormat.a4,
@@ -162,6 +222,10 @@ class PdfPreview extends StatefulWidget {
   /// The rendering dots per inch resolution
   /// If not provided, this value is calculated.
   final double? dpi;
+
+  /// clients can pass this builder to render
+  /// their own pages.
+  final CustomPdfPagesBuilder? _pagesBuilder;
 
   @override
   _PdfPreviewState createState() => _PdfPreviewState();
@@ -331,6 +395,7 @@ class _PdfPreviewState extends State<PdfPreview> {
                 previewPageMargin: widget.previewPageMargin,
                 scrollViewDecoration: widget.scrollViewDecoration,
                 shouldRepaint: widget.shouldRepaint,
+                pagesBuilder: widget._pagesBuilder,
                 dpi: widget.dpi,
               );
             }),
