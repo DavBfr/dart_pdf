@@ -33,12 +33,15 @@ class PdfPreviewPageData {
 
    /// returns with to height aspect ratio
   double get aspectRatio {
-    if (height != 0.0)
+    if (height != 0.0) {
       return width / height;
-    if (width > 0.0)
+    }
+    if (width > 0.0) {
       return double.infinity;
-    if (width < 0.0)
+    }
+    if (width < 0.0) {
       return double.negativeInfinity;
+    }
     return 0.0;
   }
 
