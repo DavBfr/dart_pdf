@@ -38,7 +38,7 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
   PdfPageFormat get pageFormat => widget.pageFormat;
 
   /// Resulting pages
-  final pages = <PdfPreviewPage>[];
+  final pages = <PdfPreviewPageData>[];
 
   /// Printing subsystem information
   PrintingInfo? info;
@@ -167,23 +167,18 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
           _rastering = false;
           return;
         }
-
         if (pages.length <= pageNum) {
-          pages.add(PdfPreviewPage(
+          pages.add(PdfPreviewPageData(
             image: MemoryImage(await page.toPng()),
             width: page.width,
             height: page.height,
-            pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
-            pageMargin: widget.previewPageMargin,
           ));
         } else {
           pages[pageNum].image.evict();
-          pages[pageNum] = PdfPreviewPage(
+          pages[pageNum] = PdfPreviewPageData(
             image: MemoryImage(await page.toPng()),
             width: page.width,
             height: page.height,
-            pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
-            pageMargin: widget.previewPageMargin,
           );
         }
 
