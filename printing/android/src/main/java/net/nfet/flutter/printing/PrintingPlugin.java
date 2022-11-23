@@ -25,7 +25,6 @@ import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodChannel;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /**
  * PrintingPlugin
@@ -34,21 +33,6 @@ public class PrintingPlugin implements FlutterPlugin, ActivityAware {
     private Activity activity;
     private MethodChannel channel;
     private PrintingHandler handler;
-
-    /**
-     * Plugin registration.
-     * for legacy Embedding API
-     */
-    public static void registerWith(Registrar registrar) {
-        Activity activity = registrar.activity();
-        if (activity == null) {
-            return; // We can't print without an activity
-        }
-
-        final PrintingPlugin instance = new PrintingPlugin();
-        instance.onAttachedToEngine(registrar.messenger());
-        instance.onAttachedToActivity(activity);
-    }
 
     @Override
     public void onAttachedToEngine(FlutterPluginBinding binding) {

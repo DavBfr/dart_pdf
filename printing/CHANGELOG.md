@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.9.4
+
+- Remove deprecated Android embedding
+
 ## 5.9.3
 
 - Add an option to shrinkwrap preview and set scrollablePhysics [Damian Bast]
