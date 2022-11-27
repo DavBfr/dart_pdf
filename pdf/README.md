@@ -83,6 +83,21 @@ pdf.addPage(pw.Page(build: (pw.Context context) {
 })); // Page
 ```
 
+To load an SVG from assets:
+
+```dart
+String svgRaw =
+     await rootBundle.loadString('assets/path/to/file.svg');
+
+final svgImage = pw.SvgImage(svg: svgRaw);
+
+pdf.addPage(pw.Page(build: (pw.Context context) {
+  return pw.Center(
+    child: svgImage,
+  ); // Center
+})); // Page
+```
+
 To use a TrueType font:
 
 ```dart
