@@ -118,8 +118,8 @@ class PieDataSet extends Dataset {
     required this.value,
     String? legend,
     required PdfColor color,
-    this.borderColor = PdfColors.white,
-    this.borderWidth = 1.5,
+    PdfColor? borderColor = PdfColors.white,
+    double borderWidth = 1.5,
     bool? drawBorder,
     this.drawSurface = true,
     this.surfaceOpacity = 1,
@@ -142,6 +142,8 @@ class PieDataSet extends Dataset {
         super(
           legend: legend,
           color: color,
+          borderColor: borderColor,
+          borderWidth: borderWidth,
         );
 
   final num value;
@@ -151,8 +153,6 @@ class PieDataSet extends Dataset {
   late double angleEnd;
 
   final bool drawBorder;
-  final PdfColor? borderColor;
-  final double borderWidth;
 
   final bool drawSurface;
 

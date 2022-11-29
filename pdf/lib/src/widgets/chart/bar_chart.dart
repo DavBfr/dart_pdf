@@ -27,8 +27,8 @@ class BarDataSet<T extends PointChartValue> extends PointDataSet<T> {
   BarDataSet({
     required List<T> data,
     String? legend,
-    this.borderColor,
-    this.borderWidth = 1.5,
+    PdfColor? borderColor,
+    double borderWidth = 1.5,
     PdfColor color = PdfColors.blue,
     bool? drawBorder,
     this.drawSurface = true,
@@ -54,11 +54,11 @@ class BarDataSet<T extends PointChartValue> extends PointDataSet<T> {
           pointSize: pointSize,
           shape: shape,
           valuePosition: valuePosition,
+          borderColor: borderColor,
+          borderWidth: borderWidth,
         );
 
   final bool drawBorder;
-  final PdfColor? borderColor;
-  final double borderWidth;
 
   final bool drawSurface;
 

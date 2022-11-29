@@ -8,6 +8,7 @@
 - Fix unit tests
 - Update Image dependency
 - Fix lints
+- Add options to customise border in Dataset widget [838]
 
 ## 3.8.4
 
