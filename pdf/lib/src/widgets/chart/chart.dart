@@ -152,11 +152,17 @@ abstract class Dataset extends Widget {
   Dataset({
     this.legend,
     this.color,
+    this.borderColor,
+    this.borderWidth = .5,
   });
 
   final String? legend;
 
   final PdfColor? color;
+
+  final PdfColor? borderColor;
+
+  final double borderWidth;
 
   void paintBackground(Context context) {}
 
@@ -167,8 +173,8 @@ abstract class Dataset extends Widget {
       decoration: BoxDecoration(
         color: color,
         border: Border.all(
-          color: PdfColors.black,
-          width: .5,
+          color: borderColor ?? PdfColors.black,
+          width: borderWidth,
         ),
       ),
     );
