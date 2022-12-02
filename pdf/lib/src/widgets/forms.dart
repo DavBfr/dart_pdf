@@ -31,6 +31,46 @@ import 'text_style.dart';
 import 'theme.dart';
 import 'widget.dart';
 
+class ChoiceField extends StatelessWidget {
+  ChoiceField({
+    this.width = 120,
+    this.height = 13,
+    this.textStyle,
+    required this.name,
+    required this.items,
+    this.value,
+  });
+  final String name;
+  final TextStyle? textStyle;
+  final double width;
+  final double height;
+  final List<String> items;
+  final String? value;
+
+  @override
+  void paint(Context context) {
+    super.paint(context);
+    final _textStyle = Theme.of(context).defaultTextStyle.merge(textStyle);
+    final pdfRect = context.localToGlobal(box!);
+
+    final bf = PdfChoiceField(
+      textColor: _textStyle.color!,
+      fieldName: name,
+      value: value,
+      font: _textStyle.font!.getFont(context),
+      fontSize: _textStyle.fontSize!,
+      items: items,
+      rect: pdfRect,
+    );
+    PdfAnnot(context.page, bf);
+  }
+
+  @override
+  Widget build(Context context) {
+    return SizedBox(width: width, height: height);
+  }
+}
+
 class Checkbox extends SingleChildWidget {
   Checkbox({
     required this.value,

@@ -98,6 +98,17 @@ void main() {
               Decorated(child: TextField(name: 'Address')),
               //
               SizedBox(width: double.infinity, height: 10),
+              Label(label: 'ChoiceField:', width: 100),
+              Decorated(
+                  child: ChoiceField(name: 'Test Choice', items: [
+                'One',
+                'Two',
+                'Blue',
+                'Yellow',
+                'Test äöüß',
+              ])),
+              //
+              SizedBox(width: double.infinity, height: 10),
               //
               Label(label: 'Postcode:', width: 100),
               Decorated(
@@ -114,6 +125,7 @@ void main() {
                 name: 'Country',
                 color: PdfColors.blue,
               )),
+
               //
               SizedBox(width: double.infinity, height: 10),
               //

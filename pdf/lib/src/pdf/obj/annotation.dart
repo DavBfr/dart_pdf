@@ -31,6 +31,73 @@ import 'object.dart';
 import 'object_dict.dart';
 import 'page.dart';
 
+class PdfChoiceField extends PdfAnnotWidget {
+  PdfChoiceField({
+    required PdfRect rect,
+    required this.textColor,
+    required this.font,
+    required this.fontSize,
+    required this.items,
+    String? fieldName,
+    this.value,
+    this.defaultValue,
+  }) : super(
+          rect: rect,
+          fieldType: '/Ch',
+          fieldName: fieldName,
+        );
+
+  final List<String> items;
+  final PdfColor textColor;
+  final String? value;
+  final String? defaultValue;
+  final Set<PdfFieldFlags>? fieldFlags = {
+    PdfFieldFlags.combo,
+  };
+  final PdfFont font;
+
+  final double fontSize;
+  @override
+  void build(PdfPage page, PdfObject object, PdfDict params) {
+    super.build(page, object, params);
+    // What is /F?
+    //params['/F'] = const PdfNum(4);
+    params['/Ff'] = PdfNum(fieldFlagsValue);
+    params['/Opt'] =
+        PdfArray<PdfString>(items.map((e) => PdfString.fromString(e)).toList());
+
+    if (defaultValue != null) {
+      params['/DV'] = PdfString.fromString(defaultValue!);
+    }
+
+    if (value != null) {
+      params['/V'] = PdfString.fromString(value!);
+    } else {
+      params['/V'] = const PdfNull();
+    }
+
+    final buf = PdfStream();
+    final g = PdfGraphics(page, buf);
+    g.setFillColor(textColor);
+    g.setFont(font, fontSize);
+
+    params['/DA'] = PdfSecString.fromStream(object, buf);
+
+    // What is /TU? Tooltip?
+    //params['/TU'] = PdfString.fromString('Select from list');
+  }
+
+  int get fieldFlagsValue {
+    if (fieldFlags == null || fieldFlags!.isEmpty) {
+      return 0;
+    }
+
+    return fieldFlags!
+        .map<int>((PdfFieldFlags e) => 1 << e.index)
+        .reduce((int a, int b) => a | b);
+  }
+}
+
 class PdfAnnot extends PdfObjectDict {
   PdfAnnot(this.pdfPage, this.annot)
       : super(pdfPage.pdfDocument, type: '/Annot') {

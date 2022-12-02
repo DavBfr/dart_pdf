@@ -9,6 +9,7 @@
 - Update Image dependency
 - Fix lints
 - Add options to customise border in Dataset widget [838]
+- Add Choice Field [Carsten Fregin]
 
 ## 3.8.4
 
