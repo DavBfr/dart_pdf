@@ -54,8 +54,8 @@ void main() {
         final file = File('isolate.pdf');
         await file.writeAsBytes(data);
         print('File saved');
+        completer.complete();
       }
-      completer.complete();
     });
 
     print('Download image');
