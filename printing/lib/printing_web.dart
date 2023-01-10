@@ -56,7 +56,11 @@ class PrintingPlugin extends PrintingPlatform {
         'typeof pdfjsLib !== "undefined" && pdfjsLib.GlobalWorkerOptions.workerSrc!="";'
       ]);
 
-  String get _pdfJsUrlBase => '$_pdfJsCdnPath@$_pdfJsVersion/';
+  String get _selectPdfJsVersion => js.context.hasProperty('dartPdfJsVersion')
+      ? js.context['dartPdfJsVersion']
+      : _pdfJsVersion;
+
+  String get _pdfJsUrlBase => '$_pdfJsCdnPath@$_selectPdfJsVersion/';
 
   Future<void> _initPlugin() async {
     await _loading.acquire();
