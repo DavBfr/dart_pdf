@@ -37,6 +37,8 @@ class Settings {
   external set scale(double value);
   external set canvasContext(CanvasRenderingContext2D value);
   external set viewport(PdfJsViewport value);
+  external set cMapUrl(String value);
+  external set cMapPacked(bool value);
 }
 
 @anonymous
