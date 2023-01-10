@@ -43,14 +43,13 @@ for documentation.
    <true/>
    ```
 
-5. If you want to manually set the PdfJs library version for the web, a javascript
-   library and a small script has to be added to your `web/index.html` file, just
-   before `</head>`. Otherwise it is loaded automatically:
+5. If you want to manually set the PdfJs library version for the web, a small script
+   has to be added to your `web/index.html` file, just before `</head>`.
+   Otherwise it is loaded automatically:
 
    ```html
-   <script src="//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.8.335/pdf.min.js"></script>
-   <script type="text/javascript">
-       pdfjsLib.GlobalWorkerOptions.workerSrc = "//cdnjs.cloudflare.com/ajax/libs/pdf.js/2.8.335/pdf.worker.min.js";
+   <script>
+     var dartPdfJsVersion = "3.2.146";
    </script>
    ```
 

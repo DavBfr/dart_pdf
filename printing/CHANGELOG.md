@@ -6,6 +6,7 @@
 - Add custom pages builder to PdfPreview widget [Milad akarie]
 - Update Image dependency
 - Fix canChangeOrientation option not appearing bug [Bilal Raja]
+- Add Support cmaps option on printing web [Koji Wakamiya]
 
 ## 5.9.3
 
