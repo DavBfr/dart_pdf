@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:printing_example/raster_check.dart';
 
 Future<void> main() async {
   runApp(const MyApp('Printing Demo'));
@@ -19,11 +20,41 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text(title)),
-        body: PdfPreview(
-          build: (format) => _generatePdf(format, title),
-        ),
+      home: Home(
+        title: title,
+      ),
+    );
+  }
+}
+
+class Home extends StatelessWidget {
+  const Home({
+    Key? key,
+    required this.title,
+  }) : super(key: key);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const RasterCheck(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.language),
+          ),
+        ],
+      ),
+      body: PdfPreview(
+        build: (format) => _generatePdf(format, title),
       ),
     );
   }
