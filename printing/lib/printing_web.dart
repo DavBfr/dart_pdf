@@ -61,49 +61,44 @@ class PrintingPlugin extends PrintingPlatform {
   Future<void> _initPlugin() async {
     await _loading.acquire();
 
-    if (!_hasPdfJsLib) {
-      final script = ScriptElement()
-        ..type = 'text/javascript'
-        ..async = true
-        ..src = '$_pdfJsUrlBase/build/pdf.min.js';
-      assert(document.head != null);
-      document.head!.append(script);
-      await script.onLoad.first;
+    final script = ScriptElement()
+      ..type = 'text/javascript'
+      ..async = true
+      ..src = '$_pdfJsUrlBase/build/pdf.min.js';
+    assert(document.head != null);
+    document.head!.append(script);
+    await script.onLoad.first;
 
-      if (js.context['pdfjsLib'] == null) {
-        // In dev, requireJs is loaded in
-        final require = js.JsObject.fromBrowserObject(js.context['require']);
-        require.callMethod('config', <dynamic>[
-          js.JsObject.jsify({
-            'paths': {
-              'pdfjs-dist/build/pdf': '$_pdfJsUrlBase/build/pdf.min',
-              'pdfjs-dist/build/pdf.worker':
-                  '$_pdfJsUrlBase/build/pdf.worker.min',
-            }
-          })
-        ]);
+    // In dev, requireJs is loaded in
+    final require = js.JsObject.fromBrowserObject(js.context['require']);
+    require.callMethod('config', <dynamic>[
+      js.JsObject.jsify({
+        'paths': {
+          'pdfjs-dist/build/pdf': '$_pdfJsUrlBase/build/pdf.min',
+          'pdfjs-dist/build/pdf.worker': '$_pdfJsUrlBase/build/pdf.worker.min',
+        }
+      })
+    ]);
 
-        final completer = Completer<void>();
+    final completer = Completer<void>();
 
-        js.context.callMethod('require', <dynamic>[
-          js.JsObject.jsify(
-            [
-              'pdfjs-dist/build/pdf',
-              'pdfjs-dist/build/pdf.worker',
-            ],
-          ),
-          (dynamic app) {
-            js.context['pdfjsLib'] = app;
-            completer.complete();
-          }
-        ]);
-
-        await completer.future;
+    js.context.callMethod('require', <dynamic>[
+      js.JsObject.jsify(
+        [
+          'pdfjs-dist/build/pdf',
+          'pdfjs-dist/build/pdf.worker',
+        ],
+      ),
+      (dynamic app) {
+        js.context['pdfjsLib'] = app;
+        completer.complete();
       }
+    ]);
 
-      js.context['pdfjsLib']['GlobalWorkerOptions']['workerSrc'] =
-          '$_pdfJsUrlBase/build/pdf.worker.min.js';
-    }
+    await completer.future;
+
+    js.context['pdfjsLib']['GlobalWorkerOptions']['workerSrc'] =
+        '$_pdfJsUrlBase/build/pdf.worker.min.js';
 
     _loading.release();
   }
