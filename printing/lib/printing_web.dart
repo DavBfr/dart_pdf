@@ -46,14 +46,17 @@ class PrintingPlugin extends PrintingPlatform {
 
   static const String _frameId = '__net_nfet_printing__';
 
-  static const _pdfJsVersion =
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216';
+  static const _pdfJsCdnPath = 'https://unpkg.com/pdfjs-dist';
+
+  static const _pdfJsVersion = '2.13.216';
 
   final _loading = Mutex();
 
   bool get _hasPdfJsLib => js.context.callMethod('eval', <String>[
         'typeof pdfjsLib !== "undefined" && pdfjsLib.GlobalWorkerOptions.workerSrc!="";'
       ]);
+
+  String get _pdfJsUrlBase => '$_pdfJsCdnPath@$_pdfJsVersion/';
 
   Future<void> _initPlugin() async {
     await _loading.acquire();
@@ -62,7 +65,7 @@ class PrintingPlugin extends PrintingPlatform {
       final script = ScriptElement()
         ..type = 'text/javascript'
         ..async = true
-        ..src = '$_pdfJsVersion/pdf.min.js';
+        ..src = '$_pdfJsUrlBase/build/pdf.min.js';
       assert(document.head != null);
       document.head!.append(script);
       await script.onLoad.first;
@@ -73,8 +76,9 @@ class PrintingPlugin extends PrintingPlatform {
         require.callMethod('config', <dynamic>[
           js.JsObject.jsify({
             'paths': {
-              'pdfjs-dist/build/pdf': '$_pdfJsVersion/pdf.min',
-              'pdfjs-dist/build/pdf.worker': '$_pdfJsVersion/pdf.worker.min',
+              'pdfjs-dist/build/pdf': '$_pdfJsUrlBase/build/pdf.min',
+              'pdfjs-dist/build/pdf.worker':
+                  '$_pdfJsUrlBase/build/pdf.worker.min',
             }
           })
         ]);
@@ -83,7 +87,11 @@ class PrintingPlugin extends PrintingPlatform {
 
         js.context.callMethod('require', <dynamic>[
           js.JsObject.jsify(
-              ['pdfjs-dist/build/pdf', 'pdfjs-dist/build/pdf.worker']),
+            [
+              'pdfjs-dist/build/pdf',
+              'pdfjs-dist/build/pdf.worker',
+            ],
+          ),
           (dynamic app) {
             js.context['pdfjsLib'] = app;
             completer.complete();
@@ -94,7 +102,7 @@ class PrintingPlugin extends PrintingPlatform {
       }
 
       js.context['pdfjsLib']['GlobalWorkerOptions']['workerSrc'] =
-          '$_pdfJsVersion/pdf.worker.min.js';
+          '$_pdfJsUrlBase/build/pdf.worker.min.js';
     }
 
     _loading.release();
@@ -289,7 +297,12 @@ class PrintingPlugin extends PrintingPlatform {
   ) async* {
     await _initPlugin();
 
-    final t = PdfJs.getDocument(Settings()..data = document);
+    final t = PdfJs.getDocument(
+      Settings()
+        ..data = document
+        ..cMapUrl = '$_pdfJsUrlBase/cmaps/'
+        ..cMapPacked = true,
+    );
     try {
       final d = await promiseToFuture<PdfJsDoc>(t.promise);
       final numPages = d.numPages;
