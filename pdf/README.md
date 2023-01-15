@@ -2,8 +2,8 @@
 
 This library is divided into two parts:
 
-* a low-level Pdf creation library that takes care of the pdf bits generation.
-* a Widgets system similar to Flutter's, for easy high-level Pdf creation.
+- a low-level Pdf creation library that takes care of the pdf bits generation.
+- a Widgets system similar to Flutter's, for easy high-level Pdf creation.
 
 It can create a full multi-pages document with graphics,
 images, and text using TrueType fonts. With the ease of use you already know.
@@ -15,7 +15,7 @@ See an interactive demo here: <https://davbfr.github.io/dart_pdf/>.
 </a>
 
 The source code for a full demo that can run on any Flutter target, and how to build,
-it can be found here: 
+it can be found here:
 <https://github.com/DavBfr/dart_pdf/tree/master/demo/>
 
 Use the `printing` package <https://pub.dev/packages/printing>
@@ -23,8 +23,8 @@ for full flutter print and share operation.
 
 The coordinate system is using the internal Pdf unit:
 
-* 1.0 is defined as 1 / 72.0 inch
-* you can use the constants for centimeters, millimeters, and inch defined in PdfPageFormat
+- 1.0 is defined as 1 / 72.0 inch
+- you can use the constants for centimeters, millimeters, and inch defined in PdfPageFormat
 
 [![Buy Me A Coffee](https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/custom_images/orange_img.png "Buy Me A Coffee")](https://www.buymeacoffee.com/JORBmbw9h "Buy Me A Coffee")
 
@@ -83,11 +83,14 @@ pdf.addPage(pw.Page(build: (pw.Context context) {
 })); // Page
 ```
 
-To load an SVG from assets:
+To load an SVG:
 
 ```dart
-String svgRaw =
-     await rootBundle.loadString('assets/path/to/file.svg');
+String svgRaw = '''
+<svg viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+  <ellipse style="fill: grey; stroke: black;" cx="25" cy="25" rx="20" ry="20"></ellipse>
+</svg>
+''';
 
 final svgImage = pw.SvgImage(svg: svgRaw);
 
@@ -97,6 +100,8 @@ pdf.addPage(pw.Page(build: (pw.Context context) {
   ); // Center
 })); // Page
 ```
+
+To load the SVG from a Flutter asset, use `await rootBundle.loadString('assets/file.svg')`
 
 To use a TrueType font:
 
