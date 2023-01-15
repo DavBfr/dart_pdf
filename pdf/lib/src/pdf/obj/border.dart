@@ -63,7 +63,7 @@ class PdfBorder extends PdfObjectDict {
     super.prepare();
 
     params['/S'] =
-        PdfName('/' + 'SDBIU'.substring(style.index, style.index + 1));
+        PdfName('/${'SDBIU'.substring(style.index, style.index + 1)}');
     params['/W'] = PdfNum(width);
 
     if (dash != null) {

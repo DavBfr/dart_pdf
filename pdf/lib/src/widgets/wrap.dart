@@ -45,19 +45,19 @@ class _RunMetrics {
   final int childCount;
 }
 
-class _WrapContext extends WidgetContext {
+class WrapContext extends WidgetContext {
   int firstChild = 0;
   int lastChild = 0;
 
   @override
-  void apply(_WrapContext other) {
+  void apply(WrapContext other) {
     firstChild = other.firstChild;
     lastChild = other.lastChild;
   }
 
   @override
   WidgetContext clone() {
-    return _WrapContext()..apply(this);
+    return WrapContext()..apply(this);
   }
 
   @override
@@ -110,7 +110,7 @@ class Wrap extends MultiChildWidget with SpanningWidget {
   @override
   bool get hasMoreWidgets => _context.lastChild < children.length;
 
-  final _WrapContext _context = _WrapContext();
+  final WrapContext _context = WrapContext();
 
   double? _getMainAxisExtent(Widget child) {
     switch (direction) {
@@ -390,7 +390,7 @@ class Wrap extends MultiChildWidget with SpanningWidget {
   }
 
   @override
-  void restoreContext(_WrapContext context) {
+  void restoreContext(WrapContext context) {
     _context.apply(context);
     _context.firstChild = context.lastChild;
   }

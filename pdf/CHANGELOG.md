@@ -7,6 +7,7 @@
 - Add Inseparable Widget
 - Fix unit tests
 - Update Image dependency
+- Fix lints
 
 ## 3.8.4
 

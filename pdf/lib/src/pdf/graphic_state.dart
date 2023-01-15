@@ -127,7 +127,7 @@ class PdfGraphicState {
     if (blendMode != null) {
       final bm = blendMode.toString();
       params['/BM'] =
-          PdfName('/' + bm.substring(13, 14).toUpperCase() + bm.substring(14));
+          PdfName('/${bm.substring(13, 14).toUpperCase()}${bm.substring(14)}');
     }
 
     if (softMask != null) {

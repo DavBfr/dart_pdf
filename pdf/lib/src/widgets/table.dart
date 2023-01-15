@@ -136,27 +136,27 @@ class TableBorder extends Border {
   }
 }
 
-class _TableContext extends WidgetContext {
+class TableContext extends WidgetContext {
   int firstLine = 0;
   int lastLine = 0;
 
   @override
-  void apply(_TableContext other) {
+  void apply(TableContext other) {
     firstLine = other.firstLine;
     lastLine = other.lastLine;
   }
 
   @override
   WidgetContext clone() {
-    return _TableContext()..apply(this);
+    return TableContext()..apply(this);
   }
 
   @override
   String toString() => '$runtimeType firstLine: $firstLine lastLine: $lastLine';
 }
 
-class _ColumnLayout {
-  _ColumnLayout(this.width, this.flex);
+class ColumnLayout {
+  ColumnLayout(this.width, this.flex);
 
   final double? width;
   final double? flex;
@@ -165,7 +165,7 @@ class _ColumnLayout {
 abstract class TableColumnWidth {
   const TableColumnWidth();
 
-  _ColumnLayout layout(
+  ColumnLayout layout(
       Widget child, Context context, BoxConstraints constraints);
 }
 
@@ -175,10 +175,10 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   final double? flex;
 
   @override
-  _ColumnLayout layout(
+  ColumnLayout layout(
       Widget child, Context context, BoxConstraints constraints) {
     if (flex != null) {
-      return _ColumnLayout(0, flex);
+      return ColumnLayout(0, flex);
     }
 
     child.layout(context, const BoxConstraints());
@@ -189,7 +189,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
         (child is Expanded
             ? child.flex.toDouble()
             : (child.box!.width == double.infinity ? 1 : 0));
-    return _ColumnLayout(calculatedWidth, childFlex);
+    return ColumnLayout(calculatedWidth, childFlex);
   }
 }
 
@@ -199,9 +199,9 @@ class FixedColumnWidth extends TableColumnWidth {
   final double width;
 
   @override
-  _ColumnLayout layout(
+  ColumnLayout layout(
       Widget child, Context context, BoxConstraints? constraints) {
-    return _ColumnLayout(width, 0);
+    return ColumnLayout(width, 0);
   }
 }
 
@@ -211,9 +211,9 @@ class FlexColumnWidth extends TableColumnWidth {
   final double flex;
 
   @override
-  _ColumnLayout layout(
+  ColumnLayout layout(
       Widget child, Context context, BoxConstraints? constraints) {
-    return _ColumnLayout(0, flex);
+    return ColumnLayout(0, flex);
   }
 }
 
@@ -223,9 +223,9 @@ class FractionColumnWidth extends TableColumnWidth {
   final double value;
 
   @override
-  _ColumnLayout layout(
+  ColumnLayout layout(
       Widget child, Context context, BoxConstraints? constraints) {
-    return _ColumnLayout(constraints!.maxWidth * value, 0);
+    return ColumnLayout(constraints!.maxWidth * value, 0);
   }
 }
 
@@ -412,7 +412,7 @@ class Table extends Widget with SpanningWidget {
   final List<double?> _widths = <double?>[];
   final List<double> _heights = <double>[];
 
-  final _TableContext _context = _TableContext();
+  final TableContext _context = TableContext();
 
   final TableColumnWidth defaultColumnWidth;
   final Map<int, TableColumnWidth>? columnWidths;
@@ -423,7 +423,7 @@ class Table extends Widget with SpanningWidget {
   }
 
   @override
-  void restoreContext(_TableContext context) {
+  void restoreContext(TableContext context) {
     _context.apply(context);
     _context.firstLine = _context.lastLine;
   }

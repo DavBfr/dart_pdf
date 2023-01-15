@@ -15,6 +15,7 @@
  */
 
 import 'package:flutter/material.dart';
+
 /// A class that holds rasterized pdf data
 class PdfPreviewPageData {
   /// Default constructor
@@ -26,12 +27,14 @@ class PdfPreviewPageData {
 
   /// rasterized pdf image provider
   final ImageProvider image;
+
   /// rasterized image width
   final int width;
+
   /// rasterized image height
   final int height;
 
-   /// returns with to height aspect ratio
+  /// returns with to height aspect ratio
   double get aspectRatio {
     if (height != 0.0) {
       return width / height;

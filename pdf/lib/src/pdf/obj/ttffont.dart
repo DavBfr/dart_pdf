@@ -89,7 +89,7 @@ class PdfTtfFont extends PdfFont {
     file.buf.putBytes(font.bytes.buffer.asUint8List());
     file.params['/Length1'] = PdfNum(font.bytes.lengthInBytes);
 
-    params['/BaseFont'] = PdfName('/' + fontName);
+    params['/BaseFont'] = PdfName('/$fontName');
     params['/FontDescriptor'] = descriptor.ref();
     charMin = 32;
     charMax = 255;
@@ -113,7 +113,7 @@ class PdfTtfFont extends PdfFont {
 
     final descendantFont = PdfDict({
       '/Type': const PdfName('/Font'),
-      '/BaseFont': PdfName('/' + fontName),
+      '/BaseFont': PdfName('/$fontName'),
       '/FontFile2': file.ref(),
       '/FontDescriptor': descriptor.ref(),
       '/W': PdfArray([
@@ -130,7 +130,7 @@ class PdfTtfFont extends PdfFont {
       })
     });
 
-    params['/BaseFont'] = PdfName('/' + fontName);
+    params['/BaseFont'] = PdfName('/$fontName');
     params['/Encoding'] = const PdfName('/Identity-H');
     params['/DescendantFonts'] = PdfArray([descendantFont]);
     params['/ToUnicode'] = unicodeCMap.ref();

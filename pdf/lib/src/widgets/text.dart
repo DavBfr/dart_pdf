@@ -393,7 +393,7 @@ class _WidgetSpan extends _Span {
   }
 }
 
-typedef _VisitorCallback = bool Function(
+typedef VisitorCallback = bool Function(
   InlineSpan span,
   TextStyle? parentStyle,
   AnnotationBuilder? annotation,
@@ -435,7 +435,7 @@ abstract class InlineSpan {
   }
 
   bool visitChildren(
-    _VisitorCallback visitor,
+    VisitorCallback visitor,
     TextStyle? parentStyle,
     AnnotationBuilder? annotation,
   );
@@ -469,7 +469,7 @@ class WidgetSpan extends InlineSpan {
   /// Calls `visitor` on this [WidgetSpan]. There are no children spans to walk.
   @override
   bool visitChildren(
-    _VisitorCallback visitor,
+    VisitorCallback visitor,
     TextStyle? parentStyle,
     AnnotationBuilder? annotation,
   ) {
@@ -509,7 +509,7 @@ class TextSpan extends InlineSpan {
 
   @override
   bool visitChildren(
-    _VisitorCallback visitor,
+    VisitorCallback visitor,
     TextStyle? parentStyle,
     AnnotationBuilder? annotation,
   ) {
@@ -624,14 +624,14 @@ class _Line {
   }
 }
 
-class _RichTextContext extends WidgetContext {
+class RichTextContext extends WidgetContext {
   var startOffset = 0.0;
   var endOffset = 0.0;
   var spanStart = 0;
   var spanEnd = 0;
 
   @override
-  void apply(_RichTextContext other) {
+  void apply(RichTextContext other) {
     startOffset = other.startOffset;
     endOffset = other.endOffset;
     spanStart = other.spanStart;
@@ -640,7 +640,7 @@ class _RichTextContext extends WidgetContext {
 
   @override
   WidgetContext clone() {
-    return _RichTextContext()..apply(this);
+    return RichTextContext()..apply(this);
   }
 
   @override
@@ -682,7 +682,7 @@ class RichText extends Widget with SpanningWidget {
 
   final List<_TextDecoration> _decorations = <_TextDecoration>[];
 
-  final _context = _RichTextContext();
+  final _context = RichTextContext();
 
   final TextOverflow? overflow;
 
@@ -1297,7 +1297,7 @@ class RichText extends Widget with SpanningWidget {
   bool get hasMoreWidgets => canSpan;
 
   @override
-  void restoreContext(_RichTextContext context) {
+  void restoreContext(RichTextContext context) {
     _context.spanStart = context.spanEnd;
     _context.startOffset = -context.endOffset;
   }

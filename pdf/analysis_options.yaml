@@ -10,6 +10,7 @@ analyzer:
     todo: ignore
     constant_identifier_names: ignore
     avoid_print: ignore
+    no_leading_underscores_for_local_identifiers: ignore
 
 linter:
   rules:

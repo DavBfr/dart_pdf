@@ -24,6 +24,7 @@ import '../printing.dart';
 import '../printing_info.dart';
 import 'page.dart';
 import 'raster.dart';
+
 /// Custom widget builder that's used for custom
 /// rasterized pdf pages rendering
 typedef CustomPdfPagesBuilder = Widget Function(

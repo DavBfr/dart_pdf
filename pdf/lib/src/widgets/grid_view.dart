@@ -24,7 +24,7 @@ import 'geometry.dart';
 import 'multi_page.dart';
 import 'widget.dart';
 
-class _GridViewContext extends WidgetContext {
+class GridViewContext extends WidgetContext {
   int firstChild = 0;
   int lastChild = 0;
 
@@ -32,7 +32,7 @@ class _GridViewContext extends WidgetContext {
   double? childMainAxis;
 
   @override
-  void apply(_GridViewContext other) {
+  void apply(GridViewContext other) {
     firstChild = other.firstChild;
     lastChild = other.lastChild;
     childCrossAxis = other.childCrossAxis ?? childCrossAxis;
@@ -41,7 +41,7 @@ class _GridViewContext extends WidgetContext {
 
   @override
   WidgetContext clone() {
-    return _GridViewContext()..apply(this);
+    return GridViewContext()..apply(this);
   }
 
   @override
@@ -67,7 +67,7 @@ class GridView extends MultiChildWidget with SpanningWidget {
   final double crossAxisSpacing;
   final double childAspectRatio;
 
-  final _GridViewContext _context = _GridViewContext();
+  final GridViewContext _context = GridViewContext();
 
   int? _mainAxisCount;
 
@@ -331,7 +331,7 @@ class GridView extends MultiChildWidget with SpanningWidget {
   bool get hasMoreWidgets => true;
 
   @override
-  void restoreContext(_GridViewContext context) {
+  void restoreContext(GridViewContext context) {
     _context.apply(context);
     _context.firstChild = context.lastChild;
   }

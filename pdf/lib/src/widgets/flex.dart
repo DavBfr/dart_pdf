@@ -62,19 +62,19 @@ enum VerticalDirection {
 
 typedef _ChildSizingFunction = double? Function(Widget child, double? extent);
 
-class _FlexContext extends WidgetContext {
+class FlexContext extends WidgetContext {
   int firstChild = 0;
   int lastChild = 0;
 
   @override
-  void apply(_FlexContext other) {
+  void apply(FlexContext other) {
     firstChild = other.firstChild;
     lastChild = other.lastChild;
   }
 
   @override
   WidgetContext clone() {
-    return _FlexContext()..apply(this);
+    return FlexContext()..apply(this);
   }
 
   @override
@@ -101,7 +101,7 @@ class Flex extends MultiChildWidget with SpanningWidget {
 
   final VerticalDirection verticalDirection;
 
-  final _FlexContext _context = _FlexContext();
+  final FlexContext _context = FlexContext();
 
   double _getIntrinsicSize(
       {Axis? sizingDirection,
@@ -502,7 +502,7 @@ class Flex extends MultiChildWidget with SpanningWidget {
   bool get hasMoreWidgets => true;
 
   @override
-  void restoreContext(_FlexContext context) {
+  void restoreContext(FlexContext context) {
     _context.firstChild = context.lastChild;
   }
 

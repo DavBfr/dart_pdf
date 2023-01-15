@@ -50,10 +50,7 @@ class PdfXref {
 
   /// The xref in the format of the xref section in the Pdf file
   String ref() {
-    return offset.toString().padLeft(10, '0') +
-        ' ' +
-        generation.toString().padLeft(5, '0') +
-        (type == PdfCrossRefEntryType.inUse ? ' n ' : ' f ');
+    return '${offset.toString().padLeft(10, '0')} ${generation.toString().padLeft(5, '0')}${type == PdfCrossRefEntryType.inUse ? ' n ' : ' f '}';
   }
 
   PdfIndirect? get container => object == null ? null : PdfIndirect(object!, 0);

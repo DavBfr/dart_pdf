@@ -121,7 +121,7 @@ class LoremText {
       }
       wordList.add(w);
     }
-    final text = wordList.join(' ') + '.';
+    final text = '${wordList.join(' ')}.';
     return text[0].toUpperCase() + text.substring(1);
   }
 

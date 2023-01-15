@@ -77,14 +77,14 @@ class Partition extends Widget with SpanningWidget {
   bool get hasMoreWidgets => child.hasMoreWidgets;
 }
 
-class _PartitionsContext extends WidgetContext {
-  _PartitionsContext(int count)
+class PartitionsContext extends WidgetContext {
+  PartitionsContext(int count)
       : partitionContext = List<WidgetContext?>.filled(count, null);
 
   final List<WidgetContext?> partitionContext;
 
   @override
-  void apply(_PartitionsContext other) {
+  void apply(PartitionsContext other) {
     for (var index = 0; index < partitionContext.length; index++) {
       partitionContext[index]?.apply(other.partitionContext[index]!);
     }
@@ -92,7 +92,7 @@ class _PartitionsContext extends WidgetContext {
 
   @override
   WidgetContext clone() {
-    final context = _PartitionsContext(partitionContext.length);
+    final context = PartitionsContext(partitionContext.length);
     for (var index = 0; index < partitionContext.length; index++) {
       context.partitionContext[index] = partitionContext[index]?.clone();
     }
@@ -105,12 +105,12 @@ class Partitions extends Widget with SpanningWidget {
   Partitions({
     required this.children,
     this.mainAxisSize = MainAxisSize.max,
-  })  : _context = _PartitionsContext(children.length),
+  })  : _context = PartitionsContext(children.length),
         super();
 
   final List<Partition> children;
 
-  final _PartitionsContext _context;
+  final PartitionsContext _context;
 
   final MainAxisSize mainAxisSize;
 
@@ -218,7 +218,7 @@ class Partitions extends Widget with SpanningWidget {
   }
 
   @override
-  void restoreContext(_PartitionsContext context) {
+  void restoreContext(PartitionsContext context) {
     _context.apply(context);
     var index = 0;
     for (final child in children) {

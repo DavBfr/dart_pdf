@@ -43,7 +43,7 @@ String logicalToVisual(String input) {
   final buffer = StringBuffer();
   final paragraphs = bidi.splitStringToParagraphs(input);
   for (final paragraph in paragraphs) {
-    final endsWithNewLine = paragraph.paragraphSeparator == 10;
+    final endsWithNewLine = paragraph.separator == 10;
     final endIndex = paragraph.bidiText.length - (endsWithNewLine ? 1 : 0);
     final visual = String.fromCharCodes(paragraph.bidiText, 0, endIndex);
     buffer.write(visual.split(' ').reversed.join(' '));

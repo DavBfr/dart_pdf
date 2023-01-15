@@ -59,7 +59,7 @@ class PdfType1Font extends PdfFont {
   void prepare() {
     super.prepare();
 
-    params['/BaseFont'] = PdfName('/' + fontName);
+    params['/BaseFont'] = PdfName('/$fontName');
   }
 
   @override

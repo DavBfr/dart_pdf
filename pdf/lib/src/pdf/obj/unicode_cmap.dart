@@ -51,11 +51,8 @@ class PdfUnicodeCmap extends PdfObjectStream {
 
     for (var key = 0; key < cmap.length; key++) {
       final value = cmap[key];
-      buf.putString('<' +
-          key.toRadixString(16).toUpperCase().padLeft(4, '0') +
-          '> <' +
-          value.toRadixString(16).toUpperCase().padLeft(4, '0') +
-          '>\n');
+      buf.putString(
+          '<${key.toRadixString(16).toUpperCase().padLeft(4, '0')}> <${value.toRadixString(16).toUpperCase().padLeft(4, '0')}>\n');
     }
 
     buf.putString('endbfchar\n'

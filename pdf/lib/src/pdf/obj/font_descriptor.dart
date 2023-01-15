@@ -37,7 +37,7 @@ class PdfFontDescriptor extends PdfObjectDict {
   void prepare() {
     super.prepare();
 
-    params['/FontName'] = PdfName('/' + ttfFont.fontName);
+    params['/FontName'] = PdfName('/${ttfFont.fontName}');
     params['/FontFile2'] = file.ref();
     params['/Flags'] = PdfNum(ttfFont.font.unicode ? 4 : 32);
     params['/FontBBox'] = PdfArray.fromNum(<int>[
