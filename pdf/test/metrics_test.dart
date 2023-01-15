@@ -100,6 +100,9 @@ void printMetrics(
 
 void main() {
   test('Pdf Font Metrics', () async {
+    Document.debug = true;
+    RichText.debug = true;
+
     final pdf = Document();
 
     PdfFont.courier(pdf.document);

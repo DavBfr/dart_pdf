@@ -54,7 +54,8 @@ Widget barcode(
 
 void main() {
   setUpAll(() {
-    // Document.debug = true;
+    RichText.debug = true;
+    Document.debug = true;
     pdf = Document();
   });
 

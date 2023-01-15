@@ -5,6 +5,7 @@
 - Improve TTF Writer compatibility
 - Apply THE BIDIRECTIONAL ALGORITHM using dart_bidi [Milad akarie]
 - Add Inseparable Widget
+- Fix unit tests
 
 ## 3.8.4
 

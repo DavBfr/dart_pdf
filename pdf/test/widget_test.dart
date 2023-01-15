@@ -29,6 +29,7 @@ void main() {
 
   setUpAll(() {
     Document.debug = true;
+    RichText.debug = true;
 
     final defaultFont = File('open-sans.ttf').readAsBytesSync();
     final defaultFontBold = File('open-sans-bold.ttf').readAsBytesSync();

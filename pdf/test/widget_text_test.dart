@@ -104,7 +104,7 @@ void main() {
     for (final align in TextAlign.values) {
       widgets.add(
         Text(
-          '$align:\n' + para,
+          '$align:\n$para',
           textAlign: align,
         ),
       );

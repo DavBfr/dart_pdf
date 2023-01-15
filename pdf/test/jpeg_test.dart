@@ -29,6 +29,7 @@ late MemoryImage image;
 void main() {
   setUpAll(() async {
     Document.debug = true;
+    RichText.debug = true;
     pdf = Document();
 
     image = MemoryImage(

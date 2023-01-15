@@ -24,6 +24,7 @@ late Document pdf;
 
 void main() {
   setUpAll(() {
+    RichText.debug = true;
     Document.debug = true;
     pdf = Document();
   });

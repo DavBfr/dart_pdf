@@ -26,6 +26,7 @@ PageTheme? pageTheme;
 void main() {
   setUpAll(() {
     Document.debug = true;
+    RichText.debug = true;
     pdf = Document();
 
     pageTheme = PageTheme(

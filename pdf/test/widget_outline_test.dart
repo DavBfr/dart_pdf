@@ -70,6 +70,7 @@ Iterable<Widget> level(int i) sync* {
 void main() {
   setUpAll(() {
     Document.debug = true;
+    RichText.debug = true;
     pdf = Document(pageMode: PdfPageMode.outlines);
   });
 

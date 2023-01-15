@@ -37,7 +37,7 @@ TextStyle? style;
 
 void main() {
   setUpAll(() {
-    Document.debug = false;
+    Document.debug = true;
     RichText.debug = true;
     pdf = Document();
 

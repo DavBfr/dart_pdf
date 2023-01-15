@@ -113,7 +113,7 @@ void hexDump(
         }
       }
     }
-    s += b.toRadixString(16).padLeft(2, '0') + ' ';
+    s += '${b.toRadixString(16).padLeft(2, '0')} ';
     if (b > 31 && b < 128) {
       t += String.fromCharCode(b);
     } else {

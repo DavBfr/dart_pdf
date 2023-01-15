@@ -23,6 +23,9 @@ List<Widget> lines = <Widget>[];
 
 void main() {
   setUpAll(() {
+    Document.debug = true;
+    RichText.debug = true;
+
     for (var i = 0; i < 200; i++) {
       lines.add(Text('Line $i'));
     }

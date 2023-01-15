@@ -65,7 +65,8 @@ class Decorated extends StatelessWidget {
 
 void main() {
   setUpAll(() {
-    // Document.debug = true;
+    Document.debug = true;
+    RichText.debug = true;
     pdf = Document();
   });
 
