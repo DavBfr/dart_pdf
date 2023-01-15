@@ -24,7 +24,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-import 'package:image/image.dart' as im;
 import 'package:pdf/pdf.dart';
 
 import 'src/callback.dart';
@@ -358,11 +357,7 @@ class _WebPdfRaster extends PdfRaster {
 
   @override
   Uint8List get pixels {
-    if (_pixels == null) {
-      final img = im.PngDecoder().decodeImage(png)!;
-      _pixels = img.data.buffer.asUint8List();
-    }
-
+    _pixels ??= PdfRasterBase.fromPng(png).pixels;
     return _pixels!;
   }
 

@@ -187,6 +187,6 @@ class RawImage extends ImageImage {
     required int height,
     PdfImageOrientation? orientation,
     double? dpi,
-  }) : super(im.Image.fromBytes(width, height, bytes),
+  }) : super(PdfRasterBase(width, height, true, bytes).asImage(),
             orientation: orientation, dpi: dpi);
 }

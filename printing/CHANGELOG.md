@@ -4,6 +4,7 @@
 
 - Remove deprecated Android embedding
 - Add custom pages builder to PdfPreview widget [Milad akarie]
+- Update Image dependency
 
 ## 5.9.3
 

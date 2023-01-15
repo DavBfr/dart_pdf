@@ -41,4 +41,5 @@ export 'src/pdf/obj/smask.dart';
 export 'src/pdf/obj/ttffont.dart';
 export 'src/pdf/page_format.dart';
 export 'src/pdf/point.dart';
+export 'src/pdf/raster.dart';
 export 'src/pdf/rect.dart';

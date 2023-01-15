@@ -17,7 +17,7 @@ dependencies:
   url_launcher: ^6.0.6
 
 dev_dependencies:
-  flutter_launcher_icons: ^0.10.0
+  # flutter_launcher_icons: ^0.10.0
   flutter_lints: ^1.0.4
   flutter_test:
     sdk: flutter

@@ -21,6 +21,7 @@ import 'package:image/image.dart' as im;
 import '../data_types.dart';
 import '../document.dart';
 import '../exif.dart';
+import '../raster.dart';
 import 'xobject.dart';
 
 /// Represents the position of the first pixel in the data stream
@@ -152,12 +153,13 @@ class PdfImage extends PdfXObject {
     required im.Image image,
     PdfImageOrientation orientation = PdfImageOrientation.topLeft,
   }) {
+    final raster = PdfRasterBase.fromImage(image);
     return PdfImage(
       pdfDocument,
-      image: image.getBytes(format: im.Format.rgba),
-      width: image.width,
-      height: image.height,
-      alpha: image.channels == im.Channels.rgba,
+      image: raster.pixels,
+      width: raster.width,
+      height: raster.height,
+      alpha: raster.alpha,
       orientation: orientation,
     );
   }

@@ -179,7 +179,7 @@ void main() {
     ));
   });
 
-  test('Container Widgets BoxShadow', () {
+  test('Container Widgets BoxShadow Rectangle', () {
     pdf.addPage(Page(
       build: (Context context) => Container(
         margin: const EdgeInsets.all(30),
@@ -196,6 +196,28 @@ void main() {
         ),
         width: 200,
         height: 400,
+      ),
+    ));
+  });
+
+  test('Container Widgets BoxShadow Ellipse', () {
+    pdf.addPage(Page(
+      build: (Context context) => Container(
+        margin: const EdgeInsets.all(30),
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              blurRadius: 4,
+              spreadRadius: 10,
+              offset: PdfPoint(2, 2),
+            ),
+          ],
+          color: PdfColors.blue,
+        ),
+        width: 200,
+        height: 200,
       ),
     ));
   });
