@@ -25,8 +25,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 /// ImageProvider that draws a Flutter Widget on a PDF document
-class WidgetWraper extends pw.ImageProvider {
-  WidgetWraper._(
+class WidgetWrapper extends pw.ImageProvider {
+  WidgetWrapper._(
     this.bytes,
     int width,
     int height,
@@ -51,7 +51,7 @@ class WidgetWraper extends pw.ImageProvider {
   /// Future<Uint8List> _generatePdf(PdfPageFormat format) async {
   ///   final pdf = pw.Document();
   ///
-  ///   final image = await WidgetWraper.fromKey(key: rb);
+  ///   final image = await WidgetWrapper.fromKey(key: rb);
   ///
   ///   pdf.addPage(
   ///     pw.Page(
@@ -66,7 +66,7 @@ class WidgetWraper extends pw.ImageProvider {
   ///   return pdf.save();
   /// }
   /// ```
-  static Future<WidgetWraper> fromKey({
+  static Future<WidgetWrapper> fromKey({
     required GlobalKey key,
     int? width,
     int? height,
@@ -82,7 +82,7 @@ class WidgetWraper extends pw.ImageProvider {
     final byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
 
     if (byteData == null) {
-      return WidgetWraper._(
+      return WidgetWrapper._(
         Uint8List(0),
         0,
         0,
@@ -92,7 +92,7 @@ class WidgetWraper extends pw.ImageProvider {
     }
 
     final imageData = byteData.buffer.asUint8List();
-    return WidgetWraper._(
+    return WidgetWrapper._(
       imageData,
       image.width,
       image.height,
@@ -104,7 +104,7 @@ class WidgetWraper extends pw.ImageProvider {
   /// Wrap a Flutter Widget to an ImageProvider.
   ///
   /// ```
-  /// final wrapped = await WidgetWraper.fromWidget(
+  /// final wrapped = await WidgetWrapper.fromWidget(
   ///   widget: Container(
   ///     color: Colors.white,
   ///     child: Text(
@@ -125,7 +125,7 @@ class WidgetWraper extends pw.ImageProvider {
   ///   ),
   /// );
   /// ```
-  static Future<WidgetWraper> fromWidget({
+  static Future<WidgetWrapper> fromWidget({
     required Widget widget,
     required BoxConstraints constraints,
     double pixelRatio = 1.0,
@@ -170,11 +170,7 @@ class WidgetWraper extends pw.ImageProvider {
       configuration: ViewConfiguration(
           size: Size(_constraints.maxWidth, _constraints.maxHeight),
           devicePixelRatio: ui.window.devicePixelRatio),
-      window: _FlutterView(
-        configuration: ui.ViewConfiguration(
-          devicePixelRatio: ui.window.devicePixelRatio,
-        ),
-      ),
+      window: ui.window,
     );
 
     final pipelineOwner = PipelineOwner()..rootNode = renderView;
@@ -204,7 +200,7 @@ class WidgetWraper extends pw.ImageProvider {
       throw Exception('Unable to read image data');
     }
 
-    return WidgetWraper._(
+    return WidgetWrapper._(
       bytes.buffer.asUint8List(),
       image.width,
       image.height,
@@ -228,15 +224,51 @@ class WidgetWraper extends pw.ImageProvider {
   }
 }
 
-class _FlutterView extends ui.FlutterView {
-  _FlutterView({required this.configuration});
+/// ImageProvider that draws a Flutter Widget on a PDF document
+@Deprecated('Use WidgetWrapper instead')
+class WidgetWraper extends WidgetWrapper {
+  WidgetWraper._(
+    Uint8List bytes,
+    int width,
+    int height,
+    PdfImageOrientation orientation,
+    double? dpi,
+  ) : super._(bytes, width, height, orientation, dpi);
 
-  final ui.ViewConfiguration configuration;
+  /// Wrap a Flutter Widget identified by a GlobalKey to an ImageProvider.
+  @Deprecated('Use WidgetWrapper.fromKey instead')
+  static Future<WidgetWrapper> fromKey({
+    required GlobalKey key,
+    int? width,
+    int? height,
+    double pixelRatio = 1.0,
+    PdfImageOrientation? orientation,
+    double? dpi,
+  }) {
+    return WidgetWrapper.fromKey(
+      key: key,
+      width: width,
+      pixelRatio: pixelRatio,
+      orientation: orientation,
+      dpi: dpi,
+    );
+  }
 
-  @override
-  ui.PlatformDispatcher get platformDispatcher =>
-      ui.PlatformDispatcher.instance;
-
-  @override
-  ui.ViewConfiguration get viewConfiguration => configuration;
+  /// Wrap a Flutter Widget to an ImageProvider.
+  @Deprecated('Use WidgetWrapper.fromWidget instead')
+  static Future<WidgetWrapper> fromWidget({
+    required Widget widget,
+    required BoxConstraints constraints,
+    double pixelRatio = 1.0,
+    PdfImageOrientation? orientation,
+    double? dpi,
+  }) {
+    return WidgetWrapper.fromWidget(
+      widget: widget,
+      constraints: constraints,
+      pixelRatio: pixelRatio,
+      orientation: orientation,
+      dpi: dpi,
+    );
+  }
 }

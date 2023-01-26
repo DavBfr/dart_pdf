@@ -10,6 +10,7 @@
 - Fix lints
 - Add options to customise border in Dataset widget [838]
 - Add Choice Field [Carsten Fregin]
+- Add Flutter 3.7 compatibility
 
 ## 3.8.4
 

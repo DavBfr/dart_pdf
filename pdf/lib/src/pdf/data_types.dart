@@ -76,7 +76,6 @@ class PdfBool extends PdfDataType {
 class PdfNum extends PdfDataType {
   const PdfNum(this.value)
       : assert(value != double.infinity),
-        assert(value != double.nan),
         assert(value != double.negativeInfinity);
 
   static const int precision = 5;
@@ -85,6 +84,9 @@ class PdfNum extends PdfDataType {
 
   @override
   void output(PdfStream s, [int? indent]) {
+    assert(!value.isNaN);
+    assert(!value.isInfinite);
+
     if (value is int) {
       s.putString(value.toInt().toString());
     } else {

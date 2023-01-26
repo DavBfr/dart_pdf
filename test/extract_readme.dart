@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:markdown/markdown.dart' as md;
 
-Iterable<String> getCode(List<md.Node> nodes, [bool isCode = false]) sync* {
+Iterable<String> getCode(List<md.Node>? nodes, [bool isCode = false]) sync* {
   if (nodes == null) {
     return;
   }

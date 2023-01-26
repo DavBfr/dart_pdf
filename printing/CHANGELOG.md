@@ -7,6 +7,7 @@
 - Update Image dependency
 - Fix canChangeOrientation option not appearing bug [Bilal Raja]
 - Add Support cmaps option on printing web [Koji Wakamiya]
+- Add Flutter 3.7 compatibility
 
 ## 5.9.3
 
