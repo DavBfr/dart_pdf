@@ -144,31 +144,32 @@ class WidgetWrapper extends pw.ImageProvider {
       child: widget,
     );
 
-    final _properties = DiagnosticPropertiesBuilder();
-    widget.debugFillProperties(_properties);
+    final prop = DiagnosticPropertiesBuilder();
+    widget.debugFillProperties(prop);
 
-    if (_properties.properties.isEmpty) {
+    if (prop.properties.isEmpty) {
       throw ErrorDescription('Unable to get the widget properties');
     }
 
-    final _constraints = _properties.properties
+    final computedConstraints = prop.properties
         .whereType<DiagnosticsProperty<BoxConstraints>>()
         .first
         .value;
 
-    if (_constraints == null ||
-        !_constraints.hasBoundedWidth ||
-        !_constraints.hasBoundedWidth) {
+    if (computedConstraints == null ||
+        !computedConstraints.hasBoundedWidth ||
+        !computedConstraints.hasBoundedWidth) {
       throw Exception('Unable to convert an unbounded widget.');
     }
 
-    final _repaintBoundary = RenderRepaintBoundary();
+    final repaintBoundary = RenderRepaintBoundary();
 
     final renderView = RenderView(
       child: RenderPositionedBox(
-          alignment: Alignment.center, child: _repaintBoundary),
+          alignment: Alignment.center, child: repaintBoundary),
       configuration: ViewConfiguration(
-          size: Size(_constraints.maxWidth, _constraints.maxHeight),
+          size:
+              Size(computedConstraints.maxWidth, computedConstraints.maxHeight),
           devicePixelRatio: ui.window.devicePixelRatio),
       window: ui.window,
     );
@@ -177,8 +178,8 @@ class WidgetWrapper extends pw.ImageProvider {
     renderView.prepareInitialFrame();
 
     final buildOwner = BuildOwner(focusManager: FocusManager());
-    final _rootElement = RenderObjectToWidgetAdapter<RenderBox>(
-      container: _repaintBoundary,
+    final rootElement = RenderObjectToWidgetAdapter<RenderBox>(
+      container: repaintBoundary,
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: IntrinsicHeight(child: IntrinsicWidth(child: widget)),
@@ -186,7 +187,7 @@ class WidgetWrapper extends pw.ImageProvider {
     ).attachToRenderTree(buildOwner);
 
     buildOwner
-      ..buildScope(_rootElement)
+      ..buildScope(rootElement)
       ..finalizeTree();
 
     pipelineOwner
@@ -194,7 +195,7 @@ class WidgetWrapper extends pw.ImageProvider {
       ..flushCompositingBits()
       ..flushPaint();
 
-    final image = await _repaintBoundary.toImage(pixelRatio: pixelRatio);
+    final image = await repaintBoundary.toImage(pixelRatio: pixelRatio);
     final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
     if (bytes == null) {
       throw Exception('Unable to read image data');

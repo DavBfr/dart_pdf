@@ -333,7 +333,7 @@ class MultiPage extends Page {
               'You probably need a SpanningWidget or use a single page layout');
         }
 
-        final span = child as SpanningWidget;
+        final span = child;
 
         if (savedContext != null) {
           // Restore saved context

@@ -157,9 +157,9 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
   void didChangeDependencies() {
     if (!infoLoaded) {
       infoLoaded = true;
-      Printing.info().then((PrintingInfo _info) {
+      Printing.info().then((PrintingInfo printingInfo) {
         setState(() {
-          info = _info;
+          info = printingInfo;
           raster();
         });
       });
@@ -182,8 +182,8 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
       return _showError(error!);
     }
 
-    final _info = info;
-    if (_info != null && !_info.canRaster) {
+    final printingInfo = info;
+    if (printingInfo != null && !printingInfo.canRaster) {
       return _showError(_errorMessage);
     }
 

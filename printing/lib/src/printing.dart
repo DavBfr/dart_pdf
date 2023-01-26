@@ -74,9 +74,9 @@ mixin Printing {
     Rect? bounds,
     String? title,
   }) async {
-    final _info = await info();
+    final printingInfo = await info();
 
-    if (_info.canListPrinters) {
+    if (printingInfo.canListPrinters) {
       final printers = await listPrinters();
       printers.sort((a, b) {
         if (a.isDefault) {
@@ -88,6 +88,7 @@ mixin Printing {
         return a.name.compareTo(b.name);
       });
 
+      // ignore: use_build_context_synchronously
       return await showDialog<Printer>(
         context: context,
         builder: (context) => SimpleDialog(

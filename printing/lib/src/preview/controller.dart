@@ -67,12 +67,9 @@ class PdfPreviewData extends ChangeNotifier {
   PdfPageFormat get actualPageFormat => _onComputeActualPageFormat();
 
   String get localPageFormat {
-    // Flutter 3 workaround
-    // ignore: omit_local_variable_types
-    final WidgetsBinding? wbi = WidgetsBinding.instance;
-    final locale = wbi!.window.locale;
-    // ignore: unnecessary_cast
-    final cc = (locale as Locale?)?.countryCode ?? 'US';
+    final wbi = WidgetsBinding.instance;
+    final locale = wbi.window.locale;
+    final cc = locale.countryCode ?? 'US';
 
     if (cc == 'US' || cc == 'CA' || cc == 'MX') {
       return 'Letter';

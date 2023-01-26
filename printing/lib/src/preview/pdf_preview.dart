@@ -228,10 +228,10 @@ class PdfPreview extends StatefulWidget {
   final CustomPdfPagesBuilder? _pagesBuilder;
 
   @override
-  _PdfPreviewState createState() => _PdfPreviewState();
+  PdfPreviewState createState() => PdfPreviewState();
 }
 
-class _PdfPreviewState extends State<PdfPreview> {
+class PdfPreviewState extends State<PdfPreview> {
   final previewWidget = GlobalKey<PdfPreviewCustomState>();
   late PdfPreviewData previewData;
 
@@ -305,9 +305,9 @@ class _PdfPreviewState extends State<PdfPreview> {
   void didChangeDependencies() {
     if (!infoLoaded) {
       infoLoaded = true;
-      Printing.info().then((PrintingInfo _info) {
+      Printing.info().then((PrintingInfo printingInfo) {
         setState(() {
-          info = _info;
+          info = printingInfo;
         });
       });
     }

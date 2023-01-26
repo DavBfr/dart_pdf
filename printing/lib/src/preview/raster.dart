@@ -100,10 +100,10 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
     }
     _rastering = true;
 
-    Uint8List _doc;
+    Uint8List doc;
 
-    final _info = info;
-    if (_info != null && !_info.canRaster) {
+    final printingInfo = info;
+    if (printingInfo != null && !printingInfo.canRaster) {
       assert(() {
         if (kIsWeb) {
           FlutterError.reportError(FlutterErrorDetails(
@@ -122,7 +122,7 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
     }
 
     try {
-      _doc = await widget.build(pageFormat);
+      doc = await widget.build(pageFormat);
     } catch (exception, stack) {
       InformationCollector? collector;
 
@@ -159,7 +159,7 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
     try {
       var pageNum = 0;
       await for (final PdfRaster page in Printing.raster(
-        _doc,
+        doc,
         dpi: dpi,
         pages: widget.pages,
       )) {
