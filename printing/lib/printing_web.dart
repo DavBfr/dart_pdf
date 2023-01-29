@@ -65,6 +65,15 @@ class PrintingPlugin extends PrintingPlatform {
     await _loading.acquire();
 
     if (!_hasPdfJsLib) {
+      dynamic amd;
+      dynamic define;
+      if (js.context['define'] != null) {
+        // In dev, requireJs is loaded in. Disable it here.
+        define = js.JsObject.fromBrowserObject(js.context['define']);
+        amd = define['amd'];
+        define['amd'] = false;
+      }
+
       final script = ScriptElement()
         ..type = 'text/javascript'
         ..async = true
@@ -73,35 +82,9 @@ class PrintingPlugin extends PrintingPlatform {
       document.head!.append(script);
       await script.onLoad.first;
 
-      if (js.context['pdfjsLib'] == null) {
-        // In dev, requireJs is loaded in
-        final require = js.JsObject.fromBrowserObject(js.context['require']);
-        require.callMethod('config', <dynamic>[
-          js.JsObject.jsify({
-            'paths': {
-              'pdfjs-dist/build/pdf': '$_pdfJsUrlBase/build/pdf.min',
-              'pdfjs-dist/build/pdf.worker':
-                  '$_pdfJsUrlBase/build/pdf.worker.min',
-            }
-          })
-        ]);
-
-        final completer = Completer<void>();
-
-        js.context.callMethod('require', <dynamic>[
-          js.JsObject.jsify(
-            [
-              'pdfjs-dist/build/pdf',
-              'pdfjs-dist/build/pdf.worker',
-            ],
-          ),
-          (dynamic app) {
-            js.context['pdfjsLib'] = app;
-            completer.complete();
-          }
-        ]);
-
-        await completer.future;
+      if (amd != null) {
+        // Re-enable requireJs
+        define['amd'] = amd;
       }
 
       js.context['pdfjsLib']['GlobalWorkerOptions']['workerSrc'] =

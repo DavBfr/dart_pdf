@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.10.1
+
+- Fix loading pdfjs in debug mode
+
 ## 5.10.0
 
 - Remove deprecated Android embedding
