@@ -93,7 +93,7 @@ class Calendar extends StatelessWidget {
     }
 
     if (date.day == 1) {
-      text += ' ' + DateFormat.MMM().format(date);
+      text += ' ${DateFormat.MMM().format(date)}';
     }
 
     return Container(
@@ -109,12 +109,12 @@ class Calendar extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    final _date = date ?? DateTime.now();
-    final _year = year ?? _date.year;
-    final _month = month ?? _date.month;
+    final localDate = date ?? DateTime.now();
+    final localYear = year ?? localDate.year;
+    final localMnth = month ?? localDate.month;
 
-    final start = DateTime(_year, _month, 1, 12);
-    final end = DateTime(_year, _month + 1, 1, 12).subtract(
+    final start = DateTime(localYear, localMnth, 1, 12);
+    final end = DateTime(localYear, localMnth + 1, 1, 12).subtract(
       const Duration(days: 1),
     );
 
@@ -148,9 +148,9 @@ class Calendar extends StatelessWidget {
       children: List<Widget>.generate(42, (int index) {
         final d = start.add(Duration(days: index - startId));
         final currentMonth = index >= startId && index < endId;
-        final currentDay = d.year == _date.year &&
-            d.month == _date.month &&
-            d.day == _date.day;
+        final currentDay = d.year == localDate.year &&
+            d.month == localDate.month &&
+            d.day == localDate.day;
         return Container(
           foregroundDecoration: BoxDecoration(
               border: Border(
@@ -170,7 +170,7 @@ class Calendar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          title(context, DateTime(_year, _month)),
+          title(context, DateTime(localYear, localMnth)),
           head,
           Expanded(child: body),
         ],

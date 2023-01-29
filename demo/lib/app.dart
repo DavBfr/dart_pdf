@@ -117,7 +117,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
     final appDocDir = await getApplicationDocumentsDirectory();
     final appDocPath = appDocDir.path;
-    final file = File(appDocPath + '/' + 'document.pdf');
+    final file = File('$appDocPath/document.pdf');
     print('Save as file ${file.path} ...');
     await file.writeAsBytes(bytes);
     await OpenFile.open(file.path);

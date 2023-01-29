@@ -62,7 +62,7 @@ Future<Uint8List> generateDocument(
               pw.RichText(
                   text: pw.TextSpan(children: [
                 pw.TextSpan(
-                  text: DateTime.now().year.toString() + '\n',
+                  text: '${DateTime.now().year}\n',
                   style: pw.TextStyle(
                     fontWeight: pw.FontWeight.bold,
                     color: PdfColors.grey600,
