@@ -53,7 +53,7 @@ Future<Uint8List> generateResume(PdfPageFormat format, CustomData data) async {
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: <pw.Widget>[
-                        pw.Text('Parnella Charlesbois',
+                        pw.Text('Manish Bhanushali',
                             textScaleFactor: 2,
                             style: pw.Theme.of(context)
                                 .defaultTextStyle
