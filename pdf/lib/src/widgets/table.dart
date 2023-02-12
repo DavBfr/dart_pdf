@@ -338,7 +338,7 @@ class Table extends Widget with SpanningWidget {
               alignment: align,
               padding: headerPadding,
               constraints: BoxConstraints(minHeight: headerHeight),
-              child: Text(
+              child:cell is Widget? cell:  Text(
                 headerFormat == null
                     ? cell.toString()
                     : headerFormat(tableRow.length, cell),
@@ -360,7 +360,7 @@ class Table extends Widget with SpanningWidget {
               decoration: cellDecoration == null
                   ? null
                   : cellDecoration(tableRow.length, cell, rowNum),
-              child: Text(
+              child: cell is Widget? cell:  Text(
                 cellFormat == null
                     ? cell.toString()
                     : cellFormat(tableRow.length, cell),
