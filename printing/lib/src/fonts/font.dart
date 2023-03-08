@@ -18,7 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:pdf/widgets.dart';
 
 import '../cache.dart';
-import 'manifest.dart';
+import 'manifest.dart' as manifest;
 
 /// Downloadable font object
 class DownloadableFont {
@@ -44,7 +44,7 @@ class DownloadableFont {
     bool cache = true,
   }) async {
     final asset = '$assetPrefix$name.ttf';
-    if (await AssetManifest.contains(asset)) {
+    if (await manifest.AssetManifest.contains(asset)) {
       bundle ??= rootBundle;
       final data = await bundle.load(asset);
       return TtfFont(
