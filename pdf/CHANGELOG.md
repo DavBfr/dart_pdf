@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.10.0
+
+- Apply BoxShape and BorderRadius to selected Checkbox [Joseph Grabinger]
+
 ## 3.9.0
 
 - Improve TTF Writer compatibility
