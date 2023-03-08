@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:vector_math/vector_math_64.dart';
@@ -81,7 +82,10 @@ class Checkbox extends SingleChildWidget {
     double width = 13,
     double height = 13,
     BoxDecoration? decoration,
-  }) : super(
+  }) : radius = decoration?.shape == BoxShape.circle 
+        ? Radius.circular(math.max(height, width)/2) 
+        : decoration?.borderRadius?.topLeft ?? Radius.zero,
+      super(
             child: Container(
                 width: width,
                 height: height,
@@ -103,6 +107,8 @@ class Checkbox extends SingleChildWidget {
 
   final String name;
 
+  final Radius radius;
+
   @override
   void paint(Context context) {
     super.paint(context);
@@ -118,7 +124,7 @@ class Checkbox extends SingleChildWidget {
 
     final g = bf.appearance(context.document, PdfAnnotAppearance.normal,
         name: '/Yes', selected: value);
-    g.drawRect(0, 0, bf.rect.width, bf.rect.height);
+    g.drawRRect(0, 0, bf.rect.width, bf.rect.height, radius.y, radius.x);
     g.setFillColor(activeColor);
     g.fillPath();
     g.moveTo(2, bf.rect.height / 2);
