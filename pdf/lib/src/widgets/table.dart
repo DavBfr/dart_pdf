@@ -351,7 +351,6 @@ class Table extends Widget with SpanningWidget {
       } else {
         for (final dynamic cell in row) {
           final align = cellAlignments[tableRow.length] ?? cellAlignment;
-          final textAlign = _textAlign(align);
           tableRow.add(
             Container(
               alignment: align,
@@ -360,13 +359,14 @@ class Table extends Widget with SpanningWidget {
               decoration: cellDecoration == null
                   ? null
                   : cellDecoration(tableRow.length, cell, rowNum),
-              child: Text(
-                cellFormat == null
-                    ? cell.toString()
-                    : cellFormat(tableRow.length, cell),
-                style: isOdd ? oddCellStyle : cellStyle,
-                textAlign: textAlign,
-              ),
+              child: cell is String
+                  ? Text(
+                      cellFormat == null
+                          ? cell.toString()
+                          : cellFormat(tableRow.length, cell),
+                      style: isOdd ? oddCellStyle : cellStyle,
+                      textAlign: _textAlign(align))
+                  : (cell is Widget ? cell : null),
             ),
           );
         }
