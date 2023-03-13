@@ -3,6 +3,7 @@
 ## 5.10.2
 
 - Fix Flutter 3.9 deprecations
+- Improve podspec files
 
 ## 5.10.1
 
