@@ -123,17 +123,13 @@ class PdfCatalog extends PdfObjectDict {
     }
 
     if (widgets.isNotEmpty) {
-      params['/AcroForm'] = PdfDict({
-        '/SigFlags': PdfNum(pdfDocument.sign?.flagsValue ?? 0),
-        '/Fields': PdfArray.fromObjects(widgets),
-      });
-
-      // final acroForm = (params['/AcroForm'] ??= PdfDict()) as PdfDict;
-      // acroForm['/SigFlags'] = PdfNum(pdfDocument.sign?.flagsValue ?? 0);
-      // final fields = (acroForm['/Fields'] ??= PdfArray()) as PdfArray;
-      // for (final w in widgets) {
-      //   fields.add(w.ref());
-      // }
+      final acroForm = (params['/AcroForm'] ??= PdfDict()) as PdfDict;
+      acroForm['/SigFlags'] = PdfNum(pdfDocument.sign?.flagsValue ?? 0) |
+          (acroForm['/SigFlags'] as PdfNum? ?? const PdfNum(0));
+      final fields = (acroForm['/Fields'] ??= PdfArray()) as PdfArray;
+      for (final w in widgets) {
+        fields.add(w.ref());
+      }
     }
   }
 }

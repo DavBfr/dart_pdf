@@ -6,6 +6,8 @@
 - Fix Color.toHex()
 - Improve Annotations placement
 - Improve documentation strings
+- Improve verbose output
+- Import already defined form
 
 ## 3.9.0
 

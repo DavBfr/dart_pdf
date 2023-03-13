@@ -114,6 +114,10 @@ class PdfNum extends PdfDataType {
     return false;
   }
 
+  PdfNum operator |(PdfNum other) {
+    return PdfNum(value.toInt() | other.value.toInt());
+  }
+
   @override
   int get hashCode => value.hashCode;
 }
