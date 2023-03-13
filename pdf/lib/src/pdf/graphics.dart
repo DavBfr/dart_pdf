@@ -35,17 +35,17 @@ import 'stream.dart';
 
 /// Shape to be used at the corners of paths that are stroked
 enum PdfLineJoin {
-  /// The outer edges of the strokes for the two segments shall beextended until they meet at an angle, as in a picture frame. If the segments meet at too sharp an angle (as defined by the miter limit parameter, a bevel join shall be used instead.
+  /// The outer edges of the strokes for the two segments shall be extended until they meet at an angle, as in a picture frame. If the segments meet at too sharp an angle (as defined by the miter limit parameter, a bevel join shall be used instead.
   miter,
 
-  /// An arc of a circle with a diameter equal to the line width shall be drawn around the point where the two segments meet, connecting the outer edges of the strokes for the two segments. This pieslice-shaped figure shall be filled in, producing a rounded corner.
+  /// An arc of a circle with a diameter equal to the line width shall be drawn around the point where the two segments meet, connecting the outer edges of the strokes for the two segments. This pie-slice-shaped figure shall be filled in, producing a rounded corner.
   round,
 
   /// The two segments shall be finished with butt caps and the resulting notch beyond the ends of the segments shall be filled with a triangle.
   bevel
 }
 
-/// Specify the shape that shall be used at the ends of open subpaths
+/// Specify the shape that shall be used at the ends of open sub paths
 /// and dashes, when they are stroked.
 enum PdfLineCap {
   /// The stroke shall be squared off at the endpoint of the path. There shall be no projection beyond the end of the path.
@@ -54,7 +54,7 @@ enum PdfLineCap {
   /// A semicircular arc with a diameter equal to the line width shall be drawn around the endpoint and shall be filled in.
   round,
 
-  /// The stroke shall continue beyond the endpoint of the path for a distance equal to half the line width and shall besquared off.
+  /// The stroke shall continue beyond the endpoint of the path for a distance equal to half the line width and shall be squared off.
   square
 }
 
@@ -216,7 +216,7 @@ class PdfGraphics {
     }
   }
 
-  /// Save the graphc context
+  /// Save the graphic context
   void saveContext() {
     assert(() {
       if (_page.pdfDocument.verbose) {
@@ -291,7 +291,7 @@ class PdfGraphics {
 
   /// Draws an ellipse
   ///
-  /// Use clockwise=false to draw the inside of a donnnut
+  /// Use clockwise=false to draw the inside of a donut
   void drawEllipse(double x, double y, double r1, double r2,
       {bool clockwise = true}) {
     assert(() {

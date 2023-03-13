@@ -51,7 +51,7 @@ class PdfCatalog extends PdfObjectDict {
   /// The page labels of the document
   PdfPageLabels? pageLabels;
 
-  /// These map the page modes just defined to the pagemodes setting of Pdf.
+  /// These map the page modes just defined to the page modes setting of the Pdf.
   static const List<String> _pdfPageModes = <String>[
     '/UseNone',
     '/UseOutlines',

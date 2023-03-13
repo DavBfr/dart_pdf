@@ -95,7 +95,7 @@ class PdfXrefTable extends PdfDataType {
   /// Contains offsets of each object
   final offsets = <PdfXref>[];
 
-  /// Add a xross reference element to the set
+  /// Add a cross reference element to the set
   void add(PdfXref xref) {
     offsets.add(xref);
   }
