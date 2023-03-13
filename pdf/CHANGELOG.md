@@ -9,6 +9,7 @@
 - Improve verbose output
 - Import already defined form
 - Add support for deleted objects
+- Draw page content only if not empty
 
 ## 3.9.0
 

@@ -123,6 +123,9 @@ class PdfGraphics {
   /// Default font if none selected
   PdfFont? get defaultFont => _page.getDefaultFont();
 
+  bool _altered = false;
+  bool get altered => _altered;
+
   /// Draw a surface on the previously defined shape
   /// set evenOdd to false to use the nonzero winding number rule to determine the region to fill and to true to use the even-odd rule to determine the region to fill
   void fillPath({bool evenOdd = false}) {
@@ -136,6 +139,7 @@ class PdfGraphics {
     }());
 
     _buf.putString('f${evenOdd ? '*' : ''} ');
+    _altered = true;
 
     assert(() {
       if (_page.pdfDocument.verbose) {
@@ -158,6 +162,7 @@ class PdfGraphics {
     }());
 
     _buf.putString('${close ? 's' : 'S'} ');
+    _altered = true;
 
     assert(() {
       if (_page.pdfDocument.verbose) {
@@ -178,6 +183,7 @@ class PdfGraphics {
     }());
 
     _buf.putString('h ');
+    _altered = true;
 
     assert(() {
       if (_page.pdfDocument.verbose) {
@@ -224,6 +230,7 @@ class PdfGraphics {
     }());
 
     _buf.putString('${close ? 'b' : 'B'}${evenOdd ? '*' : ''} ');
+    _altered = true;
 
     assert(() {
       if (_page.pdfDocument.verbose) {
@@ -248,6 +255,7 @@ class PdfGraphics {
     // The shader needs to be registered in the page resources
     _page.addShader(shader);
     _buf.putString('${shader.name} sh ');
+    _altered = true;
 
     assert(() {
       if (_page.pdfDocument.verbose) {
@@ -354,7 +362,7 @@ class PdfGraphics {
     }
 
     _buf.putString(' cm ${img.name} Do Q ');
-  }
+    _altered = true;
 
     assert(() {
       if (_page.pdfDocument.verbose) {
@@ -571,6 +579,7 @@ class PdfGraphics {
       return true;
     }());
 
+    _altered = true;
   }
 
   void reset() {
