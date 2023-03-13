@@ -4,6 +4,7 @@
 
 - Apply BoxShape and BorderRadius to selected Checkbox [Joseph Grabinger]
 - Fix Color.toHex()
+- Improve Annotations placement
 
 ## 3.9.0
 

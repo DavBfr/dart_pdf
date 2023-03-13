@@ -20,7 +20,7 @@ import 'dart:typed_data';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
-import '../priv.dart';
+import '../pdf/data_types.dart';
 import 'basic.dart';
 import 'border_radius.dart';
 import 'box_border.dart';
@@ -32,7 +32,57 @@ import 'text_style.dart';
 import 'theme.dart';
 import 'widget.dart';
 
-class ChoiceField extends StatelessWidget {
+mixin AnnotationAppearance on Widget {
+  void drawAppearance(
+    Context context,
+    PdfAnnotBase bf,
+    Matrix4 mat,
+    Widget child, {
+    PdfAnnotAppearance type = PdfAnnotAppearance.normal,
+    PdfName? tag,
+    String? name,
+    bool selected = false,
+  }) {
+    final canvas = bf.appearance(
+      context.document,
+      type,
+      matrix: mat,
+      boundingBox: PdfRect(0, 0, box!.width, box!.height),
+      name: name,
+      selected: selected,
+    );
+
+    if (tag != null) {
+      canvas.markContentBegin(tag);
+    }
+
+    Widget.draw(
+      child,
+      offset: PdfPoint.zero,
+      canvas: canvas,
+      page: context.page,
+      constraints:
+          BoxConstraints.tightFor(width: box!.width, height: box!.height),
+    );
+
+    if (tag != null) {
+      canvas.markContentEnd();
+    }
+  }
+
+  Matrix4 getAppearanceMatrix(Context context) {
+    final translation = Vector3(0, 0, 0);
+    final rotation = Quaternion(0, 0, 0, 0);
+    final scale = Vector3(0, 0, 0);
+
+    return context.canvas.getTransform()
+      ..decompose(translation, rotation, scale)
+      ..leftTranslate(-translation.x, -translation.y)
+      ..translate(box!.x, box!.y);
+  }
+}
+
+class ChoiceField extends StatelessWidget with AnnotationAppearance {
   ChoiceField({
     this.width = 120,
     this.height = 13,
@@ -63,6 +113,19 @@ class ChoiceField extends StatelessWidget {
       items: items,
       rect: pdfRect,
     );
+
+    if (value != null) {
+      final mat = getAppearanceMatrix(context);
+
+      drawAppearance(
+        context,
+        bf,
+        mat,
+        Text(value!, style: _textStyle),
+        tag: const PdfName('/Tx'),
+      );
+    }
+
     PdfAnnot(context.page, bf);
   }
 
@@ -72,7 +135,7 @@ class ChoiceField extends StatelessWidget {
   }
 }
 
-class Checkbox extends SingleChildWidget {
+class Checkbox extends SingleChildWidget with AnnotationAppearance {
   Checkbox({
     required this.value,
     this.tristate = false,
@@ -82,10 +145,10 @@ class Checkbox extends SingleChildWidget {
     double width = 13,
     double height = 13,
     BoxDecoration? decoration,
-  }) : radius = decoration?.shape == BoxShape.circle 
-        ? Radius.circular(math.max(height, width)/2) 
-        : decoration?.borderRadius?.topLeft ?? Radius.zero,
-      super(
+  })  : radius = decoration?.shape == BoxShape.circle
+            ? Radius.circular(math.max(height, width) / 2)
+            : decoration?.borderRadius?.topLeft ?? Radius.zero,
+        super(
             child: Container(
                 width: width,
                 height: height,
@@ -112,7 +175,6 @@ class Checkbox extends SingleChildWidget {
   @override
   void paint(Context context) {
     super.paint(context);
-    paintChild(context);
 
     final bf = PdfButtonField(
       rect: context.localToGlobal(box!),
@@ -122,26 +184,45 @@ class Checkbox extends SingleChildWidget {
       flags: <PdfAnnotFlags>{PdfAnnotFlags.print},
     );
 
-    final g = bf.appearance(context.document, PdfAnnotAppearance.normal,
-        name: '/Yes', selected: value);
-    g.drawRRect(0, 0, bf.rect.width, bf.rect.height, radius.y, radius.x);
-    g.setFillColor(activeColor);
-    g.fillPath();
-    g.moveTo(2, bf.rect.height / 2);
-    g.lineTo(bf.rect.width / 3, bf.rect.height / 4);
-    g.lineTo(bf.rect.width - 2, bf.rect.height / 4 * 3);
-    g.setStrokeColor(checkColor);
-    g.setLineWidth(2);
-    g.strokePath();
+    final mat = getAppearanceMatrix(context);
 
-    bf.appearance(context.document, PdfAnnotAppearance.normal,
-        name: '/Off', selected: !value);
+    drawAppearance(
+      context,
+      bf,
+      mat,
+      name: '/Yes',
+      selected: value,
+      CustomPaint(
+        size: bf.rect.size,
+        painter: (canvas, size) {
+          canvas.drawRRect(
+              0, 0, bf.rect.width, bf.rect.height, radius.y, radius.x);
+          canvas.setFillColor(activeColor);
+          canvas.fillPath();
+          canvas.moveTo(2, bf.rect.height / 2);
+          canvas.lineTo(bf.rect.width / 3, bf.rect.height / 4);
+          canvas.lineTo(bf.rect.width - 2, bf.rect.height / 4 * 3);
+          canvas.setStrokeColor(checkColor);
+          canvas.setLineWidth(2);
+          canvas.strokePath();
+        },
+      ),
+    );
+
+    drawAppearance(
+      context,
+      bf,
+      mat,
+      name: '/Off',
+      selected: !value,
+      child!,
+    );
 
     PdfAnnot(context.page, bf);
   }
 }
 
-class FlatButton extends SingleChildWidget {
+class FlatButton extends SingleChildWidget with AnnotationAppearance {
   FlatButton({
     PdfColor textColor = PdfColors.white,
     PdfColor color = PdfColors.blue,
@@ -213,53 +294,18 @@ class FlatButton extends SingleChildWidget {
       fieldFlags: <PdfFieldFlags>{PdfFieldFlags.pushButton},
     );
 
-    final mat = context.canvas.getTransform();
-    final translation = Vector3(0, 0, 0);
-    final rotation = Quaternion(0, 0, 0, 0);
-    final scale = Vector3(0, 0, 0);
-    mat
-      ..decompose(translation, rotation, scale)
-      ..leftTranslate(-translation.x, -translation.y)
-      ..translate(box!.x, box!.y);
+    final mat = getAppearanceMatrix(context);
 
-    var canvas = bf.appearance(context.document, PdfAnnotAppearance.normal,
-        matrix: mat, boundingBox: box);
-    Widget.draw(
-      child!,
-      offset: PdfPoint.zero,
-      canvas: canvas,
-      page: context.page,
-      constraints:
-          BoxConstraints.tightFor(width: box!.width, height: box!.height),
-    );
-
-    canvas = bf.appearance(context.document, PdfAnnotAppearance.down,
-        matrix: mat, boundingBox: box);
-    Widget.draw(
-      _childDown,
-      offset: PdfPoint.zero,
-      canvas: canvas,
-      page: context.page,
-      constraints:
-          BoxConstraints.tightFor(width: box!.width, height: box!.height),
-    );
-
-    canvas = bf.appearance(context.document, PdfAnnotAppearance.rollover,
-        matrix: mat, boundingBox: box);
-    Widget.draw(
-      _childRollover,
-      offset: PdfPoint.zero,
-      canvas: canvas,
-      page: context.page,
-      constraints:
-          BoxConstraints.tightFor(width: box!.width, height: box!.height),
-    );
+    drawAppearance(context, bf, mat, child!);
+    drawAppearance(context, bf, mat, _childDown, type: PdfAnnotAppearance.down);
+    drawAppearance(context, bf, mat, _childRollover,
+        type: PdfAnnotAppearance.rollover);
 
     PdfAnnot(context.page, bf);
   }
 }
 
-class TextField extends StatelessWidget {
+class TextField extends StatelessWidget with AnnotationAppearance {
   TextField({
     this.child,
     this.width = 120,
@@ -329,35 +375,23 @@ class TextField extends StatelessWidget {
       textColor: _textStyle.color!,
     );
 
-    final mat = context.canvas.getTransform();
-    final translation = Vector3(0, 0, 0);
-    final rotation = Quaternion(0, 0, 0, 0);
-    final scale = Vector3(0, 0, 0);
-    mat
-      ..decompose(translation, rotation, scale)
-      ..leftTranslate(-translation.x, -translation.y)
-      ..translate(box!.x, box!.y);
-
     if (value != null) {
-      final canvas = tf.appearance(context.document, PdfAnnotAppearance.normal,
-          matrix: mat, boundingBox: box);
-      canvas.markContentBegin(const PdfName('/Tx'));
-      Widget.draw(
+      final mat = getAppearanceMatrix(context);
+
+      drawAppearance(
+        context,
+        tf,
+        mat,
         Text(value!, style: _textStyle),
-        offset: PdfPoint.zero,
-        canvas: canvas,
-        page: context.page,
-        constraints:
-            BoxConstraints.tightFor(width: box!.width, height: box!.height),
+        tag: const PdfName('/Tx'),
       );
-      canvas.markContentEnd();
     }
 
     PdfAnnot(context.page, tf);
   }
 }
 
-class Signature extends SingleChildWidget {
+class Signature extends SingleChildWidget with AnnotationAppearance {
   Signature({
     Widget? child,
     @Deprecated('Use value instead') PdfSignatureBase? crypto,
@@ -438,25 +472,8 @@ class Signature extends SingleChildWidget {
     );
 
     if (child != null && value != null) {
-      final mat = context.canvas.getTransform();
-      final translation = Vector3(0, 0, 0);
-      final rotation = Quaternion(0, 0, 0, 0);
-      final scale = Vector3(0, 0, 0);
-      mat
-        ..decompose(translation, rotation, scale)
-        ..leftTranslate(-translation.x, -translation.y)
-        ..translate(box!.x, box!.y);
-
-      final canvas = bf.appearance(context.document, PdfAnnotAppearance.normal,
-          matrix: mat);
-      Widget.draw(
-        child!,
-        offset: PdfPoint.zero,
-        canvas: canvas,
-        page: context.page,
-        constraints:
-            BoxConstraints.tightFor(width: box!.width, height: box!.height),
-      );
+      final mat = getAppearanceMatrix(context);
+      drawAppearance(context, bf, mat, child!);
     }
 
     PdfAnnot(context.page, bf);
