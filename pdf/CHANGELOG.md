@@ -3,6 +3,7 @@
 ## 3.10.0
 
 - Apply BoxShape and BorderRadius to selected Checkbox [Joseph Grabinger]
+- Fix Color.toHex()
 
 ## 3.9.0
 
