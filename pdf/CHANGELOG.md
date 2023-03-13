@@ -8,6 +8,7 @@
 - Improve documentation strings
 - Improve verbose output
 - Import already defined form
+- Add support for deleted objects
 
 ## 3.9.0
 

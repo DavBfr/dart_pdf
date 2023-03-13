@@ -35,6 +35,7 @@ import 'obj/page_list.dart';
 import 'obj/signature.dart';
 import 'output.dart';
 import 'stream.dart';
+import 'xref.dart';
 
 /// PDF version to generate
 enum PdfVersion {
@@ -213,7 +214,17 @@ class PdfDocument {
 
     // Write each object to the [PdfStream]. We call via the output
     // as that builds the xref table
-    objects.forEach(pos.write);
+    objects.where((e) => e.inUse).forEach(pos.write);
+    var lastFree = 0;
+    for (final obj in objects.where((e) => !e.inUse)) {
+      pos.xref.add(PdfXref(
+        obj.objser,
+        lastFree,
+        generation: obj.objgen,
+        type: PdfCrossRefEntryType.free,
+      ));
+      lastFree = obj.objser;
+    }
 
     // Finally close the output, which writes the xref table.
     await pos.close();

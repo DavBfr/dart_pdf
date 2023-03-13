@@ -46,6 +46,8 @@ abstract class PdfObject<T extends PdfDataType> with PdfDiagnostic {
   /// This allows any Pdf object to refer to the document being constructed.
   final PdfDocument pdfDocument;
 
+  var inUse = true;
+
   /// Writes the object to the output stream.
   void write(PdfStream os) {
     prepare();
