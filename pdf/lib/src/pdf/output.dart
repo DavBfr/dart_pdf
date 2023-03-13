@@ -94,7 +94,6 @@ class PdfOutput with PdfDiagnostic {
       signatureID = ob;
     }
 
-    xref.add(PdfXref(ob.objser, os.offset));
     assert(() {
       if (verbose) {
         ob.setInsertion(os);
@@ -102,6 +101,7 @@ class PdfOutput with PdfDiagnostic {
       }
       return true;
     }());
+    xref.add(PdfXref(ob.objser, os.offset, generation: ob.objgen));
     ob.write(os);
     assert(() {
       if (verbose) {
@@ -145,36 +145,15 @@ class PdfOutput with PdfDiagnostic {
       params['/Prev'] = PdfNum(rootID!.pdfDocument.prev!.xrefOffset);
     }
 
-    final _xref = os.offset;
-    if (isCompressed) {
-      xref.outputCompressed(rootID!, os, params);
-    } else {
-      assert(() {
-        if (verbose) {
-          os.putComment('');
-          os.putComment('-' * 78);
-        }
-        return true;
-      }());
-      xref.output(os);
-
-      // the trailer object
-      assert(() {
-        if (verbose) {
-          os.putComment('');
-          os.putComment('-' * 78);
-        }
-        return true;
-      }());
-      os.putString('trailer\n');
-      params.output(os, verbose ? 0 : null);
-      os.putByte(0x0a);
-    }
+    final _xref = isCompressed
+        ? xref.outputCompressed(rootID!, os, params)
+        : xref.outputLegacy(rootID!, os, params);
 
     assert(() {
       if (verbose) {
         os.putComment('');
         os.putComment('-' * 78);
+        os.putComment('$runtimeType');
       }
       return true;
     }());
