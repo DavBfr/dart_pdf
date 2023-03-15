@@ -534,6 +534,10 @@ class PdfArray<T extends PdfDataType> extends PdfDataType {
     return false;
   }
 
+  bool get isEmpty => values.isEmpty;
+
+  bool get isNotEmpty => values.isNotEmpty;
+
   @override
   int get hashCode => values.hashCode;
 }

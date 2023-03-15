@@ -128,7 +128,7 @@ class PdfPage extends PdfObjectDict with PdfGraphicStream {
 
     if (contentList.values.length == 1) {
       params['/Contents'] = contentList.values.first;
-    } else if (contents.isNotEmpty) {
+    } else if (contentList.isNotEmpty) {
       params['/Contents'] = contentList;
     }
 

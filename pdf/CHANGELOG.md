@@ -10,6 +10,7 @@
 - Import already defined form
 - Add support for deleted objects
 - Draw page content only if not empty
+- Fix Page Content
 
 ## 3.9.0
 
