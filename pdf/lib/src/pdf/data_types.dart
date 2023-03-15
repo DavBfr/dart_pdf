@@ -193,39 +193,37 @@ class PdfString extends PdfDataType {
 
   /// Produce a list of UTF-16BE encoded bytes.
   static List<int> _encodeUtf16be(String str) {
-    const UNICODE_REPLACEMENT_CHARACTER_CODEPOINT = 0xfffd;
-    const UNICODE_BYTE_ZERO_MASK = 0xff;
-    const UNICODE_BYTE_ONE_MASK = 0xff00;
-    const UNICODE_VALID_RANGE_MAX = 0x10ffff;
-    const UNICODE_PLANE_ONE_MAX = 0xffff;
-    const UNICODE_UTF16_RESERVED_LO = 0xd800;
-    const UNICODE_UTF16_RESERVED_HI = 0xdfff;
-    const UNICODE_UTF16_OFFSET = 0x10000;
-    const UNICODE_UTF16_SURROGATE_UNIT_0_BASE = 0xd800;
-    const UNICODE_UTF16_SURROGATE_UNIT_1_BASE = 0xdc00;
-    const UNICODE_UTF16_HI_MASK = 0xffc00;
-    const UNICODE_UTF16_LO_MASK = 0x3ff;
+    const unicodeReplacementCharacterCodePoint = 0xfffd;
+    const unicodeByteZeroMask = 0xff;
+    const unicodeByteOneMask = 0xff00;
+    const unicodeValidRangeMax = 0x10ffff;
+    const unicodePlaneOneMax = 0xffff;
+    const unicodeUtf16ReservedLo = 0xd800;
+    const unicodeUtf16ReservedHi = 0xdfff;
+    const unicodeUtf16Offset = 0x10000;
+    const unicodeUtf16SurrogateUnit0Base = 0xd800;
+    const unicodeUtf16SurrogateUnit1Base = 0xdc00;
+    const unicodeUtf16HiMask = 0xffc00;
+    const unicodeUtf16LoMask = 0x3ff;
 
     final encoding = <int>[];
 
     void add(int unit) {
-      encoding.add((unit & UNICODE_BYTE_ONE_MASK) >> 8);
-      encoding.add(unit & UNICODE_BYTE_ZERO_MASK);
+      encoding.add((unit & unicodeByteOneMask) >> 8);
+      encoding.add(unit & unicodeByteZeroMask);
     }
 
     for (final unit in str.codeUnits) {
-      if ((unit >= 0 && unit < UNICODE_UTF16_RESERVED_LO) ||
-          (unit > UNICODE_UTF16_RESERVED_HI && unit <= UNICODE_PLANE_ONE_MAX)) {
+      if ((unit >= 0 && unit < unicodeUtf16ReservedLo) ||
+          (unit > unicodeUtf16ReservedHi && unit <= unicodePlaneOneMax)) {
         add(unit);
-      } else if (unit > UNICODE_PLANE_ONE_MAX &&
-          unit <= UNICODE_VALID_RANGE_MAX) {
-        final base = unit - UNICODE_UTF16_OFFSET;
-        add(UNICODE_UTF16_SURROGATE_UNIT_0_BASE +
-            ((base & UNICODE_UTF16_HI_MASK) >> 10));
-        add(UNICODE_UTF16_SURROGATE_UNIT_1_BASE +
-            (base & UNICODE_UTF16_LO_MASK));
+      } else if (unit > unicodePlaneOneMax && unit <= unicodeValidRangeMax) {
+        final base = unit - unicodeUtf16Offset;
+        add(unicodeUtf16SurrogateUnit0Base +
+            ((base & unicodeUtf16HiMask) >> 10));
+        add(unicodeUtf16SurrogateUnit1Base + (base & unicodeUtf16LoMask));
       } else {
-        add(UNICODE_REPLACEMENT_CHARACTER_CODEPOINT);
+        add(unicodeReplacementCharacterCodePoint);
       }
     }
     return encoding;
