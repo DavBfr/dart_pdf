@@ -15,6 +15,7 @@
  */
 
 import 'base.dart';
+import 'object_base.dart';
 import 'stream.dart';
 
 class PdfIndirect extends PdfDataType {
@@ -25,7 +26,7 @@ class PdfIndirect extends PdfDataType {
   final int gen;
 
   @override
-  void output(PdfStream s, [int? indent]) {
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
     s.putString('$ser $gen R');
   }
 

@@ -20,18 +20,15 @@ import 'dart:io';
 import 'package:pdf/src/priv.dart';
 import 'package:test/test.dart';
 
-class BasicObject with PdfObjectBase {
-  const BasicObject(this.objser);
-
-  @override
-  final int objser;
+class BasicObject extends PdfObjectBase {
+  const BasicObject(int objser) : super(objser: objser);
 
   @override
   bool get verbose => true;
 
   void write(PdfStream os, PdfDataType value) {
     os.putString('$objser $objgen obj\n');
-    value.output(os, verbose ? 0 : null);
+    value.output(this, os, verbose ? 0 : null);
     os.putByte(0x0a);
     os.putString('endobj\n');
   }
@@ -57,7 +54,6 @@ void main() {
     });
 
     final content = PdfDictStream(
-      object: const BasicObject(1),
       data: latin1.encode('30 811.88976 m 200 641.88976 l S'),
     );
 

@@ -15,6 +15,7 @@
  */
 
 import 'base.dart';
+import 'object_base.dart';
 import 'stream.dart';
 
 class PdfBool extends PdfDataType {
@@ -23,7 +24,7 @@ class PdfBool extends PdfDataType {
   final bool value;
 
   @override
-  void output(PdfStream s, [int? indent]) {
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
     s.putString(value ? 'true' : 'false');
   }
 

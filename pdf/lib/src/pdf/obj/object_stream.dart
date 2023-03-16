@@ -37,10 +37,9 @@ class PdfObjectStream extends PdfObjectDict {
   @override
   void writeContent(PdfStream os) {
     PdfDictStream.values(
-      object: this,
       isBinary: isBinary,
       values: params.values,
       data: buf.output(),
-    ).output(os, pdfDocument.verbose ? 0 : null);
+    ).output(this, os, pdfDocument.verbose ? 0 : null);
   }
 }

@@ -20,7 +20,6 @@ import '../format/dict.dart';
 import '../format/name.dart';
 import '../format/num.dart';
 import '../format/string.dart';
-import 'object.dart';
 import 'object_dict.dart';
 
 enum PdfPageLabelStyle {
@@ -53,7 +52,7 @@ class PdfPageLabel {
   final String? prefix;
   final int? subsequent;
 
-  PdfDict toDict(PdfObject obj) {
+  PdfDict toDict() {
     final PdfName? s;
     switch (style) {
       case PdfPageLabelStyle.arabic:
@@ -77,7 +76,7 @@ class PdfPageLabel {
     return PdfDict({
       if (s != null) '/S': s,
       if (prefix != null && prefix!.isNotEmpty)
-        '/P': PdfSecString.fromString(obj, prefix!),
+        '/P': PdfSecString.fromString(prefix!),
       if (subsequent != null) '/St': PdfNum(subsequent!)
     });
   }
@@ -191,7 +190,7 @@ class PdfPageLabels extends PdfObjectDict {
     final nums = PdfArray();
     for (final entry in labels.entries) {
       nums.add(PdfNum(entry.key));
-      nums.add(entry.value.toDict(this));
+      nums.add(entry.value.toDict());
     }
 
     params['/Nums'] = nums;

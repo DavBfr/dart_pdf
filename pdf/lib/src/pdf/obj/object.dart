@@ -23,27 +23,21 @@ import '../format/stream.dart';
 import 'diagnostic.dart';
 
 /// Base Object used in the PDF file
-abstract class PdfObject<T extends PdfDataType>
-    with PdfDiagnostic, PdfObjectBase {
+abstract class PdfObject<T extends PdfDataType> extends PdfObjectBase
+    with PdfDiagnostic {
   /// This is usually called by extensors to this class, and sets the
   /// Pdf Object Type
   PdfObject(
     this.pdfDocument, {
     required this.params,
-    this.objgen = 0,
+    int objgen = 0,
     int? objser,
-  }) : objser = objser ?? pdfDocument.genSerial() {
+  }) : super(objser: objser ?? pdfDocument.genSerial(), objgen: objgen) {
     pdfDocument.objects.add(this);
   }
 
   /// This is the object parameters.
   final T params;
-
-  @override
-  final int objser;
-
-  @override
-  final int objgen;
 
   /// This allows any Pdf object to refer to the document being constructed.
   final PdfDocument pdfDocument;
@@ -81,7 +75,7 @@ abstract class PdfObject<T extends PdfDataType>
   }
 
   void writeContent(PdfStream os) {
-    params.output(os, verbose ? 0 : null);
+    params.output(this, os, verbose ? 0 : null);
     os.putByte(0x0a);
   }
 

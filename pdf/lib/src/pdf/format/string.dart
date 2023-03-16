@@ -167,7 +167,7 @@ class PdfString extends PdfDataType {
   }
 
   @override
-  void output(PdfStream s, [int? indent]) {
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
     _output(s, value);
   }
 
@@ -185,51 +185,44 @@ class PdfString extends PdfDataType {
 }
 
 class PdfSecString extends PdfString {
-  const PdfSecString(this.object, Uint8List value,
+  const PdfSecString(Uint8List value,
       [PdfStringFormat format = PdfStringFormat.binary])
       : super(value, format);
 
   factory PdfSecString.fromString(
-    PdfObjectBase object,
     String value, [
     PdfStringFormat format = PdfStringFormat.literal,
   ]) {
     return PdfSecString(
-      object,
       PdfString._string(value),
       format,
     );
   }
 
   factory PdfSecString.fromStream(
-    PdfObjectBase object,
     PdfStream value, [
     PdfStringFormat format = PdfStringFormat.literal,
   ]) {
     return PdfSecString(
-      object,
       value.output(),
       format,
     );
   }
 
-  factory PdfSecString.fromDate(PdfObjectBase object, DateTime date) {
+  factory PdfSecString.fromDate(DateTime date) {
     return PdfSecString(
-      object,
       PdfString._date(date),
       PdfStringFormat.literal,
     );
   }
 
-  final PdfObjectBase object;
-
   @override
-  void output(PdfStream s, [int? indent]) {
-    if (object.encryptCallback == null) {
-      return super.output(s, indent);
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
+    if (o.encryptCallback == null) {
+      return super.output(o, s, indent);
     }
 
-    final enc = object.encryptCallback!(value, object);
+    final enc = o.encryptCallback!(value, o);
     _output(s, enc);
   }
 }

@@ -58,7 +58,7 @@ class PdfDict<T extends PdfDataType> extends PdfDataType {
   }
 
   @override
-  void output(PdfStream s, [int? indent]) {
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
     if (indent != null) {
       s.putBytes(List<int>.filled(indent, 0x20));
     }
@@ -87,7 +87,7 @@ class PdfDict<T extends PdfDataType> extends PdfDataType {
           s.putByte(0x20);
         }
       }
-      v.output(s, indent);
+      v.output(o, s, indent);
       if (indent != null) {
         s.putByte(0x0a);
       }

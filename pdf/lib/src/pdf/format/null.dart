@@ -15,13 +15,14 @@
  */
 
 import 'base.dart';
+import 'object_base.dart';
 import 'stream.dart';
 
 class PdfNull extends PdfDataType {
   const PdfNull();
 
   @override
-  void output(PdfStream s, [int? indent]) {
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
     s.putString('null');
   }
 

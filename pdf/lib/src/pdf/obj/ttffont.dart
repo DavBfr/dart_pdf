@@ -129,8 +129,8 @@ class PdfTtfFont extends PdfFont {
       '/Subtype': const PdfName('/CIDFontType2'),
       '/CIDSystemInfo': PdfDict({
         '/Supplement': const PdfNum(0),
-        '/Registry': PdfSecString.fromString(this, 'Adobe'),
-        '/Ordering': PdfSecString.fromString(this, 'Identity-H'),
+        '/Registry': PdfSecString.fromString('Adobe'),
+        '/Ordering': PdfSecString.fromString('Identity-H'),
       })
     });
 

@@ -65,7 +65,7 @@ class PdfArray<T extends PdfDataType> extends PdfDataType {
   }
 
   @override
-  void output(PdfStream s, [int? indent]) {
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
     if (indent != null) {
       s.putBytes(List<int>.filled(indent, 0x20));
       indent += kIndentSize;
@@ -88,7 +88,7 @@ class PdfArray<T extends PdfDataType> extends PdfDataType {
             s.putByte(0x20);
           }
         }
-        val.output(s, indent);
+        val.output(o, s, indent);
       }
       if (indent != null) {
         s.putByte(0x0a);

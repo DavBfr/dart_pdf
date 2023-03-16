@@ -18,6 +18,7 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
+import 'object_base.dart';
 import 'stream.dart';
 
 const kIndentSize = 2;
@@ -25,11 +26,11 @@ const kIndentSize = 2;
 abstract class PdfDataType {
   const PdfDataType();
 
-  void output(PdfStream s, [int? indent]);
+  void output(PdfObjectBase o, PdfStream s, [int? indent]);
 
   PdfStream _toStream() {
     final s = PdfStream();
-    output(s);
+    output(const PdfObjectBase(objser: 0), s);
     return s;
   }
 

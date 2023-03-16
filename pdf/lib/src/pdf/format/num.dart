@@ -15,6 +15,7 @@
  */
 
 import 'base.dart';
+import 'object_base.dart';
 import 'stream.dart';
 
 class PdfNum extends PdfDataType {
@@ -27,7 +28,7 @@ class PdfNum extends PdfDataType {
   final num value;
 
   @override
-  void output(PdfStream s, [int? indent]) {
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
     assert(!value.isNaN);
     assert(!value.isInfinite);
 
@@ -72,12 +73,12 @@ class PdfNumList extends PdfDataType {
   final List<num> values;
 
   @override
-  void output(PdfStream s, [int? indent]) {
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
     for (var n = 0; n < values.length; n++) {
       if (n > 0) {
         s.putByte(0x20);
       }
-      PdfNum(values[n]).output(s, indent);
+      PdfNum(values[n]).output(o, s, indent);
     }
   }
 

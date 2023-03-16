@@ -33,7 +33,6 @@ class PdfMetadata extends PdfObject<PdfDictStream> {
   ) : super(
           pdfDocument,
           params: PdfDictStream(
-            object: pdfDocument.catalog,
             compress: false,
             encrypt: false,
           ),

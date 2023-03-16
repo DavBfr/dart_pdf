@@ -34,12 +34,17 @@ enum PdfVersion {
   pdf_1_5,
 }
 
-mixin PdfObjectBase {
+class PdfObjectBase {
+  const PdfObjectBase({
+    required this.objser,
+    this.objgen = 0,
+  });
+
   /// This is the unique serial number for this object.
-  int get objser;
+  final int objser;
 
   /// This is the generation number for this object.
-  int get objgen => 0;
+  final int objgen;
 
   /// Callback used to compress the data
   DeflateCallback? get deflate => null;

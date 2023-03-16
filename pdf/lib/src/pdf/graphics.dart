@@ -338,28 +338,28 @@ class PdfGraphics {
     _buf.putString('q ');
     switch (img.orientation) {
       case PdfImageOrientation.topLeft:
-        PdfNumList(<double>[w, 0, 0, h, x, y]).output(_buf);
+        PdfNumList(<double>[w, 0, 0, h, x, y]).output(_page, _buf);
         break;
       case PdfImageOrientation.topRight:
-        PdfNumList(<double>[-w, 0, 0, h, w + x, y]).output(_buf);
+        PdfNumList(<double>[-w, 0, 0, h, w + x, y]).output(_page, _buf);
         break;
       case PdfImageOrientation.bottomRight:
-        PdfNumList(<double>[-w, 0, 0, -h, w + x, h + y]).output(_buf);
+        PdfNumList(<double>[-w, 0, 0, -h, w + x, h + y]).output(_page, _buf);
         break;
       case PdfImageOrientation.bottomLeft:
-        PdfNumList(<double>[w, 0, 0, -h, x, h + y]).output(_buf);
+        PdfNumList(<double>[w, 0, 0, -h, x, h + y]).output(_page, _buf);
         break;
       case PdfImageOrientation.leftTop:
-        PdfNumList(<double>[0, -h, -w, 0, w + x, h + y]).output(_buf);
+        PdfNumList(<double>[0, -h, -w, 0, w + x, h + y]).output(_page, _buf);
         break;
       case PdfImageOrientation.rightTop:
-        PdfNumList(<double>[0, -h, w, 0, x, h + y]).output(_buf);
+        PdfNumList(<double>[0, -h, w, 0, x, h + y]).output(_page, _buf);
         break;
       case PdfImageOrientation.rightBottom:
-        PdfNumList(<double>[0, h, w, 0, x, y]).output(_buf);
+        PdfNumList(<double>[0, h, w, 0, x, y]).output(_page, _buf);
         break;
       case PdfImageOrientation.leftBottom:
-        PdfNumList(<double>[0, h, -w, 0, w + x, y]).output(_buf);
+        PdfNumList(<double>[0, h, -w, 0, w + x, y]).output(_page, _buf);
         break;
     }
 
@@ -411,7 +411,7 @@ class PdfGraphics {
       return true;
     }());
 
-    PdfNumList([x, y, w, h]).output(_buf);
+    PdfNumList([x, y, w, h]).output(_page, _buf);
     _buf.putString(' re ');
 
     assert(() {
@@ -464,22 +464,22 @@ class PdfGraphics {
     _page.addFont(font);
 
     _buf.putString('${font.name} ');
-    PdfNum(size).output(_buf);
+    PdfNum(size).output(_page, _buf);
     _buf.putString(' Tf ');
     if (charSpace != null) {
-      PdfNum(charSpace).output(_buf);
+      PdfNum(charSpace).output(_page, _buf);
       _buf.putString(' Tc ');
     }
     if (wordSpace != null) {
-      PdfNum(wordSpace).output(_buf);
+      PdfNum(wordSpace).output(_page, _buf);
       _buf.putString(' Tw ');
     }
     if (scale != null) {
-      PdfNum(scale * 100).output(_buf);
+      PdfNum(scale * 100).output(_page, _buf);
       _buf.putString(' Tz ');
     }
     if (rise != null) {
-      PdfNum(rise).output(_buf);
+      PdfNum(rise).output(_page, _buf);
       _buf.putString(' Ts ');
     }
     if (mode != PdfTextRenderingMode.fill) {
@@ -543,7 +543,7 @@ class PdfGraphics {
       return true;
     }());
 
-    PdfNumList([x, y]).output(_buf);
+    PdfNumList([x, y]).output(_page, _buf);
     _buf.putString(' Td ');
 
     assert(() {
@@ -622,10 +622,11 @@ class PdfGraphics {
 
     if (color is PdfColorCmyk) {
       PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
-          .output(_buf);
+          .output(_page, _buf);
       _buf.putString(' k ');
     } else {
-      PdfNumList(<double>[color!.red, color.green, color.blue]).output(_buf);
+      PdfNumList(<double>[color!.red, color.green, color.blue])
+          .output(_page, _buf);
       _buf.putString(' rg ');
     }
 
@@ -651,10 +652,11 @@ class PdfGraphics {
 
     if (color is PdfColorCmyk) {
       PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
-          .output(_buf);
+          .output(_page, _buf);
       _buf.putString(' K ');
     } else {
-      PdfNumList(<double>[color!.red, color.green, color.blue]).output(_buf);
+      PdfNumList(<double>[color!.red, color.green, color.blue])
+          .output(_page, _buf);
       _buf.putString(' RG ');
     }
 
@@ -750,7 +752,8 @@ class PdfGraphics {
     }());
 
     final s = t.storage;
-    PdfNumList(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]).output(_buf);
+    PdfNumList(<double>[s[0], s[1], s[4], s[5], s[12], s[13]])
+        .output(_page, _buf);
     _buf.putString(' cm ');
     _context.ctm.multiply(t);
 
@@ -780,7 +783,7 @@ class PdfGraphics {
       return true;
     }());
 
-    PdfNumList([x, y]).output(_buf);
+    PdfNumList([x, y]).output(_page, _buf);
     _buf.putString(' l ');
 
     assert(() {
@@ -803,7 +806,7 @@ class PdfGraphics {
       return true;
     }());
 
-    PdfNumList([x, y]).output(_buf);
+    PdfNumList([x, y]).output(_page, _buf);
     _buf.putString(' m ');
 
     assert(() {
@@ -829,7 +832,7 @@ class PdfGraphics {
       return true;
     }());
 
-    PdfNumList([x1, y1, x2, y2, x3, y3]).output(_buf);
+    PdfNumList([x1, y1, x2, y2, x3, y3]).output(_page, _buf);
     _buf.putString(' c ');
 
     assert(() {
@@ -1047,7 +1050,7 @@ class PdfGraphics {
       return true;
     }());
 
-    PdfNum(width).output(_buf);
+    PdfNum(width).output(_page, _buf);
     _buf.putString(' w ');
 
     assert(() {
@@ -1071,7 +1074,7 @@ class PdfGraphics {
     }());
 
     assert(limit >= 1.0);
-    PdfNum(limit).output(_buf);
+    PdfNum(limit).output(_page, _buf);
     _buf.putString(' M ');
 
     assert(() {
@@ -1097,7 +1100,7 @@ class PdfGraphics {
       return true;
     }());
 
-    PdfArray.fromNum(array).output(_buf);
+    PdfArray.fromNum(array).output(_page, _buf);
     _buf.putString(' $phase d ');
 
     assert(() {
@@ -1119,7 +1122,7 @@ class PdfGraphics {
       return true;
     }());
 
-    tag.output(_buf);
+    tag.output(_page, _buf);
     _buf.putString(' BMC ');
 
     assert(() {

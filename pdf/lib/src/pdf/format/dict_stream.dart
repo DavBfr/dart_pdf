@@ -26,7 +26,6 @@ import 'stream.dart';
 
 class PdfDictStream extends PdfDict<PdfDataType> {
   factory PdfDictStream({
-    required PdfObjectBase object,
     Map<String, PdfDataType>? values,
     Uint8List? data,
     bool isBinary = false,
@@ -34,7 +33,6 @@ class PdfDictStream extends PdfDict<PdfDataType> {
     bool compress = true,
   }) {
     return PdfDictStream.values(
-      object: object,
       values: values ?? {},
       data: data ?? Uint8List(0),
       encrypt: encrypt,
@@ -44,7 +42,6 @@ class PdfDictStream extends PdfDict<PdfDataType> {
   }
 
   PdfDictStream.values({
-    required this.object,
     required Map<String, PdfDataType> values,
     required this.data,
     this.isBinary = false,
@@ -54,8 +51,6 @@ class PdfDictStream extends PdfDict<PdfDataType> {
 
   Uint8List data;
 
-  final PdfObjectBase object;
-
   final bool isBinary;
 
   final bool encrypt;
@@ -63,7 +58,7 @@ class PdfDictStream extends PdfDict<PdfDataType> {
   final bool compress;
 
   @override
-  void output(PdfStream s, [int? indent]) {
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
     final _values = PdfDict(values);
 
     Uint8List? _data;
@@ -71,9 +66,9 @@ class PdfDictStream extends PdfDict<PdfDataType> {
     if (_values.containsKey('/Filter')) {
       // The data is already in the right format
       _data = data;
-    } else if (compress && object.deflate != null) {
+    } else if (compress && o.deflate != null) {
       // Compress the data
-      final newData = Uint8List.fromList(object.deflate!(data));
+      final newData = Uint8List.fromList(o.deflate!(data));
       if (newData.lengthInBytes < data.lengthInBytes) {
         _values['/Filter'] = const PdfName('/FlateDecode');
         _data = newData;
@@ -92,13 +87,13 @@ class PdfDictStream extends PdfDict<PdfDataType> {
       }
     }
 
-    if (encrypt && object.encryptCallback != null) {
-      _data = object.encryptCallback!(_data, object);
+    if (encrypt && o.encryptCallback != null) {
+      _data = o.encryptCallback!(_data, o);
     }
 
     _values['/Length'] = PdfNum(_data.length);
 
-    _values.output(s, indent);
+    _values.output(o, s, indent);
     if (indent != null) {
       s.putByte(0x0a);
     }

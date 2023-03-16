@@ -195,7 +195,8 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
   /// Draw some text
   void putText(PdfStream stream, String text) {
     try {
-      PdfString(latin1.encode(text), PdfStringFormat.literal).output(stream);
+      PdfString(latin1.encode(text), PdfStringFormat.literal)
+          .output(this, stream);
     } catch (_) {
       assert(() {
         print(_cannotDecodeMessage);

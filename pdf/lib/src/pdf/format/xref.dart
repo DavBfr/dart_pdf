@@ -117,7 +117,7 @@ class PdfXrefTable extends PdfDataType {
   }
 
   @override
-  void output(PdfStream s, [int? indent]) {}
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {}
 
   @override
   String toString() {
@@ -181,7 +181,7 @@ class PdfXrefTable extends PdfDataType {
       return true;
     }());
     s.putString('trailer\n');
-    params.output(s, object.verbose ? 0 : null);
+    params.output(object, s, object.verbose ? 0 : null);
     s.putByte(0x0a);
 
     return objOffset;
@@ -253,12 +253,11 @@ class PdfXrefTable extends PdfDataType {
     s.putString('$id 0 obj\n');
 
     PdfDictStream(
-      object: object,
       data: o.buffer.asUint8List(),
       isBinary: false,
       encrypt: false,
       values: params.values,
-    ).output(s, object.verbose ? 0 : null);
+    ).output(object, s, object.verbose ? 0 : null);
 
     s.putString('endobj\n');
     return objOffset;

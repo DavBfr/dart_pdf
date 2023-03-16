@@ -15,6 +15,7 @@
  */
 
 import 'base.dart';
+import 'object_base.dart';
 import 'stream.dart';
 
 class PdfName extends PdfDataType {
@@ -23,7 +24,7 @@ class PdfName extends PdfDataType {
   final String value;
 
   @override
-  void output(PdfStream s, [int? indent]) {
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
     assert(value[0] == '/');
     final bytes = <int>[];
     for (final c in value.codeUnits) {
