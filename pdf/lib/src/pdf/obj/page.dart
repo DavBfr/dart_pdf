@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
+import '../format/array.dart';
+import '../format/indirect.dart';
+import '../format/num.dart';
 import '../graphics.dart';
 import '../page_format.dart';
 import 'annotation.dart';

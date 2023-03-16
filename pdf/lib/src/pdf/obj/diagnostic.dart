@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
-import '../stream.dart';
+import '../format/stream.dart';
 
 mixin PdfDiagnostic {
   static const _maxSize = 300;

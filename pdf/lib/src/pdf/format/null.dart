@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-export 'pdf/format/array.dart';
-export 'pdf/format/ascii85.dart';
-export 'pdf/format/base.dart';
-export 'pdf/format/bool.dart';
-export 'pdf/format/dict.dart';
-export 'pdf/format/dict_stream.dart';
-export 'pdf/format/indirect.dart';
-export 'pdf/format/name.dart';
-export 'pdf/format/null.dart';
-export 'pdf/format/num.dart';
-export 'pdf/format/object_base.dart' hide DeflateCallback, PdfVersion;
-export 'pdf/format/stream.dart';
-export 'pdf/format/string.dart';
-export 'pdf/format/xref.dart';
-export 'pdf/obj/object.dart';
-export 'pdf/obj/object_stream.dart';
+import 'base.dart';
+import 'stream.dart';
+
+class PdfNull extends PdfDataType {
+  const PdfNull();
+
+  @override
+  void output(PdfStream s, [int? indent]) {
+    s.putString('null');
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PdfNull;
+  }
+
+  @override
+  int get hashCode => null.hashCode;
+}

@@ -14,22 +14,87 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
 import 'dart:io';
 
-import 'package:pdf/pdf.dart';
+import 'package:pdf/src/priv.dart';
 import 'package:test/test.dart';
+
+class BasicObject with PdfObjectBase {
+  const BasicObject(this.objser);
+
+  @override
+  final int objser;
+
+  @override
+  bool get verbose => true;
+
+  void write(PdfStream os, PdfDataType value) {
+    os.putString('$objser $objgen obj\n');
+    value.output(os, verbose ? 0 : null);
+    os.putByte(0x0a);
+    os.putString('endobj\n');
+  }
+}
 
 void main() {
   test('Pdf Minimal', () async {
-    final pdf = PdfDocument(compress: false);
-    final page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
+    final pages = PdfDict({
+      '/Type': const PdfName('/Pages'),
+      '/Count': const PdfNum(1),
+    });
 
-    final g = page.getGraphics();
-    g.drawLine(
-        30, page.pageFormat.height - 30.0, 200, page.pageFormat.height - 200.0);
-    g.strokePath();
+    final page = PdfDict({
+      '/Type': const PdfName('/Page'),
+      '/Parent': const PdfIndirect(2, 0),
+      '/MediaBox': PdfArray.fromNum([0, 0, 595.27559, 841.88976]),
+      '/Resources': PdfDict({
+        '/ProcSet': PdfArray([
+          const PdfName('/PDF'),
+        ]),
+      }),
+      '/Contents': const PdfIndirect(4, 0),
+    });
+
+    final content = PdfDictStream(
+      object: const BasicObject(1),
+      data: latin1.encode('30 811.88976 m 200 641.88976 l S'),
+    );
+
+    pages['/Kids'] = PdfArray([const PdfIndirect(3, 0)]);
+
+    final catalog = PdfDict({
+      '/Type': const PdfName('/Catalog'),
+      '/Pages': const PdfIndirect(2, 0),
+    });
+
+    final os = PdfStream();
+
+    final xref = PdfXrefTable();
+
+    os.putString('%PDF-1.4\n');
+    os.putBytes(const <int>[0x25, 0xC2, 0xA5, 0xC2, 0xB1, 0xC3, 0xAB, 0x0A]);
+
+    xref.add(PdfXref(1, os.offset));
+    final cat = const BasicObject(1)..write(os, catalog);
+    xref.add(PdfXref(2, os.offset));
+    const BasicObject(2).write(os, pages);
+    xref.add(PdfXref(3, os.offset));
+    const BasicObject(3).write(os, page);
+    xref.add(PdfXref(4, os.offset));
+    const BasicObject(4).write(os, content);
+
+    final xrefOffset = xref.outputLegacy(
+        cat,
+        os,
+        PdfDict({
+          '/Size': PdfNum(xref.offsets.length + 1),
+          '/Root': const PdfIndirect(1, 0),
+        }));
+
+    os.putString('startxref\n$xrefOffset\n%%EOF\n');
 
     final file = File('minimal.pdf');
-    await file.writeAsBytes(await pdf.save());
+    await file.writeAsBytes(os.output());
   });
 }

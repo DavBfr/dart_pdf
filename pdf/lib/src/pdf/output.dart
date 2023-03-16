@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-import 'data_types.dart';
-import 'document.dart';
+import 'format/array.dart';
+import 'format/dict.dart';
+import 'format/num.dart';
+import 'format/object_base.dart';
+import 'format/stream.dart';
+import 'format/string.dart';
+import 'format/xref.dart';
 import 'obj/catalog.dart';
 import 'obj/diagnostic.dart';
 import 'obj/encryption.dart';
 import 'obj/info.dart';
 import 'obj/object.dart';
 import 'obj/signature.dart';
-import 'stream.dart';
-import 'xref.dart';
 
 /// PDF document writer
 class PdfOutput with PdfDiagnostic {

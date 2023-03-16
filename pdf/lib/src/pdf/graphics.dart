@@ -22,7 +22,10 @@ import 'package:path_parsing/path_parsing.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'color.dart';
-import 'data_types.dart';
+import 'format/array.dart';
+import 'format/name.dart';
+import 'format/num.dart';
+import 'format/stream.dart';
 import 'graphic_state.dart';
 import 'obj/font.dart';
 import 'obj/graphic_stream.dart';
@@ -31,7 +34,6 @@ import 'obj/page.dart';
 import 'obj/pattern.dart';
 import 'obj/shading.dart';
 import 'rect.dart';
-import 'stream.dart';
 
 /// Shape to be used at the corners of paths that are stroked
 enum PdfLineJoin {

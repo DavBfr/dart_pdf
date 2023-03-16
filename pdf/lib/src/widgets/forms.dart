@@ -20,7 +20,6 @@ import 'dart:typed_data';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
-import '../pdf/data_types.dart';
 import 'basic.dart';
 import 'border_radius.dart';
 import 'box_border.dart';

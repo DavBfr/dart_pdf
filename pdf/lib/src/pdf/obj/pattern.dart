@@ -16,8 +16,9 @@
 
 import 'package:vector_math/vector_math_64.dart';
 
-import '../data_types.dart';
 import '../document.dart';
+import '../format/array.dart';
+import '../format/num.dart';
 import '../graphic_state.dart';
 import 'object_dict.dart';
 import 'shading.dart';

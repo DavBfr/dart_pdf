@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
+import '../format/array.dart';
+import '../format/dict.dart';
+import '../format/name.dart';
+import '../format/num.dart';
 import 'annotation.dart';
 import 'metadata.dart';
 import 'names.dart';

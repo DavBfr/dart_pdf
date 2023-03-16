@@ -14,19 +14,32 @@
  * limitations under the License.
  */
 
-export 'pdf/format/array.dart';
-export 'pdf/format/ascii85.dart';
-export 'pdf/format/base.dart';
-export 'pdf/format/bool.dart';
-export 'pdf/format/dict.dart';
-export 'pdf/format/dict_stream.dart';
-export 'pdf/format/indirect.dart';
-export 'pdf/format/name.dart';
-export 'pdf/format/null.dart';
-export 'pdf/format/num.dart';
-export 'pdf/format/object_base.dart' hide DeflateCallback, PdfVersion;
-export 'pdf/format/stream.dart';
-export 'pdf/format/string.dart';
-export 'pdf/format/xref.dart';
-export 'pdf/obj/object.dart';
-export 'pdf/obj/object_stream.dart';
+import 'dart:typed_data';
+
+import 'package:meta/meta.dart';
+
+import 'stream.dart';
+
+const kIndentSize = 2;
+
+abstract class PdfDataType {
+  const PdfDataType();
+
+  void output(PdfStream s, [int? indent]);
+
+  PdfStream _toStream() {
+    final s = PdfStream();
+    output(s);
+    return s;
+  }
+
+  @override
+  String toString() {
+    return String.fromCharCodes(_toStream().output());
+  }
+
+  @visibleForTesting
+  Uint8List toList() {
+    return _toStream().output();
+  }
+}

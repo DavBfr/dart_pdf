@@ -17,13 +17,17 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import '../data_types.dart';
 import '../document.dart';
 import '../font/bidi_utils.dart' as bidi;
 import '../font/font_metrics.dart';
 import '../font/ttf_parser.dart';
 import '../font/ttf_writer.dart';
-import '../stream.dart';
+import '../format/array.dart';
+import '../format/dict.dart';
+import '../format/name.dart';
+import '../format/num.dart';
+import '../format/stream.dart';
+import '../format/string.dart';
 import 'array.dart';
 import 'font.dart';
 import 'font_descriptor.dart';

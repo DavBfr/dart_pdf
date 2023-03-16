@@ -16,9 +16,9 @@
 
 import 'dart:typed_data';
 
-import '../data_types.dart';
 import '../document.dart';
-import '../stream.dart';
+import '../format/dict.dart';
+import '../format/stream.dart';
 import 'object.dart';
 import 'object_dict.dart';
 import 'object_stream.dart';

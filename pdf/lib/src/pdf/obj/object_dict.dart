@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
-import '../stream.dart';
+import '../format/dict.dart';
+import '../format/name.dart';
+import '../format/stream.dart';
 import 'object.dart';
 
 /// Object with a PdfDict used in the PDF file

@@ -11,6 +11,7 @@
 - Add support for deleted objects
 - Draw page content only if not empty
 - Fix Page Content
+- Reorganize data types
 
 ## 3.9.0
 

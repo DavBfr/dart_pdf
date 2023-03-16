@@ -17,8 +17,14 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'data_types.dart';
-import 'obj/object.dart';
+import 'array.dart';
+import 'base.dart';
+import 'dict.dart';
+import 'dict_stream.dart';
+import 'indirect.dart';
+import 'name.dart';
+import 'num.dart';
+import 'object_base.dart';
 import 'stream.dart';
 
 enum PdfCrossRefEntryType { free, inUse, compressed }
@@ -49,14 +55,14 @@ class PdfXref {
   final PdfCrossRefEntryType type;
 
   /// The xref in the format of the xref section in the Pdf file
-  String ref() {
+  String _legacyRef() {
     return '${offset.toString().padLeft(10, '0')} ${generation.toString().padLeft(5, '0')}${type == PdfCrossRefEntryType.inUse ? ' n ' : ' f '}';
   }
 
   PdfIndirect? get container => object == null ? null : PdfIndirect(object!, 0);
 
   /// The xref in the format of the compressed xref section in the Pdf file
-  int cref(ByteData o, int ofs, List<int> w) {
+  int _compressedRef(ByteData o, int ofs, List<int> w) {
     assert(w.length >= 3);
 
     void setVal(int l, int v) {
@@ -105,7 +111,7 @@ class PdfXrefTable extends PdfDataType {
     s.putString('$firstId ${block.length}\n');
 
     for (final x in block) {
-      s.putString(x.ref());
+      s.putString(x._legacyRef());
       s.putByte(0x0a);
     }
   }
@@ -122,15 +128,15 @@ class PdfXrefTable extends PdfDataType {
     return s.toString();
   }
 
-  int outputLegacy(PdfObject object, PdfStream s, PdfDict params) {
+  int outputLegacy(PdfObjectBase object, PdfStream s, PdfDict params) {
     // Now scan through the offsets list. They should be in sequence.
     offsets.sort((a, b) => a.id.compareTo(b.id));
 
     assert(() {
-      if (object.pdfDocument.verbose) {
+      if (object.verbose) {
         s.putComment('');
         s.putComment('-' * 78);
-        s.putComment('$runtimeType ${object.pdfDocument.version.name}\n$this');
+        s.putComment('$runtimeType ${object.version.name}\n$this');
       }
       return true;
     }());
@@ -169,20 +175,20 @@ class PdfXrefTable extends PdfDataType {
 
     // the trailer object
     assert(() {
-      if (object.pdfDocument.verbose) {
+      if (object.verbose) {
         s.putComment('');
       }
       return true;
     }());
     s.putString('trailer\n');
-    params.output(s, object.pdfDocument.verbose ? 0 : null);
+    params.output(s, object.verbose ? 0 : null);
     s.putByte(0x0a);
 
     return objOffset;
   }
 
   /// Output a compressed cross-reference table
-  int outputCompressed(PdfObject object, PdfStream s, PdfDict params) {
+  int outputCompressed(PdfObjectBase object, PdfStream s, PdfDict params) {
     final offset = s.offset;
 
     // Sort all references
@@ -229,15 +235,15 @@ class PdfXrefTable extends PdfDataType {
     ofs += wl;
 
     for (final x in offsets) {
-      ofs = x.cref(o, ofs, w);
+      ofs = x._compressedRef(o, ofs, w);
     }
 
     // Write the object
     assert(() {
-      if (object.pdfDocument.verbose) {
+      if (object.verbose) {
         s.putComment('');
         s.putComment('-' * 78);
-        s.putComment('$runtimeType ${object.pdfDocument.version.name}\n$this');
+        s.putComment('$runtimeType ${object.version.name}\n$this');
       }
       return true;
     }());
@@ -252,7 +258,7 @@ class PdfXrefTable extends PdfDataType {
       isBinary: false,
       encrypt: false,
       values: params.values,
-    ).output(s, object.pdfDocument.verbose ? 0 : null);
+    ).output(s, object.verbose ? 0 : null);
 
     s.putString('endobj\n');
     return objOffset;

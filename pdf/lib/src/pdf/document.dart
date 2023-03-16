@@ -20,6 +20,9 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 
 import 'document_parser.dart';
+import 'format/object_base.dart';
+import 'format/stream.dart';
+import 'format/xref.dart';
 import 'graphic_state.dart';
 import 'io/vm.dart' if (dart.library.js) 'io/js.dart';
 import 'obj/catalog.dart';
@@ -34,17 +37,6 @@ import 'obj/page_label.dart';
 import 'obj/page_list.dart';
 import 'obj/signature.dart';
 import 'output.dart';
-import 'stream.dart';
-import 'xref.dart';
-
-/// PDF version to generate
-enum PdfVersion {
-  /// PDF 1.4
-  pdf_1_4,
-
-  /// PDF 1.5 to 1.7
-  pdf_1_5,
-}
 
 /// Display hint for the PDF viewer
 enum PdfPageMode {
@@ -65,9 +57,6 @@ enum PdfPageMode {
   /// window present.
   fullscreen
 }
-
-/// Callback used to compress the data
-typedef DeflateCallback = List<int> Function(List<int> data);
 
 /// This class is the base of the Pdf generator. A [PdfDocument] class is
 /// created for a document, and each page, object, annotation,
@@ -163,6 +152,7 @@ class PdfDocument {
 
   bool get compress => deflate != null;
 
+  /// Output a PDF document with comments and formatted data
   final bool verbose;
 
   /// Generates the document ID

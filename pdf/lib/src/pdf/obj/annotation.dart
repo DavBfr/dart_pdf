@@ -18,12 +18,18 @@ import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../color.dart';
-import '../data_types.dart';
 import '../document.dart';
+import '../format/array.dart';
+import '../format/base.dart';
+import '../format/dict.dart';
+import '../format/name.dart';
+import '../format/null.dart';
+import '../format/num.dart';
+import '../format/stream.dart';
+import '../format/string.dart';
 import '../graphics.dart';
 import '../point.dart';
 import '../rect.dart';
-import '../stream.dart';
 import 'border.dart';
 import 'font.dart';
 import 'graphic_stream.dart';
@@ -295,7 +301,7 @@ abstract class PdfAnnotBase {
     }
 
     if (color != null) {
-      params['/C'] = PdfColorType(color!);
+      params['/C'] = PdfArray.fromColor(color!);
     }
 
     if (subject != null) {
@@ -441,7 +447,7 @@ class PdfAnnotSquare extends PdfAnnotBase {
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
     if (interiorColor != null) {
-      params['/IC'] = PdfColorType(interiorColor!);
+      params['/IC'] = PdfArray.fromColor(interiorColor!);
     }
   }
 }
@@ -474,7 +480,7 @@ class PdfAnnotCircle extends PdfAnnotBase {
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
     if (interiorColor != null) {
-      params['/IC'] = PdfColorType(interiorColor!);
+      params['/IC'] = PdfArray.fromColor(interiorColor!);
     }
   }
 }
@@ -525,7 +531,7 @@ class PdfAnnotPolygon extends PdfAnnotBase {
     params['/Vertices'] = PdfArray.fromNum(verticies);
 
     if (interiorColor != null) {
-      params['/IC'] = PdfColorType(interiorColor!);
+      params['/IC'] = PdfArray.fromColor(interiorColor!);
     }
   }
 }
@@ -631,11 +637,11 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
 
     final mk = PdfDict();
     if (color != null) {
-      mk.values['/BC'] = PdfColorType(color!);
+      mk.values['/BC'] = PdfArray.fromColor(color!);
     }
 
     if (backgroundColor != null) {
-      mk.values['/BG'] = PdfColorType(backgroundColor!);
+      mk.values['/BG'] = PdfArray.fromColor(backgroundColor!);
     }
 
     if (mk.values.isNotEmpty) {

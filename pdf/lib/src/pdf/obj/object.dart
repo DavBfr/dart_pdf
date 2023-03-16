@@ -16,13 +16,15 @@
 
 import 'package:meta/meta.dart';
 
-import '../data_types.dart';
 import '../document.dart';
-import '../stream.dart';
+import '../format/base.dart';
+import '../format/object_base.dart';
+import '../format/stream.dart';
 import 'diagnostic.dart';
 
 /// Base Object used in the PDF file
-abstract class PdfObject<T extends PdfDataType> with PdfDiagnostic {
+abstract class PdfObject<T extends PdfDataType>
+    with PdfDiagnostic, PdfObjectBase {
   /// This is usually called by extensors to this class, and sets the
   /// Pdf Object Type
   PdfObject(
@@ -37,16 +39,28 @@ abstract class PdfObject<T extends PdfDataType> with PdfDiagnostic {
   /// This is the object parameters.
   final T params;
 
-  /// This is the unique serial number for this object.
+  @override
   final int objser;
 
-  /// This is the generation number for this object.
+  @override
   final int objgen;
 
   /// This allows any Pdf object to refer to the document being constructed.
   final PdfDocument pdfDocument;
 
   var inUse = true;
+
+  @override
+  DeflateCallback? get deflate => pdfDocument.deflate;
+
+  @override
+  PdfEncryptCallback? get encryptCallback => pdfDocument.encryption?.encrypt;
+
+  @override
+  bool get verbose => pdfDocument.verbose;
+
+  @override
+  PdfVersion get version => pdfDocument.version;
 
   /// Writes the object to the output stream.
   void write(PdfStream os) {
@@ -67,7 +81,7 @@ abstract class PdfObject<T extends PdfDataType> with PdfDiagnostic {
   }
 
   void writeContent(PdfStream os) {
-    params.output(os, pdfDocument.verbose ? 0 : null);
+    params.output(os, verbose ? 0 : null);
     os.putByte(0x0a);
   }
 
@@ -76,9 +90,6 @@ abstract class PdfObject<T extends PdfDataType> with PdfDiagnostic {
   void _writeEnd(PdfStream os) {
     os.putString('endobj\n');
   }
-
-  /// Returns the unique serial number in Pdf format
-  PdfIndirect ref() => PdfIndirect(objser, objgen);
 
   @override
   String toString() => '$runtimeType $params';

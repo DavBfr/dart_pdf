@@ -15,8 +15,9 @@
  */
 
 import '../color.dart';
-import '../data_types.dart';
 import '../document.dart';
+import '../format/array.dart';
+import '../format/num.dart';
 import 'object_dict.dart';
 import 'object_stream.dart';
 

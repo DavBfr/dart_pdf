@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
-import '../stream.dart';
+import '../format/dict_stream.dart';
+import '../format/stream.dart';
 import 'object_dict.dart';
 
 /// Stream Object

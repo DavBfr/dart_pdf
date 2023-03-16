@@ -14,19 +14,30 @@
  * limitations under the License.
  */
 
-export 'pdf/format/array.dart';
-export 'pdf/format/ascii85.dart';
-export 'pdf/format/base.dart';
-export 'pdf/format/bool.dart';
-export 'pdf/format/dict.dart';
-export 'pdf/format/dict_stream.dart';
-export 'pdf/format/indirect.dart';
-export 'pdf/format/name.dart';
-export 'pdf/format/null.dart';
-export 'pdf/format/num.dart';
-export 'pdf/format/object_base.dart' hide DeflateCallback, PdfVersion;
-export 'pdf/format/stream.dart';
-export 'pdf/format/string.dart';
-export 'pdf/format/xref.dart';
-export 'pdf/obj/object.dart';
-export 'pdf/obj/object_stream.dart';
+import 'base.dart';
+import 'stream.dart';
+
+class PdfIndirect extends PdfDataType {
+  const PdfIndirect(this.ser, this.gen);
+
+  final int ser;
+
+  final int gen;
+
+  @override
+  void output(PdfStream s, [int? indent]) {
+    s.putString('$ser $gen R');
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is PdfIndirect) {
+      return ser == other.ser && gen == other.gen;
+    }
+
+    return false;
+  }
+
+  @override
+  int get hashCode => ser.hashCode + gen.hashCode;
+}

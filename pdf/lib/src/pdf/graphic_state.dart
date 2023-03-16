@@ -18,8 +18,10 @@
 
 import 'package:meta/meta.dart';
 
-import 'data_types.dart';
 import 'document.dart';
+import 'format/dict.dart';
+import 'format/name.dart';
+import 'format/num.dart';
 import 'obj/function.dart';
 import 'obj/object_dict.dart';
 import 'obj/smask.dart';

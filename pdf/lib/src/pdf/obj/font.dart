@@ -16,12 +16,13 @@
 
 import 'dart:convert';
 
-import '../data_types.dart';
 import '../document.dart';
 import '../font/font_metrics.dart';
 import '../font/type1_fonts.dart';
+import '../format/name.dart';
+import '../format/stream.dart';
+import '../format/string.dart';
 import '../point.dart';
-import '../stream.dart';
 import 'object_dict.dart';
 import 'type1_font.dart';
 

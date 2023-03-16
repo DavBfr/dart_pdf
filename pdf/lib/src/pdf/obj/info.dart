@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
+import '../format/string.dart';
 import 'object_dict.dart';
 
 /// Information object

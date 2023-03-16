@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
 import '../font/font_metrics.dart';
+import '../format/name.dart';
 import 'font.dart';
 import 'ttffont.dart';
 
