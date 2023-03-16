@@ -18,6 +18,7 @@ export 'pdf/format/array.dart';
 export 'pdf/format/ascii85.dart';
 export 'pdf/format/base.dart';
 export 'pdf/format/bool.dart';
+export 'pdf/format/diagnostic.dart';
 export 'pdf/format/dict.dart';
 export 'pdf/format/dict_stream.dart';
 export 'pdf/format/indirect.dart';

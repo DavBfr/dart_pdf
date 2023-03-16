@@ -19,6 +19,7 @@ import 'dart:typed_data';
 
 import 'array.dart';
 import 'base.dart';
+import 'diagnostic.dart';
 import 'dict.dart';
 import 'dict_stream.dart';
 import 'indirect.dart';
@@ -95,16 +96,17 @@ class PdfXref {
   int get hashCode => offset;
 }
 
-class PdfXrefTable extends PdfDataType {
+class PdfXrefTable extends PdfDataType with PdfDiagnostic {
   PdfXrefTable();
 
-  /// Contains offsets of each object
-  final offsets = <PdfXref>[];
+  /// Document root point
+  final params = PdfDict();
 
-  /// Add a cross reference element to the set
-  void add(PdfXref xref) {
-    offsets.add(xref);
-  }
+  /// List of objects to write
+  final objects = <PdfObjectBase>{};
+
+  /// Contains the offset of each objects
+  final _offsets = <PdfXref>[];
 
   /// Writes a block of references to the Pdf file
   void _writeBlock(PdfStream s, int firstId, List<PdfXref> block) {
@@ -117,26 +119,109 @@ class PdfXrefTable extends PdfDataType {
   }
 
   @override
-  void output(PdfObjectBase o, PdfStream s, [int? indent]) {}
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
+    String v;
+    switch (o.version) {
+      case PdfVersion.pdf_1_4:
+        v = '1.4';
+        break;
+      case PdfVersion.pdf_1_5:
+        v = '1.5';
+        break;
+    }
+
+    s.putString('%PDF-$v\n');
+    s.putBytes(const <int>[0x25, 0xC2, 0xA5, 0xC2, 0xB1, 0xC3, 0xAB, 0x0A]);
+    assert(() {
+      if (o.verbose) {
+        setInsertion(s);
+        startStopwatch();
+        debugFill('Verbose dart_pdf');
+        debugFill('Producer https://github.com/DavBfr/dart_pdf');
+        debugFill('Creation date: ${DateTime.now()}');
+      }
+      return true;
+    }());
+
+    for (final ob in objects) {
+      assert(() {
+        if (ob.verbose) {
+          ob.setInsertion(s, 150);
+          ob.startStopwatch();
+        }
+        return true;
+      }());
+      _offsets.add(PdfXref(ob.objser, s.offset, generation: ob.objgen));
+      ob.output(s);
+      assert(() {
+        if (ob.verbose) {
+          ob.stopStopwatch();
+          ob.debugFill(
+              'Creation time: ${ob.elapsedStopwatch / Duration.microsecondsPerSecond} seconds');
+          ob.writeDebug(s);
+        }
+        return true;
+      }());
+    }
+
+    final int xrefOffset;
+
+    params['/Root'] = o.ref();
+
+    switch (o.version) {
+      case PdfVersion.pdf_1_4:
+        xrefOffset = outputLegacy(o, s);
+        break;
+      case PdfVersion.pdf_1_5:
+        xrefOffset = outputCompressed(o, s);
+        break;
+    }
+
+    assert(() {
+      if (o.verbose) {
+        s.putComment('');
+        s.putComment('-' * 78);
+        s.putComment('$runtimeType');
+      }
+      return true;
+    }());
+
+    // the reference to the xref object
+    s.putString('startxref\n$xrefOffset\n%%EOF\n');
+
+    assert(() {
+      if (o.verbose) {
+        stopStopwatch();
+        debugFill(
+            'Creation time: ${elapsedStopwatch / Duration.microsecondsPerSecond} seconds');
+        debugFill('File size: ${s.offset} bytes');
+        // debugFill('Pages: ${rootID!.pdfDocument.pdfPageList.pages.length}');
+        debugFill('Objects: ${objects.length}');
+        writeDebug(s);
+      }
+      return true;
+    }());
+  }
 
   @override
   String toString() {
     final s = StringBuffer();
-    for (final x in offsets) {
+    for (final x in _offsets) {
       s.writeln('  $x');
     }
     return s.toString();
   }
 
-  int outputLegacy(PdfObjectBase object, PdfStream s, PdfDict params) {
+  int outputLegacy(PdfObjectBase o, PdfStream s) {
     // Now scan through the offsets list. They should be in sequence.
-    offsets.sort((a, b) => a.id.compareTo(b.id));
+    _offsets.sort((a, b) => a.id.compareTo(b.id));
+    final size = _offsets.last.id + 1;
 
     assert(() {
-      if (object.verbose) {
+      if (o.verbose) {
         s.putComment('');
         s.putComment('-' * 78);
-        s.putComment('$runtimeType ${object.version.name}\n$this');
+        s.putComment('$runtimeType ${o.version.name}\n$this');
       }
       return true;
     }());
@@ -156,7 +241,7 @@ class PdfXrefTable extends PdfDataType {
     final objOffset = s.offset;
     s.putString('xref\n');
 
-    for (final x in offsets) {
+    for (final x in _offsets) {
       // check to see if block is in range
       if (x.id != (lastId + 1)) {
         // no, so write this block, and reset
@@ -175,31 +260,33 @@ class PdfXrefTable extends PdfDataType {
 
     // the trailer object
     assert(() {
-      if (object.verbose) {
+      if (o.verbose) {
         s.putComment('');
       }
       return true;
     }());
     s.putString('trailer\n');
-    params.output(object, s, object.verbose ? 0 : null);
+    params['/Size'] = PdfNum(size);
+    params.output(o, s, o.verbose ? 0 : null);
     s.putByte(0x0a);
 
     return objOffset;
   }
 
   /// Output a compressed cross-reference table
-  int outputCompressed(PdfObjectBase object, PdfStream s, PdfDict params) {
+  int outputCompressed(PdfObjectBase o, PdfStream s) {
     final offset = s.offset;
 
     // Sort all references
-    offsets.sort((a, b) => a.id.compareTo(b.id));
+    _offsets.sort((a, b) => a.id.compareTo(b.id));
 
     // Write this object too
-    final id = offsets.last.id + 1;
-    offsets.add(PdfXref(id, offset));
+    final id = _offsets.last.id + 1;
+    final size = id + 1;
+    _offsets.add(PdfXref(id, offset));
 
     params['/Type'] = const PdfName('/XRef');
-    params['/Size'] = PdfNum(id + 1);
+    params['/Size'] = PdfNum(size);
 
     var firstId = 0; // First id in block
     var lastId = 0; // The last id used
@@ -208,7 +295,7 @@ class PdfXrefTable extends PdfDataType {
     // We need block 0 to exist
     blocks.add(firstId);
 
-    for (final x in offsets) {
+    for (final x in _offsets) {
       // check to see if block is in range
       if (x.id != (lastId + 1)) {
         // no, so store this block, and reset
@@ -220,7 +307,7 @@ class PdfXrefTable extends PdfDataType {
     }
     blocks.add(lastId - firstId + 1);
 
-    if (!(blocks.length == 2 && blocks[0] == 0 && blocks[1] == id + 1)) {
+    if (!(blocks.length == 2 && blocks[0] == 0 && blocks[1] == size)) {
       params['/Index'] = PdfArray.fromNum(blocks);
     }
 
@@ -229,21 +316,21 @@ class PdfXrefTable extends PdfDataType {
     params['/W'] = PdfArray.fromNum(w);
     final wl = w.reduce((a, b) => a + b);
 
-    final o = ByteData((offsets.length + 1) * wl);
+    final binOffsets = ByteData((_offsets.length + 1) * wl);
     var ofs = 0;
     // Write offset zero, all zeros
     ofs += wl;
 
-    for (final x in offsets) {
-      ofs = x._compressedRef(o, ofs, w);
+    for (final x in _offsets) {
+      ofs = x._compressedRef(binOffsets, ofs, w);
     }
 
     // Write the object
     assert(() {
-      if (object.verbose) {
+      if (o.verbose) {
         s.putComment('');
         s.putComment('-' * 78);
-        s.putComment('$runtimeType ${object.version.name}\n$this');
+        s.putComment('$runtimeType ${o.version.name}\n$this');
       }
       return true;
     }());
@@ -253,13 +340,13 @@ class PdfXrefTable extends PdfDataType {
     s.putString('$id 0 obj\n');
 
     PdfDictStream(
-      data: o.buffer.asUint8List(),
+      data: binOffsets.buffer.asUint8List(),
       isBinary: false,
       encrypt: false,
       values: params.values,
-    ).output(object, s, object.verbose ? 0 : null);
+    ).output(o, s, o.verbose ? 0 : null);
 
-    s.putString('endobj\n');
+    s.putString('\nendobj\n');
     return objOffset;
   }
 }

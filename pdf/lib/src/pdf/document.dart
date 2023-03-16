@@ -20,8 +20,11 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 
 import 'document_parser.dart';
+import 'format/array.dart';
+import 'format/num.dart';
 import 'format/object_base.dart';
 import 'format/stream.dart';
+import 'format/string.dart';
 import 'format/xref.dart';
 import 'graphic_state.dart';
 import 'io/vm.dart' if (dart.library.js) 'io/js.dart';
@@ -36,7 +39,6 @@ import 'obj/page.dart';
 import 'obj/page_label.dart';
 import 'obj/page_list.dart';
 import 'obj/signature.dart';
-import 'output.dart';
 
 /// Display hint for the PDF viewer
 enum PdfPageMode {
@@ -200,24 +202,36 @@ class PdfDocument {
 
   /// This writes the document to an OutputStream.
   Future<void> _write(PdfStream os) async {
-    final pos = PdfOutput(os, version, verbose);
+    PdfSignature? signature;
 
-    // Write each object to the [PdfStream]. We call via the output
-    // as that builds the xref table
-    objects.where((e) => e.inUse).forEach(pos.write);
-    var lastFree = 0;
-    for (final obj in objects.where((e) => !e.inUse)) {
-      pos.xref.add(PdfXref(
-        obj.objser,
-        lastFree,
-        generation: obj.objgen,
-        type: PdfCrossRefEntryType.free,
-      ));
-      lastFree = obj.objser;
+    final xref = PdfXrefTable();
+
+    for (final ob in objects.where((e) => e.inUse)) {
+      ob.prepare();
+      if (ob is PdfInfo) {
+        xref.params['/Info'] = ob.ref();
+      } else if (ob is PdfEncryption) {
+        xref.params['/Encrypt'] = ob.ref();
+      } else if (ob is PdfSignature) {
+        assert(signature == null, 'Only one document signature is allowed');
+        signature = ob;
+      }
+      xref.objects.add(ob);
     }
 
-    // Finally close the output, which writes the xref table.
-    await pos.close();
+    final id =
+        PdfString(documentID, format: PdfStringFormat.binary, encrypted: false);
+    xref.params['/ID'] = PdfArray([id, id]);
+
+    if (prev != null) {
+      xref.params['/Prev'] = PdfNum(prev!.xrefOffset);
+    }
+
+    xref.output(catalog, os);
+
+    if (signature != null) {
+      await signature.writeSignature(os);
+    }
   }
 
   /// Generate the PDF document as a memory file

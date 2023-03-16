@@ -30,7 +30,7 @@ abstract class PdfDataType {
 
   PdfStream _toStream() {
     final s = PdfStream();
-    output(const PdfObjectBase(objser: 0), s);
+    output(PdfObjectBase(objser: 0, params: this), s);
     return s;
   }
 

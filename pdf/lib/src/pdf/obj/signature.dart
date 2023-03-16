@@ -82,12 +82,12 @@ class PdfSignature extends PdfObjectDict {
   int? _offsetEnd;
 
   @override
-  void write(PdfStream os) {
+  void output(PdfStream s) {
     value.preSign(this, params);
 
-    _offsetStart = os.offset + '$objser $objgen obj\n'.length;
-    super.write(os);
-    _offsetEnd = os.offset;
+    _offsetStart = s.offset + '$objser $objgen obj\n'.length;
+    super.output(s);
+    _offsetEnd = s.offset;
   }
 
   Future<void> writeSignature(PdfStream os) async {

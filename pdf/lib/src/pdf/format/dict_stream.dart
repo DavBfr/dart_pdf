@@ -99,6 +99,6 @@ class PdfDictStream extends PdfDict<PdfDataType> {
     }
     s.putString('stream\n');
     s.putBytes(_data);
-    s.putString('\nendstream\n');
+    s.putString('\nendstream');
   }
 }

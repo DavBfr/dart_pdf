@@ -19,25 +19,23 @@ import 'package:meta/meta.dart';
 import '../document.dart';
 import '../format/base.dart';
 import '../format/object_base.dart';
-import '../format/stream.dart';
-import 'diagnostic.dart';
 
 /// Base Object used in the PDF file
-abstract class PdfObject<T extends PdfDataType> extends PdfObjectBase
-    with PdfDiagnostic {
+abstract class PdfObject<T extends PdfDataType> extends PdfObjectBase<T> {
   /// This is usually called by extensors to this class, and sets the
   /// Pdf Object Type
   PdfObject(
     this.pdfDocument, {
-    required this.params,
+    required T params,
     int objgen = 0,
     int? objser,
-  }) : super(objser: objser ?? pdfDocument.genSerial(), objgen: objgen) {
+  }) : super(
+          objser: objser ?? pdfDocument.genSerial(),
+          objgen: objgen,
+          params: params,
+        ) {
     pdfDocument.objects.add(this);
   }
-
-  /// This is the object parameters.
-  final T params;
 
   /// This allows any Pdf object to refer to the document being constructed.
   final PdfDocument pdfDocument;
@@ -56,34 +54,9 @@ abstract class PdfObject<T extends PdfDataType> extends PdfObjectBase
   @override
   PdfVersion get version => pdfDocument.version;
 
-  /// Writes the object to the output stream.
-  void write(PdfStream os) {
-    prepare();
-    _writeStart(os);
-    writeContent(os);
-    _writeEnd(os);
-  }
-
   /// Prepare the object to be written to the stream
   @mustCallSuper
   void prepare() {}
-
-  /// The write method should call this before writing anything to the
-  /// OutputStream. This will send the standard header for each object.
-  void _writeStart(PdfStream os) {
-    os.putString('$objser $objgen obj\n');
-  }
-
-  void writeContent(PdfStream os) {
-    params.output(this, os, verbose ? 0 : null);
-    os.putByte(0x0a);
-  }
-
-  /// The write method should call this after writing anything to the
-  /// OutputStream. This will send the standard footer for each object.
-  void _writeEnd(PdfStream os) {
-    os.putString('endobj\n');
-  }
 
   @override
   String toString() => '$runtimeType $params';

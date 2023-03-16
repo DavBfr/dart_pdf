@@ -16,7 +16,10 @@
 
 import 'dart:typed_data';
 
+import 'base.dart';
+import 'diagnostic.dart';
 import 'indirect.dart';
+import 'stream.dart';
 
 /// Callback used to compress the data
 typedef DeflateCallback = List<int> Function(List<int> data);
@@ -34,10 +37,11 @@ enum PdfVersion {
   pdf_1_5,
 }
 
-class PdfObjectBase {
-  const PdfObjectBase({
+class PdfObjectBase<T extends PdfDataType> with PdfDiagnostic {
+  PdfObjectBase({
     required this.objser,
     this.objgen = 0,
+    required this.params,
   });
 
   /// This is the unique serial number for this object.
@@ -45,6 +49,8 @@ class PdfObjectBase {
 
   /// This is the generation number for this object.
   final int objgen;
+
+  final T params;
 
   /// Callback used to compress the data
   DeflateCallback? get deflate => null;
@@ -59,4 +65,15 @@ class PdfObjectBase {
 
   /// Returns the unique serial number in Pdf format
   PdfIndirect ref() => PdfIndirect(objser, objgen);
+
+  void output(PdfStream s) {
+    s.putString('$objser $objgen obj\n');
+    writeContent(s);
+    s.putString('endobj\n');
+  }
+
+  void writeContent(PdfStream s) {
+    params.output(this, s, verbose ? 0 : null);
+    s.putByte(0x0a);
+  }
 }

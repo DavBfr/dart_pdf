@@ -17,78 +17,74 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:pdf/pdf.dart';
 import 'package:pdf/src/priv.dart';
 import 'package:test/test.dart';
 
-class BasicObject extends PdfObjectBase {
-  const BasicObject(int objser) : super(objser: objser);
+class BasicObject<T extends PdfDataType> extends PdfObjectBase<T> {
+  BasicObject({required super.objser, required super.params});
 
   @override
   bool get verbose => true;
 
-  void write(PdfStream os, PdfDataType value) {
-    os.putString('$objser $objgen obj\n');
-    value.output(this, os, verbose ? 0 : null);
-    os.putByte(0x0a);
-    os.putString('endobj\n');
-  }
+  @override
+  PdfVersion get version => PdfVersion.pdf_1_4;
+
+  @override
+  DeflateCallback? get deflate => zlib.encode;
 }
 
 void main() {
   test('Pdf Minimal', () async {
-    final pages = PdfDict({
-      '/Type': const PdfName('/Pages'),
-      '/Count': const PdfNum(1),
-    });
+    var objser = 1;
 
-    final page = PdfDict({
-      '/Type': const PdfName('/Page'),
-      '/Parent': const PdfIndirect(2, 0),
-      '/MediaBox': PdfArray.fromNum([0, 0, 595.27559, 841.88976]),
-      '/Resources': PdfDict({
-        '/ProcSet': PdfArray([
-          const PdfName('/PDF'),
-        ]),
-      }),
-      '/Contents': const PdfIndirect(4, 0),
-    });
+    final pages = BasicObject(
+        objser: objser++,
+        params: PdfDict({
+          '/Type': const PdfName('/Pages'),
+          '/Count': const PdfNum(1),
+        }));
 
-    final content = PdfDictStream(
-      data: latin1.encode('30 811.88976 m 200 641.88976 l S'),
-    );
+    final content = BasicObject(
+        objser: objser++,
+        params: PdfDictStream(
+          data: latin1.encode('30 811.88976 m 200 641.88976 l S'),
+        ));
 
-    pages['/Kids'] = PdfArray([const PdfIndirect(3, 0)]);
+    final page = BasicObject(
+        objser: objser++,
+        params: PdfDict({
+          '/Type': const PdfName('/Page'),
+          '/Parent': pages.ref(),
+          '/MediaBox': PdfArray.fromNum([0, 0, 595.27559, 841.88976]),
+          '/Resources': PdfDict({
+            '/ProcSet': PdfArray([
+              const PdfName('/PDF'),
+            ]),
+          }),
+          '/Contents': content.ref(),
+        }));
 
-    final catalog = PdfDict({
-      '/Type': const PdfName('/Catalog'),
-      '/Pages': const PdfIndirect(2, 0),
-    });
+    pages.params['/Kids'] = PdfArray([page.ref()]);
+
+    final catalog = BasicObject(
+        objser: objser++,
+        params: PdfDict({
+          '/Type': const PdfName('/Catalog'),
+          '/Pages': pages.ref(),
+        }));
 
     final os = PdfStream();
 
     final xref = PdfXrefTable();
+    xref.objects.addAll([
+      catalog,
+      pages,
+      page,
+      content,
+    ]);
 
-    os.putString('%PDF-1.4\n');
-    os.putBytes(const <int>[0x25, 0xC2, 0xA5, 0xC2, 0xB1, 0xC3, 0xAB, 0x0A]);
-
-    xref.add(PdfXref(1, os.offset));
-    final cat = const BasicObject(1)..write(os, catalog);
-    xref.add(PdfXref(2, os.offset));
-    const BasicObject(2).write(os, pages);
-    xref.add(PdfXref(3, os.offset));
-    const BasicObject(3).write(os, page);
-    xref.add(PdfXref(4, os.offset));
-    const BasicObject(4).write(os, content);
-
-    final xrefOffset = xref.outputLegacy(
-        cat,
-        os,
-        PdfDict({
-          '/Size': PdfNum(xref.offsets.length + 1),
-          '/Root': const PdfIndirect(1, 0),
-        }));
-
-    os.putString('startxref\n$xrefOffset\n%%EOF\n');
+    xref.output(catalog, os);
 
     final file = File('minimal.pdf');
     await file.writeAsBytes(os.output());
