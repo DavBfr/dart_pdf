@@ -87,7 +87,7 @@ class PdfChoiceField extends PdfAnnotWidget {
     g.setFillColor(textColor);
     g.setFont(font, fontSize);
 
-    params['/DA'] = PdfSecString.fromStream(buf);
+    params['/DA'] = PdfString.fromStream(buf);
 
     // What is /TU? Tooltip?
     //params['/TU'] = PdfString.fromString('Select from list');
@@ -285,11 +285,11 @@ abstract class PdfAnnotBase {
     }
 
     if (content != null) {
-      params['/Contents'] = PdfSecString.fromString(content!);
+      params['/Contents'] = PdfString.fromString(content!);
     }
 
     if (name != null) {
-      params['/NM'] = PdfSecString.fromString(name!);
+      params['/NM'] = PdfString.fromString(name!);
     }
 
     if (flags != null && flags!.isNotEmpty) {
@@ -297,7 +297,7 @@ abstract class PdfAnnotBase {
     }
 
     if (date != null) {
-      params['/M'] = PdfSecString.fromDate(date!);
+      params['/M'] = PdfString.fromDate(date!);
     }
 
     if (color != null) {
@@ -305,11 +305,11 @@ abstract class PdfAnnotBase {
     }
 
     if (subject != null) {
-      params['/Subj'] = PdfSecString.fromString(subject!);
+      params['/Subj'] = PdfString.fromString(subject!);
     }
 
     if (author != null) {
-      params['/T'] = PdfSecString.fromString(author!);
+      params['/T'] = PdfString.fromString(author!);
     }
 
     if (_appearances.isNotEmpty) {
@@ -377,7 +377,7 @@ class PdfAnnotNamedLink extends PdfAnnotBase {
     params['/A'] = PdfDict(
       {
         '/S': const PdfName('/GoTo'),
-        '/D': PdfSecString.fromString(dest),
+        '/D': PdfString.fromString(dest),
       },
     );
   }
@@ -413,7 +413,7 @@ class PdfAnnotUrlLink extends PdfAnnotBase {
     params['/A'] = PdfDict(
       {
         '/S': const PdfName('/URI'),
-        '/URI': PdfSecString.fromString(url),
+        '/URI': PdfString.fromString(url),
       },
     );
   }
@@ -632,7 +632,7 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
     params['/FT'] = PdfName(fieldType);
 
     if (fieldName != null) {
-      params['/T'] = PdfSecString.fromString(fieldName!);
+      params['/T'] = PdfString.fromString(fieldName!);
     }
 
     final mk = PdfDict();
@@ -847,10 +847,10 @@ class PdfFormField extends PdfAnnotWidget {
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
     if (alternateName != null) {
-      params['/TU'] = PdfSecString.fromString(alternateName!);
+      params['/TU'] = PdfString.fromString(alternateName!);
     }
     if (mappingName != null) {
-      params['/TM'] = PdfSecString.fromString(mappingName!);
+      params['/TM'] = PdfString.fromString(mappingName!);
     }
 
     params['/Ff'] = PdfNum(fieldFlagsValue);
@@ -923,13 +923,13 @@ class PdfTextField extends PdfFormField {
     final g = PdfGraphics(page, buf);
     g.setFillColor(textColor);
     g.setFont(font, fontSize);
-    params['/DA'] = PdfSecString.fromStream(buf);
+    params['/DA'] = PdfString.fromStream(buf);
 
     if (value != null) {
-      params['/V'] = PdfSecString.fromString(value!);
+      params['/V'] = PdfString.fromString(value!);
     }
     if (defaultValue != null) {
-      params['/DV'] = PdfSecString.fromString(defaultValue!);
+      params['/DV'] = PdfString.fromString(defaultValue!);
     }
     if (textAlign != null) {
       params['/Q'] = PdfNum(textAlign!.index);

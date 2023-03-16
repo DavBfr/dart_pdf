@@ -24,24 +24,40 @@ import 'stream.dart';
 enum PdfStringFormat { binary, literal }
 
 class PdfString extends PdfDataType {
-  const PdfString(this.value, [this.format = PdfStringFormat.literal]);
+  const PdfString(
+    this.value, {
+    this.format = PdfStringFormat.literal,
+    this.encrypted = true,
+  });
 
-  factory PdfString.fromString(String value) {
-    return PdfString(_string(value), PdfStringFormat.literal);
+  factory PdfString.fromString(
+    String value, {
+    bool encrypted = true,
+  }) {
+    return PdfString(_string(value),
+        format: PdfStringFormat.literal, encrypted: encrypted);
   }
 
-  factory PdfString.fromStream(PdfStream value,
-      [PdfStringFormat format = PdfStringFormat.literal]) {
-    return PdfString(value.output(), format);
+  factory PdfString.fromStream(
+    PdfStream value, {
+    PdfStringFormat format = PdfStringFormat.literal,
+    bool encrypted = true,
+  }) {
+    return PdfString(value.output(), format: format, encrypted: encrypted);
   }
 
-  factory PdfString.fromDate(DateTime date) {
-    return PdfString(_date(date));
+  factory PdfString.fromDate(
+    DateTime date, {
+    bool encrypted = true,
+  }) {
+    return PdfString(_date(date), encrypted: encrypted);
   }
 
   final Uint8List value;
 
   final PdfStringFormat format;
+
+  final bool encrypted;
 
   static Uint8List _string(String value) {
     try {
@@ -168,7 +184,12 @@ class PdfString extends PdfDataType {
 
   @override
   void output(PdfObjectBase o, PdfStream s, [int? indent]) {
-    _output(s, value);
+    if (!encrypted || o.encryptCallback == null) {
+      return _output(s, value);
+    }
+
+    final enc = o.encryptCallback!(value, o);
+    _output(s, enc);
   }
 
   @override
@@ -182,47 +203,4 @@ class PdfString extends PdfDataType {
 
   @override
   int get hashCode => value.hashCode;
-}
-
-class PdfSecString extends PdfString {
-  const PdfSecString(Uint8List value,
-      [PdfStringFormat format = PdfStringFormat.binary])
-      : super(value, format);
-
-  factory PdfSecString.fromString(
-    String value, [
-    PdfStringFormat format = PdfStringFormat.literal,
-  ]) {
-    return PdfSecString(
-      PdfString._string(value),
-      format,
-    );
-  }
-
-  factory PdfSecString.fromStream(
-    PdfStream value, [
-    PdfStringFormat format = PdfStringFormat.literal,
-  ]) {
-    return PdfSecString(
-      value.output(),
-      format,
-    );
-  }
-
-  factory PdfSecString.fromDate(DateTime date) {
-    return PdfSecString(
-      PdfString._date(date),
-      PdfStringFormat.literal,
-    );
-  }
-
-  @override
-  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
-    if (o.encryptCallback == null) {
-      return super.output(o, s, indent);
-    }
-
-    final enc = o.encryptCallback!(value, o);
-    _output(s, enc);
-  }
 }

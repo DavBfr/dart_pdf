@@ -76,7 +76,7 @@ class PdfPageLabel {
     return PdfDict({
       if (s != null) '/S': s,
       if (prefix != null && prefix!.isNotEmpty)
-        '/P': PdfSecString.fromString(prefix!),
+        '/P': PdfString.fromString(prefix!),
       if (subsequent != null) '/St': PdfNum(subsequent!)
     });
   }

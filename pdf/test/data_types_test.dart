@@ -59,7 +59,7 @@ void main() {
     expect(
       PdfString(
         Uint8List.fromList(const <int>[0, 1, 2, 3, 4, 5, 6]),
-        PdfStringFormat.binary,
+        format: PdfStringFormat.binary,
       ).toString(),
       '<00010203040506>',
     );

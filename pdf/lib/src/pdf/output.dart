@@ -130,8 +130,8 @@ class PdfOutput with PdfDiagnostic {
 
     // the /Root catalog indirect reference (REQUIRED)
     params['/Root'] = rootID!.ref();
-    final id =
-        PdfString(rootID!.pdfDocument.documentID, PdfStringFormat.binary);
+    final id = PdfString(rootID!.pdfDocument.documentID,
+        format: PdfStringFormat.binary, encrypted: false);
     params['/ID'] = PdfArray([id, id]);
 
     // the /Info reference (OPTIONAL)

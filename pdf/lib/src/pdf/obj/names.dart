@@ -62,7 +62,7 @@ class PdfNames extends PdfObjectDict {
     final keys = _dests.keys.toList()..sort();
 
     for (final name in keys) {
-      dests.add(PdfSecString.fromString(name));
+      dests.add(PdfString.fromString(name));
       dests.add(_dests[name]!);
     }
 
@@ -70,8 +70,8 @@ class PdfNames extends PdfObjectDict {
     if (dests.values.isNotEmpty) {
       dict['/Names'] = dests;
       dict['/Limits'] = PdfArray([
-        PdfSecString.fromString(keys.first),
-        PdfSecString.fromString(keys.last),
+        PdfString.fromString(keys.first),
+        PdfString.fromString(keys.last),
       ]);
     }
     params['/Dests'] = dict;

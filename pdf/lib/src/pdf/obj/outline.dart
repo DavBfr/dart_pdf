@@ -125,7 +125,7 @@ class PdfOutline extends PdfObjectDict {
 
     // These are for kids only
     if (parent != null) {
-      params['/Title'] = PdfSecString.fromString(title!);
+      params['/Title'] = PdfString.fromString(title!);
 
       if (color != null) {
         params['/C'] = PdfArray.fromColor(color!);
@@ -136,7 +136,7 @@ class PdfOutline extends PdfObjectDict {
       }
 
       if (anchor != null) {
-        params['/Dest'] = PdfSecString.fromString(anchor!);
+        params['/Dest'] = PdfString.fromString(anchor!);
       } else {
         final dests = PdfArray();
         dests.add(dest!.ref());
