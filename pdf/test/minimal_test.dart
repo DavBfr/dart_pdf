@@ -21,38 +21,33 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/src/priv.dart';
 import 'package:test/test.dart';
 
-class BasicObject<T extends PdfDataType> extends PdfObjectBase<T> {
-  BasicObject({required super.objser, required super.params});
-
-  @override
-  bool get verbose => true;
-
-  @override
-  PdfVersion get version => PdfVersion.pdf_1_4;
-
-  @override
-  DeflateCallback? get deflate => zlib.encode;
-}
-
 void main() {
   test('Pdf Minimal', () async {
     var objser = 1;
+    const verbose = true;
+    const version = PdfVersion.pdf_1_4;
 
-    final pages = BasicObject(
+    final pages = PdfObjectBase(
         objser: objser++,
+        verbose: verbose,
+        version: version,
         params: PdfDict({
           '/Type': const PdfName('/Pages'),
           '/Count': const PdfNum(1),
         }));
 
-    final content = BasicObject(
+    final content = PdfObjectBase(
         objser: objser++,
+        verbose: verbose,
+        version: version,
         params: PdfDictStream(
           data: latin1.encode('30 811.88976 m 200 641.88976 l S'),
         ));
 
-    final page = BasicObject(
+    final page = PdfObjectBase(
         objser: objser++,
+        verbose: verbose,
+        version: version,
         params: PdfDict({
           '/Type': const PdfName('/Page'),
           '/Parent': pages.ref(),
@@ -67,8 +62,10 @@ void main() {
 
     pages.params['/Kids'] = PdfArray([page.ref()]);
 
-    final catalog = BasicObject(
+    final catalog = PdfObjectBase(
         objser: objser++,
+        verbose: verbose,
+        version: version,
         params: PdfDict({
           '/Type': const PdfName('/Catalog'),
           '/Pages': pages.ref(),

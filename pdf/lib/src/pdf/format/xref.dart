@@ -144,24 +144,8 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
     }());
 
     for (final ob in objects) {
-      assert(() {
-        if (ob.verbose) {
-          ob.setInsertion(s, 150);
-          ob.startStopwatch();
-        }
-        return true;
-      }());
-      _offsets.add(PdfXref(ob.objser, s.offset, generation: ob.objgen));
-      ob.output(s);
-      assert(() {
-        if (ob.verbose) {
-          ob.stopStopwatch();
-          ob.debugFill(
-              'Creation time: ${ob.elapsedStopwatch / Duration.microsecondsPerSecond} seconds');
-          ob.writeDebug(s);
-        }
-        return true;
-      }());
+      final offset = ob.output(s);
+      _offsets.add(PdfXref(ob.objser, offset, generation: ob.objgen));
     }
 
     final int xrefOffset;
@@ -195,7 +179,6 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
         debugFill(
             'Creation time: ${elapsedStopwatch / Duration.microsecondsPerSecond} seconds');
         debugFill('File size: ${s.offset} bytes');
-        // debugFill('Pages: ${rootID!.pdfDocument.pdfPageList.pages.length}');
         debugFill('Objects: ${objects.length}');
         writeDebug(s);
       }
@@ -337,16 +320,19 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
 
     final objOffset = s.offset;
 
-    s.putString('$id 0 obj\n');
+    PdfObjectBase(
+      objser: id,
+      params: PdfDictStream(
+        data: binOffsets.buffer.asUint8List(),
+        isBinary: false,
+        encrypt: false,
+        values: params.values,
+      ),
+      deflate: o.deflate,
+      verbose: o.verbose,
+      version: o.version,
+    ).output(s);
 
-    PdfDictStream(
-      data: binOffsets.buffer.asUint8List(),
-      isBinary: false,
-      encrypt: false,
-      values: params.values,
-    ).output(o, s, o.verbose ? 0 : null);
-
-    s.putString('\nendobj\n');
     return objOffset;
   }
 }

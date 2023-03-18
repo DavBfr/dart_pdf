@@ -42,6 +42,10 @@ class PdfObjectBase<T extends PdfDataType> with PdfDiagnostic {
     required this.objser,
     this.objgen = 0,
     required this.params,
+    this.deflate,
+    this.encryptCallback,
+    this.verbose = false,
+    this.version = PdfVersion.pdf_1_5,
   });
 
   /// This is the unique serial number for this object.
@@ -53,23 +57,44 @@ class PdfObjectBase<T extends PdfDataType> with PdfDiagnostic {
   final T params;
 
   /// Callback used to compress the data
-  DeflateCallback? get deflate => null;
+  final DeflateCallback? deflate;
 
   /// Callback used to encrypt the value of a [PdfDictStream] or a [PdfEncStream]
-  PdfEncryptCallback? get encryptCallback => null;
+  final PdfEncryptCallback? encryptCallback;
 
   /// Output a PDF document with comments and formatted data
-  bool get verbose => false;
+  final bool verbose;
 
-  PdfVersion get version => PdfVersion.pdf_1_5;
+  /// PDF version to generate
+  final PdfVersion version;
 
   /// Returns the unique serial number in Pdf format
   PdfIndirect ref() => PdfIndirect(objser, objgen);
 
-  void output(PdfStream s) {
+  int output(PdfStream s) {
+    assert(() {
+      if (verbose) {
+        setInsertion(s, 160);
+        startStopwatch();
+      }
+      return true;
+    }());
+
+    final offset = s.offset;
     s.putString('$objser $objgen obj\n');
     writeContent(s);
     s.putString('endobj\n');
+
+    assert(() {
+      if (verbose) {
+        stopStopwatch();
+        debugFill(
+            'Creation time: ${elapsedStopwatch / Duration.microsecondsPerSecond} seconds');
+        writeDebug(s);
+      }
+      return true;
+    }());
+    return offset;
   }
 
   void writeContent(PdfStream s) {
