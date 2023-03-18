@@ -33,11 +33,11 @@ class PdfArray<T extends PdfDataType> extends PdfDataType {
     }
   }
 
-  static PdfArray<PdfIndirect> fromObjects(List<PdfObjectBase> objects) {
+  static PdfArray<PdfIndirect> fromObjects(Iterable<PdfObjectBase> objects) {
     return PdfArray(objects.map<PdfIndirect>((e) => e.ref()).toList());
   }
 
-  static PdfArray<PdfNum> fromNum(List<num> list) {
+  static PdfArray<PdfNum> fromNum(Iterable<num> list) {
     return PdfArray(list.map<PdfNum>((num e) => PdfNum(e)).toList());
   }
 

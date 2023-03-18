@@ -12,6 +12,7 @@
 - Draw page content only if not empty
 - Fix Page Content
 - Reorganize data types
+- Improve Documents conformity
 
 ## 3.9.0
 
