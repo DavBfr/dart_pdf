@@ -85,8 +85,8 @@ class PdfSignature extends PdfObjectDict {
   int output(PdfStream s) {
     value.preSign(this, params);
 
-    _offsetStart = s.offset + '$objser $objgen obj\n'.length;
     final offset = super.output(s);
+    _offsetStart = offset + '$objser $objgen obj\n'.length;
     _offsetEnd = s.offset;
     return offset;
   }

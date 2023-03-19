@@ -77,21 +77,17 @@ class PdfDocument {
         prev = null,
         _objser = 1 {
     // create the catalog
-    catalog = PdfCatalog(this, PdfPageList(this), pageMode);
+    catalog = PdfCatalog(this, PdfPageList(this), pageMode: pageMode);
   }
 
   PdfDocument.load(
     this.prev, {
-    PdfPageMode pageMode = PdfPageMode.none,
     DeflateCallback? deflate,
     bool compress = true,
     this.verbose = false,
   })  : deflate = compress ? (deflate ?? defaultDeflate) : null,
         _objser = prev!.size,
         version = prev.version {
-    // Now create some standard objects
-    catalog = PdfCatalog(this, PdfPageList(this), pageMode);
-
     // Import the existing document
     prev!.mergeDocument(this);
   }

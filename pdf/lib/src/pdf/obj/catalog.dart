@@ -32,9 +32,11 @@ class PdfCatalog extends PdfObjectDict {
   /// This constructs a Pdf Catalog object
   PdfCatalog(
     PdfDocument pdfDocument,
-    this.pdfPageList,
+    this.pdfPageList, {
     this.pageMode,
-  ) : super(pdfDocument, type: '/Catalog');
+    int objgen = 0,
+    int? objser,
+  }) : super(pdfDocument, type: '/Catalog', objser: objser, objgen: objgen);
 
   /// The pages of the document
   final PdfPageList pdfPageList;
@@ -46,7 +48,7 @@ class PdfCatalog extends PdfObjectDict {
   PdfMetadata? metadata;
 
   /// The initial page mode
-  final PdfPageMode pageMode;
+  final PdfPageMode? pageMode;
 
   /// The anchor names
   PdfNames? names;
@@ -91,7 +93,9 @@ class PdfCatalog extends PdfObjectDict {
     }
 
     // the /PageMode setting
-    params['/PageMode'] = PdfName(_pdfPageModes[pageMode.index]);
+    if (pageMode != null) {
+      params['/PageMode'] = PdfName(_pdfPageModes[pageMode!.index]);
+    }
 
     if (pdfDocument.sign != null) {
       if (pdfDocument.sign!.value.hasMDP) {
