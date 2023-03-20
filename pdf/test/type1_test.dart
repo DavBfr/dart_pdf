@@ -74,9 +74,6 @@ void main() {
     printText(page, g, s, PdfFont.timesItalic(pdf), 20.0 + 30.0 * top++);
     printText(page, g, s, PdfFont.timesBoldItalic(pdf), 20.0 + 30.0 * top++);
 
-    printText(page, g, s, PdfFont.symbol(pdf), 20.0 + 30.0 * top++);
-    printText(page, g, s, PdfFont.zapfDingbats(pdf), 20.0 + 30.0 * top++);
-
     final file = File('type1.pdf');
     await file.writeAsBytes(await pdf.save());
   });
