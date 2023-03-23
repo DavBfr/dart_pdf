@@ -158,6 +158,9 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     if (!infoLoaded) {
       infoLoaded = true;
       Printing.info().then((PrintingInfo printingInfo) {
+        if (!mounted) {
+          return;
+        }
         setState(() {
           info = printingInfo;
           raster();
