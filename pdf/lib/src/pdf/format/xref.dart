@@ -99,9 +99,6 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
   /// List of objects to write
   final objects = <PdfObjectBase>{};
 
-  /// Contains the offset of each objects
-  final _offsets = <PdfXref>[];
-
   /// Writes a block of references to the Pdf file
   void _writeBlock(PdfStream s, int firstId, List<PdfXref> block) {
     s.putString('$firstId ${block.length}\n');
@@ -137,10 +134,23 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
       return true;
     }());
 
+    final xrefList = <PdfXref>[];
     for (final ob in objects) {
       final offset = ob.output(s);
-      _offsets.add(PdfXref(ob.objser, offset, gen: ob.objgen));
+      xrefList.add(PdfXref(ob.objser, offset, gen: ob.objgen));
     }
+
+    assert(() {
+      if (o.settings.verbose) {
+        s.putComment('');
+        s.putComment('-' * 78);
+        s.putComment('$runtimeType ${o.settings.version.name}');
+        for (final x in xrefList) {
+          s.putComment('  $x');
+        }
+      }
+      return true;
+    }());
 
     final int xrefOffset;
 
@@ -148,10 +158,10 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
 
     switch (o.settings.version) {
       case PdfVersion.pdf_1_4:
-        xrefOffset = outputLegacy(o, s);
+        xrefOffset = _outputLegacy(o, s, xrefList);
         break;
       case PdfVersion.pdf_1_5:
-        xrefOffset = outputCompressed(o, s);
+        xrefOffset = _outputCompressed(o, s, xrefList);
         break;
     }
 
@@ -159,7 +169,6 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
       if (o.settings.verbose) {
         s.putComment('');
         s.putComment('-' * 78);
-        s.putComment('$runtimeType');
       }
       return true;
     }());
@@ -180,28 +189,10 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
     }());
   }
 
-  @override
-  String toString() {
-    final s = StringBuffer();
-    for (final x in _offsets) {
-      s.writeln('  $x');
-    }
-    return s.toString();
-  }
-
-  int outputLegacy(PdfObjectBase o, PdfStream s) {
+  int _outputLegacy(PdfObjectBase o, PdfStream s, List<PdfXref> xrefList) {
     // Now scan through the offsets list. They should be in sequence.
-    _offsets.sort((a, b) => a.ser.compareTo(b.ser));
-    final size = _offsets.last.ser + 1;
-
-    assert(() {
-      if (o.settings.verbose) {
-        s.putComment('');
-        s.putComment('-' * 78);
-        s.putComment('$runtimeType ${o.settings.version.name}\n$this');
-      }
-      return true;
-    }());
+    xrefList.sort((a, b) => a.ser.compareTo(b.ser));
+    final size = xrefList.last.ser + 1;
 
     var firstId = 0; // First id in block
     var lastId = 0; // The last id used
@@ -218,7 +209,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
     final objOffset = s.offset;
     s.putString('xref\n');
 
-    for (final x in _offsets) {
+    for (final x in xrefList) {
       // check to see if block is in range
       if (x.ser != (lastId + 1)) {
         // no, so write this block, and reset
@@ -251,16 +242,16 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
   }
 
   /// Output a compressed cross-reference table
-  int outputCompressed(PdfObjectBase o, PdfStream s) {
+  int _outputCompressed(PdfObjectBase o, PdfStream s, List<PdfXref> xrefList) {
     final offset = s.offset;
 
     // Sort all references
-    _offsets.sort((a, b) => a.ser.compareTo(b.ser));
+    xrefList.sort((a, b) => a.ser.compareTo(b.ser));
 
     // Write this object too
-    final id = _offsets.last.ser + 1;
+    final id = xrefList.last.ser + 1;
     final size = id + 1;
-    _offsets.add(PdfXref(id, offset));
+    xrefList.add(PdfXref(id, offset));
 
     params['/Type'] = const PdfName('/XRef');
     params['/Size'] = PdfNum(size);
@@ -272,7 +263,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
     // We need block 0 to exist
     blocks.add(firstId);
 
-    for (final x in _offsets) {
+    for (final x in xrefList) {
       // check to see if block is in range
       if (x.ser != (lastId + 1)) {
         // no, so store this block, and reset
@@ -293,24 +284,14 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
     params['/W'] = PdfArray.fromNum(w);
     final wl = w.reduce((a, b) => a + b);
 
-    final binOffsets = ByteData((_offsets.length + 1) * wl);
+    final binOffsets = ByteData((xrefList.length + 1) * wl);
     var ofs = 0;
     // Write offset zero, all zeros
     ofs += wl;
 
-    for (final x in _offsets) {
+    for (final x in xrefList) {
       ofs = x._compressedRef(binOffsets, ofs, w);
     }
-
-    // Write the object
-    assert(() {
-      if (o.settings.verbose) {
-        s.putComment('');
-        s.putComment('-' * 78);
-        s.putComment('$runtimeType ${o.settings.version.name}\n$this');
-      }
-      return true;
-    }());
 
     final objOffset = s.offset;
 

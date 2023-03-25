@@ -15,6 +15,7 @@
 - Improve Documents conformity
 - Make PdfXref a PdfIndirect descendent
 - Move Pdf generation settings to PdfSettings
+- Improve PdfXrefTable output
 
 ## 3.9.0
 
