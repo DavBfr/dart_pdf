@@ -37,26 +37,17 @@ enum PdfVersion {
   pdf_1_5,
 }
 
-class PdfObjectBase<T extends PdfDataType> with PdfDiagnostic {
-  PdfObjectBase({
-    required this.objser,
-    this.objgen = 0,
-    required this.params,
+class PdfSettings {
+  const PdfSettings({
     this.deflate,
     this.encryptCallback,
     this.verbose = false,
     this.version = PdfVersion.pdf_1_5,
   });
 
-  /// This is the unique serial number for this object.
-  final int objser;
-
-  /// This is the generation number for this object.
-  final int objgen;
-
-  final T params;
-
-  /// Callback used to compress the data
+  /// Callback to compress the streams in the pdf file.
+  /// Use `deflate: zlib.encode` if using dart:io
+  /// No compression by default
   final DeflateCallback? deflate;
 
   /// Callback used to encrypt the value of a [PdfDictStream] or a [PdfEncStream]
@@ -68,12 +59,34 @@ class PdfObjectBase<T extends PdfDataType> with PdfDiagnostic {
   /// PDF version to generate
   final PdfVersion version;
 
+  /// Compress the document
+  bool get compress => deflate != null;
+}
+
+class PdfObjectBase<T extends PdfDataType> with PdfDiagnostic {
+  PdfObjectBase({
+    required this.objser,
+    this.objgen = 0,
+    required this.params,
+    required this.settings,
+  });
+
+  /// This is the unique serial number for this object.
+  final int objser;
+
+  /// This is the generation number for this object.
+  final int objgen;
+
+  final T params;
+
+  final PdfSettings settings;
+
   /// Returns the unique serial number in Pdf format
   PdfIndirect ref() => PdfIndirect(objser, objgen);
 
   int output(PdfStream s) {
     assert(() {
-      if (verbose) {
+      if (settings.verbose) {
         setInsertion(s, 160);
         startStopwatch();
       }
@@ -86,7 +99,7 @@ class PdfObjectBase<T extends PdfDataType> with PdfDiagnostic {
     s.putString('endobj\n');
 
     assert(() {
-      if (verbose) {
+      if (settings.verbose) {
         stopStopwatch();
         debugFill(
             'Creation time: ${elapsedStopwatch / Duration.microsecondsPerSecond} seconds');
@@ -98,7 +111,7 @@ class PdfObjectBase<T extends PdfDataType> with PdfDiagnostic {
   }
 
   void writeContent(PdfStream s) {
-    params.output(this, s, verbose ? 0 : null);
+    params.output(this, s, settings.verbose ? 0 : null);
     s.putByte(0x0a);
   }
 }

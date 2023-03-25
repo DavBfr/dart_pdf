@@ -66,9 +66,9 @@ class PdfDictStream extends PdfDict<PdfDataType> {
     if (_values.containsKey('/Filter')) {
       // The data is already in the right format
       _data = data;
-    } else if (compress && o.deflate != null) {
+    } else if (compress && o.settings.deflate != null) {
       // Compress the data
-      final newData = Uint8List.fromList(o.deflate!(data));
+      final newData = Uint8List.fromList(o.settings.deflate!(data));
       if (newData.lengthInBytes < data.lengthInBytes) {
         _values['/Filter'] = const PdfName('/FlateDecode');
         _data = newData;
@@ -87,8 +87,8 @@ class PdfDictStream extends PdfDict<PdfDataType> {
       }
     }
 
-    if (encrypt && o.encryptCallback != null) {
-      _data = o.encryptCallback!(_data, o);
+    if (encrypt && o.settings.encryptCallback != null) {
+      _data = o.settings.encryptCallback!(_data, o);
     }
 
     _values['/Length'] = PdfNum(_data.length);

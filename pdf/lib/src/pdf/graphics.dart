@@ -132,7 +132,7 @@ class PdfGraphics {
   void fillPath({bool evenOdd = false}) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -143,7 +143,7 @@ class PdfGraphics {
     _page.altered = true;
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('fillPath(evenOdd: $evenOdd)');
       }
@@ -155,7 +155,7 @@ class PdfGraphics {
   void strokePath({bool close = false}) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -166,7 +166,7 @@ class PdfGraphics {
     _page.altered = true;
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('strokePath(close: $close)');
       }
@@ -177,7 +177,7 @@ class PdfGraphics {
   /// Close the path with a line
   void closePath() {
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * (_indent));
       }
       return true;
@@ -187,7 +187,7 @@ class PdfGraphics {
     _page.altered = true;
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * (_commentIndent - 2 - _indent));
         _buf.putComment('closePath()');
       }
@@ -200,7 +200,7 @@ class PdfGraphics {
   void clipPath({bool evenOdd = false, bool end = true}) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -210,7 +210,7 @@ class PdfGraphics {
     _buf.putString('W${evenOdd ? '*' : ''}${end ? ' n' : ''} ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('clipPath(evenOdd: $evenOdd, end: $end)');
       }
@@ -223,7 +223,7 @@ class PdfGraphics {
   void fillAndStrokePath({bool evenOdd = false, bool close = false}) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -234,7 +234,7 @@ class PdfGraphics {
     _page.altered = true;
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('fillAndStrokePath(evenOdd:$evenOdd, close:$close)');
       }
@@ -246,7 +246,7 @@ class PdfGraphics {
   void applyShader(PdfShading shader) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -259,7 +259,7 @@ class PdfGraphics {
     _page.altered = true;
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('applyShader(${shader.ref()})');
       }
@@ -276,7 +276,7 @@ class PdfGraphics {
     if (_contextQueue.isNotEmpty) {
       assert(() {
         _indent -= _indentAmount;
-        if (_page.pdfDocument.verbose) {
+        if (_page.pdfDocument.settings.verbose) {
           _buf.putString(' ' * (_indent));
         }
         return true;
@@ -287,7 +287,7 @@ class PdfGraphics {
       _context = _contextQueue.removeLast();
 
       assert(() {
-        if (_page.pdfDocument.verbose) {
+        if (_page.pdfDocument.settings.verbose) {
           _buf.putString(' ' * (_commentIndent - 2 - _indent));
           _buf.putComment('restoreContext()');
         }
@@ -299,7 +299,7 @@ class PdfGraphics {
   /// Save the graphic context
   void saveContext() {
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * (_indent));
       }
       return true;
@@ -307,7 +307,7 @@ class PdfGraphics {
     _buf.putString('q ');
     _contextQueue.addLast(_context.copy());
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * (_commentIndent - 2 - _indent));
         _buf.putComment('saveContext()');
       }
@@ -320,7 +320,7 @@ class PdfGraphics {
   void drawImage(PdfImage img, double x, double y, [double? w, double? h]) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -366,7 +366,7 @@ class PdfGraphics {
     _page.altered = true;
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('drawImage(${img.ref()}, x: $x, y: $y, w: $w, h: $h)');
       }
@@ -403,7 +403,7 @@ class PdfGraphics {
   void drawRect(double x, double y, double w, double h) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -414,7 +414,7 @@ class PdfGraphics {
     _buf.putString(' re ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('drawRect(x: $x, y: $y, w: $w, h: $h)');
       }
@@ -453,7 +453,7 @@ class PdfGraphics {
   }) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -486,7 +486,7 @@ class PdfGraphics {
     }
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment(
             'setFont(${font.ref()}, size: $size, charSpace: $charSpace, wordSpace: $wordSpace, scale: $scale, mode: ${mode.name}, rise: $rise)');
@@ -509,7 +509,7 @@ class PdfGraphics {
     double? rise,
   }) {
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * (_indent));
       }
       return true;
@@ -518,7 +518,7 @@ class PdfGraphics {
     _buf.putString('BT ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * (_commentIndent - 3 - _indent));
         _buf.putComment('beginText()');
         _indent += _indentAmount;
@@ -535,7 +535,7 @@ class PdfGraphics {
 
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -546,7 +546,7 @@ class PdfGraphics {
     _buf.putString(' Td ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('moveCursor($x, $y)');
         o = _buf.offset;
@@ -560,7 +560,7 @@ class PdfGraphics {
     _buf.putString(']TJ ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('drawString("$s")');
         o = _buf.offset;
@@ -573,7 +573,7 @@ class PdfGraphics {
     _buf.putString('ET ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * (_commentIndent - 3 - _indent));
         _buf.putComment('endText()');
       }
@@ -585,7 +585,7 @@ class PdfGraphics {
 
   void reset() {
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * (_indent));
       }
       return true;
@@ -594,7 +594,7 @@ class PdfGraphics {
     _buf.putString('0 Tr ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * (_commentIndent - 5 - _indent));
         _buf.putComment('reset()');
       }
@@ -612,7 +612,7 @@ class PdfGraphics {
   void setFillColor(PdfColor? color) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -630,7 +630,7 @@ class PdfGraphics {
     }
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('setFillColor(${color?.toHex()})');
       }
@@ -642,7 +642,7 @@ class PdfGraphics {
   void setStrokeColor(PdfColor? color) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -660,7 +660,7 @@ class PdfGraphics {
     }
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('setStrokeColor(${color?.toHex()})');
       }
@@ -672,7 +672,7 @@ class PdfGraphics {
   void setFillPattern(PdfPattern pattern) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -684,7 +684,7 @@ class PdfGraphics {
     _buf.putString('/Pattern cs${pattern.name} scn ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('setFillPattern(${pattern.ref()})');
       }
@@ -696,7 +696,7 @@ class PdfGraphics {
   void setStrokePattern(PdfPattern pattern) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -708,7 +708,7 @@ class PdfGraphics {
     _buf.putString('/Pattern CS${pattern.name} SCN ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('setStrokePattern(${pattern.ref()})');
       }
@@ -720,7 +720,7 @@ class PdfGraphics {
   void setGraphicState(PdfGraphicState state) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -731,7 +731,7 @@ class PdfGraphics {
     _buf.putString('$name gs ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('setGraphicState($state)');
       }
@@ -743,7 +743,7 @@ class PdfGraphics {
   void setTransform(Matrix4 t) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -757,7 +757,7 @@ class PdfGraphics {
     _context.ctm.multiply(t);
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         final n = math.max(0, _commentIndent - _buf.offset + o);
         _buf.putString(' ' * n);
         _buf.putComment('setTransform($s)');
@@ -775,7 +775,7 @@ class PdfGraphics {
   void lineTo(double x, double y) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -786,7 +786,7 @@ class PdfGraphics {
     _buf.putString(' l ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('lineTo($x, $y)');
       }
@@ -798,7 +798,7 @@ class PdfGraphics {
   void moveTo(double x, double y) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -809,7 +809,7 @@ class PdfGraphics {
     _buf.putString(' m ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('moveTo($x, $y)');
       }
@@ -824,7 +824,7 @@ class PdfGraphics {
       double x1, double y1, double x2, double y2, double x3, double y3) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -835,7 +835,7 @@ class PdfGraphics {
     _buf.putString(' c ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('curveTo($x1, $y1, $x2, $y2, $x3, $y3)');
       }
@@ -1001,7 +1001,7 @@ class PdfGraphics {
   /// Set line starting and ending cap type
   void setLineCap(PdfLineCap cap) {
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * (_indent));
       }
       return true;
@@ -1010,7 +1010,7 @@ class PdfGraphics {
     _buf.putString('${cap.index} J ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * (_commentIndent - 4 - _indent));
         _buf.putComment('setLineCap(${cap.name})');
       }
@@ -1021,7 +1021,7 @@ class PdfGraphics {
   /// Set line join type
   void setLineJoin(PdfLineJoin join) {
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * (_indent));
       }
       return true;
@@ -1030,7 +1030,7 @@ class PdfGraphics {
     _buf.putString('${join.index} j ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * (_commentIndent - 4 - _indent));
         _buf.putComment('setLineJoin(${join.name})');
       }
@@ -1042,7 +1042,7 @@ class PdfGraphics {
   void setLineWidth(double width) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -1053,7 +1053,7 @@ class PdfGraphics {
     _buf.putString(' w ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('setLineWidth($width)');
       }
@@ -1065,7 +1065,7 @@ class PdfGraphics {
   void setMiterLimit(double limit) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -1077,7 +1077,7 @@ class PdfGraphics {
     _buf.putString(' M ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('setMiterLimit($limit)');
       }
@@ -1092,7 +1092,7 @@ class PdfGraphics {
   void setLineDashPattern([List<num> array = const <num>[], int phase = 0]) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -1103,7 +1103,7 @@ class PdfGraphics {
     _buf.putString(' $phase d ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('setLineDashPattern($array, $phase)');
       }
@@ -1114,7 +1114,7 @@ class PdfGraphics {
   void markContentBegin(PdfName tag) {
     var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         o = _buf.offset;
         _buf.putString(' ' * (_indent));
       }
@@ -1125,7 +1125,7 @@ class PdfGraphics {
     _buf.putString(' BMC ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
         _buf.putComment('markContentBegin($tag)');
       }
@@ -1135,7 +1135,7 @@ class PdfGraphics {
 
   void markContentEnd() {
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * (_indent));
       }
       return true;
@@ -1144,7 +1144,7 @@ class PdfGraphics {
     _buf.putString('EMC ');
 
     assert(() {
-      if (_page.pdfDocument.verbose) {
+      if (_page.pdfDocument.settings.verbose) {
         _buf.putString(' ' * (_commentIndent - 4 - _indent));
         _buf.putComment('markContentEnd()');
       }

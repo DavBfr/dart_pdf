@@ -24,13 +24,15 @@ import 'package:test/test.dart';
 void main() {
   test('Pdf Minimal', () async {
     var objser = 1;
-    const verbose = true;
-    const version = PdfVersion.pdf_1_4;
+
+    const settings = PdfSettings(
+      verbose: true,
+      version: PdfVersion.pdf_1_4,
+    );
 
     final pages = PdfObjectBase(
         objser: objser++,
-        verbose: verbose,
-        version: version,
+        settings: settings,
         params: PdfDict({
           '/Type': const PdfName('/Pages'),
           '/Count': const PdfNum(1),
@@ -38,16 +40,14 @@ void main() {
 
     final content = PdfObjectBase(
         objser: objser++,
-        verbose: verbose,
-        version: version,
+        settings: settings,
         params: PdfDictStream(
           data: latin1.encode('30 811.88976 m 200 641.88976 l S'),
         ));
 
     final page = PdfObjectBase(
         objser: objser++,
-        verbose: verbose,
-        version: version,
+        settings: settings,
         params: PdfDict({
           '/Type': const PdfName('/Page'),
           '/Parent': pages.ref(),
@@ -64,8 +64,7 @@ void main() {
 
     final catalog = PdfObjectBase(
         objser: objser++,
-        verbose: verbose,
-        version: version,
+        settings: settings,
         params: PdfDict({
           '/Type': const PdfName('/Catalog'),
           '/Pages': pages.ref(),

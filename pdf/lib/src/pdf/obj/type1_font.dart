@@ -52,7 +52,7 @@ class PdfType1Font extends PdfFont {
         }()),
         super.create(pdfDocument, subtype: '/Type1') {
     params['/BaseFont'] = PdfName('/$fontName');
-    if (version.index >= PdfVersion.pdf_1_5.index) {
+    if (settings.version.index >= PdfVersion.pdf_1_5.index) {
       params['/FirstChar'] = const PdfNum(0);
       params['/LastChar'] = const PdfNum(256);
       params['/Widths'] = PdfArray.fromNum(widths.map((e) => e * 1000));

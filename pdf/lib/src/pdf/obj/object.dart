@@ -33,6 +33,7 @@ abstract class PdfObject<T extends PdfDataType> extends PdfObjectBase<T> {
           objser: objser ?? pdfDocument.genSerial(),
           objgen: objgen,
           params: params,
+          settings: pdfDocument.settings,
         ) {
     pdfDocument.objects.add(this);
   }
@@ -41,18 +42,6 @@ abstract class PdfObject<T extends PdfDataType> extends PdfObjectBase<T> {
   final PdfDocument pdfDocument;
 
   var inUse = true;
-
-  @override
-  DeflateCallback? get deflate => pdfDocument.deflate;
-
-  @override
-  PdfEncryptCallback? get encryptCallback => pdfDocument.encryption?.encrypt;
-
-  @override
-  bool get verbose => pdfDocument.verbose;
-
-  @override
-  PdfVersion get version => pdfDocument.version;
 
   /// Prepare the object to be written to the stream
   @mustCallSuper

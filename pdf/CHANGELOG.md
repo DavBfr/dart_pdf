@@ -14,6 +14,7 @@
 - Reorganize data types
 - Improve Documents conformity
 - Make PdfXref a PdfIndirect descendent
+- Move Pdf generation settings to PdfSettings
 
 ## 3.9.0
 

@@ -115,7 +115,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
   @override
   void output(PdfObjectBase o, PdfStream s, [int? indent]) {
     String v;
-    switch (o.version) {
+    switch (o.settings.version) {
       case PdfVersion.pdf_1_4:
         v = '1.4';
         break;
@@ -127,7 +127,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
     s.putString('%PDF-$v\n');
     s.putBytes(const <int>[0x25, 0xC2, 0xA5, 0xC2, 0xB1, 0xC3, 0xAB, 0x0A]);
     assert(() {
-      if (o.verbose) {
+      if (o.settings.verbose) {
         setInsertion(s);
         startStopwatch();
         debugFill('Verbose dart_pdf');
@@ -146,7 +146,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
 
     params['/Root'] = o.ref();
 
-    switch (o.version) {
+    switch (o.settings.version) {
       case PdfVersion.pdf_1_4:
         xrefOffset = outputLegacy(o, s);
         break;
@@ -156,7 +156,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
     }
 
     assert(() {
-      if (o.verbose) {
+      if (o.settings.verbose) {
         s.putComment('');
         s.putComment('-' * 78);
         s.putComment('$runtimeType');
@@ -168,7 +168,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
     s.putString('startxref\n$xrefOffset\n%%EOF\n');
 
     assert(() {
-      if (o.verbose) {
+      if (o.settings.verbose) {
         stopStopwatch();
         debugFill(
             'Creation time: ${elapsedStopwatch / Duration.microsecondsPerSecond} seconds');
@@ -195,10 +195,10 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
     final size = _offsets.last.ser + 1;
 
     assert(() {
-      if (o.verbose) {
+      if (o.settings.verbose) {
         s.putComment('');
         s.putComment('-' * 78);
-        s.putComment('$runtimeType ${o.version.name}\n$this');
+        s.putComment('$runtimeType ${o.settings.version.name}\n$this');
       }
       return true;
     }());
@@ -237,14 +237,14 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
 
     // the trailer object
     assert(() {
-      if (o.verbose) {
+      if (o.settings.verbose) {
         s.putComment('');
       }
       return true;
     }());
     s.putString('trailer\n');
     params['/Size'] = PdfNum(size);
-    params.output(o, s, o.verbose ? 0 : null);
+    params.output(o, s, o.settings.verbose ? 0 : null);
     s.putByte(0x0a);
 
     return objOffset;
@@ -304,10 +304,10 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
 
     // Write the object
     assert(() {
-      if (o.verbose) {
+      if (o.settings.verbose) {
         s.putComment('');
         s.putComment('-' * 78);
-        s.putComment('$runtimeType ${o.version.name}\n$this');
+        s.putComment('$runtimeType ${o.settings.version.name}\n$this');
       }
       return true;
     }());
@@ -322,9 +322,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
         encrypt: false,
         values: params.values,
       ),
-      deflate: o.deflate,
-      verbose: o.verbose,
-      version: o.version,
+      settings: o.settings,
     ).output(s);
 
     return objOffset;

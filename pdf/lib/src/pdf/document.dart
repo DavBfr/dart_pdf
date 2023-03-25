@@ -71,11 +71,17 @@ class PdfDocument {
     PdfPageMode pageMode = PdfPageMode.none,
     DeflateCallback? deflate,
     bool compress = true,
-    this.verbose = false,
-    this.version = PdfVersion.pdf_1_5,
-  })  : deflate = compress ? (deflate ?? defaultDeflate) : null,
-        prev = null,
+    bool verbose = false,
+    PdfVersion version = PdfVersion.pdf_1_5,
+  })  : prev = null,
         _objser = 1 {
+    settings = PdfSettings(
+      deflate: compress ? (deflate ?? defaultDeflate) : null,
+      verbose: verbose,
+      version: version,
+      encryptCallback: (input, object) =>
+          encryption?.encrypt(input, object) ?? input,
+    );
     // create the catalog
     catalog = PdfCatalog(this, PdfPageList(this), pageMode: pageMode);
   }
@@ -84,10 +90,16 @@ class PdfDocument {
     this.prev, {
     DeflateCallback? deflate,
     bool compress = true,
-    this.verbose = false,
-  })  : deflate = compress ? (deflate ?? defaultDeflate) : null,
-        _objser = prev!.size,
-        version = prev.version {
+    bool verbose = false,
+  }) : _objser = prev!.size {
+    settings = PdfSettings(
+      deflate: compress ? (deflate ?? defaultDeflate) : null,
+      verbose: verbose,
+      version: prev!.version,
+      encryptCallback: (input, object) =>
+          encryption?.encrypt(input, object) ?? input,
+    );
+
     // Import the existing document
     prev!.mergeDocument(this);
   }
@@ -105,8 +117,12 @@ class PdfDocument {
   /// This is the Catalog object, which is required by each Pdf Document
   late final PdfCatalog catalog;
 
+  /// PDF generation settings
+  late final PdfSettings settings;
+
   /// PDF version to generate
-  final PdfVersion version;
+  @Deprecated('Use settings.version')
+  PdfVersion get version => settings.version;
 
   /// This is the info object. Although this is an optional object, we
   /// include it.
@@ -129,7 +145,8 @@ class PdfDocument {
   /// Callback to compress the stream in the pdf file.
   /// Use `deflate: zlib.encode` if using dart:io
   /// No compression by default
-  final DeflateCallback? deflate;
+  @Deprecated('Use settings.deflate')
+  DeflateCallback? get deflate => settings.deflate;
 
   /// Object used to encrypt the document
   PdfEncryption? encryption;
@@ -148,10 +165,12 @@ class PdfDocument {
 
   Uint8List? _documentID;
 
-  bool get compress => deflate != null;
+  @Deprecated('Use settings.compress')
+  bool get compress => settings.deflate != null;
 
   /// Output a PDF document with comments and formatted data
-  final bool verbose;
+  @Deprecated('Use settings.verbose')
+  bool get verbose => settings.verbose;
 
   /// Generates the document ID
   Uint8List get documentID {

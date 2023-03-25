@@ -184,11 +184,11 @@ class PdfString extends PdfDataType {
 
   @override
   void output(PdfObjectBase o, PdfStream s, [int? indent]) {
-    if (!encrypted || o.encryptCallback == null) {
+    if (!encrypted || o.settings.encryptCallback == null) {
       return _output(s, value);
     }
 
-    final enc = o.encryptCallback!(value, o);
+    final enc = o.settings.encryptCallback!(value, o);
     _output(s, enc);
   }
 
