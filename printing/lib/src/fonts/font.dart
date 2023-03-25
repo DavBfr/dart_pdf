@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' as services;
 import 'package:pdf/widgets.dart';
 
 import '../cache.dart';
@@ -40,12 +40,12 @@ class DownloadableFont {
     bool protect = false,
     Map<String, String>? headers,
     String assetPrefix = 'google_fonts/',
-    AssetBundle? bundle,
+    services.AssetBundle? bundle,
     bool cache = true,
   }) async {
     final asset = '$assetPrefix$name.ttf';
-    if (await manifest.AssetManifest.contains(asset)) {
-      bundle ??= rootBundle;
+    if (await AssetManifest.contains(asset)) {
+      bundle ??= services.rootBundle;
       final data = await bundle.load(asset);
       return TtfFont(
         data,
