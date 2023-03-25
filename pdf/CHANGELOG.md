@@ -13,6 +13,7 @@
 - Fix Page Content
 - Reorganize data types
 - Improve Documents conformity
+- Make PdfXref a PdfIndirect descendent
 
 ## 3.9.0
 

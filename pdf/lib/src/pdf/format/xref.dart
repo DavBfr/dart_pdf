@@ -31,18 +31,15 @@ import 'stream.dart';
 enum PdfCrossRefEntryType { free, inUse, compressed }
 
 /// Cross-reference for a Pdf Object
-class PdfXref {
+class PdfXref extends PdfIndirect {
   /// Creates a cross-reference for a Pdf Object
   const PdfXref(
-    this.id,
+    int ser,
     this.offset, {
-    this.generation = 0,
+    int gen = 0,
     this.object,
     this.type = PdfCrossRefEntryType.inUse,
-  });
-
-  /// The id of a Pdf Object
-  final int id;
+  }) : super(ser, gen);
 
   /// The offset within the Pdf file
   final int offset;
@@ -50,14 +47,11 @@ class PdfXref {
   /// The object ID containing this compressed object
   final int? object;
 
-  /// The generation of the object, usually 0
-  final int generation;
-
   final PdfCrossRefEntryType type;
 
   /// The xref in the format of the xref section in the Pdf file
   String _legacyRef() {
-    return '${offset.toString().padLeft(10, '0')} ${generation.toString().padLeft(5, '0')}${type == PdfCrossRefEntryType.inUse ? ' n ' : ' f '}';
+    return '${offset.toString().padLeft(10, '0')} ${gen.toString().padLeft(5, '0')}${type == PdfCrossRefEntryType.inUse ? ' n ' : ' f '}';
   }
 
   PdfIndirect? get container => object == null ? null : PdfIndirect(object!, 0);
@@ -75,7 +69,7 @@ class PdfXref {
 
     setVal(w[0], type == PdfCrossRefEntryType.inUse ? 1 : 0);
     setVal(w[1], offset);
-    setVal(w[2], generation);
+    setVal(w[2], gen);
 
     return ofs;
   }
@@ -90,7 +84,7 @@ class PdfXref {
   }
 
   @override
-  String toString() => '$id $generation obj ${type.name} $offset';
+  String toString() => '$ser $gen obj ${type.name} $offset';
 
   @override
   int get hashCode => offset;
@@ -145,7 +139,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
 
     for (final ob in objects) {
       final offset = ob.output(s);
-      _offsets.add(PdfXref(ob.objser, offset, generation: ob.objgen));
+      _offsets.add(PdfXref(ob.objser, offset, gen: ob.objgen));
     }
 
     final int xrefOffset;
@@ -197,8 +191,8 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
 
   int outputLegacy(PdfObjectBase o, PdfStream s) {
     // Now scan through the offsets list. They should be in sequence.
-    _offsets.sort((a, b) => a.id.compareTo(b.id));
-    final size = _offsets.last.id + 1;
+    _offsets.sort((a, b) => a.ser.compareTo(b.ser));
+    final size = _offsets.last.ser + 1;
 
     assert(() {
       if (o.verbose) {
@@ -217,7 +211,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
     block.add(const PdfXref(
       0,
       0,
-      generation: 65535,
+      gen: 65535,
       type: PdfCrossRefEntryType.free,
     ));
 
@@ -226,16 +220,16 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
 
     for (final x in _offsets) {
       // check to see if block is in range
-      if (x.id != (lastId + 1)) {
+      if (x.ser != (lastId + 1)) {
         // no, so write this block, and reset
         _writeBlock(s, firstId, block);
         block.clear();
-        firstId = x.id;
+        firstId = x.ser;
       }
 
       // now add to block
       block.add(x);
-      lastId = x.id;
+      lastId = x.ser;
     }
 
     // now write the last block
@@ -261,10 +255,10 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
     final offset = s.offset;
 
     // Sort all references
-    _offsets.sort((a, b) => a.id.compareTo(b.id));
+    _offsets.sort((a, b) => a.ser.compareTo(b.ser));
 
     // Write this object too
-    final id = _offsets.last.id + 1;
+    final id = _offsets.last.ser + 1;
     final size = id + 1;
     _offsets.add(PdfXref(id, offset));
 
@@ -280,13 +274,13 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
 
     for (final x in _offsets) {
       // check to see if block is in range
-      if (x.id != (lastId + 1)) {
+      if (x.ser != (lastId + 1)) {
         // no, so store this block, and reset
         blocks.add(lastId - firstId + 1);
-        firstId = x.id;
+        firstId = x.ser;
         blocks.add(firstId);
       }
-      lastId = x.id;
+      lastId = x.ser;
     }
     blocks.add(lastId - firstId + 1);
 
