@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.10.1
+
+- Fix web debug build
+
 ## 3.10.0
 
 - Apply BoxShape and BorderRadius to selected Checkbox [Joseph Grabinger]

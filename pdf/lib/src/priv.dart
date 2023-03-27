@@ -23,7 +23,7 @@ export 'pdf/format/dict.dart';
 export 'pdf/format/dict_stream.dart';
 export 'pdf/format/indirect.dart';
 export 'pdf/format/name.dart';
-export 'pdf/format/null.dart';
+export 'pdf/format/null_value.dart';
 export 'pdf/format/num.dart';
 export 'pdf/format/object_base.dart' hide DeflateCallback, PdfVersion;
 export 'pdf/format/stream.dart';

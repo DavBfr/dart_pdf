@@ -20,7 +20,7 @@ import 'array.dart';
 import 'base.dart';
 import 'bool.dart';
 import 'indirect.dart';
-import 'null.dart';
+import 'null_value.dart';
 import 'num.dart';
 import 'object_base.dart';
 import 'stream.dart';
