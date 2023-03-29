@@ -17,12 +17,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/args.dart';
+
 String _capitalize(String s) {
   if (s.isEmpty) return s;
   return '${s[0].toUpperCase()}${s.substring(1)}';
 }
 
-String _uncapitalize(String s) {
+String _uncapitalized(String s) {
   if (s.isEmpty) return s;
   return '${s[0].toLowerCase()}${s.substring(1)}';
 }
@@ -43,7 +45,7 @@ class FontDesc {
   final String name;
 
   String get dartFamily =>
-      _uncapitalize(family == null ? key : family!.replaceAll(' ', ''));
+      _uncapitalized(family == null ? key : family!.replaceAll(' ', ''));
 
   String get fontDartName => dartFamily + (sub ?? '');
 
@@ -52,7 +54,7 @@ class FontDesc {
 
 Iterable<FontDesc> getFonts(Map m) sync* {
   for (final f in m['items']) {
-    final family = _uncapitalize(f['family'].replaceAll(' ', ''));
+    final family = _uncapitalized(f['family'].replaceAll(' ', ''));
 
     for (final s in f['files'].entries) {
       var sub = _capitalize(s.key);
@@ -103,13 +105,30 @@ Iterable<FontDesc> getFonts(Map m) sync* {
 }
 
 void main(List<String> args) async {
+  final parser = ArgParser();
+  parser.addOption(
+    'key',
+    abbr: 'k',
+    mandatory: true,
+    help:
+        'Google API key, can be generated here: https://console.cloud.google.com/apis/credentials',
+  );
+  final ArgResults results;
+  try {
+    results = parser.parse(args);
+  } catch (e) {
+    print(parser.usage);
+    print(e);
+    return;
+  }
+
   final f = File('fonts.json');
   final d = StringBuffer();
 
   if (f.existsSync()) {
     d.write(await f.readAsString());
   } else {
-    final key = args[0];
+    final key = results['key'];
     final http = HttpClient();
     print('Downloading...');
     final q = await http.getUrl(Uri.parse(
