@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.10.4
+
+- Update Google Fonts
+
 ## 5.10.3
 
 - Check if widget is mounted before setState [asaarnak]
