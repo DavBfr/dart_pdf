@@ -4529,6 +4529,14 @@ import 'font.dart';
 /// - ubuntuMonoBoldItalic (Ubuntu Mono 700italic)
 /// - uchenRegular (Uchen regular)
 /// - ultraRegular (Ultra regular)
+/// - unboundedExtraLight (Unbounded ExtraLight 200)
+/// - unboundedLight (Unbounded Light 300)
+/// - unboundedRegular (Unbounded Regular 400)
+/// - unboundedMedium (Unbounded Medium 500)
+/// - unboundedSemiBold (Unbounded SemiBold 600)
+/// - unboundedBold (Unbounded Bold 700)
+/// - unboundedExtraBold (Unbounded ExtraBold 800)
+/// - unboundedBlack (Unbounded Black 900)
 /// - uncialAntiquaRegular (Uncial Antiqua regular)
 /// - underdogRegular (Underdog regular)
 /// - unicaOneRegular (Unica One regular)
@@ -49775,6 +49783,86 @@ class PdfGoogleFonts extends DownloadableFont {
     const font = PdfGoogleFonts._(
       'https://fonts.gstatic.com/s/ultra/v13/zOLy4prXmrtY-tT6yLOD6NxF.ttf',
       'Ultra-Regular',
+    );
+    return font.getFont();
+  }
+
+    /// @nodoc
+  /// Unbounded ExtraLight
+  static Future<Font> unboundedExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/unbounded/v5/Yq6F-LOTXCb04q32xlpat-6uR42XTqtG65jx040.ttf',
+      'Unbounded-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Unbounded Light
+  static Future<Font> unboundedLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/unbounded/v5/Yq6F-LOTXCb04q32xlpat-6uR42XTqtG60bx040.ttf',
+      'Unbounded-Light',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Unbounded Regular
+  static Future<Font> unboundedRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/unbounded/v5/Yq6F-LOTXCb04q32xlpat-6uR42XTqtG6xjx040.ttf',
+      'Unbounded-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Unbounded Medium
+  static Future<Font> unboundedMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/unbounded/v5/Yq6F-LOTXCb04q32xlpat-6uR42XTqtG6yrx040.ttf',
+      'Unbounded-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Unbounded SemiBold
+  static Future<Font> unboundedSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/unbounded/v5/Yq6F-LOTXCb04q32xlpat-6uR42XTqtG68b2040.ttf',
+      'Unbounded-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Unbounded Bold
+  static Future<Font> unboundedBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/unbounded/v5/Yq6F-LOTXCb04q32xlpat-6uR42XTqtG6__2040.ttf',
+      'Unbounded-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Unbounded ExtraBold
+  static Future<Font> unboundedExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/unbounded/v5/Yq6F-LOTXCb04q32xlpat-6uR42XTqtG65j2040.ttf',
+      'Unbounded-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Unbounded Black
+  static Future<Font> unboundedBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/unbounded/v5/Yq6F-LOTXCb04q32xlpat-6uR42XTqtG67H2040.ttf',
+      'Unbounded-Black',
     );
     return font.getFont();
   }
