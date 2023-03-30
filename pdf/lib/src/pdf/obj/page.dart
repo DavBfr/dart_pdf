@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
+import '../format/array.dart';
+import '../format/indirect.dart';
+import '../format/num.dart';
 import '../graphics.dart';
 import '../page_format.dart';
 import 'annotation.dart';
 import 'graphic_stream.dart';
+import 'object.dart';
 import 'object_dict.dart';
 import 'object_stream.dart';
 
@@ -64,10 +67,12 @@ class PdfPage extends PdfObjectDict with PdfGraphicStream {
   PdfPageRotation rotate;
 
   /// This holds the contents of the page.
-  final contents = <PdfObjectStream>[];
+  final contents = <PdfObject>[];
 
   /// This holds any Annotations contained within this page.
   final annotations = <PdfAnnot>[];
+
+  final _contentGraphics = <PdfObject, PdfGraphics>{};
 
   /// This returns a [PdfGraphics] object, which can then be used to render
   /// on to this page. If a previous [PdfGraphics] object was used, this object
@@ -76,6 +81,7 @@ class PdfPage extends PdfObjectDict with PdfGraphicStream {
   PdfGraphics getGraphics() {
     final stream = PdfObjectStream(pdfDocument);
     final g = PdfGraphics(this, stream.buf);
+    _contentGraphics[stream] = g;
     contents.add(stream);
     return g;
   }
@@ -100,8 +106,15 @@ class PdfPage extends PdfObjectDict with PdfGraphicStream {
     params['/MediaBox'] =
         PdfArray.fromNum(<double>[0, 0, pageFormat.width, pageFormat.height]);
 
+    for (final content in contents) {
+      if (!_contentGraphics[content]!.altered) {
+        content.inUse = false;
+      }
+    }
+
     // The graphic operations to draw the page
-    final contentList = PdfArray.fromObjects(contents);
+    final contentList =
+        PdfArray.fromObjects(contents.where((e) => e.inUse).toList());
 
     if (params.containsKey('/Contents')) {
       final prevContent = params['/Contents']!;
@@ -117,16 +130,17 @@ class PdfPage extends PdfObjectDict with PdfGraphicStream {
 
     if (contentList.values.length == 1) {
       params['/Contents'] = contentList.values.first;
-    } else if (contents.isNotEmpty) {
+    } else if (contentList.isNotEmpty) {
       params['/Contents'] = contentList;
     }
 
     // The /Annots object
     if (annotations.isNotEmpty) {
       if (params.containsKey('/Annots')) {
-        final annotsList = params['/Annots'];
-        if (annotsList is PdfArray) {
-          annotsList.values.addAll(PdfArray.fromObjects(annotations).values);
+        final annotationList = params['/Annots'];
+        if (annotationList is PdfArray) {
+          annotationList.values
+              .addAll(PdfArray.fromObjects(annotations).values);
         }
       } else {
         params['/Annots'] = PdfArray.fromObjects(annotations);

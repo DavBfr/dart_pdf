@@ -1,5 +1,26 @@
 # Changelog
 
+## 3.10.1
+
+- Fix web debug build
+
+## 3.10.0
+
+- Apply BoxShape and BorderRadius to selected Checkbox [Joseph Grabinger]
+- Fix Color.toHex()
+- Improve Annotations placement
+- Improve documentation strings
+- Improve verbose output
+- Import already defined form
+- Add support for deleted objects
+- Draw page content only if not empty
+- Fix Page Content
+- Reorganize data types
+- Improve Documents conformity
+- Make PdfXref a PdfIndirect descendent
+- Move Pdf generation settings to PdfSettings
+- Improve PdfXrefTable output
+
 ## 3.9.0
 
 - Improve TTF Writer compatibility

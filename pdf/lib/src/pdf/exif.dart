@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// ignore_for_file: constant_identifier_names
+
 import 'dart:convert';
 import 'dart:typed_data';
 

@@ -18,9 +18,11 @@ import 'dart:typed_data';
 
 import 'package:image/image.dart' as im;
 
-import '../data_types.dart';
 import '../document.dart';
 import '../exif.dart';
+import '../format/indirect.dart';
+import '../format/name.dart';
+import '../format/num.dart';
 import '../raster.dart';
 import 'xobject.dart';
 

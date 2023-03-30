@@ -14,9 +14,29 @@
  * limitations under the License.
  */
 
-import 'package:archive/archive.dart';
+import 'base.dart';
+import 'object_base.dart';
+import 'stream.dart';
 
-import '../format/object_base.dart';
+class PdfBool extends PdfDataType {
+  const PdfBool(this.value);
 
-/// Zip compression function
-DeflateCallback defaultDeflate = const ZLibEncoder().encode;
+  final bool value;
+
+  @override
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
+    s.putString(value ? 'true' : 'false');
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is PdfBool) {
+      return value == other.value;
+    }
+
+    return false;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
+}

@@ -248,9 +248,9 @@ svg: $(patsubst %,ref/svg/%.svg,$(SVG))
 
 ref: svg
 	mkdir -p ref
-	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/pdf/pdfs/PDF32000_2008.pdf'
-	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/pdf/adobe_supplement_iso32000.pdf'
-	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_reference_1-7.pdf'
+	cd $@; curl -OL 'https://ia801003.us.archive.org/5/items/pdf320002008/PDF32000_2008.pdf'
+	cd $@; curl -OL 'https://www.adobe.com/content/dam/cc1/en/devnet/pdf/pdfs/adobe_supplement_iso32000_1.pdf'
+	cd $@; curl -OL 'https://ia801001.us.archive.org/1/items/pdf1.7/pdf_reference_1-7.pdf'
 
 gh-social: all
 	cd test; $(DART_BIN) --enable-asserts github_social_preview.dart

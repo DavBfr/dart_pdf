@@ -16,67 +16,36 @@
 
 import 'package:meta/meta.dart';
 
-import '../data_types.dart';
 import '../document.dart';
-import '../stream.dart';
-import 'diagnostic.dart';
+import '../format/base.dart';
+import '../format/object_base.dart';
 
 /// Base Object used in the PDF file
-abstract class PdfObject<T extends PdfDataType> with PdfDiagnostic {
+abstract class PdfObject<T extends PdfDataType> extends PdfObjectBase<T> {
   /// This is usually called by extensors to this class, and sets the
   /// Pdf Object Type
   PdfObject(
     this.pdfDocument, {
-    required this.params,
-    this.objgen = 0,
+    required T params,
+    int objgen = 0,
     int? objser,
-  }) : objser = objser ?? pdfDocument.genSerial() {
+  }) : super(
+          objser: objser ?? pdfDocument.genSerial(),
+          objgen: objgen,
+          params: params,
+          settings: pdfDocument.settings,
+        ) {
     pdfDocument.objects.add(this);
   }
-
-  /// This is the object parameters.
-  final T params;
-
-  /// This is the unique serial number for this object.
-  final int objser;
-
-  /// This is the generation number for this object.
-  final int objgen;
 
   /// This allows any Pdf object to refer to the document being constructed.
   final PdfDocument pdfDocument;
 
-  /// Writes the object to the output stream.
-  void write(PdfStream os) {
-    prepare();
-    _writeStart(os);
-    writeContent(os);
-    _writeEnd(os);
-  }
+  var inUse = true;
 
   /// Prepare the object to be written to the stream
   @mustCallSuper
   void prepare() {}
-
-  /// The write method should call this before writing anything to the
-  /// OutputStream. This will send the standard header for each object.
-  void _writeStart(PdfStream os) {
-    os.putString('$objser $objgen obj\n');
-  }
-
-  void writeContent(PdfStream os) {
-    params.output(os, pdfDocument.verbose ? 0 : null);
-    os.putByte(0x0a);
-  }
-
-  /// The write method should call this after writing anything to the
-  /// OutputStream. This will send the standard footer for each object.
-  void _writeEnd(PdfStream os) {
-    os.putString('endobj\n');
-  }
-
-  /// Returns the unique serial number in Pdf format
-  PdfIndirect ref() => PdfIndirect(objser, objgen);
 
   @override
   String toString() => '$runtimeType $params';

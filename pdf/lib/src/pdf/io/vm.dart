@@ -16,7 +16,7 @@
 
 import 'dart:io';
 
-import '../document.dart';
+import '../format/object_base.dart';
 
 /// Zip compression function
 DeflateCallback defaultDeflate = zlib.encode;

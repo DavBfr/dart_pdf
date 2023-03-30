@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
+import '../format/array.dart';
 import 'object.dart';
 
 /// An array object

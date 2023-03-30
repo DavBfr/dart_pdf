@@ -66,13 +66,13 @@ void main() {
     final font2 = PdfTtfFont(pdf, data.buffer.asByteData());
     const s = 'Hello World!';
     final r = font2.stringMetrics(s);
-    const FS = 20.0;
+    const fs = 20.0;
     g.setColor(const PdfColor(0, 1, 1));
     g.drawRect(
-        50.0 + r.left * FS, 30.0 + r.top * FS, r.width * FS, r.height * FS);
+        50.0 + r.left * fs, 30.0 + r.top * fs, r.width * fs, r.height * fs);
     g.fillPath();
     g.setColor(const PdfColor(0.3, 0.3, 0.3));
-    g.drawString(font2, FS, s, 50, 30);
+    g.drawString(font2, fs, s, 50, 30);
 
     g.setColor(const PdfColor(1, 0, 0));
     g.drawString(font2, 20, 'Hé (Olà)', 50, 10);

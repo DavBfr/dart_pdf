@@ -16,9 +16,9 @@
 
 import 'dart:typed_data';
 
-import '../data_types.dart';
 import '../document.dart';
-import '../stream.dart';
+import '../format/dict.dart';
+import '../format/stream.dart';
 import 'object.dart';
 import 'object_dict.dart';
 import 'object_stream.dart';
@@ -82,12 +82,13 @@ class PdfSignature extends PdfObjectDict {
   int? _offsetEnd;
 
   @override
-  void write(PdfStream os) {
+  int output(PdfStream s) {
     value.preSign(this, params);
 
-    _offsetStart = os.offset + '$objser $objgen obj\n'.length;
-    super.write(os);
-    _offsetEnd = os.offset;
+    final offset = super.output(s);
+    _offsetStart = offset + '$objser $objgen obj\n'.length;
+    _offsetEnd = s.offset;
+    return offset;
   }
 
   Future<void> writeSignature(PdfStream os) async {

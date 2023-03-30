@@ -141,9 +141,8 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         }
 
         return currentSize!.height
-       
     }
-    
+
     func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool) {
         currentSize = size
         dynamic = dyn

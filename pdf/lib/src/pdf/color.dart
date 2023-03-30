@@ -153,8 +153,8 @@ class PdfColor {
   /// Get an Hexadecimal representation of this color
   String toHex() {
     final i = toInt();
-    final rgb = (i & 0xffffff).toRadixString(16);
-    final a = ((i & 0xff000000) >> 24).toRadixString(16);
+    final rgb = (i & 0xffffff).toRadixString(16).padLeft(6, '0');
+    final a = ((i & 0xff000000) >> 24).toRadixString(16).padLeft(2, '0');
     return '#$rgb$a';
   }
 

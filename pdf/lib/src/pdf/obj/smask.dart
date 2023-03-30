@@ -16,8 +16,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-import '../data_types.dart';
 import '../document.dart';
+import '../format/array.dart';
+import '../format/bool.dart';
+import '../format/dict.dart';
+import '../format/name.dart';
 import '../graphics.dart';
 import '../rect.dart';
 import 'function.dart';

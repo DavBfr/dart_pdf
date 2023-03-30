@@ -17,6 +17,7 @@
 import 'dart:typed_data';
 
 import 'document.dart';
+import 'format/object_base.dart';
 
 /// Base class for loading an existing PDF document.
 abstract class PdfDocumentParserBase {

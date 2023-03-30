@@ -15,8 +15,11 @@
  */
 
 import '../color.dart';
-import '../data_types.dart';
 import '../document.dart';
+import '../format/array.dart';
+import '../format/name.dart';
+import '../format/num.dart';
+import '../format/string.dart';
 import '../rect.dart';
 import 'object_dict.dart';
 import 'page.dart';
@@ -122,10 +125,10 @@ class PdfOutline extends PdfObjectDict {
 
     // These are for kids only
     if (parent != null) {
-      params['/Title'] = PdfSecString.fromString(this, title!);
+      params['/Title'] = PdfString.fromString(title!);
 
       if (color != null) {
-        params['/C'] = PdfColorType(color!);
+        params['/C'] = PdfArray.fromColor(color!);
       }
 
       if (style != PdfOutlineStyle.normal) {
@@ -133,7 +136,7 @@ class PdfOutline extends PdfObjectDict {
       }
 
       if (anchor != null) {
-        params['/Dest'] = PdfSecString.fromString(this, anchor!);
+        params['/Dest'] = PdfString.fromString(anchor!);
       } else {
         final dests = PdfArray();
         dests.add(dest!.ref());

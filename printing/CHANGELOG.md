@@ -1,5 +1,18 @@
 # Changelog
 
+## 5.10.4
+
+- Update Google Fonts
+
+## 5.10.3
+
+- Check if widget is mounted before setState [asaarnak]
+
+## 5.10.2
+
+- Fix Flutter 3.9 deprecations
+- Improve podspec files
+
 ## 5.10.1
 
 - Fix loading pdfjs in debug mode
@@ -173,7 +186,7 @@
 ## 5.1.0
 
 - Fix PdfPreview timer dispose [wwl901215]
-- Remove unnecessary _raster call in PdfPreview [yaymalaga]
+- Remove unnecessary \_raster call in PdfPreview [yaymalaga]
 - Added subject, body and email parameters in sharePdf [Deepak]
 - Subject, body and emails parameter to pdf preview [Deepak]
 

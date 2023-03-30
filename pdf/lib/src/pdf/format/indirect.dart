@@ -14,9 +14,31 @@
  * limitations under the License.
  */
 
-import 'package:archive/archive.dart';
+import 'base.dart';
+import 'object_base.dart';
+import 'stream.dart';
 
-import '../format/object_base.dart';
+class PdfIndirect extends PdfDataType {
+  const PdfIndirect(this.ser, this.gen);
 
-/// Zip compression function
-DeflateCallback defaultDeflate = const ZLibEncoder().encode;
+  final int ser;
+
+  final int gen;
+
+  @override
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
+    s.putString('$ser $gen R');
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is PdfIndirect) {
+      return ser == other.ser && gen == other.gen;
+    }
+
+    return false;
+  }
+
+  @override
+  int get hashCode => ser.hashCode + gen.hashCode;
+}

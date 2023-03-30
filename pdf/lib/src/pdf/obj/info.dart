@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
+import '../format/string.dart';
 import 'object_dict.dart';
 
 /// Information object
@@ -30,28 +30,27 @@ class PdfInfo extends PdfObjectDict {
       this.producer})
       : super(pdfDocument) {
     if (author != null) {
-      params['/Author'] = PdfSecString.fromString(this, author!);
+      params['/Author'] = PdfString.fromString(author!);
     }
     if (creator != null) {
-      params['/Creator'] = PdfSecString.fromString(this, creator!);
+      params['/Creator'] = PdfString.fromString(creator!);
     }
     if (title != null) {
-      params['/Title'] = PdfSecString.fromString(this, title!);
+      params['/Title'] = PdfString.fromString(title!);
     }
     if (subject != null) {
-      params['/Subject'] = PdfSecString.fromString(this, subject!);
+      params['/Subject'] = PdfString.fromString(subject!);
     }
     if (keywords != null) {
-      params['/Keywords'] = PdfSecString.fromString(this, keywords!);
+      params['/Keywords'] = PdfString.fromString(keywords!);
     }
     if (producer != null) {
-      params['/Producer'] =
-          PdfSecString.fromString(this, '$producer ($_libraryName)');
+      params['/Producer'] = PdfString.fromString('$producer ($_libraryName)');
     } else {
-      params['/Producer'] = PdfSecString.fromString(this, _libraryName);
+      params['/Producer'] = PdfString.fromString(_libraryName);
     }
 
-    params['/CreationDate'] = PdfSecString.fromDate(this, DateTime.now());
+    params['/CreationDate'] = PdfString.fromDate(DateTime.now());
   }
 
   static const String _libraryName = 'https://github.com/DavBfr/dart_pdf';

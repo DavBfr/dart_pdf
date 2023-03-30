@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
+import '../format/array.dart';
+import '../format/bool.dart';
+import '../format/dict.dart';
+import '../format/name.dart';
 import '../graphic_state.dart';
 import 'font.dart';
 import 'object_dict.dart';
@@ -48,6 +51,10 @@ mixin PdfGraphicStream on PdfObjectDict {
 
   /// The xobjects or other images in the pdf
   final xObjects = <String, PdfXObject>{};
+
+  bool _altered = false;
+  bool get altered => _altered;
+  set altered(bool _) => _altered = true;
 
   /// Add a font to this graphic object
   void addFont(PdfFont font) {
@@ -98,12 +105,14 @@ mixin PdfGraphicStream on PdfObjectDict {
     // This holds any resources for this page
     final resources = PdfDict();
 
-    resources['/ProcSet'] = PdfArray(const <PdfName>[
-      PdfName('/PDF'),
-      PdfName('/Text'),
-      PdfName('/ImageB'),
-      PdfName('/ImageC'),
-    ]);
+    if (altered) {
+      resources['/ProcSet'] = PdfArray(const <PdfName>[
+        PdfName('/PDF'),
+        PdfName('/Text'),
+        PdfName('/ImageB'),
+        PdfName('/ImageC'),
+      ]);
+    }
 
     // fonts
     if (fonts.isNotEmpty) {
@@ -138,15 +147,17 @@ mixin PdfGraphicStream on PdfObjectDict {
       resources['/ExtGState'] = pdfDocument.graphicStates.ref();
     }
 
-    if (params.containsKey('/Resources')) {
-      final res = params['/Resources'];
-      if (res is PdfDict) {
-        res.merge(resources);
-        return;
+    if (resources.isNotEmpty) {
+      if (params.containsKey('/Resources')) {
+        final res = params['/Resources'];
+        if (res is PdfDict) {
+          res.merge(resources);
+          return;
+        }
       }
-    }
 
-    params['/Resources'] = resources;
+      params['/Resources'] = resources;
+    }
   }
 }
 

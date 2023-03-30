@@ -14,9 +14,23 @@
  * limitations under the License.
  */
 
-import 'package:archive/archive.dart';
+import 'base.dart';
+import 'object_base.dart';
+import 'stream.dart';
 
-import '../format/object_base.dart';
+class PdfNull extends PdfDataType {
+  const PdfNull();
 
-/// Zip compression function
-DeflateCallback defaultDeflate = const ZLibEncoder().encode;
+  @override
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
+    s.putString('null');
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PdfNull;
+  }
+
+  @override
+  int get hashCode => null.hashCode;
+}

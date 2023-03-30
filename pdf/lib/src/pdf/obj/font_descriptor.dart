@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
+import '../format/array.dart';
+import '../format/name.dart';
+import '../format/num.dart';
 import 'object_dict.dart';
 import 'object_stream.dart';
 import 'ttffont.dart';

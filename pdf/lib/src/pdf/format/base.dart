@@ -14,29 +14,39 @@
  * limitations under the License.
  */
 
-import '../document.dart';
-import '../format/array.dart';
-import '../format/num.dart';
-import 'object_dict.dart';
-import 'page.dart';
+import 'dart:typed_data';
 
-/// PdfPageList object
-class PdfPageList extends PdfObjectDict {
-  /// This constructs a [PdfPageList] object.
-  PdfPageList(
-    PdfDocument pdfDocument, {
-    int objgen = 0,
-    int? objser,
-  }) : super(pdfDocument, type: '/Pages', objgen: objgen, objser: objser);
+import 'package:meta/meta.dart';
 
-  /// This holds the pages
-  final pages = <PdfPage>[];
+import 'object_base.dart';
+import 'stream.dart';
+
+const kIndentSize = 2;
+
+abstract class PdfDataType {
+  const PdfDataType();
+
+  void output(PdfObjectBase o, PdfStream s, [int? indent]);
+
+  PdfStream _toStream() {
+    final s = PdfStream();
+    output(
+        PdfObjectBase(
+          objser: 0,
+          params: this,
+          settings: const PdfSettings(),
+        ),
+        s);
+    return s;
+  }
 
   @override
-  void prepare() {
-    super.prepare();
+  String toString() {
+    return String.fromCharCodes(_toStream().output());
+  }
 
-    params['/Kids'] = PdfArray.fromObjects(pages);
-    params['/Count'] = PdfNum(pages.length);
+  @visibleForTesting
+  Uint8List toList() {
+    return _toStream().output();
   }
 }

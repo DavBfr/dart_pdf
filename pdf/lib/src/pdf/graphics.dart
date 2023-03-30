@@ -22,7 +22,10 @@ import 'package:path_parsing/path_parsing.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'color.dart';
-import 'data_types.dart';
+import 'format/array.dart';
+import 'format/name.dart';
+import 'format/num.dart';
+import 'format/stream.dart';
 import 'graphic_state.dart';
 import 'obj/font.dart';
 import 'obj/graphic_stream.dart';
@@ -31,21 +34,20 @@ import 'obj/page.dart';
 import 'obj/pattern.dart';
 import 'obj/shading.dart';
 import 'rect.dart';
-import 'stream.dart';
 
 /// Shape to be used at the corners of paths that are stroked
 enum PdfLineJoin {
-  /// The outer edges of the strokes for the two segments shall beextended until they meet at an angle, as in a picture frame. If the segments meet at too sharp an angle (as defined by the miter limit parameter, a bevel join shall be used instead.
+  /// The outer edges of the strokes for the two segments shall be extended until they meet at an angle, as in a picture frame. If the segments meet at too sharp an angle (as defined by the miter limit parameter, a bevel join shall be used instead.
   miter,
 
-  /// An arc of a circle with a diameter equal to the line width shall be drawn around the point where the two segments meet, connecting the outer edges of the strokes for the two segments. This pieslice-shaped figure shall be filled in, producing a rounded corner.
+  /// An arc of a circle with a diameter equal to the line width shall be drawn around the point where the two segments meet, connecting the outer edges of the strokes for the two segments. This pie-slice-shaped figure shall be filled in, producing a rounded corner.
   round,
 
   /// The two segments shall be finished with butt caps and the resulting notch beyond the ends of the segments shall be filled with a triangle.
   bevel
 }
 
-/// Specify the shape that shall be used at the ends of open subpaths
+/// Specify the shape that shall be used at the ends of open sub paths
 /// and dashes, when they are stroked.
 enum PdfLineCap {
   /// The stroke shall be squared off at the endpoint of the path. There shall be no projection beyond the end of the path.
@@ -54,7 +56,7 @@ enum PdfLineCap {
   /// A semicircular arc with a diameter equal to the line width shall be drawn around the endpoint and shall be filled in.
   round,
 
-  /// The stroke shall continue beyond the endpoint of the path for a distance equal to half the line width and shall besquared off.
+  /// The stroke shall continue beyond the endpoint of the path for a distance equal to half the line width and shall be squared off.
   square
 }
 
@@ -107,6 +109,10 @@ class PdfGraphics {
   /// Ellipse 4-spline magic number
   static const double _m4 = 0.551784;
 
+  static const int _commentIndent = 35;
+  static const int _indentAmount = 2;
+  int _indent = _indentAmount;
+
   /// Graphic context
   late _PdfGraphicsContext _context;
   final Queue<_PdfGraphicsContext> _contextQueue = Queue<_PdfGraphicsContext>();
@@ -119,81 +125,146 @@ class PdfGraphics {
   /// Default font if none selected
   PdfFont? get defaultFont => _page.getDefaultFont();
 
+  bool get altered => _page.altered;
+
   /// Draw a surface on the previously defined shape
   /// set evenOdd to false to use the nonzero winding number rule to determine the region to fill and to true to use the even-odd rule to determine the region to fill
   void fillPath({bool evenOdd = false}) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('fillPath evenOdd:$evenOdd');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    _buf.putString('f${evenOdd ? '*' : ''}\n');
+    _buf.putString('f${evenOdd ? '*' : ''} ');
+    _page.altered = true;
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('fillPath(evenOdd: $evenOdd)');
+      }
+      return true;
+    }());
   }
 
   /// Draw the contour of the previously defined shape
   void strokePath({bool close = false}) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('strokePath close:$close');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    _buf.putString('${close ? 's' : 'S'}\n');
+    _buf.putString('${close ? 's' : 'S'} ');
+    _page.altered = true;
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('strokePath(close: $close)');
+      }
+      return true;
+    }());
   }
 
   /// Close the path with a line
   void closePath() {
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('closePath');
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    _buf.putString('h\n');
+    _buf.putString('h ');
+    _page.altered = true;
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * (_commentIndent - 2 - _indent));
+        _buf.putComment('closePath()');
+      }
+      return true;
+    }());
   }
 
   /// Create a clipping surface from the previously defined shape,
   /// to prevent any further drawing outside
   void clipPath({bool evenOdd = false, bool end = true}) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('clipPath evenOdd:$evenOdd end:$end');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    _buf.putString('W${evenOdd ? '*' : ''}${end ? ' n' : ''}\n');
+    _buf.putString('W${evenOdd ? '*' : ''}${end ? ' n' : ''} ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('clipPath(evenOdd: $evenOdd, end: $end)');
+      }
+      return true;
+    }());
   }
 
   /// Draw a surface on the previously defined shape and then draw the contour
   /// set evenOdd to false to use the nonzero winding number rule to determine the region to fill and to true to use the even-odd rule to determine the region to fill
   void fillAndStrokePath({bool evenOdd = false, bool close = false}) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('fillAndStrokePath evenOdd:$evenOdd close:$close');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    _buf.putString('${close ? 'b' : 'B'}${evenOdd ? '*' : ''}\n');
+    _buf.putString('${close ? 'b' : 'B'}${evenOdd ? '*' : ''} ');
+    _page.altered = true;
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('fillAndStrokePath(evenOdd:$evenOdd, close:$close)');
+      }
+      return true;
+    }());
   }
 
   /// Apply a shader
   void applyShader(PdfShading shader) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('applyShader');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
     // The shader needs to be registered in the page resources
     _page.addShader(shader);
-    _buf.putString('${shader.name} sh\n');
+    _buf.putString('${shader.name} sh ');
+    _page.altered = true;
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('applyShader(${shader.ref()})');
+      }
+      return true;
+    }());
   }
 
   /// This releases any resources used by this Graphics object. You must use
@@ -202,38 +273,56 @@ class PdfGraphics {
   /// When using [PdfPage], you can create another fresh Graphics instance,
   /// which will draw over this one.
   void restoreContext() {
-    assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('restoreContext');
-      }
-      return true;
-    }());
-
     if (_contextQueue.isNotEmpty) {
+      assert(() {
+        _indent -= _indentAmount;
+        if (_page.pdfDocument.settings.verbose) {
+          _buf.putString(' ' * (_indent));
+        }
+        return true;
+      }());
+
       // restore graphics context
-      _buf.putString('Q\n');
+      _buf.putString('Q ');
       _context = _contextQueue.removeLast();
+
+      assert(() {
+        if (_page.pdfDocument.settings.verbose) {
+          _buf.putString(' ' * (_commentIndent - 2 - _indent));
+          _buf.putComment('restoreContext()');
+        }
+        return true;
+      }());
     }
   }
 
-  /// Save the graphc context
+  /// Save the graphic context
   void saveContext() {
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('saveContext');
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
-
-    _buf.putString('q\n');
+    _buf.putString('q ');
     _contextQueue.addLast(_context.copy());
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * (_commentIndent - 2 - _indent));
+        _buf.putComment('saveContext()');
+      }
+      _indent += _indentAmount;
+      return true;
+    }());
   }
 
   /// Draws an image onto the page.
   void drawImage(PdfImage img, double x, double y, [double? w, double? h]) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('drawImage x:$x y:$y');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
@@ -248,59 +337,54 @@ class PdfGraphics {
     _buf.putString('q ');
     switch (img.orientation) {
       case PdfImageOrientation.topLeft:
-        PdfNumList(<double>[w, 0, 0, h, x, y]).output(_buf);
+        PdfNumList(<double>[w, 0, 0, h, x, y]).output(_page, _buf);
         break;
       case PdfImageOrientation.topRight:
-        PdfNumList(<double>[-w, 0, 0, h, w + x, y]).output(_buf);
+        PdfNumList(<double>[-w, 0, 0, h, w + x, y]).output(_page, _buf);
         break;
       case PdfImageOrientation.bottomRight:
-        PdfNumList(<double>[-w, 0, 0, -h, w + x, h + y]).output(_buf);
+        PdfNumList(<double>[-w, 0, 0, -h, w + x, h + y]).output(_page, _buf);
         break;
       case PdfImageOrientation.bottomLeft:
-        PdfNumList(<double>[w, 0, 0, -h, x, h + y]).output(_buf);
+        PdfNumList(<double>[w, 0, 0, -h, x, h + y]).output(_page, _buf);
         break;
       case PdfImageOrientation.leftTop:
-        PdfNumList(<double>[0, -h, -w, 0, w + x, h + y]).output(_buf);
+        PdfNumList(<double>[0, -h, -w, 0, w + x, h + y]).output(_page, _buf);
         break;
       case PdfImageOrientation.rightTop:
-        PdfNumList(<double>[0, -h, w, 0, x, h + y]).output(_buf);
+        PdfNumList(<double>[0, -h, w, 0, x, h + y]).output(_page, _buf);
         break;
       case PdfImageOrientation.rightBottom:
-        PdfNumList(<double>[0, h, w, 0, x, y]).output(_buf);
+        PdfNumList(<double>[0, h, w, 0, x, y]).output(_page, _buf);
         break;
       case PdfImageOrientation.leftBottom:
-        PdfNumList(<double>[0, h, -w, 0, w + x, y]).output(_buf);
+        PdfNumList(<double>[0, h, -w, 0, w + x, y]).output(_page, _buf);
         break;
     }
 
-    _buf.putString(' cm ${img.name} Do Q\n');
+    _buf.putString(' cm ${img.name} Do Q ');
+    _page.altered = true;
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('drawImage(${img.ref()}, x: $x, y: $y, w: $w, h: $h)');
+      }
+      return true;
+    }());
   }
 
   /// Draws a line between two coordinates.
   void drawLine(double x1, double y1, double x2, double y2) {
-    assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('drawLine x1:$x1 y1:$y1 x2:$x2 y2:$y2');
-      }
-      return true;
-    }());
-
     moveTo(x1, y1);
     lineTo(x2, y2);
   }
 
   /// Draws an ellipse
   ///
-  /// Use clockwise=false to draw the inside of a donnnut
+  /// Use clockwise=false to draw the inside of a donut
   void drawEllipse(double x, double y, double r1, double r2,
       {bool clockwise = true}) {
-    assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('drawEllipse x:$x y:$y r1:$r1 r2:$r2');
-      }
-      return true;
-    }());
-
     moveTo(x, y - r2);
     if (clockwise) {
       curveTo(x + _m4 * r1, y - r2, x + r1, y - _m4 * r2, x + r1, y);
@@ -316,21 +400,26 @@ class PdfGraphics {
   }
 
   /// Draws a Rectangle
-  void drawRect(
-    double x,
-    double y,
-    double w,
-    double h,
-  ) {
+  void drawRect(double x, double y, double w, double h) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('drawRect x:$x y:$y w:$w h:$h');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    PdfNumList([x, y, w, h]).output(_buf);
-    _buf.putString(' re\n');
+    PdfNumList([x, y, w, h]).output(_page, _buf);
+    _buf.putString(' re ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('drawRect(x: $x, y: $y, w: $w, h: $h)');
+      }
+      return true;
+    }());
   }
 
   /// Draws a Rectangle
@@ -340,13 +429,6 @@ class PdfGraphics {
 
   /// Draws a Rounded Rectangle
   void drawRRect(double x, double y, double w, double h, double rv, double rh) {
-    assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('drawRRect x:$x y:$y w:$w h:$h rv:$rv rh:$rh');
-      }
-      return true;
-    }());
-
     moveTo(x, y + rv);
     curveTo(x, y - _m4 * rv + rv, x - _m4 * rh + rh, y, x + rh, y);
     lineTo(x + w - rh, y);
@@ -366,38 +448,51 @@ class PdfGraphics {
     double? charSpace,
     double? wordSpace,
     double? scale,
-    PdfTextRenderingMode? mode = PdfTextRenderingMode.fill,
+    PdfTextRenderingMode mode = PdfTextRenderingMode.fill,
     double? rise,
   }) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('setFont');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
+    _page.addFont(font);
+
     _buf.putString('${font.name} ');
-    PdfNum(size).output(_buf);
-    _buf.putString(' Tf\n');
+    PdfNum(size).output(_page, _buf);
+    _buf.putString(' Tf ');
     if (charSpace != null) {
-      PdfNum(charSpace).output(_buf);
-      _buf.putString(' Tc\n');
+      PdfNum(charSpace).output(_page, _buf);
+      _buf.putString(' Tc ');
     }
     if (wordSpace != null) {
-      PdfNum(wordSpace).output(_buf);
-      _buf.putString(' Tw\n');
+      PdfNum(wordSpace).output(_page, _buf);
+      _buf.putString(' Tw ');
     }
     if (scale != null) {
-      PdfNum(scale * 100).output(_buf);
-      _buf.putString(' Tz\n');
+      PdfNum(scale * 100).output(_page, _buf);
+      _buf.putString(' Tz ');
     }
     if (rise != null) {
-      PdfNum(rise).output(_buf);
-      _buf.putString(' Ts\n');
+      PdfNum(rise).output(_page, _buf);
+      _buf.putString(' Ts ');
     }
     if (mode != PdfTextRenderingMode.fill) {
-      _buf.putString('${mode!.index} Tr\n');
+      _buf.putString('${mode.index} Tr ');
     }
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment(
+            'setFont(${font.ref()}, size: $size, charSpace: $charSpace, wordSpace: $wordSpace, scale: $scale, mode: ${mode.name}, rise: $rise)');
+      }
+      return true;
+    }());
   }
 
   /// This draws a string.
@@ -407,44 +502,104 @@ class PdfGraphics {
     String s,
     double x,
     double y, {
-    double charSpace = 0,
-    double wordSpace = 0,
-    double scale = 1,
+    double? charSpace,
+    double? wordSpace,
+    double? scale,
     PdfTextRenderingMode mode = PdfTextRenderingMode.fill,
-    double rise = 0,
+    double? rise,
   }) {
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('drawString x:$x y:$y size:$size "$s"');
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    _page.addFont(font);
-
     _buf.putString('BT ');
-    PdfNumList([x, y]).output(_buf);
-    _buf.putString(' Td ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * (_commentIndent - 3 - _indent));
+        _buf.putComment('beginText()');
+        _indent += _indentAmount;
+      }
+      return true;
+    }());
+
     setFont(font, size,
         charSpace: charSpace,
         mode: mode,
         rise: rise,
         scale: scale,
         wordSpace: wordSpace);
-    _buf.putString('[');
-    font.putText(_buf, s);
-    _buf.putString(']TJ ET\n');
-  }
 
-  void reset() {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('reset');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    _buf.putString('0 Tr\n');
+    PdfNumList([x, y]).output(_page, _buf);
+    _buf.putString(' Td ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('moveCursor($x, $y)');
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
+      }
+      return true;
+    }());
+
+    _buf.putString('[');
+    font.putText(_buf, s);
+    _buf.putString(']TJ ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('drawString("$s")');
+        o = _buf.offset;
+        _indent -= _indentAmount;
+        _buf.putString(' ' * (_indent));
+      }
+      return true;
+    }());
+
+    _buf.putString('ET ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * (_commentIndent - 3 - _indent));
+        _buf.putComment('endText()');
+      }
+      return true;
+    }());
+
+    _page.altered = true;
+  }
+
+  void reset() {
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * (_indent));
+      }
+      return true;
+    }());
+
+    _buf.putString('0 Tr ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * (_commentIndent - 5 - _indent));
+        _buf.putComment('reset()');
+      }
+      return true;
+    }());
   }
 
   /// Sets the color for drawing
@@ -455,96 +610,160 @@ class PdfGraphics {
 
   /// Sets the fill color for drawing
   void setFillColor(PdfColor? color) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('setFillColor ${color?.toHex()}');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
     if (color is PdfColorCmyk) {
       PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
-          .output(_buf);
-      _buf.putString(' k\n');
+          .output(_page, _buf);
+      _buf.putString(' k ');
     } else {
-      PdfNumList(<double>[color!.red, color.green, color.blue]).output(_buf);
-      _buf.putString(' rg\n');
+      PdfNumList(<double>[color!.red, color.green, color.blue])
+          .output(_page, _buf);
+      _buf.putString(' rg ');
     }
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('setFillColor(${color?.toHex()})');
+      }
+      return true;
+    }());
   }
 
   /// Sets the stroke color for drawing
   void setStrokeColor(PdfColor? color) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('setStrokeColor ${color?.toHex()}');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
     if (color is PdfColorCmyk) {
       PdfNumList(<double>[color.cyan, color.magenta, color.yellow, color.black])
-          .output(_buf);
-      _buf.putString(' K\n');
+          .output(_page, _buf);
+      _buf.putString(' K ');
     } else {
-      PdfNumList(<double>[color!.red, color.green, color.blue]).output(_buf);
-      _buf.putString(' RG\n');
+      PdfNumList(<double>[color!.red, color.green, color.blue])
+          .output(_page, _buf);
+      _buf.putString(' RG ');
     }
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('setStrokeColor(${color?.toHex()})');
+      }
+      return true;
+    }());
   }
 
   /// Sets the fill pattern for drawing
   void setFillPattern(PdfPattern pattern) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('setFillPattern');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
     // The shader needs to be registered in the page resources
     _page.addPattern(pattern);
-    _buf.putString('/Pattern cs${pattern.name} scn\n');
+    _buf.putString('/Pattern cs${pattern.name} scn ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('setFillPattern(${pattern.ref()})');
+      }
+      return true;
+    }());
   }
 
   /// Sets the stroke pattern for drawing
   void setStrokePattern(PdfPattern pattern) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('setStrokePattern');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
     // The shader needs to be registered in the page resources
     _page.addPattern(pattern);
-    _buf.putString('/Pattern CS${pattern.name} SCN\n');
+    _buf.putString('/Pattern CS${pattern.name} SCN ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('setStrokePattern(${pattern.ref()})');
+      }
+      return true;
+    }());
   }
 
   /// Set the graphic state for drawing
   void setGraphicState(PdfGraphicState state) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('setGraphicState $state');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
     final name = _page.stateName(state);
-    _buf.putString('$name gs\n');
+    _buf.putString('$name gs ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('setGraphicState($state)');
+      }
+      return true;
+    }());
   }
 
   /// Set the transformation Matrix
   void setTransform(Matrix4 t) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('setTransform\n$t');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
     final s = t.storage;
-    PdfNumList(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]).output(_buf);
-    _buf.putString(' cm\n');
+    PdfNumList(<double>[s[0], s[1], s[4], s[5], s[12], s[13]])
+        .output(_page, _buf);
+    _buf.putString(' cm ');
     _context.ctm.multiply(t);
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        final n = math.max(0, _commentIndent - _buf.offset + o);
+        _buf.putString(' ' * n);
+        _buf.putComment('setTransform($s)');
+      }
+      return true;
+    }());
   }
 
   /// Get the transformation Matrix
@@ -554,28 +773,48 @@ class PdfGraphics {
 
   /// This adds a line segment to the current path
   void lineTo(double x, double y) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('lineTo x:$x y:$y');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    PdfNumList([x, y]).output(_buf);
-    _buf.putString(' l\n');
+    PdfNumList([x, y]).output(_page, _buf);
+    _buf.putString(' l ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('lineTo($x, $y)');
+      }
+      return true;
+    }());
   }
 
   /// This moves the current drawing point.
   void moveTo(double x, double y) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('moveTo x:$x y:$y');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    PdfNumList([x, y]).output(_buf);
-    _buf.putString(' m\n');
+    PdfNumList([x, y]).output(_page, _buf);
+    _buf.putString(' m ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('moveTo($x, $y)');
+      }
+      return true;
+    }());
   }
 
   /// Draw a cubic bézier curve from the current point to (x3,y3)
@@ -583,15 +822,25 @@ class PdfGraphics {
   /// and (x2,y2) as the control point at the end of the curve.
   void curveTo(
       double x1, double y1, double x2, double y2, double x3, double y3) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('curveTo x1:$x1 y1:$y1 x2:$x2 y2:$y2 x3:$x3 y3:$y3');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    PdfNumList([x1, y1, x2, y2, x3, y3]).output(_buf);
-    _buf.putString(' c\n');
+    PdfNumList([x1, y1, x2, y2, x3, y3]).output(_page, _buf);
+    _buf.putString(' c ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('curveTo($x1, $y1, $x2, $y2, $x3, $y3)');
+      }
+      return true;
+    }());
   }
 
   double _vectorAngle(double ux, double uy, double vx, double vy) {
@@ -752,52 +1001,88 @@ class PdfGraphics {
   /// Set line starting and ending cap type
   void setLineCap(PdfLineCap cap) {
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('setLineCap $cap');
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    _buf.putString('${cap.index} J\n');
+    _buf.putString('${cap.index} J ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * (_commentIndent - 4 - _indent));
+        _buf.putComment('setLineCap(${cap.name})');
+      }
+      return true;
+    }());
   }
 
   /// Set line join type
   void setLineJoin(PdfLineJoin join) {
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('setLineJoin $join');
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    _buf.putString('${join.index} j\n');
+    _buf.putString('${join.index} j ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * (_commentIndent - 4 - _indent));
+        _buf.putComment('setLineJoin(${join.name})');
+      }
+      return true;
+    }());
   }
 
   /// Set line width
   void setLineWidth(double width) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('setLineWidth $width');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    PdfNum(width).output(_buf);
-    _buf.putString(' w\n');
+    PdfNum(width).output(_page, _buf);
+    _buf.putString(' w ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('setLineWidth($width)');
+      }
+      return true;
+    }());
   }
 
   /// Set line joint miter limit, applies if the
   void setMiterLimit(double limit) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('setMiterLimit $limit');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
     assert(limit >= 1.0);
-    PdfNum(limit).output(_buf);
-    _buf.putString(' M\n');
+    PdfNum(limit).output(_page, _buf);
+    _buf.putString(' M ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('setMiterLimit($limit)');
+      }
+      return true;
+    }());
   }
 
   /// The dash array shall be cycled through, adding up the lengths of dashes and gaps.
@@ -805,38 +1090,66 @@ class PdfGraphics {
   ///
   /// Example: [2 1] will create a dash pattern with 2 on, 1 off, 2 on, 1 off, ...
   void setLineDashPattern([List<num> array = const <num>[], int phase = 0]) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('setLineDashPattern $array phase:$phase');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    PdfArray.fromNum(array).output(_buf);
-    _buf.putString(' $phase d\n');
+    PdfArray.fromNum(array).output(_page, _buf);
+    _buf.putString(' $phase d ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('setLineDashPattern($array, $phase)');
+      }
+      return true;
+    }());
   }
 
   void markContentBegin(PdfName tag) {
+    var o = 0;
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('markContentBegin');
+      if (_page.pdfDocument.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    tag.output(_buf);
-    _buf.putString(' BMC\n');
+    tag.output(_page, _buf);
+    _buf.putString(' BMC ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('markContentBegin($tag)');
+      }
+      return true;
+    }());
   }
 
   void markContentEnd() {
     assert(() {
-      if (_page.pdfDocument.verbose) {
-        _buf.putComment('markContentEnd');
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * (_indent));
       }
       return true;
     }());
 
-    _buf.putString('EMC\n');
+    _buf.putString('EMC ');
+
+    assert(() {
+      if (_page.pdfDocument.settings.verbose) {
+        _buf.putString(' ' * (_commentIndent - 4 - _indent));
+        _buf.putComment('markContentEnd()');
+      }
+      return true;
+    }());
   }
 }
 
@@ -891,8 +1204,8 @@ class _PathBBProxy extends PathProxy {
   @override
   void cubicTo(
       double x1, double y1, double x2, double y2, double x3, double y3) {
-    final tvalues = <double>[];
-    double a, b, c, t, t1, t2, b2ac, sqrtb2ac;
+    final tValues = <double>[];
+    double a, b, c, t, t1, t2, b2ac, sqrtB2ac;
 
     for (var i = 0; i < 2; ++i) {
       if (i == 0) {
@@ -910,7 +1223,7 @@ class _PathBBProxy extends PathProxy {
         }
         t = -c / b;
         if (0 < t && t < 1) {
-          tvalues.add(t);
+          tValues.add(t);
         }
         continue;
       }
@@ -919,23 +1232,23 @@ class _PathBBProxy extends PathProxy {
         if (b2ac.abs() < 1e-12) {
           t = -b / (2 * a);
           if (0 < t && t < 1) {
-            tvalues.add(t);
+            tValues.add(t);
           }
         }
         continue;
       }
-      sqrtb2ac = math.sqrt(b2ac);
-      t1 = (-b + sqrtb2ac) / (2 * a);
+      sqrtB2ac = math.sqrt(b2ac);
+      t1 = (-b + sqrtB2ac) / (2 * a);
       if (0 < t1 && t1 < 1) {
-        tvalues.add(t1);
+        tValues.add(t1);
       }
-      t2 = (-b - sqrtb2ac) / (2 * a);
+      t2 = (-b - sqrtB2ac) / (2 * a);
       if (0 < t2 && t2 < 1) {
-        tvalues.add(t2);
+        tValues.add(t2);
       }
     }
 
-    for (final t in tvalues) {
+    for (final t in tValues) {
       final mt = 1 - t;
       _updateMinMax(
           (mt * mt * mt * _pX) +
