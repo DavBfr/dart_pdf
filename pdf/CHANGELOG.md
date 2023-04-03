@@ -5,6 +5,7 @@
 - Fix Type1 font widths
 - Deprecate PdfArrayObject and PdfObjectDict
 - Improve PdfArray and PdfDict constructors
+- Fix underline on spans [RomanIvn]
 
 ## 3.10.1
 
