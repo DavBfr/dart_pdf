@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.10.2
+
+- Fix Type1 font widths
+
 ## 3.10.1
 
 - Fix web debug build

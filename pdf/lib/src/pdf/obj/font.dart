@@ -47,7 +47,6 @@ abstract class PdfFont extends PdfObjectDict {
       stdHW: 84,
       stdVW: 106,
       isFixedPitch: true,
-      missingWidth: 600,
     );
   }
 
@@ -63,7 +62,6 @@ abstract class PdfFont extends PdfObjectDict {
       stdHW: 51,
       stdVW: 51,
       isFixedPitch: true,
-      missingWidth: 600,
     );
   }
 
@@ -80,7 +78,6 @@ abstract class PdfFont extends PdfObjectDict {
       isFixedPitch: true,
       stdHW: 84,
       stdVW: 106,
-      missingWidth: 600,
     );
   }
 
@@ -97,7 +94,6 @@ abstract class PdfFont extends PdfObjectDict {
       italicAngle: -12,
       stdHW: 51,
       stdVW: 51,
-      missingWidth: 600,
     );
   }
 
@@ -279,9 +275,6 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
 
   /// Spans the distance between the baseline and the lowest descending glyph
   double get descent;
-
-  /// Default width of a glyph
-  static const double defaultGlyphWidth = 0.600;
 
   /// Internal units per
   int get unitsPerEm;
