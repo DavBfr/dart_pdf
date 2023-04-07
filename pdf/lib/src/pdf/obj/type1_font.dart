@@ -64,7 +64,7 @@ class PdfType1Font extends PdfFont {
 
       final fontDescriptor = PdfObject<PdfDict>(
         pdfDocument,
-        params: PdfDict({
+        params: PdfDict.values({
           '/Type': const PdfName('/FontDescriptor'),
           '/FontName': PdfName('/$fontName'),
           '/Flags': PdfNum(32 + (isFixedPitch ? 1 : 0)),

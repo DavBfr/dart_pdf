@@ -45,7 +45,7 @@ class PdfSignature extends PdfObject<PdfDict> {
     List<Uint8List>? ocsp,
   }) : super(
           pdfDocument,
-          params: PdfDict({
+          params: PdfDict.values({
             '/Type': const PdfName('/Sig'),
           }),
         ) {

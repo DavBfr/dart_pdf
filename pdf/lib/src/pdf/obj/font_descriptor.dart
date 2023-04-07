@@ -30,7 +30,7 @@ class PdfFontDescriptor extends PdfObject<PdfDict> {
     this.file,
   ) : super(
           ttfFont.pdfDocument,
-          params: PdfDict({
+          params: PdfDict.values({
             '/Type': const PdfName('/FontDescriptor'),
           }),
         );

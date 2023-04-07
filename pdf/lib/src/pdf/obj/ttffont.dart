@@ -115,7 +115,7 @@ class PdfTtfFont extends PdfFont {
     file.buf.putBytes(data);
     file.params['/Length1'] = PdfNum(data.length);
 
-    final descendantFont = PdfDict({
+    final descendantFont = PdfDict.values({
       '/Type': const PdfName('/Font'),
       '/BaseFont': PdfName('/$fontName'),
       '/FontFile2': file.ref(),
@@ -127,7 +127,7 @@ class PdfTtfFont extends PdfFont {
       '/CIDToGIDMap': const PdfName('/Identity'),
       '/DW': const PdfNum(1000),
       '/Subtype': const PdfName('/CIDFontType2'),
-      '/CIDSystemInfo': PdfDict({
+      '/CIDSystemInfo': PdfDict.values({
         '/Supplement': const PdfNum(0),
         '/Registry': PdfString.fromString('Adobe'),
         '/Ordering': PdfString.fromString('Identity-H'),

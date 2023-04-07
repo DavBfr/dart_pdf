@@ -32,7 +32,7 @@ class PdfInfo extends PdfObject<PdfDict> {
     this.producer,
   }) : super(
           pdfDocument,
-          params: PdfDict({
+          params: PdfDict.values({
             if (author != null) '/Author': PdfString.fromString(author),
             if (creator != null) '/Creator': PdfString.fromString(creator),
             if (title != null) '/Title': PdfString.fromString(title),

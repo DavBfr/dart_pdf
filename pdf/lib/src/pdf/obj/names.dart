@@ -42,7 +42,7 @@ class PdfNames extends PdfObject<PdfDict> {
   }) {
     assert(page.pdfDocument == pdfDocument);
 
-    _dests[name] = PdfDict({
+    _dests[name] = PdfDict.values({
       '/D': PdfArray([
         page.ref(),
         const PdfName('/XYZ'),

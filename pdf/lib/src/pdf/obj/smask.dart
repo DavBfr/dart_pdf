@@ -69,7 +69,7 @@ class PdfSoftMask {
   String toString() => '$runtimeType';
 
   PdfDict output() {
-    final params = PdfDict({
+    final params = PdfDict.values({
       '/S': const PdfName('/Luminosity'),
       '/G': _mask.ref(),
     });

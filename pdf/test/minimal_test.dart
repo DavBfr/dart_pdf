@@ -33,7 +33,7 @@ void main() {
     final pages = PdfObjectBase(
         objser: objser++,
         settings: settings,
-        params: PdfDict({
+        params: PdfDict.values({
           '/Type': const PdfName('/Pages'),
           '/Count': const PdfNum(1),
         }));
@@ -48,11 +48,11 @@ void main() {
     final page = PdfObjectBase(
         objser: objser++,
         settings: settings,
-        params: PdfDict({
+        params: PdfDict.values({
           '/Type': const PdfName('/Page'),
           '/Parent': pages.ref(),
           '/MediaBox': PdfArray.fromNum([0, 0, 595.27559, 841.88976]),
-          '/Resources': PdfDict({
+          '/Resources': PdfDict.values({
             '/ProcSet': PdfArray([
               const PdfName('/PDF'),
             ]),
@@ -65,7 +65,7 @@ void main() {
     final catalog = PdfObjectBase(
         objser: objser++,
         settings: settings,
-        params: PdfDict({
+        params: PdfDict.values({
           '/Type': const PdfName('/Catalog'),
           '/Pages': pages.ref(),
         }));

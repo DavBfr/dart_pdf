@@ -34,7 +34,7 @@ abstract class PdfFont extends PdfObject<PdfDict> {
   PdfFont.create(PdfDocument pdfDocument, {required this.subtype})
       : super(
           pdfDocument,
-          params: PdfDict({
+          params: PdfDict.values({
             '/Type': const PdfName('/Font'),
           }),
         ) {

@@ -25,22 +25,16 @@ import 'object_base.dart';
 import 'stream.dart';
 
 class PdfDictStream extends PdfDict<PdfDataType> {
-  factory PdfDictStream({
+  PdfDictStream({
     Map<String, PdfDataType>? values,
     Uint8List? data,
-    bool isBinary = false,
-    bool encrypt = true,
-    bool compress = true,
-  }) {
-    return PdfDictStream.values(
-      values: values ?? {},
-      data: data ?? Uint8List(0),
-      encrypt: encrypt,
-      compress: compress,
-      isBinary: isBinary,
-    );
-  }
+    this.isBinary = false,
+    this.encrypt = true,
+    this.compress = true,
+  })  : data = data ?? Uint8List(0),
+        super.values(values ?? {});
 
+  @Deprecated('Use PdfDictStream() instead')
   PdfDictStream.values({
     required Map<String, PdfDataType> values,
     required this.data,

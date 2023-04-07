@@ -30,7 +30,7 @@ class PdfObjectStream extends PdfObject<PdfDict> {
     this.isBinary = false,
   }) : super(
           pdfDocument,
-          params: PdfDict({
+          params: PdfDict.values({
             if (type != null) '/Type': PdfName(type),
           }),
         );
@@ -43,7 +43,7 @@ class PdfObjectStream extends PdfObject<PdfDict> {
 
   @override
   void writeContent(PdfStream s) {
-    PdfDictStream.values(
+    PdfDictStream(
       isBinary: isBinary,
       values: params.values,
       data: buf.output(),

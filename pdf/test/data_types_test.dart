@@ -102,7 +102,7 @@ void main() {
     expect(PdfDict().toString(), '<<>>');
 
     expect(
-      PdfDict({
+      PdfDict.values({
         '/Name': const PdfName('/Value'),
         '/Bool': const PdfBool(true),
         '/Num': const PdfNum(42),

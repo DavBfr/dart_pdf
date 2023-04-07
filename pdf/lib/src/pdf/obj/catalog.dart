@@ -38,7 +38,7 @@ class PdfCatalog extends PdfObject<PdfDict> {
     int? objser,
   }) : super(
           pdfDocument,
-          params: PdfDict({
+          params: PdfDict.values({
             '/Type': const PdfName('/Catalog'),
           }),
           objser: objser,
@@ -106,7 +106,7 @@ class PdfCatalog extends PdfObject<PdfDict> {
 
     if (pdfDocument.sign != null) {
       if (pdfDocument.sign!.value.hasMDP) {
-        params['/Perms'] = PdfDict({
+        params['/Perms'] = PdfDict.values({
           '/DocMDP': pdfDocument.sign!.ref(),
         });
       }

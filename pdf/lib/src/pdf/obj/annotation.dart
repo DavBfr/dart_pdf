@@ -106,7 +106,7 @@ class PdfChoiceField extends PdfAnnotWidget {
 class PdfAnnot extends PdfObject<PdfDict> {
   PdfAnnot(this.pdfPage, this.annot)
       : super(pdfPage.pdfDocument,
-            params: PdfDict({
+            params: PdfDict.values({
               '/Type': const PdfName('/Annot'),
             })) {
     pdfPage.annotations.add(this);
@@ -315,7 +315,7 @@ abstract class PdfAnnotBase {
     }
 
     if (_appearances.isNotEmpty) {
-      params['/AP'] = PdfDict(_appearances);
+      params['/AP'] = PdfDict.values(_appearances);
       if (_as != null) {
         params['/AS'] = _as!;
       }
@@ -376,7 +376,7 @@ class PdfAnnotNamedLink extends PdfAnnotBase {
   @override
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
-    params['/A'] = PdfDict(
+    params['/A'] = PdfDict.values(
       {
         '/S': const PdfName('/GoTo'),
         '/D': PdfString.fromString(dest),
@@ -412,7 +412,7 @@ class PdfAnnotUrlLink extends PdfAnnotBase {
   @override
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
-    params['/A'] = PdfDict(
+    params['/A'] = PdfDict.values(
       {
         '/S': const PdfName('/URI'),
         '/URI': PdfString.fromString(url),

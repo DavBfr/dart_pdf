@@ -54,7 +54,7 @@ class PdfPage extends PdfObject<PdfDict> with PdfGraphicStream {
     int? objser,
     int objgen = 0,
   }) : super(pdfDocument,
-            params: PdfDict({
+            params: PdfDict.values({
               '/Type': const PdfName('/Page'),
             }),
             objser: objser,

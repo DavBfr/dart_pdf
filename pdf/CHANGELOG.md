@@ -4,6 +4,7 @@
 
 - Fix Type1 font widths
 - Deprecate PdfArrayObject and PdfObjectDict
+- Improve PdfArray and PdfDict constructors
 
 ## 3.10.1
 

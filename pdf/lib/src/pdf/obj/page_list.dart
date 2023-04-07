@@ -31,7 +31,7 @@ class PdfPageList extends PdfObject<PdfDict> {
     int? objser,
   }) : super(
           pdfDocument,
-          params: PdfDict({
+          params: PdfDict.values({
             '/Type': const PdfName('/Pages'),
           }),
           objgen: objgen,

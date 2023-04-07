@@ -73,7 +73,7 @@ class PdfPageLabel {
       case null:
         s = null;
     }
-    return PdfDict({
+    return PdfDict.values({
       if (s != null) '/S': s,
       if (prefix != null && prefix!.isNotEmpty)
         '/P': PdfString.fromString(prefix!),

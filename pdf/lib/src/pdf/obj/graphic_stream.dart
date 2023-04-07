@@ -136,7 +136,7 @@ mixin PdfGraphicStream on PdfObject<PdfDict> {
 
     if (pdfDocument.hasGraphicStates) {
       // Declare Transparency Group settings
-      params['/Group'] = PdfDict({
+      params['/Group'] = PdfDict.values({
         '/Type': const PdfName('/Group'),
         '/S': const PdfName('/Transparency'),
         '/CS': const PdfName('/DeviceRGB'),

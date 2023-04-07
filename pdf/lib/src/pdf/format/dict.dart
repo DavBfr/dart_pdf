@@ -26,19 +26,13 @@ import 'object_base.dart';
 import 'stream.dart';
 
 class PdfDict<T extends PdfDataType> extends PdfDataType {
-  factory PdfDict([Map<String, T>? values]) {
-    final _values = <String, T>{};
-    if (values != null) {
-      _values.addAll(values);
-    }
-    return PdfDict.values(_values);
-  }
+  PdfDict([Map<String, T>? values]) : values = {if (values != null) ...values};
 
-  const PdfDict.values([this.values = const {}]);
+  PdfDict.values([Map<String, T>? values]) : values = values ?? {};
 
   static PdfDict<PdfIndirect> fromObjectMap(
       Map<String, PdfObjectBase> objects) {
-    return PdfDict(
+    return PdfDict.values(
       objects.map<String, PdfIndirect>(
         (key, value) => MapEntry<String, PdfIndirect>(key, value.ref()),
       ),
@@ -48,6 +42,8 @@ class PdfDict<T extends PdfDataType> extends PdfDataType {
   final Map<String, T> values;
 
   bool get isNotEmpty => values.isNotEmpty;
+
+  bool get isEmpty => values.isEmpty;
 
   operator []=(String k, T v) {
     values[k] = v;
