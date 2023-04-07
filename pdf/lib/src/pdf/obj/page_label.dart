@@ -20,7 +20,7 @@ import '../format/dict.dart';
 import '../format/name.dart';
 import '../format/num.dart';
 import '../format/string.dart';
-import 'object_dict.dart';
+import 'object.dart';
 
 enum PdfPageLabelStyle {
   arabic,
@@ -145,9 +145,10 @@ class PdfPageLabel {
 }
 
 /// Pdf PageLabels object
-class PdfPageLabels extends PdfObjectDict {
+class PdfPageLabels extends PdfObject<PdfDict> {
   /// Constructs a Pdf PageLabels object.
-  PdfPageLabels(PdfDocument pdfDocument) : super(pdfDocument);
+  PdfPageLabels(PdfDocument pdfDocument)
+      : super(pdfDocument, params: PdfDict());
 
   final labels = <int, PdfPageLabel>{};
 

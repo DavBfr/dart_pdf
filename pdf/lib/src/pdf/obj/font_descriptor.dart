@@ -15,24 +15,30 @@
  */
 
 import '../format/array.dart';
+import '../format/dict.dart';
 import '../format/name.dart';
 import '../format/num.dart';
-import 'object_dict.dart';
+import 'object.dart';
 import 'object_stream.dart';
 import 'ttffont.dart';
 
 /// Font descriptor object
-class PdfFontDescriptor extends PdfObjectDict {
+class PdfFontDescriptor extends PdfObject<PdfDict> {
   /// Create a Font descriptor object
   PdfFontDescriptor(
     this.ttfFont,
     this.file,
-  ) : super(ttfFont.pdfDocument, type: '/FontDescriptor');
+  ) : super(
+          ttfFont.pdfDocument,
+          params: PdfDict({
+            '/Type': const PdfName('/FontDescriptor'),
+          }),
+        );
 
   /// File data
   final PdfObjectStream file;
 
-  /// Truetype font
+  /// TrueType font
   final PdfTtfFont ttfFont;
 
   @override

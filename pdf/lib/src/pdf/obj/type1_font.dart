@@ -19,7 +19,6 @@ import '../document.dart';
 import '../font/font_metrics.dart';
 import '../format/object_base.dart';
 import 'font.dart';
-import 'object_dict.dart';
 import 'ttffont.dart';
 
 /// Type 1 font object.
@@ -63,17 +62,22 @@ class PdfType1Font extends PdfFont {
             List<int>.filled(256, (missingWidth * unitsPerEm).toInt()));
       }
 
-      final fontDescriptor = PdfObjectDict(pdfDocument, type: '/FontDescriptor')
-        ..params['/FontName'] = PdfName('/$fontName')
-        ..params['/Flags'] = PdfNum(32 + (isFixedPitch ? 1 : 0))
-        ..params['/FontBBox'] = PdfArray.fromNum(fontBBox)
-        ..params['/Ascent'] = PdfNum((ascent * unitsPerEm).toInt())
-        ..params['/Descent'] = PdfNum((descent * unitsPerEm).toInt())
-        ..params['/ItalicAngle'] = PdfNum(italicAngle)
-        ..params['/CapHeight'] = PdfNum(capHeight)
-        ..params['/StemV'] = PdfNum(stdVW)
-        ..params['/StemH'] = PdfNum(stdHW)
-        ..params['/MissingWidth'] = PdfNum((missingWidth * unitsPerEm).toInt());
+      final fontDescriptor = PdfObject<PdfDict>(
+        pdfDocument,
+        params: PdfDict({
+          '/Type': const PdfName('/FontDescriptor'),
+          '/FontName': PdfName('/$fontName'),
+          '/Flags': PdfNum(32 + (isFixedPitch ? 1 : 0)),
+          '/FontBBox': PdfArray.fromNum(fontBBox),
+          '/Ascent': PdfNum((ascent * unitsPerEm).toInt()),
+          '/Descent': PdfNum((descent * unitsPerEm).toInt()),
+          '/ItalicAngle': PdfNum(italicAngle),
+          '/CapHeight': PdfNum(capHeight),
+          '/StemV': PdfNum(stdVW),
+          '/StemH': PdfNum(stdHW),
+          '/MissingWidth': PdfNum((missingWidth * unitsPerEm).toInt()),
+        }),
+      );
 
       params['/FontDescriptor'] = fontDescriptor.ref();
     }

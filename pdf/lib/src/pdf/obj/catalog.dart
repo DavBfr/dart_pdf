@@ -22,13 +22,13 @@ import '../format/num.dart';
 import 'annotation.dart';
 import 'metadata.dart';
 import 'names.dart';
-import 'object_dict.dart';
+import 'object.dart';
 import 'outline.dart';
 import 'page_label.dart';
 import 'page_list.dart';
 
 /// Pdf Catalog object
-class PdfCatalog extends PdfObjectDict {
+class PdfCatalog extends PdfObject<PdfDict> {
   /// This constructs a Pdf Catalog object
   PdfCatalog(
     PdfDocument pdfDocument,
@@ -36,7 +36,14 @@ class PdfCatalog extends PdfObjectDict {
     this.pageMode,
     int objgen = 0,
     int? objser,
-  }) : super(pdfDocument, type: '/Catalog', objser: objser, objgen: objgen);
+  }) : super(
+          pdfDocument,
+          params: PdfDict({
+            '/Type': const PdfName('/Catalog'),
+          }),
+          objser: objser,
+          objgen: objgen,
+        );
 
   /// The pages of the document
   final PdfPageList pdfPageList;

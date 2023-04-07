@@ -22,13 +22,13 @@ import '../format/name.dart';
 import '../format/null_value.dart';
 import '../format/num.dart';
 import '../format/string.dart';
-import 'object_dict.dart';
+import 'object.dart';
 import 'page.dart';
 
 /// Pdf Name object
-class PdfNames extends PdfObjectDict {
+class PdfNames extends PdfObject<PdfDict> {
   /// This constructs a Pdf Name object
-  PdfNames(PdfDocument pdfDocument) : super(pdfDocument);
+  PdfNames(PdfDocument pdfDocument) : super(pdfDocument, params: PdfDict());
 
   final Map<String, PdfDataType> _dests = <String, PdfDataType>{};
 

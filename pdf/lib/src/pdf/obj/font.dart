@@ -19,19 +19,25 @@ import 'dart:convert';
 import '../document.dart';
 import '../font/font_metrics.dart';
 import '../font/type1_fonts.dart';
+import '../format/dict.dart';
 import '../format/name.dart';
 import '../format/stream.dart';
 import '../format/string.dart';
 import '../point.dart';
-import 'object_dict.dart';
+import 'object.dart';
 import 'type1_font.dart';
 
 /// Pdf font object
-abstract class PdfFont extends PdfObjectDict {
+abstract class PdfFont extends PdfObject<PdfDict> {
   /// Constructs a [PdfFont]. This will attempt to map the font from a known
   /// font name to that in Pdf, defaulting to Helvetica if not possible.
   PdfFont.create(PdfDocument pdfDocument, {required this.subtype})
-      : super(pdfDocument, type: '/Font') {
+      : super(
+          pdfDocument,
+          params: PdfDict({
+            '/Type': const PdfName('/Font'),
+          }),
+        ) {
     pdfDocument.fonts.add(this);
   }
 

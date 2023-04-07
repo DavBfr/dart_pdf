@@ -16,14 +16,15 @@
 
 import '../document.dart';
 import '../format/array.dart';
+import '../format/dict.dart';
 import '../format/indirect.dart';
+import '../format/name.dart';
 import '../format/num.dart';
 import '../graphics.dart';
 import '../page_format.dart';
 import 'annotation.dart';
 import 'graphic_stream.dart';
 import 'object.dart';
-import 'object_dict.dart';
 import 'object_stream.dart';
 
 /// Page rotation
@@ -42,7 +43,7 @@ enum PdfPageRotation {
 }
 
 /// Page object, which will hold any contents for this page.
-class PdfPage extends PdfObjectDict with PdfGraphicStream {
+class PdfPage extends PdfObject<PdfDict> with PdfGraphicStream {
   /// This constructs a Page object, which will hold any contents for this
   /// page.
   PdfPage(
@@ -52,7 +53,12 @@ class PdfPage extends PdfObjectDict with PdfGraphicStream {
     int? index,
     int? objser,
     int objgen = 0,
-  }) : super(pdfDocument, type: '/Page', objser: objser, objgen: objgen) {
+  }) : super(pdfDocument,
+            params: PdfDict({
+              '/Type': const PdfName('/Page'),
+            }),
+            objser: objser,
+            objgen: objgen) {
     if (index != null) {
       pdfDocument.pdfPageList.pages.insert(index, this);
     } else {

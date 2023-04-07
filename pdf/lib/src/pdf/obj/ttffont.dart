@@ -28,9 +28,9 @@ import '../format/name.dart';
 import '../format/num.dart';
 import '../format/stream.dart';
 import '../format/string.dart';
-import 'array.dart';
 import 'font.dart';
 import 'font_descriptor.dart';
+import 'object.dart';
 import 'object_stream.dart';
 import 'unicode_cmap.dart';
 
@@ -42,7 +42,7 @@ class PdfTtfFont extends PdfFont {
     file = PdfObjectStream(pdfDocument, isBinary: true);
     unicodeCMap = PdfUnicodeCmap(pdfDocument, protect);
     descriptor = PdfFontDescriptor(this, file);
-    widthsObject = PdfArrayObject(pdfDocument, PdfArray());
+    widthsObject = PdfObject<PdfArray>(pdfDocument, params: PdfArray());
   }
 
   @override
@@ -54,7 +54,7 @@ class PdfTtfFont extends PdfFont {
 
   late PdfObjectStream file;
 
-  late PdfArrayObject widthsObject;
+  late PdfObject<PdfArray> widthsObject;
 
   final TtfParser font;
 
@@ -98,7 +98,7 @@ class PdfTtfFont extends PdfFont {
     charMin = 32;
     charMax = 255;
     for (var i = charMin; i <= charMax; i++) {
-      widthsObject.array
+      widthsObject.params
           .add(PdfNum((glyphMetrics(i).advanceWidth * 1000.0).toInt()));
     }
     params['/FirstChar'] = PdfNum(charMin);
@@ -142,7 +142,7 @@ class PdfTtfFont extends PdfFont {
     charMin = 0;
     charMax = unicodeCMap.cmap.length - 1;
     for (var i = charMin; i <= charMax; i++) {
-      widthsObject.array.add(PdfNum(
+      widthsObject.params.add(PdfNum(
           (glyphMetrics(unicodeCMap.cmap[i]).advanceWidth * 1000.0).toInt()));
     }
   }

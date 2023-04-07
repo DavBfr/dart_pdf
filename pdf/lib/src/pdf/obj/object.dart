@@ -21,9 +21,8 @@ import '../format/base.dart';
 import '../format/object_base.dart';
 
 /// Base Object used in the PDF file
-abstract class PdfObject<T extends PdfDataType> extends PdfObjectBase<T> {
-  /// This is usually called by extensors to this class, and sets the
-  /// Pdf Object Type
+class PdfObject<T extends PdfDataType> extends PdfObjectBase<T> {
+  /// Create a base Object used in the PDF file
   PdfObject(
     this.pdfDocument, {
     required T params,

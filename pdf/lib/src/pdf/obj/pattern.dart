@@ -18,14 +18,15 @@ import 'package:vector_math/vector_math_64.dart';
 
 import '../document.dart';
 import '../format/array.dart';
+import '../format/dict.dart';
 import '../format/num.dart';
 import '../graphic_state.dart';
-import 'object_dict.dart';
+import 'object.dart';
 import 'shading.dart';
 
-abstract class PdfPattern extends PdfObjectDict {
+abstract class PdfPattern extends PdfObject<PdfDict> {
   PdfPattern(PdfDocument pdfDocument, this.patternType, this.matrix)
-      : super(pdfDocument);
+      : super(pdfDocument, params: PdfDict());
 
   /// Name of the Pattern object
   String get name => '/P$objser';

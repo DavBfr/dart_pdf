@@ -21,13 +21,13 @@ import '../format/dict.dart';
 import '../format/name.dart';
 import '../graphic_state.dart';
 import 'font.dart';
-import 'object_dict.dart';
+import 'object.dart';
 import 'pattern.dart';
 import 'shading.dart';
 import 'xobject.dart';
 
 /// Helper functions for graphic objects
-mixin PdfGraphicStream on PdfObjectDict {
+mixin PdfGraphicStream on PdfObject<PdfDict> {
   /// Isolated transparency: If this flag is true, objects within the group
   /// shall be composited against a fully transparent initial backdrop;
   /// if false, they shall be composited against the group’s backdrop

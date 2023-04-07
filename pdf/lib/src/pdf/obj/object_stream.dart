@@ -15,18 +15,25 @@
  */
 
 import '../document.dart';
+import '../format/dict.dart';
 import '../format/dict_stream.dart';
+import '../format/name.dart';
 import '../format/stream.dart';
-import 'object_dict.dart';
+import 'object.dart';
 
 /// Stream Object
-class PdfObjectStream extends PdfObjectDict {
+class PdfObjectStream extends PdfObject<PdfDict> {
   /// Constructs a stream object to store some data
   PdfObjectStream(
     PdfDocument pdfDocument, {
     String? type,
     this.isBinary = false,
-  }) : super(pdfDocument, type: type);
+  }) : super(
+          pdfDocument,
+          params: PdfDict({
+            if (type != null) '/Type': PdfName(type),
+          }),
+        );
 
   /// This holds the stream's content.
   final PdfStream buf = PdfStream();

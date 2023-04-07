@@ -34,7 +34,6 @@ import 'border.dart';
 import 'font.dart';
 import 'graphic_stream.dart';
 import 'object.dart';
-import 'object_dict.dart';
 import 'page.dart';
 
 class PdfChoiceField extends PdfAnnotWidget {
@@ -104,9 +103,12 @@ class PdfChoiceField extends PdfAnnotWidget {
   }
 }
 
-class PdfAnnot extends PdfObjectDict {
+class PdfAnnot extends PdfObject<PdfDict> {
   PdfAnnot(this.pdfPage, this.annot)
-      : super(pdfPage.pdfDocument, type: '/Annot') {
+      : super(pdfPage.pdfDocument,
+            params: PdfDict({
+              '/Type': const PdfName('/Annot'),
+            })) {
     pdfPage.annotations.add(this);
   }
 

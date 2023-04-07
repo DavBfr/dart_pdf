@@ -21,6 +21,7 @@ import '../format/stream.dart';
 import 'object.dart';
 
 /// Object with a PdfDict used in the PDF file
+@Deprecated('Use PdfObject<PdfDict> instead')
 class PdfObjectDict extends PdfObject<PdfDict> {
   /// This is usually called by extensors to this class, and sets the
   /// Pdf Object Type

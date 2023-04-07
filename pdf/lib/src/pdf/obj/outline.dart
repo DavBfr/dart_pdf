@@ -17,11 +17,12 @@
 import '../color.dart';
 import '../document.dart';
 import '../format/array.dart';
+import '../format/dict.dart';
 import '../format/name.dart';
 import '../format/num.dart';
 import '../format/string.dart';
 import '../rect.dart';
-import 'object_dict.dart';
+import 'object.dart';
 import 'page.dart';
 
 /// Outline mode
@@ -49,7 +50,7 @@ enum PdfOutlineStyle {
 }
 
 /// Pdf Outline object
-class PdfOutline extends PdfObjectDict {
+class PdfOutline extends PdfObject<PdfDict> {
   /// Constructs a Pdf Outline object.
   /// When selected, the specified region is displayed.
   PdfOutline(
@@ -64,7 +65,7 @@ class PdfOutline extends PdfObjectDict {
     PdfPage? page,
   })  : assert(anchor == null || (dest == null && rect == null)),
         _page = page,
-        super(pdfDocument);
+        super(pdfDocument, params: PdfDict());
 
   /// This holds any outlines below us
   List<PdfOutline> outlines = <PdfOutline>[];

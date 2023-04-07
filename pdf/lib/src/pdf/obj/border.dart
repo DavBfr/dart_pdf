@@ -16,10 +16,11 @@
 
 import '../document.dart';
 import '../format/array.dart';
+import '../format/dict.dart';
 import '../format/name.dart';
 import '../format/num.dart';
 import 'annotation.dart';
-import 'object_dict.dart';
+import 'object.dart';
 
 /// Border style
 enum PdfBorderStyle {
@@ -42,14 +43,14 @@ enum PdfBorderStyle {
 }
 
 /// Defines a border object
-class PdfBorder extends PdfObjectDict {
+class PdfBorder extends PdfObject<PdfDict> {
   /// Creates a border using the predefined styles in [PdfAnnot].
   PdfBorder(
     PdfDocument pdfDocument,
     this.width, {
     this.style = PdfBorderStyle.solid,
     this.dash,
-  }) : super(pdfDocument);
+  }) : super(pdfDocument, params: PdfDict());
 
   /// The style of the border
   final PdfBorderStyle style;
