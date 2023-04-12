@@ -15,7 +15,6 @@
  */
 
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:image/image.dart' as im;
 import 'package:vector_math/vector_math_64.dart';
@@ -75,7 +74,7 @@ class SvgImg extends SvgOperation {
           final img = im.decodeImage(bytes)!;
           image = PdfImage(
             painter.document,
-            image: img.data?.buffer.asUint8List() ?? Uint8List(0),
+            image: img.data.buffer.asUint8List(),
             width: img.width,
             height: img.height,
           );
