@@ -175,7 +175,7 @@ class WidgetWrapper extends pw.ImageProvider {
           size:
               Size(computedConstraints.maxWidth, computedConstraints.maxHeight),
           devicePixelRatio: view.devicePixelRatio),
-      window: view,
+      view: view,
     );
 
     final pipelineOwner = PipelineOwner()..rootNode = renderView;
