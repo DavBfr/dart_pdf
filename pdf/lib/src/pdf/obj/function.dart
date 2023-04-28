@@ -15,13 +15,16 @@
  */
 
 import '../color.dart';
-import '../data_types.dart';
 import '../document.dart';
-import 'object_dict.dart';
+import '../format/array.dart';
+import '../format/dict.dart';
+import '../format/num.dart';
+import 'object.dart';
 import 'object_stream.dart';
 
-abstract class PdfBaseFunction extends PdfObjectDict {
-  PdfBaseFunction(PdfDocument pdfDocument) : super(pdfDocument);
+abstract class PdfBaseFunction extends PdfObject<PdfDict> {
+  PdfBaseFunction(PdfDocument pdfDocument)
+      : super(pdfDocument, params: PdfDict());
 
   factory PdfBaseFunction.colorsAndStops(
     PdfDocument pdfDocument,

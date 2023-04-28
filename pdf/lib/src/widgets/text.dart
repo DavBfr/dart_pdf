@@ -49,11 +49,13 @@ enum TextOverflow {
 }
 
 abstract class _Span {
-  _Span(this.style);
+  _Span(this.style, this.realWidth);
 
   final TextStyle style;
 
   var offset = PdfPoint.zero;
+
+  double realWidth;
 
   double get left;
 
@@ -103,9 +105,13 @@ class _TextDecoration {
       return _box;
     }
 
-    final x1 = spans[startSpan].offset.x + spans[startSpan].left;
-    final x2 =
-        spans[endSpan].offset.x + spans[endSpan].left + spans[endSpan].width;
+    final x1 = spans[startSpan].offset.x +
+        spans[startSpan].left +
+        spans[startSpan].realWidth;
+    final x2 = spans[endSpan].offset.x +
+        spans[endSpan].left +
+        spans[endSpan].width -
+        spans[endSpan].realWidth;
     var y1 = spans[startSpan].offset.y + spans[startSpan].top;
     var y2 = y1 + spans[startSpan].height;
 
@@ -178,11 +184,13 @@ class _TextDecoration {
 
     if (style.decoration!.contains(TextDecoration.underline)) {
       final base = -font.descent * style.fontSize! * textScaleFactor / 2;
-
+      final l = box!.left;
+      final r = box.right;
+      final x = globalBox!.x;
       context.canvas.drawLine(
-        globalBox!.x + box!.left,
+        x + l,
         globalBox.top + box.bottom + base,
-        globalBox.x + box.right,
+        x + r,
         globalBox.top + box.bottom + base,
       );
       if (style.decorationStyle == TextDecorationStyle.double) {
@@ -257,7 +265,7 @@ class _Word extends _Span {
     this.text,
     TextStyle style,
     this.metrics,
-  ) : super(style);
+  ) : super(style, metrics.advanceWidth);
 
   final String text;
 
@@ -323,7 +331,7 @@ class _Word extends _Span {
 }
 
 class _WidgetSpan extends _Span {
-  _WidgetSpan(this.widget, TextStyle style, this.baseline) : super(style);
+  _WidgetSpan(this.widget, TextStyle style, this.baseline) : super(style, 0);
 
   final Widget widget;
 

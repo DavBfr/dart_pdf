@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
-import '../stream.dart';
+import '../format/dict.dart';
+import '../format/name.dart';
+import '../format/stream.dart';
 import 'object.dart';
 
 /// Object with a PdfDict used in the PDF file
+@Deprecated('Use PdfObject<PdfDict> instead')
 class PdfObjectDict extends PdfObject<PdfDict> {
   /// This is usually called by extensors to this class, and sets the
   /// Pdf Object Type
@@ -35,10 +37,10 @@ class PdfObjectDict extends PdfObject<PdfDict> {
   }
 
   @override
-  void writeContent(PdfStream os) {
+  void writeContent(PdfStream s) {
     if (params.isNotEmpty) {
-      params.output(os, pdfDocument.verbose ? 0 : null);
-      os.putByte(0x0a);
+      params.output(this, s, pdfDocument.settings.verbose ? 0 : null);
+      s.putByte(0x0a);
     }
   }
 }

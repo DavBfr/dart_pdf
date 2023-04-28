@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
+import '../format/name.dart';
 import 'object_stream.dart';
 
 class PdfXObject extends PdfObjectStream {

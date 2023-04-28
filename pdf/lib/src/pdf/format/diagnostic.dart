@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
-import '../stream.dart';
+import 'stream.dart';
 
 mixin PdfDiagnostic {
   static const _maxSize = 300;
@@ -14,6 +14,8 @@ mixin PdfDiagnostic {
   Stopwatch? _stopwatch;
 
   int get elapsedStopwatch => _stopwatch?.elapsedMicroseconds ?? 0;
+
+  int size = 0;
 
   @protected
   @mustCallSuper
@@ -29,10 +31,11 @@ mixin PdfDiagnostic {
     }());
   }
 
-  void setInsertion(PdfStream os) {
+  void setInsertion(PdfStream os, [int size = _maxSize]) {
     assert(() {
+      this.size = size;
       _offset = os.offset;
-      os.putComment(' ' * _maxSize);
+      os.putComment(' ' * size);
       return true;
     }());
   }
@@ -45,7 +48,7 @@ mixin PdfDiagnostic {
         final b = o.output();
         os.setBytes(
           _offset!,
-          b.sublist(0, math.min(_maxSize + 2, b.lengthInBytes - 1)),
+          b.sublist(0, math.min(size + 2, b.lengthInBytes - 1)),
         );
       }
       return true;

@@ -306,6 +306,9 @@ class PdfPreviewState extends State<PdfPreview> {
     if (!infoLoaded) {
       infoLoaded = true;
       Printing.info().then((PrintingInfo printingInfo) {
+        if (!mounted) {
+          return;
+        }
         setState(() {
           info = printingInfo;
         });

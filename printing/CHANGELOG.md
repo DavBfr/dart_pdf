@@ -1,8 +1,17 @@
 # Changelog
 
+## 5.10.4
+
+- Update Google Fonts
+
+## 5.10.3
+
+- Check if widget is mounted before setState [asaarnak]
+
 ## 5.10.2
 
 - Fix Flutter 3.9 deprecations
+- Improve podspec files
 
 ## 5.10.1
 

@@ -15,4 +15,4 @@ jobs:
           close-issue-message: "Closing this stale issue because it has no activity."
           days-before-stale: 20
           days-before-close: 5
-          exempt-issue-labels: "needs triage,help wanted,enhancement,bug"
+          exempt-issue-labels: "needs triage"

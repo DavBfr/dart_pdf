@@ -41,19 +41,19 @@ class TtfWriter {
   }
 
   void _updateCompoundGlyph(TtfGlyphInfo glyph, Map<int, int?> compoundMap) {
-    const ARG_1_AND_2_ARE_WORDS = 1;
-    const MORE_COMPONENTS = 32;
+    const arg1And2AreWords = 1;
+    const moreComponents = 32;
 
     var offset = 10;
     final bytes = glyph.data.buffer
         .asByteData(glyph.data.offsetInBytes, glyph.data.lengthInBytes);
-    var flags = MORE_COMPONENTS;
+    var flags = moreComponents;
 
-    while (flags & MORE_COMPONENTS != 0) {
+    while (flags & moreComponents != 0) {
       flags = bytes.getUint16(offset);
       final glyphIndex = bytes.getUint16(offset + 2);
       bytes.setUint16(offset + 2, compoundMap[glyphIndex]!);
-      offset += (flags & ARG_1_AND_2_ARE_WORDS != 0) ? 8 : 6;
+      offset += (flags & arg1And2AreWords != 0) ? 8 : 6;
     }
   }
 

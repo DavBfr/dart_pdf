@@ -9,7 +9,7 @@ issue_tracker: https://github.com/DavBfr/dart_pdf/issues
 screenshots:
   - description: 'Printing a document on iOS'
     path: example.png
-version: 5.10.2
+version: 5.10.4
 
 environment:
   sdk: ">=2.18.0 <3.0.0"
@@ -29,7 +29,7 @@ dependencies:
     git:
       url: https://github.com/Shahriyar13/dart_pdf.git
       path: pdf
-      version: ^3.9.0
+      version: ^3.10.0
   plugin_platform_interface: ^2.1.0
 
 dev_dependencies:

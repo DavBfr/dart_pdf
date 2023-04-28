@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
+import '../format/array.dart';
 import 'object.dart';
 
 /// An array object
+@Deprecated('Use PdfObject<PdfArray> instead')
 class PdfArrayObject extends PdfObject<PdfArray> {
   /// Creates an array object
   PdfArrayObject(

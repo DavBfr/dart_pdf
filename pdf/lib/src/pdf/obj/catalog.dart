@@ -14,24 +14,36 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
+import '../format/array.dart';
+import '../format/dict.dart';
+import '../format/name.dart';
+import '../format/num.dart';
 import 'annotation.dart';
 import 'metadata.dart';
 import 'names.dart';
-import 'object_dict.dart';
+import 'object.dart';
 import 'outline.dart';
 import 'page_label.dart';
 import 'page_list.dart';
 
 /// Pdf Catalog object
-class PdfCatalog extends PdfObjectDict {
+class PdfCatalog extends PdfObject<PdfDict> {
   /// This constructs a Pdf Catalog object
   PdfCatalog(
     PdfDocument pdfDocument,
-    this.pdfPageList,
+    this.pdfPageList, {
     this.pageMode,
-  ) : super(pdfDocument, type: '/Catalog');
+    int objgen = 0,
+    int? objser,
+  }) : super(
+          pdfDocument,
+          params: PdfDict.values({
+            '/Type': const PdfName('/Catalog'),
+          }),
+          objser: objser,
+          objgen: objgen,
+        );
 
   /// The pages of the document
   final PdfPageList pdfPageList;
@@ -43,7 +55,7 @@ class PdfCatalog extends PdfObjectDict {
   PdfMetadata? metadata;
 
   /// The initial page mode
-  final PdfPageMode pageMode;
+  final PdfPageMode? pageMode;
 
   /// The anchor names
   PdfNames? names;
@@ -51,7 +63,7 @@ class PdfCatalog extends PdfObjectDict {
   /// The page labels of the document
   PdfPageLabels? pageLabels;
 
-  /// These map the page modes just defined to the pagemodes setting of Pdf.
+  /// These map the page modes just defined to the page modes setting of the Pdf.
   static const List<String> _pdfPageModes = <String>[
     '/UseNone',
     '/UseOutlines',
@@ -88,11 +100,13 @@ class PdfCatalog extends PdfObjectDict {
     }
 
     // the /PageMode setting
-    params['/PageMode'] = PdfName(_pdfPageModes[pageMode.index]);
+    if (pageMode != null) {
+      params['/PageMode'] = PdfName(_pdfPageModes[pageMode!.index]);
+    }
 
     if (pdfDocument.sign != null) {
       if (pdfDocument.sign!.value.hasMDP) {
-        params['/Perms'] = PdfDict({
+        params['/Perms'] = PdfDict.values({
           '/DocMDP': pdfDocument.sign!.ref(),
         });
       }
@@ -123,17 +137,13 @@ class PdfCatalog extends PdfObjectDict {
     }
 
     if (widgets.isNotEmpty) {
-      params['/AcroForm'] = PdfDict({
-        '/SigFlags': PdfNum(pdfDocument.sign?.flagsValue ?? 0),
-        '/Fields': PdfArray.fromObjects(widgets),
-      });
-
-      // final acroForm = (params['/AcroForm'] ??= PdfDict()) as PdfDict;
-      // acroForm['/SigFlags'] = PdfNum(pdfDocument.sign?.flagsValue ?? 0);
-      // final fields = (acroForm['/Fields'] ??= PdfArray()) as PdfArray;
-      // for (final w in widgets) {
-      //   fields.add(w.ref());
-      // }
+      final acroForm = (params['/AcroForm'] ??= PdfDict()) as PdfDict;
+      acroForm['/SigFlags'] = PdfNum(pdfDocument.sign?.flagsValue ?? 0) |
+          (acroForm['/SigFlags'] as PdfNum? ?? const PdfNum(0));
+      final fields = (acroForm['/Fields'] ??= PdfArray()) as PdfArray;
+      for (final w in widgets) {
+        fields.add(w.ref());
+      }
     }
   }
 }

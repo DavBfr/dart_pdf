@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
+import '../format/array.dart';
+import '../format/bool.dart';
+import '../format/dict.dart';
+import '../format/name.dart';
+import '../format/num.dart';
 import '../point.dart';
 import '../rect.dart';
 import 'function.dart';
-import 'object_dict.dart';
+import 'object.dart';
 
 enum PdfShadingType { axial, radial }
 
-class PdfShading extends PdfObjectDict {
+class PdfShading extends PdfObject<PdfDict> {
   PdfShading(
     PdfDocument pdfDocument, {
     required this.shadingType,
@@ -35,7 +39,7 @@ class PdfShading extends PdfObjectDict {
     this.boundingBox,
     this.extendStart = false,
     this.extendEnd = false,
-  }) : super(pdfDocument);
+  }) : super(pdfDocument, params: PdfDict());
 
   /// Name of the Shading object
   String get name => '/S$objser';

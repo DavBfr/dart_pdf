@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
+import '../../priv.dart';
 import '../document.dart';
 import '../font/font_metrics.dart';
+import '../format/object_base.dart';
 import 'font.dart';
 import 'ttffont.dart';
 
@@ -30,15 +31,57 @@ import 'ttffont.dart';
 /// see https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
 class PdfType1Font extends PdfFont {
   /// Constructs a [PdfTtfFont]
-  PdfType1Font.create(PdfDocument pdfDocument, this.fontName, this.ascent,
-      this.descent, this.widths)
+  PdfType1Font.create(PdfDocument pdfDocument,
+      {required this.fontName,
+      required this.ascent,
+      required this.descent,
+      required List<int> fontBBox,
+      double italicAngle = 0,
+      required int capHeight,
+      required int stdHW,
+      required int stdVW,
+      bool isFixedPitch = false,
+      this.missingWidth = 0.600,
+      this.widths = const <double>[]})
       : assert(() {
           // ignore: avoid_print
           print(
               '$fontName has no Unicode support see https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management');
           return true;
         }()),
-        super.create(pdfDocument, subtype: '/Type1');
+        super.create(pdfDocument, subtype: '/Type1') {
+    params['/BaseFont'] = PdfName('/$fontName');
+    if (settings.version.index >= PdfVersion.pdf_1_5.index) {
+      params['/FirstChar'] = const PdfNum(0);
+      params['/LastChar'] = const PdfNum(255);
+      if (widths.isNotEmpty) {
+        params['/Widths'] =
+            PdfArray.fromNum(widths.map((e) => (e * unitsPerEm).toInt()));
+      } else {
+        params['/Widths'] = PdfArray.fromNum(
+            List<int>.filled(256, (missingWidth * unitsPerEm).toInt()));
+      }
+
+      final fontDescriptor = PdfObject<PdfDict>(
+        pdfDocument,
+        params: PdfDict.values({
+          '/Type': const PdfName('/FontDescriptor'),
+          '/FontName': PdfName('/$fontName'),
+          '/Flags': PdfNum(32 + (isFixedPitch ? 1 : 0)),
+          '/FontBBox': PdfArray.fromNum(fontBBox),
+          '/Ascent': PdfNum((ascent * unitsPerEm).toInt()),
+          '/Descent': PdfNum((descent * unitsPerEm).toInt()),
+          '/ItalicAngle': PdfNum(italicAngle),
+          '/CapHeight': PdfNum(capHeight),
+          '/StemV': PdfNum(stdVW),
+          '/StemH': PdfNum(stdHW),
+          '/MissingWidth': PdfNum((missingWidth * unitsPerEm).toInt()),
+        }),
+      );
+
+      params['/FontDescriptor'] = fontDescriptor.ref();
+    }
+  }
 
   @override
   final String fontName;
@@ -55,12 +98,8 @@ class PdfType1Font extends PdfFont {
   /// Width of each glyph
   final List<double> widths;
 
-  @override
-  void prepare() {
-    super.prepare();
-
-    params['/BaseFont'] = PdfName('/$fontName');
-  }
+  /// Default width of a glyph
+  final double missingWidth;
 
   @override
   PdfFontMetrics glyphMetrics(int charCode) {
@@ -70,12 +109,11 @@ class PdfType1Font extends PdfFont {
     }
 
     return PdfFontMetrics(
-        left: 0,
-        top: descent,
-        right: charCode < widths.length
-            ? widths[charCode]
-            : PdfFont.defaultGlyphWidth,
-        bottom: ascent);
+      left: 0,
+      top: descent,
+      right: charCode < widths.length ? widths[charCode] : missingWidth,
+      bottom: ascent,
+    );
   }
 
   @override

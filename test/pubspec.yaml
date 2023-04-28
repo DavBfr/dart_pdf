@@ -6,10 +6,11 @@ issue_tracker: https://github.com/DavBfr/dart_pdf/issues
 version: 1.0.0
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
-  flutter: ">=1.16.0"
+  sdk: ">=2.18.0 <3.0.0"
+  flutter: ">=3.7.0"
 
 dependencies:
+  args:
   flutter:
     sdk: flutter
   markdown:

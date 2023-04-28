@@ -67,7 +67,7 @@ class Document {
 
   Document.load(
     PdfDocumentParserBase parser, {
-    PdfPageMode pageMode = PdfPageMode.none,
+    @Deprecated('Not used') PdfPageMode pageMode = PdfPageMode.none,
     DeflateCallback? deflate,
     bool compress = true,
     bool verbose = false,
@@ -80,7 +80,6 @@ class Document {
     String? producer,
   }) : document = PdfDocument.load(
           parser,
-          pageMode: pageMode,
           deflate: deflate,
           compress: compress,
           verbose: verbose,

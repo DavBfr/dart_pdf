@@ -14,15 +14,29 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
-import 'object_dict.dart';
+import '../format/array.dart';
+import '../format/dict.dart';
+import '../format/name.dart';
+import '../format/num.dart';
+import 'object.dart';
 import 'page.dart';
 
 /// PdfPageList object
-class PdfPageList extends PdfObjectDict {
+class PdfPageList extends PdfObject<PdfDict> {
   /// This constructs a [PdfPageList] object.
-  PdfPageList(PdfDocument pdfDocument) : super(pdfDocument, type: '/Pages');
+  PdfPageList(
+    PdfDocument pdfDocument, {
+    int objgen = 0,
+    int? objser,
+  }) : super(
+          pdfDocument,
+          params: PdfDict.values({
+            '/Type': const PdfName('/Pages'),
+          }),
+          objgen: objgen,
+          objser: objser,
+        );
 
   /// This holds the pages
   final pages = <PdfPage>[];
