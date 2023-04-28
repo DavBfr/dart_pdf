@@ -349,7 +349,7 @@ class Table extends Widget with SpanningWidget {
           );
         }
       } else {
-        for (final Widget cell in row) {
+        for (final dynamic cell in row) {
           final align = cellAlignments[tableRow.length] ?? cellAlignment;
           tableRow.add(
             Container(
@@ -359,7 +359,12 @@ class Table extends Widget with SpanningWidget {
               decoration: cellDecoration == null
                   ? null
                   : cellDecoration(tableRow.length, cell, rowNum),
-              child: cell,
+              child: Text(cellFormat == null
+                  ? cell.toString()
+                  : cellFormat(tableRow.length, cell),
+                style: isOdd ? oddCellStyle : cellStyle,
+                textAlign: _textAlign(align)
+              ),
             ),
           );
         }
