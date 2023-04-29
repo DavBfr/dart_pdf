@@ -84,7 +84,7 @@ class PdfXref extends PdfIndirect {
   }
 
   @override
-  String toString() => '$ser $gen obj ${type.name} $offset';
+  String toString([int? indent]) => '$ser $gen obj ${type.name} $offset';
 
   @override
   int get hashCode => offset;

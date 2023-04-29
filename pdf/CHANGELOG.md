@@ -6,6 +6,7 @@
 - Deprecate PdfArrayObject and PdfObjectDict
 - Improve PdfArray and PdfDict constructors
 - Fix underline on spans [RomanIvn]
+- Improve verbose output
 
 ## 3.10.1
 
