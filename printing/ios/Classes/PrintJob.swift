@@ -134,13 +134,15 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
 
         printing.onCompleted(printJob: self, completed: completed, error: error?.localizedDescription as NSString?)
     }
-
-    public func printInteractionController(_ printInteractionController: UIPrintInteractionController, cutLengthFor paper: UIPrintPaper) -> CGFloat {
-        if currentSize == nil{
-            return  paper.paperSize.height
+    
+    public func printInteractionController(_ printController: UIPrintInteractionController, choosePaper paperList: [UIPrintPaper]) -> UIPrintPaper {
+        if currentSize == nil {
+            return paperList[0]
         }
-
-        return currentSize!.height
+        
+        let bestPaper = UIPrintPaper.bestPaper(forPageSize: currentSize!, withPapersFrom: paperList)
+        
+        return bestPaper
     }
 
     func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool) {
