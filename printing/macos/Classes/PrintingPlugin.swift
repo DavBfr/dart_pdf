@@ -115,23 +115,27 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             let marginBottom = CGFloat((args["marginBottom"] as? NSNumber)?.floatValue ?? 0.0)
             let printJob = PrintJob(printing: self, index: args["job"] as! Int)
 
-            printJob.convertHtml(
-                args["html"] as! String,
-                withPageSize: CGRect(
-                    x: 0.0,
-                    y: 0.0,
-                    width: width,
-                    height: height
-                ),
-                andMargin: CGRect(
-                    x: marginLeft,
-                    y: marginTop,
-                    width: width - marginRight - marginLeft,
-                    height: height - marginBottom - marginTop
-                ),
-                andBaseUrl: args["baseUrl"] as? String == nil ? nil : URL(string: args["baseUrl"] as! String)
-            )
-            result(NSNumber(value: 1))
+            if #available(macOS 11.0, *) {
+                printJob.convertHtml(
+                    args["html"] as! String,
+                    withPageSize: CGRect(
+                        x: 0.0,
+                        y: 0.0,
+                        width: width,
+                        height: height
+                    ),
+                    andMargin: CGRect(
+                        x: marginLeft,
+                        y: marginTop,
+                        width: width - marginRight - marginLeft,
+                        height: height - marginBottom - marginTop
+                    ),
+                    andBaseUrl: args["baseUrl"] as? String == nil ? nil : URL(string: args["baseUrl"] as! String)
+                )
+                result(NSNumber(value: 1))
+            } else {
+                result(NSNumber(value: 0))
+            }
         } else if call.method == "printingInfo" {
             result(PrintJob.printingInfo())
         } else if call.method == "rasterPdf" {

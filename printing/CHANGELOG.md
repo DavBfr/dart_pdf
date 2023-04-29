@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.14.0
+
+- Replace WebView with WKWebView on macOS
+
 ## 5.13.4
 
 - Improve Web Browser detection logic
