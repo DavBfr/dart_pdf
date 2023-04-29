@@ -3,6 +3,9 @@
 ## 5.10.4
 
 - Update Google Fonts
+- Fix CMP0135 policy issue [Jemis Goti]
+- Fix raster crash on iOS and MacOS [Eduardo Vital Alencar Cunha]
+- Fix wrong format in directPrintPdf [<AlhasanAlQaisi>]
 
 ## 5.10.3
 
