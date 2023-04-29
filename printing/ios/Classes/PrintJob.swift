@@ -32,7 +32,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     private let semaphore = DispatchSemaphore(value: 0)
     private var dynamic = false
     private var currentSize: CGSize?
-    
+
     public init(printing: PrintingPlugin, index: Int) {
         self.printing = printing
         self.index = index
@@ -312,18 +312,19 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     }
 
     public func rasterPdf(data: Data, pages: [Int]?, scale: CGFloat) {
-        let provider = CGDataProvider(data: data as CFData)!
-        let document = CGPDFDocument(provider)
-        if document == nil {
+        guard
+            let provider = CGDataProvider(data: data as CFData),
+            let document = CGPDFDocument(provider)
+        else {
             printing.onPageRasterEnd(printJob: self, error: "Cannot raster a malformed PDF file")
             return
         }
 
         DispatchQueue.global().async {
-            let pageCount = document!.numberOfPages
+            let pageCount = document.numberOfPages
 
             for pageNum in pages ?? Array(0 ... pageCount - 1) {
-                guard let page = document!.page(at: pageNum + 1) else { continue }
+                guard let page = document.page(at: pageNum + 1) else { continue }
                 let angle = CGFloat(page.rotationAngle) * CGFloat.pi / -180
                 let rect = page.getBoxRect(.mediaBox)
                 let width = Int(abs((cos(angle) * rect.width + sin(angle) * rect.height) * scale))
