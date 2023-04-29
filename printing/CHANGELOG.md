@@ -3,6 +3,7 @@
 ## 5.11.1
 
 - Use pdfDpi on CPP lib
+- Replace WebView with WKWebView
 
 ## 5.11.0
 
