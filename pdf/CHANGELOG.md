@@ -7,6 +7,7 @@
 - Improve PdfArray and PdfDict constructors
 - Fix underline on spans [RomanIvn]
 - Improve verbose output
+- Allow saving an unmodified document
 
 ## 3.10.1
 

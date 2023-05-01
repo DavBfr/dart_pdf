@@ -91,13 +91,15 @@ class PdfXref extends PdfIndirect {
 }
 
 class PdfXrefTable extends PdfDataType with PdfDiagnostic {
-  PdfXrefTable();
+  PdfXrefTable({this.lastObjectId = 0});
 
   /// Document root point
   final params = PdfDict();
 
   /// List of objects to write
   final objects = <PdfObjectBase>{};
+
+  final int lastObjectId;
 
   /// Writes a block of references to the Pdf file
   void _writeBlock(PdfStream s, int firstId, List<PdfXref> block) {
@@ -192,7 +194,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
   int _outputLegacy(PdfObjectBase o, PdfStream s, List<PdfXref> xrefList) {
     // Now scan through the offsets list. They should be in sequence.
     xrefList.sort((a, b) => a.ser.compareTo(b.ser));
-    final size = xrefList.last.ser + 1;
+    final size = math.max(lastObjectId, xrefList.last.ser + 1);
 
     var firstId = 0; // First id in block
     var lastId = 0; // The last id used
@@ -249,7 +251,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
     xrefList.sort((a, b) => a.ser.compareTo(b.ser));
 
     // Write this object too
-    final id = xrefList.last.ser + 1;
+    final id = math.max(lastObjectId, xrefList.last.ser + 1);
     final size = id + 1;
     xrefList.add(PdfXref(id, offset));
 
