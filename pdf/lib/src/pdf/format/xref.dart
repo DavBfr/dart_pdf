@@ -101,6 +101,8 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
 
   final int lastObjectId;
 
+  static const String libraryName = 'https://github.com/DavBfr/dart_pdf';
+
   /// Writes a block of references to the Pdf file
   void _writeBlock(PdfStream s, int firstId, List<PdfXref> block) {
     s.putString('$firstId ${block.length}\n');
@@ -125,13 +127,16 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
 
     s.putString('%PDF-$v\n');
     s.putBytes(const <int>[0x25, 0xC2, 0xA5, 0xC2, 0xB1, 0xC3, 0xAB, 0x0A]);
+    s.putComment(libraryName);
     assert(() {
       if (o.settings.verbose) {
-        setInsertion(s);
+        setInsertion(s, 350);
         startStopwatch();
         debugFill('Verbose dart_pdf');
-        debugFill('Producer https://github.com/DavBfr/dart_pdf');
+        debugFill('Producer $libraryName');
         debugFill('Creation date: ${DateTime.now()}');
+        debugFill('Compress: ${o.settings.compress}');
+        debugFill('Crypto: ${o.settings.encryptCallback != null}');
       }
       return true;
     }());
