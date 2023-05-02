@@ -359,12 +359,14 @@ class Table extends Widget with SpanningWidget {
               decoration: cellDecoration == null
                   ? null
                   : cellDecoration(tableRow.length, cell, rowNum),
-              child: Text(cellFormat == null
-                  ? cell.toString()
-                  : cellFormat(tableRow.length, cell),
-                style: isOdd ? oddCellStyle : cellStyle,
-                textAlign: _textAlign(align)
-              ),
+              child: cell is String
+                  ? Text(
+                      cellFormat == null
+                          ? cell.toString()
+                          : cellFormat(tableRow.length, cell),
+                      style: isOdd ? oddCellStyle : cellStyle,
+                      textAlign: _textAlign(align))
+                  : (cell is Widget ? cell : null),
             ),
           );
         }
