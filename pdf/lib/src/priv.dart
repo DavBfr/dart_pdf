@@ -30,6 +30,7 @@ export 'pdf/format/stream.dart';
 export 'pdf/format/string.dart';
 export 'pdf/format/xref.dart';
 export 'pdf/obj/catalog.dart';
+export 'pdf/obj/graphic_stream.dart';
 export 'pdf/obj/object.dart';
 export 'pdf/obj/object_stream.dart';
 export 'pdf/obj/page_list.dart';

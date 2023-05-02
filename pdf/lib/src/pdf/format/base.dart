@@ -28,21 +28,23 @@ abstract class PdfDataType {
 
   void output(PdfObjectBase o, PdfStream s, [int? indent]);
 
-  PdfStream _toStream() {
+  PdfStream _toStream([int? indent]) {
     final s = PdfStream();
     output(
-        PdfObjectBase(
-          objser: 0,
-          params: this,
-          settings: const PdfSettings(),
-        ),
-        s);
+      PdfObjectBase(
+        objser: 0,
+        params: this,
+        settings: const PdfSettings(),
+      ),
+      s,
+      indent,
+    );
     return s;
   }
 
   @override
-  String toString() {
-    return String.fromCharCodes(_toStream().output());
+  String toString([int? indent]) {
+    return String.fromCharCodes(_toStream(indent).output());
   }
 
   @visibleForTesting
