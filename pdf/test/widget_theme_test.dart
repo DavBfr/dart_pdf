@@ -86,7 +86,7 @@ void main() {
     pdf.addPage(Page(
       theme: theme,
       build: (Context context) => Center(
-        child: Table.fromTextArray(context: context, data: <List<String>>[
+        child: TableHelper.fromTextArray(context: context, data: <List<String>>[
           <String>['Header', '123'],
           <String>['Cell', '456']
         ]),

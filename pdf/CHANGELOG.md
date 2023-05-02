@@ -9,6 +9,7 @@
 - Improve verbose output
 - Allow saving an unmodified document
 - Table cell: dynamic widget [Shahriyar Aghajani]
+- Move Table.fromTextArray to TableHelper.fromTextArray
 
 ## 3.10.1
 

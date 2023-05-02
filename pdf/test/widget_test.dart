@@ -149,7 +149,7 @@ void main() {
           pageFormat: const PdfPageFormat(400, 200),
           margin: const EdgeInsets.all(10),
           build: (Context context) => <Widget>[
-            Table.fromTextArray(
+            TableHelper.fromTextArray(
               context: context,
               cellPadding: const EdgeInsets.all(3),
               data: <List<String>>[

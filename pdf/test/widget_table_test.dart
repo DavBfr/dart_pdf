@@ -190,7 +190,7 @@ void main() {
 
   test('Table fromTextArray', () {
     pdf.addPage(Page(
-      build: (Context context) => Table.fromTextArray(
+      build: (Context context) => TableHelper.fromTextArray(
         context: context,
         tableWidth: TableWidth.min,
         data: <List<dynamic>>[
@@ -204,7 +204,7 @@ void main() {
 
   test('Table fromTextArray with formatting', () {
     pdf.addPage(Page(
-      build: (Context context) => Table.fromTextArray(
+      build: (Context context) => TableHelper.fromTextArray(
         border: null,
         cellAlignment: Alignment.center,
         headerDecoration: const BoxDecoration(
@@ -242,7 +242,7 @@ void main() {
       ),
       build: (Context context) => Directionality(
         textDirection: TextDirection.rtl,
-        child: Table.fromTextArray(
+        child: TableHelper.fromTextArray(
           headers: <dynamic>['ثلاثة', 'اثنان', 'واحد'],
           cellAlignment: Alignment.centerRight,
           data: <List<dynamic>>[
@@ -257,7 +257,7 @@ void main() {
   test('Table fromTextArray with alignment', () {
     pdf.addPage(
       Page(
-        build: (Context context) => Table.fromTextArray(
+        build: (Context context) => TableHelper.fromTextArray(
           cellAlignment: Alignment.center,
           data: <List<String>>[
             <String>['line 1', 'Text\n\n\ntext'],
