@@ -8,6 +8,7 @@
 - Fix underline on spans [RomanIvn]
 - Improve verbose output
 - Allow saving an unmodified document
+- Table cell: dynamic widget [Shahriyar Aghajani]
 
 ## 3.10.1
 

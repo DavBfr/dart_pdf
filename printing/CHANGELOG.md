@@ -6,6 +6,7 @@
 - Fix CMP0135 policy issue [Jemis Goti]
 - Fix raster crash on iOS and MacOS [Eduardo Vital Alencar Cunha]
 - Fix wrong format in directPrintPdf [<AlhasanAlQaisi>]
+- Add compatibility with Android Gradle Plugin 8.0 [asaarnak]
 
 ## 5.10.3
 
