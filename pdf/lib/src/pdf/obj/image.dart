@@ -97,10 +97,18 @@ class PdfImage extends PdfXObject {
     final h = height;
     final s = w * h;
     final out = Uint8List(s * 3);
-    for (var i = 0; i < s; i++) {
-      out[i * 3] = image[i * 4];
-      out[i * 3 + 1] = image[i * 4 + 1];
-      out[i * 3 + 2] = image[i * 4 + 2];
+    if (alpha) {
+      for (var i = 0; i < s; i++) {
+        out[i * 3] = image[i * 4];
+        out[i * 3 + 1] = image[i * 4 + 1];
+        out[i * 3 + 2] = image[i * 4 + 2];
+      }
+    } else {
+      for (var i = 0; i < s; i++) {
+        out[i * 3] = image[i * 3];
+        out[i * 3 + 1] = image[i * 3 + 1];
+        out[i * 3 + 2] = image[i * 3 + 2];
+      }
     }
 
     im.buf.putBytes(out);
