@@ -18,6 +18,8 @@ import 'package:pdf/widgets.dart';
 
 import 'src/fonts/gfonts.dart';
 
+export 'package:pdf_widget_wrapper/pdf_widget_wrapper.dart';
+
 export 'src/asset_utils.dart';
 export 'src/cache.dart';
 export 'src/callback.dart';
@@ -28,7 +30,6 @@ export 'src/printer.dart';
 export 'src/printing.dart';
 export 'src/printing_info.dart';
 export 'src/raster.dart';
-export 'src/widget_wrapper.dart';
 
 Future<void> pdfDefaultTheme() async {
   if (ThemeData.buildThemeData != null) {
