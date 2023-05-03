@@ -10,6 +10,7 @@
 - Allow saving an unmodified document
 - Table cell: dynamic widget [Shahriyar Aghajani]
 - Move Table.fromTextArray to TableHelper.fromTextArray
+- Fix PdfImage constructor without alpha channel [Tomasz Gucio]
 
 ## 3.10.1
 
