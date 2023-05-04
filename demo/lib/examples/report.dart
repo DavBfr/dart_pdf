@@ -150,7 +150,7 @@ Future<Uint8List> generateReport(
   );
 
   // Data table
-  final table = pw.Table.fromTextArray(
+  final table = pw.TableHelper.fromTextArray(
     border: null,
     headers: tableHeaders,
     data: List<List<dynamic>>.generate(

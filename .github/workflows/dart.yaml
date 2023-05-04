@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -44,7 +44,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -59,10 +59,76 @@ jobs:
     runs-on: macos-12
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          architecture: x64
+      - name: Enable macOS for flutter
+        run: flutter config --enable-macos-desktop
+      - name: Prepare build
+        run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
+      - name: Build example for macOS
+        run: cd printing/example; flutter build -v macos
+      # - name: Build example for iOS
+      #   run: cd printing/example; flutter build -v ios
+
+  linux-dev:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: master
+      - name: Enable Linux for flutter
+        run: flutter config --enable-linux-desktop
+      - name: Update repo
+        run: sudo apt update
+      - name: Install utils
+        run: sudo apt install poppler-utils imagemagick clang cmake ninja-build pkg-config libgtk-3-dev
+      - name: Run analysis
+        run: make analyze
+      - name: Run tests
+        run: make test
+      - name: Run readme tests
+        run: make test-readme
+      - name: Verify that nothing changed
+        run: test -z "$(git status --porcelain)"
+      - name: Push to codecov
+        run: bash <(curl -s https://codecov.io/bash)
+      - name: Prepare build
+        run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
+      - name: Build example for Linux
+        run: cd printing/example; flutter build -v linux
+      - name: Build example for Android
+        run: cd printing/example; flutter build -v apk
+      - name: Build demo for Web
+        run: cd demo; flutter build -v web
+
+  windows-dev:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: master
+      - name: Enable Windows for flutter
+        run: flutter config --enable-windows-desktop
+      - name: Prepare build
+        run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
+      - name: Build example for Windows
+        run: cd printing/example; flutter build -v windows
+
+  macos-dev:
+    runs-on: macos-12
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: master
           architecture: x64
       - name: Enable macOS for flutter
         run: flutter config --enable-macos-desktop

@@ -20,16 +20,7 @@ import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
-import 'box_border.dart';
-import 'container.dart';
-import 'decoration.dart';
-import 'flex.dart';
-import 'geometry.dart';
-import 'multi_page.dart';
-import 'text.dart';
-import 'text_style.dart';
-import 'theme.dart';
-import 'widget.dart';
+import '../../widgets.dart';
 
 /// A horizontal group of cells in a [Table].
 @immutable
@@ -244,6 +235,7 @@ class Table extends Widget with SpanningWidget {
     this.tableWidth = TableWidth.max,
   }) : super();
 
+  @Deprecated('Use TextHelper.fromTextArray() instead.')
   factory Table.fromTextArray({
     Context? context,
     required List<List<dynamic>> data,
@@ -278,121 +270,35 @@ class Table extends Widget with SpanningWidget {
     BoxDecoration? headerCellDecoration,
     BoxDecoration? rowDecoration,
     BoxDecoration? oddRowDecoration,
-  }) {
-    assert(headerCount >= 0);
-
-    if (context != null) {
-      final theme = Theme.of(context);
-      headerStyle ??= theme.tableHeader;
-      cellStyle ??= theme.tableCell;
-    }
-
-    headerPadding ??= cellPadding;
-    headerHeight ??= cellHeight;
-    oddRowDecoration ??= rowDecoration;
-    oddCellStyle ??= cellStyle;
-    cellAlignments ??= const <int, Alignment>{};
-    headerAlignments ??= cellAlignments;
-
-    final rows = <TableRow>[];
-
-    var rowNum = 0;
-    if (headers != null) {
-      final tableRow = <Widget>[];
-
-      for (final dynamic cell in headers) {
-        tableRow.add(
-          Container(
-            alignment: headerAlignments[tableRow.length] ?? headerAlignment,
-            padding: headerPadding,
-            decoration: headerCellDecoration,
-            constraints: BoxConstraints(minHeight: headerHeight),
-            child: Text(
-              headerFormat == null
-                  ? cell.toString()
-                  : headerFormat(tableRow.length, cell),
-              style: headerStyle,
-            ),
-          ),
-        );
-      }
-      rows.add(TableRow(
-        children: tableRow,
-        repeat: true,
-        decoration: headerDecoration,
-      ));
-      rowNum++;
-    }
-
-    for (final row in data) {
-      final tableRow = <Widget>[];
-      final isOdd = (rowNum - headerCount) % 2 != 0;
-
-      if (rowNum < headerCount) {
-        for (final dynamic cell in row) {
-          final align = headerAlignments[tableRow.length] ?? headerAlignment;
-          final textAlign = _textAlign(align);
-
-          tableRow.add(
-            Container(
-              alignment: align,
-              padding: headerPadding,
-              constraints: BoxConstraints(minHeight: headerHeight),
-              child: Text(
-                headerFormat == null
-                    ? cell.toString()
-                    : headerFormat(tableRow.length, cell),
-                style: headerStyle,
-                textAlign: textAlign,
-              ),
-            ),
-          );
-        }
-      } else {
-        for (final dynamic cell in row) {
-          final align = cellAlignments[tableRow.length] ?? cellAlignment;
-          final textAlign = _textAlign(align);
-          tableRow.add(
-            Container(
-              alignment: align,
-              padding: cellPadding,
-              constraints: BoxConstraints(minHeight: cellHeight),
-              decoration: cellDecoration == null
-                  ? null
-                  : cellDecoration(tableRow.length, cell, rowNum),
-              child: Text(
-                cellFormat == null
-                    ? cell.toString()
-                    : cellFormat(tableRow.length, cell),
-                style: isOdd ? oddCellStyle : cellStyle,
-                textAlign: textAlign,
-              ),
-            ),
-          );
-        }
-      }
-
-      var decoration = isOdd ? oddRowDecoration : rowDecoration;
-      if (rowNum < headerCount) {
-        decoration = headerDecoration;
-      }
-
-      rows.add(TableRow(
-        children: tableRow,
-        repeat: rowNum < headerCount,
-        decoration: decoration,
-      ));
-      rowNum++;
-    }
-    return Table(
-      border: border,
-      tableWidth: tableWidth,
-      children: rows,
-      columnWidths: columnWidths,
-      defaultColumnWidth: defaultColumnWidth,
-      defaultVerticalAlignment: TableCellVerticalAlignment.full,
-    );
-  }
+  }) =>
+      TableHelper.fromTextArray(
+        context: context,
+        data: data,
+        cellPadding: cellPadding,
+        cellHeight: cellHeight,
+        cellAlignment: cellAlignment,
+        cellAlignments: cellAlignments,
+        cellStyle: cellStyle,
+        oddCellStyle: oddCellStyle,
+        cellFormat: cellFormat,
+        cellDecoration: cellDecoration,
+        headerCount: headerCount = 1,
+        headers: headers,
+        headerPadding: headerPadding,
+        headerHeight: headerHeight,
+        headerAlignment: headerAlignment,
+        headerAlignments: headerAlignments,
+        headerStyle: headerStyle,
+        headerFormat: headerFormat,
+        border: border,
+        columnWidths: columnWidths,
+        defaultColumnWidth: defaultColumnWidth,
+        tableWidth: tableWidth,
+        headerDecoration: headerDecoration,
+        headerCellDecoration: headerCellDecoration,
+        rowDecoration: rowDecoration,
+        oddRowDecoration: oddRowDecoration,
+      );
 
   @override
   bool get canSpan => true;
@@ -671,15 +577,5 @@ class Table extends Widget with SpanningWidget {
     return (heightIndex >= 0 && heightIndex < _heights.length)
         ? _heights[heightIndex]
         : 0.0;
-  }
-
-  static TextAlign _textAlign(Alignment align) {
-    if (align.x == 0) {
-      return TextAlign.center;
-    } else if (align.x < 0) {
-      return TextAlign.left;
-    } else {
-      return TextAlign.right;
-    }
   }
 }

@@ -3,6 +3,11 @@
 ## 5.10.4
 
 - Update Google Fonts
+- Fix CMP0135 policy issue [Jemis Goti]
+- Fix raster crash on iOS and MacOS [Eduardo Vital Alencar Cunha]
+- Fix wrong format in directPrintPdf [<AlhasanAlQaisi>]
+- Add compatibility with Android Gradle Plugin 8.0 [asaarnak]
+- Add compatibility with  Flutter 3.10
 
 ## 5.10.3
 

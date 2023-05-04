@@ -84,20 +84,24 @@ class PdfXref extends PdfIndirect {
   }
 
   @override
-  String toString() => '$ser $gen obj ${type.name} $offset';
+  String toString([int? indent]) => '$ser $gen obj ${type.name} $offset';
 
   @override
   int get hashCode => offset;
 }
 
 class PdfXrefTable extends PdfDataType with PdfDiagnostic {
-  PdfXrefTable();
+  PdfXrefTable({this.lastObjectId = 0});
 
   /// Document root point
   final params = PdfDict();
 
   /// List of objects to write
   final objects = <PdfObjectBase>{};
+
+  final int lastObjectId;
+
+  static const String libraryName = 'https://github.com/DavBfr/dart_pdf';
 
   /// Writes a block of references to the Pdf file
   void _writeBlock(PdfStream s, int firstId, List<PdfXref> block) {
@@ -123,13 +127,16 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
 
     s.putString('%PDF-$v\n');
     s.putBytes(const <int>[0x25, 0xC2, 0xA5, 0xC2, 0xB1, 0xC3, 0xAB, 0x0A]);
+    s.putComment(libraryName);
     assert(() {
       if (o.settings.verbose) {
-        setInsertion(s);
+        setInsertion(s, 350);
         startStopwatch();
         debugFill('Verbose dart_pdf');
-        debugFill('Producer https://github.com/DavBfr/dart_pdf');
+        debugFill('Producer $libraryName');
         debugFill('Creation date: ${DateTime.now()}');
+        debugFill('Compress: ${o.settings.compress}');
+        debugFill('Crypto: ${o.settings.encryptCallback != null}');
       }
       return true;
     }());
@@ -192,7 +199,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
   int _outputLegacy(PdfObjectBase o, PdfStream s, List<PdfXref> xrefList) {
     // Now scan through the offsets list. They should be in sequence.
     xrefList.sort((a, b) => a.ser.compareTo(b.ser));
-    final size = xrefList.last.ser + 1;
+    final size = math.max(lastObjectId, xrefList.last.ser + 1);
 
     var firstId = 0; // First id in block
     var lastId = 0; // The last id used
@@ -249,7 +256,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
     xrefList.sort((a, b) => a.ser.compareTo(b.ser));
 
     // Write this object too
-    final id = xrefList.last.ser + 1;
+    final id = math.max(lastObjectId, xrefList.last.ser + 1);
     final size = id + 1;
     xrefList.add(PdfXref(id, offset));
 

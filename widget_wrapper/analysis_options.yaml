@@ -1,0 +1,37 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    missing_required_param: warning
+    missing_return: warning
+    public_member_api_docs: ignore
+    todo: ignore
+
+linter:
+  rules:
+    - always_put_control_body_on_new_line
+    - avoid_bool_literals_in_conditional_expressions
+    - avoid_classes_with_only_static_members
+    - avoid_field_initializers_in_const_classes
+    - avoid_slow_async_io
+    - avoid_unused_constructor_parameters
+    - avoid_void_async
+    - cancel_subscriptions
+    - directives_ordering
+    - flutter_style_todos
+    - no_adjacent_strings_in_list
+    - omit_local_variable_types
+    - package_api_docs
+    - prefer_asserts_in_initializer_lists
+    - prefer_final_locals
+    - prefer_foreach
+    - prefer_if_elements_to_conditional_expressions
+    - prefer_relative_imports
+    - prefer_single_quotes
+    - public_member_api_docs
+    - sort_constructors_first
+    - sort_pub_dependencies
+    - sort_unnamed_constructors_first
+    - test_types_in_equals
+    - throw_in_finally
+    - unnecessary_statements

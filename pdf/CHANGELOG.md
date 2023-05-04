@@ -6,6 +6,11 @@
 - Deprecate PdfArrayObject and PdfObjectDict
 - Improve PdfArray and PdfDict constructors
 - Fix underline on spans [RomanIvn]
+- Improve verbose output
+- Allow saving an unmodified document
+- Table cell: dynamic widget [Shahriyar Aghajani]
+- Move Table.fromTextArray to TableHelper.fromTextArray
+- Fix PdfImage constructor without alpha channel [Tomasz Gucio]
 
 ## 3.10.1
 

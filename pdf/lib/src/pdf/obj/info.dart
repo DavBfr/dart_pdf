@@ -17,6 +17,7 @@
 import '../document.dart';
 import '../format/dict.dart';
 import '../format/string.dart';
+import '../format/xref.dart';
 import 'object.dart';
 
 /// Information object
@@ -39,14 +40,13 @@ class PdfInfo extends PdfObject<PdfDict> {
             if (subject != null) '/Subject': PdfString.fromString(subject),
             if (keywords != null) '/Keywords': PdfString.fromString(keywords),
             if (producer != null)
-              '/Producer': PdfString.fromString('$producer ($_libraryName)')
+              '/Producer': PdfString.fromString(
+                  '$producer (${PdfXrefTable.libraryName})')
             else
-              '/Producer': PdfString.fromString(_libraryName),
+              '/Producer': PdfString.fromString(PdfXrefTable.libraryName),
             '/CreationDate': PdfString.fromDate(DateTime.now()),
           }),
         );
-
-  static const String _libraryName = 'https://github.com/DavBfr/dart_pdf';
 
   /// Author of this document
   final String? author;

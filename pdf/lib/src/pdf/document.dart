@@ -219,7 +219,7 @@ class PdfDocument {
   Future<void> _write(PdfStream os) async {
     PdfSignature? signature;
 
-    final xref = PdfXrefTable();
+    final xref = PdfXrefTable(lastObjectId: _objser);
 
     for (final ob in objects.where((e) => e.inUse)) {
       ob.prepare();

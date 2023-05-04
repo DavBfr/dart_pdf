@@ -164,7 +164,7 @@ class WidgetWrapper extends pw.ImageProvider {
     }
 
     final repaintBoundary = RenderRepaintBoundary();
-    // Flutter 3.9
+    // Flutter 3.10
     // final view = View.of(context);
     final view = WidgetsBinding.instance.window;
 
@@ -175,6 +175,8 @@ class WidgetWrapper extends pw.ImageProvider {
           size:
               Size(computedConstraints.maxWidth, computedConstraints.maxHeight),
           devicePixelRatio: view.devicePixelRatio),
+      // Flutter 3.10
+      // view: view,
       window: view,
     );
 
