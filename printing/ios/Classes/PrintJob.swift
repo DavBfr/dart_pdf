@@ -21,7 +21,9 @@ func dataProviderReleaseDataCallback(info _: UnsafeMutableRawPointer?, data: Uns
     data.deallocate()
 }
 
-var selectedPrinter: UIPrinter?
+// A variable that holds the selected printers to prevent recreate it if selected again
+// Each printer will be identified by its URL string
+var selectedPrinters = [String: UIPrinter]()
 
 public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate {
     private var printing: PrintingPlugin
@@ -95,17 +97,19 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                     return
                 }
                 
-                if selectedPrinter?.url.absoluteString != printerURL!.absoluteString {
-                    selectedPrinter = UIPrinter(url: printerURL!)
+                let printerURLString = printerURL!.absoluteString
+                
+                if !selectedPrinters.keys.contains(printerURLString) {
+                    selectedPrinters[printerURLString] = UIPrinter(url: printerURL!)
                 }
                 
-                selectedPrinter!.contactPrinter { available in
+                selectedPrinters[printerURLString]!.contactPrinter { available in
                     if !available {
                         self.printing.onCompleted(printJob: self, completed: false, error: "Printer not available")
                         return
                     }
                     
-                    controller.print(to: selectedPrinter!, completionHandler: self.completionHandler)
+                    controller.print(to: selectedPrinters[printerURLString]!, completionHandler: self.completionHandler)
                 }
             } else {
                 controller.present(animated: true, completionHandler: self.completionHandler)
@@ -189,208 +193,211 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                 return
             }
             
-            if selectedPrinter?.url.absoluteString != printerURL!.absoluteString {
-                selectedPrinter = UIPrinter(url: printerURL!)
+            let printerURLString = printerURL!.absoluteString
+            
+            if !selectedPrinters.keys.contains(printerURLString) {
+                selectedPrinters[printerURLString] = UIPrinter(url: printerURL!)
             }
             
-            selectedPrinter!.contactPrinter { available in
+            
+            selectedPrinters[printerURLString]!.contactPrinter { available in
                 if !available {
                     self.printing.onCompleted(printJob: self, completed: false, error: "Printer not available")
                     return
                 }
-            }
                 
-                controller.print(to: selectedPrinter!, completionHandler: completionHandler)
-                return
+                controller.print(to: selectedPrinters[printerURLString]!, completionHandler: self.completionHandler)
             }
-            
-            if dynamic {
-                controller.present(animated: true, completionHandler: completionHandler)
-                return
-            }
-            
-            self.printing.onLayout(
-                printJob: self,
-                width: size.width,
-                height: size.height,
-                marginLeft: margin.minX,
-                marginTop: margin.minY,
-                marginRight: size.width - margin.maxX,
-                marginBottom: size.height - margin.maxY
-            )
+            return
         }
         
-        static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String, subject: String?, body: String?) {
-            let tmpDirURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-            let fileURL = tmpDirURL.appendingPathComponent(name)
-            
-            do {
-                try data.write(to: fileURL, options: .atomic)
-            } catch {
-                print("sharePdf error: \(error.localizedDescription)")
-                return
-            }
-            
-            let activityViewController = UIActivityViewController(activityItems: [fileURL, body as Any], applicationActivities: nil)
-            activityViewController.setValue(subject, forKey: "subject")
-            if UIDevice.current.userInterfaceIdiom == .pad {
-                let controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController
-                activityViewController.popoverPresentationController?.sourceView = controller?.view
-                activityViewController.popoverPresentationController?.sourceRect = rect
-            }
-            UIApplication.shared.keyWindow?.rootViewController?.present(activityViewController, animated: true)
+        if dynamic {
+            controller.present(animated: true, completionHandler: completionHandler)
+            return
         }
         
-        func convertHtml(_ data: String, withPageSize rect: CGRect, andMargin margin: CGRect, andBaseUrl baseUrl: URL?) {
-            let viewController = UIApplication.shared.delegate?.window?!.rootViewController
-            let wkWebView = WKWebView(frame: viewController!.view.bounds)
-            wkWebView.isHidden = true
-            wkWebView.tag = 100
-            viewController?.view.addSubview(wkWebView)
-            wkWebView.loadHTMLString(data, baseURL: baseUrl ?? Bundle.main.bundleURL)
-            
-            urlObservation = wkWebView.observe(\.isLoading, changeHandler: { _, _ in
-                // this is workaround for issue with loading local images
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    // assign the print formatter to the print page renderer
-                    let renderer = UIPrintPageRenderer()
-                    renderer.addPrintFormatter(wkWebView.viewPrintFormatter(), startingAtPageAt: 0)
+        self.printing.onLayout(
+            printJob: self,
+            width: size.width,
+            height: size.height,
+            marginLeft: margin.minX,
+            marginTop: margin.minY,
+            marginRight: size.width - margin.maxX,
+            marginBottom: size.height - margin.maxY
+        )
+    }
+    
+    static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String, subject: String?, body: String?) {
+        let tmpDirURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+        let fileURL = tmpDirURL.appendingPathComponent(name)
+        
+        do {
+            try data.write(to: fileURL, options: .atomic)
+        } catch {
+            print("sharePdf error: \(error.localizedDescription)")
+            return
+        }
+        
+        let activityViewController = UIActivityViewController(activityItems: [fileURL, body as Any], applicationActivities: nil)
+        activityViewController.setValue(subject, forKey: "subject")
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            let controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController
+            activityViewController.popoverPresentationController?.sourceView = controller?.view
+            activityViewController.popoverPresentationController?.sourceRect = rect
+        }
+        UIApplication.shared.keyWindow?.rootViewController?.present(activityViewController, animated: true)
+    }
+    
+    func convertHtml(_ data: String, withPageSize rect: CGRect, andMargin margin: CGRect, andBaseUrl baseUrl: URL?) {
+        let viewController = UIApplication.shared.delegate?.window?!.rootViewController
+        let wkWebView = WKWebView(frame: viewController!.view.bounds)
+        wkWebView.isHidden = true
+        wkWebView.tag = 100
+        viewController?.view.addSubview(wkWebView)
+        wkWebView.loadHTMLString(data, baseURL: baseUrl ?? Bundle.main.bundleURL)
+        
+        urlObservation = wkWebView.observe(\.isLoading, changeHandler: { _, _ in
+            // this is workaround for issue with loading local images
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                // assign the print formatter to the print page renderer
+                let renderer = UIPrintPageRenderer()
+                renderer.addPrintFormatter(wkWebView.viewPrintFormatter(), startingAtPageAt: 0)
+                
+                // assign paperRect and printableRect values
+                renderer.setValue(rect, forKey: "paperRect")
+                renderer.setValue(margin, forKey: "printableRect")
+                
+                // create pdf context and draw each page
+                let pdfData = NSMutableData()
+                UIGraphicsBeginPDFContextToData(pdfData, rect, nil)
+                
+                for i in 0 ..< renderer.numberOfPages {
+                    UIGraphicsBeginPDFPage()
+                    renderer.drawPage(at: i, in: UIGraphicsGetPDFContextBounds())
+                }
+                
+                UIGraphicsEndPDFContext()
+                
+                if let viewWithTag = viewController?.view.viewWithTag(wkWebView.tag) {
+                    viewWithTag.removeFromSuperview() // remove hidden webview when pdf is generated
                     
-                    // assign paperRect and printableRect values
-                    renderer.setValue(rect, forKey: "paperRect")
-                    renderer.setValue(margin, forKey: "printableRect")
-                    
-                    // create pdf context and draw each page
-                    let pdfData = NSMutableData()
-                    UIGraphicsBeginPDFContextToData(pdfData, rect, nil)
-                    
-                    for i in 0 ..< renderer.numberOfPages {
-                        UIGraphicsBeginPDFPage()
-                        renderer.drawPage(at: i, in: UIGraphicsGetPDFContextBounds())
-                    }
-                    
-                    UIGraphicsEndPDFContext()
-                    
-                    if let viewWithTag = viewController?.view.viewWithTag(wkWebView.tag) {
-                        viewWithTag.removeFromSuperview() // remove hidden webview when pdf is generated
-                        
-                        // clear WKWebView cache
-                        if #available(iOS 9.0, *) {
-                            WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
-                                records.forEach { record in
-                                    WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {})
-                                }
+                    // clear WKWebView cache
+                    if #available(iOS 9.0, *) {
+                        WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
+                            records.forEach { record in
+                                WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {})
                             }
                         }
                     }
-                    
-                    // dispose urlObservation
-                    self.urlObservation = nil
-                    self.printing.onHtmlRendered(printJob: self, pdfData: pdfData as Data)
-                }
-            })
-        }
-        
-        static func pickPrinter(result: @escaping FlutterResult, withSourceRect rect: CGRect) {
-            let controller = UIPrinterPickerController(initiallySelectedPrinter: nil)
-            
-            let pickPrinterCompletionHandler: UIPrinterPickerController.CompletionHandler = {
-                (printerPickerController: UIPrinterPickerController, completed: Bool, error: Error?) in
-                if !completed, error != nil {
-                    print("Unable to pick printer: \(error?.localizedDescription ?? "unknown error")")
-                    result(nil)
-                    return
                 }
                 
-                if printerPickerController.selectedPrinter == nil {
-                    result(nil)
-                    return
-                }
-                
-                let printer = printerPickerController.selectedPrinter!
-                let data: NSDictionary = [
-                    "url": printer.url.absoluteString as Any,
-                    "name": printer.displayName as Any,
-                    "model": printer.makeAndModel as Any,
-                    "location": printer.displayLocation as Any,
-                ]
-                result(data)
+                // dispose urlObservation
+                self.urlObservation = nil
+                self.printing.onHtmlRendered(printJob: self, pdfData: pdfData as Data)
             }
-            
-            if UIDevice.current.userInterfaceIdiom == .pad {
-                let viewController: UIViewController? = UIApplication.shared.keyWindow?.rootViewController
-                if viewController != nil {
-                    controller.present(from: rect, in: viewController!.view, animated: true, completionHandler: pickPrinterCompletionHandler)
-                    return
-                }
-            }
-            
-            controller.present(animated: true, completionHandler: pickPrinterCompletionHandler)
-        }
+        })
+    }
+    
+    static func pickPrinter(result: @escaping FlutterResult, withSourceRect rect: CGRect) {
+        let controller = UIPrinterPickerController(initiallySelectedPrinter: nil)
         
-        public func rasterPdf(data: Data, pages: [Int]?, scale: CGFloat) {
-            guard
-                let provider = CGDataProvider(data: data as CFData),
-                let document = CGPDFDocument(provider)
-            else {
-                printing.onPageRasterEnd(printJob: self, error: "Cannot raster a malformed PDF file")
+        let pickPrinterCompletionHandler: UIPrinterPickerController.CompletionHandler = {
+            (printerPickerController: UIPrinterPickerController, completed: Bool, error: Error?) in
+            if !completed, error != nil {
+                print("Unable to pick printer: \(error?.localizedDescription ?? "unknown error")")
+                result(nil)
                 return
             }
             
-            DispatchQueue.global().async {
-                let pageCount = document.numberOfPages
+            if printerPickerController.selectedPrinter == nil {
+                result(nil)
+                return
+            }
+            
+            let printer = printerPickerController.selectedPrinter!
+            let data: NSDictionary = [
+                "url": printer.url.absoluteString as Any,
+                "name": printer.displayName as Any,
+                "model": printer.makeAndModel as Any,
+                "location": printer.displayLocation as Any,
+            ]
+            result(data)
+        }
+        
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            let viewController: UIViewController? = UIApplication.shared.keyWindow?.rootViewController
+            if viewController != nil {
+                controller.present(from: rect, in: viewController!.view, animated: true, completionHandler: pickPrinterCompletionHandler)
+                return
+            }
+        }
+        
+        controller.present(animated: true, completionHandler: pickPrinterCompletionHandler)
+    }
+    
+    public func rasterPdf(data: Data, pages: [Int]?, scale: CGFloat) {
+        guard
+            let provider = CGDataProvider(data: data as CFData),
+            let document = CGPDFDocument(provider)
+        else {
+            printing.onPageRasterEnd(printJob: self, error: "Cannot raster a malformed PDF file")
+            return
+        }
+        
+        DispatchQueue.global().async {
+            let pageCount = document.numberOfPages
+            
+            for pageNum in pages ?? Array(0 ... pageCount - 1) {
+                guard let page = document.page(at: pageNum + 1) else { continue }
+                let angle = CGFloat(page.rotationAngle) * CGFloat.pi / -180
+                let rect = page.getBoxRect(.mediaBox)
+                let width = Int(abs((cos(angle) * rect.width + sin(angle) * rect.height) * scale))
+                let height = Int(abs((cos(angle) * rect.height + sin(angle) * rect.width) * scale))
+                let stride = width * 4
+                var data = Data(repeating: 0, count: stride * height)
                 
-                for pageNum in pages ?? Array(0 ... pageCount - 1) {
-                    guard let page = document.page(at: pageNum + 1) else { continue }
-                    let angle = CGFloat(page.rotationAngle) * CGFloat.pi / -180
-                    let rect = page.getBoxRect(.mediaBox)
-                    let width = Int(abs((cos(angle) * rect.width + sin(angle) * rect.height) * scale))
-                    let height = Int(abs((cos(angle) * rect.height + sin(angle) * rect.width) * scale))
-                    let stride = width * 4
-                    var data = Data(repeating: 0, count: stride * height)
+                data.withUnsafeMutableBytes { (outputBytes: UnsafeMutableRawBufferPointer) in
+                    let rgb = CGColorSpaceCreateDeviceRGB()
+                    let context = CGContext(
+                        data: outputBytes.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                        width: width,
+                        height: height,
+                        bitsPerComponent: 8,
+                        bytesPerRow: stride,
+                        space: rgb,
+                        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+                    )
                     
-                    data.withUnsafeMutableBytes { (outputBytes: UnsafeMutableRawBufferPointer) in
-                        let rgb = CGColorSpaceCreateDeviceRGB()
-                        let context = CGContext(
-                            data: outputBytes.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                            width: width,
-                            height: height,
-                            bitsPerComponent: 8,
-                            bytesPerRow: stride,
-                            space: rgb,
-                            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-                        )
-                        
-                        if context != nil {
-                            context!.translateBy(x: CGFloat(width) / 2, y: CGFloat(height) / 2)
-                            context!.scaleBy(x: scale, y: scale)
-                            context!.rotate(by: angle)
-                            context!.translateBy(x: -rect.width / 2, y: -rect.height / 2)
-                            context!.drawPDFPage(page)
-                        }
-                    }
-                    
-                    DispatchQueue.main.sync {
-                        self.printing.onPageRasterized(printJob: self, imageData: data, width: width, height: height)
+                    if context != nil {
+                        context!.translateBy(x: CGFloat(width) / 2, y: CGFloat(height) / 2)
+                        context!.scaleBy(x: scale, y: scale)
+                        context!.rotate(by: angle)
+                        context!.translateBy(x: -rect.width / 2, y: -rect.height / 2)
+                        context!.drawPDFPage(page)
                     }
                 }
                 
                 DispatchQueue.main.sync {
-                    self.printing.onPageRasterEnd(printJob: self, error: nil)
+                    self.printing.onPageRasterized(printJob: self, imageData: data, width: width, height: height)
                 }
             }
-        }
-        
-        public static func printingInfo() -> NSDictionary {
-            let data: NSDictionary = [
-                "directPrint": true,
-                "dynamicLayout": true,
-                "canPrint": true,
-                "canConvertHtml": true,
-                "canShare": true,
-                "canRaster": true,
-                "canListPrinters": false,
-            ]
-            return data
+            
+            DispatchQueue.main.sync {
+                self.printing.onPageRasterEnd(printJob: self, error: nil)
+            }
         }
     }
+    
+    public static func printingInfo() -> NSDictionary {
+        let data: NSDictionary = [
+            "directPrint": true,
+            "dynamicLayout": true,
+            "canPrint": true,
+            "canConvertHtml": true,
+            "canShare": true,
+            "canRaster": true,
+            "canListPrinters": false,
+        ]
+        return data
+    }
+}
