@@ -11,6 +11,8 @@
 - Table cell: dynamic widget [Shahriyar Aghajani]
 - Move Table.fromTextArray to TableHelper.fromTextArray
 - Fix PdfImage constructor without alpha channel [Tomasz Gucio]
+- image.fromBytes() pass bytes offset [Aravindhan K]
+- Update xml dependency and deprecated getter
 
 ## 3.10.1
 
