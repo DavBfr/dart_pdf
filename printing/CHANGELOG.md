@@ -8,6 +8,7 @@
 - Fix wrong format in directPrintPdf [<AlhasanAlQaisi>]
 - Add compatibility with Android Gradle Plugin 8.0 [asaarnak]
 - Add compatibility with  Flutter 3.10
+- Re-init UIPrinter cause issues with delegate [Hasan]
 
 ## 5.10.3
 
