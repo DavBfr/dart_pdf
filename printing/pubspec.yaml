@@ -30,7 +30,11 @@ dependencies:
       url: https://github.com/Shahriyar13/dart_pdf.git
       path: pdf
       version: ^3.10.2
-  pdf_widget_wrapper: '>=1.0.1 <2.0.0'
+  pdf_widget_wrapper:
+    git:
+      url: https://github.com/Shahriyar13/dart_pdf.git
+      path: pdf_widget_wrapper
+      version: ^3.10.2
   plugin_platform_interface: ^2.1.0
 
 dev_dependencies:
