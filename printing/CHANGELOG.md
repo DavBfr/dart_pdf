@@ -3,6 +3,7 @@
 ## 5.11.0
 
 - Set Flutter 3.10 as the minimum version
+- Fix web builds with Flutter 3.10
 
 ## 5.10.4
 
