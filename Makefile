@@ -137,13 +137,6 @@ publish-printing: format clean
 	find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 	git tag $(shell grep version printing/pubspec.yaml | sed 's/version\s*:\s*/printing-/g')
 
-publish-wrapper: format clean
-	test -z "$(shell git status --porcelain)"
-	find widget_wrapper -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
-	cd widget_wrapper; $(DART_BIN) pub publish -f
-	find widget_wrapper -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
-	git tag $(shell grep version widget_wrapper/pubspec.yaml | sed 's/version\s*:\s*/wrapper-/g')
-
 .pana:
 	which pana || $(DART_BIN) pub global activate pana
 	touch $@

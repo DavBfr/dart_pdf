@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.11.0
+
+- Set Flutter 3.10 as the minimum version
+
 ## 5.10.4
 
 - Update Google Fonts
