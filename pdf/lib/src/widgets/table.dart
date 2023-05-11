@@ -235,7 +235,7 @@ class Table extends Widget with SpanningWidget {
     this.tableWidth = TableWidth.max,
   }) : super();
 
-  @Deprecated('Use TextHelper.fromTextArray() instead.')
+  @Deprecated('Use TableHelper.fromTextArray() instead.')
   factory Table.fromTextArray({
     Context? context,
     required List<List<dynamic>> data,
