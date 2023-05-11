@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.10.3
+
+- Set xml 6.3.0 as minimum dependency
+
 ## 3.10.2
 
 - Fix Type1 font widths
