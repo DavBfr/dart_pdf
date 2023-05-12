@@ -67,12 +67,25 @@ class PrintingPlugin extends PrintingPlatform {
     if (!_hasPdfJsLib) {
       dynamic amd;
       dynamic define;
+      dynamic module;
+      dynamic exports;
       if (js.context['define'] != null) {
         // In dev, requireJs is loaded in. Disable it here.
         define = js.JsObject.fromBrowserObject(js.context['define']);
         amd = define['amd'];
         define['amd'] = false;
       }
+
+      // Save Webpack values and make typeof module != object
+      if (js.context['exports'] != null) {
+        exports = js.JsObject.fromBrowserObject(js.context['exports']);
+      }
+      js.context['exports'] = 0;
+
+      if (js.context['module'] != null) {
+        module = js.JsObject.fromBrowserObject(js.context['module']);
+      }
+      js.context['module'] = 0;
 
       final script = ScriptElement()
         ..type = 'text/javascript'
@@ -89,6 +102,14 @@ class PrintingPlugin extends PrintingPlatform {
 
       js.context['pdfjsLib']['GlobalWorkerOptions']['workerSrc'] =
           '$_pdfJsUrlBase/build/pdf.worker.min.js';
+
+      // Restore module and exports
+      if (module != null) {
+        js.context['module'] = module;
+      }
+      if (exports != null) {
+        js.context['exports'] = exports;
+      }
     }
 
     _loading.release();

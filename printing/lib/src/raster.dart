@@ -66,15 +66,9 @@ class PdfRasterImage extends ImageProvider<PdfRaster> {
   }
 
   @override
-  ImageStreamCompleter loadBuffer(PdfRaster key, DecoderBufferCallback decode) {
+  ImageStreamCompleter loadImage(PdfRaster key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(_loadAsync());
   }
-
-  // Flutter 3.10
-  // @override
-  // ImageStreamCompleter loadImage(PdfRaster key, ImageDecoderCallback decode) {
-  //   return OneFrameImageStreamCompleter(_loadAsync());
-  // }
 
   @override
   Future<PdfRaster> obtainKey(ImageConfiguration configuration) async {

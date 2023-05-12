@@ -21,6 +21,10 @@ func dataProviderReleaseDataCallback(info _: UnsafeMutableRawPointer?, data: Uns
     data.deallocate()
 }
 
+// A variable that holds the selected printers to prevent recreate it if selected again
+// Each printer will be identified by its URL string
+var selectedPrinters = [String: UIPrinter]()
+
 public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate {
     private var printing: PrintingPlugin
     public var index: Int
@@ -93,14 +97,19 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                     return
                 }
 
-                let printer = UIPrinter(url: printerURL!)
-                printer.contactPrinter { available in
+                let printerURLString = printerURL!.absoluteString
+
+                if !selectedPrinters.keys.contains(printerURLString) {
+                    selectedPrinters[printerURLString] = UIPrinter(url: printerURL!)
+                }
+
+                selectedPrinters[printerURLString]!.contactPrinter { available in
                     if !available {
                         self.printing.onCompleted(printJob: self, completed: false, error: "Printer not available")
                         return
                     }
 
-                    controller.print(to: printer, completionHandler: self.completionHandler)
+                    controller.print(to: selectedPrinters[printerURLString]!, completionHandler: self.completionHandler)
                 }
             } else {
                 controller.present(animated: true, completionHandler: self.completionHandler)
@@ -134,14 +143,14 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
 
         printing.onCompleted(printJob: self, completed: completed, error: error?.localizedDescription as NSString?)
     }
-    
-    public func printInteractionController(_ printController: UIPrintInteractionController, choosePaper paperList: [UIPrintPaper]) -> UIPrintPaper {
+
+    public func printInteractionController(_: UIPrintInteractionController, choosePaper paperList: [UIPrintPaper]) -> UIPrintPaper {
         if currentSize == nil {
             return paperList[0]
         }
-        
+
         let bestPaper = UIPrintPaper.bestPaper(forPageSize: currentSize!, withPapersFrom: paperList)
-        
+
         return bestPaper
     }
 
@@ -184,8 +193,20 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                 return
             }
 
-            let printer = UIPrinter(url: printerURL!)
-            controller.print(to: printer, completionHandler: completionHandler)
+            let printerURLString = printerURL!.absoluteString
+
+            if !selectedPrinters.keys.contains(printerURLString) {
+                selectedPrinters[printerURLString] = UIPrinter(url: printerURL!)
+            }
+
+            selectedPrinters[printerURLString]!.contactPrinter { available in
+                if !available {
+                    self.printing.onCompleted(printJob: self, completed: false, error: "Printer not available")
+                    return
+                }
+
+                controller.print(to: selectedPrinters[printerURLString]!, completionHandler: self.completionHandler)
+            }
             return
         }
 
@@ -281,25 +302,25 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
 
         let pickPrinterCompletionHandler: UIPrinterPickerController.CompletionHandler = {
             (printerPickerController: UIPrinterPickerController, completed: Bool, error: Error?) in
-                if !completed, error != nil {
-                    print("Unable to pick printer: \(error?.localizedDescription ?? "unknown error")")
-                    result(nil)
-                    return
-                }
+            if !completed, error != nil {
+                print("Unable to pick printer: \(error?.localizedDescription ?? "unknown error")")
+                result(nil)
+                return
+            }
 
-                if printerPickerController.selectedPrinter == nil {
-                    result(nil)
-                    return
-                }
+            if printerPickerController.selectedPrinter == nil {
+                result(nil)
+                return
+            }
 
-                let printer = printerPickerController.selectedPrinter!
-                let data: NSDictionary = [
-                    "url": printer.url.absoluteString as Any,
-                    "name": printer.displayName as Any,
-                    "model": printer.makeAndModel as Any,
-                    "location": printer.displayLocation as Any,
-                ]
-                result(data)
+            let printer = printerPickerController.selectedPrinter!
+            let data: NSDictionary = [
+                "url": printer.url.absoluteString as Any,
+                "name": printer.displayName as Any,
+                "model": printer.makeAndModel as Any,
+                "location": printer.displayLocation as Any,
+            ]
+            result(data)
         }
 
         if UIDevice.current.userInterfaceIdiom == .pad {

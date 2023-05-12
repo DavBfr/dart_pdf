@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.10.3
+
+- Set xml 6.3.0 as minimum dependency
+
 ## 3.10.2
 
 - Fix Type1 font widths
@@ -11,6 +15,8 @@
 - Table cell: dynamic widget [Shahriyar Aghajani]
 - Move Table.fromTextArray to TableHelper.fromTextArray
 - Fix PdfImage constructor without alpha channel [Tomasz Gucio]
+- image.fromBytes() pass bytes offset [Aravindhan K]
+- Update xml dependency and deprecated getter
 
 ## 3.10.1
 

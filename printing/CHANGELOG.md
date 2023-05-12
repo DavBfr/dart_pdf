@@ -1,5 +1,10 @@
 # Changelog
 
+## 5.11.0
+
+- Set Flutter 3.10 as the minimum version
+- Fix web builds with Flutter 3.10
+
 ## 5.10.4
 
 - Update Google Fonts
@@ -8,6 +13,7 @@
 - Fix wrong format in directPrintPdf [<AlhasanAlQaisi>]
 - Add compatibility with Android Gradle Plugin 8.0 [asaarnak]
 - Add compatibility with  Flutter 3.10
+- Re-init UIPrinter cause issues with delegate [Hasan]
 
 ## 5.10.3
 

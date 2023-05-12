@@ -129,6 +129,7 @@ class PdfRasterBase {
       width: width,
       height: height,
       bytes: pixels.buffer,
+      bytesOffset: pixels.offsetInBytes,
       format: im.Format.uint8,
       numChannels: 4,
     );
