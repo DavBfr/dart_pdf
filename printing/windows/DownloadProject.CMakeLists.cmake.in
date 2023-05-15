@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 3.10)
 project(${DL_ARGS_PROJ}-download NONE)
 
 include(ExternalProject)
+cmake_policy(SET CMP0135 NEW)
 ExternalProject_Add(${DL_ARGS_PROJ}-download
                     ${DL_ARGS_UNPARSED_ARGUMENTS}
                     SOURCE_DIR          "${DL_ARGS_SOURCE_DIR}"
@@ -14,5 +15,4 @@ ExternalProject_Add(${DL_ARGS_PROJ}-download
                     BUILD_COMMAND       ""
                     INSTALL_COMMAND     ""
                     TEST_COMMAND        ""
-                    DOWNLOAD_EXTRACT_TIMESTAMP true
 )
