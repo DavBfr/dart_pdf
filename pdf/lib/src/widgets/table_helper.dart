@@ -98,12 +98,14 @@ mixin TableHelper {
             padding: headerPadding,
             decoration: headerCellDecoration,
             constraints: BoxConstraints(minHeight: headerHeight),
-            child: Text(
-              headerFormat == null
-                  ? cell.toString()
-                  : headerFormat(tableRow.length, cell),
-              style: headerStyle,
-            ),
+            child: cell is Widget
+                ? cell
+                : Text(
+                    headerFormat == null
+                        ? cell.toString()
+                        : headerFormat(tableRow.length, cell),
+                    style: headerStyle,
+                  ),
           ),
         );
       }
@@ -129,13 +131,15 @@ mixin TableHelper {
               alignment: align,
               padding: headerPadding,
               constraints: BoxConstraints(minHeight: headerHeight),
-              child: Text(
-                headerFormat == null
-                    ? cell.toString()
-                    : headerFormat(tableRow.length, cell),
-                style: headerStyle,
-                textAlign: textAlign,
-              ),
+              child: cell is Widget
+                  ? cell
+                  : Text(
+                      headerFormat == null
+                          ? cell.toString()
+                          : headerFormat(tableRow.length, cell),
+                      style: headerStyle,
+                      textAlign: textAlign,
+                    ),
             ),
           );
         }

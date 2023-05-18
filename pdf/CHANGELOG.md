@@ -3,6 +3,7 @@
 ## 3.10.4
 
 - Fix Deprecation warning message
+- TableHelper data accepts Widgets as child
 
 ## 3.10.3
 
