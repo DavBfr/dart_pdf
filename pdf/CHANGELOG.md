@@ -4,6 +4,7 @@
 
 - Fix Deprecation warning message
 - TableHelper data accepts Widgets as child
+- Add RTL support on TableHelper
 
 ## 3.10.3
 

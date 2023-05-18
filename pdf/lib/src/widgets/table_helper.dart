@@ -69,6 +69,8 @@ mixin TableHelper {
     BoxDecoration? headerCellDecoration,
     BoxDecoration? rowDecoration,
     BoxDecoration? oddRowDecoration,
+    TextDirection? headerDirection,
+    TextDirection? tableDirection,
   }) {
     assert(headerCount >= 0);
 
@@ -105,6 +107,7 @@ mixin TableHelper {
                         ? cell.toString()
                         : headerFormat(tableRow.length, cell),
                     style: headerStyle,
+                    textDirection: headerDirection,
                   ),
           ),
         );
@@ -139,6 +142,7 @@ mixin TableHelper {
                           : headerFormat(tableRow.length, cell),
                       style: headerStyle,
                       textAlign: textAlign,
+                      textDirection: headerDirection,
                     ),
             ),
           );
@@ -161,7 +165,9 @@ mixin TableHelper {
                           ? cell.toString()
                           : cellFormat(tableRow.length, cell),
                       style: isOdd ? oddCellStyle : cellStyle,
-                      textAlign: _textAlign(align)),
+                      textAlign: _textAlign(align),
+                      textDirection: tableDirection,
+                    ),
             ),
           );
         }
