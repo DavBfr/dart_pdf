@@ -69,6 +69,8 @@ mixin TableHelper {
     BoxDecoration? headerCellDecoration,
     BoxDecoration? rowDecoration,
     BoxDecoration? oddRowDecoration,
+    TextDirection? headerDirection,
+    TextDirection? tableDirection,
   }) {
     assert(headerCount >= 0);
 
@@ -98,12 +100,15 @@ mixin TableHelper {
             padding: headerPadding,
             decoration: headerCellDecoration,
             constraints: BoxConstraints(minHeight: headerHeight),
-            child: Text(
-              headerFormat == null
-                  ? cell.toString()
-                  : headerFormat(tableRow.length, cell),
-              style: headerStyle,
-            ),
+            child: cell is Widget
+                ? cell
+                : Text(
+                    headerFormat == null
+                        ? cell.toString()
+                        : headerFormat(tableRow.length, cell),
+                    style: headerStyle,
+                    textDirection: headerDirection,
+                  ),
           ),
         );
       }
@@ -129,13 +134,16 @@ mixin TableHelper {
               alignment: align,
               padding: headerPadding,
               constraints: BoxConstraints(minHeight: headerHeight),
-              child: Text(
-                headerFormat == null
-                    ? cell.toString()
-                    : headerFormat(tableRow.length, cell),
-                style: headerStyle,
-                textAlign: textAlign,
-              ),
+              child: cell is Widget
+                  ? cell
+                  : Text(
+                      headerFormat == null
+                          ? cell.toString()
+                          : headerFormat(tableRow.length, cell),
+                      style: headerStyle,
+                      textAlign: textAlign,
+                      textDirection: headerDirection,
+                    ),
             ),
           );
         }
@@ -157,7 +165,9 @@ mixin TableHelper {
                           ? cell.toString()
                           : cellFormat(tableRow.length, cell),
                       style: isOdd ? oddCellStyle : cellStyle,
-                      textAlign: _textAlign(align)),
+                      textAlign: _textAlign(align),
+                      textDirection: tableDirection,
+                    ),
             ),
           );
         }

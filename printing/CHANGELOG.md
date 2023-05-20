@@ -4,6 +4,7 @@
 
 - Set Flutter 3.10 as the minimum version
 - Fix web builds with Flutter 3.10
+- Fix cmake build on Linux and Windows
 
 ## 5.10.4
 

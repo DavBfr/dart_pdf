@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.10.4
+
+- Fix Deprecation warning message
+- TableHelper data accepts Widgets as child
+- Add RTL support on TableHelper
+
 ## 3.10.3
 
 - Set xml 6.3.0 as minimum dependency
