@@ -3,6 +3,7 @@
 ## 3.10.5
 
 - Improve TTF writer with multi-compound characters
+- Partially revert underline on spans changes
 
 ## 3.10.4
 
