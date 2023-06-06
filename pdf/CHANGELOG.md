@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.10.5
+
+- Improve TTF writer with multi-compound characters
+
 ## 3.10.4
 
 - Fix Deprecation warning message
