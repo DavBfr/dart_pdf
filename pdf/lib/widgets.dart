@@ -54,6 +54,7 @@ export 'src/widgets/shape.dart';
 export 'src/widgets/stack.dart';
 export 'src/widgets/svg.dart';
 export 'src/widgets/table.dart';
+export 'src/widgets/table_helper.dart';
 export 'src/widgets/text.dart';
 export 'src/widgets/text_style.dart';
 export 'src/widgets/theme.dart';

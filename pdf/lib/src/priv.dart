@@ -14,8 +14,23 @@
  * limitations under the License.
  */
 
-export 'pdf/data_types.dart';
+export 'pdf/format/array.dart';
+export 'pdf/format/ascii85.dart';
+export 'pdf/format/base.dart';
+export 'pdf/format/bool.dart';
+export 'pdf/format/diagnostic.dart';
+export 'pdf/format/dict.dart';
+export 'pdf/format/dict_stream.dart';
+export 'pdf/format/indirect.dart';
+export 'pdf/format/name.dart';
+export 'pdf/format/null_value.dart';
+export 'pdf/format/num.dart';
+export 'pdf/format/object_base.dart' hide DeflateCallback, PdfVersion;
+export 'pdf/format/stream.dart';
+export 'pdf/format/string.dart';
+export 'pdf/format/xref.dart';
+export 'pdf/obj/catalog.dart';
+export 'pdf/obj/graphic_stream.dart';
 export 'pdf/obj/object.dart';
 export 'pdf/obj/object_stream.dart';
-export 'pdf/stream.dart';
-export 'pdf/xref.dart';
+export 'pdf/obj/page_list.dart';

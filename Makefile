@@ -20,6 +20,7 @@ CLNG_SRC=$(shell find printing/ios printing/macos printing/windows printing/linu
 SWFT_SRC=$(shell find printing/ios printing/macos -name '*.swift')
 FONTS=pdf/open-sans.ttf pdf/open-sans-bold.ttf pdf/roboto.ttf pdf/noto-sans.ttf pdf/genyomintw.ttf pdf/hacen-tunisia.ttf pdf/material.ttf pdf/emoji.ttf
 COV_PORT=9292
+SVG_ASSETS_URL=https://raw.githubusercontent.com/dnfield/flutter_svg/master/packages/flutter_svg/example/assets
 SVG=blend_and_mask blend_mode_devil clip_path clip_path_2 clip_path_2 clip_path_3  clip_path_3  dash_path ellipse empty_defs equation fill-rule-inherit group_composite_opacity group_fill_opacity group_mask group_opacity group_opacity_transform hidden href-fill image image_def implicit_fill_with_opacity linear_gradient linear_gradient_2 linear_gradient_absolute_user_space_translate linear_gradient_percentage_bounding_translate linear_gradient_percentage_user_space_translate linear_gradient_xlink male mask mask_with_gradient mask_with_use mask_with_use2 nested_group opacity_on_path radial_gradient radial_gradient_absolute_user_space_translate radial_gradient_focal radial_gradient_percentage_bounding_translate radial_gradient_percentage_user_space_translate radial_gradient_xlink radial_ref_linear_gradient rect_rrect rect_rrect_no_ry stroke_inherit_circles style_attr text text_2 text_3 use_circles use_circles_def use_emc2 use_fill use_opacity_grid width_height_viewbox flutter_logo emoji_u1f600 text_transform dart new-pause-button new-send-circle new-gif new-camera new-image numeric_25 new-mention new-gif-button new-action-expander new-play-button aa alphachannel Ghostscript_Tiger Firefox_Logo_2017 chess_knight Flag_of_the_United_States
 
 all: $(FONTS) demo/assets/logo.svg demo/assets/profile.jpg format printing/example/.metadata get
@@ -162,95 +163,95 @@ fix: get .dartfix
 
 ref/svg/%.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/simple/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/simple/$(notdir $@)" > $@
 
 ref/svg/flutter_logo.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/$(notdir $@)" > $@
 
 ref/svg/dart.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/$(notdir $@)" > $@
 
 ref/svg/text_transform.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/$(notdir $@)" > $@
 
 ref/svg/emoji_u1f600.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/noto-emoji/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/noto-emoji/$(notdir $@)" > $@
 
 ref/svg/new-pause-button.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/deborah_ufw/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/deborah_ufw/$(notdir $@)" > $@
 
 ref/svg/new-send-circle.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/deborah_ufw/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/deborah_ufw/$(notdir $@)" > $@
 
 ref/svg/new-gif.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/deborah_ufw/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/deborah_ufw/$(notdir $@)" > $@
 
 ref/svg/new-camera.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/deborah_ufw/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/deborah_ufw/$(notdir $@)" > $@
 
 ref/svg/new-image.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/deborah_ufw/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/deborah_ufw/$(notdir $@)" > $@
 
 ref/svg/numeric_25.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/deborah_ufw/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/deborah_ufw/$(notdir $@)" > $@
 
 ref/svg/new-mention.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/deborah_ufw/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/deborah_ufw/$(notdir $@)" > $@
 
 ref/svg/new-gif-button.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/deborah_ufw/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/deborah_ufw/$(notdir $@)" > $@
 
 ref/svg/new-action-expander.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/deborah_ufw/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/deborah_ufw/$(notdir $@)" > $@
 
 ref/svg/new-play-button.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/deborah_ufw/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/deborah_ufw/$(notdir $@)" > $@
 
 ref/svg/aa.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/w3samples/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/w3samples/$(notdir $@)" > $@
 
 ref/svg/alphachannel.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/w3samples/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/w3samples/$(notdir $@)" > $@
 
 ref/svg/Ghostscript_Tiger.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/wikimedia/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/wikimedia/$(notdir $@)" > $@
 
 ref/svg/Firefox_Logo_2017.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/wikimedia/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/wikimedia/$(notdir $@)" > $@
 
 ref/svg/chess_knight.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/wikimedia/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/wikimedia/$(notdir $@)" > $@
 
 ref/svg/Flag_of_the_United_States.svg:
 	mkdir -p ref/svg
-	curl -L "https://raw.githubusercontent.com/dnfield/flutter_svg/master/example/assets/wikimedia/$(notdir $@)" > $@
+	curl -L "$(SVG_ASSETS_URL)/wikimedia/$(notdir $@)" > $@
 
 svg: $(patsubst %,ref/svg/%.svg,$(SVG))
 
 ref: svg
 	mkdir -p ref
-	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/pdf/pdfs/PDF32000_2008.pdf'
-	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/pdf/adobe_supplement_iso32000.pdf'
-	cd $@; curl -OL 'https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/pdf_reference_1-7.pdf'
+	cd $@; curl -OL 'https://ia801003.us.archive.org/5/items/pdf320002008/PDF32000_2008.pdf'
+	cd $@; curl -OL 'https://www.adobe.com/content/dam/cc1/en/devnet/pdf/pdfs/adobe_supplement_iso32000_1.pdf'
+	cd $@; curl -OL 'https://ia801001.us.archive.org/1/items/pdf1.7/pdf_reference_1-7.pdf'
 
 gh-social: all
 	cd test; $(DART_BIN) --enable-asserts github_social_preview.dart

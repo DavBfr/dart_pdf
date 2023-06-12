@@ -14,47 +14,39 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
-import 'object_dict.dart';
+import '../format/dict.dart';
+import '../format/string.dart';
+import '../format/xref.dart';
+import 'object.dart';
 
 /// Information object
-class PdfInfo extends PdfObjectDict {
+class PdfInfo extends PdfObject<PdfDict> {
   /// Create an information object
-  PdfInfo(PdfDocument pdfDocument,
-      {this.title,
-      this.author,
-      this.creator,
-      this.subject,
-      this.keywords,
-      this.producer})
-      : super(pdfDocument) {
-    if (author != null) {
-      params['/Author'] = PdfSecString.fromString(this, author!);
-    }
-    if (creator != null) {
-      params['/Creator'] = PdfSecString.fromString(this, creator!);
-    }
-    if (title != null) {
-      params['/Title'] = PdfSecString.fromString(this, title!);
-    }
-    if (subject != null) {
-      params['/Subject'] = PdfSecString.fromString(this, subject!);
-    }
-    if (keywords != null) {
-      params['/Keywords'] = PdfSecString.fromString(this, keywords!);
-    }
-    if (producer != null) {
-      params['/Producer'] =
-          PdfSecString.fromString(this, '$producer ($_libraryName)');
-    } else {
-      params['/Producer'] = PdfSecString.fromString(this, _libraryName);
-    }
-
-    params['/CreationDate'] = PdfSecString.fromDate(this, DateTime.now());
-  }
-
-  static const String _libraryName = 'https://github.com/DavBfr/dart_pdf';
+  PdfInfo(
+    PdfDocument pdfDocument, {
+    this.title,
+    this.author,
+    this.creator,
+    this.subject,
+    this.keywords,
+    this.producer,
+  }) : super(
+          pdfDocument,
+          params: PdfDict.values({
+            if (author != null) '/Author': PdfString.fromString(author),
+            if (creator != null) '/Creator': PdfString.fromString(creator),
+            if (title != null) '/Title': PdfString.fromString(title),
+            if (subject != null) '/Subject': PdfString.fromString(subject),
+            if (keywords != null) '/Keywords': PdfString.fromString(keywords),
+            if (producer != null)
+              '/Producer': PdfString.fromString(
+                  '$producer (${PdfXrefTable.libraryName})')
+            else
+              '/Producer': PdfString.fromString(PdfXrefTable.libraryName),
+            '/CreationDate': PdfString.fromDate(DateTime.now()),
+          }),
+        );
 
   /// Author of this document
   final String? author;

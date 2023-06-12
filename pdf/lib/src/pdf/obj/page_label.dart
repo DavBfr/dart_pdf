@@ -1,6 +1,26 @@
-import '../../priv.dart';
+/*
+ * Copyright (C) 2017, David PHAM-VAN <dev.nfet.net@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import '../document.dart';
-import 'object_dict.dart';
+import '../format/array.dart';
+import '../format/dict.dart';
+import '../format/name.dart';
+import '../format/num.dart';
+import '../format/string.dart';
+import 'object.dart';
 
 enum PdfPageLabelStyle {
   arabic,
@@ -32,7 +52,7 @@ class PdfPageLabel {
   final String? prefix;
   final int? subsequent;
 
-  PdfDict toDict(PdfObject obj) {
+  PdfDict toDict() {
     final PdfName? s;
     switch (style) {
       case PdfPageLabelStyle.arabic:
@@ -53,10 +73,10 @@ class PdfPageLabel {
       case null:
         s = null;
     }
-    return PdfDict({
+    return PdfDict.values({
       if (s != null) '/S': s,
       if (prefix != null && prefix!.isNotEmpty)
-        '/P': PdfSecString.fromString(obj, prefix!),
+        '/P': PdfString.fromString(prefix!),
       if (subsequent != null) '/St': PdfNum(subsequent!)
     });
   }
@@ -125,9 +145,10 @@ class PdfPageLabel {
 }
 
 /// Pdf PageLabels object
-class PdfPageLabels extends PdfObjectDict {
+class PdfPageLabels extends PdfObject<PdfDict> {
   /// Constructs a Pdf PageLabels object.
-  PdfPageLabels(PdfDocument pdfDocument) : super(pdfDocument);
+  PdfPageLabels(PdfDocument pdfDocument)
+      : super(pdfDocument, params: PdfDict());
 
   final labels = <int, PdfPageLabel>{};
 
@@ -170,7 +191,7 @@ class PdfPageLabels extends PdfObjectDict {
     final nums = PdfArray();
     for (final entry in labels.entries) {
       nums.add(PdfNum(entry.key));
-      nums.add(entry.value.toDict(this));
+      nums.add(entry.value.toDict());
     }
 
     params['/Nums'] = nums;

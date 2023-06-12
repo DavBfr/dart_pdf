@@ -16,7 +16,7 @@
 
 import 'dart:typed_data';
 
-import 'package:pdf/src/pdf/data_types.dart';
+import 'package:pdf/src/priv.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -59,7 +59,7 @@ void main() {
     expect(
       PdfString(
         Uint8List.fromList(const <int>[0, 1, 2, 3, 4, 5, 6]),
-        PdfStringFormat.binary,
+        format: PdfStringFormat.binary,
       ).toString(),
       '<00010203040506>',
     );
@@ -102,7 +102,7 @@ void main() {
     expect(PdfDict().toString(), '<<>>');
 
     expect(
-      PdfDict({
+      PdfDict.values({
         '/Name': const PdfName('/Value'),
         '/Bool': const PdfBool(true),
         '/Num': const PdfNum(42),

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// ignore_for_file: constant_identifier_names
+
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -436,11 +438,11 @@ class TtfParser {
 
   TtfGlyphInfo _readSimpleGlyph(
       int glyph, int start, int offset, int numberOfContours) {
-    const X_IS_BYTE = 2;
-    const Y_IS_BYTE = 4;
-    const REPEAT = 8;
-    const X_DELTA = 16;
-    const Y_DELTA = 32;
+    const xIsByte = 2;
+    const yIsByte = 4;
+    const repeat = 8;
+    const xDelta = 16;
+    const yDelta = 32;
 
     var numPoints = 1;
 
@@ -449,7 +451,7 @@ class TtfParser {
       offset += 2;
     }
 
-    // skip over intructions
+    // skip over instructions
     offset += bytes.getUint16(offset) + 2;
 
     if (numberOfContours == 0) {
@@ -466,7 +468,7 @@ class TtfParser {
       final flag = bytes.getUint8(offset++);
       flags.add(flag);
 
-      if (flag & REPEAT != 0) {
+      if (flag & repeat != 0) {
         var repeatCount = bytes.getUint8(offset++);
         i += repeatCount;
         while (repeatCount-- > 0) {
@@ -475,8 +477,8 @@ class TtfParser {
       }
     }
 
-    var byteFlag = X_IS_BYTE;
-    var deltaFlag = X_DELTA;
+    var byteFlag = xIsByte;
+    var deltaFlag = xDelta;
     for (var a = 0; a < 2; a++) {
       for (var i = 0; i < numPoints; i++) {
         final flag = flags[i];
@@ -486,8 +488,8 @@ class TtfParser {
           offset += 2;
         }
       }
-      byteFlag = Y_IS_BYTE;
-      deltaFlag = Y_DELTA;
+      byteFlag = yIsByte;
+      deltaFlag = yDelta;
     }
 
     return TtfGlyphInfo(
@@ -498,31 +500,31 @@ class TtfParser {
   }
 
   TtfGlyphInfo _readCompoundGlyph(int glyph, int start, int offset) {
-    const ARG_1_AND_2_ARE_WORDS = 0x0001;
-    const HAS_SCALE = 0x008;
-    const MORE_COMPONENTS = 0x0020;
-    const HAS_X_Y_SCALE = 0x0040;
-    const HAS_TRANSFORMATION_MATRIX = 0x0080;
-    const WE_HAVE_INSTRUCTIONS = 0x0100;
+    const arg1And2AreWords = 0x0001;
+    const hasScale = 0x008;
+    const moreComponents = 0x0020;
+    const hasXYScale = 0x0040;
+    const hasTransformationMatrix = 0x0080;
+    const weHaveInstructions = 0x0100;
 
     final components = <int>[];
     var hasInstructions = false;
-    var flags = MORE_COMPONENTS;
+    var flags = moreComponents;
 
-    while (flags & MORE_COMPONENTS != 0) {
+    while (flags & moreComponents != 0) {
       flags = bytes.getUint16(offset);
       final glyphIndex = bytes.getUint16(offset + 2);
-      offset += (flags & ARG_1_AND_2_ARE_WORDS != 0) ? 8 : 6;
-      if (flags & HAS_SCALE != 0) {
+      offset += (flags & arg1And2AreWords != 0) ? 8 : 6;
+      if (flags & hasScale != 0) {
         offset += 2;
-      } else if (flags & HAS_X_Y_SCALE != 0) {
+      } else if (flags & hasXYScale != 0) {
         offset += 4;
-      } else if (flags & HAS_TRANSFORMATION_MATRIX != 0) {
+      } else if (flags & hasTransformationMatrix != 0) {
         offset += 8;
       }
 
       components.add(glyphIndex);
-      if (flags & WE_HAVE_INSTRUCTIONS != 0) {
+      if (flags & weHaveInstructions != 0) {
         assert(!hasInstructions); // Not already set
         hasInstructions = true;
       }

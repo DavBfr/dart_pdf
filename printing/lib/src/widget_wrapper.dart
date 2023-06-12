@@ -15,9 +15,9 @@
  */
 
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -126,6 +126,7 @@ class WidgetWrapper extends pw.ImageProvider {
   /// );
   /// ```
   static Future<WidgetWrapper> fromWidget({
+    required BuildContext context,
     required Widget widget,
     required BoxConstraints constraints,
     double pixelRatio = 1.0,
@@ -163,6 +164,7 @@ class WidgetWrapper extends pw.ImageProvider {
     }
 
     final repaintBoundary = RenderRepaintBoundary();
+    final view = View.of(context);
 
     final renderView = RenderView(
       child: RenderPositionedBox(
@@ -170,8 +172,8 @@ class WidgetWrapper extends pw.ImageProvider {
       configuration: ViewConfiguration(
           size:
               Size(computedConstraints.maxWidth, computedConstraints.maxHeight),
-          devicePixelRatio: ui.window.devicePixelRatio),
-      window: ui.window,
+          devicePixelRatio: view.devicePixelRatio),
+      view: view,
     );
 
     final pipelineOwner = PipelineOwner()..rootNode = renderView;
@@ -258,6 +260,7 @@ class WidgetWraper extends WidgetWrapper {
   /// Wrap a Flutter Widget to an ImageProvider.
   @Deprecated('Use WidgetWrapper.fromWidget instead')
   static Future<WidgetWrapper> fromWidget({
+    required BuildContext context,
     required Widget widget,
     required BoxConstraints constraints,
     double pixelRatio = 1.0,
@@ -265,6 +268,7 @@ class WidgetWraper extends WidgetWrapper {
     double? dpi,
   }) {
     return WidgetWrapper.fromWidget(
+      context: context,
       widget: widget,
       constraints: constraints,
       pixelRatio: pixelRatio,

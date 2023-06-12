@@ -178,11 +178,13 @@ class _TextDecoration {
 
     if (style.decoration!.contains(TextDecoration.underline)) {
       final base = -font.descent * style.fontSize! * textScaleFactor / 2;
-
+      final l = box!.left;
+      final r = box.right;
+      final x = globalBox!.x;
       context.canvas.drawLine(
-        globalBox!.x + box!.left,
+        x + l,
         globalBox.top + box.bottom + base,
-        globalBox.x + box.right,
+        x + r,
         globalBox.top + box.bottom + base,
       );
       if (style.decorationStyle == TextDecorationStyle.double) {

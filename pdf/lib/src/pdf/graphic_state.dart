@@ -18,65 +18,67 @@
 
 import 'package:meta/meta.dart';
 
-import 'data_types.dart';
 import 'document.dart';
+import 'format/dict.dart';
+import 'format/name.dart';
+import 'format/num.dart';
 import 'obj/function.dart';
-import 'obj/object_dict.dart';
+import 'obj/object.dart';
 import 'obj/smask.dart';
 
 enum PdfBlendMode {
-  /// Selects the source colour, ignoring the backdrop
+  /// Selects the source color, ignoring the backdrop
   normal,
 
-  /// Multiplies the backdrop and source colour values
+  /// Multiplies the backdrop and source color values
   multiply,
 
-  /// Multiplies the complements of the backdrop and source colour values,
+  /// Multiplies the complements of the backdrop and source color values,
   /// then complements the result
   screen,
 
-  /// Multiplies or screens the colours, depending on the backdrop colour value
+  /// Multiplies or screens the colors, depending on the backdrop color value
   overlay,
 
-  /// Selects the darker of the backdrop and source colours
+  /// Selects the darker of the backdrop and source colors
   darken,
 
-  /// Selects the lighter of the backdrop and source colours
+  /// Selects the lighter of the backdrop and source colors
   lighten,
 
-  /// Brightens the backdrop colour to reflect the source colour.
+  /// Brightens the backdrop color to reflect the source color.
   /// Painting with black produces no changes.
   colorDodge,
 
-  /// Darkens the backdrop colour to reflect the source colour
+  /// Darkens the backdrop color to reflect the source color
   colorBurn,
 
-  /// Multiplies or screens the colours, depending on the source colour value
+  /// Multiplies or screens the colors, depending on the source color value
   hardLight,
 
-  /// Darkens or lightens the colours, depending on the source colour value
+  /// Darkens or lightens the colors, depending on the source color value
   softLight,
 
-  /// Subtracts the darker of the two constituent colours from the lighter colour
+  /// Subtracts the darker of the two constituent colors from the lighter color
   difference,
 
   /// Produces an effect similar to that of the Difference mode but lower in contrast
   exclusion,
 
-  /// Creates a colour with the hue of the source colour and the saturation and
-  /// luminosity of the backdrop colour
+  /// Creates a color with the hue of the source color and the saturation and
+  /// luminosity of the backdrop color
   hue,
 
-  /// Creates a colour with the saturation of the source colour and the hue and
-  /// luminosity of the backdrop colour
+  /// Creates a color with the saturation of the source color and the hue and
+  /// luminosity of the backdrop color
   saturation,
 
-  /// Creates a colour with the hue and saturation of the source colour and the
-  /// luminosity of the backdrop colour
+  /// Creates a color with the hue and saturation of the source color and the
+  /// luminosity of the backdrop color
   color,
 
-  /// Creates a colour with the luminosity of the source colour and the hue and
-  /// saturation of the backdrop colour
+  /// Creates a color with the luminosity of the source color and the hue and
+  /// saturation of the backdrop color
   luminosity,
 }
 
@@ -163,9 +165,10 @@ class PdfGraphicState {
 }
 
 /// Stores all the graphic states used in the document
-class PdfGraphicStates extends PdfObjectDict {
+class PdfGraphicStates extends PdfObject<PdfDict> {
   /// Create a new Graphic States object
-  PdfGraphicStates(PdfDocument pdfDocument) : super(pdfDocument);
+  PdfGraphicStates(PdfDocument pdfDocument)
+      : super(pdfDocument, params: PdfDict());
 
   final List<PdfGraphicState> _states = <PdfGraphicState>[];
 

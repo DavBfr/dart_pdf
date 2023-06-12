@@ -14,22 +14,75 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:pdf/pdf.dart';
+import 'package:pdf/src/priv.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('Pdf Minimal', () async {
-    final pdf = PdfDocument(compress: false);
-    final page = PdfPage(pdf, pageFormat: PdfPageFormat.a4);
+    var objser = 1;
 
-    final g = page.getGraphics();
-    g.drawLine(
-        30, page.pageFormat.height - 30.0, 200, page.pageFormat.height - 200.0);
-    g.strokePath();
+    const settings = PdfSettings(
+      verbose: true,
+      version: PdfVersion.pdf_1_4,
+    );
+
+    final pages = PdfObjectBase(
+        objser: objser++,
+        settings: settings,
+        params: PdfDict.values({
+          '/Type': const PdfName('/Pages'),
+          '/Count': const PdfNum(1),
+        }));
+
+    final content = PdfObjectBase(
+        objser: objser++,
+        settings: settings,
+        params: PdfDictStream(
+          data: latin1.encode('30 811.88976 m 200 641.88976 l S'),
+        ));
+
+    final page = PdfObjectBase(
+        objser: objser++,
+        settings: settings,
+        params: PdfDict.values({
+          '/Type': const PdfName('/Page'),
+          '/Parent': pages.ref(),
+          '/MediaBox': PdfArray.fromNum([0, 0, 595.27559, 841.88976]),
+          '/Resources': PdfDict.values({
+            '/ProcSet': PdfArray([
+              const PdfName('/PDF'),
+            ]),
+          }),
+          '/Contents': content.ref(),
+        }));
+
+    pages.params['/Kids'] = PdfArray([page.ref()]);
+
+    final catalog = PdfObjectBase(
+        objser: objser++,
+        settings: settings,
+        params: PdfDict.values({
+          '/Type': const PdfName('/Catalog'),
+          '/Pages': pages.ref(),
+        }));
+
+    final os = PdfStream();
+
+    final xref = PdfXrefTable();
+    xref.objects.addAll([
+      catalog,
+      pages,
+      page,
+      content,
+    ]);
+
+    xref.output(catalog, os);
 
     final file = File('minimal.pdf');
-    await file.writeAsBytes(await pdf.save());
+    await file.writeAsBytes(os.output());
   });
 }

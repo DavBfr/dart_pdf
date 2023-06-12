@@ -17,14 +17,16 @@
 import 'dart:typed_data';
 
 import '../document.dart';
+import '../format/dict.dart';
+import '../format/object_base.dart';
 import 'object.dart';
-import 'object_dict.dart';
 
 /// Encryption object
-abstract class PdfEncryption extends PdfObjectDict {
+abstract class PdfEncryption extends PdfObject<PdfDict> {
   /// Creates an encryption object
-  PdfEncryption(PdfDocument pdfDocument) : super(pdfDocument);
+  PdfEncryption(PdfDocument pdfDocument)
+      : super(pdfDocument, params: PdfDict());
 
   /// Encrypt some data
-  Uint8List encrypt(Uint8List input, PdfObject object);
+  Uint8List encrypt(Uint8List input, PdfObjectBase object);
 }

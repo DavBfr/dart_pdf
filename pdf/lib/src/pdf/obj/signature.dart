@@ -16,11 +16,11 @@
 
 import 'dart:typed_data';
 
-import '../data_types.dart';
 import '../document.dart';
-import '../stream.dart';
+import '../format/dict.dart';
+import '../format/name.dart';
+import '../format/stream.dart';
 import 'object.dart';
-import 'object_dict.dart';
 import 'object_stream.dart';
 
 /// Signature flags
@@ -35,7 +35,7 @@ enum PdfSigFlags {
   appendOnly,
 }
 
-class PdfSignature extends PdfObjectDict {
+class PdfSignature extends PdfObject<PdfDict> {
   PdfSignature(
     PdfDocument pdfDocument, {
     required this.value,
@@ -43,7 +43,12 @@ class PdfSignature extends PdfObjectDict {
     List<Uint8List>? crl,
     List<Uint8List>? cert,
     List<Uint8List>? ocsp,
-  }) : super(pdfDocument, type: '/Sig') {
+  }) : super(
+          pdfDocument,
+          params: PdfDict.values({
+            '/Type': const PdfName('/Sig'),
+          }),
+        ) {
     if (crl != null) {
       for (final o in crl) {
         this.crl.add(PdfObjectStream(pdfDocument)..buf.putBytes(o));
@@ -82,12 +87,13 @@ class PdfSignature extends PdfObjectDict {
   int? _offsetEnd;
 
   @override
-  void write(PdfStream os) {
+  int output(PdfStream s) {
     value.preSign(this, params);
 
-    _offsetStart = os.offset + '$objser $objgen obj\n'.length;
-    super.write(os);
-    _offsetEnd = os.offset;
+    final offset = super.output(s);
+    _offsetStart = offset + '$objser $objgen obj\n'.length;
+    _offsetEnd = s.offset;
+    return offset;
   }
 
   Future<void> writeSignature(PdfStream os) async {

@@ -20,6 +20,12 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 
 import 'document_parser.dart';
+import 'format/array.dart';
+import 'format/num.dart';
+import 'format/object_base.dart';
+import 'format/stream.dart';
+import 'format/string.dart';
+import 'format/xref.dart';
 import 'graphic_state.dart';
 import 'io/vm.dart' if (dart.library.js) 'io/js.dart';
 import 'obj/catalog.dart';
@@ -33,17 +39,6 @@ import 'obj/page.dart';
 import 'obj/page_label.dart';
 import 'obj/page_list.dart';
 import 'obj/signature.dart';
-import 'output.dart';
-import 'stream.dart';
-
-/// PDF version to generate
-enum PdfVersion {
-  /// PDF 1.4
-  pdf_1_4,
-
-  /// PDF 1.5 to 1.7
-  pdf_1_5,
-}
 
 /// Display hint for the PDF viewer
 enum PdfPageMode {
@@ -65,9 +60,6 @@ enum PdfPageMode {
   fullscreen
 }
 
-/// Callback used to compress the data
-typedef DeflateCallback = List<int> Function(List<int> data);
-
 /// This class is the base of the Pdf generator. A [PdfDocument] class is
 /// created for a document, and each page, object, annotation,
 /// etc is added to the document.
@@ -79,26 +71,34 @@ class PdfDocument {
     PdfPageMode pageMode = PdfPageMode.none,
     DeflateCallback? deflate,
     bool compress = true,
-    this.verbose = false,
-    this.version = PdfVersion.pdf_1_5,
-  })  : deflate = compress ? (deflate ?? defaultDeflate) : null,
-        prev = null,
+    bool verbose = false,
+    PdfVersion version = PdfVersion.pdf_1_5,
+  })  : prev = null,
         _objser = 1 {
+    settings = PdfSettings(
+      deflate: compress ? (deflate ?? defaultDeflate) : null,
+      verbose: verbose,
+      version: version,
+      encryptCallback: (input, object) =>
+          encryption?.encrypt(input, object) ?? input,
+    );
     // create the catalog
-    catalog = PdfCatalog(this, PdfPageList(this), pageMode);
+    catalog = PdfCatalog(this, PdfPageList(this), pageMode: pageMode);
   }
 
   PdfDocument.load(
     this.prev, {
-    PdfPageMode pageMode = PdfPageMode.none,
     DeflateCallback? deflate,
     bool compress = true,
-    this.verbose = false,
-  })  : deflate = compress ? (deflate ?? defaultDeflate) : null,
-        _objser = prev!.size,
-        version = prev.version {
-    // Now create some standard objects
-    catalog = PdfCatalog(this, PdfPageList(this), pageMode);
+    bool verbose = false,
+  }) : _objser = prev!.size {
+    settings = PdfSettings(
+      deflate: compress ? (deflate ?? defaultDeflate) : null,
+      verbose: verbose,
+      version: prev!.version,
+      encryptCallback: (input, object) =>
+          encryption?.encrypt(input, object) ?? input,
+    );
 
     // Import the existing document
     prev!.mergeDocument(this);
@@ -117,8 +117,12 @@ class PdfDocument {
   /// This is the Catalog object, which is required by each Pdf Document
   late final PdfCatalog catalog;
 
+  /// PDF generation settings
+  late final PdfSettings settings;
+
   /// PDF version to generate
-  final PdfVersion version;
+  @Deprecated('Use settings.version')
+  PdfVersion get version => settings.version;
 
   /// This is the info object. Although this is an optional object, we
   /// include it.
@@ -141,7 +145,8 @@ class PdfDocument {
   /// Callback to compress the stream in the pdf file.
   /// Use `deflate: zlib.encode` if using dart:io
   /// No compression by default
-  final DeflateCallback? deflate;
+  @Deprecated('Use settings.deflate')
+  DeflateCallback? get deflate => settings.deflate;
 
   /// Object used to encrypt the document
   PdfEncryption? encryption;
@@ -160,9 +165,12 @@ class PdfDocument {
 
   Uint8List? _documentID;
 
-  bool get compress => deflate != null;
+  @Deprecated('Use settings.compress')
+  bool get compress => settings.deflate != null;
 
-  final bool verbose;
+  /// Output a PDF document with comments and formatted data
+  @Deprecated('Use settings.verbose')
+  bool get verbose => settings.verbose;
 
   /// Generates the document ID
   Uint8List get documentID {
@@ -209,14 +217,36 @@ class PdfDocument {
 
   /// This writes the document to an OutputStream.
   Future<void> _write(PdfStream os) async {
-    final pos = PdfOutput(os, version, verbose);
+    PdfSignature? signature;
 
-    // Write each object to the [PdfStream]. We call via the output
-    // as that builds the xref table
-    objects.forEach(pos.write);
+    final xref = PdfXrefTable(lastObjectId: _objser);
 
-    // Finally close the output, which writes the xref table.
-    await pos.close();
+    for (final ob in objects.where((e) => e.inUse)) {
+      ob.prepare();
+      if (ob is PdfInfo) {
+        xref.params['/Info'] = ob.ref();
+      } else if (ob is PdfEncryption) {
+        xref.params['/Encrypt'] = ob.ref();
+      } else if (ob is PdfSignature) {
+        assert(signature == null, 'Only one document signature is allowed');
+        signature = ob;
+      }
+      xref.objects.add(ob);
+    }
+
+    final id =
+        PdfString(documentID, format: PdfStringFormat.binary, encrypted: false);
+    xref.params['/ID'] = PdfArray([id, id]);
+
+    if (prev != null) {
+      xref.params['/Prev'] = PdfNum(prev!.xrefOffset);
+    }
+
+    xref.output(catalog, os);
+
+    if (signature != null) {
+      await signature.writeSignature(os);
+    }
   }
 
   /// Generate the PDF document as a memory file

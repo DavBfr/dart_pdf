@@ -17,16 +17,20 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import '../data_types.dart';
 import '../document.dart';
 import '../font/bidi_utils.dart' as bidi;
 import '../font/font_metrics.dart';
 import '../font/ttf_parser.dart';
 import '../font/ttf_writer.dart';
-import '../stream.dart';
-import 'array.dart';
+import '../format/array.dart';
+import '../format/dict.dart';
+import '../format/name.dart';
+import '../format/num.dart';
+import '../format/stream.dart';
+import '../format/string.dart';
 import 'font.dart';
 import 'font_descriptor.dart';
+import 'object.dart';
 import 'object_stream.dart';
 import 'unicode_cmap.dart';
 
@@ -38,7 +42,7 @@ class PdfTtfFont extends PdfFont {
     file = PdfObjectStream(pdfDocument, isBinary: true);
     unicodeCMap = PdfUnicodeCmap(pdfDocument, protect);
     descriptor = PdfFontDescriptor(this, file);
-    widthsObject = PdfArrayObject(pdfDocument, PdfArray());
+    widthsObject = PdfObject<PdfArray>(pdfDocument, params: PdfArray());
   }
 
   @override
@@ -50,7 +54,7 @@ class PdfTtfFont extends PdfFont {
 
   late PdfObjectStream file;
 
-  late PdfArrayObject widthsObject;
+  late PdfObject<PdfArray> widthsObject;
 
   final TtfParser font;
 
@@ -94,7 +98,7 @@ class PdfTtfFont extends PdfFont {
     charMin = 32;
     charMax = 255;
     for (var i = charMin; i <= charMax; i++) {
-      widthsObject.array
+      widthsObject.params
           .add(PdfNum((glyphMetrics(i).advanceWidth * 1000.0).toInt()));
     }
     params['/FirstChar'] = PdfNum(charMin);
@@ -111,7 +115,7 @@ class PdfTtfFont extends PdfFont {
     file.buf.putBytes(data);
     file.params['/Length1'] = PdfNum(data.length);
 
-    final descendantFont = PdfDict({
+    final descendantFont = PdfDict.values({
       '/Type': const PdfName('/Font'),
       '/BaseFont': PdfName('/$fontName'),
       '/FontFile2': file.ref(),
@@ -123,10 +127,10 @@ class PdfTtfFont extends PdfFont {
       '/CIDToGIDMap': const PdfName('/Identity'),
       '/DW': const PdfNum(1000),
       '/Subtype': const PdfName('/CIDFontType2'),
-      '/CIDSystemInfo': PdfDict({
+      '/CIDSystemInfo': PdfDict.values({
         '/Supplement': const PdfNum(0),
-        '/Registry': PdfSecString.fromString(this, 'Adobe'),
-        '/Ordering': PdfSecString.fromString(this, 'Identity-H'),
+        '/Registry': PdfString.fromString('Adobe'),
+        '/Ordering': PdfString.fromString('Identity-H'),
       })
     });
 
@@ -138,7 +142,7 @@ class PdfTtfFont extends PdfFont {
     charMin = 0;
     charMax = unicodeCMap.cmap.length - 1;
     for (var i = charMin; i <= charMax; i++) {
-      widthsObject.array.add(PdfNum(
+      widthsObject.params.add(PdfNum(
           (glyphMetrics(unicodeCMap.cmap[i]).advanceWidth * 1000.0).toInt()));
     }
   }

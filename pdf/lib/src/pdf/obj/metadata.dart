@@ -19,8 +19,9 @@ import 'dart:typed_data';
 
 import 'package:xml/xml.dart';
 
-import '../data_types.dart';
 import '../document.dart';
+import '../format/dict_stream.dart';
+import '../format/name.dart';
 import 'object.dart';
 
 /// Pdf Metadata
@@ -32,7 +33,6 @@ class PdfMetadata extends PdfObject<PdfDictStream> {
   ) : super(
           pdfDocument,
           params: PdfDictStream(
-            object: pdfDocument.catalog,
             compress: false,
             encrypt: false,
           ),

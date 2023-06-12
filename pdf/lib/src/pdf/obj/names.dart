@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-import '../data_types.dart';
 import '../document.dart';
-import 'object_dict.dart';
+import '../format/array.dart';
+import '../format/base.dart';
+import '../format/dict.dart';
+import '../format/name.dart';
+import '../format/null_value.dart';
+import '../format/num.dart';
+import '../format/string.dart';
+import 'object.dart';
 import 'page.dart';
 
 /// Pdf Name object
-class PdfNames extends PdfObjectDict {
+class PdfNames extends PdfObject<PdfDict> {
   /// This constructs a Pdf Name object
-  PdfNames(PdfDocument pdfDocument) : super(pdfDocument);
+  PdfNames(PdfDocument pdfDocument) : super(pdfDocument, params: PdfDict());
 
   final Map<String, PdfDataType> _dests = <String, PdfDataType>{};
 
@@ -36,7 +42,7 @@ class PdfNames extends PdfObjectDict {
   }) {
     assert(page.pdfDocument == pdfDocument);
 
-    _dests[name] = PdfDict({
+    _dests[name] = PdfDict.values({
       '/D': PdfArray([
         page.ref(),
         const PdfName('/XYZ'),
@@ -56,7 +62,7 @@ class PdfNames extends PdfObjectDict {
     final keys = _dests.keys.toList()..sort();
 
     for (final name in keys) {
-      dests.add(PdfSecString.fromString(this, name));
+      dests.add(PdfString.fromString(name));
       dests.add(_dests[name]!);
     }
 
@@ -64,8 +70,8 @@ class PdfNames extends PdfObjectDict {
     if (dests.values.isNotEmpty) {
       dict['/Names'] = dests;
       dict['/Limits'] = PdfArray([
-        PdfSecString.fromString(this, keys.first),
-        PdfSecString.fromString(this, keys.last),
+        PdfString.fromString(keys.first),
+        PdfString.fromString(keys.last),
       ]);
     }
     params['/Dests'] = dict;
