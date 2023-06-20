@@ -49,13 +49,11 @@ enum TextOverflow {
 }
 
 abstract class _Span {
-  _Span(this.style, this.realWidth);
+  _Span(this.style);
 
   final TextStyle style;
 
   var offset = PdfPoint.zero;
-
-  double realWidth;
 
   double get left;
 
@@ -105,13 +103,9 @@ class _TextDecoration {
       return _box;
     }
 
-    final x1 = spans[startSpan].offset.x +
-        spans[startSpan].left +
-        spans[startSpan].realWidth;
-    final x2 = spans[endSpan].offset.x +
-        spans[endSpan].left +
-        spans[endSpan].width -
-        spans[endSpan].realWidth;
+    final x1 = spans[startSpan].offset.x + spans[startSpan].left;
+    final x2 =
+        spans[endSpan].offset.x + spans[endSpan].left + spans[endSpan].width;
     var y1 = spans[startSpan].offset.y + spans[startSpan].top;
     var y2 = y1 + spans[startSpan].height;
 
@@ -265,7 +259,7 @@ class _Word extends _Span {
     this.text,
     TextStyle style,
     this.metrics,
-  ) : super(style, metrics.advanceWidth);
+  ) : super(style);
 
   final String text;
 
@@ -331,7 +325,7 @@ class _Word extends _Span {
 }
 
 class _WidgetSpan extends _Span {
-  _WidgetSpan(this.widget, TextStyle style, this.baseline) : super(style, 0);
+  _WidgetSpan(this.widget, TextStyle style, this.baseline) : super(style);
 
   final Widget widget;
 

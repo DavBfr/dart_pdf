@@ -67,43 +67,56 @@ class TtfWriter {
     final tablesLength = <String, int>{};
 
     // Create the glyphs table
-    final glyphsInfo = <TtfGlyphInfo>[];
+    final glyphsMap = <int, TtfGlyphInfo>{};
+    final charMap = <int, int>{};
+    final overflow = <int>{};
     final compounds = <int, int>{};
 
-    for (var index = 0; index < chars.length; index++) {
-      if (chars[index] == 32) {
+    for (final char in chars) {
+      if (char == 32) {
         final glyph = TtfGlyphInfo(32, Uint8List(0), const <int>[]);
-        glyphsInfo.add(glyph);
+        glyphsMap[glyph.index] = glyph;
+        charMap[char] = glyph.index;
         continue;
       }
 
-      final glyphIndex = ttf.charToGlyphIndexMap[chars[index]] ?? 0;
+      final glyphIndex = ttf.charToGlyphIndexMap[char] ?? 0;
       if (glyphIndex >= ttf.glyphOffsets.length) {
+        assert(true, '$glyphIndex not in the font');
         continue;
       }
 
-      final glyph = ttf.readGlyph(glyphIndex).copy();
-      for (final g in glyph.compounds) {
-        compounds[g] = -1;
+      void addGlyph(glyphIndex) {
+        final glyph = ttf.readGlyph(glyphIndex).copy();
+        for (final g in glyph.compounds) {
+          compounds[g] = -1;
+          overflow.add(g);
+          addGlyph(g);
+        }
+        glyphsMap[glyph.index] = glyph;
       }
-      glyphsInfo.add(glyph);
+
+      charMap[char] = glyphIndex;
+      addGlyph(glyphIndex);
     }
+
+    final glyphsInfo = <TtfGlyphInfo>[];
+
+    for (final char in chars) {
+      final glyphsIndex = charMap[char]!;
+      print('$char $glyphsIndex $glyphsMap $charMap ${ttf.fontName}');
+      glyphsInfo.add(glyphsMap[glyphsIndex] ?? glyphsMap.values.first);
+      glyphsMap.remove(glyphsIndex);
+    }
+
+    glyphsInfo.addAll(glyphsMap.values);
 
     // Add compound glyphs
     for (final compound in compounds.keys) {
-      final index = glyphsInfo.firstWhere(
-        (TtfGlyphInfo glyph) => glyph.index == compound,
-        orElse: () {
-          final glyph = ttf.readGlyph(compound);
-          assert(glyph.compounds.isEmpty, 'This is not a simple glyph');
-          glyphsInfo.add(glyph);
-
-          return glyph;
-        },
-      );
-
+      final index = glyphsInfo
+          .firstWhere((TtfGlyphInfo glyph) => glyph.index == compound);
       compounds[compound] = glyphsInfo.indexOf(index);
-      assert(compounds[compound]! >= 0, 'Unable to find the glyph');
+      assert((compounds[compound] ?? 0) >= 0, 'Unable to find the glyph');
     }
 
     // update compound indices
