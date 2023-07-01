@@ -649,7 +649,7 @@ class ListView extends StatelessWidget {
         super();
 
   final Axis direction;
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
   final double? spacing;
   final bool reverse;
   final IndexedWidgetBuilder? itemBuilder;
