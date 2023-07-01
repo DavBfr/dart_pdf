@@ -16,15 +16,10 @@
 
 import 'dart:math' as math;
 
-import 'package:pdf/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
-import 'box_border.dart';
-import 'container.dart';
-import 'decoration.dart';
-import 'geometry.dart';
-import 'widget.dart';
+import '../../widgets.dart';
 
 enum BoxFit { fill, contain, cover, fitWidth, fitHeight, none, scaleDown }
 
@@ -303,7 +298,7 @@ class Align extends SingleChildWidget {
         super(child: child);
 
   /// How to align the child.
-  final Alignment alignment;
+  final AlignmentGeometry alignment;
 
   /// If non-null, sets its width to the child's width multiplied by this factor.
   final double? widthFactor;
@@ -330,8 +325,8 @@ class Align extends SingleChildWidget {
           height: shrinkWrapHeight
               ? child!.box!.height * (heightFactor ?? 1.0)
               : double.infinity);
-
-      child!.box = alignment.inscribe(child!.box!.size, box!);
+      final resolvedAlignment = alignment.resolve(Directionality.of(context));
+      child!.box = resolvedAlignment.inscribe(child!.box!.size, box!);
     } else {
       box = constraints.constrainRect(
           width: shrinkWrapWidth ? 0.0 : double.infinity,

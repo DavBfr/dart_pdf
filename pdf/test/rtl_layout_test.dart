@@ -284,6 +284,120 @@ void main() {
     );
   });
 
+  test('Should render a blue box aligned center right', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return Align(
+             alignment: AlignmentDirectional.centerStart,
+            child: _blueBox,
+          );
+        },
+      ),
+    );
+  });
+
+  test('Should render a blue box aligned center left', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.ltr,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: _blueBox,
+          );
+        },
+      ),
+    );
+  });
+
+  test('Should render a box with top-right curved corner', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return Container(
+            decoration: const BoxDecoration(
+              color: PdfColors.blue,
+              borderRadius: BorderRadiusDirectional.only(
+                topStart: Radius.circular(20),
+              ),
+            ),
+            width: 150,
+            height: 150,
+          );
+        },
+      ),
+    );
+  });
+
+  test('Should render a box with right curved corners', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return Container(
+            decoration: const BoxDecoration(
+              color: PdfColors.blue,
+              borderRadius: BorderRadiusDirectional.horizontal(
+                start: Radius.circular(20),
+              ),
+            ),
+            width: 150,
+            height: 150,
+          );
+        },
+      ),
+    );
+  });
+
+  test('Should render a box with left curved corners', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.ltr,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return Container(
+            decoration: const BoxDecoration(
+              color: PdfColors.blue,
+              borderRadius: BorderRadiusDirectional.horizontal(
+                start: Radius.circular(20),
+              ),
+            ),
+            width: 150,
+            height: 150,
+          );
+        },
+      ),
+    );
+  });
+
+  test('Should render a box with top-left curved corner', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.ltr,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return Container(
+            decoration: const BoxDecoration(
+              color: PdfColors.blue,
+              borderRadius: BorderRadiusDirectional.only(
+                topStart: Radius.circular(20),
+              ),
+            ),
+            width: 150,
+            height: 150,
+          );
+        },
+      ),
+    );
+  });
+
   tearDownAll(() async {
     final file = File('rtl-layout.pdf');
     await file.writeAsBytes(await pdf.save());
