@@ -38,7 +38,7 @@ mixin TableHelper {
   static Table fromTextArray({
     Context? context,
     required List<List<dynamic>> data,
-    EdgeInsets cellPadding = const EdgeInsets.all(5),
+    EdgeInsetsGeometry cellPadding = const EdgeInsets.all(5),
     double cellHeight = 0,
     Alignment cellAlignment = Alignment.topLeft,
     Map<int, Alignment>? cellAlignments,
@@ -48,7 +48,7 @@ mixin TableHelper {
     OnCellDecoration? cellDecoration,
     int headerCount = 1,
     List<dynamic>? headers,
-    EdgeInsets? headerPadding,
+    EdgeInsetsGeometry? headerPadding,
     double? headerHeight,
     Alignment headerAlignment = Alignment.center,
     Map<int, Alignment>? headerAlignments,

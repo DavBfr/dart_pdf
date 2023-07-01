@@ -40,7 +40,6 @@ final _yellowBox = Container(
   color: PdfColors.yellow,
 );
 
-
 void main() {
   setUpAll(() {
     Document.debug = true;
@@ -227,10 +226,7 @@ void main() {
         pageFormat: const PdfPageFormat(150, 150),
         build: (Context context) {
           return [
-            ListView(children: [
-              for(int i = 0; i < 30; i++)
-                Text('Hello World')
-            ]),
+            ListView(children: [for (int i = 0; i < 30; i++) Text('Hello World')]),
           ];
         },
       ),
@@ -244,10 +240,7 @@ void main() {
         pageFormat: const PdfPageFormat(150, 150),
         build: (Context context) {
           return [
-            ListView(children: [
-              for(int i = 0; i < 30; i++)
-                Text('Hello World')
-            ]),
+            ListView(children: [for (int i = 0; i < 30; i++) Text('Hello World')]),
           ];
         },
       ),
@@ -291,7 +284,7 @@ void main() {
         pageFormat: const PdfPageFormat(150, 150),
         build: (Context context) {
           return Align(
-             alignment: AlignmentDirectional.centerStart,
+            alignment: AlignmentDirectional.centerStart,
             child: _blueBox,
           );
         },
@@ -392,6 +385,93 @@ void main() {
             ),
             width: 150,
             height: 150,
+          );
+        },
+      ),
+    );
+  });
+
+  test('Should render Grid with run alignment right', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return GridView(
+            crossAxisCount: 3,
+            childAspectRatio: 1,
+            direction: Axis.vertical,
+            children: [
+              for (int i = 0; i < 8; i++)
+                Container(
+                  color: [PdfColors.blue, PdfColors.red, PdfColors.yellow][i % 3],
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  });
+
+  test('Should render Grid with run alignment left', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.ltr,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return GridView(
+            crossAxisCount: 3,
+            childAspectRatio: 1,
+            direction: Axis.vertical,
+            children: [
+              for (int i = 0; i < 7; i++)
+                Container(
+                  color: [PdfColors.blue, PdfColors.red, PdfColors.yellow][i % 3],
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  });
+  test('Should render Grid (horizontal) with run alignment right', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return GridView(
+            crossAxisCount: 3,
+            childAspectRatio: 1,
+            direction: Axis.horizontal,
+            children: [
+              for (int i = 0; i < 7; i++)
+                Container(
+                  color: [PdfColors.blue, PdfColors.red, PdfColors.yellow][i % 3],
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  });
+
+  test('Should render Grid (horizontal) with run alignment left', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.ltr,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return GridView(
+            crossAxisCount: 3,
+            childAspectRatio: 1,
+            direction: Axis.horizontal,
+            children: [
+              for (int i = 0; i < 7; i++)
+                Container(
+                  color: [PdfColors.blue, PdfColors.red, PdfColors.yellow][i % 3],
+                ),
+            ],
           );
         },
       ),

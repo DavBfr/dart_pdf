@@ -56,9 +56,9 @@ class Header extends StatelessWidget {
 
   final BoxDecoration? decoration;
 
-  final EdgeInsets? margin;
+  final EdgeInsetsGeometry? margin;
 
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   final TextStyle? textStyle;
 
@@ -190,9 +190,9 @@ class Paragraph extends StatelessWidget {
 
   final TextStyle? style;
 
-  final EdgeInsets margin;
+  final EdgeInsetsGeometry margin;
 
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(Context context) {
@@ -232,11 +232,11 @@ class Bullet extends StatelessWidget {
 
   final TextStyle? style;
 
-  final EdgeInsets margin;
+  final EdgeInsetsGeometry margin;
 
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
-  final EdgeInsets bulletMargin;
+  final EdgeInsetsGeometry bulletMargin;
 
   final double bulletSize;
 
