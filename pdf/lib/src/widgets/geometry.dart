@@ -20,16 +20,13 @@ import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
-import 'basic.dart';
+import '../../widgets.dart';
 
 @immutable
 class BoxConstraints {
   /// Creates box constraints with the given constraints.
   const BoxConstraints(
-      {this.minWidth = 0.0,
-      this.maxWidth = double.infinity,
-      this.minHeight = 0.0,
-      this.maxHeight = double.infinity});
+      {this.minWidth = 0.0, this.maxWidth = double.infinity, this.minHeight = 0.0, this.maxHeight = double.infinity});
 
   /// Creates box constraints that require the given width or height.
   const BoxConstraints.tightFor({double? width, double? height})
@@ -104,8 +101,7 @@ class BoxConstraints {
     return result;
   }
 
-  PdfRect constrainRect(
-      {double width = double.infinity, double height = double.infinity}) {
+  PdfRect constrainRect({double width = double.infinity, double height = double.infinity}) {
     final result = PdfPoint(constrainWidth(width), constrainHeight(height));
     return PdfRect.fromPoints(PdfPoint.zero, result);
   }
@@ -162,10 +158,8 @@ class BoxConstraints {
     return BoxConstraints(
         minWidth: width == null ? minWidth : width.clamp(minWidth, maxWidth),
         maxWidth: width == null ? maxWidth : width.clamp(minWidth, maxWidth),
-        minHeight:
-            height == null ? minHeight : height.clamp(minHeight, maxHeight),
-        maxHeight:
-            height == null ? maxHeight : height.clamp(minHeight, maxHeight));
+        minHeight: height == null ? minHeight : height.clamp(minHeight, maxHeight),
+        maxHeight: height == null ? maxHeight : height.clamp(minHeight, maxHeight));
   }
 
   /// Returns new box constraints that are smaller by the given edge dimensions.
@@ -197,17 +191,11 @@ class BoxConstraints {
     return BoxConstraints(
         minWidth: minWidth.clamp(constraints.minWidth, constraints.maxWidth),
         maxWidth: maxWidth.clamp(constraints.minWidth, constraints.maxWidth),
-        minHeight:
-            minHeight.clamp(constraints.minHeight, constraints.maxHeight),
-        maxHeight:
-            maxHeight.clamp(constraints.minHeight, constraints.maxHeight));
+        minHeight: minHeight.clamp(constraints.minHeight, constraints.maxHeight),
+        maxHeight: maxHeight.clamp(constraints.minHeight, constraints.maxHeight));
   }
 
-  BoxConstraints copyWith(
-      {double? minWidth,
-      double? maxWidth,
-      double? minHeight,
-      double? maxHeight}) {
+  BoxConstraints copyWith({double? minWidth, double? maxWidth, double? minHeight, double? maxHeight}) {
     return BoxConstraints(
         minWidth: minWidth ?? this.minWidth,
         maxWidth: maxWidth ?? this.maxWidth,
@@ -222,7 +210,96 @@ class BoxConstraints {
 }
 
 @immutable
-class EdgeInsets {
+abstract class EdgeInsetsGeometry {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const EdgeInsetsGeometry();
+
+  double get _bottom;
+
+  double get _end;
+
+  double get _left;
+
+  double get _right;
+
+  double get _start;
+
+  double get _top;
+
+  /// The total offset in the horizontal direction.
+  double get horizontal => _left + _right + _start + _end;
+
+  /// The total offset in the vertical direction.
+  double get vertical => _top + _bottom;
+
+  /// Convert this instance into an [EdgeInsets], which uses literal coordinates
+  /// (i.e. the `left` coordinate being explicitly a distance from the left, and
+  /// the `right` coordinate being explicitly a distance from the right).
+  ///
+  /// See also:
+  ///
+  ///  * [EdgeInsets], for which this is a no-op (returns itself).
+  ///  * [EdgeInsetsDirectional], which flips the horizontal direction
+  ///    based on the `direction` argument.
+  EdgeInsets resolve(TextDirection? direction);
+
+  /// Returns the sum of two [EdgeInsetsGeometry] objects.
+  ///
+  /// If you know you are adding two [EdgeInsets] or two [EdgeInsetsDirectional]
+  /// objects, consider using the `+` operator instead, which always returns an
+  /// object of the same type as the operands, and is typed accordingly.
+  ///
+  /// If [add] is applied to two objects of the same type ([EdgeInsets] or
+  /// [EdgeInsetsDirectional]), an object of that type will be returned (though
+  /// this is not reflected in the type system). Otherwise, an object
+  /// representing a combination of both is returned. That object can be turned
+  /// into a concrete [EdgeInsets] using [resolve].
+  EdgeInsetsGeometry add(EdgeInsetsGeometry other) {
+    return _MixedEdgeInsets.fromLRSETB(
+      _left + other._left,
+      _right + other._right,
+      _start + other._start,
+      _end + other._end,
+      _top + other._top,
+      _bottom + other._bottom,
+    );
+  }
+
+  @override
+  String toString() {
+    if (_start == 0.0 && _end == 0.0) {
+      if (_left == 0.0 && _right == 0.0 && _top == 0.0 && _bottom == 0.0) {
+        return 'EdgeInsets.zero';
+      }
+      if (_left == _right && _right == _top && _top == _bottom) {
+        return 'EdgeInsets.all(${_left.toStringAsFixed(1)})';
+      }
+      return 'EdgeInsets(${_left.toStringAsFixed(1)}, '
+          '${_top.toStringAsFixed(1)}, '
+          '${_right.toStringAsFixed(1)}, '
+          '${_bottom.toStringAsFixed(1)})';
+    }
+    if (_left == 0.0 && _right == 0.0) {
+      return 'EdgeInsetsDirectional(${_start.toStringAsFixed(1)}, '
+          '${_top.toStringAsFixed(1)}, '
+          '${_end.toStringAsFixed(1)}, '
+          '${_bottom.toStringAsFixed(1)})';
+    }
+    return 'EdgeInsets(${_left.toStringAsFixed(1)}, '
+        '${_top.toStringAsFixed(1)}, '
+        '${_right.toStringAsFixed(1)}, '
+        '${_bottom.toStringAsFixed(1)})'
+        ' + '
+        'EdgeInsetsDirectional(${_start.toStringAsFixed(1)}, '
+        '0.0, '
+        '${_end.toStringAsFixed(1)}, '
+        '0.0)';
+  }
+}
+
+@immutable
+class EdgeInsets extends EdgeInsetsGeometry {
   const EdgeInsets.fromLTRB(this.left, this.top, this.right, this.bottom);
 
   const EdgeInsets.all(double value)
@@ -231,8 +308,7 @@ class EdgeInsets {
         right = value,
         bottom = value;
 
-  const EdgeInsets.only(
-      {this.left = 0.0, this.top = 0.0, this.right = 0.0, this.bottom = 0.0});
+  const EdgeInsets.only({this.left = 0.0, this.top = 0.0, this.right = 0.0, this.bottom = 0.0});
 
   const EdgeInsets.symmetric({double vertical = 0.0, double horizontal = 0.0})
       : left = horizontal,
@@ -242,19 +318,45 @@ class EdgeInsets {
 
   static const EdgeInsets zero = EdgeInsets.only();
 
+  /// The offset from the left.
   final double left;
 
+  @override
+  double get _left => left;
+
+  /// The offset from the top.
   final double top;
 
+  @override
+  double get _top => top;
+
+  /// The offset from the right.
   final double right;
 
+  @override
+  double get _right => right;
+
+  /// The offset from the bottom.
   final double bottom;
 
-  /// The total offset in the horizontal direction.
-  double get horizontal => left + right;
+  @override
+  double get _bottom => bottom;
 
-  /// The total offset in the vertical direction.
-  double get vertical => top + bottom;
+  @override
+  double get _start => 0.0;
+
+  @override
+  double get _end => 0.0;
+
+  /// Returns the sum of two [EdgeInsets].
+  EdgeInsets operator +(EdgeInsets other) {
+    return EdgeInsets.fromLTRB(
+      left + other.left,
+      top + other.top,
+      right + other.right,
+      bottom + other.bottom,
+    );
+  }
 
   EdgeInsets copyWith({
     double? left,
@@ -270,18 +372,198 @@ class EdgeInsets {
     );
   }
 
-  /// Returns the sum of two [EdgeInsets] objects.
-  EdgeInsets add(EdgeInsets other) {
-    return EdgeInsets.fromLTRB(
-      left + other.left,
+  @override
+  EdgeInsetsGeometry add(EdgeInsetsGeometry other) {
+    if (other is EdgeInsets) {
+      return this + other;
+    }
+    return super.add(other);
+  }
+
+  @override
+  EdgeInsets resolve(TextDirection? direction) => this;
+}
+
+class _MixedEdgeInsets extends EdgeInsetsGeometry {
+  const _MixedEdgeInsets.fromLRSETB(this._left, this._right, this._start, this._end, this._top, this._bottom);
+
+  @override
+  final double _left;
+
+  @override
+  final double _right;
+
+  @override
+  final double _start;
+
+  @override
+  final double _end;
+
+  @override
+  final double _top;
+
+  @override
+  final double _bottom;
+
+  @override
+  EdgeInsets resolve(TextDirection? direction) {
+    assert(direction != null);
+    switch (direction!) {
+      case TextDirection.rtl:
+        return EdgeInsets.fromLTRB(_end + _left, _top, _start + _right, _bottom);
+      case TextDirection.ltr:
+        return EdgeInsets.fromLTRB(_start + _left, _top, _end + _right, _bottom);
+    }
+  }
+}
+
+/// An immutable set of offsets in each of the four cardinal directions, but
+/// whose horizontal components are dependent on the writing direction.
+///
+/// This can be used to indicate padding from the left in [TextDirection.ltr]
+/// text and padding from the right in [TextDirection.rtl] text without having
+/// to be aware of the current text direction.
+///
+/// See also:
+///
+///  * [EdgeInsets], a variant that uses physical labels (left and right instead
+///    of start and end).
+class EdgeInsetsDirectional extends EdgeInsetsGeometry {
+  /// Creates insets from offsets from the start, top, end, and bottom.
+  const EdgeInsetsDirectional.fromSTEB(this.start, this.top, this.end, this.bottom);
+
+  /// Creates insets with only the given values non-zero.
+  ///
+  /// {@tool snippet}
+  ///
+  /// A margin indent of 40 pixels on the leading side:
+  ///
+  /// ```dart
+  /// const EdgeInsetsDirectional.only(start: 40.0)
+  /// ```
+  /// {@end-tool}
+  const EdgeInsetsDirectional.only({
+    this.start = 0.0,
+    this.top = 0.0,
+    this.end = 0.0,
+    this.bottom = 0.0,
+  });
+
+  /// Creates insets with symmetric vertical and horizontal offsets.
+  ///
+  /// This is equivalent to [EdgeInsets.symmetric], since the inset is the same
+  /// with either [TextDirection]. This constructor is just a convenience for
+  /// type compatibility.
+  ///
+  /// {@tool snippet}
+  /// Eight pixel margin above and below, no horizontal margins:
+  ///
+  /// ```dart
+  /// const EdgeInsetsDirectional.symmetric(vertical: 8.0)
+  /// ```
+  /// {@end-tool}
+  const EdgeInsetsDirectional.symmetric({
+    double horizontal = 0.0,
+    double vertical = 0.0,
+  })  : start = horizontal,
+        end = horizontal,
+        top = vertical,
+        bottom = vertical;
+
+  /// Creates insets where all the offsets are `value`.
+  ///
+  /// {@tool snippet}
+  ///
+  /// Typical eight-pixel margin on all sides:
+  ///
+  /// ```dart
+  /// const EdgeInsetsDirectional.all(8.0)
+  /// ```
+  /// {@end-tool}
+  const EdgeInsetsDirectional.all(double value)
+      : start = value,
+        top = value,
+        end = value,
+        bottom = value;
+
+  /// An [EdgeInsetsDirectional] with zero offsets in each direction.
+  ///
+  /// Consider using [EdgeInsets.zero] instead, since that object has the same
+  /// effect, but will be cheaper to [resolve].
+  static const EdgeInsetsDirectional zero = EdgeInsetsDirectional.only();
+
+  /// The offset from the start side, the side from which the user will start
+  /// reading text.
+  ///
+  /// This value is normalized into an [EdgeInsets.left] or [EdgeInsets.right]
+  /// value by the [resolve] method.
+  final double start;
+
+  @override
+  double get _start => start;
+
+  /// The offset from the top.
+  ///
+  /// This value is passed through to [EdgeInsets.top] unmodified by the
+  /// [resolve] method.
+  final double top;
+
+  @override
+  double get _top => top;
+
+  /// The offset from the end side, the side on which the user ends reading
+  /// text.
+  ///
+  /// This value is normalized into an [EdgeInsets.left] or [EdgeInsets.right]
+  /// value by the [resolve] method.
+  final double end;
+
+  @override
+  double get _end => end;
+
+  /// The offset from the bottom.
+  ///
+  /// This value is passed through to [EdgeInsets.bottom] unmodified by the
+  /// [resolve] method.
+  final double bottom;
+
+  @override
+  double get _bottom => bottom;
+
+  @override
+  double get _left => 0.0;
+
+  @override
+  double get _right => 0.0;
+
+  @override
+  EdgeInsetsGeometry add(EdgeInsetsGeometry other) {
+    if (other is EdgeInsetsDirectional) {
+      return this + other;
+    }
+    return super.add(other);
+  }
+
+  /// Returns the sum of two [EdgeInsetsDirectional] objects.
+  EdgeInsetsDirectional operator +(EdgeInsetsDirectional other) {
+    return EdgeInsetsDirectional.fromSTEB(
+      start + other.start,
       top + other.top,
-      right + other.right,
+      end + other.end,
       bottom + other.bottom,
     );
   }
 
   @override
-  String toString() => 'EdgeInsets $left, $top, $right, $bottom';
+  EdgeInsets resolve(TextDirection? direction) {
+    assert(direction != null);
+    switch (direction!) {
+      case TextDirection.rtl:
+        return EdgeInsets.fromLTRB(end, top, start, bottom);
+      case TextDirection.ltr:
+        return EdgeInsets.fromLTRB(start, top, end, bottom);
+    }
+  }
 }
 
 class Alignment {
@@ -374,10 +656,7 @@ class FittedSizes {
 }
 
 FittedSizes applyBoxFit(BoxFit fit, PdfPoint inputSize, PdfPoint outputSize) {
-  if (inputSize.y <= 0.0 ||
-      inputSize.x <= 0.0 ||
-      outputSize.y <= 0.0 ||
-      outputSize.x <= 0.0) {
+  if (inputSize.y <= 0.0 || inputSize.x <= 0.0 || outputSize.y <= 0.0 || outputSize.x <= 0.0) {
     return const FittedSizes(PdfPoint.zero, PdfPoint.zero);
   }
 
@@ -390,38 +669,29 @@ FittedSizes applyBoxFit(BoxFit fit, PdfPoint inputSize, PdfPoint outputSize) {
     case BoxFit.contain:
       sourceSize = inputSize;
       if (outputSize.x / outputSize.y > sourceSize.x / sourceSize.y) {
-        destinationSize =
-            PdfPoint(sourceSize.x * outputSize.y / sourceSize.y, outputSize.y);
+        destinationSize = PdfPoint(sourceSize.x * outputSize.y / sourceSize.y, outputSize.y);
       } else {
-        destinationSize =
-            PdfPoint(outputSize.x, sourceSize.y * outputSize.x / sourceSize.x);
+        destinationSize = PdfPoint(outputSize.x, sourceSize.y * outputSize.x / sourceSize.x);
       }
       break;
     case BoxFit.cover:
       if (outputSize.x / outputSize.y > inputSize.x / inputSize.y) {
-        sourceSize =
-            PdfPoint(inputSize.x, inputSize.x * outputSize.y / outputSize.x);
+        sourceSize = PdfPoint(inputSize.x, inputSize.x * outputSize.y / outputSize.x);
       } else {
-        sourceSize =
-            PdfPoint(inputSize.y * outputSize.x / outputSize.y, inputSize.y);
+        sourceSize = PdfPoint(inputSize.y * outputSize.x / outputSize.y, inputSize.y);
       }
       destinationSize = outputSize;
       break;
     case BoxFit.fitWidth:
-      sourceSize =
-          PdfPoint(inputSize.x, inputSize.x * outputSize.y / outputSize.x);
-      destinationSize =
-          PdfPoint(outputSize.x, sourceSize.y * outputSize.x / sourceSize.x);
+      sourceSize = PdfPoint(inputSize.x, inputSize.x * outputSize.y / outputSize.x);
+      destinationSize = PdfPoint(outputSize.x, sourceSize.y * outputSize.x / sourceSize.x);
       break;
     case BoxFit.fitHeight:
-      sourceSize =
-          PdfPoint(inputSize.y * outputSize.x / outputSize.y, inputSize.y);
-      destinationSize =
-          PdfPoint(sourceSize.x * outputSize.y / sourceSize.y, outputSize.y);
+      sourceSize = PdfPoint(inputSize.y * outputSize.x / outputSize.y, inputSize.y);
+      destinationSize = PdfPoint(sourceSize.x * outputSize.y / sourceSize.y, outputSize.y);
       break;
     case BoxFit.none:
-      sourceSize = PdfPoint(math.min(inputSize.x, outputSize.x),
-          math.min(inputSize.y, outputSize.y));
+      sourceSize = PdfPoint(math.min(inputSize.x, outputSize.x), math.min(inputSize.y, outputSize.y));
       destinationSize = sourceSize;
       break;
     case BoxFit.scaleDown:

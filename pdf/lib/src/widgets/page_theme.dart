@@ -30,7 +30,7 @@ class PageTheme {
     this.buildForeground,
     this.theme,
     PageOrientation? orientation,
-    EdgeInsets? margin,
+    EdgeInsetsGeometry? margin,
     this.clip = false,
     this.textDirection,
   })  : pageFormat = pageFormat ?? PdfPageFormat.standard,
@@ -41,7 +41,7 @@ class PageTheme {
 
   final PageOrientation orientation;
 
-  final EdgeInsets? _margin;
+  final EdgeInsetsGeometry? _margin;
 
   final BuildCallback? buildBackground;
 
@@ -54,27 +54,30 @@ class PageTheme {
   final TextDirection? textDirection;
 
   bool get mustRotate =>
-      (orientation == PageOrientation.landscape &&
-          pageFormat.height > pageFormat.width) ||
-      (orientation == PageOrientation.portrait &&
-          pageFormat.width > pageFormat.height);
+      (orientation == PageOrientation.landscape && pageFormat.height > pageFormat.width) ||
+      (orientation == PageOrientation.portrait && pageFormat.width > pageFormat.height);
 
-  EdgeInsets? get margin {
+  EdgeInsetsGeometry? get margin {
     if (_margin != null) {
+      final effectiveMargin = _margin!.resolve(textDirection);
       if (mustRotate) {
         return EdgeInsets.fromLTRB(
-            _margin!.bottom, _margin!.left, _margin!.top, _margin!.right);
+          effectiveMargin.bottom,
+          effectiveMargin.left,
+          effectiveMargin.top,
+          effectiveMargin.right,
+        );
       } else {
         return _margin;
       }
     }
 
     if (mustRotate) {
-      return EdgeInsets.fromLTRB(pageFormat.marginBottom, pageFormat.marginLeft,
-          pageFormat.marginTop, pageFormat.marginRight);
+      return EdgeInsets.fromLTRB(
+          pageFormat.marginBottom, pageFormat.marginLeft, pageFormat.marginTop, pageFormat.marginRight);
     } else {
-      return EdgeInsets.fromLTRB(pageFormat.marginLeft, pageFormat.marginTop,
-          pageFormat.marginRight, pageFormat.marginBottom);
+      return EdgeInsets.fromLTRB(
+          pageFormat.marginLeft, pageFormat.marginTop, pageFormat.marginRight, pageFormat.marginBottom);
     }
   }
 
