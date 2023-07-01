@@ -34,6 +34,17 @@ final _redBox = Container(
   color: PdfColors.red,
 );
 
+final _yellowBox = Container(
+  width: 50,
+  height: 50,
+  color: PdfColors.yellow,
+);
+
+final _greenBox = Container(
+  width: 50,
+  height: 50,
+  color: PdfColors.green,
+);
 void main() {
   setUpAll(() {
     Document.debug = true;
@@ -119,6 +130,75 @@ void main() {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [_blueBox, _redBox],
           ),
+        ),
+      ),
+    );
+  });
+
+  test('Wrap Should render blue,red,yellow ordered RTL', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) => SizedBox(
+            width: 150,
+            height: 150,
+           child: Wrap(
+              children: [_blueBox, _redBox,_yellowBox],
+            )
+        ),
+      ),
+    );
+  });
+
+  test('Wrap Should render blue,red,yellow ordered LTR', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.ltr,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) => SizedBox(
+            width: 150,
+            height: 150,
+            child: Wrap(
+              children: [_blueBox, _redBox,_yellowBox],
+            )
+        ),
+      ),
+    );
+  });
+  test('Wrap Should render blue,red,yellow ordered RTL aligned center', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) => SizedBox(
+            width: 150,
+            height: 150,
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              runAlignment: WrapAlignment.center,
+              children: [_blueBox, _redBox,_yellowBox],
+            )
+        ),
+      ),
+    );
+  });
+
+  test('Wrap Should render blue,red,yellow ordered RTL aligned bottom', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) => SizedBox(
+            width: 150,
+            height: 150,
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              runAlignment: WrapAlignment.end,
+              children: [_blueBox, _redBox,_yellowBox],
+            )
         ),
       ),
     );
