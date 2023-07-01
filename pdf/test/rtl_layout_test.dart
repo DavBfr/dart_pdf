@@ -40,11 +40,7 @@ final _yellowBox = Container(
   color: PdfColors.yellow,
 );
 
-final _greenBox = Container(
-  width: 50,
-  height: 50,
-  color: PdfColors.green,
-);
+
 void main() {
   setUpAll(() {
     Document.debug = true;
@@ -143,10 +139,9 @@ void main() {
         build: (Context context) => SizedBox(
             width: 150,
             height: 150,
-           child: Wrap(
-              children: [_blueBox, _redBox,_yellowBox],
-            )
-        ),
+            child: Wrap(
+              children: [_blueBox, _redBox, _yellowBox],
+            )),
       ),
     );
   });
@@ -160,9 +155,8 @@ void main() {
             width: 150,
             height: 150,
             child: Wrap(
-              children: [_blueBox, _redBox,_yellowBox],
-            )
-        ),
+              children: [_blueBox, _redBox, _yellowBox],
+            )),
       ),
     );
   });
@@ -178,9 +172,8 @@ void main() {
               spacing: 10,
               runSpacing: 10,
               runAlignment: WrapAlignment.center,
-              children: [_blueBox, _redBox,_yellowBox],
-            )
-        ),
+              children: [_blueBox, _redBox, _yellowBox],
+            )),
       ),
     );
   });
@@ -197,9 +190,96 @@ void main() {
               spacing: 10,
               runSpacing: 10,
               runAlignment: WrapAlignment.end,
-              children: [_blueBox, _redBox,_yellowBox],
-            )
-        ),
+              children: [_blueBox, _redBox, _yellowBox],
+            )),
+      ),
+    );
+  });
+
+  test('RTL Page Should render child aligned right', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return _blueBox;
+        },
+      ),
+    );
+  });
+
+  test('LTR Page Should render child aligned left', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.ltr,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return _blueBox;
+        },
+      ),
+    );
+  });
+
+  test('RTL Multi Page Should render child aligned right', () {
+    pdf.addPage(
+      MultiPage(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return [
+            ListView(children: [
+              for(int i = 0; i < 30; i++)
+                Text('Hello World')
+            ]),
+          ];
+        },
+      ),
+    );
+  });
+
+  test('LTR Multi Page Should render child aligned left', () {
+    pdf.addPage(
+      MultiPage(
+        textDirection: TextDirection.ltr,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return [
+            ListView(children: [
+              for(int i = 0; i < 30; i++)
+                Text('Hello World')
+            ]),
+          ];
+        },
+      ),
+    );
+  });
+
+  test('Should render a blue box padded from right', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return Padding(
+            padding: const EdgeInsetsDirectional.only(start: 20),
+            child: _blueBox,
+          );
+        },
+      ),
+    );
+  });
+
+  test('Should render a blue box padded from left', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.ltr,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return Padding(
+            padding: const EdgeInsetsDirectional.only(start: 20),
+            child: _blueBox,
+          );
+        },
       ),
     );
   });

@@ -16,6 +16,7 @@
 
 import 'dart:math' as math;
 
+import 'package:pdf/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
@@ -80,46 +81,48 @@ class Padding extends SingleChildWidget {
     Widget? child,
   }) : super(child: child);
 
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
+      final effectivePadding = padding.resolve(Directionality.of(context));
     if (child != null) {
-      final childConstraints = constraints.deflate(padding);
+      final childConstraints = constraints.deflate(effectivePadding);
       child!.layout(context, childConstraints, parentUsesSize: parentUsesSize);
       assert(child!.box != null);
       box = constraints.constrainRect(
-          width: child!.box!.width + padding.horizontal,
-          height: child!.box!.height + padding.vertical);
+          width: child!.box!.width + effectivePadding.horizontal,
+          height: child!.box!.height + effectivePadding.vertical);
     } else {
       box = constraints.constrainRect(
-          width: padding.horizontal, height: padding.vertical);
+          width: effectivePadding.horizontal, height: effectivePadding.vertical);
     }
   }
 
   @override
   void debugPaint(Context context) {
+    final effectivePadding = padding.resolve(Directionality.of(context));
     context.canvas
       ..setFillColor(PdfColors.lime)
       ..moveTo(box!.x, box!.y)
       ..lineTo(box!.right, box!.y)
       ..lineTo(box!.right, box!.top)
       ..lineTo(box!.x, box!.top)
-      ..moveTo(box!.x + padding.left, box!.y + padding.bottom)
-      ..lineTo(box!.x + padding.left, box!.top - padding.top)
-      ..lineTo(box!.right - padding.right, box!.top - padding.top)
-      ..lineTo(box!.right - padding.right, box!.y + padding.bottom)
+      ..moveTo(box!.x + effectivePadding.left, box!.y + effectivePadding.bottom)
+      ..lineTo(box!.x + effectivePadding.left, box!.top - effectivePadding.top)
+      ..lineTo(box!.right - effectivePadding.right, box!.top - effectivePadding.top)
+      ..lineTo(box!.right - effectivePadding.right, box!.y + effectivePadding.bottom)
       ..fillPath();
   }
 
   @override
   void paint(Context context) {
     super.paint(context);
-
+  final effectivePadding = padding.resolve(Directionality.of(context));
     if (child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box!.x + padding.left, box!.y + padding.bottom);
+      mat.translate(box!.x + effectivePadding.left, box!.y + effectivePadding.bottom);
       context.canvas
         ..saveContext()
         ..setTransform(mat);
