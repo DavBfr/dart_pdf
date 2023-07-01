@@ -146,7 +146,7 @@ class Checkbox extends SingleChildWidget with AnnotationAppearance {
     BoxDecoration? decoration,
   })  : radius = decoration?.shape == BoxShape.circle
             ? Radius.circular(math.max(height, width) / 2)
-            : decoration?.borderRadius?.topLeft ?? Radius.zero,
+            : decoration?.borderRadius?.uniform ?? Radius.zero,
         super(
             child: Container(
                 width: width,

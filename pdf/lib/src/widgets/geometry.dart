@@ -566,7 +566,35 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   }
 }
 
-class Alignment {
+/// Base class for [Alignment] that allows for text-direction aware
+/// resolution.
+///
+/// A property or argument of this type accepts classes created either with [
+/// Alignment] and its variants, or [AlignmentDirectional.new].
+///
+/// To convert an [AlignmentGeometry] object of indeterminate type into an
+/// [Alignment] object, call the [resolve] method.
+@immutable
+abstract class AlignmentGeometry {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const AlignmentGeometry();
+
+
+  /// Convert this instance into an [Alignment], which uses literal
+  /// coordinates (the `x` coordinate being explicitly a distance from the
+  /// left).
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], for which this is a no-op (returns itself).
+  ///  * [AlignmentDirectional], which flips the horizontal direction
+  ///    based on the `direction` argument.
+  Alignment resolve(TextDirection? direction);
+
+}
+
+class Alignment extends AlignmentGeometry {
   const Alignment(this.x, this.y);
 
   /// The distance fraction in the horizontal direction.
@@ -633,8 +661,168 @@ class Alignment {
   }
 
   @override
-  String toString() => '($x, $y)';
+  String toString() => _stringify(x, y);
+
+  static String _stringify(double x, double y) {
+    if (x == -1.0 && y == -1.0) {
+      return 'Alignment.topLeft';
+    }
+    if (x == 0.0 && y == -1.0) {
+      return 'Alignment.topCenter';
+    }
+    if (x == 1.0 && y == -1.0) {
+      return 'Alignment.topRight';
+    }
+    if (x == -1.0 && y == 0.0) {
+      return 'Alignment.centerLeft';
+    }
+    if (x == 0.0 && y == 0.0) {
+      return 'Alignment.center';
+    }
+    if (x == 1.0 && y == 0.0) {
+      return 'Alignment.centerRight';
+    }
+    if (x == -1.0 && y == 1.0) {
+      return 'Alignment.bottomLeft';
+    }
+    if (x == 0.0 && y == 1.0) {
+      return 'Alignment.bottomCenter';
+    }
+    if (x == 1.0 && y == 1.0) {
+      return 'Alignment.bottomRight';
+    }
+    return 'Alignment(${x.toStringAsFixed(1)}, '
+        '${y.toStringAsFixed(1)})';
+  }
+
+  @override
+  Alignment resolve(TextDirection? direction) => this;
 }
+
+/// An offset that's expressed as a fraction of a [Size], but whose horizontal
+/// component is dependent on the writing direction.
+///
+/// This can be used to indicate an offset from the left in [TextDirection.ltr]
+/// text and an offset from the right in [TextDirection.rtl] text without having
+/// to be aware of the current text direction.
+///
+/// See also:
+///
+///  * [Alignment], a variant that is defined in physical terms (i.e.
+///    whose horizontal component does not depend on the text direction).
+class AlignmentDirectional extends AlignmentGeometry {
+  /// Creates a directional alignment.
+  ///
+  /// The [start] and [y] arguments must not be null.
+  const AlignmentDirectional(this.start, this.y);
+
+  /// The distance fraction in the horizontal direction.
+  ///
+  /// A value of -1.0 corresponds to the edge on the "start" side, which is the
+  /// left side in [TextDirection.ltr] contexts and the right side in
+  /// [TextDirection.rtl] contexts. A value of 1.0 corresponds to the opposite
+  /// edge, the "end" side. Values are not limited to that range; values less
+  /// than -1.0 represent positions beyond the start edge, and values greater than
+  /// 1.0 represent positions beyond the end edge.
+  ///
+  /// This value is normalized into an [Alignment.x] value by the [resolve]
+  /// method.
+  final double start;
+
+  /// The distance fraction in the vertical direction.
+  ///
+  /// A value of -1.0 corresponds to the topmost edge. A value of 1.0
+  /// corresponds to the bottommost edge. Values are not limited to that range;
+  /// values less than -1.0 represent positions above the top, and values
+  /// greater than 1.0 represent positions below the bottom.
+  ///
+  /// This value is passed through to [Alignment.y] unmodified by the
+  /// [resolve] method.
+  final double y;
+
+  /// The top corner on the "start" side.
+  static const AlignmentDirectional topStart = AlignmentDirectional(-1.0, -1.0);
+
+  /// The center point along the top edge.
+  ///
+  /// Consider using [Alignment.topCenter] instead, as it does not need
+  /// to be [resolve]d to be used.
+  static const AlignmentDirectional topCenter = AlignmentDirectional(0.0, -1.0);
+
+  /// The top corner on the "end" side.
+  static const AlignmentDirectional topEnd = AlignmentDirectional(1.0, -1.0);
+
+  /// The center point along the "start" edge.
+  static const AlignmentDirectional centerStart = AlignmentDirectional(-1.0, 0.0);
+
+  /// The center point, both horizontally and vertically.
+  ///
+  /// Consider using [Alignment.center] instead, as it does not need to
+  /// be [resolve]d to be used.
+  static const AlignmentDirectional center = AlignmentDirectional(0.0, 0.0);
+
+  /// The center point along the "end" edge.
+  static const AlignmentDirectional centerEnd = AlignmentDirectional(1.0, 0.0);
+
+  /// The bottom corner on the "start" side.
+  static const AlignmentDirectional bottomStart = AlignmentDirectional(-1.0, 1.0);
+
+  /// The center point along the bottom edge.
+  ///
+  /// Consider using [Alignment.bottomCenter] instead, as it does not
+  /// need to be [resolve]d to be used.
+  static const AlignmentDirectional bottomCenter = AlignmentDirectional(0.0, 1.0);
+
+  /// The bottom corner on the "end" side.
+  static const AlignmentDirectional bottomEnd = AlignmentDirectional(1.0, 1.0);
+
+  static String _stringify(double start, double y) {
+    if (start == -1.0 && y == -1.0) {
+      return 'AlignmentDirectional.topStart';
+    }
+    if (start == 0.0 && y == -1.0) {
+      return 'AlignmentDirectional.topCenter';
+    }
+    if (start == 1.0 && y == -1.0) {
+      return 'AlignmentDirectional.topEnd';
+    }
+    if (start == -1.0 && y == 0.0) {
+      return 'AlignmentDirectional.centerStart';
+    }
+    if (start == 0.0 && y == 0.0) {
+      return 'AlignmentDirectional.center';
+    }
+    if (start == 1.0 && y == 0.0) {
+      return 'AlignmentDirectional.centerEnd';
+    }
+    if (start == -1.0 && y == 1.0) {
+      return 'AlignmentDirectional.bottomStart';
+    }
+    if (start == 0.0 && y == 1.0) {
+      return 'AlignmentDirectional.bottomCenter';
+    }
+    if (start == 1.0 && y == 1.0) {
+      return 'AlignmentDirectional.bottomEnd';
+    }
+    return 'AlignmentDirectional(${start.toStringAsFixed(1)}, '
+        '${y.toStringAsFixed(1)})';
+  }
+
+  @override
+  String toString() => _stringify(start, y);
+
+  @override
+  Alignment resolve(TextDirection? direction) {
+    assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
+    switch (direction!) {
+      case TextDirection.rtl:
+        return Alignment(-start, y);
+      case TextDirection.ltr:
+        return Alignment(start, y);
+    }
+  }
+}
+
 
 /// An offset that's expressed as a fraction of a [PdfPoint].
 @immutable

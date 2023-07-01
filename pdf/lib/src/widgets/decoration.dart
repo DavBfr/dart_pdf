@@ -20,12 +20,7 @@ import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
-import 'basic.dart';
-import 'border_radius.dart';
-import 'box_border.dart';
-import 'geometry.dart';
-import 'image_provider.dart';
-import 'widget.dart';
+import '../../widgets.dart';
 
 enum DecorationPosition { background, foreground }
 
@@ -271,7 +266,7 @@ class BoxDecoration {
   /// The color to fill in the background of the box.
   final PdfColor? color;
   final BoxBorder? border;
-  final BorderRadius? borderRadius;
+  final BorderRadiusGeometry? borderRadius;
   final BoxShape shape;
   final DecorationGraphic? image;
   final Gradient? gradient;
@@ -282,11 +277,12 @@ class BoxDecoration {
     PdfRect box, [
     PaintPhase phase = PaintPhase.all,
   ]) {
+    final resolvedBorderRadius = borderRadius?.resolve(Directionality.of(context));
     if (phase == PaintPhase.all || phase == PaintPhase.background) {
       if (color != null) {
         switch (shape) {
           case BoxShape.rectangle:
-            if (borderRadius == null) {
+            if (resolvedBorderRadius == null) {
               if (boxShadow != null) {
                 for (final s in boxShadow!) {
                   final i = PdfRasterBase.shadowRect(box.width, box.height,
@@ -313,7 +309,7 @@ class BoxDecoration {
                   );
                 }
               }
-              borderRadius!.paint(context, box);
+              resolvedBorderRadius.paint(context, box);
             }
             break;
           case BoxShape.circle:
@@ -341,10 +337,10 @@ class BoxDecoration {
       if (gradient != null) {
         switch (shape) {
           case BoxShape.rectangle:
-            if (borderRadius == null) {
+            if (resolvedBorderRadius == null) {
               context.canvas.drawBox(box);
             } else {
-              borderRadius!.paint(context, box);
+              resolvedBorderRadius.paint(context, box);
             }
             break;
           case BoxShape.circle:
@@ -367,8 +363,8 @@ class BoxDecoration {
 
             break;
           case BoxShape.rectangle:
-            if (borderRadius != null) {
-              borderRadius!.paint(context, box);
+            if (resolvedBorderRadius!= null) {
+              resolvedBorderRadius.paint(context, box);
               context.canvas.clipPath();
             }
             break;
@@ -384,7 +380,7 @@ class BoxDecoration {
           context,
           box,
           shape: shape,
-          borderRadius: borderRadius,
+          borderRadius: resolvedBorderRadius,
         );
       }
     }

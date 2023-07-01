@@ -16,14 +16,10 @@
 
 import 'dart:math' as math;
 
-import 'package:pdf/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
-import 'basic.dart';
-import 'geometry.dart';
-import 'multi_page.dart';
-import 'widget.dart';
+import '../../widgets.dart';
 
 enum FlexFit {
   tight,
