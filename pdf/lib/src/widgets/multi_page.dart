@@ -188,28 +188,18 @@ class MultiPage extends Page {
       final _margin = resolvedMargin!;
       context.canvas
         ..saveContext()
-        ..setTransform(Matrix4.identity()
-          ..rotateZ(-math.pi / 2)
-          ..translate(
-            x - pageHeight + _margin.top - _margin.left,
-            y + _margin.left - _margin.bottom,
-          ));
-
-      final availableWidth = pageHeight - resolvedMargin!.vertical;
-      if (pageTheme.textDirection == TextDirection.rtl) {
-        child.box = child.box!.copyWith(
-          x: (availableWidth - child.box!.width) + child.box!.x,
+        ..setTransform(
+          Matrix4.identity()
+            ..rotateZ(-math.pi / 2)
+            ..translate(
+              x - pageHeight + _margin.top - _margin.left,
+              y + _margin.left - _margin.bottom,
+            ),
         );
-      }
       child.paint(context);
       context.canvas.restoreContext();
     } else {
-      var childXPos = x;
-      if (pageTheme.textDirection == TextDirection.rtl) {
-        final availableWidth = pageFormat.width - resolvedMargin!.horizontal;
-        childXPos = (availableWidth - child.box!.width) + x;
-      }
-      child.box = child.box!.copyWith(x: childXPos, y: y);
+      child.box = child.box!.copyWith(x: x, y: y);
       child.paint(context);
     }
   }
@@ -384,7 +374,7 @@ class MultiPage extends Page {
     final pageHeightMargin = _mustRotate ? _margin.horizontal : _margin.vertical;
     final pageWidthMargin = _mustRotate ? _margin.vertical : _margin.horizontal;
     final availableWidth = pageWidth - pageWidthMargin;
-
+    final isRTL = pageTheme.textDirection == TextDirection.rtl;
     for (final page in _pages) {
       var offsetStart = pageHeight - (_mustRotate ? pageHeightMargin - _margin.bottom : _margin.top);
       var offsetEnd = _mustRotate ? pageHeightMargin - _margin.left : _margin.bottom;
@@ -394,7 +384,8 @@ class MultiPage extends Page {
 
         child.layout(page.context, page.fullConstraints, parentUsesSize: false);
         assert(child.box != null);
-        _paintChild(page.context, child, _margin.left, _margin.bottom, pageFormat.height);
+        final xPos = isRTL ? _margin.left + (availableWidth - child.box!.width) : _margin.left;
+        _paintChild(page.context, child, xPos, _margin.bottom, pageFormat.height);
       }
 
       var totalFlex = 0;
@@ -419,21 +410,20 @@ class MultiPage extends Page {
 
       if (header != null) {
         final headerWidget = header!(page.context);
-
         headerWidget.layout(page.context, page.constraints, parentUsesSize: false);
         assert(headerWidget.box != null);
         offsetStart -= headerWidget.box!.height;
-        _paintChild(
-            page.context, headerWidget, _margin.left, page.offsetStart! - headerWidget.box!.height, pageFormat.height);
+        final xPos = isRTL ? _margin.left + (availableWidth - headerWidget.box!.width) : _margin.left;
+        _paintChild(page.context, headerWidget, xPos, page.offsetStart! - headerWidget.box!.height, pageFormat.height);
       }
 
       if (footer != null) {
         final footerWidget = footer!(page.context);
-
         footerWidget.layout(page.context, page.constraints, parentUsesSize: false);
         assert(footerWidget.box != null);
+        final xPos = isRTL ? _margin.left + (availableWidth - footerWidget.box!.width) : _margin.left;
         offsetEnd += footerWidget.box!.height;
-        _paintChild(page.context, footerWidget, _margin.left, _margin.bottom, pageFormat.height);
+        _paintChild(page.context, footerWidget, xPos, _margin.bottom, pageFormat.height);
       }
 
       final freeSpace = math.max(0.0, offsetStart - offsetEnd - allocatedSize);
@@ -508,23 +498,28 @@ class MultiPage extends Page {
           allocatedFlexSpace += maxChildExtent;
         }
       }
-
       var pos = offsetStart - leadingSpace;
       for (final widget in page.widgets) {
         pos -= widget.child.box!.height;
         late double x;
         switch (crossAxisAlignment) {
+          case CrossAxisAlignment.stretch:
           case CrossAxisAlignment.start:
-            x = 0;
+            if (isRTL) {
+              x = availableWidth - widget.child.box!.width;
+            } else {
+              x = 0;
+            }
             break;
           case CrossAxisAlignment.end:
-            x = availableWidth - widget.child.box!.width;
+            if (isRTL) {
+              x = 0;
+            } else {
+              x = availableWidth - widget.child.box!.width;
+            }
             break;
           case CrossAxisAlignment.center:
             x = availableWidth / 2 - widget.child.box!.width / 2;
-            break;
-          case CrossAxisAlignment.stretch:
-            x = 0;
             break;
         }
         final child = widget.child;
@@ -540,7 +535,8 @@ class MultiPage extends Page {
 
         child.layout(page.context, page.fullConstraints, parentUsesSize: false);
         assert(child.box != null);
-        _paintChild(page.context, child, _margin.left, _margin.bottom, pageFormat.height);
+        final xPos = isRTL ? _margin.left + (availableWidth - child.box!.width) : _margin.left;
+        _paintChild(page.context, child, xPos, _margin.bottom, pageFormat.height);
       }
     }
   }

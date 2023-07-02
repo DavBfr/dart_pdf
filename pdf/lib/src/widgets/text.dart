@@ -566,7 +566,7 @@ class _Line {
         delta = isRTL ? wordsWidth : 0;
         break;
       case TextAlign.right:
-        delta = totalWidth - wordsWidth;
+        delta = isRTL ? totalWidth: totalWidth - wordsWidth;
         break;
       case TextAlign.start:
         delta = isRTL ? totalWidth : 0;
@@ -576,6 +576,9 @@ class _Line {
         break;
       case TextAlign.center:
         delta = (totalWidth - wordsWidth) / 2.0;
+        if(isRTL) {
+          delta += wordsWidth;
+        }
         break;
       case TextAlign.justify:
         delta = isRTL ? totalWidth : 0;
