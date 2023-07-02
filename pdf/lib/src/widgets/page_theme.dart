@@ -59,13 +59,13 @@ class PageTheme {
 
   EdgeInsetsGeometry? get margin {
     if (_margin != null) {
-      final effectiveMargin = _margin!.resolve(textDirection);
+      final resolvedMargin = _margin!.resolve(textDirection);
       if (mustRotate) {
         return EdgeInsets.fromLTRB(
-          effectiveMargin.bottom,
-          effectiveMargin.left,
-          effectiveMargin.top,
-          effectiveMargin.right,
+          resolvedMargin.bottom,
+          resolvedMargin.left,
+          resolvedMargin.top,
+          resolvedMargin.right,
         );
       } else {
         return _margin;

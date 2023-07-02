@@ -18,6 +18,7 @@ import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
+import 'package:pdf/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
@@ -146,7 +147,7 @@ abstract class Widget {
     PdfGraphics? canvas,
     BoxConstraints? constraints,
     required PdfPoint offset,
-    Alignment? alignment,
+    AlignmentGeometry? alignment,
     Context? context,
   }) {
     context ??= Context(
@@ -165,7 +166,8 @@ abstract class Widget {
     assert(widget.box != null);
 
     if (alignment != null) {
-      final d = alignment.withinRect(widget.box!);
+      final resolvedAlignment = alignment.resolve(Directionality.of(context));
+      final d = resolvedAlignment.withinRect(widget.box!);
       offset = PdfPoint(offset.x - d.x, offset.y - d.y);
     }
 

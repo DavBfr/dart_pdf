@@ -15,6 +15,7 @@
  */
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
@@ -41,9 +42,29 @@ final _yellowBox = Container(
 );
 
 void main() {
+  late final arabicFont;
   setUpAll(() {
     Document.debug = true;
     pdf = Document();
+    final fontData = File('test/fonts/cairo.ttf').readAsBytesSync();
+    // final fontData = File('test/fonts/hacen_tunisia.ttf').readAsBytesSync();
+    arabicFont = Font.ttf(fontData.buffer.asByteData());
+  });
+
+  test('Should render Text aligned right', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 50),
+        build: (Context context) => SizedBox(
+          width: 150,
+          child: Text(
+            'مرحبا بالعالم',
+            style: TextStyle(font: arabicFont),
+          ),
+        ),
+      ),
+    );
   });
 
   test('Should render a blue box followed by a red box ordered RTL aligned right', () {
@@ -51,13 +72,12 @@ void main() {
       Page(
         textDirection: TextDirection.rtl,
         pageFormat: const PdfPageFormat(150, 50),
-        build: (Context context) =>
-            TestAnnotation(
-              anno: 'RTL Row',
-              child: Row(
-                children: [_blueBox, _redBox],
-              ),
-            ),
+        build: (Context context) => TestAnnotation(
+          anno: 'RTL Row',
+          child: Row(
+            children: [_blueBox, _redBox],
+          ),
+        ),
       ),
     );
   });
@@ -67,14 +87,13 @@ void main() {
       Page(
         textDirection: TextDirection.rtl,
         pageFormat: const PdfPageFormat(150, 50),
-        build: (Context context) =>
-            TestAnnotation(
-              anno: 'RTL Row MainAlignment.center',
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [_blueBox, _redBox],
-              ),
-            ),
+        build: (Context context) => TestAnnotation(
+          anno: 'RTL Row MainAlignment.center',
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [_blueBox, _redBox],
+          ),
+        ),
       ),
     );
   });
@@ -84,18 +103,17 @@ void main() {
       Page(
         pageFormat: const PdfPageFormat(150, 100),
         textDirection: TextDirection.rtl,
-        build: (Context context) =>
-            TestAnnotation(
-              anno: 'RTL Row CrossAlignment.end',
-              child: SizedBox(
-                width: 150,
-                height: 100,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [_blueBox, _redBox],
-                ),
-              ),
+        build: (Context context) => TestAnnotation(
+          anno: 'RTL Row CrossAlignment.end',
+          child: SizedBox(
+            width: 150,
+            height: 100,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [_blueBox, _redBox],
             ),
+          ),
+        ),
       ),
     );
   });
@@ -103,13 +121,12 @@ void main() {
     pdf.addPage(
       Page(
         pageFormat: const PdfPageFormat(150, 50),
-        build: (Context context) =>
-            TestAnnotation(
-              anno: 'LTR Row',
-              child: Row(
-                children: [_blueBox, _redBox],
-              ),
-            ),
+        build: (Context context) => TestAnnotation(
+          anno: 'LTR Row',
+          child: Row(
+            children: [_blueBox, _redBox],
+          ),
+        ),
       ),
     );
   });
@@ -118,18 +135,17 @@ void main() {
       Page(
         textDirection: TextDirection.rtl,
         pageFormat: const PdfPageFormat(150, 150),
-        build: (Context context) =>
-            TestAnnotation(
-              anno: 'RTL Column crossAlignment.start',
-              child: SizedBox(
-                width: 150,
-                height: 150,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [_blueBox, _redBox],
-                ),
-              ),
+        build: (Context context) => TestAnnotation(
+          anno: 'RTL Column crossAlignment.start',
+          child: SizedBox(
+            width: 150,
+            height: 150,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [_blueBox, _redBox],
             ),
+          ),
+        ),
       ),
     );
   });
@@ -138,18 +154,17 @@ void main() {
       Page(
         textDirection: TextDirection.ltr,
         pageFormat: const PdfPageFormat(150, 150),
-        build: (Context context) =>
-            TestAnnotation(
-              anno: 'LTR Column crossAlignment.start',
-              child: SizedBox(
-                width: 150,
-                height: 150,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [_blueBox, _redBox],
-                ),
-              ),
+        build: (Context context) => TestAnnotation(
+          anno: 'LTR Column crossAlignment.start',
+          child: SizedBox(
+            width: 150,
+            height: 150,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [_blueBox, _redBox],
             ),
+          ),
+        ),
       ),
     );
   });
@@ -159,17 +174,16 @@ void main() {
       Page(
         textDirection: TextDirection.rtl,
         pageFormat: const PdfPageFormat(150, 150),
-        build: (Context context) =>
-            TestAnnotation(
-              anno: 'RTL Wrap',
-              child: SizedBox(
-                width: 150,
-                height: 150,
-                child: Wrap(
-                  children: [_blueBox, _redBox, _yellowBox],
-                ),
-              ),
+        build: (Context context) => TestAnnotation(
+          anno: 'RTL Wrap',
+          child: SizedBox(
+            width: 150,
+            height: 150,
+            child: Wrap(
+              children: [_blueBox, _redBox, _yellowBox],
             ),
+          ),
+        ),
       ),
     );
   });
@@ -179,17 +193,16 @@ void main() {
       Page(
         textDirection: TextDirection.ltr,
         pageFormat: const PdfPageFormat(150, 150),
-        build: (Context context) =>
-            TestAnnotation(
-              anno: 'LTR Wrap',
-              child: SizedBox(
-                width: 150,
-                height: 150,
-                child: Wrap(
-                  children: [_blueBox, _redBox, _yellowBox],
-                ),
-              ),
+        build: (Context context) => TestAnnotation(
+          anno: 'LTR Wrap',
+          child: SizedBox(
+            width: 150,
+            height: 150,
+            child: Wrap(
+              children: [_blueBox, _redBox, _yellowBox],
             ),
+          ),
+        ),
       ),
     );
   });
@@ -198,20 +211,19 @@ void main() {
       Page(
         textDirection: TextDirection.rtl,
         pageFormat: const PdfPageFormat(150, 150),
-        build: (Context context) =>
-            TestAnnotation(
-              anno: 'RTL Wrap WrapAlignment.center',
-              child: SizedBox(
-                width: 150,
-                height: 150,
-                child: Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  runAlignment: WrapAlignment.center,
-                  children: [_blueBox, _redBox, _yellowBox],
-                ),
-              ),
+        build: (Context context) => TestAnnotation(
+          anno: 'RTL Wrap WrapAlignment.center',
+          child: SizedBox(
+            width: 150,
+            height: 150,
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              runAlignment: WrapAlignment.center,
+              children: [_blueBox, _redBox, _yellowBox],
             ),
+          ),
+        ),
       ),
     );
   });
@@ -221,19 +233,18 @@ void main() {
       Page(
         textDirection: TextDirection.rtl,
         pageFormat: const PdfPageFormat(150, 150),
-        build: (Context context) =>
-            TestAnnotation(
-              anno: 'RTL Wrap WrapAlignment.end',
-              child: SizedBox(
-                  width: 150,
-                  height: 150,
-                  child: Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    runAlignment: WrapAlignment.end,
-                    children: [_blueBox, _redBox, _yellowBox],
-                  )),
-            ),
+        build: (Context context) => TestAnnotation(
+          anno: 'RTL Wrap WrapAlignment.end',
+          child: SizedBox(
+              width: 150,
+              height: 150,
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                runAlignment: WrapAlignment.end,
+                children: [_blueBox, _redBox, _yellowBox],
+              )),
+        ),
       ),
     );
   });
@@ -529,17 +540,20 @@ void main() {
         textDirection: TextDirection.rtl,
         pageFormat: const PdfPageFormat(150, 150),
         build: (Context context) {
-          return TestAnnotation(anno: 'RTL GridView Axis.horizontal', child: GridView(
-            crossAxisCount: 3,
-            childAspectRatio: 1,
-            direction: Axis.horizontal,
-            children: [
-              for (int i = 0; i < 7; i++)
-                Container(
-                  color: [PdfColors.blue, PdfColors.red, PdfColors.yellow][i % 3],
-                ),
-            ],
-          ),);
+          return TestAnnotation(
+            anno: 'RTL GridView Axis.horizontal',
+            child: GridView(
+              crossAxisCount: 3,
+              childAspectRatio: 1,
+              direction: Axis.horizontal,
+              children: [
+                for (int i = 0; i < 7; i++)
+                  Container(
+                    color: [PdfColors.blue, PdfColors.red, PdfColors.yellow][i % 3],
+                  ),
+              ],
+            ),
+          );
         },
       ),
     );
@@ -551,17 +565,20 @@ void main() {
         textDirection: TextDirection.ltr,
         pageFormat: const PdfPageFormat(150, 150),
         build: (Context context) {
-          return TestAnnotation(anno: 'LTR GridView Axis.horizontal', child: GridView(
-            crossAxisCount: 3,
-            childAspectRatio: 1,
-            direction: Axis.horizontal,
-            children: [
-              for (int i = 0; i < 7; i++)
-                Container(
-                  color: [PdfColors.blue, PdfColors.red, PdfColors.yellow][i % 3],
-                ),
-            ],
-          ),);
+          return TestAnnotation(
+            anno: 'LTR GridView Axis.horizontal',
+            child: GridView(
+              crossAxisCount: 3,
+              childAspectRatio: 1,
+              direction: Axis.horizontal,
+              children: [
+                for (int i = 0; i < 7; i++)
+                  Container(
+                    color: [PdfColors.blue, PdfColors.red, PdfColors.yellow][i % 3],
+                  ),
+              ],
+            ),
+          );
         },
       ),
     );
