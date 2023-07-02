@@ -15,7 +15,6 @@
  */
 
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
@@ -42,29 +41,9 @@ final _yellowBox = Container(
 );
 
 void main() {
-  late final arabicFont;
   setUpAll(() {
     Document.debug = true;
     pdf = Document();
-    final fontData = File('test/fonts/cairo.ttf').readAsBytesSync();
-    // final fontData = File('test/fonts/hacen_tunisia.ttf').readAsBytesSync();
-    arabicFont = Font.ttf(fontData.buffer.asByteData());
-  });
-
-  test('Should render Text aligned right', () {
-    pdf.addPage(
-      Page(
-        textDirection: TextDirection.rtl,
-        pageFormat: const PdfPageFormat(150, 50),
-        build: (Context context) => SizedBox(
-          width: 150,
-          child: Text(
-            'مرحبا بالعالم',
-            style: TextStyle(font: arabicFont),
-          ),
-        ),
-      ),
-    );
   });
 
   test('Should render a blue box followed by a red box ordered RTL aligned right', () {
@@ -76,6 +55,92 @@ void main() {
           anno: 'RTL Row',
           child: Row(
             children: [_blueBox, _redBox],
+          ),
+        ),
+      ),
+    );
+  });
+
+  test('RTL Text', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 50),
+        build: (Context context) => Text(
+          'RTL Text',
+        ),
+      ),
+    );
+  });
+  test('RTL Text TextAlign.end', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 50),
+        build: (Context context) => SizedBox(
+          width: 150,
+          child: Text(
+            'RTL Text : TextAlign.end',
+            textAlign: TextAlign.end,
+          ),
+        ),
+      ),
+    );
+  });
+
+  test('RTL Text TextAlign.left', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 50),
+        build: (Context context) => SizedBox(
+          width: 150,
+          child: Text(
+            'RTL Text : TextAlign.left',
+            textAlign: TextAlign.left,
+          ),
+        ),
+      ),
+    );
+  });
+
+  test('LTR Text', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.ltr,
+        pageFormat: const PdfPageFormat(150, 50),
+        build: (Context context) => Text(
+          'LTR Text',
+        ),
+      ),
+    );
+  });
+  test('LTR Text TextAlign.end', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.ltr,
+        pageFormat: const PdfPageFormat(150, 50),
+        build: (Context context) => SizedBox(
+          width: 150,
+          child: Text(
+            'RTL Text : TextAlign.end',
+            textAlign: TextAlign.end,
+          ),
+        ),
+      ),
+    );
+  });
+
+  test('LTR Text TextAlign.right', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.ltr,
+        pageFormat: const PdfPageFormat(150, 50),
+        build: (Context context) => SizedBox(
+          width: 150,
+          child: Text(
+            'LTR Text : TextAlign.right',
+            textAlign: TextAlign.right,
           ),
         ),
       ),
@@ -286,10 +351,12 @@ void main() {
         pageFormat: const PdfPageFormat(150, 150),
         build: (Context context) {
           return [
-            ListView(children: [
-              Text('RTL MultiPage'),
-              for (int i = 0; i < 15; i++) Text('List item'),
-            ]),
+            Text('RTL MultiPage', style: const TextStyle(fontSize: 9)),
+            ListView(
+              children: [
+                for (int i = 0; i < 15; i++) Text('List item'),
+              ],
+            ),
           ];
         },
       ),
@@ -303,7 +370,7 @@ void main() {
         pageFormat: const PdfPageFormat(150, 150),
         build: (Context context) {
           return [
-            Text('LTR MultiPage'),
+            Text('LTR MultiPage', style: const TextStyle(fontSize: 9)),
             ListView(children: [
               for (int i = 0; i < 15; i++) Text('List item'),
             ]),
@@ -444,7 +511,7 @@ void main() {
           return TestAnnotation(
             anno: 'LTR RadiusDirectional.horizontal end',
             child: Container(
-              margin: const EdgeInsets.only(top: 22),
+              margin: const EdgeInsets.only(top: 11),
               decoration: const BoxDecoration(
                 color: PdfColors.blue,
                 borderRadius: BorderRadiusDirectional.horizontal(
@@ -609,6 +676,7 @@ class TestAnnotation extends StatelessWidget {
           child: Text(
             anno,
             style: const TextStyle(color: PdfColors.black, fontSize: 9),
+            textDirection: TextDirection.ltr,
             textAlign: TextAlign.center,
           ),
         ),
