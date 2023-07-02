@@ -330,9 +330,9 @@ class Footer extends StatelessWidget {
 
   final Widget? trailing;
 
-  final EdgeInsets? margin;
+  final EdgeInsetsGeometry? margin;
 
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   final BoxDecoration? decoration;
 

@@ -113,10 +113,10 @@ class LinearGradient extends Gradient {
   }) : super(colors: colors, stops: stops);
 
   /// The offset at which stop 0.0 of the gradient is placed.
-  final Alignment begin;
+  final AlignmentGeometry begin;
 
   /// The offset at which stop 1.0 of the gradient is placed.
-  final Alignment end;
+  final AlignmentGeometry end;
 
   /// How this gradient should tile the plane beyond in the region before
   final TileMode tileMode;
@@ -134,7 +134,7 @@ class LinearGradient extends Gradient {
     }
 
     assert(stops == null || stops!.length == colors.length);
-
+    final textDirection = Directionality.of(context);
     context.canvas
       ..saveContext()
       ..clipPath()
@@ -148,8 +148,8 @@ class LinearGradient extends Gradient {
             colors,
             stops,
           ),
-          start: begin.withinRect(box),
-          end: end.withinRect(box),
+          start: begin.resolve(textDirection).withinRect(box),
+          end: end.resolve(textDirection).withinRect(box),
           extendStart: true,
           extendEnd: true,
         ),
@@ -175,7 +175,7 @@ class RadialGradient extends Gradient {
   }) : super(colors: colors, stops: stops);
 
   /// The center of the gradient
-  final Alignment center;
+  final AlignmentGeometry center;
 
   /// The radius of the gradient
   final double radius;
@@ -185,7 +185,7 @@ class RadialGradient extends Gradient {
   final TileMode tileMode;
 
   /// The focal point of the gradient.
-  final Alignment? focal;
+  final AlignmentGeometry? focal;
 
   /// The radius of the focal point of the gradient.
   final double focalRadius;
@@ -207,7 +207,7 @@ class RadialGradient extends Gradient {
     final _focal = focal ?? center;
 
     final _radius = math.min(box.width, box.height);
-
+  final textDirection = Directionality.of(context);
     context.canvas
       ..saveContext()
       ..clipPath()
@@ -221,8 +221,8 @@ class RadialGradient extends Gradient {
             colors,
             stops,
           ),
-          start: _focal.withinRect(box),
-          end: center.withinRect(box),
+          start: _focal.resolve(textDirection).withinRect(box),
+          end: center.resolve(textDirection).withinRect(box),
           radius0: focalRadius * _radius,
           radius1: radius * _radius,
           extendStart: true,

@@ -227,7 +227,7 @@ class FlatButton extends SingleChildWidget with AnnotationAppearance {
     PdfColor color = PdfColors.blue,
     PdfColor colorDown = PdfColors.red,
     PdfColor colorRollover = PdfColors.blueAccent,
-    EdgeInsets? padding,
+    EdgeInsetsGeometry? padding,
     BoxDecoration? decoration,
     this.flags,
     required Widget child,
