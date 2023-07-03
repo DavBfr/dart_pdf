@@ -74,32 +74,31 @@ class Padding extends SingleChildWidget {
 
   @override
   void layout(Context context, BoxConstraints constraints, {bool parentUsesSize = false}) {
-    final effectivePadding = padding.resolve(Directionality.of(context));
+    final resolvedPadding = padding.resolve(Directionality.of(context));
     if (child != null) {
-      final childConstraints = constraints.deflate(effectivePadding);
+      final childConstraints = constraints.deflate(resolvedPadding);
       child!.layout(context, childConstraints, parentUsesSize: parentUsesSize);
       assert(child!.box != null);
       box = constraints.constrainRect(
-          width: child!.box!.width + effectivePadding.horizontal,
-          height: child!.box!.height + effectivePadding.vertical);
+          width: child!.box!.width + resolvedPadding.horizontal, height: child!.box!.height + resolvedPadding.vertical);
     } else {
-      box = constraints.constrainRect(width: effectivePadding.horizontal, height: effectivePadding.vertical);
+      box = constraints.constrainRect(width: resolvedPadding.horizontal, height: resolvedPadding.vertical);
     }
   }
 
   @override
   void debugPaint(Context context) {
-    final effectivePadding = padding.resolve(Directionality.of(context));
+    final resolvedPadding = padding.resolve(Directionality.of(context));
     context.canvas
       ..setFillColor(PdfColors.lime)
       ..moveTo(box!.x, box!.y)
       ..lineTo(box!.right, box!.y)
       ..lineTo(box!.right, box!.top)
       ..lineTo(box!.x, box!.top)
-      ..moveTo(box!.x + effectivePadding.left, box!.y + effectivePadding.bottom)
-      ..lineTo(box!.x + effectivePadding.left, box!.top - effectivePadding.top)
-      ..lineTo(box!.right - effectivePadding.right, box!.top - effectivePadding.top)
-      ..lineTo(box!.right - effectivePadding.right, box!.y + effectivePadding.bottom)
+      ..moveTo(box!.x + resolvedPadding.left, box!.y + resolvedPadding.bottom)
+      ..lineTo(box!.x + resolvedPadding.left, box!.top - resolvedPadding.top)
+      ..lineTo(box!.right - resolvedPadding.right, box!.top - resolvedPadding.top)
+      ..lineTo(box!.right - resolvedPadding.right, box!.y + resolvedPadding.bottom)
       ..fillPath();
   }
 
@@ -188,7 +187,7 @@ class Transform extends SingleChildWidget {
 
   final bool unconstrained;
 
-  Matrix4   _effectiveTransform(Context context) {
+  Matrix4 _effectiveTransform(Context context) {
     final result = Matrix4.identity();
     if (origin != null) {
       result.translate(origin!.x, origin!.y);
