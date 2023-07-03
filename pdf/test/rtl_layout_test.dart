@@ -46,20 +46,7 @@ void main() {
     pdf = Document();
   });
 
-  test('Should render a blue box followed by a red box ordered RTL aligned right', () {
-    pdf.addPage(
-      Page(
-        textDirection: TextDirection.rtl,
-        pageFormat: const PdfPageFormat(150, 50),
-        build: (Context context) => TestAnnotation(
-          anno: 'RTL Row',
-          child: Row(
-            children: [_blueBox, _redBox],
-          ),
-        ),
-      ),
-    );
-  });
+
 
   test('RTL Text', () {
     pdf.addPage(
@@ -141,6 +128,21 @@ void main() {
           child: Text(
             'LTR Text : TextAlign.right',
             textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    );
+  });
+
+  test('Should render a blue box followed by a red box ordered RTL aligned right', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 50),
+        build: (Context context) => TestAnnotation(
+          anno: 'RTL Row',
+          child: Row(
+            children: [_blueBox, _redBox],
           ),
         ),
       ),
@@ -645,6 +647,46 @@ void main() {
                   ),
               ],
             ),
+          );
+        },
+      ),
+    );
+  });
+
+  test('RTL Stack, should directional child to right44', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return TestAnnotation(
+            anno: 'RTL Stack PositionDirectional.start',
+            child: Stack(children: [
+              PositionedDirectional(
+                start: 0,
+                child: _blueBox,
+              )
+            ]),
+          );
+        },
+      ),
+    );
+  });
+
+  test('LTR Stack, should directional child to right44', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.ltr,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) {
+          return TestAnnotation(
+            anno: 'LTR Stack PositionDirectional.start',
+            child: Stack(children: [
+              PositionedDirectional(
+                start: 0,
+                child: _blueBox,
+              )
+            ]),
           );
         },
       ),
