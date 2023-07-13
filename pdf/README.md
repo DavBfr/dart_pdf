@@ -57,7 +57,7 @@ pdf.addPage(pw.Page(
       })); // Page
 ```
 
-To load an image from a file:
+To load an image from a file (Mobile):
 
 ```dart
 final image = pw.MemoryImage(
@@ -69,6 +69,28 @@ pdf.addPage(pw.Page(build: (pw.Context context) {
     child: pw.Image(image),
   ); // Center
 })); // Page
+```
+
+To load an image from asset file (web):
+
+Create a Uint8List from the image
+
+```dart
+final img = await rootBundle.load('assets/images/logo.jpg');
+final imageBytes = img.buffer.asUint8List();
+```
+Create an image from the ImageBytes
+
+```dart
+pw.Image image = pw.Image(pw.MemoryImage(imageBytes));
+```
+implement the image in a container
+```dart
+pw.Container(
+   alignment: pw.Alignment.center,
+   height: 200,
+   child: image,
+),
 ```
 
 To load an image from the network using the `printing` package:
@@ -152,7 +174,7 @@ pdf.addPage(pw.Page(
     })); // Page
 ```
 
-To save the pdf file:
+To save the pdf file (Mobile):
 
 ```dart
 // On Flutter, use the [path_provider](https://pub.dev/packages/path_provider) library:
@@ -160,6 +182,18 @@ To save the pdf file:
 //   final file = File("${output.path}/example.pdf");
 final file = File("example.pdf");
 await file.writeAsBytes(await pdf.save());
+```
+
+To save the pdf file (Web):
+(saved as a unique name based on milliseconds since epoch)
+
+```dart
+var savedFile = await pdf.save();
+List<int> fileInts = List.from(savedFile);
+html.AnchorElement(
+    href: "data:application/octet-stream;charset=utf-16le;base64,${con.base64.encode(fileInts)}")
+  ..setAttribute("download", "${DateTime.now().millisecondsSinceEpoch}.pdf")
+  ..click();
 ```
 
 ## Encryption, Digital Signature, and loading a PDF Document
