@@ -192,7 +192,9 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
       for (var index = pageNum; index < pages.length; index++) {
         pages[index].image.evict();
       }
-      pages.removeRange(pageNum, pages.length);
+      if (pageNum >= 0 && pageNum <= pages.length) {
+        pages.removeRange(pageNum, pages.length);
+      }
       if (mounted) {
         setState(() {});
       }
