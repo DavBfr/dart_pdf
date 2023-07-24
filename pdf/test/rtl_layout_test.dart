@@ -46,8 +46,6 @@ void main() {
     pdf = Document();
   });
 
-
-
   test('RTL Text', () {
     pdf.addPage(
       Page(
@@ -134,7 +132,9 @@ void main() {
     );
   });
 
-  test('Should render a blue box followed by a red box ordered RTL aligned right', () {
+  test(
+      'Should render a blue box followed by a red box ordered RTL aligned right',
+      () {
     pdf.addPage(
       Page(
         textDirection: TextDirection.rtl,
@@ -149,7 +149,9 @@ void main() {
     );
   });
 
-  test('Should render a blue box followed by a red box ordered RTL with aligned center', () {
+  test(
+      'Should render a blue box followed by a red box ordered RTL with aligned center',
+      () {
     pdf.addPage(
       Page(
         textDirection: TextDirection.rtl,
@@ -165,7 +167,9 @@ void main() {
     );
   });
 
-  test('Should render a blue box followed by a red box ordered RTL with CrossAxisAlignment.end aligned right', () {
+  test(
+      'Should render a blue box followed by a red box ordered RTL with CrossAxisAlignment.end aligned right',
+      () {
     pdf.addPage(
       Page(
         pageFormat: const PdfPageFormat(150, 100),
@@ -184,7 +188,9 @@ void main() {
       ),
     );
   });
-  test('Should render a blue box followed by a red box ordered LTR aligned left', () {
+  test(
+      'Should render a blue box followed by a red box ordered LTR aligned left',
+      () {
     pdf.addPage(
       Page(
         pageFormat: const PdfPageFormat(150, 50),
@@ -197,7 +203,9 @@ void main() {
       ),
     );
   });
-  test('Should render a blue box followed by a red box ordered TTB aligned right', () {
+  test(
+      'Should render a blue box followed by a red box ordered TTB aligned right',
+      () {
     pdf.addPage(
       Page(
         textDirection: TextDirection.rtl,
@@ -216,7 +224,9 @@ void main() {
       ),
     );
   });
-  test('Should render a blue box followed by a red box ordered TTB aligned left', () {
+  test(
+      'Should render a blue box followed by a red box ordered TTB aligned left',
+      () {
     pdf.addPage(
       Page(
         textDirection: TextDirection.ltr,
@@ -569,7 +579,11 @@ void main() {
               children: [
                 for (int i = 0; i < 7; i++)
                   Container(
-                    color: [PdfColors.blue, PdfColors.red, PdfColors.yellow][i % 3],
+                    color: [
+                      PdfColors.blue,
+                      PdfColors.red,
+                      PdfColors.yellow
+                    ][i % 3],
                   ),
               ],
             ),
@@ -594,7 +608,11 @@ void main() {
               children: [
                 for (int i = 0; i < 7; i++)
                   Container(
-                    color: [PdfColors.blue, PdfColors.red, PdfColors.yellow][i % 3],
+                    color: [
+                      PdfColors.blue,
+                      PdfColors.red,
+                      PdfColors.yellow
+                    ][i % 3],
                   ),
               ],
             ),
@@ -618,7 +636,11 @@ void main() {
               children: [
                 for (int i = 0; i < 7; i++)
                   Container(
-                    color: [PdfColors.blue, PdfColors.red, PdfColors.yellow][i % 3],
+                    color: [
+                      PdfColors.blue,
+                      PdfColors.red,
+                      PdfColors.yellow
+                    ][i % 3],
                   ),
               ],
             ),
@@ -643,7 +665,11 @@ void main() {
               children: [
                 for (int i = 0; i < 7; i++)
                   Container(
-                    color: [PdfColors.blue, PdfColors.red, PdfColors.yellow][i % 3],
+                    color: [
+                      PdfColors.blue,
+                      PdfColors.red,
+                      PdfColors.yellow
+                    ][i % 3],
                   ),
               ],
             ),

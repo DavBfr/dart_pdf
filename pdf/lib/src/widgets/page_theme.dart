@@ -54,8 +54,10 @@ class PageTheme {
   final TextDirection? textDirection;
 
   bool get mustRotate =>
-      (orientation == PageOrientation.landscape && pageFormat.height > pageFormat.width) ||
-      (orientation == PageOrientation.portrait && pageFormat.width > pageFormat.height);
+      (orientation == PageOrientation.landscape &&
+          pageFormat.height > pageFormat.width) ||
+      (orientation == PageOrientation.portrait &&
+          pageFormat.width > pageFormat.height);
 
   EdgeInsetsGeometry? get margin {
     if (_margin != null) {
@@ -73,11 +75,11 @@ class PageTheme {
     }
 
     if (mustRotate) {
-      return EdgeInsets.fromLTRB(
-          pageFormat.marginBottom, pageFormat.marginLeft, pageFormat.marginTop, pageFormat.marginRight);
+      return EdgeInsets.fromLTRB(pageFormat.marginBottom, pageFormat.marginLeft,
+          pageFormat.marginTop, pageFormat.marginRight);
     } else {
-      return EdgeInsets.fromLTRB(
-          pageFormat.marginLeft, pageFormat.marginTop, pageFormat.marginRight, pageFormat.marginBottom);
+      return EdgeInsets.fromLTRB(pageFormat.marginLeft, pageFormat.marginTop,
+          pageFormat.marginRight, pageFormat.marginBottom);
     }
   }
 

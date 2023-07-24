@@ -22,7 +22,8 @@ import 'point.dart';
 class PdfRect {
   const PdfRect(this.x, this.y, this.width, this.height);
 
-  factory PdfRect.fromLTRB(double left, double top, double right, double bottom) {
+  factory PdfRect.fromLTRB(
+      double left, double top, double right, double bottom) {
     return PdfRect(left, top, right - left, bottom - top);
   }
 
@@ -70,7 +71,8 @@ class PdfRect {
 
   /// Returns a new rectangle with edges moved outwards by the given delta.
   PdfRect inflate(double delta) {
-    return PdfRect.fromLTRB(left - delta, top - delta, right + delta, bottom + delta);
+    return PdfRect.fromLTRB(
+        left - delta, top - delta, right + delta, bottom + delta);
   }
 
   /// Returns a new rectangle with edges moved inwards by the given delta.

@@ -207,7 +207,7 @@ class RadialGradient extends Gradient {
     final _focal = focal ?? center;
 
     final _radius = math.min(box.width, box.height);
-  final textDirection = Directionality.of(context);
+    final textDirection = Directionality.of(context);
     context.canvas
       ..saveContext()
       ..clipPath()
@@ -277,7 +277,8 @@ class BoxDecoration {
     PdfRect box, [
     PaintPhase phase = PaintPhase.all,
   ]) {
-    final resolvedBorderRadius = borderRadius?.resolve(Directionality.of(context));
+    final resolvedBorderRadius =
+        borderRadius?.resolve(Directionality.of(context));
     if (phase == PaintPhase.all || phase == PaintPhase.background) {
       if (color != null) {
         switch (shape) {
@@ -363,7 +364,7 @@ class BoxDecoration {
 
             break;
           case BoxShape.rectangle:
-            if (resolvedBorderRadius!= null) {
+            if (resolvedBorderRadius != null) {
               resolvedBorderRadius.paint(context, box);
               context.canvas.clipPath();
             }

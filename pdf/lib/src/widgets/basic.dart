@@ -39,16 +39,22 @@ class LimitedBox extends SingleChildWidget {
   BoxConstraints _limitConstraints(BoxConstraints constraints) {
     return BoxConstraints(
         minWidth: constraints.minWidth,
-        maxWidth: constraints.hasBoundedWidth ? constraints.maxWidth : constraints.constrainWidth(maxWidth),
+        maxWidth: constraints.hasBoundedWidth
+            ? constraints.maxWidth
+            : constraints.constrainWidth(maxWidth),
         minHeight: constraints.minHeight,
-        maxHeight: constraints.hasBoundedHeight ? constraints.maxHeight : constraints.constrainHeight(maxHeight));
+        maxHeight: constraints.hasBoundedHeight
+            ? constraints.maxHeight
+            : constraints.constrainHeight(maxHeight));
   }
 
   @override
-  void layout(Context context, BoxConstraints constraints, {bool parentUsesSize = false}) {
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
     PdfPoint size;
     if (child != null) {
-      child!.layout(context, _limitConstraints(constraints), parentUsesSize: true);
+      child!.layout(context, _limitConstraints(constraints),
+          parentUsesSize: true);
       assert(child!.box != null);
       size = constraints.constrain(child!.box!.size);
     } else {
@@ -73,16 +79,19 @@ class Padding extends SingleChildWidget {
   final EdgeInsetsGeometry padding;
 
   @override
-  void layout(Context context, BoxConstraints constraints, {bool parentUsesSize = false}) {
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
     final resolvedPadding = padding.resolve(Directionality.of(context));
     if (child != null) {
       final childConstraints = constraints.deflate(resolvedPadding);
       child!.layout(context, childConstraints, parentUsesSize: parentUsesSize);
       assert(child!.box != null);
       box = constraints.constrainRect(
-          width: child!.box!.width + resolvedPadding.horizontal, height: child!.box!.height + resolvedPadding.vertical);
+          width: child!.box!.width + resolvedPadding.horizontal,
+          height: child!.box!.height + resolvedPadding.vertical);
     } else {
-      box = constraints.constrainRect(width: resolvedPadding.horizontal, height: resolvedPadding.vertical);
+      box = constraints.constrainRect(
+          width: resolvedPadding.horizontal, height: resolvedPadding.vertical);
     }
   }
 
@@ -97,8 +106,10 @@ class Padding extends SingleChildWidget {
       ..lineTo(box!.x, box!.top)
       ..moveTo(box!.x + resolvedPadding.left, box!.y + resolvedPadding.bottom)
       ..lineTo(box!.x + resolvedPadding.left, box!.top - resolvedPadding.top)
-      ..lineTo(box!.right - resolvedPadding.right, box!.top - resolvedPadding.top)
-      ..lineTo(box!.right - resolvedPadding.right, box!.y + resolvedPadding.bottom)
+      ..lineTo(
+          box!.right - resolvedPadding.right, box!.top - resolvedPadding.top)
+      ..lineTo(
+          box!.right - resolvedPadding.right, box!.y + resolvedPadding.bottom)
       ..fillPath();
   }
 
@@ -108,7 +119,8 @@ class Padding extends SingleChildWidget {
     final resolvedPadding = padding.resolve(Directionality.of(context));
     if (child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box!.x + resolvedPadding.left, box!.y + resolvedPadding.bottom);
+      mat.translate(
+          box!.x + resolvedPadding.left, box!.y + resolvedPadding.bottom);
       context.canvas
         ..saveContext()
         ..setTransform(mat);
@@ -210,7 +222,8 @@ class Transform extends SingleChildWidget {
   }
 
   @override
-  void layout(Context context, BoxConstraints constraints, {bool parentUsesSize = false}) {
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
     if (!adjustLayout) {
       return super.layout(context, constraints, parentUsesSize: parentUsesSize);
     }
@@ -239,14 +252,20 @@ class Transform extends SingleChildWidget {
         0,
       ]);
 
-      final dx = -math.min(math.min(math.min(values[0], values[3]), values[6]), values[9]);
-      final dy = -math.min(math.min(math.min(values[1], values[4]), values[7]), values[10]);
+      final dx = -math.min(
+          math.min(math.min(values[0], values[3]), values[6]), values[9]);
+      final dy = -math.min(
+          math.min(math.min(values[1], values[4]), values[7]), values[10]);
 
       box = PdfRect.fromLTRB(
         0,
         0,
-        math.max(math.max(math.max(values[0], values[3]), values[6]), values[9]) + dx,
-        math.max(math.max(math.max(values[1], values[4]), values[7]), values[10]) + dy,
+        math.max(math.max(math.max(values[0], values[3]), values[6]),
+                values[9]) +
+            dx,
+        math.max(math.max(math.max(values[1], values[4]), values[7]),
+                values[10]) +
+            dy,
       );
 
       transform.leftTranslate(dx, dy);
@@ -273,7 +292,11 @@ class Transform extends SingleChildWidget {
 /// A widget that aligns its child within itself and optionally sizes itself
 /// based on the child's size.
 class Align extends SingleChildWidget {
-  Align({this.alignment = Alignment.center, this.widthFactor, this.heightFactor, Widget? child})
+  Align(
+      {this.alignment = Alignment.center,
+      this.widthFactor,
+      this.heightFactor,
+      Widget? child})
       : assert(widthFactor == null || widthFactor >= 0.0),
         assert(heightFactor == null || heightFactor >= 0.0),
         super(child: child);
@@ -288,22 +311,30 @@ class Align extends SingleChildWidget {
   final double? heightFactor;
 
   @override
-  void layout(Context context, BoxConstraints constraints, {bool parentUsesSize = false}) {
-    final shrinkWrapWidth = widthFactor != null || constraints.maxWidth == double.infinity;
-    final shrinkWrapHeight = heightFactor != null || constraints.maxHeight == double.infinity;
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    final shrinkWrapWidth =
+        widthFactor != null || constraints.maxWidth == double.infinity;
+    final shrinkWrapHeight =
+        heightFactor != null || constraints.maxHeight == double.infinity;
 
     if (child != null) {
       child!.layout(context, constraints.loosen(), parentUsesSize: true);
       assert(child!.box != null);
 
       box = constraints.constrainRect(
-          width: shrinkWrapWidth ? child!.box!.width * (widthFactor ?? 1.0) : double.infinity,
-          height: shrinkWrapHeight ? child!.box!.height * (heightFactor ?? 1.0) : double.infinity);
+          width: shrinkWrapWidth
+              ? child!.box!.width * (widthFactor ?? 1.0)
+              : double.infinity,
+          height: shrinkWrapHeight
+              ? child!.box!.height * (heightFactor ?? 1.0)
+              : double.infinity);
       final resolvedAlignment = alignment.resolve(Directionality.of(context));
       child!.box = resolvedAlignment.inscribe(child!.box!.size, box!);
     } else {
       box = constraints.constrainRect(
-          width: shrinkWrapWidth ? 0.0 : double.infinity, height: shrinkWrapHeight ? 0.0 : double.infinity);
+          width: shrinkWrapWidth ? 0.0 : double.infinity,
+          height: shrinkWrapHeight ? 0.0 : double.infinity);
     }
   }
 
@@ -326,40 +357,58 @@ class Align extends SingleChildWidget {
           box!.left + child!.box!.horizontalCenter,
           box!.bottom,
         )
-        ..lineTo(box!.left + child!.box!.horizontalCenter, box!.bottom + child!.box!.bottom)
-        ..lineTo(box!.left + child!.box!.horizontalCenter - headSize, box!.bottom + child!.box!.bottom - headSize)
-        ..moveTo(box!.left + child!.box!.horizontalCenter, box!.bottom + child!.box!.bottom)
-        ..lineTo(box!.left + child!.box!.horizontalCenter + headSize, box!.bottom + child!.box!.bottom - headSize);
+        ..lineTo(box!.left + child!.box!.horizontalCenter,
+            box!.bottom + child!.box!.bottom)
+        ..lineTo(box!.left + child!.box!.horizontalCenter - headSize,
+            box!.bottom + child!.box!.bottom - headSize)
+        ..moveTo(box!.left + child!.box!.horizontalCenter,
+            box!.bottom + child!.box!.bottom)
+        ..lineTo(box!.left + child!.box!.horizontalCenter + headSize,
+            box!.bottom + child!.box!.bottom - headSize);
     }
 
     if (box!.bottom + child!.box!.top < box!.top) {
-      final headSize = math.min((box!.top - child!.box!.top - box!.bottom) * 0.2, 10);
+      final headSize =
+          math.min((box!.top - child!.box!.top - box!.bottom) * 0.2, 10);
       context.canvas
         ..moveTo(box!.left + child!.box!.horizontalCenter, box!.top)
-        ..lineTo(box!.left + child!.box!.horizontalCenter, box!.bottom + child!.box!.top)
-        ..lineTo(box!.left + child!.box!.horizontalCenter - headSize, box!.bottom + child!.box!.top + headSize)
-        ..moveTo(box!.left + child!.box!.horizontalCenter, box!.bottom + child!.box!.top)
-        ..lineTo(box!.left + child!.box!.horizontalCenter + headSize, box!.bottom + child!.box!.top + headSize);
+        ..lineTo(box!.left + child!.box!.horizontalCenter,
+            box!.bottom + child!.box!.top)
+        ..lineTo(box!.left + child!.box!.horizontalCenter - headSize,
+            box!.bottom + child!.box!.top + headSize)
+        ..moveTo(box!.left + child!.box!.horizontalCenter,
+            box!.bottom + child!.box!.top)
+        ..lineTo(box!.left + child!.box!.horizontalCenter + headSize,
+            box!.bottom + child!.box!.top + headSize);
     }
 
     if (child!.box!.left > 0) {
       final headSize = math.min(child!.box!.left * 0.2, 10);
       context.canvas
         ..moveTo(box!.left, box!.bottom + child!.box!.verticalCenter)
-        ..lineTo(box!.left + child!.box!.left, box!.bottom + child!.box!.verticalCenter)
-        ..lineTo(box!.left + child!.box!.left - headSize, box!.bottom + child!.box!.verticalCenter - headSize)
-        ..moveTo(box!.left + child!.box!.left, box!.bottom + child!.box!.verticalCenter)
-        ..lineTo(box!.left + child!.box!.left - headSize, box!.bottom + child!.box!.verticalCenter + headSize);
+        ..lineTo(box!.left + child!.box!.left,
+            box!.bottom + child!.box!.verticalCenter)
+        ..lineTo(box!.left + child!.box!.left - headSize,
+            box!.bottom + child!.box!.verticalCenter - headSize)
+        ..moveTo(box!.left + child!.box!.left,
+            box!.bottom + child!.box!.verticalCenter)
+        ..lineTo(box!.left + child!.box!.left - headSize,
+            box!.bottom + child!.box!.verticalCenter + headSize);
     }
 
     if (box!.left + child!.box!.right < box!.right) {
-      final headSize = math.min((box!.right - child!.box!.right - box!.left) * 0.2, 10);
+      final headSize =
+          math.min((box!.right - child!.box!.right - box!.left) * 0.2, 10);
       context.canvas
         ..moveTo(box!.right, box!.bottom + child!.box!.verticalCenter)
-        ..lineTo(box!.left + child!.box!.right, box!.bottom + child!.box!.verticalCenter)
-        ..lineTo(box!.left + child!.box!.right + headSize, box!.bottom + child!.box!.verticalCenter - headSize)
-        ..moveTo(box!.left + child!.box!.right, box!.bottom + child!.box!.verticalCenter)
-        ..lineTo(box!.left + child!.box!.right + headSize, box!.bottom + child!.box!.verticalCenter + headSize);
+        ..lineTo(box!.left + child!.box!.right,
+            box!.bottom + child!.box!.verticalCenter)
+        ..lineTo(box!.left + child!.box!.right + headSize,
+            box!.bottom + child!.box!.verticalCenter - headSize)
+        ..moveTo(box!.left + child!.box!.right,
+            box!.bottom + child!.box!.verticalCenter)
+        ..lineTo(box!.left + child!.box!.right + headSize,
+            box!.bottom + child!.box!.verticalCenter + headSize);
     }
 
     context.canvas.strokePath();
@@ -374,19 +423,23 @@ class Align extends SingleChildWidget {
 
 /// A widget that imposes additional constraints on its child.
 class ConstrainedBox extends SingleChildWidget {
-  ConstrainedBox({required this.constraints, Widget? child}) : super(child: child);
+  ConstrainedBox({required this.constraints, Widget? child})
+      : super(child: child);
 
   /// The additional constraints to impose on the child.
   final BoxConstraints constraints;
 
   @override
-  void layout(Context context, BoxConstraints constraints, {bool parentUsesSize = false}) {
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
     if (child != null) {
-      child!.layout(context, this.constraints.enforce(constraints), parentUsesSize: true);
+      child!.layout(context, this.constraints.enforce(constraints),
+          parentUsesSize: true);
       assert(child!.box != null);
       box = child!.box;
     } else {
-      box = PdfRect.fromPoints(PdfPoint.zero, this.constraints.enforce(constraints).smallest);
+      box = PdfRect.fromPoints(
+          PdfPoint.zero, this.constraints.enforce(constraints).smallest);
     }
   }
 
@@ -399,7 +452,8 @@ class ConstrainedBox extends SingleChildWidget {
 
 class Center extends Align {
   Center({double? widthFactor, double? heightFactor, Widget? child})
-      : super(widthFactor: widthFactor, heightFactor: heightFactor, child: child);
+      : super(
+            widthFactor: widthFactor, heightFactor: heightFactor, child: child);
 }
 
 /// Scales and positions its child within itself according to [fit].
@@ -417,12 +471,14 @@ class FittedBox extends SingleChildWidget {
   final AlignmentGeometry alignment;
 
   @override
-  void layout(Context context, BoxConstraints constraints, {bool parentUsesSize = false}) {
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
     PdfPoint size;
     if (child != null) {
       child!.layout(context, const BoxConstraints(), parentUsesSize: true);
       assert(child!.box != null);
-      size = constraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.box!.size);
+      size = constraints
+          .constrainSizeAndAttemptToPreserveAspectRatio(child!.box!.size);
     } else {
       size = constraints.smallest;
     }
@@ -439,12 +495,15 @@ class FittedBox extends SingleChildWidget {
       final sizes = applyBoxFit(fit, childSize, box!.size);
       final scaleX = sizes.destination!.x / sizes.source!.x;
       final scaleY = sizes.destination!.y / sizes.source!.y;
-      final sourceRect = resolvedAlignment.inscribe(sizes.source!, PdfRect.fromPoints(PdfPoint.zero, childSize));
-      final destinationRect = resolvedAlignment.inscribe(sizes.destination!, box!);
+      final sourceRect = resolvedAlignment.inscribe(
+          sizes.source!, PdfRect.fromPoints(PdfPoint.zero, childSize));
+      final destinationRect =
+          resolvedAlignment.inscribe(sizes.destination!, box!);
 
-      final mat = Matrix4.translationValues(destinationRect.x, destinationRect.y, 0)
-        ..scale(scaleX, scaleY, 1)
-        ..translate(-sourceRect.x, -sourceRect.y);
+      final mat =
+          Matrix4.translationValues(destinationRect.x, destinationRect.y, 0)
+            ..scale(scaleX, scaleY, 1)
+            ..translate(-sourceRect.x, -sourceRect.y);
 
       context.canvas
         ..saveContext()
@@ -502,10 +561,12 @@ class AspectRatio extends SingleChildWidget {
   }
 
   @override
-  void layout(Context context, BoxConstraints constraints, {bool parentUsesSize = false}) {
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
     box = PdfRect.fromPoints(PdfPoint.zero, _applyAspectRatio(constraints));
     if (child != null) {
-      child!.layout(context, BoxConstraints.tightFor(width: box!.width, height: box!.height));
+      child!.layout(context,
+          BoxConstraints.tightFor(width: box!.width, height: box!.height));
     }
     assert(child!.box != null);
   }
@@ -532,7 +593,8 @@ class CustomPaint extends SingleChildWidget {
   final PdfPoint size;
 
   @override
-  void layout(Context context, BoxConstraints constraints, {bool parentUsesSize = false}) {
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
     if (child != null) {
       child!.layout(context, constraints, parentUsesSize: parentUsesSize);
       assert(child!.box != null);
@@ -599,7 +661,9 @@ class SizedBox extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    return ConstrainedBox(child: child, constraints: BoxConstraints.tightFor(width: width, height: height));
+    return ConstrainedBox(
+        child: child,
+        constraints: BoxConstraints.tightFor(width: width, height: height));
   }
 }
 
@@ -622,7 +686,8 @@ class Builder extends StatelessWidget {
 }
 
 /// The signature of the [LayoutBuilder] builder function.
-typedef LayoutWidgetBuilder = Widget Function(Context context, BoxConstraints? constraints);
+typedef LayoutWidgetBuilder = Widget Function(
+    Context context, BoxConstraints? constraints);
 
 /// Builds a widget tree that can depend on the parent widget's size.
 class LayoutBuilder extends StatelessWidget {
@@ -637,7 +702,8 @@ class LayoutBuilder extends StatelessWidget {
   BoxConstraints? _constraints;
 
   @override
-  void layout(Context context, BoxConstraints constraints, {bool parentUsesSize = false}) {
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
     _constraints = constraints;
     super.layout(context, constraints);
   }
@@ -684,7 +750,8 @@ class FullPage extends SingleChildWidget {
   }
 
   @override
-  void layout(Context context, BoxConstraints constraints, {bool parentUsesSize = false}) {
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
     final constraints = _getConstraints(context);
 
     if (child != null) {
@@ -904,11 +971,13 @@ class OverflowBox extends SingleChildWidget {
   }
 
   @override
-  void layout(Context context, BoxConstraints constraints, {bool parentUsesSize = false}) {
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
     box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
 
     if (child != null) {
-      child!.layout(context, _getInnerConstraints(constraints), parentUsesSize: true);
+      child!.layout(context, _getInnerConstraints(constraints),
+          parentUsesSize: true);
       assert(child!.box != null);
       final resolvedAlignment = alignment.resolve(Directionality.of(context));
       child!.box = resolvedAlignment.inscribe(child!.box!.size, box!);

@@ -4,6 +4,7 @@
 
 - Improve TTF writer with multi-compound characters
 - Partially revert underline on spans changes
+- Add RTL support [Milad-Akarie]
 
 ## 3.10.4
 
