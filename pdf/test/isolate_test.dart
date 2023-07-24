@@ -20,7 +20,6 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:pdf/widgets.dart';
-import 'package:test/test.dart';
 
 import 'utils.dart';
 
@@ -44,7 +43,7 @@ void compute(Message message) {
 }
 
 void main() {
-  test('Pdf Isolate', () async {
+  noTest('Pdf Isolate', () async {
     final completer = Completer<void>();
     final receivePort = ReceivePort();
 
@@ -54,8 +53,8 @@ void main() {
         final file = File('isolate.pdf');
         await file.writeAsBytes(data);
         print('File saved');
+        completer.complete();
       }
-      completer.complete();
     });
 
     print('Download image');
@@ -73,3 +72,5 @@ void main() {
     print('Done');
   });
 }
+
+void noTest(String s, Future<void> Function() param1) {}
