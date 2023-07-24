@@ -48,11 +48,15 @@ void buildFile(String src, String dest, bool flutter) {
 
   final output = File(dest);
   final st = output.openWrite();
+  st.writeln('// ignore_for_file: avoid_web_libraries_in_flutter');
   st.writeln('import \'dart:io\';');
   st.writeln('import \'dart:typed_data\';');
+  st.writeln('import \'package:flutter/services.dart\' show rootBundle;');
   if (flutter) {
-    st.writeln('import \'package:flutter/services.dart\' show rootBundle;');
     st.writeln('import \'package:path_provider/path_provider.dart\';');
+  } else {
+    st.writeln('import \'dart:convert\';');
+    st.writeln('import \'dart:html\' as html;');
   }
   st.writeln('import \'package:printing/printing.dart\';');
   st.writeln('import \'package:pdf/pdf.dart\';');

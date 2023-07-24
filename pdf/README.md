@@ -79,18 +79,21 @@ Create a Uint8List from the image
 final img = await rootBundle.load('assets/images/logo.jpg');
 final imageBytes = img.buffer.asUint8List();
 ```
+
 Create an image from the ImageBytes
 
 ```dart
-pw.Image image = pw.Image(pw.MemoryImage(imageBytes));
+pw.Image image1 = pw.Image(pw.MemoryImage(imageBytes));
 ```
+
 implement the image in a container
+
 ```dart
 pw.Container(
    alignment: pw.Alignment.center,
    height: 200,
-   child: image,
-),
+   child: image1,
+);
 ```
 
 To load an image from the network using the `printing` package:
@@ -191,7 +194,7 @@ To save the pdf file (Web):
 var savedFile = await pdf.save();
 List<int> fileInts = List.from(savedFile);
 html.AnchorElement(
-    href: "data:application/octet-stream;charset=utf-16le;base64,${con.base64.encode(fileInts)}")
+    href: "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(fileInts)}")
   ..setAttribute("download", "${DateTime.now().millisecondsSinceEpoch}.pdf")
   ..click();
 ```
