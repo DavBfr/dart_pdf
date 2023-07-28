@@ -167,19 +167,17 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
           _rastering = false;
           return;
         }
+
+        final pdfPreviewPageData = PdfPreviewPageData(
+          image: MemoryImage(await page.toPng()),
+          width: page.width,
+          height: page.height,
+        );
         if (pages.length <= pageNum) {
-          pages.add(PdfPreviewPageData(
-            image: MemoryImage(await page.toPng()),
-            width: page.width,
-            height: page.height,
-          ));
+          pages.add(pdfPreviewPageData);
         } else {
           pages[pageNum].image.evict();
-          pages[pageNum] = PdfPreviewPageData(
-            image: MemoryImage(await page.toPng()),
-            width: page.width,
-            height: page.height,
-          );
+          pages[pageNum] = pdfPreviewPageData;
         }
 
         if (mounted) {
