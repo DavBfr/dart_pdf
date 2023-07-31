@@ -120,7 +120,8 @@ mixin TableHelper {
       rowNum++;
     }
 
-     final textDirection =  context == null ? TextDirection.ltr : Directionality.of(context);
+    final textDirection =
+        context == null ? TextDirection.ltr : Directionality.of(context);
     for (final row in data) {
       final tableRow = <Widget>[];
       final isOdd = (rowNum - headerCount) % 2 != 0;

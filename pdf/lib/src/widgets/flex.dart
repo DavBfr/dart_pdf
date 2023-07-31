@@ -394,8 +394,9 @@ class Flex extends MultiChildWidget with SpanningWidget {
     double? leadingSpace;
     late double betweenSpace;
 
-    final textDirection = Directionality.of(context) ;
-    final flipMainAxis = !(_startIsTopLeft(direction, textDirection, verticalDirection) ?? true);
+    final textDirection = Directionality.of(context);
+    final flipMainAxis =
+        !(_startIsTopLeft(direction, textDirection, verticalDirection) ?? true);
 
     switch (mainAxisAlignment) {
       case MainAxisAlignment.start:
@@ -436,8 +437,9 @@ class Flex extends MultiChildWidget with SpanningWidget {
       switch (crossAxisAlignment) {
         case CrossAxisAlignment.start:
         case CrossAxisAlignment.end:
-          childCrossPosition = _startIsTopLeft(flipAxis(direction), textDirection, verticalDirection)
-              == (crossAxisAlignment == CrossAxisAlignment.start)
+          childCrossPosition = _startIsTopLeft(
+                      flipAxis(direction), textDirection, verticalDirection) ==
+                  (crossAxisAlignment == CrossAxisAlignment.start)
               ? 0.0
               : crossSize - _getCrossSize(child);
           break;
@@ -479,7 +481,8 @@ class Flex extends MultiChildWidget with SpanningWidget {
     }
   }
 
-  bool? _startIsTopLeft(Axis direction, TextDirection? textDirection, VerticalDirection? verticalDirection) {
+  bool? _startIsTopLeft(Axis direction, TextDirection? textDirection,
+      VerticalDirection? verticalDirection) {
     // If the relevant value of textDirection or verticalDirection is null, this returns null too.
     switch (direction) {
       case Axis.horizontal:

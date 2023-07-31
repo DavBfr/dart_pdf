@@ -82,7 +82,10 @@ class TtfWriter {
 
       final glyphIndex = ttf.charToGlyphIndexMap[char] ?? 0;
       if (glyphIndex >= ttf.glyphOffsets.length) {
-        assert(true, '$glyphIndex not in the font');
+        assert(() {
+          print('Glyph $glyphIndex not in the font ${ttf.fontName}');
+          return true;
+        }());
         continue;
       }
 
@@ -103,10 +106,11 @@ class TtfWriter {
     final glyphsInfo = <TtfGlyphInfo>[];
 
     for (final char in chars) {
-      final glyphsIndex = charMap[char]!;
-      print('$char $glyphsIndex $glyphsMap $charMap ${ttf.fontName}');
-      glyphsInfo.add(glyphsMap[glyphsIndex] ?? glyphsMap.values.first);
-      glyphsMap.remove(glyphsIndex);
+      final glyphsIndex = charMap[char];
+      if (glyphsIndex != null) {
+        glyphsInfo.add(glyphsMap[glyphsIndex] ?? glyphsMap.values.first);
+        glyphsMap.remove(glyphsIndex);
+      }
     }
 
     glyphsInfo.addAll(glyphsMap.values);

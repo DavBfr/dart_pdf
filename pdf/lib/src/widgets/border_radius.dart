@@ -85,7 +85,9 @@ abstract class BorderRadiusGeometry {
   @override
   String toString() {
     String? visual, logical;
-    if (_topLeft == _topRight && _topRight == _bottomLeft && _bottomLeft == _bottomRight) {
+    if (_topLeft == _topRight &&
+        _topRight == _bottomLeft &&
+        _bottomLeft == _bottomRight) {
       if (_topLeft != Radius.zero) {
         if (_topLeft.x == _topLeft.y) {
           visual = 'BorderRadius.circular(${_topLeft.x.toStringAsFixed(1)})';
@@ -125,10 +127,13 @@ abstract class BorderRadiusGeometry {
       result.write(')');
       visual = result.toString();
     }
-    if (_topStart == _topEnd && _topEnd == _bottomEnd && _bottomEnd == _bottomStart) {
+    if (_topStart == _topEnd &&
+        _topEnd == _bottomEnd &&
+        _bottomEnd == _bottomStart) {
       if (_topStart != Radius.zero) {
         if (_topStart.x == _topStart.y) {
-          logical = 'BorderRadiusDirectional.circular(${_topStart.x.toStringAsFixed(1)})';
+          logical =
+              'BorderRadiusDirectional.circular(${_topStart.x.toStringAsFixed(1)})';
         } else {
           logical = 'BorderRadiusDirectional.all($_topStart)';
         }
@@ -228,8 +233,6 @@ class BorderRadius extends BorderRadiusGeometry {
     this.bottomRight = Radius.zero,
   });
 
-
-
   /// A border radius with all zero radii.
   static const BorderRadius zero = BorderRadius.all(Radius.zero);
 
@@ -245,13 +248,12 @@ class BorderRadius extends BorderRadiusGeometry {
   /// The bottom-right [Radius].
   final Radius bottomRight;
 
-
   @override
-  bool get isUniform => topLeft == topRight && topLeft == bottomLeft && topLeft == bottomRight;
+  bool get isUniform =>
+      topLeft == topRight && topLeft == bottomLeft && topLeft == bottomRight;
 
   @override
   Radius get uniform => isUniform ? topLeft : Radius.zero;
-
 
   void paint(Context context, PdfRect box) {
     // Ellipse 4-spline magic number
@@ -261,13 +263,23 @@ class BorderRadius extends BorderRadiusGeometry {
       // Start
       ..moveTo(box.x, box.y + bottomLeft.y)
       // bottomLeft
-      ..curveTo(box.x, box.y - _m4 * bottomLeft.y + bottomLeft.y, box.x - _m4 * bottomLeft.x + bottomLeft.x, box.y,
-          box.x + bottomLeft.x, box.y)
+      ..curveTo(
+          box.x,
+          box.y - _m4 * bottomLeft.y + bottomLeft.y,
+          box.x - _m4 * bottomLeft.x + bottomLeft.x,
+          box.y,
+          box.x + bottomLeft.x,
+          box.y)
       // bottom
       ..lineTo(box.x + box.width - bottomRight.x, box.y)
       // bottomRight
-      ..curveTo(box.x + _m4 * bottomRight.x + box.width - bottomRight.x, box.y, box.x + box.width,
-          box.y - _m4 * bottomRight.y + bottomRight.y, box.x + box.width, box.y + bottomRight.y)
+      ..curveTo(
+          box.x + _m4 * bottomRight.x + box.width - bottomRight.x,
+          box.y,
+          box.x + box.width,
+          box.y - _m4 * bottomRight.y + bottomRight.y,
+          box.x + box.width,
+          box.y + bottomRight.y)
       // right
       ..lineTo(box.x + box.width, box.y + box.height - topRight.y)
       // topRight
@@ -281,8 +293,13 @@ class BorderRadius extends BorderRadiusGeometry {
       // top
       ..lineTo(box.x + topLeft.x, box.y + box.height)
       // topLeft
-      ..curveTo(box.x - _m4 * topLeft.x + topLeft.x, box.y + box.height, box.x,
-          box.y + _m4 * topLeft.y + box.height - topLeft.y, box.x, box.y + box.height - topLeft.y)
+      ..curveTo(
+          box.x - _m4 * topLeft.x + topLeft.x,
+          box.y + box.height,
+          box.x,
+          box.y + _m4 * topLeft.y + box.height - topLeft.y,
+          box.x,
+          box.y + box.height - topLeft.y)
       // left
       ..lineTo(box.x, box.y + bottomLeft.y);
   }
@@ -329,17 +346,19 @@ class BorderRadius extends BorderRadiusGeometry {
 ///    `topRight` instead of `topStart` and `topEnd`).
 class BorderRadiusDirectional extends BorderRadiusGeometry {
   /// Creates a border radius where all radii are [radius].
-  const BorderRadiusDirectional.all(Radius radius) : this.only(
-    topStart: radius,
-    topEnd: radius,
-    bottomStart: radius,
-    bottomEnd: radius,
-  );
+  const BorderRadiusDirectional.all(Radius radius)
+      : this.only(
+          topStart: radius,
+          topEnd: radius,
+          bottomStart: radius,
+          bottomEnd: radius,
+        );
 
   /// Creates a border radius where all radii are [Radius.circular(radius)].
-  BorderRadiusDirectional.circular(double radius) : this.all(
-    Radius.circular(radius),
-  );
+  BorderRadiusDirectional.circular(double radius)
+      : this.all(
+          Radius.circular(radius),
+        );
 
   /// Creates a vertically symmetric border radius where the top and bottom
   /// sides of the rectangle have the same radii.
@@ -347,11 +366,11 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
     Radius top = Radius.zero,
     Radius bottom = Radius.zero,
   }) : this.only(
-    topStart: top,
-    topEnd: top,
-    bottomStart: bottom,
-    bottomEnd: bottom,
-  );
+          topStart: top,
+          topEnd: top,
+          bottomStart: bottom,
+          bottomEnd: bottom,
+        );
 
   /// Creates a horizontally symmetrical border radius where the start and end
   /// sides of the rectangle have the same radii.
@@ -359,11 +378,11 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
     Radius start = Radius.zero,
     Radius end = Radius.zero,
   }) : this.only(
-    topStart: start,
-    topEnd: end,
-    bottomStart: start,
-    bottomEnd: end,
-  );
+          topStart: start,
+          topEnd: end,
+          bottomStart: start,
+          bottomEnd: end,
+        );
 
   /// Creates a border radius with only the given non-zero values. The other
   /// corners will be right angles.
@@ -378,7 +397,8 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   ///
   /// Consider using [BorderRadius.zero] instead, since that object has the same
   /// effect, but will be cheaper to [resolve].
-  static const BorderRadiusDirectional zero = BorderRadiusDirectional.all(Radius.zero);
+  static const BorderRadiusDirectional zero =
+      BorderRadiusDirectional.all(Radius.zero);
 
   /// The top-start [Radius].
   final Radius topStart;
@@ -417,7 +437,8 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   Radius get _bottomRight => Radius.zero;
 
   @override
-  bool get isUniform => topStart == topEnd && topStart == bottomStart && topStart == bottomEnd;
+  bool get isUniform =>
+      topStart == topEnd && topStart == bottomStart && topStart == bottomEnd;
 
   @override
   Radius get uniform => isUniform ? topStart : Radius.zero;

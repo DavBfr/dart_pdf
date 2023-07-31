@@ -146,7 +146,8 @@ class PositionedDirectional extends Positioned {
   final double? end;
 
   @override
-  void layout(Context context, BoxConstraints constraints, {bool parentUsesSize = false}) {
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
     super.layout(context, constraints, parentUsesSize: parentUsesSize);
     switch (Directionality.of(context)) {
       case TextDirection.rtl:
@@ -181,7 +182,8 @@ class Stack extends MultiChildWidget {
   final Overflow overflow;
 
   @override
-  void layout(Context context, BoxConstraints constraints, {bool parentUsesSize = false}) {
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
     final childCount = children.length;
 
     var hasNonPositionedChildren = false;
@@ -230,22 +232,27 @@ class Stack extends MultiChildWidget {
     final resolvedAlignment = alignment.resolve(Directionality.of(context));
     for (final child in children) {
       if (child is! Positioned) {
-        child.box = PdfRect.fromPoints(resolvedAlignment.inscribe(child.box!.size, box!).offset, child.box!.size);
+        child.box = PdfRect.fromPoints(
+            resolvedAlignment.inscribe(child.box!.size, box!).offset,
+            child.box!.size);
       } else {
         final positioned = child;
 
         var childConstraints = const BoxConstraints();
 
         if (positioned.left != null && positioned.right != null) {
-          childConstraints = childConstraints.tighten(width: box!.width - positioned.right! - positioned.left!);
+          childConstraints = childConstraints.tighten(
+              width: box!.width - positioned.right! - positioned.left!);
         } else if (positioned.width != null) {
           childConstraints = childConstraints.tighten(width: positioned.width);
         }
 
         if (positioned.top != null && positioned.bottom != null) {
-          childConstraints = childConstraints.tighten(height: box!.height - positioned.bottom! - positioned.top!);
+          childConstraints = childConstraints.tighten(
+              height: box!.height - positioned.bottom! - positioned.top!);
         } else if (positioned.height != null) {
-          childConstraints = childConstraints.tighten(height: positioned.height);
+          childConstraints =
+              childConstraints.tighten(height: positioned.height);
         }
 
         positioned.layout(context, childConstraints, parentUsesSize: true);
@@ -269,7 +276,8 @@ class Stack extends MultiChildWidget {
           y = resolvedAlignment.inscribe(positioned.box!.size, box!).y;
         }
 
-        positioned.box = PdfRect.fromPoints(PdfPoint(x!, y!), positioned.box!.size);
+        positioned.box =
+            PdfRect.fromPoints(PdfPoint(x!, y!), positioned.box!.size);
       }
     }
   }

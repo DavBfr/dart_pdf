@@ -200,7 +200,6 @@ class GridPaper extends SingleChildWidget {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-
     final resolvedMargin = margin.resolve(Directionality.of(context));
     box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
     if (child != null) {
@@ -216,7 +215,8 @@ class GridPaper extends SingleChildWidget {
 
       assert(child!.box != null);
       child!.box = PdfRect.fromPoints(
-          PdfPoint(resolvedMargin.left, box!.top - resolvedMargin.top - child!.box!.height),
+          PdfPoint(resolvedMargin.left,
+              box!.top - resolvedMargin.top - child!.box!.height),
           child!.box!.size);
     }
   }
@@ -273,8 +273,8 @@ class GridPaper extends SingleChildWidget {
       context.canvas
         ..setStrokeColor(border.left.color)
         ..setLineWidth(border.left.width)
-        ..drawLine(box!.left + resolvedMargin.left, box!.top, box!.left + resolvedMargin.left,
-            box!.bottom)
+        ..drawLine(box!.left + resolvedMargin.left, box!.top,
+            box!.left + resolvedMargin.left, box!.bottom)
         ..strokePath();
       border.left.style.unsetStyle(context);
     }
@@ -293,8 +293,8 @@ class GridPaper extends SingleChildWidget {
       context.canvas
         ..setStrokeColor(border.top.color)
         ..setLineWidth(border.top.width)
-        ..drawLine(
-            box!.left, box!.top - resolvedMargin.top, box!.right, box!.top - resolvedMargin.top)
+        ..drawLine(box!.left, box!.top - resolvedMargin.top, box!.right,
+            box!.top - resolvedMargin.top)
         ..strokePath();
       border.top.style.unsetStyle(context);
     }
