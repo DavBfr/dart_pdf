@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.10.6
+
+- Throw multi page error explicitly.
+
 ## 3.10.5
 
 - Improve TTF writer with multi-compound characters
