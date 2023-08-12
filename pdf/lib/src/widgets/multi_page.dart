@@ -246,14 +246,11 @@ class MultiPage extends Page {
     while (_index < children.length) {
       final child = children[_index];
 
-      assert(() {
-        // Detect too big widgets
-        if (sameCount++ > maxPages) {
-          throw Exception(
-              'This widget created more than $maxPages pages. This may be an issue in the widget or the document. See https://pub.dev/documentation/pdf/latest/widgets/MultiPage-class.html');
-        }
-        return true;
-      }());
+      // Detect too big widgets
+      if (sameCount++ > maxPages) {
+        throw TooManyPagesException(
+            'This widget created more than $maxPages pages. This may be an issue in the widget or the document. See https://pub.dev/documentation/pdf/latest/widgets/MultiPage-class.html');
+      }
 
       // Create a new page if we don't already have one
       if (context == null || child is NewPage) {
@@ -578,4 +575,11 @@ class MultiPage extends Page {
       }
     }
   }
+}
+
+/// Exception thrown when generator populates more pages than [maxPages].
+class TooManyPagesException implements Exception {
+  TooManyPagesException(this.message);
+
+  final String message;
 }
