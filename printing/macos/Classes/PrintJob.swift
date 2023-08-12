@@ -230,7 +230,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         printInfo.rightMargin = size.width - margin.maxX
         printInfo.bottomMargin = size.height - margin.maxY
 
-        let webView = WebView()
+        let webView = WKWebView()
         webView.mainFrame.loadHTMLString(data, baseURL: baseUrl)
         let when = DispatchTime.now() + 1
 
