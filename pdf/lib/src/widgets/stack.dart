@@ -19,9 +19,7 @@ import 'dart:math' as math;
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
-import 'geometry.dart';
-import 'text.dart';
-import 'widget.dart';
+import '../../widgets.dart';
 
 /// How to size the non-positioned children of a [Stack].
 enum StackFit { loose, expand, passthrough }
@@ -33,22 +31,26 @@ enum Overflow { visible, clip }
 /// A widget that controls where a child of a [Stack] is positioned.
 class Positioned extends SingleChildWidget {
   Positioned({
-    this.left,
+    double? left,
     this.top,
-    this.right,
+    double? right,
     this.bottom,
     required Widget child,
-  }) : super(child: child);
+  })  : _left = left,
+        _right = right,
+        super(child: child);
 
   /// Creates a Positioned object with left, top, right, and bottom set to 0.0
   /// unless a value for them is passed.
   Positioned.fill({
-    this.left = 0.0,
+    double? left = 0.0,
     this.top = 0.0,
-    this.right = 0.0,
+    double? right = 0.0,
     this.bottom = 0.0,
     required Widget child,
-  }) : super(child: child);
+  })  : _left = left,
+        _right = right,
+        super(child: child);
 
   /// Creates a widget that controls where a child of a [Stack] is positioned.
   factory Positioned.directional({
@@ -80,11 +82,14 @@ class Positioned extends SingleChildWidget {
     );
   }
 
-  final double? left;
+  double? get left => _left;
+
+  double? get right => _right;
+
+  final double? _left;
+  final double? _right;
 
   final double? top;
-
-  final double? right;
 
   final double? bottom;
 
@@ -99,6 +104,64 @@ class Positioned extends SingleChildWidget {
   }
 }
 
+/// A widget that controls where a child of a [Stack] is positioned without
+/// committing to a specific [TextDirection].
+class PositionedDirectional extends Positioned {
+  PositionedDirectional({
+    this.start,
+    this.end,
+    double? top,
+    double? bottom,
+    required Widget child,
+  }) : super(
+          child: child,
+          top: top,
+          bottom: bottom,
+        );
+
+  PositionedDirectional.fill({
+    this.start = 0.0,
+    this.end = 0.0,
+    double? top = 0.0,
+    double? bottom = 0.0,
+    required Widget child,
+  }) : super(
+          child: child,
+          top: top,
+          bottom: bottom,
+        );
+
+  final double? start;
+
+  double? _resolvedLeft;
+
+  double? _resolvedRight;
+
+  @override
+  double? get left => _resolvedLeft;
+
+  @override
+  double? get right => _resolvedRight;
+
+  final double? end;
+
+  @override
+  void layout(Context context, BoxConstraints constraints,
+      {bool parentUsesSize = false}) {
+    super.layout(context, constraints, parentUsesSize: parentUsesSize);
+    switch (Directionality.of(context)) {
+      case TextDirection.rtl:
+        _resolvedLeft = end;
+        _resolvedRight = start;
+        break;
+      case TextDirection.ltr:
+        _resolvedLeft = start;
+        _resolvedRight = end;
+        break;
+    }
+  }
+}
+
 /// A widget that positions its children relative to the edges of its box.
 class Stack extends MultiChildWidget {
   Stack({
@@ -110,7 +173,7 @@ class Stack extends MultiChildWidget {
 
   /// How to align the non-positioned and partially-positioned children in the
   /// stack.
-  final Alignment alignment;
+  final AlignmentGeometry alignment;
 
   /// How to size the non-positioned children in the stack.
   final StackFit fit;
@@ -150,7 +213,6 @@ class Stack extends MultiChildWidget {
     for (final child in children) {
       if (child is! Positioned) {
         hasNonPositionedChildren = true;
-
         child.layout(context, nonPositionedConstraints, parentUsesSize: true);
         assert(child.box != null);
 
@@ -167,13 +229,15 @@ class Stack extends MultiChildWidget {
     } else {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
     }
-
+    final resolvedAlignment = alignment.resolve(Directionality.of(context));
     for (final child in children) {
       if (child is! Positioned) {
         child.box = PdfRect.fromPoints(
-            alignment.inscribe(child.box!.size, box!).offset, child.box!.size);
+            resolvedAlignment.inscribe(child.box!.size, box!).offset,
+            child.box!.size);
       } else {
         final positioned = child;
+
         var childConstraints = const BoxConstraints();
 
         if (positioned.left != null && positioned.right != null) {
@@ -200,7 +264,7 @@ class Stack extends MultiChildWidget {
         } else if (positioned.right != null) {
           x = box!.width - positioned.right! - positioned.width!;
         } else {
-          x = alignment.inscribe(positioned.box!.size, box!).x;
+          x = resolvedAlignment.inscribe(positioned.box!.size, box!).x;
         }
 
         double? y;
@@ -209,7 +273,7 @@ class Stack extends MultiChildWidget {
         } else if (positioned.top != null) {
           y = box!.height - positioned.top! - positioned.height!;
         } else {
-          y = alignment.inscribe(positioned.box!.size, box!).y;
+          y = resolvedAlignment.inscribe(positioned.box!.size, box!).y;
         }
 
         positioned.box =

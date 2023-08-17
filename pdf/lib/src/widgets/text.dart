@@ -32,7 +32,7 @@ import 'text_style.dart';
 import 'theme.dart';
 import 'widget.dart';
 
-enum TextAlign { left, right, center, justify }
+enum TextAlign { left, right, start, end, center, justify }
 
 enum TextDirection { ltr, rtl }
 
@@ -580,38 +580,48 @@ class _Line {
     var delta = 0.0;
     switch (textAlign) {
       case TextAlign.left:
-        delta = isRTL ? totalWidth - wordsWidth : 0;
+        delta = isRTL ? wordsWidth : 0;
         break;
       case TextAlign.right:
-        delta = isRTL ? 0 : totalWidth - wordsWidth;
+        delta = isRTL ? totalWidth : totalWidth - wordsWidth;
+        break;
+      case TextAlign.start:
+        delta = isRTL ? totalWidth : 0;
+        break;
+      case TextAlign.end:
+        delta = isRTL ? wordsWidth : totalWidth - wordsWidth;
         break;
       case TextAlign.center:
         delta = (totalWidth - wordsWidth) / 2.0;
+        if (isRTL) {
+          delta += wordsWidth;
+        }
         break;
       case TextAlign.justify:
+        delta = isRTL ? totalWidth : 0;
         if (!justify) {
           break;
         }
 
-        delta = (totalWidth - wordsWidth) / (spans.length - 1);
+        final gap = (totalWidth - wordsWidth) / (spans.length - 1);
         var x = 0.0;
         for (final span in spans) {
-          if (isRTL) {
-            final xOffset = span.offset.x + span.width;
-            span.offset =
-                PdfPoint((totalWidth - xOffset) - x, span.offset.y - baseline);
-          } else {
-            span.offset = span.offset.translate(x, -baseline);
-          }
-          x += delta;
+          span.offset = PdfPoint(
+            isRTL
+                ? delta - x - (span.offset.x + span.width)
+                : span.offset.x + x,
+            span.offset.y - baseline,
+          );
+          x += gap;
         }
+
         return;
     }
 
     if (isRTL) {
       for (final span in spans) {
         span.offset = PdfPoint(
-          totalWidth - (span.offset.x + span.width) - delta,
+          delta - (span.offset.x + span.width),
           span.offset.y - baseline,
         );
       }
@@ -621,8 +631,6 @@ class _Line {
     for (final span in spans) {
       span.offset = span.offset.translate(delta, -baseline);
     }
-
-    return;
   }
 }
 
@@ -876,11 +884,7 @@ class RichText extends Widget with SpanningWidget {
     final _softWrap = softWrap ?? theme.softWrap;
     final _maxLines = maxLines ?? theme.maxLines;
     final _textDirection = textDirection ?? Directionality.of(context);
-    _textAlign = textAlign ??
-        theme.textAlign ??
-        (_textDirection == TextDirection.rtl
-            ? TextAlign.right
-            : TextAlign.left);
+    _textAlign = textAlign ?? theme.textAlign ?? TextAlign.start;
 
     final _overflow = this.overflow ?? theme.overflow;
 

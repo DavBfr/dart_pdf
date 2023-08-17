@@ -19,10 +19,7 @@ import 'dart:math' as math;
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
-import 'basic.dart';
-import 'geometry.dart';
-import 'multi_page.dart';
-import 'widget.dart';
+import '../../widgets.dart';
 
 enum FlexFit {
   tight,
@@ -396,10 +393,11 @@ class Flex extends MultiChildWidget with SpanningWidget {
     final remainingSpace = math.max(0.0, actualSizeDelta);
     double? leadingSpace;
     late double betweenSpace;
-    final flipMainAxis = (verticalDirection == VerticalDirection.down &&
-            direction == Axis.vertical) ||
-        (verticalDirection == VerticalDirection.up &&
-            direction == Axis.horizontal);
+
+    final textDirection = Directionality.of(context);
+    final flipMainAxis =
+        !(_startIsTopLeft(direction, textDirection, verticalDirection) ?? true);
+
     switch (mainAxisAlignment) {
       case MainAxisAlignment.start:
         leadingSpace = 0.0;
@@ -430,10 +428,6 @@ class Flex extends MultiChildWidget with SpanningWidget {
     }
 
     // Position elements
-    final flipCrossAxis = (verticalDirection == VerticalDirection.down &&
-            direction == Axis.horizontal) ||
-        (verticalDirection == VerticalDirection.up &&
-            direction == Axis.vertical);
     var childMainPosition =
         flipMainAxis ? actualSize - leadingSpace : leadingSpace;
 
@@ -442,12 +436,12 @@ class Flex extends MultiChildWidget with SpanningWidget {
       double? childCrossPosition;
       switch (crossAxisAlignment) {
         case CrossAxisAlignment.start:
-          childCrossPosition =
-              flipCrossAxis ? crossSize - _getCrossSize(child) : 0.0;
-          break;
         case CrossAxisAlignment.end:
-          childCrossPosition =
-              !flipCrossAxis ? crossSize - _getCrossSize(child) : 0.0;
+          childCrossPosition = _startIsTopLeft(
+                      flipAxis(direction), textDirection, verticalDirection) ==
+                  (crossAxisAlignment == CrossAxisAlignment.start)
+              ? 0.0
+              : crossSize - _getCrossSize(child);
           break;
         case CrossAxisAlignment.center:
           childCrossPosition = crossSize / 2.0 - _getCrossSize(child) / 2.0;
@@ -475,6 +469,40 @@ class Flex extends MultiChildWidget with SpanningWidget {
       } else {
         childMainPosition += _getMainSize(child) + betweenSpace;
       }
+    }
+  }
+
+  Axis flipAxis(Axis direction) {
+    switch (direction) {
+      case Axis.horizontal:
+        return Axis.vertical;
+      case Axis.vertical:
+        return Axis.horizontal;
+    }
+  }
+
+  bool? _startIsTopLeft(Axis direction, TextDirection? textDirection,
+      VerticalDirection? verticalDirection) {
+    // If the relevant value of textDirection or verticalDirection is null, this returns null too.
+    switch (direction) {
+      case Axis.horizontal:
+        switch (textDirection) {
+          case TextDirection.ltr:
+            return true;
+          case TextDirection.rtl:
+            return false;
+          case null:
+            return null;
+        }
+      case Axis.vertical:
+        switch (verticalDirection) {
+          case VerticalDirection.down:
+            return false;
+          case VerticalDirection.up:
+            return true;
+          case null:
+            return null;
+        }
     }
   }
 
@@ -624,7 +652,7 @@ class ListView extends StatelessWidget {
         super();
 
   final Axis direction;
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
   final double? spacing;
   final bool reverse;
   final IndexedWidgetBuilder? itemBuilder;

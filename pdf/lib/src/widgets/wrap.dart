@@ -19,10 +19,7 @@ import 'dart:math' as math;
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
-import 'flex.dart';
-import 'geometry.dart';
-import 'multi_page.dart';
-import 'widget.dart';
+import '../../widgets.dart';
 
 /// How [Wrap] should align objects.
 enum WrapAlignment {
@@ -164,11 +161,14 @@ class Wrap extends MultiChildWidget with SpanningWidget {
     double? mainAxisLimit = 0.0;
     var flipMainAxis = false;
     var flipCrossAxis = false;
-
+    final textDirection = Directionality.of(context);
     switch (direction) {
       case Axis.horizontal:
         childConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
         mainAxisLimit = constraints.maxWidth;
+        if (textDirection == TextDirection.rtl) {
+          flipMainAxis = true;
+        }
         if (verticalDirection == VerticalDirection.down) {
           flipCrossAxis = true;
         }
@@ -178,6 +178,9 @@ class Wrap extends MultiChildWidget with SpanningWidget {
         mainAxisLimit = constraints.maxHeight;
         if (verticalDirection == VerticalDirection.down) {
           flipMainAxis = true;
+        }
+        if (textDirection == TextDirection.rtl) {
+          flipCrossAxis = true;
         }
         break;
     }

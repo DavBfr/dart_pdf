@@ -40,7 +40,7 @@ class Page {
     required BuildCallback build,
     ThemeData? theme,
     PageOrientation? orientation,
-    EdgeInsets? margin,
+    EdgeInsetsGeometry? margin,
     bool clip = false,
     TextDirection? textDirection,
   })  : assert(
@@ -77,11 +77,14 @@ class Page {
 
   PdfPage? _pdfPage;
 
-  EdgeInsets? get margin => pageTheme.margin;
+  EdgeInsetsGeometry? get margin => pageTheme.margin;
+
+  EdgeInsets? get resolvedMargin => margin?.resolve(pageTheme.textDirection);
 
   @protected
   void debugPaint(Context context) {
-    final _margin = margin!;
+    final _margin = resolvedMargin!;
+
     context.canvas
       ..setFillColor(PdfColors.lightGreen)
       ..moveTo(0, 0)
@@ -112,7 +115,7 @@ class Page {
   void postProcess(Document document) {
     final canvas = _pdfPage!.getGraphics();
     canvas.reset();
-    final _margin = margin;
+    final _margin = resolvedMargin;
     var constraints = mustRotate
         ? BoxConstraints(
             maxWidth: pageFormat.height - _margin!.vertical,
@@ -183,7 +186,7 @@ class Page {
   @protected
   PdfPoint layout(Widget child, Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
-    final _margin = margin!;
+    final _margin = resolvedMargin!;
     child.layout(context, constraints, parentUsesSize: parentUsesSize);
     assert(child.box != null);
 
@@ -203,21 +206,32 @@ class Page {
 
   @protected
   void paint(Widget child, Context context) {
+    final _margin = resolvedMargin!;
+    final box = PdfRect(
+      _margin.left,
+      _margin.bottom,
+      pageFormat.width - _margin.horizontal,
+      pageFormat.height - _margin.vertical,
+    );
     if (pageTheme.clip) {
-      final _margin = margin!;
       context.canvas
         ..saveContext()
-        ..drawRect(
-          _margin.left,
-          _margin.bottom,
-          pageFormat.width - _margin.horizontal,
-          pageFormat.height - _margin.vertical,
-        )
+        ..drawRect(box.x, box.y, box.width, box.height)
         ..clipPath();
     }
 
+    if (pageTheme.textDirection == TextDirection.rtl) {
+      child.box = PdfRect(
+        ((mustRotate ? box.height : box.width) - child.box!.width) +
+            child.box!.x,
+        child.box!.y,
+        child.box!.width,
+        child.box!.height,
+      );
+    }
+
     if (mustRotate) {
-      final _margin = margin!;
+      final _margin = resolvedMargin!;
       context.canvas
         ..saveContext()
         ..setTransform(Matrix4.identity()

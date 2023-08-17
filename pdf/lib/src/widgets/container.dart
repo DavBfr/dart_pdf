@@ -75,9 +75,9 @@ class Container extends StatelessWidget {
 
   final Widget? child;
 
-  final Alignment? alignment;
+  final AlignmentGeometry? alignment;
 
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   /// The decoration to paint behind the [child].
   final BoxDecoration? decoration;
@@ -89,7 +89,7 @@ class Container extends StatelessWidget {
   final BoxConstraints? constraints;
 
   /// Empty space to surround the [decoration] and [child].
-  final EdgeInsets? margin;
+  final EdgeInsetsGeometry? margin;
 
   /// The transformation matrix to apply before painting the container.
   final Matrix4? transform;

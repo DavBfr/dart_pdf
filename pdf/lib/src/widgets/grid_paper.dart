@@ -15,9 +15,7 @@
  */
 
 import '../../pdf.dart';
-import 'box_border.dart';
-import 'geometry.dart';
-import 'widget.dart';
+import '../../widgets.dart';
 
 /// A widget that draws a rectilinear grid of lines.
 /// The grid is drawn over the [child] widget.
@@ -187,7 +185,7 @@ class GridPaper extends SingleChildWidget {
   final int verticalSubdivisions;
 
   /// The margin to apply to the horizontal and vertical lines
-  final EdgeInsets margin;
+  final EdgeInsetsGeometry margin;
 
   final int horizontalOffset;
 
@@ -202,12 +200,13 @@ class GridPaper extends SingleChildWidget {
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
+    final resolvedMargin = margin.resolve(Directionality.of(context));
     box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
     if (child != null) {
       if (constraints.hasBoundedWidth && constraints.hasBoundedHeight) {
         final childConstraints = BoxConstraints(
-          maxWidth: constraints.maxWidth - margin.horizontal,
-          maxHeight: constraints.maxHeight - margin.vertical,
+          maxWidth: constraints.maxWidth - resolvedMargin.horizontal,
+          maxHeight: constraints.maxHeight - resolvedMargin.vertical,
         );
         child!.layout(context, childConstraints, parentUsesSize: false);
       } else {
@@ -216,7 +215,8 @@ class GridPaper extends SingleChildWidget {
 
       assert(child!.box != null);
       child!.box = PdfRect.fromPoints(
-          PdfPoint(margin.left, box!.top - margin.top - child!.box!.height),
+          PdfPoint(resolvedMargin.left,
+              box!.top - resolvedMargin.top - child!.box!.height),
           child!.box!.size);
     }
   }
@@ -225,7 +225,7 @@ class GridPaper extends SingleChildWidget {
   void paint(Context context) {
     super.paint(context);
     paintChild(context);
-
+    final resolvedMargin = margin.resolve(Directionality.of(context));
     context.canvas.saveContext();
     context.canvas.setGraphicState(PdfGraphicState(opacity: opacity));
     context.canvas.setStrokeColor(horizontalColor);
@@ -236,8 +236,8 @@ class GridPaper extends SingleChildWidget {
     final allHorizontalDivisions =
         (horizontalDivisions * horizontalSubdivisions).toDouble();
     var n = horizontalOffset;
-    for (var x = box!.left + margin.left;
-        x <= box!.right - margin.right;
+    for (var x = box!.left + resolvedMargin.left;
+        x <= box!.right - resolvedMargin.right;
         x += horizontalInterval / allHorizontalDivisions) {
       context.canvas
         ..setLineWidth((n % (horizontalSubdivisions * horizontalDivisions) == 0)
@@ -254,8 +254,8 @@ class GridPaper extends SingleChildWidget {
     final allVerticalDivisions =
         (verticalDivisions * verticalSubdivisions).toDouble();
     n = verticalOffset;
-    for (var y = box!.top - margin.top;
-        y >= box!.bottom + margin.bottom;
+    for (var y = box!.top - resolvedMargin.top;
+        y >= box!.bottom + resolvedMargin.bottom;
         y -= verticalInterval / allVerticalDivisions) {
       context.canvas
         ..setLineWidth((n % (verticalSubdivisions * verticalDivisions) == 0)
@@ -273,8 +273,8 @@ class GridPaper extends SingleChildWidget {
       context.canvas
         ..setStrokeColor(border.left.color)
         ..setLineWidth(border.left.width)
-        ..drawLine(box!.left + margin.left, box!.top, box!.left + margin.left,
-            box!.bottom)
+        ..drawLine(box!.left + resolvedMargin.left, box!.top,
+            box!.left + resolvedMargin.left, box!.bottom)
         ..strokePath();
       border.left.style.unsetStyle(context);
     }
@@ -283,8 +283,8 @@ class GridPaper extends SingleChildWidget {
       context.canvas
         ..setStrokeColor(border.right.color)
         ..setLineWidth(border.right.width)
-        ..drawLine(box!.right - margin.right, box!.top,
-            box!.right - margin.right, box!.bottom)
+        ..drawLine(box!.right - resolvedMargin.right, box!.top,
+            box!.right - resolvedMargin.right, box!.bottom)
         ..strokePath();
       border.right.style.unsetStyle(context);
     }
@@ -293,8 +293,8 @@ class GridPaper extends SingleChildWidget {
       context.canvas
         ..setStrokeColor(border.top.color)
         ..setLineWidth(border.top.width)
-        ..drawLine(
-            box!.left, box!.top - margin.top, box!.right, box!.top - margin.top)
+        ..drawLine(box!.left, box!.top - resolvedMargin.top, box!.right,
+            box!.top - resolvedMargin.top)
         ..strokePath();
       border.top.style.unsetStyle(context);
     }
@@ -303,8 +303,8 @@ class GridPaper extends SingleChildWidget {
       context.canvas
         ..setStrokeColor(border.bottom.color)
         ..setLineWidth(border.bottom.width)
-        ..drawLine(box!.left, box!.bottom + margin.bottom, box!.right,
-            box!.bottom + margin.bottom)
+        ..drawLine(box!.left, box!.bottom + resolvedMargin.bottom, box!.right,
+            box!.bottom + resolvedMargin.bottom)
         ..strokePath();
       border.bottom.style.unsetStyle(context);
     }

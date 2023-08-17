@@ -20,7 +20,7 @@ import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
-import 'basic.dart';
+import '../../widgets.dart';
 
 @immutable
 class BoxConstraints {
@@ -222,7 +222,96 @@ class BoxConstraints {
 }
 
 @immutable
-class EdgeInsets {
+abstract class EdgeInsetsGeometry {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const EdgeInsetsGeometry();
+
+  double get _bottom;
+
+  double get _end;
+
+  double get _left;
+
+  double get _right;
+
+  double get _start;
+
+  double get _top;
+
+  /// The total offset in the horizontal direction.
+  double get horizontal => _left + _right + _start + _end;
+
+  /// The total offset in the vertical direction.
+  double get vertical => _top + _bottom;
+
+  /// Convert this instance into an [EdgeInsets], which uses literal coordinates
+  /// (i.e. the `left` coordinate being explicitly a distance from the left, and
+  /// the `right` coordinate being explicitly a distance from the right).
+  ///
+  /// See also:
+  ///
+  ///  * [EdgeInsets], for which this is a no-op (returns itself).
+  ///  * [EdgeInsetsDirectional], which flips the horizontal direction
+  ///    based on the `direction` argument.
+  EdgeInsets resolve(TextDirection? direction);
+
+  /// Returns the sum of two [EdgeInsetsGeometry] objects.
+  ///
+  /// If you know you are adding two [EdgeInsets] or two [EdgeInsetsDirectional]
+  /// objects, consider using the `+` operator instead, which always returns an
+  /// object of the same type as the operands, and is typed accordingly.
+  ///
+  /// If [add] is applied to two objects of the same type ([EdgeInsets] or
+  /// [EdgeInsetsDirectional]), an object of that type will be returned (though
+  /// this is not reflected in the type system). Otherwise, an object
+  /// representing a combination of both is returned. That object can be turned
+  /// into a concrete [EdgeInsets] using [resolve].
+  EdgeInsetsGeometry add(EdgeInsetsGeometry other) {
+    return _MixedEdgeInsets.fromLRSETB(
+      _left + other._left,
+      _right + other._right,
+      _start + other._start,
+      _end + other._end,
+      _top + other._top,
+      _bottom + other._bottom,
+    );
+  }
+
+  @override
+  String toString() {
+    if (_start == 0.0 && _end == 0.0) {
+      if (_left == 0.0 && _right == 0.0 && _top == 0.0 && _bottom == 0.0) {
+        return 'EdgeInsets.zero';
+      }
+      if (_left == _right && _right == _top && _top == _bottom) {
+        return 'EdgeInsets.all(${_left.toStringAsFixed(1)})';
+      }
+      return 'EdgeInsets(${_left.toStringAsFixed(1)}, '
+          '${_top.toStringAsFixed(1)}, '
+          '${_right.toStringAsFixed(1)}, '
+          '${_bottom.toStringAsFixed(1)})';
+    }
+    if (_left == 0.0 && _right == 0.0) {
+      return 'EdgeInsetsDirectional(${_start.toStringAsFixed(1)}, '
+          '${_top.toStringAsFixed(1)}, '
+          '${_end.toStringAsFixed(1)}, '
+          '${_bottom.toStringAsFixed(1)})';
+    }
+    return 'EdgeInsets(${_left.toStringAsFixed(1)}, '
+        '${_top.toStringAsFixed(1)}, '
+        '${_right.toStringAsFixed(1)}, '
+        '${_bottom.toStringAsFixed(1)})'
+        ' + '
+        'EdgeInsetsDirectional(${_start.toStringAsFixed(1)}, '
+        '0.0, '
+        '${_end.toStringAsFixed(1)}, '
+        '0.0)';
+  }
+}
+
+@immutable
+class EdgeInsets extends EdgeInsetsGeometry {
   const EdgeInsets.fromLTRB(this.left, this.top, this.right, this.bottom);
 
   const EdgeInsets.all(double value)
@@ -242,19 +331,45 @@ class EdgeInsets {
 
   static const EdgeInsets zero = EdgeInsets.only();
 
+  /// The offset from the left.
   final double left;
 
+  @override
+  double get _left => left;
+
+  /// The offset from the top.
   final double top;
 
+  @override
+  double get _top => top;
+
+  /// The offset from the right.
   final double right;
 
+  @override
+  double get _right => right;
+
+  /// The offset from the bottom.
   final double bottom;
 
-  /// The total offset in the horizontal direction.
-  double get horizontal => left + right;
+  @override
+  double get _bottom => bottom;
 
-  /// The total offset in the vertical direction.
-  double get vertical => top + bottom;
+  @override
+  double get _start => 0.0;
+
+  @override
+  double get _end => 0.0;
+
+  /// Returns the sum of two [EdgeInsets].
+  EdgeInsets operator +(EdgeInsets other) {
+    return EdgeInsets.fromLTRB(
+      left + other.left,
+      top + other.top,
+      right + other.right,
+      bottom + other.bottom,
+    );
+  }
 
   EdgeInsets copyWith({
     double? left,
@@ -270,21 +385,231 @@ class EdgeInsets {
     );
   }
 
-  /// Returns the sum of two [EdgeInsets] objects.
-  EdgeInsets add(EdgeInsets other) {
-    return EdgeInsets.fromLTRB(
-      left + other.left,
+  @override
+  EdgeInsetsGeometry add(EdgeInsetsGeometry other) {
+    if (other is EdgeInsets) {
+      return this + other;
+    }
+    return super.add(other);
+  }
+
+  @override
+  EdgeInsets resolve(TextDirection? direction) => this;
+}
+
+class _MixedEdgeInsets extends EdgeInsetsGeometry {
+  const _MixedEdgeInsets.fromLRSETB(
+      this._left, this._right, this._start, this._end, this._top, this._bottom);
+
+  @override
+  final double _left;
+
+  @override
+  final double _right;
+
+  @override
+  final double _start;
+
+  @override
+  final double _end;
+
+  @override
+  final double _top;
+
+  @override
+  final double _bottom;
+
+  @override
+  EdgeInsets resolve(TextDirection? direction) {
+    assert(direction != null);
+    switch (direction!) {
+      case TextDirection.rtl:
+        return EdgeInsets.fromLTRB(
+            _end + _left, _top, _start + _right, _bottom);
+      case TextDirection.ltr:
+        return EdgeInsets.fromLTRB(
+            _start + _left, _top, _end + _right, _bottom);
+    }
+  }
+}
+
+/// An immutable set of offsets in each of the four cardinal directions, but
+/// whose horizontal components are dependent on the writing direction.
+///
+/// This can be used to indicate padding from the left in [TextDirection.ltr]
+/// text and padding from the right in [TextDirection.rtl] text without having
+/// to be aware of the current text direction.
+///
+/// See also:
+///
+///  * [EdgeInsets], a variant that uses physical labels (left and right instead
+///    of start and end).
+class EdgeInsetsDirectional extends EdgeInsetsGeometry {
+  /// Creates insets from offsets from the start, top, end, and bottom.
+  const EdgeInsetsDirectional.fromSTEB(
+      this.start, this.top, this.end, this.bottom);
+
+  /// Creates insets with only the given values non-zero.
+  ///
+  /// {@tool snippet}
+  ///
+  /// A margin indent of 40 pixels on the leading side:
+  ///
+  /// ```dart
+  /// const EdgeInsetsDirectional.only(start: 40.0)
+  /// ```
+  /// {@end-tool}
+  const EdgeInsetsDirectional.only({
+    this.start = 0.0,
+    this.top = 0.0,
+    this.end = 0.0,
+    this.bottom = 0.0,
+  });
+
+  /// Creates insets with symmetric vertical and horizontal offsets.
+  ///
+  /// This is equivalent to [EdgeInsets.symmetric], since the inset is the same
+  /// with either [TextDirection]. This constructor is just a convenience for
+  /// type compatibility.
+  ///
+  /// {@tool snippet}
+  /// Eight pixel margin above and below, no horizontal margins:
+  ///
+  /// ```dart
+  /// const EdgeInsetsDirectional.symmetric(vertical: 8.0)
+  /// ```
+  /// {@end-tool}
+  const EdgeInsetsDirectional.symmetric({
+    double horizontal = 0.0,
+    double vertical = 0.0,
+  })  : start = horizontal,
+        end = horizontal,
+        top = vertical,
+        bottom = vertical;
+
+  /// Creates insets where all the offsets are `value`.
+  ///
+  /// {@tool snippet}
+  ///
+  /// Typical eight-pixel margin on all sides:
+  ///
+  /// ```dart
+  /// const EdgeInsetsDirectional.all(8.0)
+  /// ```
+  /// {@end-tool}
+  const EdgeInsetsDirectional.all(double value)
+      : start = value,
+        top = value,
+        end = value,
+        bottom = value;
+
+  /// An [EdgeInsetsDirectional] with zero offsets in each direction.
+  ///
+  /// Consider using [EdgeInsets.zero] instead, since that object has the same
+  /// effect, but will be cheaper to [resolve].
+  static const EdgeInsetsDirectional zero = EdgeInsetsDirectional.only();
+
+  /// The offset from the start side, the side from which the user will start
+  /// reading text.
+  ///
+  /// This value is normalized into an [EdgeInsets.left] or [EdgeInsets.right]
+  /// value by the [resolve] method.
+  final double start;
+
+  @override
+  double get _start => start;
+
+  /// The offset from the top.
+  ///
+  /// This value is passed through to [EdgeInsets.top] unmodified by the
+  /// [resolve] method.
+  final double top;
+
+  @override
+  double get _top => top;
+
+  /// The offset from the end side, the side on which the user ends reading
+  /// text.
+  ///
+  /// This value is normalized into an [EdgeInsets.left] or [EdgeInsets.right]
+  /// value by the [resolve] method.
+  final double end;
+
+  @override
+  double get _end => end;
+
+  /// The offset from the bottom.
+  ///
+  /// This value is passed through to [EdgeInsets.bottom] unmodified by the
+  /// [resolve] method.
+  final double bottom;
+
+  @override
+  double get _bottom => bottom;
+
+  @override
+  double get _left => 0.0;
+
+  @override
+  double get _right => 0.0;
+
+  @override
+  EdgeInsetsGeometry add(EdgeInsetsGeometry other) {
+    if (other is EdgeInsetsDirectional) {
+      return this + other;
+    }
+    return super.add(other);
+  }
+
+  /// Returns the sum of two [EdgeInsetsDirectional] objects.
+  EdgeInsetsDirectional operator +(EdgeInsetsDirectional other) {
+    return EdgeInsetsDirectional.fromSTEB(
+      start + other.start,
       top + other.top,
-      right + other.right,
+      end + other.end,
       bottom + other.bottom,
     );
   }
 
   @override
-  String toString() => 'EdgeInsets $left, $top, $right, $bottom';
+  EdgeInsets resolve(TextDirection? direction) {
+    assert(direction != null);
+    switch (direction!) {
+      case TextDirection.rtl:
+        return EdgeInsets.fromLTRB(end, top, start, bottom);
+      case TextDirection.ltr:
+        return EdgeInsets.fromLTRB(start, top, end, bottom);
+    }
+  }
 }
 
-class Alignment {
+/// Base class for [Alignment] that allows for text-direction aware
+/// resolution.
+///
+/// A property or argument of this type accepts classes created either with [
+/// Alignment] and its variants, or [AlignmentDirectional.new].
+///
+/// To convert an [AlignmentGeometry] object of indeterminate type into an
+/// [Alignment] object, call the [resolve] method.
+@immutable
+abstract class AlignmentGeometry {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const AlignmentGeometry();
+
+  /// Convert this instance into an [Alignment], which uses literal
+  /// coordinates (the `x` coordinate being explicitly a distance from the
+  /// left).
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], for which this is a no-op (returns itself).
+  ///  * [AlignmentDirectional], which flips the horizontal direction
+  ///    based on the `direction` argument.
+  Alignment resolve(TextDirection? direction);
+}
+
+class Alignment extends AlignmentGeometry {
   const Alignment(this.x, this.y);
 
   /// The distance fraction in the horizontal direction.
@@ -351,7 +676,170 @@ class Alignment {
   }
 
   @override
-  String toString() => '($x, $y)';
+  String toString() => _stringify(x, y);
+
+  static String _stringify(double x, double y) {
+    if (x == -1.0 && y == -1.0) {
+      return 'Alignment.topLeft';
+    }
+    if (x == 0.0 && y == -1.0) {
+      return 'Alignment.topCenter';
+    }
+    if (x == 1.0 && y == -1.0) {
+      return 'Alignment.topRight';
+    }
+    if (x == -1.0 && y == 0.0) {
+      return 'Alignment.centerLeft';
+    }
+    if (x == 0.0 && y == 0.0) {
+      return 'Alignment.center';
+    }
+    if (x == 1.0 && y == 0.0) {
+      return 'Alignment.centerRight';
+    }
+    if (x == -1.0 && y == 1.0) {
+      return 'Alignment.bottomLeft';
+    }
+    if (x == 0.0 && y == 1.0) {
+      return 'Alignment.bottomCenter';
+    }
+    if (x == 1.0 && y == 1.0) {
+      return 'Alignment.bottomRight';
+    }
+    return 'Alignment(${x.toStringAsFixed(1)}, '
+        '${y.toStringAsFixed(1)})';
+  }
+
+  @override
+  Alignment resolve(TextDirection? direction) => this;
+}
+
+/// An offset that's expressed as a fraction of a [Size], but whose horizontal
+/// component is dependent on the writing direction.
+///
+/// This can be used to indicate an offset from the left in [TextDirection.ltr]
+/// text and an offset from the right in [TextDirection.rtl] text without having
+/// to be aware of the current text direction.
+///
+/// See also:
+///
+///  * [Alignment], a variant that is defined in physical terms (i.e.
+///    whose horizontal component does not depend on the text direction).
+class AlignmentDirectional extends AlignmentGeometry {
+  /// Creates a directional alignment.
+  ///
+  /// The [start] and [y] arguments must not be null.
+  const AlignmentDirectional(this.start, this.y);
+
+  /// The distance fraction in the horizontal direction.
+  ///
+  /// A value of -1.0 corresponds to the edge on the "start" side, which is the
+  /// left side in [TextDirection.ltr] contexts and the right side in
+  /// [TextDirection.rtl] contexts. A value of 1.0 corresponds to the opposite
+  /// edge, the "end" side. Values are not limited to that range; values less
+  /// than -1.0 represent positions beyond the start edge, and values greater than
+  /// 1.0 represent positions beyond the end edge.
+  ///
+  /// This value is normalized into an [Alignment.x] value by the [resolve]
+  /// method.
+  final double start;
+
+  /// The distance fraction in the vertical direction.
+  ///
+  /// A value of -1.0 corresponds to the topmost edge. A value of 1.0
+  /// corresponds to the bottommost edge. Values are not limited to that range;
+  /// values less than -1.0 represent positions above the top, and values
+  /// greater than 1.0 represent positions below the bottom.
+  ///
+  /// This value is passed through to [Alignment.y] unmodified by the
+  /// [resolve] method.
+  final double y;
+
+  /// The top corner on the "start" side.
+  static const AlignmentDirectional topStart = AlignmentDirectional(-1.0, -1.0);
+
+  /// The center point along the top edge.
+  ///
+  /// Consider using [Alignment.topCenter] instead, as it does not need
+  /// to be [resolve]d to be used.
+  static const AlignmentDirectional topCenter = AlignmentDirectional(0.0, -1.0);
+
+  /// The top corner on the "end" side.
+  static const AlignmentDirectional topEnd = AlignmentDirectional(1.0, -1.0);
+
+  /// The center point along the "start" edge.
+  static const AlignmentDirectional centerStart =
+      AlignmentDirectional(-1.0, 0.0);
+
+  /// The center point, both horizontally and vertically.
+  ///
+  /// Consider using [Alignment.center] instead, as it does not need to
+  /// be [resolve]d to be used.
+  static const AlignmentDirectional center = AlignmentDirectional(0.0, 0.0);
+
+  /// The center point along the "end" edge.
+  static const AlignmentDirectional centerEnd = AlignmentDirectional(1.0, 0.0);
+
+  /// The bottom corner on the "start" side.
+  static const AlignmentDirectional bottomStart =
+      AlignmentDirectional(-1.0, 1.0);
+
+  /// The center point along the bottom edge.
+  ///
+  /// Consider using [Alignment.bottomCenter] instead, as it does not
+  /// need to be [resolve]d to be used.
+  static const AlignmentDirectional bottomCenter =
+      AlignmentDirectional(0.0, 1.0);
+
+  /// The bottom corner on the "end" side.
+  static const AlignmentDirectional bottomEnd = AlignmentDirectional(1.0, 1.0);
+
+  static String _stringify(double start, double y) {
+    if (start == -1.0 && y == -1.0) {
+      return 'AlignmentDirectional.topStart';
+    }
+    if (start == 0.0 && y == -1.0) {
+      return 'AlignmentDirectional.topCenter';
+    }
+    if (start == 1.0 && y == -1.0) {
+      return 'AlignmentDirectional.topEnd';
+    }
+    if (start == -1.0 && y == 0.0) {
+      return 'AlignmentDirectional.centerStart';
+    }
+    if (start == 0.0 && y == 0.0) {
+      return 'AlignmentDirectional.center';
+    }
+    if (start == 1.0 && y == 0.0) {
+      return 'AlignmentDirectional.centerEnd';
+    }
+    if (start == -1.0 && y == 1.0) {
+      return 'AlignmentDirectional.bottomStart';
+    }
+    if (start == 0.0 && y == 1.0) {
+      return 'AlignmentDirectional.bottomCenter';
+    }
+    if (start == 1.0 && y == 1.0) {
+      return 'AlignmentDirectional.bottomEnd';
+    }
+    return 'AlignmentDirectional(${start.toStringAsFixed(1)}, '
+        '${y.toStringAsFixed(1)})';
+  }
+
+  @override
+  String toString() => _stringify(start, y);
+
+  @override
+  Alignment resolve(TextDirection? direction) {
+    assert(direction != null,
+        'Cannot resolve $runtimeType without a TextDirection.');
+    switch (direction!) {
+      case TextDirection.rtl:
+        return Alignment(-start, y);
+      case TextDirection.ltr:
+        return Alignment(start, y);
+    }
+  }
 }
 
 /// An offset that's expressed as a fraction of a [PdfPoint].

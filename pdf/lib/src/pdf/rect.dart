@@ -36,14 +36,18 @@ class PdfRect {
   static const PdfRect zero = PdfRect(0, 0, 0, 0);
 
   double get left => x;
+
   double get bottom => y;
+
   double get right => x + width;
+
   double get top => y + height;
 
   @Deprecated('type => horizontalCenter')
   double get horizondalCenter => horizontalCenter;
 
   double get horizontalCenter => x + width / 2;
+
   double get verticalCenter => y + height / 2;
 
   @override
@@ -54,11 +58,15 @@ class PdfRect {
   }
 
   PdfPoint get offset => PdfPoint(x, y);
+
   PdfPoint get size => PdfPoint(width, height);
 
   PdfPoint get topLeft => PdfPoint(x, y);
+
   PdfPoint get topRight => PdfPoint(right, y);
+
   PdfPoint get bottomLeft => PdfPoint(x, top);
+
   PdfPoint get bottomRight => PdfPoint(right, top);
 
   /// Returns a new rectangle with edges moved outwards by the given delta.
@@ -69,4 +77,18 @@ class PdfRect {
 
   /// Returns a new rectangle with edges moved inwards by the given delta.
   PdfRect deflate(double delta) => inflate(-delta);
+
+  PdfRect copyWith({
+    double? x,
+    double? y,
+    double? width,
+    double? height,
+  }) {
+    return PdfRect(
+      x ?? this.x,
+      y ?? this.y,
+      width ?? this.width,
+      height ?? this.height,
+    );
+  }
 }

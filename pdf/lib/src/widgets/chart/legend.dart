@@ -38,13 +38,13 @@ class ChartLegend extends StatelessWidget {
 
   final TextStyle? textStyle;
 
-  final Alignment position;
+  final AlignmentGeometry position;
 
   final Axis direction;
 
   final BoxDecoration? decoration;
 
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   Widget _buildLegend(Context context, Dataset dataset) {
     final style = Theme.of(context).defaultTextStyle.merge(textStyle);

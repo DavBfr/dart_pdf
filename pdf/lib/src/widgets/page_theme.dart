@@ -30,7 +30,7 @@ class PageTheme {
     this.buildForeground,
     this.theme,
     PageOrientation? orientation,
-    EdgeInsets? margin,
+    EdgeInsetsGeometry? margin,
     this.clip = false,
     this.textDirection,
   })  : pageFormat = pageFormat ?? PdfPageFormat.standard,
@@ -41,7 +41,7 @@ class PageTheme {
 
   final PageOrientation orientation;
 
-  final EdgeInsets? _margin;
+  final EdgeInsetsGeometry? _margin;
 
   final BuildCallback? buildBackground;
 
@@ -59,11 +59,16 @@ class PageTheme {
       (orientation == PageOrientation.portrait &&
           pageFormat.width > pageFormat.height);
 
-  EdgeInsets? get margin {
+  EdgeInsetsGeometry? get margin {
     if (_margin != null) {
+      final resolvedMargin = _margin!.resolve(textDirection);
       if (mustRotate) {
         return EdgeInsets.fromLTRB(
-            _margin!.bottom, _margin!.left, _margin!.top, _margin!.right);
+          resolvedMargin.bottom,
+          resolvedMargin.left,
+          resolvedMargin.top,
+          resolvedMargin.right,
+        );
       } else {
         return _margin;
       }

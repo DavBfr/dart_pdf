@@ -146,7 +146,7 @@ class Checkbox extends SingleChildWidget with AnnotationAppearance {
     BoxDecoration? decoration,
   })  : radius = decoration?.shape == BoxShape.circle
             ? Radius.circular(math.max(height, width) / 2)
-            : decoration?.borderRadius?.topLeft ?? Radius.zero,
+            : decoration?.borderRadius?.uniform ?? Radius.zero,
         super(
             child: Container(
                 width: width,
@@ -227,7 +227,7 @@ class FlatButton extends SingleChildWidget with AnnotationAppearance {
     PdfColor color = PdfColors.blue,
     PdfColor colorDown = PdfColors.red,
     PdfColor colorRollover = PdfColors.blueAccent,
-    EdgeInsets? padding,
+    EdgeInsetsGeometry? padding,
     BoxDecoration? decoration,
     this.flags,
     required Widget child,

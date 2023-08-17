@@ -38,20 +38,20 @@ mixin TableHelper {
   static Table fromTextArray({
     Context? context,
     required List<List<dynamic>> data,
-    EdgeInsets cellPadding = const EdgeInsets.all(5),
+    EdgeInsetsGeometry cellPadding = const EdgeInsets.all(5),
     double cellHeight = 0,
-    Alignment cellAlignment = Alignment.topLeft,
-    Map<int, Alignment>? cellAlignments,
+    AlignmentGeometry cellAlignment = Alignment.topLeft,
+    Map<int, AlignmentGeometry>? cellAlignments,
     TextStyle? cellStyle,
     TextStyle? oddCellStyle,
     OnCellFormat? cellFormat,
     OnCellDecoration? cellDecoration,
     int headerCount = 1,
     List<dynamic>? headers,
-    EdgeInsets? headerPadding,
+    EdgeInsetsGeometry? headerPadding,
     double? headerHeight,
-    Alignment headerAlignment = Alignment.center,
-    Map<int, Alignment>? headerAlignments,
+    AlignmentGeometry headerAlignment = Alignment.center,
+    Map<int, AlignmentGeometry>? headerAlignments,
     TextStyle? headerStyle,
     OnCellFormat? headerFormat,
     TableBorder? border = const TableBorder(
@@ -120,14 +120,15 @@ mixin TableHelper {
       rowNum++;
     }
 
+    final textDirection =
+        context == null ? TextDirection.ltr : Directionality.of(context);
     for (final row in data) {
       final tableRow = <Widget>[];
       final isOdd = (rowNum - headerCount) % 2 != 0;
-
       if (rowNum < headerCount) {
         for (final dynamic cell in row) {
           final align = headerAlignments[tableRow.length] ?? headerAlignment;
-          final textAlign = _textAlign(align);
+          final textAlign = _textAlign(align.resolve(textDirection));
 
           tableRow.add(
             Container(
@@ -165,7 +166,7 @@ mixin TableHelper {
                           ? cell.toString()
                           : cellFormat(tableRow.length, cell),
                       style: isOdd ? oddCellStyle : cellStyle,
-                      textAlign: _textAlign(align),
+                      textAlign: _textAlign(align.resolve(textDirection)),
                       textDirection: tableDirection,
                     ),
             ),

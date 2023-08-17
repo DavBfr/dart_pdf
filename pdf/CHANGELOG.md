@@ -4,6 +4,9 @@
 
 - Improve TTF writer with multi-compound characters
 - Partially revert underline on spans changes
+- Add RTL support [Milad-Akarie]
+- Fix Arabic fonts missing isolated form [Milad-Akarie]
+- Throw multi page error explicitly [Marcin Jeleński]
 
 ## 3.10.4
 

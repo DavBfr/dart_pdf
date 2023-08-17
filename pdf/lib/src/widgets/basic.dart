@@ -19,11 +19,7 @@ import 'dart:math' as math;
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
-import 'box_border.dart';
-import 'container.dart';
-import 'decoration.dart';
-import 'geometry.dart';
-import 'widget.dart';
+import '../../widgets.dart';
 
 enum BoxFit { fill, contain, cover, fitWidth, fitHeight, none, scaleDown }
 
@@ -80,46 +76,51 @@ class Padding extends SingleChildWidget {
     Widget? child,
   }) : super(child: child);
 
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   @override
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false}) {
+    final resolvedPadding = padding.resolve(Directionality.of(context));
     if (child != null) {
-      final childConstraints = constraints.deflate(padding);
+      final childConstraints = constraints.deflate(resolvedPadding);
       child!.layout(context, childConstraints, parentUsesSize: parentUsesSize);
       assert(child!.box != null);
       box = constraints.constrainRect(
-          width: child!.box!.width + padding.horizontal,
-          height: child!.box!.height + padding.vertical);
+          width: child!.box!.width + resolvedPadding.horizontal,
+          height: child!.box!.height + resolvedPadding.vertical);
     } else {
       box = constraints.constrainRect(
-          width: padding.horizontal, height: padding.vertical);
+          width: resolvedPadding.horizontal, height: resolvedPadding.vertical);
     }
   }
 
   @override
   void debugPaint(Context context) {
+    final resolvedPadding = padding.resolve(Directionality.of(context));
     context.canvas
       ..setFillColor(PdfColors.lime)
       ..moveTo(box!.x, box!.y)
       ..lineTo(box!.right, box!.y)
       ..lineTo(box!.right, box!.top)
       ..lineTo(box!.x, box!.top)
-      ..moveTo(box!.x + padding.left, box!.y + padding.bottom)
-      ..lineTo(box!.x + padding.left, box!.top - padding.top)
-      ..lineTo(box!.right - padding.right, box!.top - padding.top)
-      ..lineTo(box!.right - padding.right, box!.y + padding.bottom)
+      ..moveTo(box!.x + resolvedPadding.left, box!.y + resolvedPadding.bottom)
+      ..lineTo(box!.x + resolvedPadding.left, box!.top - resolvedPadding.top)
+      ..lineTo(
+          box!.right - resolvedPadding.right, box!.top - resolvedPadding.top)
+      ..lineTo(
+          box!.right - resolvedPadding.right, box!.y + resolvedPadding.bottom)
       ..fillPath();
   }
 
   @override
   void paint(Context context) {
     super.paint(context);
-
+    final resolvedPadding = padding.resolve(Directionality.of(context));
     if (child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box!.x + padding.left, box!.y + padding.bottom);
+      mat.translate(
+          box!.x + resolvedPadding.left, box!.y + resolvedPadding.bottom);
       context.canvas
         ..saveContext()
         ..setTransform(mat);
@@ -192,13 +193,13 @@ class Transform extends SingleChildWidget {
   final PdfPoint? origin;
 
   /// The alignment of the origin, relative to the size of the box.
-  final Alignment? alignment;
+  final AlignmentGeometry? alignment;
 
   final bool adjustLayout;
 
   final bool unconstrained;
 
-  Matrix4 get _effectiveTransform {
+  Matrix4 _effectiveTransform(Context context) {
     final result = Matrix4.identity();
     if (origin != null) {
       result.translate(origin!.x, origin!.y);
@@ -206,7 +207,8 @@ class Transform extends SingleChildWidget {
     result.translate(box!.x, box!.y);
     late PdfPoint translation;
     if (alignment != null) {
-      translation = alignment!.alongSize(box!.size);
+      final resolvedAlignment = alignment!.resolve(Directionality.of(context));
+      translation = resolvedAlignment.alongSize(box!.size);
       result.translate(translation.x, translation.y);
     }
     result.multiply(transform);
@@ -277,7 +279,7 @@ class Transform extends SingleChildWidget {
     super.paint(context);
 
     if (child != null) {
-      final mat = _effectiveTransform;
+      final mat = _effectiveTransform(context);
       context.canvas
         ..saveContext()
         ..setTransform(mat);
@@ -300,7 +302,7 @@ class Align extends SingleChildWidget {
         super(child: child);
 
   /// How to align the child.
-  final Alignment alignment;
+  final AlignmentGeometry alignment;
 
   /// If non-null, sets its width to the child's width multiplied by this factor.
   final double? widthFactor;
@@ -327,8 +329,8 @@ class Align extends SingleChildWidget {
           height: shrinkWrapHeight
               ? child!.box!.height * (heightFactor ?? 1.0)
               : double.infinity);
-
-      child!.box = alignment.inscribe(child!.box!.size, box!);
+      final resolvedAlignment = alignment.resolve(Directionality.of(context));
+      child!.box = resolvedAlignment.inscribe(child!.box!.size, box!);
     } else {
       box = constraints.constrainRect(
           width: shrinkWrapWidth ? 0.0 : double.infinity,
@@ -466,7 +468,7 @@ class FittedBox extends SingleChildWidget {
   final BoxFit fit;
 
   /// How to align the child within its parent's bounds.
-  final Alignment alignment;
+  final AlignmentGeometry alignment;
 
   @override
   void layout(Context context, BoxConstraints constraints,
@@ -488,13 +490,15 @@ class FittedBox extends SingleChildWidget {
     super.paint(context);
 
     if (child != null) {
+      final resolvedAlignment = alignment.resolve(Directionality.of(context));
       final childSize = child!.box!.size;
       final sizes = applyBoxFit(fit, childSize, box!.size);
       final scaleX = sizes.destination!.x / sizes.source!.x;
       final scaleY = sizes.destination!.y / sizes.source!.y;
-      final sourceRect = alignment.inscribe(
+      final sourceRect = resolvedAlignment.inscribe(
           sizes.source!, PdfRect.fromPoints(PdfPoint.zero, childSize));
-      final destinationRect = alignment.inscribe(sizes.destination!, box!);
+      final destinationRect =
+          resolvedAlignment.inscribe(sizes.destination!, box!);
 
       final mat =
           Matrix4.translationValues(destinationRect.x, destinationRect.y, 0)
@@ -939,7 +943,7 @@ class OverflowBox extends SingleChildWidget {
   }) : super(child: child);
 
   /// How to align the child.
-  final Alignment alignment;
+  final AlignmentGeometry alignment;
 
   /// The minimum width constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
@@ -975,7 +979,8 @@ class OverflowBox extends SingleChildWidget {
       child!.layout(context, _getInnerConstraints(constraints),
           parentUsesSize: true);
       assert(child!.box != null);
-      child!.box = alignment.inscribe(child!.box!.size, box!);
+      final resolvedAlignment = alignment.resolve(Directionality.of(context));
+      child!.box = resolvedAlignment.inscribe(child!.box!.size, box!);
     }
   }
 
