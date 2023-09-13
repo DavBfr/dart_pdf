@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import 'dart:math' as math;
-
 import 'point.dart';
 
 class PdfPageFormat {
@@ -100,16 +98,17 @@ class PdfPageFormat {
   PdfPageFormat get portrait =>
       height >= width ? this : copyWith(width: height, height: width);
 
-  PdfPageFormat applyMargin(
-          {required double left,
-          required double top,
-          required double right,
-          required double bottom}) =>
+  PdfPageFormat applyMargin({
+    double? left,
+    double? top,
+    double? right,
+    double? bottom,
+  }) =>
       copyWith(
-        marginLeft: math.max(marginLeft, left),
-        marginTop: math.max(marginTop, top),
-        marginRight: math.max(marginRight, right),
-        marginBottom: math.max(marginBottom, bottom),
+        marginLeft: left ?? marginLeft,
+        marginTop: top ?? marginTop,
+        marginRight: right ?? marginRight,
+        marginBottom: bottom ?? marginBottom,
       );
 
   @override
