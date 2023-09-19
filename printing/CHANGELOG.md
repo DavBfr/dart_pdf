@@ -3,6 +3,8 @@
 ## 5.11.1
 
 - Use pdfDpi on CPP lib
+- set PDFIUM_ARCH according to FLUTTER_TARGET_PLATFORM [nik012003]
+- Make pdf background transparent on windows and linux [Mohammad Rasim]
 
 ## 5.11.0
 
