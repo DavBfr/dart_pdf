@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.0.0-napkin
+
+- Add error log to SvgOperation.fromXml
+
 ## 3.10.5
 
 - Improve TTF writer with multi-compound characters
