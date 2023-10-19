@@ -42,31 +42,37 @@ abstract class SvgOperation {
       return null;
     }
 
-    switch (element.name.local) {
-      case 'circle':
-        return SvgPath.fromCircleXml(element, painter, brush);
-      case 'ellipse':
-        return SvgPath.fromEllipseXml(element, painter, brush);
-      case 'g':
-        return SvgGroup.fromXml(element, painter, brush);
-      case 'image':
-        return SvgImg.fromXml(element, painter, brush);
-      case 'line':
-        return SvgPath.fromLineXml(element, painter, brush);
-      case 'path':
-        return SvgPath.fromXml(element, painter, brush);
-      case 'polygon':
-        return SvgPath.fromPolygonXml(element, painter, brush);
-      case 'polyline':
-        return SvgPath.fromPolylineXml(element, painter, brush);
-      case 'rect':
-        return SvgPath.fromRectXml(element, painter, brush);
-      case 'symbol':
-        return SvgSymbol.fromXml(element, painter, brush);
-      case 'text':
-        return SvgText.fromXml(element, painter, brush);
-      case 'use':
-        return SvgUse.fromXml(element, painter, brush);
+    // Napkin update: catch potential errors instead of crashing
+    try {
+      switch (element.name.local) {
+        case 'circle':
+          return SvgPath.fromCircleXml(element, painter, brush);
+        case 'ellipse':
+          return SvgPath.fromEllipseXml(element, painter, brush);
+        case 'g':
+          return SvgGroup.fromXml(element, painter, brush);
+        case 'image':
+          return SvgImg.fromXml(element, painter, brush);
+        case 'line':
+          return SvgPath.fromLineXml(element, painter, brush);
+        case 'path':
+          return SvgPath.fromXml(element, painter, brush);
+        case 'polygon':
+          return SvgPath.fromPolygonXml(element, painter, brush);
+        case 'polyline':
+          return SvgPath.fromPolylineXml(element, painter, brush);
+        case 'rect':
+          return SvgPath.fromRectXml(element, painter, brush);
+        case 'symbol':
+          return SvgSymbol.fromXml(element, painter, brush);
+        case 'text':
+          return SvgText.fromXml(element, painter, brush);
+        case 'use':
+          return SvgUse.fromXml(element, painter, brush);
+      }
+    } catch (e) {
+      print('[pdf][SvgOperation] Error parsing SVG element: ${e}');
+      return null;
     }
 
     return null;
