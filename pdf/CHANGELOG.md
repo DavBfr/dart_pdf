@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.0.1-napkin
+
+- Update error log in SvgOperation.fromXml
+
 # 1.0.0-napkin
 
 - Add error log to SvgOperation.fromXml

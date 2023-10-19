@@ -6,7 +6,7 @@ issue_tracker: https://github.com/DavBfr/dart_pdf/issues
 screenshots:
   - description: 'Example of a generated document'
     path: example.jpg
-version: 1.0.0-napkin
+version: 1.0.1-napkin
 
 environment:
   sdk: ">=2.18.0 <4.0.0"
