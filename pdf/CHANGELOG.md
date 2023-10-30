@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.1.0-napkin
+
+- Implement embedded svg images
+
 # 1.0.1-napkin
 
 - Update error log in SvgOperation.fromXml

@@ -24,6 +24,7 @@ import 'group.dart';
 import 'image.dart';
 import 'painter.dart';
 import 'path.dart';
+import 'svg.dart';
 import 'symbol.dart';
 import 'text.dart';
 import 'transform.dart';
@@ -52,7 +53,15 @@ abstract class SvgOperation {
         case 'g':
           return SvgGroup.fromXml(element, painter, brush);
         case 'image':
-          return SvgImg.fromXml(element, painter, brush);
+          try {
+            final svgImage = SvgImg.fromXml(element, painter, brush);
+            return svgImage;
+          } catch (e) {
+            if (e == EmbeddedSvgUnsupportedError) {
+              return EmbeddedSvg.fromXml(element, painter, brush);
+            }
+            rethrow;
+          }
         case 'line':
           return SvgPath.fromLineXml(element, painter, brush);
         case 'path':
