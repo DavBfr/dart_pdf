@@ -252,6 +252,7 @@ ref: svg
 	cd $@; curl -OL 'https://ia801003.us.archive.org/5/items/pdf320002008/PDF32000_2008.pdf'
 	cd $@; curl -OL 'https://www.adobe.com/content/dam/cc1/en/devnet/pdf/pdfs/adobe_supplement_iso32000_1.pdf'
 	cd $@; curl -OL 'https://ia801001.us.archive.org/1/items/pdf1.7/pdf_reference_1-7.pdf'
+	cd $@; curl -OL 'https://www.adobe.com/devnet-docs/acrobatetk/tools/DigSigDC/Acrobat_DigitalSignatures_in_PDF.pdf'
 
 gh-social: all
 	cd test; $(DART_BIN) --enable-asserts github_social_preview.dart
