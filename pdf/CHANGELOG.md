@@ -7,6 +7,7 @@
 - Add RTL support [Milad-Akarie]
 - Fix Arabic fonts missing isolated form [Milad-Akarie]
 - Throw multi page error explicitly [Marcin Jeleński]
+- Fix deprecations
 
 ## 3.10.4
 
