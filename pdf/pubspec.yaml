@@ -6,6 +6,12 @@ issue_tracker: https://github.com/DavBfr/dart_pdf/issues
 screenshots:
   - description: 'Example of a generated document'
     path: example.jpg
+topics:
+  - pdf
+  - printer
+  - print
+  - printing
+  - report
 version: 3.10.5
 
 environment:
