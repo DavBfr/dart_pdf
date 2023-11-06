@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.10.6
+
+- Update bidi dependency
+
 ## 3.10.5
 
 - Improve TTF writer with multi-compound characters
