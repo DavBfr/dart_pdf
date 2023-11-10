@@ -192,6 +192,8 @@ class TtfParser {
 
   int get descent => bytes.getInt16(tableOffsets[hhea_table]! + 6);
 
+  int get lineGap => bytes.getInt16(tableOffsets[hhea_table]! + 8);
+
   int get numOfLongHorMetrics =>
       bytes.getUint16(tableOffsets[hhea_table]! + 34);
 
