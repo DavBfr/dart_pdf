@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.10.7
+
+- Fix empty lines text gap
+
 ## 3.10.6
 
 - Update bidi dependency
