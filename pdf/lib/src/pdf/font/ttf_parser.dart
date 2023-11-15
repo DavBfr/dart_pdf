@@ -19,9 +19,10 @@
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'package:meta/meta.dart';
-import 'bidi_utils.dart' as bidi;
 
+import 'package:meta/meta.dart';
+
+import 'bidi_utils.dart' as bidi;
 import 'font_metrics.dart';
 
 enum TtfParserName {
@@ -191,6 +192,8 @@ class TtfParser {
   int get ascent => bytes.getInt16(tableOffsets[hhea_table]! + 4);
 
   int get descent => bytes.getInt16(tableOffsets[hhea_table]! + 6);
+
+  int get lineGap => bytes.getInt16(tableOffsets[hhea_table]! + 8);
 
   int get numOfLongHorMetrics =>
       bytes.getUint16(tableOffsets[hhea_table]! + 34);

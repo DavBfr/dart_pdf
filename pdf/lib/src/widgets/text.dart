@@ -1041,7 +1041,7 @@ class RichText extends Widget with SpanningWidget {
               if (spanCount > 0) {
                 offsetY += bottom - top;
               } else {
-                offsetY += space.ascent + space.descent;
+                offsetY += font.lineGap * style.fontSize! * textScaleFactor;
               }
               top = 0;
               bottom = 0;

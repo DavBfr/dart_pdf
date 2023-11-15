@@ -6,7 +6,13 @@ issue_tracker: https://github.com/DavBfr/dart_pdf/issues
 screenshots:
   - description: 'Example of a generated document'
     path: example.jpg
-version: 3.10.5
+topics:
+  - pdf
+  - printer
+  - print
+  - printing
+  - report
+version: 3.10.7
 
 environment:
   sdk: ">=2.18.0 <4.0.0"
@@ -14,7 +20,7 @@ environment:
 dependencies:
   archive: ^3.1.0
   barcode: ">=2.2.3 <3.0.0"
-  bidi: ^2.0.6
+  bidi: ^2.0.10
   crypto: ^3.0.0
   image: ^4.0.0
   meta: ">=1.3.0 <2.0.0"

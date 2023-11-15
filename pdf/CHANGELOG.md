@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.10.7
+
+- Fix empty lines text gap
+
+## 3.10.6
+
+- Update bidi dependency
+
 ## 3.10.5
 
 - Improve TTF writer with multi-compound characters
@@ -7,6 +15,7 @@
 - Add RTL support [Milad-Akarie]
 - Fix Arabic fonts missing isolated form [Milad-Akarie]
 - Throw multi page error explicitly [Marcin Jeleński]
+- Fix deprecations
 
 ## 3.10.4
 
