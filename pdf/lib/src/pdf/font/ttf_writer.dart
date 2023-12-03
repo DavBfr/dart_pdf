@@ -74,7 +74,7 @@ class TtfWriter {
 
     for (final char in chars) {
       if (char == 32) {
-        final glyph = TtfGlyphInfo(32, Uint8List(0), const <int>[]);
+        final glyph = TtfGlyphInfo(ttf.charToGlyphIndexMap[char]!, Uint8List(0), const <int>[]);
         glyphsMap[glyph.index] = glyph;
         charMap[char] = glyph.index;
         continue;
