@@ -3,6 +3,7 @@
 ## 3.10.7
 
 - Fix empty lines text gap
+- Fix lookup index of glyph for space character [Hendrik-Brower]
 
 ## 3.10.6
 
