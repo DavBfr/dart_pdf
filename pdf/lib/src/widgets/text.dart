@@ -20,6 +20,7 @@ import 'package:meta/meta.dart';
 
 import '../../pdf.dart';
 import '../pdf/font/bidi_utils.dart' as bidi;
+import '../pdf/options.dart';
 import 'annotations.dart';
 import 'basic.dart';
 import 'document.dart';
@@ -928,7 +929,7 @@ class RichText extends Widget with SpanningWidget {
           final space =
               font.stringMetrics(' ') * (style.fontSize! * textScaleFactor);
 
-          final spanLines = (_textDirection == TextDirection.rtl
+          final spanLines = (useBidi && _textDirection == TextDirection.rtl
                   ? bidi.logicalToVisual(span.text!)
                   : span.text)!
               .split('\n');

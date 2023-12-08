@@ -6,6 +6,7 @@
 - Add support for existing reference objects
 - Update barcode golden pdf
 - Add support for hyphenation [ilja]
+- Add an option to disable bidirectional support [Olzhas-Suleimen]
 
 ## 3.10.7
 
