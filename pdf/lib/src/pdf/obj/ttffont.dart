@@ -28,6 +28,7 @@ import '../format/name.dart';
 import '../format/num.dart';
 import '../format/stream.dart';
 import '../format/string.dart';
+import '../options.dart';
 import 'font.dart';
 import 'font_descriptor.dart';
 import 'object.dart';
@@ -78,7 +79,7 @@ class PdfTtfFont extends PdfFont {
       return PdfFontMetrics.zero;
     }
 
-    if (bidi.isArabicDiacriticValue(charCode)) {
+    if (useBidi && bidi.isArabicDiacriticValue(charCode)) {
       final metric = font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
       return metric.copyWith(advanceWidth: 0);
     }
