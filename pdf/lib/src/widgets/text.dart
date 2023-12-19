@@ -658,6 +658,8 @@ class RichTextContext extends WidgetContext {
       '$runtimeType Offset: $startOffset -> $endOffset  Span: $spanStart -> $spanEnd';
 }
 
+typedef Hyphenation = List<String> Function(String word);
+
 class RichText extends Widget with SpanningWidget {
   RichText({
     required this.text,
@@ -668,6 +670,7 @@ class RichText extends Widget with SpanningWidget {
     this.textScaleFactor = 1.0,
     this.maxLines,
     this.overflow = TextOverflow.visible,
+    this.hyphenation,
   });
 
   static bool debug = false;
@@ -699,6 +702,8 @@ class RichText extends Widget with SpanningWidget {
   var _mustClip = false;
 
   List<InlineSpan>? _preprocessed;
+
+  final Hyphenation? hyphenation;
 
   void _appendDecoration(bool append, _TextDecoration td) {
     if (append && _decorations.isNotEmpty) {
@@ -946,6 +951,32 @@ class RichText extends Widget with SpanningWidget {
 
               if (_softWrap &&
                   offsetX + metrics.width > constraintWidth + 0.00001) {
+                if (hyphenation != null) {
+                  final syllables = hyphenation!(word);
+                  if (syllables.length > 1) {
+                    var fits = '';
+                    for (var syllable in syllables) {
+                      if (offsetX +
+                              ((font.stringMetrics('$fits$syllable-',
+                                          letterSpacing: style.letterSpacing! /
+                                              (style.fontSize! *
+                                                  textScaleFactor)) *
+                                      (style.fontSize! * textScaleFactor))
+                                  .width) >
+                          constraintWidth + 0.00001) {
+                        break;
+                      }
+                      fits += syllable;
+                    }
+                    if (fits.isNotEmpty) {
+                      words[index] = '$fits-';
+                      words.insert(index + 1, word.substring(fits.length));
+                      index--;
+                      continue;
+                    }
+                  }
+                }
+
                 if (spanCount > 0 && metrics.width <= constraintWidth) {
                   overflow = true;
                   lines.add(_Line(

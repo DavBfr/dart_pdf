@@ -5,6 +5,7 @@
 - Add Flutter's Logical Pixel constant
 - Add support for existing reference objects
 - Update barcode golden pdf
+- Add support for hyphenation [ilja]
 
 ## 3.10.7
 
