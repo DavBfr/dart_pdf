@@ -957,16 +957,15 @@ class RichText extends Widget with SpanningWidget {
                   if (syllables.length > 1) {
                     String fits = '';
                     for (String syllable in syllables) {
-                      double calcWidth = ((font.stringMetrics(
+                      if (offsetX + ((font.stringMetrics(
                           fits + syllable + '-',
                           letterSpacing: style.letterSpacing! /
                               (style.fontSize! * textScaleFactor)) *
-                          (style.fontSize! * textScaleFactor)).width);
-                      if (offsetX + calcWidth <= constraintWidth + 0.00001) {
-                        fits += syllable;
-                        continue;
+                          (style.fontSize! * textScaleFactor)).width) >
+                          constraintWidth + 0.00001) {
+                        break;
                       }
-                      break;
+                      fits += syllable;
                     }
                     if (fits.isNotEmpty) {
                       words[index] = fits + '-';
