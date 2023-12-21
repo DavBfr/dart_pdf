@@ -21,6 +21,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../callback.dart';
 import '../printing.dart';
 import '../printing_info.dart';
+import 'action_bar_theme.dart';
 import 'actions.dart';
 import 'controller.dart';
 import 'custom.dart';
@@ -62,6 +63,7 @@ class PdfPreview extends StatefulWidget {
     this.loadingWidget,
     this.onPageFormatChanged,
     this.dpi,
+    this.actionBarTheme = const PdfActionBarTheme(),
   })  : _pagesBuilder = null,
         super(key: key);
 
@@ -119,6 +121,7 @@ class PdfPreview extends StatefulWidget {
     this.loadingWidget,
     this.onPageFormatChanged,
     this.dpi,
+    this.actionBarTheme = const PdfActionBarTheme(),
     required CustomPdfPagesBuilder pagesBuilder,
   })  : _pagesBuilder = pagesBuilder,
         super(key: key);
@@ -222,6 +225,9 @@ class PdfPreview extends StatefulWidget {
   /// The rendering dots per inch resolution
   /// If not provided, this value is calculated.
   final double? dpi;
+
+  /// The style of actions bar.
+  final PdfActionBarTheme actionBarTheme;
 
   /// clients can pass this builder to render
   /// their own pages.
@@ -406,16 +412,19 @@ class PdfPreviewState extends State<PdfPreview> {
           if (actions.isNotEmpty)
             IconTheme.merge(
               data: IconThemeData(
-                color: iconColor,
+                color: widget.actionBarTheme.iconColor ?? iconColor,
               ),
               child: Material(
-                elevation: 4,
-                color: theme.primaryColor,
+                elevation: widget.actionBarTheme.elevation,
+                color:
+                    widget.actionBarTheme.backgroundColor ?? theme.primaryColor,
+                textStyle: widget.actionBarTheme.textStyle,
                 child: SizedBox(
                   width: double.infinity,
+                  height: widget.actionBarTheme.height,
                   child: SafeArea(
                     child: Wrap(
-                      alignment: WrapAlignment.spaceAround,
+                      alignment: widget.actionBarTheme.alignment,
                       children: actions,
                     ),
                   ),
