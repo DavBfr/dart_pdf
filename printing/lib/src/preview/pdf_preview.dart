@@ -424,7 +424,9 @@ class PdfPreviewState extends State<PdfPreview> {
                   height: widget.actionBarTheme.height,
                   child: SafeArea(
                     child: Wrap(
+                      spacing: widget.actionBarTheme.actionSpacing,
                       alignment: widget.actionBarTheme.alignment,
+                      runAlignment: widget.actionBarTheme.runAlignment,
                       crossAxisAlignment:
                           widget.actionBarTheme.crossAxisAlignment,
                       children: actions,
