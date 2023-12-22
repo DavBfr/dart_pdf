@@ -1,8 +1,9 @@
 # Changelog
 
-## 5.1.2
+## 5.12.0
 
 - Refactor html imports
+- Migrated deprecated webview to WKWebview on macos printing [Akshay-Pawar]
 
 ## 5.11.1
 
