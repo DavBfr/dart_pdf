@@ -10,6 +10,7 @@ class PdfActionBarTheme with Diagnosticable {
     this.textStyle,
     this.elevation = 4,
     this.alignment = WrapAlignment.spaceAround,
+    this.crossAxisAlignment = WrapCrossAlignment.center,
   });
 
   final Color? backgroundColor;
@@ -18,6 +19,7 @@ class PdfActionBarTheme with Diagnosticable {
   final TextStyle? textStyle;
   final double elevation;
   final WrapAlignment alignment;
+  final WrapCrossAlignment crossAxisAlignment;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -28,6 +30,7 @@ class PdfActionBarTheme with Diagnosticable {
     TextStyle? textStyle,
     double? elevation,
     WrapAlignment? alignment,
+    WrapCrossAlignment? crossAxisAlignment,
   }) {
     return PdfActionBarTheme(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -36,12 +39,20 @@ class PdfActionBarTheme with Diagnosticable {
       textStyle: textStyle ?? this.textStyle,
       elevation: elevation ?? this.elevation,
       alignment: alignment ?? this.alignment,
+      crossAxisAlignment: crossAxisAlignment ?? this.crossAxisAlignment,
     );
   }
 
   @override
-  int get hashCode => Object.hashAll(
-      [backgroundColor, iconColor, height, textStyle, elevation, alignment]);
+  int get hashCode => Object.hashAll([
+        backgroundColor,
+        iconColor,
+        height,
+        textStyle,
+        elevation,
+        alignment,
+        crossAxisAlignment
+      ]);
 
   @override
   bool operator ==(Object other) {
@@ -57,7 +68,8 @@ class PdfActionBarTheme with Diagnosticable {
         other.height == height &&
         other.textStyle == textStyle &&
         other.elevation == elevation &&
-        other.alignment == alignment;
+        other.alignment == alignment &&
+        other.crossAxisAlignment == crossAxisAlignment;
   }
 
   @override
@@ -70,5 +82,8 @@ class PdfActionBarTheme with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation));
     properties.add(DiagnosticsProperty<WrapAlignment>('alignment', alignment,
         defaultValue: WrapAlignment.spaceAround));
+    properties.add(DiagnosticsProperty<WrapCrossAlignment>(
+        'crossAxisAlignment', crossAxisAlignment,
+        defaultValue: WrapCrossAlignment.center));
   }
 }
