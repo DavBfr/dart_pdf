@@ -8,8 +8,10 @@ class PdfActionBarTheme with Diagnosticable {
     this.iconColor,
     this.height,
     this.textStyle,
-    this.elevation = 4,
+    this.elevation = 4.0,
+    this.actionSpacing = 0.0,
     this.alignment = WrapAlignment.spaceAround,
+    this.runAlignment = WrapAlignment.center,
     this.crossAxisAlignment = WrapCrossAlignment.center,
   });
 
@@ -18,7 +20,9 @@ class PdfActionBarTheme with Diagnosticable {
   final double? height;
   final TextStyle? textStyle;
   final double elevation;
+  final double actionSpacing;
   final WrapAlignment alignment;
+  final WrapAlignment runAlignment;
   final WrapCrossAlignment crossAxisAlignment;
 
   /// Creates a copy of this object but with the given fields replaced with the
@@ -29,7 +33,9 @@ class PdfActionBarTheme with Diagnosticable {
     double? height,
     TextStyle? textStyle,
     double? elevation,
+    double? actionSpacing,
     WrapAlignment? alignment,
+    WrapAlignment? runAlignment,
     WrapCrossAlignment? crossAxisAlignment,
   }) {
     return PdfActionBarTheme(
@@ -38,7 +44,9 @@ class PdfActionBarTheme with Diagnosticable {
       height: height ?? this.height,
       textStyle: textStyle ?? this.textStyle,
       elevation: elevation ?? this.elevation,
+      actionSpacing: actionSpacing ?? this.actionSpacing,
       alignment: alignment ?? this.alignment,
+      runAlignment: runAlignment ?? this.runAlignment,
       crossAxisAlignment: crossAxisAlignment ?? this.crossAxisAlignment,
     );
   }
@@ -50,8 +58,10 @@ class PdfActionBarTheme with Diagnosticable {
         height,
         textStyle,
         elevation,
+        actionSpacing,
         alignment,
-        crossAxisAlignment
+        runAlignment,
+        crossAxisAlignment,
       ]);
 
   @override
@@ -68,7 +78,9 @@ class PdfActionBarTheme with Diagnosticable {
         other.height == height &&
         other.textStyle == textStyle &&
         other.elevation == elevation &&
+        other.actionSpacing == actionSpacing &&
         other.alignment == alignment &&
+        other.runAlignment == runAlignment &&
         other.crossAxisAlignment == crossAxisAlignment;
   }
 
@@ -80,8 +92,12 @@ class PdfActionBarTheme with Diagnosticable {
     properties.add(DoubleProperty('height', height));
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle));
     properties.add(DoubleProperty('elevation', elevation));
+    properties.add(DoubleProperty('actionSpacing', actionSpacing));
     properties.add(DiagnosticsProperty<WrapAlignment>('alignment', alignment,
         defaultValue: WrapAlignment.spaceAround));
+    properties.add(DiagnosticsProperty<WrapAlignment>(
+        'runAlignment', runAlignment,
+        defaultValue: WrapAlignment.center));
     properties.add(DiagnosticsProperty<WrapCrossAlignment>(
         'crossAxisAlignment', crossAxisAlignment,
         defaultValue: WrapCrossAlignment.center));
