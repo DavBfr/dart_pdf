@@ -110,6 +110,8 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     with PdfPreviewRaster {
   final listView = GlobalKey();
 
+  late List<GlobalKey> _pageGlobalKeys;
+
   bool infoLoaded = false;
 
   int? preview;
@@ -172,6 +174,28 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     super.didChangeDependencies();
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _pageGlobalKeys = List.generate(
+      pages.length,
+      (index) => GlobalKey(debugLabel: 'pdf-page-$index'),
+    );
+  }
+
+  void scrollToPage(
+    int index, {
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy =
+        ScrollPositionAlignmentPolicy.explicit,
+  }) {
+    assert(index >= 0);
+    final pageKey = _pageGlobalKeys[index];
+    Scrollable.ensureVisible(pageKey.currentContext!,
+        duration: duration, curve: curve, alignmentPolicy: alignmentPolicy);
+  }
+
   Widget _showError(Object error) {
     if (widget.onError != null) {
       return widget.onError!(context, error);
@@ -215,6 +239,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
           });
         },
         child: PdfPreviewPage(
+          key: _pageGlobalKeys[index],
           pageData: pages[index],
           pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
           pageMargin: widget.previewPageMargin,
