@@ -110,7 +110,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     with PdfPreviewRaster {
   final listView = GlobalKey();
 
-  late List<GlobalKey> _pageGlobalKeys;
+  late final List<GlobalKey> _pageGlobalKeys;
 
   bool infoLoaded = false;
 
@@ -174,15 +174,6 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     super.didChangeDependencies();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _pageGlobalKeys = List.generate(
-      pages.length,
-      (index) => GlobalKey(debugLabel: 'pdf-page-$index'),
-    );
-  }
-
   void scrollToPage(
     int index, {
     Duration duration = Duration.zero,
@@ -221,9 +212,15 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
           );
     }
 
+    _pageGlobalKeys = List.generate(
+      pages.length,
+      (index) => GlobalKey(debugLabel: 'pdf-page-$index'),
+    );
+
     if (widget.pagesBuilder != null) {
       return widget.pagesBuilder!(context, pages);
     }
+
     return ListView.builder(
       controller: scrollController,
       shrinkWrap: widget.shrinkWrap,
