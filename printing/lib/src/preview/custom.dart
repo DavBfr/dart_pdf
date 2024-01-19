@@ -110,7 +110,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     with PdfPreviewRaster {
   final listView = GlobalKey();
 
-  late final List<GlobalKey> _pageGlobalKeys;
+  late List<GlobalKey> _pageGlobalKeys;
 
   bool infoLoaded = false;
 
