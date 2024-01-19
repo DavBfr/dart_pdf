@@ -174,16 +174,17 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     super.didChangeDependencies();
   }
 
-  void scrollToPage(
+  Future<void> scrollToPage(
     int index, {
-    Duration duration = Duration.zero,
+    Duration duration = const Duration(milliseconds: 300),
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy =
         ScrollPositionAlignmentPolicy.explicit,
   }) {
-    assert(index >= 0);
-    final pageKey = _pageGlobalKeys[index];
-    Scrollable.ensureVisible(pageKey.currentContext!,
+    assert(index >= 0, 'Index of page cannot be negative');
+    final pageContext = _pageGlobalKeys[index].currentContext;
+    assert(pageContext != null, 'Context of GlobalKey cannot be null');
+    return Scrollable.ensureVisible(pageContext!,
         duration: duration, curve: curve, alignmentPolicy: alignmentPolicy);
   }
 
