@@ -1,12 +1,13 @@
 package net.nfet.flutter.printing;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.Build;
 import android.print.PrintAttributes;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -14,11 +15,11 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 
 public class PrintingHandler implements MethodChannel.MethodCallHandler {
-    private final Activity activity;
+    private final WeakReference<Context> contextWeakReference;
     private final MethodChannel channel;
 
-    PrintingHandler(@NonNull Activity activity, @NonNull MethodChannel channel) {
-        this.activity = activity;
+    PrintingHandler(@NonNull WeakReference<Context> weakReference, @NonNull MethodChannel channel) {
+        this.contextWeakReference = weakReference;
         this.channel = channel;
     }
 
@@ -32,7 +33,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     Double height = call.argument("height");
 
                     final PrintingJob printJob =
-                            new PrintingJob(activity, this, (int) call.argument("job"));
+                            new PrintingJob(contextWeakReference.get(), this, (int) call.argument("job"));
                     assert name != null;
                     printJob.printPdf(name, width, height);
 
@@ -41,7 +42,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                 }
                 case "cancelJob": {
                     final PrintingJob printJob =
-                            new PrintingJob(activity, this, (int) call.argument("job"));
+                            new PrintingJob(contextWeakReference.get(), this, (int) call.argument("job"));
                     printJob.cancelJob(null);
                     result.success(1);
                     break;
@@ -52,7 +53,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     final String subject = call.argument("subject");
                     final String body = call.argument("body");
                     final ArrayList<String> emails = call.argument("emails");
-                    PrintingJob.sharePdf(activity, document, name, subject, body, emails);
+                    PrintingJob.sharePdf(contextWeakReference.get(), document, name, subject, body, emails);
                     result.success(1);
                     break;
                 }
@@ -64,7 +65,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     Double marginRight = call.argument("marginRight");
                     Double marginBottom = call.argument("marginBottom");
                     final PrintingJob printJob =
-                            new PrintingJob(activity, this, (int) call.argument("job"));
+                            new PrintingJob(contextWeakReference.get(), this, (int) call.argument("job"));
 
                     assert width != null;
                     assert height != null;
@@ -98,7 +99,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     final ArrayList<Integer> pages = call.argument("pages");
                     Double scale = call.argument("scale");
                     final PrintingJob printJob =
-                            new PrintingJob(activity, this, (int) call.argument("job"));
+                            new PrintingJob(contextWeakReference.get(), this, (int) call.argument("job"));
                     printJob.rasterPdf(document, pages, scale);
                     result.success(1);
                     break;
@@ -115,7 +116,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
     /// Request the Pdf document from flutter
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     void onLayout(final PrintingJob printJob, Double width, double height, double marginLeft,
-            double marginTop, double marginRight, double marginBottom) {
+                  double marginTop, double marginRight, double marginBottom) {
         HashMap<String, Object> args = new HashMap<>();
         args.put("width", width);
         args.put("height", height);
