@@ -110,7 +110,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     with PdfPreviewRaster {
   final listView = GlobalKey();
 
-  List<GlobalKey> _pageGlobalKeys = <GlobalKey>[];
+  final _pageGlobalKeys = List.generate(100, (index) => GlobalKey());
 
   bool infoLoaded = false;
 
@@ -216,11 +216,6 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
             child: CircularProgressIndicator(),
           );
     }
-
-    _pageGlobalKeys = List.generate(
-      pages.length,
-      (index) => GlobalKey(debugLabel: 'pdf-page-$index'),
-    );
 
     if (widget.pagesBuilder != null) {
       return widget.pagesBuilder!(context, pages);
