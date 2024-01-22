@@ -64,6 +64,7 @@ class PdfPreview extends StatefulWidget {
     this.onPageFormatChanged,
     this.dpi,
     this.actionBarTheme = const PdfActionBarTheme(),
+    this.enableScrollToPage = false,
   })  : _pagesBuilder = null,
         super(key: key);
 
@@ -123,6 +124,7 @@ class PdfPreview extends StatefulWidget {
     this.dpi,
     this.actionBarTheme = const PdfActionBarTheme(),
     required CustomPdfPagesBuilder pagesBuilder,
+    this.enableScrollToPage = false,
   })  : _pagesBuilder = pagesBuilder,
         super(key: key);
 
@@ -233,6 +235,9 @@ class PdfPreview extends StatefulWidget {
   /// their own pages.
   final CustomPdfPagesBuilder? _pagesBuilder;
 
+  /// Whether scroll to page functionality enabled.
+  final bool enableScrollToPage;
+
   @override
   PdfPreviewState createState() => PdfPreviewState();
 }
@@ -302,7 +307,6 @@ class PdfPreviewState extends State<PdfPreview> {
         initialPageFormat: previewData.pageFormat,
         onComputeActualPageFormat: computeActualPageFormat,
       );
-      setState(() {});
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -406,6 +410,7 @@ class PdfPreviewState extends State<PdfPreview> {
                 shouldRepaint: widget.shouldRepaint,
                 pagesBuilder: widget._pagesBuilder,
                 dpi: widget.dpi,
+                enableScrollToPage: widget.enableScrollToPage,
               );
             }),
           ),

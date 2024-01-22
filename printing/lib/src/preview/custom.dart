@@ -50,6 +50,7 @@ class PdfPreviewCustom extends StatefulWidget {
     this.scrollPhysics,
     this.shrinkWrap = false,
     this.pagesBuilder,
+    this.enableScrollToPage = false,
   }) : super(key: key);
 
   /// Pdf paper page format
@@ -102,6 +103,9 @@ class PdfPreviewCustom extends StatefulWidget {
   /// their own pages.
   final CustomPdfPagesBuilder? pagesBuilder;
 
+  /// Whether scroll to page functionality enabled.
+  final bool enableScrollToPage;
+
   @override
   PdfPreviewCustomState createState() => PdfPreviewCustomState();
 }
@@ -110,7 +114,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     with PdfPreviewRaster {
   final listView = GlobalKey();
 
-  final _pageGlobalKeys = List.generate(100, (index) => GlobalKey());
+  late List<GlobalKey> _pageGlobalKeys;
 
   bool infoLoaded = false;
 
@@ -217,32 +221,62 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
           );
     }
 
+    _pageGlobalKeys = List.generate(pages.length, (index) => GlobalKey());
+
     if (widget.pagesBuilder != null) {
       return widget.pagesBuilder!(context, pages);
     }
 
-    return ListView.builder(
-      controller: scrollController,
-      shrinkWrap: widget.shrinkWrap,
-      physics: widget.scrollPhysics,
-      padding: widget.padding,
-      itemCount: pages.length,
-      itemBuilder: (BuildContext context, int index) => GestureDetector(
-        onDoubleTap: () {
-          setState(() {
-            updatePosition = scrollController.position.pixels;
-            preview = index;
-            transformationController.value.setIdentity();
-          });
-        },
-        child: PdfPreviewPage(
-          key: getPageKey(index),
-          pageData: pages[index],
-          pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
-          pageMargin: widget.previewPageMargin,
-        ),
-      ),
-    );
+    return widget.enableScrollToPage
+        ? Scrollbar(
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              physics: widget.scrollPhysics,
+              child: Column(
+                children: List.generate(
+                  pages.length,
+                  (index) => GestureDetector(
+                    onDoubleTap: () {
+                      setState(() {
+                        updatePosition = scrollController.position.pixels;
+                        preview = index;
+                        transformationController.value.setIdentity();
+                      });
+                    },
+                    child: PdfPreviewPage(
+                      key: getPageKey(index),
+                      pageData: pages[index],
+                      pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
+                      pageMargin: widget.previewPageMargin,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          )
+        : ListView.builder(
+            controller: scrollController,
+            shrinkWrap: widget.shrinkWrap,
+            physics: widget.scrollPhysics,
+            padding: widget.padding,
+            itemCount: pages.length,
+            itemBuilder: (BuildContext context, int index) => GestureDetector(
+              onDoubleTap: () {
+                setState(() {
+                  updatePosition = scrollController.position.pixels;
+                  preview = index;
+                  transformationController.value.setIdentity();
+                });
+              },
+              child: PdfPreviewPage(
+                key: getPageKey(index),
+                pageData: pages[index],
+                pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
+                pageMargin: widget.previewPageMargin,
+              ),
+            ),
+          );
   }
 
   Widget _zoomPreview() {
