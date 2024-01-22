@@ -217,12 +217,10 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
           );
     }
 
-    if (_pageGlobalKeys.isEmpty) {
-      _pageGlobalKeys = List.generate(
-        pages.length,
-        (index) => GlobalKey(debugLabel: 'pdf-page-$index'),
-      );
-    }
+    _pageGlobalKeys = List.generate(
+      pages.length,
+      (index) => GlobalKey(debugLabel: 'pdf-page-$index'),
+    );
 
     if (widget.pagesBuilder != null) {
       return widget.pagesBuilder!(context, pages);
