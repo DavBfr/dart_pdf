@@ -6,6 +6,7 @@
 - Implement PdfActionBarTheme for actions bar and add method scrollToPage [Aleksei]
 - Update cursors in zoom mode for web [Aleksei]
 - Output image sized to cropBox instead of mediaBox (iOS) [garrettApproachableGeek]
+- Replace Activity with Context for Service Compatibility (Android) [Heinrich]
 
 ## 5.11.1
 

@@ -16,9 +16,11 @@
 
 package net.nfet.flutter.printing;
 
-import android.app.Activity;
+import android.content.Context;
 
 import androidx.annotation.NonNull;
+
+import java.lang.ref.WeakReference;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -30,20 +32,21 @@ import io.flutter.plugin.common.MethodChannel;
  * PrintingPlugin
  */
 public class PrintingPlugin implements FlutterPlugin, ActivityAware {
-    private Activity activity;
+    private Context context;
     private MethodChannel channel;
     private PrintingHandler handler;
 
     @Override
     public void onAttachedToEngine(FlutterPluginBinding binding) {
+        context = binding.getApplicationContext();
         onAttachedToEngine(binding.getBinaryMessenger());
     }
 
     private void onAttachedToEngine(BinaryMessenger messenger) {
         channel = new MethodChannel(messenger, "net.nfet.printing");
 
-        if (activity != null) {
-            handler = new PrintingHandler(activity, channel);
+        if (context != null) {
+            handler = new PrintingHandler(context, channel);
             channel.setMethodCallHandler(handler);
         }
     }
@@ -57,14 +60,16 @@ public class PrintingPlugin implements FlutterPlugin, ActivityAware {
 
     @Override
     public void onAttachedToActivity(ActivityPluginBinding binding) {
-        onAttachedToActivity(binding.getActivity());
+        if (context != null) {
+            context = null;
+        }
+        context = binding.getActivity();
+        onAttachedToActivity(context);
     }
 
-    private void onAttachedToActivity(Activity _activity) {
-        activity = _activity;
-
-        if (activity != null && channel != null) {
-            handler = new PrintingHandler(activity, channel);
+    private void onAttachedToActivity(Context context) {
+        if (context != null && channel != null) {
+            handler = new PrintingHandler(context, channel);
             channel.setMethodCallHandler(handler);
         }
     }
@@ -76,13 +81,15 @@ public class PrintingPlugin implements FlutterPlugin, ActivityAware {
 
     @Override
     public void onReattachedToActivityForConfigChanges(ActivityPluginBinding binding) {
-        onAttachedToActivity(binding.getActivity());
+        context = null;
+        context = binding.getActivity();
+        onAttachedToActivity(context);
     }
 
     @Override
     public void onDetachedFromActivity() {
         channel.setMethodCallHandler(null);
-        activity = null;
+        context = null;
         handler = null;
     }
 }
