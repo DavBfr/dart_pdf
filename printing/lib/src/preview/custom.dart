@@ -110,7 +110,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     with PdfPreviewRaster {
   final listView = GlobalKey();
 
-  late List<GlobalKey> _pageGlobalKeys;
+  List<GlobalKey> _pageGlobalKeys = <GlobalKey>[];
 
   bool infoLoaded = false;
 
@@ -174,6 +174,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     super.didChangeDependencies();
   }
 
+  /// Ensures that page with [index] is become visible.
   Future<void> scrollToPage(
     int index, {
     Duration duration = const Duration(milliseconds: 300),
@@ -187,6 +188,9 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     return Scrollable.ensureVisible(pageContext!,
         duration: duration, curve: curve, alignmentPolicy: alignmentPolicy);
   }
+
+  /// Returns the global key for page with [index].
+  Key getPageKey(int index) => _pageGlobalKeys[index];
 
   Widget _showError(Object error) {
     if (widget.onError != null) {
@@ -213,10 +217,12 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
           );
     }
 
-    _pageGlobalKeys = List.generate(
-      pages.length,
-      (index) => GlobalKey(debugLabel: 'pdf-page-$index'),
-    );
+    if (_pageGlobalKeys.isEmpty) {
+      _pageGlobalKeys = List.generate(
+        pages.length,
+        (index) => GlobalKey(debugLabel: 'pdf-page-$index'),
+      );
+    }
 
     if (widget.pagesBuilder != null) {
       return widget.pagesBuilder!(context, pages);
@@ -237,7 +243,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
           });
         },
         child: PdfPreviewPage(
-          key: _pageGlobalKeys[index],
+          key: getPageKey(index),
           pageData: pages[index],
           pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
           pageMargin: widget.previewPageMargin,
