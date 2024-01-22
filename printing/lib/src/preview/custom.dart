@@ -114,7 +114,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     with PdfPreviewRaster {
   final listView = GlobalKey();
 
-  late List<GlobalKey> _pageGlobalKeys;
+  List<GlobalKey> _pageGlobalKeys = <GlobalKey>[];
 
   bool infoLoaded = false;
 
@@ -221,11 +221,29 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
           );
     }
 
-    _pageGlobalKeys = List.generate(pages.length, (index) => GlobalKey());
+    if (widget.enableScrollToPage) {
+      _pageGlobalKeys = List.generate(pages.length, (_) => GlobalKey());
+    }
 
     if (widget.pagesBuilder != null) {
       return widget.pagesBuilder!(context, pages);
     }
+
+    Widget pageWidget(int index, {Key? key}) => GestureDetector(
+          onDoubleTap: () {
+            setState(() {
+              updatePosition = scrollController.position.pixels;
+              preview = index;
+              transformationController.value.setIdentity();
+            });
+          },
+          child: PdfPreviewPage(
+            key: key,
+            pageData: pages[index],
+            pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
+            pageMargin: widget.previewPageMargin,
+          ),
+        );
 
     return widget.enableScrollToPage
         ? Scrollbar(
@@ -233,24 +251,11 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
             child: SingleChildScrollView(
               controller: scrollController,
               physics: widget.scrollPhysics,
+              padding: widget.padding,
               child: Column(
                 children: List.generate(
                   pages.length,
-                  (index) => GestureDetector(
-                    onDoubleTap: () {
-                      setState(() {
-                        updatePosition = scrollController.position.pixels;
-                        preview = index;
-                        transformationController.value.setIdentity();
-                      });
-                    },
-                    child: PdfPreviewPage(
-                      key: getPageKey(index),
-                      pageData: pages[index],
-                      pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
-                      pageMargin: widget.previewPageMargin,
-                    ),
-                  ),
+                  (index) => pageWidget(index, key: getPageKey(index)),
                 ),
               ),
             ),
@@ -261,21 +266,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
             physics: widget.scrollPhysics,
             padding: widget.padding,
             itemCount: pages.length,
-            itemBuilder: (BuildContext context, int index) => GestureDetector(
-              onDoubleTap: () {
-                setState(() {
-                  updatePosition = scrollController.position.pixels;
-                  preview = index;
-                  transformationController.value.setIdentity();
-                });
-              },
-              child: PdfPreviewPage(
-                key: getPageKey(index),
-                pageData: pages[index],
-                pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
-                pageMargin: widget.previewPageMargin,
-              ),
-            ),
+            itemBuilder: (BuildContext context, int index) => pageWidget(index),
           );
   }
 
