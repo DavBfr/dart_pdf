@@ -94,7 +94,7 @@ public class PrintingJob extends PrintDocumentAdapter {
 
     @Override
     public void onWrite(PageRange[] pageRanges, ParcelFileDescriptor parcelFileDescriptor,
-            CancellationSignal cancellationSignal, WriteResultCallback writeResultCallback) {
+                        CancellationSignal cancellationSignal, WriteResultCallback writeResultCallback) {
         OutputStream output = null;
         try {
             output = new FileOutputStream(parcelFileDescriptor.getFileDescriptor());
@@ -115,7 +115,7 @@ public class PrintingJob extends PrintDocumentAdapter {
 
     @Override
     public void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
-            CancellationSignal cancellationSignal, LayoutResultCallback callback, Bundle extras) {
+                         CancellationSignal cancellationSignal, LayoutResultCallback callback, Bundle extras) {
         // Respond to cancellation request
         if (cancellationSignal.isCanceled()) {
             callback.onLayoutCancelled();
@@ -149,7 +149,7 @@ public class PrintingJob extends PrintDocumentAdapter {
                             @Override
                             public void run() {
                                 int state = printJob == null ? PrintJobInfo.STATE_FAILED
-                                                             : printJob.getInfo().getState();
+                                        : printJob.getInfo().getState();
 
                                 if (state == PrintJobInfo.STATE_COMPLETED) {
                                     printing.onCompleted(PrintingJob.this, true, null);
@@ -216,7 +216,7 @@ public class PrintingJob extends PrintDocumentAdapter {
 
         if (mediaSize == null) {
             mediaSize = isPortrait ? PrintAttributes.MediaSize.UNKNOWN_PORTRAIT
-                                   : PrintAttributes.MediaSize.UNKNOWN_LANDSCAPE;
+                    : PrintAttributes.MediaSize.UNKNOWN_LANDSCAPE;
         }
 
         attrBuilder.setMediaSize(mediaSize);
@@ -326,7 +326,7 @@ public class PrintingJob extends PrintDocumentAdapter {
     }
 
     static void sharePdf(final Context context, final byte[] data, final String name,
-            final String subject, final String body, final ArrayList<String> emails) {
+                         final String subject, final String body, final ArrayList<String> emails) {
         assert name != null;
 
         try {
@@ -374,7 +374,7 @@ public class PrintingJob extends PrintDocumentAdapter {
     }
 
     void convertHtml(final String data, final PrintAttributes.MediaSize size,
-            final PrintAttributes.Margins margins, final String baseUrl) {
+                     final PrintAttributes.Margins margins, final String baseUrl) {
         Configuration configuration = context.getResources().getConfiguration();
         configuration.fontScale = (float) 1;
         Context webContext = context.createConfigurationContext(configuration);
@@ -425,8 +425,8 @@ public class PrintingJob extends PrintDocumentAdapter {
         documentData = data;
 
         PrintDocumentInfo info = new PrintDocumentInfo.Builder(jobName)
-                                         .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
-                                         .build();
+                .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
+                .build();
 
         // Content layout reflow is complete
         callback.onLayoutFinished(info, true);
