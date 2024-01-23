@@ -32,21 +32,21 @@ import io.flutter.plugin.common.MethodChannel;
  * PrintingPlugin
  */
 public class PrintingPlugin implements FlutterPlugin, ActivityAware {
-    private WeakReference<Context> contextWeakReference;
+    private Context context;
     private MethodChannel channel;
     private PrintingHandler handler;
 
     @Override
     public void onAttachedToEngine(FlutterPluginBinding binding) {
-        contextWeakReference = new WeakReference<>(binding.getApplicationContext());
+        context = binding.getApplicationContext();
         onAttachedToEngine(binding.getBinaryMessenger());
     }
 
     private void onAttachedToEngine(BinaryMessenger messenger) {
         channel = new MethodChannel(messenger, "net.nfet.printing");
 
-        if (contextWeakReference != null) {
-            handler = new PrintingHandler(contextWeakReference, channel);
+        if (context != null) {
+            handler = new PrintingHandler(context, channel);
             channel.setMethodCallHandler(handler);
         }
     }
@@ -60,16 +60,16 @@ public class PrintingPlugin implements FlutterPlugin, ActivityAware {
 
     @Override
     public void onAttachedToActivity(ActivityPluginBinding binding) {
-        contextWeakReference.clear();
-        contextWeakReference = new WeakReference<>(binding.getActivity().getApplicationContext());
-        onAttachedToActivity(contextWeakReference);
+        if(context != null) {
+            context = null;
+        }
+        context = binding.getActivity();
+        onAttachedToActivity(context);
     }
 
-    private void onAttachedToActivity(WeakReference<Context>  weakReference) {
-        contextWeakReference = weakReference;
-
-        if (contextWeakReference != null && channel != null) {
-            handler = new PrintingHandler(contextWeakReference, channel);
+    private void onAttachedToActivity(Context context) {
+        if (context != null && channel != null) {
+            handler = new PrintingHandler(context, channel);
             channel.setMethodCallHandler(handler);
         }
     }
@@ -81,14 +81,15 @@ public class PrintingPlugin implements FlutterPlugin, ActivityAware {
 
     @Override
     public void onReattachedToActivityForConfigChanges(ActivityPluginBinding binding) {
-        contextWeakReference = new WeakReference<>(binding.getActivity().getApplicationContext());
-        onAttachedToActivity(contextWeakReference);
+        context = null;
+        context = binding.getActivity();
+        onAttachedToActivity(context);
     }
 
     @Override
     public void onDetachedFromActivity() {
         channel.setMethodCallHandler(null);
-        contextWeakReference.clear();
+        context = null;
         handler = null;
     }
 }
