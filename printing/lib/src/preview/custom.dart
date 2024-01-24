@@ -16,6 +16,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 
@@ -51,6 +52,7 @@ class PdfPreviewCustom extends StatefulWidget {
     this.shrinkWrap = false,
     this.pagesBuilder,
     this.enableScrollToPage = false,
+    this.onZoomChanged,
   }) : super(key: key);
 
   /// Pdf paper page format
@@ -106,6 +108,9 @@ class PdfPreviewCustom extends StatefulWidget {
   /// Whether scroll to page functionality enabled.
   final bool enableScrollToPage;
 
+  /// The zoom mode has changed
+  final ValueChanged<bool>? onZoomChanged;
+
   @override
   PdfPreviewCustomState createState() => PdfPreviewCustomState();
 }
@@ -130,6 +135,8 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
 
   Timer? previewUpdate;
 
+  MouseCursor _mouseCursor = MouseCursor.defer;
+
   static const _errorMessage = 'Unable to display the document';
 
   @override
@@ -137,6 +144,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
 
   @override
   void dispose() {
+    transformationController.dispose();
     previewUpdate?.cancel();
     super.dispose();
   }
@@ -155,6 +163,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
       preview = null;
       updatePosition = null;
       raster();
+      _zoomChanged();
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -235,7 +244,11 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
               updatePosition = scrollController.position.pixels;
               preview = index;
               transformationController.value.setIdentity();
+              if (kIsWeb) {
+                _mouseCursor = SystemMouseCursors.grab;
+              }
             });
+            _zoomChanged();
           },
           child: PdfPreviewPage(
             key: key,
@@ -271,11 +284,22 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
   }
 
   Widget _zoomPreview() {
-    return GestureDetector(
+    final zoomPreview = GestureDetector(
+      onTap: () {
+        if (kIsWeb) {
+          setState(() {
+            _mouseCursor = SystemMouseCursors.grabbing;
+          });
+        }
+      },
       onDoubleTap: () {
         setState(() {
           preview = null;
+          if (kIsWeb) {
+            _mouseCursor = MouseCursor.defer;
+          }
         });
+        _zoomChanged();
       },
       child: InteractiveViewer(
         transformationController: transformationController,
@@ -289,7 +313,12 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
         ),
       ),
     );
+    return kIsWeb
+        ? MouseRegion(cursor: _mouseCursor, child: zoomPreview)
+        : zoomPreview;
   }
+
+  void _zoomChanged() => widget.onZoomChanged?.call(preview != null);
 
   @override
   Widget build(BuildContext context) {

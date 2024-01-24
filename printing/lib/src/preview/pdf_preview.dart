@@ -65,6 +65,7 @@ class PdfPreview extends StatefulWidget {
     this.dpi,
     this.actionBarTheme = const PdfActionBarTheme(),
     this.enableScrollToPage = false,
+    this.onZoomChanged,
   })  : _pagesBuilder = null,
         super(key: key);
 
@@ -125,6 +126,7 @@ class PdfPreview extends StatefulWidget {
     this.actionBarTheme = const PdfActionBarTheme(),
     required CustomPdfPagesBuilder pagesBuilder,
     this.enableScrollToPage = false,
+    this.onZoomChanged,
   })  : _pagesBuilder = pagesBuilder,
         super(key: key);
 
@@ -237,6 +239,9 @@ class PdfPreview extends StatefulWidget {
 
   /// Whether scroll to page functionality enabled.
   final bool enableScrollToPage;
+
+  /// The zoom mode has changed
+  final ValueChanged<bool>? onZoomChanged;
 
   @override
   PdfPreviewState createState() => PdfPreviewState();
@@ -411,6 +416,7 @@ class PdfPreviewState extends State<PdfPreview> {
                 pagesBuilder: widget._pagesBuilder,
                 dpi: widget.dpi,
                 enableScrollToPage: widget.enableScrollToPage,
+                onZoomChanged: widget.onZoomChanged,
               );
             }),
           ),
