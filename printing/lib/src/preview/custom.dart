@@ -285,13 +285,20 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
 
   Widget _zoomPreview() {
     final zoomPreview = GestureDetector(
-      onTap: () {
-        if (kIsWeb) {
-          setState(() {
-            _mouseCursor = SystemMouseCursors.grabbing;
-          });
-        }
-      },
+      onTapDown: kIsWeb
+          ? (_) {
+              setState(() {
+                _mouseCursor = SystemMouseCursors.grabbing;
+              });
+            }
+          : null,
+      onTapUp: kIsWeb
+          ? (_) {
+              setState(() {
+                _mouseCursor = SystemMouseCursors.grab;
+              });
+            }
+          : null,
       onDoubleTap: () {
         setState(() {
           preview = null;
