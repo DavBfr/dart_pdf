@@ -245,7 +245,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
               preview = index;
               transformationController.value.setIdentity();
               if (kIsWeb) {
-                _mouseCursor = SystemMouseCursors.grab;
+                _updateCursor(SystemMouseCursors.grab);
               }
             });
             _zoomChanged();
@@ -285,32 +285,24 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
 
   Widget _zoomPreview() {
     final zoomPreview = GestureDetector(
-      onTapDown: kIsWeb
-          ? (_) {
-              setState(() {
-                _mouseCursor = SystemMouseCursors.grabbing;
-              });
-            }
-          : null,
-      onTapUp: kIsWeb
-          ? (_) {
-              setState(() {
-                _mouseCursor = SystemMouseCursors.grab;
-              });
-            }
-          : null,
       onDoubleTap: () {
         setState(() {
           preview = null;
           if (kIsWeb) {
-            _mouseCursor = MouseCursor.defer;
+            _updateCursor(MouseCursor.defer);
           }
         });
         _zoomChanged();
       },
+      onLongPressCancel:
+          kIsWeb ? () => _updateCursor(SystemMouseCursors.grab) : null,
+      onLongPressDown:
+          kIsWeb ? (_) => _updateCursor(SystemMouseCursors.grabbing) : null,
       child: InteractiveViewer(
         transformationController: transformationController,
         maxScale: 5,
+        onInteractionEnd:
+            kIsWeb ? (_) => _updateCursor(SystemMouseCursors.grab) : null,
         child: Center(
           child: PdfPreviewPage(
             pageData: pages[preview!],
@@ -321,11 +313,22 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
       ),
     );
     return kIsWeb
-        ? MouseRegion(cursor: _mouseCursor, child: zoomPreview)
+        ? MouseRegion(
+            cursor: _mouseCursor,
+            child: zoomPreview,
+          )
         : zoomPreview;
   }
 
   void _zoomChanged() => widget.onZoomChanged?.call(preview != null);
+
+  void _updateCursor(MouseCursor mouseCursor) {
+    if (mouseCursor != _mouseCursor) {
+      setState(() {
+        _mouseCursor = mouseCursor;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
