@@ -68,7 +68,7 @@ class TextDecoration {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other is! TextDecoration) {
       return false;
     }
