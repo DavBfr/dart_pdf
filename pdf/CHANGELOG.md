@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.10.8
+
+- Add Flutter's Logical Pixel constant
+
 ## 3.10.7
 
 - Fix empty lines text gap
