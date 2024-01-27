@@ -244,9 +244,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
               updatePosition = scrollController.position.pixels;
               preview = index;
               transformationController.value.setIdentity();
-              if (kIsWeb) {
-                _updateCursor(SystemMouseCursors.grab);
-              }
+              _updateCursor(SystemMouseCursors.grab);
             });
             _zoomChanged();
           },
@@ -288,9 +286,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
       onDoubleTap: () {
         setState(() {
           preview = null;
-          if (kIsWeb) {
-            _updateCursor(MouseCursor.defer);
-          }
+          _updateCursor(MouseCursor.defer);
         });
         _zoomChanged();
       },
@@ -312,12 +308,10 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
         ),
       ),
     );
-    return kIsWeb
-        ? MouseRegion(
-            cursor: _mouseCursor,
-            child: zoomPreview,
-          )
-        : zoomPreview;
+    return MouseRegion(
+      cursor: _mouseCursor,
+      child: zoomPreview,
+    );
   }
 
   void _zoomChanged() => widget.onZoomChanged?.call(preview != null);
