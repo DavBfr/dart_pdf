@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.1.2
+
+- Refactor html imports
+
 ## 5.11.1
 
 - Use pdfDpi on CPP lib
