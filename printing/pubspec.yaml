@@ -44,8 +44,8 @@ dev_dependencies:
 dependency_overrides:
   pdf:
     path: ../pdf
-  pdf_widget_wrapper:
-    path: ../widget_wrapper
+#  pdf_widget_wrapper:
+#    path: ../widget_wrapper
 
 flutter:
   plugin:
