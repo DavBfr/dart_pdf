@@ -8,14 +8,14 @@ version: 1.0.2
 
 environment:
   sdk: ">=2.18.0 <4.0.0"
-  flutter: ">=3.18.0-1.0.pre.23<3.19.0"
+  flutter: ">=3.19.0-9.0.pre.202"
 
 dependencies:
   flutter:
     sdk: flutter
   pdf: ^3.10.0
 
-dependency_overrides:
+_dependency_overrides:
   pdf:
     path: ../pdf
 
