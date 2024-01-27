@@ -1,8 +1,9 @@
 # Changelog
 
-## 5.11.2
+## 5.12.0
 
 - Refactor html imports
+- Implement PdfActionBarTheme for actions bar and add method scrollToPage [Aleksei]
 
 ## 5.11.1
 

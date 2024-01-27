@@ -50,6 +50,7 @@ class PdfPreviewCustom extends StatefulWidget {
     this.scrollPhysics,
     this.shrinkWrap = false,
     this.pagesBuilder,
+    this.enableScrollToPage = false,
   }) : super(key: key);
 
   /// Pdf paper page format
@@ -102,6 +103,9 @@ class PdfPreviewCustom extends StatefulWidget {
   /// their own pages.
   final CustomPdfPagesBuilder? pagesBuilder;
 
+  /// Whether scroll to page functionality enabled.
+  final bool enableScrollToPage;
+
   @override
   PdfPreviewCustomState createState() => PdfPreviewCustomState();
 }
@@ -109,6 +113,8 @@ class PdfPreviewCustom extends StatefulWidget {
 class PdfPreviewCustomState extends State<PdfPreviewCustom>
     with PdfPreviewRaster {
   final listView = GlobalKey();
+
+  List<GlobalKey> _pageGlobalKeys = <GlobalKey>[];
 
   bool infoLoaded = false;
 
@@ -172,6 +178,24 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     super.didChangeDependencies();
   }
 
+  /// Ensures that page with [index] is become visible.
+  Future<void> scrollToPage(
+    int index, {
+    Duration duration = const Duration(milliseconds: 300),
+    Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy =
+        ScrollPositionAlignmentPolicy.explicit,
+  }) {
+    assert(index >= 0, 'Index of page cannot be negative');
+    final pageContext = _pageGlobalKeys[index].currentContext;
+    assert(pageContext != null, 'Context of GlobalKey cannot be null');
+    return Scrollable.ensureVisible(pageContext!,
+        duration: duration, curve: curve, alignmentPolicy: alignmentPolicy);
+  }
+
+  /// Returns the global key for page with [index].
+  Key getPageKey(int index) => _pageGlobalKeys[index];
+
   Widget _showError(Object error) {
     if (widget.onError != null) {
       return widget.onError!(context, error);
@@ -197,30 +221,53 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
           );
     }
 
+    if (widget.enableScrollToPage) {
+      _pageGlobalKeys = List.generate(pages.length, (_) => GlobalKey());
+    }
+
     if (widget.pagesBuilder != null) {
       return widget.pagesBuilder!(context, pages);
     }
-    return ListView.builder(
-      controller: scrollController,
-      shrinkWrap: widget.shrinkWrap,
-      physics: widget.scrollPhysics,
-      padding: widget.padding,
-      itemCount: pages.length,
-      itemBuilder: (BuildContext context, int index) => GestureDetector(
-        onDoubleTap: () {
-          setState(() {
-            updatePosition = scrollController.position.pixels;
-            preview = index;
-            transformationController.value.setIdentity();
-          });
-        },
-        child: PdfPreviewPage(
-          pageData: pages[index],
-          pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
-          pageMargin: widget.previewPageMargin,
-        ),
-      ),
-    );
+
+    Widget pageWidget(int index, {Key? key}) => GestureDetector(
+          onDoubleTap: () {
+            setState(() {
+              updatePosition = scrollController.position.pixels;
+              preview = index;
+              transformationController.value.setIdentity();
+            });
+          },
+          child: PdfPreviewPage(
+            key: key,
+            pageData: pages[index],
+            pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
+            pageMargin: widget.previewPageMargin,
+          ),
+        );
+
+    return widget.enableScrollToPage
+        ? Scrollbar(
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              physics: widget.scrollPhysics,
+              padding: widget.padding,
+              child: Column(
+                children: List.generate(
+                  pages.length,
+                  (index) => pageWidget(index, key: getPageKey(index)),
+                ),
+              ),
+            ),
+          )
+        : ListView.builder(
+            controller: scrollController,
+            shrinkWrap: widget.shrinkWrap,
+            physics: widget.scrollPhysics,
+            padding: widget.padding,
+            itemCount: pages.length,
+            itemBuilder: (BuildContext context, int index) => pageWidget(index),
+          );
   }
 
   Widget _zoomPreview() {
