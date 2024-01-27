@@ -4,6 +4,7 @@
 
 - Refactor html imports
 - Implement PdfActionBarTheme for actions bar and add method scrollToPage [Aleksei]
+- Update cursors in zoom mode for web [Aleksei]
 
 ## 5.11.1
 
