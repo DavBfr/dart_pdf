@@ -3,6 +3,7 @@
 ## 3.10.8
 
 - Add Flutter's Logical Pixel constant
+- Add support for existing reference objects
 
 ## 3.10.7
 
