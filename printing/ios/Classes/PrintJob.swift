@@ -350,8 +350,11 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                 guard let page = document.page(at: pageNum + 1) else { continue }
                 let angle = CGFloat(page.rotationAngle) * CGFloat.pi / -180
                 let rect = page.getBoxRect(.mediaBox)
-                let width = Int(abs((cos(angle) * rect.width + sin(angle) * rect.height) * scale))
-                let height = Int(abs((cos(angle) * rect.height + sin(angle) * rect.width) * scale))
+                let rectCrop = page.getBoxRect(.cropBox)
+                let diffHeight = rectCrop.height - rect.height
+                let diffWidth = rectCrop.width - rect.width
+                let width = Int(abs((cos(angle) * rectCrop.width + sin(angle) * rectCrop.height) * scale))
+                let height = Int(abs((cos(angle) * rectCrop.height + sin(angle) * rectCrop.width) * scale))
                 let stride = width * 4
                 var data = Data(repeating: 0, count: stride * height)
 
@@ -371,7 +374,8 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                         context!.translateBy(x: CGFloat(width) / 2, y: CGFloat(height) / 2)
                         context!.scaleBy(x: scale, y: scale)
                         context!.rotate(by: angle)
-                        context!.translateBy(x: -rect.width / 2, y: -rect.height / 2)
+                        context!.translateBy(x: -rectCrop.width / 2, y: -rectCrop.height / 2)
+                        context!.translateBy(x: diffWidth, y: diffHeight)
                         context!.drawPDFPage(page)
                     }
                 }

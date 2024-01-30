@@ -155,7 +155,10 @@ class PdfCatalog extends PdfObject<PdfDict> {
           (acroForm['/SigFlags'] as PdfNum? ?? const PdfNum(0));
       final fields = (acroForm['/Fields'] ??= PdfArray()) as PdfArray;
       for (final w in widgets) {
-        fields.add(w.ref());
+        final ref = w.ref();
+        if (!fields.values.contains(ref)) {
+          fields.add(ref);
+        }
       }
     }
 

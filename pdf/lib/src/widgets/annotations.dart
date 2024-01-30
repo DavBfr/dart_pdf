@@ -19,6 +19,7 @@ import 'dart:math';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
+import '../pdf/format/indirect.dart';
 import 'geometry.dart';
 import 'shape.dart';
 import 'text_style.dart';
@@ -32,6 +33,7 @@ class Anchor extends SingleChildWidget {
     this.description,
     this.zoom,
     this.setX = false,
+    this.replaces,
   }) : super(child: child);
 
   final String name;
@@ -41,6 +43,8 @@ class Anchor extends SingleChildWidget {
   final double? zoom;
 
   final bool setX;
+
+  final PdfIndirect? replaces;
 
   @override
   void paint(Context context) {
@@ -60,7 +64,12 @@ class Anchor extends SingleChildWidget {
     if (description != null) {
       final rb = mat.transform3(Vector3(box!.right, box!.top, 0));
       final iBox = PdfRect.fromLTRB(lt.x, lt.y, rb.x, rb.y);
-      PdfAnnot(context.page, PdfAnnotText(rect: iBox, content: description!));
+      PdfAnnot(
+        context.page,
+        PdfAnnotText(rect: iBox, content: description!),
+        objser: replaces?.ser,
+        objgen: replaces?.gen ?? 0,
+      );
     }
   }
 }
@@ -70,9 +79,11 @@ abstract class AnnotationBuilder {
 }
 
 class AnnotationLink extends AnnotationBuilder {
-  AnnotationLink(this.destination);
+  AnnotationLink(this.destination, {this.replaces});
 
   final String destination;
+
+  final PdfIndirect? replaces;
 
   @override
   PdfAnnot build(Context context, PdfRect? box) {
@@ -82,6 +93,8 @@ class AnnotationLink extends AnnotationBuilder {
         rect: context.localToGlobal(box!),
         dest: destination,
       ),
+      objser: replaces?.ser,
+      objgen: replaces?.gen ?? 0,
     );
   }
 }
@@ -92,6 +105,7 @@ class AnnotationUrl extends AnnotationBuilder {
     this.date,
     this.subject,
     this.author,
+    this.replaces,
   });
 
   final String destination;
@@ -101,6 +115,8 @@ class AnnotationUrl extends AnnotationBuilder {
   final String? author;
 
   final String? subject;
+
+  final PdfIndirect? replaces;
 
   @override
   PdfAnnot build(Context context, PdfRect? box) {
@@ -113,6 +129,8 @@ class AnnotationUrl extends AnnotationBuilder {
         author: author,
         subject: subject,
       ),
+      objser: replaces?.ser,
+      objgen: replaces?.gen ?? 0,
     );
   }
 }
@@ -126,6 +144,7 @@ class AnnotationSquare extends AnnotationBuilder {
     this.date,
     this.subject,
     this.content,
+    this.replaces,
   });
 
   final PdfColor? color;
@@ -141,6 +160,8 @@ class AnnotationSquare extends AnnotationBuilder {
   final String? subject;
 
   final String? content;
+
+  final PdfIndirect? replaces;
 
   @override
   PdfAnnot build(Context context, PdfRect? box) {
@@ -155,6 +176,8 @@ class AnnotationSquare extends AnnotationBuilder {
         author: author,
         subject: subject,
       ),
+      objser: replaces?.ser,
+      objgen: replaces?.gen ?? 0,
     );
   }
 }
@@ -168,6 +191,7 @@ class AnnotationCircle extends AnnotationBuilder {
     this.date,
     this.subject,
     this.content,
+    this.replaces,
   });
 
   final PdfColor? color;
@@ -184,6 +208,8 @@ class AnnotationCircle extends AnnotationBuilder {
 
   final String? content;
 
+  final PdfIndirect? replaces;
+
   @override
   PdfAnnot build(Context context, PdfRect? box) {
     return PdfAnnot(
@@ -197,6 +223,8 @@ class AnnotationCircle extends AnnotationBuilder {
         author: author,
         subject: subject,
       ),
+      objser: replaces?.ser,
+      objgen: replaces?.gen ?? 0,
     );
   }
 }
@@ -211,6 +239,7 @@ class AnnotationPolygon extends AnnotationBuilder {
     this.date,
     this.subject,
     this.content,
+    this.replaces,
   });
 
   final List<PdfPoint> points;
@@ -228,6 +257,8 @@ class AnnotationPolygon extends AnnotationBuilder {
   final String? subject;
 
   final String? content;
+
+  final PdfIndirect? replaces;
 
   @override
   PdfAnnot build(Context context, PdfRect? box) {
@@ -254,7 +285,12 @@ class AnnotationPolygon extends AnnotationBuilder {
       subject: subject,
     );
 
-    return PdfAnnot(context.page, pdfAnnotPolygon);
+    return PdfAnnot(
+      context.page,
+      pdfAnnotPolygon,
+      objser: replaces?.ser,
+      objgen: replaces?.gen ?? 0,
+    );
   }
 }
 
@@ -267,6 +303,7 @@ class AnnotationInk extends AnnotationBuilder {
     this.date,
     this.subject,
     this.content,
+    this.replaces,
   });
 
   final List<List<PdfPoint>> points;
@@ -282,6 +319,8 @@ class AnnotationInk extends AnnotationBuilder {
   final String? subject;
 
   final String? content;
+
+  final PdfIndirect? replaces;
 
   @override
   PdfAnnot build(Context context, PdfRect? box) {
@@ -313,7 +352,12 @@ class AnnotationInk extends AnnotationBuilder {
       content: content,
     );
 
-    return PdfAnnot(context.page, pdfAnnotInk);
+    return PdfAnnot(
+      context.page,
+      pdfAnnotInk,
+      objser: replaces?.ser,
+      objgen: replaces?.gen ?? 0,
+    );
   }
 }
 
@@ -335,6 +379,7 @@ class AnnotationTextField extends AnnotationBuilder {
     this.value,
     this.defaultValue,
     this.textStyle,
+    this.replaces,
   });
 
   final String? name;
@@ -369,6 +414,8 @@ class AnnotationTextField extends AnnotationBuilder {
 
   final String? subject;
 
+  final PdfIndirect? replaces;
+
   @override
   PdfAnnot build(Context context, PdfRect? box) {
     final _textStyle = Theme.of(context).defaultTextStyle.merge(textStyle);
@@ -396,6 +443,8 @@ class AnnotationTextField extends AnnotationBuilder {
         fontSize: _textStyle.fontSize!,
         textColor: _textStyle.color!,
       ),
+      objser: replaces?.ser,
+      objgen: replaces?.gen ?? 0,
     );
   }
 }

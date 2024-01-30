@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.10.8
+
+- Add Flutter's Logical Pixel constant
+- Add support for existing reference objects
+- Update barcode golden pdf
+- Add support for hyphenation [ilja]
+- Add an option to disable bidirectional support [Olzhas-Suleimen]
+- Fix operator== type in TextDecoration class
+
 ## 3.10.7
 
 - Fix empty lines text gap

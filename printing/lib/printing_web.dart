@@ -16,7 +16,6 @@
 
 import 'dart:async';
 import 'dart:html' as html;
-import 'dart:html';
 import 'dart:js' as js;
 import 'dart:js_util';
 import 'dart:typed_data';
@@ -87,12 +86,12 @@ class PrintingPlugin extends PrintingPlatform {
       }
       js.context['module'] = 0;
 
-      final script = ScriptElement()
+      final script = html.ScriptElement()
         ..type = 'text/javascript'
         ..async = true
         ..src = '$_pdfJsUrlBase/build/pdf.min.js';
-      assert(document.head != null);
-      document.head!.append(script);
+      assert(html.document.head != null);
+      html.document.head!.append(script);
       await script.onLoad.first;
 
       if (amd != null) {
@@ -344,10 +343,10 @@ class PrintingPlugin extends PrintingPlatform {
           final completer = Completer<void>();
           final blob = await canvas.toBlob();
           final data = BytesBuilder();
-          final r = FileReader();
+          final r = html.FileReader();
           r.readAsArrayBuffer(blob);
           r.onLoadEnd.listen(
-            (ProgressEvent e) {
+            (html.ProgressEvent e) {
               data.add(r.result as List<int>);
               completer.complete();
             },

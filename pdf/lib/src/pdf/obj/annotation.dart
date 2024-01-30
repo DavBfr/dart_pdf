@@ -104,8 +104,10 @@ class PdfChoiceField extends PdfAnnotWidget {
 }
 
 class PdfAnnot extends PdfObject<PdfDict> {
-  PdfAnnot(this.pdfPage, this.annot)
+  PdfAnnot(this.pdfPage, this.annot, {int? objser, int objgen = 0})
       : super(pdfPage.pdfDocument,
+            objser: objser,
+            objgen: objgen,
             params: PdfDict.values({
               '/Type': const PdfName('/Annot'),
             })) {

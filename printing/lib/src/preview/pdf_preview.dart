@@ -21,6 +21,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../callback.dart';
 import '../printing.dart';
 import '../printing_info.dart';
+import 'action_bar_theme.dart';
 import 'actions.dart';
 import 'controller.dart';
 import 'custom.dart';
@@ -62,6 +63,9 @@ class PdfPreview extends StatefulWidget {
     this.loadingWidget,
     this.onPageFormatChanged,
     this.dpi,
+    this.actionBarTheme = const PdfActionBarTheme(),
+    this.enableScrollToPage = false,
+    this.onZoomChanged,
   })  : _pagesBuilder = null,
         super(key: key);
 
@@ -119,7 +123,10 @@ class PdfPreview extends StatefulWidget {
     this.loadingWidget,
     this.onPageFormatChanged,
     this.dpi,
+    this.actionBarTheme = const PdfActionBarTheme(),
     required CustomPdfPagesBuilder pagesBuilder,
+    this.enableScrollToPage = false,
+    this.onZoomChanged,
   })  : _pagesBuilder = pagesBuilder,
         super(key: key);
 
@@ -223,9 +230,18 @@ class PdfPreview extends StatefulWidget {
   /// If not provided, this value is calculated.
   final double? dpi;
 
+  /// The style of actions bar.
+  final PdfActionBarTheme actionBarTheme;
+
   /// clients can pass this builder to render
   /// their own pages.
   final CustomPdfPagesBuilder? _pagesBuilder;
+
+  /// Whether scroll to page functionality enabled.
+  final bool enableScrollToPage;
+
+  /// The zoom mode has changed
+  final ValueChanged<bool>? onZoomChanged;
 
   @override
   PdfPreviewState createState() => PdfPreviewState();
@@ -296,7 +312,6 @@ class PdfPreviewState extends State<PdfPreview> {
         initialPageFormat: previewData.pageFormat,
         onComputeActualPageFormat: computeActualPageFormat,
       );
-      setState(() {});
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -400,22 +415,31 @@ class PdfPreviewState extends State<PdfPreview> {
                 shouldRepaint: widget.shouldRepaint,
                 pagesBuilder: widget._pagesBuilder,
                 dpi: widget.dpi,
+                enableScrollToPage: widget.enableScrollToPage,
+                onZoomChanged: widget.onZoomChanged,
               );
             }),
           ),
           if (actions.isNotEmpty)
             IconTheme.merge(
               data: IconThemeData(
-                color: iconColor,
+                color: widget.actionBarTheme.iconColor ?? iconColor,
               ),
               child: Material(
-                elevation: 4,
-                color: theme.primaryColor,
+                elevation: widget.actionBarTheme.elevation,
+                color:
+                    widget.actionBarTheme.backgroundColor ?? theme.primaryColor,
+                textStyle: widget.actionBarTheme.textStyle,
                 child: SizedBox(
                   width: double.infinity,
+                  height: widget.actionBarTheme.height,
                   child: SafeArea(
                     child: Wrap(
-                      alignment: WrapAlignment.spaceAround,
+                      spacing: widget.actionBarTheme.actionSpacing,
+                      alignment: widget.actionBarTheme.alignment,
+                      runAlignment: widget.actionBarTheme.runAlignment,
+                      crossAxisAlignment:
+                          widget.actionBarTheme.crossAxisAlignment,
                       children: actions,
                     ),
                   ),
