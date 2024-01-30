@@ -12,7 +12,7 @@ topics:
   - print
   - printing
   - report
-version: 3.10.7
+version: 3.10.8
 
 environment:
   sdk: ">=2.18.0 <4.0.0"

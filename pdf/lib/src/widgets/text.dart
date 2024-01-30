@@ -20,6 +20,7 @@ import 'package:meta/meta.dart';
 
 import '../../pdf.dart';
 import '../pdf/font/bidi_utils.dart' as bidi;
+import '../pdf/options.dart';
 import 'annotations.dart';
 import 'basic.dart';
 import 'document.dart';
@@ -658,7 +659,7 @@ class RichTextContext extends WidgetContext {
       '$runtimeType Offset: $startOffset -> $endOffset  Span: $spanStart -> $spanEnd';
 }
 
-typedef List<String> Hyphenation(String word);
+typedef Hyphenation = List<String> Function(String word);
 
 class RichText extends Widget with SpanningWidget {
   RichText({
@@ -928,7 +929,7 @@ class RichText extends Widget with SpanningWidget {
           final space =
               font.stringMetrics(' ') * (style.fontSize! * textScaleFactor);
 
-          final spanLines = (_textDirection == TextDirection.rtl
+          final spanLines = (useBidi && _textDirection == TextDirection.rtl
                   ? bidi.logicalToVisual(span.text!)
                   : span.text)!
               .split('\n');
@@ -951,25 +952,25 @@ class RichText extends Widget with SpanningWidget {
 
               if (_softWrap &&
                   offsetX + metrics.width > constraintWidth + 0.00001) {
-
                 if (hyphenation != null) {
-                  List<String> syllables = hyphenation!(word);
+                  final syllables = hyphenation!(word);
                   if (syllables.length > 1) {
-                    String fits = '';
-                    for (String syllable in syllables) {
-                      double calcWidth = ((font.stringMetrics(
-                          fits + syllable + '-',
-                          letterSpacing: style.letterSpacing! /
-                              (style.fontSize! * textScaleFactor)) *
-                          (style.fontSize! * textScaleFactor)).width);
-                      if (offsetX + calcWidth <= constraintWidth + 0.00001) {
-                        fits += syllable;
-                        continue;
+                    var fits = '';
+                    for (var syllable in syllables) {
+                      if (offsetX +
+                              ((font.stringMetrics('$fits$syllable-',
+                                          letterSpacing: style.letterSpacing! /
+                                              (style.fontSize! *
+                                                  textScaleFactor)) *
+                                      (style.fontSize! * textScaleFactor))
+                                  .width) >
+                          constraintWidth + 0.00001) {
+                        break;
                       }
-                      break;
+                      fits += syllable;
                     }
                     if (fits.isNotEmpty) {
-                      words[index] = fits + '-';
+                      words[index] = '$fits-';
                       words.insert(index + 1, word.substring(fits.length));
                       index--;
                       continue;
