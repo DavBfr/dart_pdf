@@ -37,6 +37,7 @@ export 'src/pdf/obj/outline.dart';
 export 'src/pdf/obj/page.dart';
 export 'src/pdf/obj/page_label.dart';
 export 'src/pdf/obj/pattern.dart';
+export 'src/pdf/obj/pdf_a_3b.dart';
 export 'src/pdf/obj/shading.dart';
 export 'src/pdf/obj/signature.dart';
 export 'src/pdf/obj/smask.dart';
