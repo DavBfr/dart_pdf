@@ -89,32 +89,6 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
                 body: args["body"] as? String
             )
             result(NSNumber(value: 1))
-        } else if call.method == "convertHtml" {
-            let width = CGFloat((args["width"] as? NSNumber)?.floatValue ?? 0.0)
-            let height = CGFloat((args["height"] as? NSNumber)?.floatValue ?? 0.0)
-            let marginLeft = CGFloat((args["marginLeft"] as? NSNumber)?.floatValue ?? 0.0)
-            let marginTop = CGFloat((args["marginTop"] as? NSNumber)?.floatValue ?? 0.0)
-            let marginRight = CGFloat((args["marginRight"] as? NSNumber)?.floatValue ?? 0.0)
-            let marginBottom = CGFloat((args["marginBottom"] as? NSNumber)?.floatValue ?? 0.0)
-            let printJob = PrintJob(printing: self, index: args["job"] as! Int)
-
-            printJob.convertHtml(
-                args["html"] as! String,
-                withPageSize: CGRect(
-                    x: 0.0,
-                    y: 0.0,
-                    width: width,
-                    height: height
-                ),
-                andMargin: CGRect(
-                    x: marginLeft,
-                    y: marginTop,
-                    width: width - marginRight - marginLeft,
-                    height: height - marginBottom - marginTop
-                ),
-                andBaseUrl: args["baseUrl"] as? String == nil ? nil : URL(string: args["baseUrl"] as! String)
-            )
-            result(NSNumber(value: 1))
         } else if call.method == "pickPrinter" {
             PrintJob.pickPrinter(result: result, withSourceRect: CGRect(
                 x: CGFloat((args["x"] as? NSNumber)?.floatValue ?? 0.0),
@@ -162,24 +136,6 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
         ]
         channel.invokeMethod("onCompleted", arguments: data)
         jobs.removeValue(forKey: UInt32(printJob.index))
-    }
-
-    /// send html to pdf data result to flutter
-    public func onHtmlRendered(printJob: PrintJob, pdfData: Data) {
-        let data: NSDictionary = [
-            "doc": FlutterStandardTypedData(bytes: pdfData),
-            "job": printJob.index,
-        ]
-        channel.invokeMethod("onHtmlRendered", arguments: data)
-    }
-
-    /// send html to pdf conversion error to flutter
-    public func onHtmlError(printJob: PrintJob, error: String) {
-        let data: NSDictionary = [
-            "error": error,
-            "job": printJob.index,
-        ]
-        channel.invokeMethod("onHtmlError", arguments: data)
     }
 
     /// send pdf to raster data result to flutter

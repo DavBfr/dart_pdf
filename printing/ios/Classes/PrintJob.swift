@@ -15,7 +15,6 @@
  */
 
 import Flutter
-import WebKit
 
 func dataProviderReleaseDataCallback(info _: UnsafeMutableRawPointer?, data: UnsafeRawPointer, size _: Int) {
     data.deallocate()
@@ -245,56 +244,6 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             activityViewController.popoverPresentationController?.sourceRect = rect
         }
         UIApplication.shared.keyWindow?.rootViewController?.present(activityViewController, animated: true)
-    }
-
-    func convertHtml(_ data: String, withPageSize rect: CGRect, andMargin margin: CGRect, andBaseUrl baseUrl: URL?) {
-        let viewController = UIApplication.shared.delegate?.window?!.rootViewController
-        let wkWebView = WKWebView(frame: viewController!.view.bounds)
-        wkWebView.isHidden = true
-        wkWebView.tag = 100
-        viewController?.view.addSubview(wkWebView)
-        wkWebView.loadHTMLString(data, baseURL: baseUrl ?? Bundle.main.bundleURL)
-
-        urlObservation = wkWebView.observe(\.isLoading, changeHandler: { _, _ in
-            // this is workaround for issue with loading local images
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                // assign the print formatter to the print page renderer
-                let renderer = UIPrintPageRenderer()
-                renderer.addPrintFormatter(wkWebView.viewPrintFormatter(), startingAtPageAt: 0)
-
-                // assign paperRect and printableRect values
-                renderer.setValue(rect, forKey: "paperRect")
-                renderer.setValue(margin, forKey: "printableRect")
-
-                // create pdf context and draw each page
-                let pdfData = NSMutableData()
-                UIGraphicsBeginPDFContextToData(pdfData, rect, nil)
-
-                for i in 0 ..< renderer.numberOfPages {
-                    UIGraphicsBeginPDFPage()
-                    renderer.drawPage(at: i, in: UIGraphicsGetPDFContextBounds())
-                }
-
-                UIGraphicsEndPDFContext()
-
-                if let viewWithTag = viewController?.view.viewWithTag(wkWebView.tag) {
-                    viewWithTag.removeFromSuperview() // remove hidden webview when pdf is generated
-
-                    // clear WKWebView cache
-                    if #available(iOS 9.0, *) {
-                        WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
-                            records.forEach { record in
-                                WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {})
-                            }
-                        }
-                    }
-                }
-
-                // dispose urlObservation
-                self.urlObservation = nil
-                self.printing.onHtmlRendered(printJob: self, pdfData: pdfData as Data)
-            }
-        })
     }
 
     static func pickPrinter(result: @escaping FlutterResult, withSourceRect rect: CGRect) {

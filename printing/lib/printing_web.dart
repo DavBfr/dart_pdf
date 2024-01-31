@@ -275,15 +275,6 @@ class PrintingPlugin extends PrintingPlatform {
   }
 
   @override
-  Future<Uint8List> convertHtml(
-    String html,
-    String? baseUrl,
-    PdfPageFormat format,
-  ) {
-    throw UnimplementedError();
-  }
-
-  @override
   Future<List<Printer>> listPrinters() {
     throw UnimplementedError();
   }

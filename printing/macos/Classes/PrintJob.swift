@@ -16,7 +16,6 @@
 
 import FlutterMacOS
 import Foundation
-import WebKit
 
 func dataProviderReleaseDataCallback(info _: UnsafeMutableRawPointer?, data: UnsafeRawPointer, size _: Int) {
     data.deallocate()
@@ -213,42 +212,6 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
 //                print("Unable to delete \(tempFile): \(error)")
 //            }
 //        }
-    }
-
-    public func convertHtml(_ data: String, withPageSize size: CGRect, andMargin margin: CGRect, andBaseUrl baseUrl: URL?) {
-        let tempFile = NSTemporaryDirectory() + NSUUID().uuidString
-        let directoryURL = URL(fileURLWithPath: tempFile)
-
-        let printOpts: [NSPrintInfo.AttributeKey: Any] = [NSPrintInfo.AttributeKey.jobDisposition: NSPrintInfo.JobDisposition.save, NSPrintInfo.AttributeKey.jobSavingURL: directoryURL]
-        let printInfo = NSPrintInfo(dictionary: printOpts)
-        printInfo.horizontalPagination = NSPrintInfo.PaginationMode.automatic
-        printInfo.verticalPagination = NSPrintInfo.PaginationMode.automatic
-        printInfo.paperSize.width = size.width
-        printInfo.paperSize.height = size.height
-        printInfo.topMargin = margin.minY
-        printInfo.leftMargin = margin.minX
-        printInfo.rightMargin = size.width - margin.maxX
-        printInfo.bottomMargin = size.height - margin.maxY
-
-        let webView = WebView()
-        webView.mainFrame.loadHTMLString(data, baseURL: baseUrl)
-        let when = DispatchTime.now() + 1
-
-        DispatchQueue.main.asyncAfter(deadline: when) {
-            let printOperation = NSPrintOperation(view: webView.mainFrame.frameView.documentView, printInfo: printInfo)
-            printOperation.showsPrintPanel = false
-            printOperation.showsProgressPanel = false
-            printOperation.run()
-
-            do {
-                let data = try Data(contentsOf: directoryURL)
-                self.printing.onHtmlRendered(printJob: self, pdfData: data)
-                let fileManager = FileManager.default
-                try fileManager.removeItem(atPath: tempFile)
-            } catch {
-                self.printing.onHtmlError(printJob: self, error: "Unable to load the pdf file from \(tempFile)")
-            }
-        }
     }
 
     public func rasterPdf(data: Data, pages: [Int]?, scale: CGFloat) {

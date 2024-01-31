@@ -96,13 +96,6 @@ abstract class PrintingPlatform extends PlatformInterface {
     List<String>? emails,
   );
 
-  /// Convert an html document to a pdf data
-  Future<Uint8List> convertHtml(
-    String html,
-    String? baseUrl,
-    PdfPageFormat format,
-  );
-
   /// Convert a Pdf document to bitmap images
   Stream<PdfRaster> raster(
     Uint8List document,

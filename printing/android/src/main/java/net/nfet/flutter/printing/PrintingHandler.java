@@ -58,39 +58,6 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     result.success(1);
                     break;
                 }
-                case "convertHtml": {
-                    Double width = call.argument("width");
-                    Double height = call.argument("height");
-                    Double marginLeft = call.argument("marginLeft");
-                    Double marginTop = call.argument("marginTop");
-                    Double marginRight = call.argument("marginRight");
-                    Double marginBottom = call.argument("marginBottom");
-                    final PrintingJob printJob =
-                            new PrintingJob(context, this, (int) call.argument("job"));
-
-                    assert width != null;
-                    assert height != null;
-                    assert marginLeft != null;
-                    assert marginTop != null;
-                    assert marginRight != null;
-                    assert marginBottom != null;
-
-                    PrintAttributes.Margins margins = new PrintAttributes.Margins(
-                            Double.valueOf(marginLeft * 1000.0).intValue(),
-                            Double.valueOf(marginTop * 1000.0 / 72.0).intValue(),
-                            Double.valueOf(marginRight * 1000.0 / 72.0).intValue(),
-                            Double.valueOf(marginBottom * 1000.0 / 72.0).intValue());
-
-                    PrintAttributes.MediaSize size =
-                            new PrintAttributes.MediaSize("flutter_printing", "Provided size",
-                                    Double.valueOf(width * 1000.0 / 72.0).intValue(),
-                                    Double.valueOf(height * 1000.0 / 72.0).intValue());
-
-                    printJob.convertHtml((String) call.argument("html"), size, margins,
-                            (String) call.argument("baseUrl"));
-                    result.success(1);
-                    break;
-                }
                 case "printingInfo": {
                     result.success(PrintingJob.printingInfo());
                     break;
@@ -160,26 +127,6 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
         args.put("job", printJob.index);
 
         channel.invokeMethod("onCompleted", args);
-    }
-
-    /// send html to pdf data result to flutter
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    void onHtmlRendered(PrintingJob printJob, byte[] pdfData) {
-        HashMap<String, Object> args = new HashMap<>();
-        args.put("doc", pdfData);
-        args.put("job", printJob.index);
-
-        channel.invokeMethod("onHtmlRendered", args);
-    }
-
-    /// send html to pdf conversion error to flutter
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    void onHtmlError(PrintingJob printJob, String error) {
-        HashMap<String, Object> args = new HashMap<>();
-        args.put("error", error);
-        args.put("job", printJob.index);
-
-        channel.invokeMethod("onHtmlError", args);
     }
 
     /// send pdf to raster data result to flutter

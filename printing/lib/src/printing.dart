@@ -190,11 +190,7 @@ mixin Printing {
     String? baseUrl,
     PdfPageFormat format = PdfPageFormat.standard,
   }) {
-    return PrintingPlatform.instance.convertHtml(
-      html,
-      baseUrl,
-      format,
-    );
+    throw UnimplementedError();
   }
 
   /// Returns a [PrintingInfo] object representing the capabilities

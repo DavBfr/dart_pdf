@@ -110,18 +110,6 @@ class MethodChannelPrinting extends PrintingPlatform {
           }
         }
         break;
-      case 'onHtmlRendered':
-        final job = _printJobs.getJob(call.arguments['job']);
-        if (job != null) {
-          job.onHtmlRendered!.complete(call.arguments['doc']);
-        }
-        break;
-      case 'onHtmlError':
-        final job = _printJobs.getJob(call.arguments['job']);
-        if (job != null) {
-          job.onHtmlRendered!.completeError(call.arguments['error']);
-        }
-        break;
       case 'onPageRasterized':
         final job = _printJobs.getJob(call.arguments['job']);
         if (job != null) {
@@ -258,31 +246,6 @@ class MethodChannelPrinting extends PrintingPlatform {
       'h': bounds.height,
     };
     return await _channel.invokeMethod<int>('sharePdf', params) != 0;
-  }
-
-  @override
-  Future<Uint8List> convertHtml(
-      String html, String? baseUrl, PdfPageFormat format) async {
-    final job = _printJobs.add(
-      onHtmlRendered: Completer<Uint8List>(),
-    );
-
-    final params = <String, dynamic>{
-      'html': html,
-      'baseUrl': baseUrl,
-      'width': format.width,
-      'height': format.height,
-      'marginLeft': format.marginLeft,
-      'marginTop': format.marginTop,
-      'marginRight': format.marginRight,
-      'marginBottom': format.marginBottom,
-      'job': job.index,
-    };
-
-    await _channel.invokeMethod<void>('convertHtml', params);
-    final result = await job.onHtmlRendered!.future;
-    _printJobs.remove(job.index);
-    return result;
   }
 
   @override

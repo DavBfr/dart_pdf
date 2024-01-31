@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.pdf.PdfRenderer;
@@ -32,7 +31,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.print.PageRange;
-import android.print.PdfConvert;
 import android.print.PrintAttributes;
 import android.print.PrintDocumentAdapter;
 import android.print.PrintDocumentInfo;
@@ -40,8 +38,6 @@ import android.print.PrintJob;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.util.Log;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -360,54 +356,6 @@ public class PrintingJob extends PrintDocumentAdapter {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    void convertHtml(final String data, final PrintAttributes.MediaSize size,
-            final PrintAttributes.Margins margins, final String baseUrl) {
-        Configuration configuration = context.getResources().getConfiguration();
-        configuration.fontScale = (float) 1;
-        Context webContext = context.createConfigurationContext(configuration);
-        final WebView webView = new WebView(webContext);
-
-        webView.loadDataWithBaseURL(baseUrl, data, "text/HTML", "UTF-8", null);
-
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    PrintAttributes attributes =
-                            new PrintAttributes.Builder()
-                                    .setMediaSize(size)
-                                    .setResolution(
-                                            new PrintAttributes.Resolution("pdf", "pdf", 600, 600))
-                                    .setMinMargins(margins)
-                                    .build();
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        final PrintDocumentAdapter adapter =
-                                webView.createPrintDocumentAdapter("printing");
-
-                        PdfConvert.print(context, adapter, attributes, new PdfConvert.Result() {
-                            @Override
-                            public void onSuccess(File file) {
-                                try {
-                                    byte[] fileContent = PdfConvert.readFile(file);
-                                    printing.onHtmlRendered(PrintingJob.this, fileContent);
-                                } catch (IOException e) {
-                                    onError(e.getMessage());
-                                }
-                            }
-
-                            @Override
-                            public void onError(String message) {
-                                printing.onHtmlError(PrintingJob.this, message);
-                            }
-                        });
-                    }
-                }
-            }
-        });
     }
 
     void setDocument(byte[] data) {

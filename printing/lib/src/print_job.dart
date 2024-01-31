@@ -16,7 +16,6 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'callback.dart';
 import 'raster.dart';
@@ -27,7 +26,6 @@ class PrintJob {
   const PrintJob._({
     required this.index,
     this.onLayout,
-    this.onHtmlRendered,
     this.onCompleted,
     this.onPageRasterized,
     required this.useFFI,
@@ -35,9 +33,6 @@ class PrintJob {
 
   /// Callback used when calling Printing.layoutPdf()
   final LayoutCallback? onLayout;
-
-  /// Callback used when calling Printing.convertHtml()
-  final Completer<Uint8List>? onHtmlRendered;
 
   /// Future triggered when the job is done
   final Completer<bool>? onCompleted;
@@ -64,14 +59,12 @@ class PrintJobs {
   /// Add a print job to the list
   PrintJob add({
     LayoutCallback? onLayout,
-    Completer<Uint8List>? onHtmlRendered,
     Completer<bool>? onCompleted,
     StreamController<PdfRaster>? onPageRasterized,
   }) {
     final job = PrintJob._(
       index: _currentIndex++,
       onLayout: onLayout,
-      onHtmlRendered: onHtmlRendered,
       onCompleted: onCompleted,
       onPageRasterized: onPageRasterized,
       useFFI: Platform.isMacOS || Platform.isIOS,
