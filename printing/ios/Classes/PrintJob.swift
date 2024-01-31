@@ -396,7 +396,6 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             "directPrint": true,
             "dynamicLayout": true,
             "canPrint": true,
-            "canConvertHtml": true,
             "canShare": true,
             "canRaster": true,
             "canListPrinters": false,

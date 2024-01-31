@@ -20,7 +20,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pdf/pdf.dart';
-
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:printing/printing.dart';
 import 'package:printing/src/interface.dart';
@@ -73,13 +72,6 @@ void main() {
     );
   });
 
-  test('convertHtml', () async {
-    expect(
-      await Printing.convertHtml(html: '<html></html>'),
-      isInstanceOf<Uint8List>(),
-    );
-  });
-
   test('raster', () async {
     expect(
       Printing.raster(Uint8List(0)),
@@ -129,11 +121,6 @@ class MockPrinting extends Mock
   @override
   Stream<PdfRaster> raster(
       Uint8List document, List<int>? pages, double dpi) async* {}
-
-  @override
-  Future<Uint8List> convertHtml(
-          String html, String? baseUrl, PdfPageFormat format) async =>
-      Uint8List(0);
 }
 
 class MockContext extends Mock implements BuildContext {}

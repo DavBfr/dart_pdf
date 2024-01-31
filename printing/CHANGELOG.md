@@ -7,6 +7,7 @@
 - Update cursors in zoom mode for web [Aleksei]
 - Output image sized to cropBox instead of mediaBox (iOS) [garrettApproachableGeek]
 - Replace Activity with Context for Service Compatibility (Android) [Heinrich]
+- Deprecate support for `convertHtml`
 
 ## 5.11.1
 

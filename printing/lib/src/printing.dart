@@ -184,6 +184,7 @@ mixin Printing {
   ///
   /// This is not supported on all platforms. Check the result of [info] to
   /// find at runtime if this feature is available or not.
+  @Deprecated('Please use another method to create your PDF document')
   static Future<Uint8List> convertHtml({
     required String html,
     String? baseUrl,

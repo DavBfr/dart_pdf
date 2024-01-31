@@ -44,10 +44,6 @@ void main() {
         .setMockMethodCallHandler(channel, null);
   });
 
-  test('convertHtml', () async {
-    // expect(await Printing.platformVersion, '42');
-  });
-
   test('flutterImageProvider(FileImage)', () async {
     final image =
         await flutterImageProvider(FileImage(File('$path/example.png')));
