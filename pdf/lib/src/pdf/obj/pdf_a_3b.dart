@@ -163,16 +163,14 @@ class PdfaAttachedFiles {
     PdfDocument pdfDocument,
     Map<String, String> files,
   ) {
-    for (var fileName in files.keys) {
-      final content = files[fileName]!;
-
+    for (var entry in files.entries) {
       _files.add(
         _AttachedFileSpec(
           pdfDocument,
           _AttachedFile(
             pdfDocument,
-            fileName,
-            content,
+            entry.key,
+            entry.value,
           ),
         ),
       );
