@@ -137,54 +137,44 @@ public class PrintingJob extends PrintDocumentAdapter {
 
     @Override
     public void onFinish() {
-        Thread thread = new Thread(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-            @Override
-            public void run() {
-                try {
-                    final boolean[] wait = {true};
-                    int count = 5 * 60 * 10; // That's 10 minutes.
-                    while (wait[0]) {
-                        new Handler(Looper.getMainLooper()).post(new Runnable() {
-                            @Override
-                            public void run() {
-                                int state = printJob == null ? PrintJobInfo.STATE_FAILED
-                                                             : printJob.getInfo().getState();
+        Thread thread = new Thread(() -> {
+            try {
+                final boolean[] wait = {true};
+                int count = 5 * 60 * 10; // That's 10 minutes.
+                while (wait[0]) {
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        int state = printJob == null ? PrintJobInfo.STATE_FAILED
+                                                     : printJob.getInfo().getState();
 
-                                if (state == PrintJobInfo.STATE_COMPLETED) {
-                                    printing.onCompleted(PrintingJob.this, true, null);
-                                    wait[0] = false;
-                                } else if (state == PrintJobInfo.STATE_CANCELED) {
-                                    printing.onCompleted(PrintingJob.this, false, null);
-                                    wait[0] = false;
-                                } else if (state == PrintJobInfo.STATE_FAILED) {
-                                    printing.onCompleted(
-                                            PrintingJob.this, false, "Unable to print");
-                                    wait[0] = false;
-                                }
-                            }
-                        });
-
-                        if (--count <= 0) {
-                            throw new Exception("Timeout waiting for the job to finish");
-                        }
-
-                        if (wait[0]) {
-                            Thread.sleep(200);
-                        }
-                    }
-                } catch (final Exception e) {
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            printing.onCompleted(PrintingJob.this,
-                                    printJob != null && printJob.isCompleted(), e.getMessage());
+                        if (state == PrintJobInfo.STATE_COMPLETED) {
+                            printing.onCompleted(PrintingJob.this, true, null);
+                            wait[0] = false;
+                        } else if (state == PrintJobInfo.STATE_CANCELED) {
+                            printing.onCompleted(PrintingJob.this, false, null);
+                            wait[0] = false;
+                        } else if (state == PrintJobInfo.STATE_FAILED) {
+                            printing.onCompleted(PrintingJob.this, false, "Unable to print");
+                            wait[0] = false;
                         }
                     });
-                }
 
-                printJob = null;
+                    if (--count <= 0) {
+                        throw new Exception("Timeout waiting for the job to finish");
+                    }
+
+                    if (wait[0]) {
+                        Thread.sleep(200);
+                    }
+                }
+            } catch (final Exception e) {
+                new Handler(Looper.getMainLooper())
+                        .post(()
+                                        -> printing.onCompleted(PrintingJob.this,
+                                                printJob != null && printJob.isCompleted(),
+                                                e.getMessage()));
             }
+
+            printJob = null;
         });
 
         thread.start();
@@ -439,86 +429,67 @@ public class PrintingJob extends PrintDocumentAdapter {
             return;
         }
 
-        Thread thread = new Thread(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-            @Override
-            public void run() {
-                String error = null;
-                try {
-                    File tempDir = context.getCacheDir();
-                    File file = File.createTempFile("printing", null, tempDir);
-                    FileOutputStream oStream = new FileOutputStream(file);
-                    oStream.write(data);
-                    oStream.close();
+        Thread thread = new Thread(() -> {
+            String error = null;
+            try {
+                File tempDir = context.getCacheDir();
+                File file = File.createTempFile("printing", null, tempDir);
+                FileOutputStream oStream = new FileOutputStream(file);
+                oStream.write(data);
+                oStream.close();
 
-                    FileInputStream iStream = new FileInputStream(file);
-                    ParcelFileDescriptor parcelFD = ParcelFileDescriptor.dup(iStream.getFD());
-                    PdfRenderer renderer = new PdfRenderer(parcelFD);
+                FileInputStream iStream = new FileInputStream(file);
+                ParcelFileDescriptor parcelFD = ParcelFileDescriptor.dup(iStream.getFD());
+                PdfRenderer renderer = new PdfRenderer(parcelFD);
 
-                    if (!file.delete()) {
-                        Log.e("PDF", "Unable to delete temporary file");
-                    }
-
-                    final int pageCount = pages != null ? pages.size() : renderer.getPageCount();
-                    for (int i = 0; i < pageCount; i++) {
-                        PdfRenderer.Page page = renderer.openPage(pages == null ? i : pages.get(i));
-
-                        final int width = Double.valueOf(page.getWidth() * scale).intValue();
-                        final int height = Double.valueOf(page.getHeight() * scale).intValue();
-                        int stride = width * 4;
-
-                        Matrix transform = new Matrix();
-                        transform.setScale(scale.floatValue(), scale.floatValue());
-
-                        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-
-                        page.render(
-                                bitmap, null, transform, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-
-                        page.close();
-
-                        final ByteBuffer buf = ByteBuffer.allocate(stride * height);
-                        bitmap.copyPixelsToBuffer(buf);
-                        bitmap.recycle();
-
-                        new Handler(Looper.getMainLooper()).post(new Runnable() {
-                            @Override
-                            public void run() {
-                                printing.onPageRasterized(
-                                        PrintingJob.this, buf.array(), width, height);
-                            }
-                        });
-                    }
-
-                    renderer.close();
-                    iStream.close();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    error = e.getMessage();
+                if (!file.delete()) {
+                    Log.e("PDF", "Unable to delete temporary file");
                 }
 
-                final String finalError = error;
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        printing.onPageRasterEnd(PrintingJob.this, finalError);
-                    }
-                });
+                final int pageCount = pages != null ? pages.size() : renderer.getPageCount();
+                for (int i = 0; i < pageCount; i++) {
+                    PdfRenderer.Page page = renderer.openPage(pages == null ? i : pages.get(i));
+
+                    final int width = Double.valueOf(page.getWidth() * scale).intValue();
+                    final int height = Double.valueOf(page.getHeight() * scale).intValue();
+                    int stride = width * 4;
+
+                    Matrix transform = new Matrix();
+                    transform.setScale(scale.floatValue(), scale.floatValue());
+
+                    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+                    page.render(bitmap, null, transform, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+
+                    page.close();
+
+                    final ByteBuffer buf = ByteBuffer.allocate(stride * height);
+                    bitmap.copyPixelsToBuffer(buf);
+                    bitmap.recycle();
+
+                    new Handler(Looper.getMainLooper())
+                            .post(()
+                                            -> printing.onPageRasterized(
+                                                    PrintingJob.this, buf.array(), width, height));
+                }
+
+                renderer.close();
+                iStream.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                error = e.getMessage();
             }
+
+            final String finalError = error;
+            new Handler(Looper.getMainLooper())
+                    .post(() -> printing.onPageRasterEnd(PrintingJob.this, finalError));
         });
 
-        thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                final String finalError = e.getMessage();
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        printing.onPageRasterEnd(PrintingJob.this, finalError);
-                    }
-                });
-            }
+        thread.setUncaughtExceptionHandler((t, e) -> {
+            final String finalError = e.getMessage();
+            new Handler(Looper.getMainLooper())
+                    .post(() -> printing.onPageRasterEnd(PrintingJob.this, finalError));
         });
 
         thread.start();
