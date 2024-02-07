@@ -283,7 +283,7 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
   double get descent;
 
   /// Height of an empty line
-  double get lineGap => ascent + descent;
+  double get emptyLineHeight => ascent + (-descent);
 
   /// Internal units per
   int get unitsPerEm;
