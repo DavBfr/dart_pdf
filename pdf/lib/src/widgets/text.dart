@@ -20,6 +20,7 @@ import 'package:meta/meta.dart';
 
 import '../../pdf.dart';
 import '../pdf/font/bidi_utils.dart' as bidi;
+import '../pdf/font/arabic.dart' as arabic;
 import '../pdf/options.dart';
 import 'annotations.dart';
 import 'basic.dart';
@@ -929,10 +930,16 @@ class RichText extends Widget with SpanningWidget {
           final space =
               font.stringMetrics(' ') * (style.fontSize! * textScaleFactor);
 
-          final spanLines = (useBidi && _textDirection == TextDirection.rtl
+          // final spanLines = (useBidi && _textDirection == TextDirection.rtl
+          //         ? bidi.logicalToVisual(span.text!)
+          //         : span.text)!
+          //     .split('\n');
+
+          final spanLines = (useArabic && _textDirection == TextDirection.rtl)
+              ? arabic.convert(span.text!)
+              : (useBidi && _textDirection == TextDirection.rtl)
                   ? bidi.logicalToVisual(span.text!)
-                  : span.text)!
-              .split('\n');
+                  : span.text!.split('\n');
 
           for (var line = 0; line < spanLines.length; line++) {
             final words = spanLines[line].split(RegExp(r'\s'));
