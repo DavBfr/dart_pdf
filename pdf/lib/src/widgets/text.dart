@@ -19,6 +19,7 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 
 import '../../pdf.dart';
+import '../pdf/font/arabic.dart' as arabic;
 import '../pdf/font/bidi_utils.dart' as bidi;
 import '../pdf/options.dart';
 import 'annotations.dart';
@@ -929,9 +930,11 @@ class RichText extends Widget with SpanningWidget {
           final space =
               font.stringMetrics(' ') * (style.fontSize! * textScaleFactor);
 
-          final spanLines = (useBidi && _textDirection == TextDirection.rtl
-                  ? bidi.logicalToVisual(span.text!)
-                  : span.text)!
+          final spanLines = (useArabic && _textDirection == TextDirection.rtl
+                  ? arabic.convert(span.text!)
+                  : useBidi && _textDirection == TextDirection.rtl
+                      ? bidi.logicalToVisual(span.text!)
+                      : span.text)!
               .split('\n');
 
           for (var line = 0; line < spanLines.length; line++) {

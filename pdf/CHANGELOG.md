@@ -9,6 +9,7 @@
 - Add an option to disable bidirectional support [Olzhas-Suleimen]
 - Fix operator== type in TextDecoration class
 - Fixed wrong empty line height [janiselfert]
+- Add Support old Arabic method without bidi package [Baghdady92]
 
 ## 3.10.7
 
