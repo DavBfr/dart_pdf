@@ -169,12 +169,7 @@ class WidgetWrapper extends pw.ImageProvider {
     final renderView = RenderView(
       child: RenderPositionedBox(
           alignment: Alignment.center, child: repaintBoundary),
-      configuration: ViewConfiguration(
-          size: Size(
-            computedConstraints.maxWidth,
-            computedConstraints.maxHeight,
-          ),
-          devicePixelRatio: view.devicePixelRatio),
+      configuration: ViewConfiguration.fromView(view),
       view: view,
     );
 
