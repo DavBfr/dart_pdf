@@ -8,6 +8,7 @@
 - Add support for hyphenation [ilja]
 - Add an option to disable bidirectional support [Olzhas-Suleimen]
 - Fix operator== type in TextDecoration class
+- Fixed wrong empty line height [janiselfert]
 
 ## 3.10.7
 
