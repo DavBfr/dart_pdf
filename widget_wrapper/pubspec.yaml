@@ -4,11 +4,11 @@ description: >
 homepage: https://github.com/DavBfr/dart_pdf/tree/master/widget_wrapper
 repository: https://github.com/DavBfr/dart_pdf
 issue_tracker: https://github.com/DavBfr/dart_pdf/issues
-version: 1.0.2
+version: 1.0.3
 
 environment:
   sdk: ">=2.18.0 <4.0.0"
-  flutter: ">=3.19.0-9.0.pre.202"
+  flutter: ">=3.19.0"
 
 dependencies:
   flutter:
