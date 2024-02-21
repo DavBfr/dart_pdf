@@ -8,6 +8,7 @@
 - Output image sized to cropBox instead of mediaBox (iOS) [garrettApproachableGeek]
 - Replace Activity with Context for Service Compatibility (Android) [Heinrich]
 - Deprecate support for `convertHtml`
+- Implement alternative location for PDF.js [Aleksei]
 
 ## 5.11.1
 
