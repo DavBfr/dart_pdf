@@ -88,7 +88,10 @@ mixin Printing {
         return a.name.compareTo(b.name);
       });
 
-      // ignore: use_build_context_synchronously
+      if (!context.mounted) {
+        return null;
+      }
+
       return await showDialog<Printer>(
         context: context,
         builder: (context) => SimpleDialog(
