@@ -90,12 +90,6 @@ class PrintingPlugin extends PrintingPlatform {
       // [dartPdfJsBaseUrl] JavaScript  variable.
       if (js.context.hasProperty(_dartPdfJsBaseUrl)) {
         _pdfJsUrlBase = js.context[_dartPdfJsBaseUrl] as String;
-        // Check if only local path is defined
-        if (!_pdfJsUrlBase.startsWith(RegExp(r'https?:'))) {
-          final html.HtmlDocument doc = js.context['document'];
-          final location = doc.window!.location as html.Location;
-          _pdfJsUrlBase = '${location.host}/$_pdfJsUrlBase';
-        }
       } else {
         final pdfJsVersion = js.context.hasProperty(_dartPdfJsVersion)
             ? js.context[_dartPdfJsVersion]
