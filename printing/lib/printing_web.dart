@@ -92,7 +92,7 @@ class PrintingPlugin extends PrintingPlatform {
         _pdfJsUrlBase = js.context[_dartPdfJsBaseUrl] as String;
         // Check if only local path is defined
         if (!_pdfJsUrlBase.startsWith(RegExp(r'https?:'))) {
-          final doc = js.context['document'] as html.HtmlDocument;
+          final html.HtmlDocument doc = js.context['document'];
           final location = doc.window!.location as html.Location;
           _pdfJsUrlBase = '${location.origin}/$_pdfJsUrlBase';
         }
