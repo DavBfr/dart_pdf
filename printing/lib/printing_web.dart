@@ -94,7 +94,7 @@ class PrintingPlugin extends PrintingPlatform {
         if (!_pdfJsUrlBase.startsWith(RegExp(r'https?:'))) {
           final html.HtmlDocument doc = js.context['document'];
           final location = doc.window!.location as html.Location;
-          _pdfJsUrlBase = '${location.origin}/$_pdfJsUrlBase';
+          _pdfJsUrlBase = '${location.host}/$_pdfJsUrlBase';
         }
       } else {
         final pdfJsVersion = js.context.hasProperty(_dartPdfJsVersion)
