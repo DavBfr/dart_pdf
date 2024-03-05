@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.11.0
+
+- Save in an isolate when available
+
 ## 3.10.8
 
 - Add Flutter's Logical Pixel constant
