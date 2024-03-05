@@ -255,7 +255,10 @@ class PdfDocument {
     if (prev != null) {
       os.putBytes(prev!.bytes);
     }
-    await _write(os);
+   // to isolate it because it frease app
+    await compute(await _write,os);
+    
+  //  await _write(os);
     return os.output();
   }
 }
