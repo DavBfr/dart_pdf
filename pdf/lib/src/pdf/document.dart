@@ -250,15 +250,29 @@ class PdfDocument {
   }
 
   /// Generate the PDF document as a memory file
-  Future<Uint8List> save() async {
+  // Future<Uint8List> save() async {
+  //   final os = PdfStream();
+  //   if (prev != null) {
+  //     os.putBytes(prev!.bytes);
+  //   }
+  //  // to isolate it because it frease app
+  //   await compute(await _write,os);
+    
+  // //  await _write(os);
+  //   return os.output();
+  // }
+  Future<Uint8List> _save() async {
     final os = PdfStream();
     if (prev != null) {
       os.putBytes(prev!.bytes);
     }
-   // to isolate it because it frease app
-    await compute(await _write,os);
-    
-  //  await _write(os);
+    await _write(os);
     return os.output();
+  }
+  // isolate save in another thread to solve freezing app
+  Future<Uint8List> save() async {
+   return 
+  await  Isolate.run(()async=> await _save());
+    
   }
 }
