@@ -16,6 +16,8 @@
 
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:isolate';
+
 
 import 'package:crypto/crypto.dart';
 
@@ -250,29 +252,19 @@ class PdfDocument {
   }
 
   /// Generate the PDF document as a memory file
-  // Future<Uint8List> save() async {
-  //   final os = PdfStream();
-  //   if (prev != null) {
-  //     os.putBytes(prev!.bytes);
-  //   }
-  //  // to isolate it because it frease app
-  //   await compute(await _write,os);
-    
-  // //  await _write(os);
-  //   return os.output();
-  // }
-  Future<Uint8List> _save() async {
+  Future<Uint8List> save() async {
     final os = PdfStream();
     if (prev != null) {
       os.putBytes(prev!.bytes);
     }
-    await _write(os);
+  await _write(os);
     return os.output();
   }
-  // isolate save in another thread to solve freezing app
-  Future<Uint8List> save() async {
-   return 
-  await  Isolate.run(()async=> await _save());
+  
+  /// [isolatedSave] this method is to isolate save in another thread to solve freezing app
+  Future<Uint8List> isolatedSave() async {
+     if(kIsWeb) return await save();
+   return Isolate.run(() async=>await save());
     
   }
 }
