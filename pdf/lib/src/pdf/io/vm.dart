@@ -24,5 +24,9 @@ DeflateCallback defaultDeflate = zlib.encode;
 
 /// The dart:io implementation of [pdfCompute].
 @pragma('vm:prefer-inline')
-Future<R> pdfCompute<R>(Future<R> Function() computation) async =>
-    Isolate.run<R>(computation, debugName: 'dart_pdf');
+Future<R> pdfCompute<R>(Future<R> Function() computation) async {
+  if (Platform.environment.containsKey('FLUTTER_TEST')) {
+    return computation();
+  }
+  return Isolate.run<R>(computation, debugName: 'dart_pdf');
+}
