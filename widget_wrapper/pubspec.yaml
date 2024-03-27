@@ -13,7 +13,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  pdf: ^3.10.0
+  # pdf: ^3.10.0
+  pdf:
+    git:
+      url: https://github.com/Akinsola1/dart_pdf_forked
+      ref: master
+      path: ./pdf
 
 dependency_overrides:
   pdf:
