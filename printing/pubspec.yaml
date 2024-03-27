@@ -40,7 +40,7 @@ dependencies:
       
   # also replacing this with the one i forked
   # pdf_widget_wrapper: '>=1.0.0 <2.0.0'
-  widget_wrapper:
+  pdf_widget_wrapper:
     git:
       url: https://github.com/Akinsola1/dart_pdf_forked
       ref: master
