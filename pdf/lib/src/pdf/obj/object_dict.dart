@@ -39,7 +39,7 @@ class PdfObjectDict extends PdfObject<PdfDict> {
   @override
   void writeContent(PdfStream s) {
     if (params.isNotEmpty) {
-      params.output(this, s, pdfDocument.settings.verbose ? 0 : null);
+      params.output(this, s, settings.verbose ? 0 : null);
       s.putByte(0x0a);
     }
   }

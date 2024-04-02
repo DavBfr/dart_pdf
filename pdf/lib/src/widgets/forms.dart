@@ -20,6 +20,7 @@ import 'dart:typed_data';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
+import '../pdf/format/indirect.dart';
 import 'basic.dart';
 import 'border_radius.dart';
 import 'box_border.dart';
@@ -89,6 +90,7 @@ class ChoiceField extends StatelessWidget with AnnotationAppearance {
     required this.name,
     required this.items,
     this.value,
+    this.replaces,
   });
   final String name;
   final TextStyle? textStyle;
@@ -96,6 +98,7 @@ class ChoiceField extends StatelessWidget with AnnotationAppearance {
   final double height;
   final List<String> items;
   final String? value;
+  final PdfIndirect? replaces;
 
   @override
   void paint(Context context) {
@@ -125,7 +128,12 @@ class ChoiceField extends StatelessWidget with AnnotationAppearance {
       );
     }
 
-    PdfAnnot(context.page, bf);
+    PdfAnnot(
+      context.page,
+      bf,
+      objser: replaces?.ser,
+      objgen: replaces?.gen ?? 0,
+    );
   }
 
   @override
@@ -144,6 +152,7 @@ class Checkbox extends SingleChildWidget with AnnotationAppearance {
     double width = 13,
     double height = 13,
     BoxDecoration? decoration,
+    this.replaces,
   })  : radius = decoration?.shape == BoxShape.circle
             ? Radius.circular(math.max(height, width) / 2)
             : decoration?.borderRadius?.uniform ?? Radius.zero,
@@ -170,6 +179,8 @@ class Checkbox extends SingleChildWidget with AnnotationAppearance {
   final String name;
 
   final Radius radius;
+
+  final PdfIndirect? replaces;
 
   @override
   void paint(Context context) {
@@ -217,7 +228,12 @@ class Checkbox extends SingleChildWidget with AnnotationAppearance {
       child!,
     );
 
-    PdfAnnot(context.page, bf);
+    PdfAnnot(
+      context.page,
+      bf,
+      objser: replaces?.ser,
+      objgen: replaces?.gen ?? 0,
+    );
   }
 }
 
@@ -232,6 +248,7 @@ class FlatButton extends SingleChildWidget with AnnotationAppearance {
     this.flags,
     required Widget child,
     required this.name,
+    this.replaces,
   })  : _childDown = Container(
           child: DefaultTextStyle(
             style: TextStyle(color: textColor),
@@ -282,6 +299,8 @@ class FlatButton extends SingleChildWidget with AnnotationAppearance {
 
   final Set<PdfAnnotFlags>? flags;
 
+  final PdfIndirect? replaces;
+
   @override
   void paint(Context context) {
     super.paint(context);
@@ -300,7 +319,12 @@ class FlatButton extends SingleChildWidget with AnnotationAppearance {
     drawAppearance(context, bf, mat, _childRollover,
         type: PdfAnnotAppearance.rollover);
 
-    PdfAnnot(context.page, bf);
+    PdfAnnot(
+      context.page,
+      bf,
+      objser: replaces?.ser,
+      objgen: replaces?.gen ?? 0,
+    );
   }
 }
 
@@ -323,6 +347,7 @@ class TextField extends StatelessWidget with AnnotationAppearance {
     this.value,
     this.defaultValue,
     this.textStyle,
+    this.replaces,
   });
 
   final Widget? child;
@@ -342,6 +367,7 @@ class TextField extends StatelessWidget with AnnotationAppearance {
   final String? value;
   final String? defaultValue;
   final TextStyle? textStyle;
+  final PdfIndirect? replaces;
 
   @override
   Widget build(Context context) {
@@ -386,7 +412,12 @@ class TextField extends StatelessWidget with AnnotationAppearance {
       );
     }
 
-    PdfAnnot(context.page, tf);
+    PdfAnnot(
+      context.page,
+      tf,
+      objser: replaces?.ser,
+      objgen: replaces?.gen ?? 0,
+    );
   }
 }
 
@@ -405,6 +436,7 @@ class Signature extends SingleChildWidget with AnnotationAppearance {
     this.crl,
     this.cert,
     this.ocsp,
+    this.replaces,
   })  : value = value ?? crypto,
         super(child: child);
 
@@ -439,6 +471,8 @@ class Signature extends SingleChildWidget with AnnotationAppearance {
 
   /// Online Certificate Status Protocol
   final List<Uint8List>? ocsp;
+
+  final PdfIndirect? replaces;
 
   @override
   void paint(Context context) {
@@ -475,6 +509,11 @@ class Signature extends SingleChildWidget with AnnotationAppearance {
       drawAppearance(context, bf, mat, child!);
     }
 
-    PdfAnnot(context.page, bf);
+    PdfAnnot(
+      context.page,
+      bf,
+      objser: replaces?.ser,
+      objgen: replaces?.gen ?? 0,
+    );
   }
 }

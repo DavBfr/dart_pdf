@@ -1,6 +1,6 @@
 package net.nfet.flutter.printing;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.Build;
 import android.print.PrintAttributes;
 
@@ -14,11 +14,11 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 
 public class PrintingHandler implements MethodChannel.MethodCallHandler {
-    private final Activity activity;
+    private final Context context;
     private final MethodChannel channel;
 
-    PrintingHandler(@NonNull Activity activity, @NonNull MethodChannel channel) {
-        this.activity = activity;
+    PrintingHandler(@NonNull Context context, @NonNull MethodChannel channel) {
+        this.context = context;
         this.channel = channel;
     }
 
@@ -32,8 +32,10 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     Double height = call.argument("height");
 
                     final PrintingJob printJob =
-                            new PrintingJob(activity, this, (int) call.argument("job"));
+                            new PrintingJob(context, this, (int) call.argument("job"));
                     assert name != null;
+                    assert width != null;
+                    assert height != null;
                     printJob.printPdf(name, width, height);
 
                     result.success(1);
@@ -41,7 +43,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                 }
                 case "cancelJob": {
                     final PrintingJob printJob =
-                            new PrintingJob(activity, this, (int) call.argument("job"));
+                            new PrintingJob(context, this, (int) call.argument("job"));
                     printJob.cancelJob(null);
                     result.success(1);
                     break;
@@ -52,7 +54,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     final String subject = call.argument("subject");
                     final String body = call.argument("body");
                     final ArrayList<String> emails = call.argument("emails");
-                    PrintingJob.sharePdf(activity, document, name, subject, body, emails);
+                    PrintingJob.sharePdf(context, document, name, subject, body, emails);
                     result.success(1);
                     break;
                 }
@@ -64,7 +66,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     Double marginRight = call.argument("marginRight");
                     Double marginBottom = call.argument("marginBottom");
                     final PrintingJob printJob =
-                            new PrintingJob(activity, this, (int) call.argument("job"));
+                            new PrintingJob(context, this, (int) call.argument("job"));
 
                     assert width != null;
                     assert height != null;
@@ -98,7 +100,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     final ArrayList<Integer> pages = call.argument("pages");
                     Double scale = call.argument("scale");
                     final PrintingJob printJob =
-                            new PrintingJob(activity, this, (int) call.argument("job"));
+                            new PrintingJob(context, this, (int) call.argument("job"));
                     printJob.rasterPdf(document, pages, scale);
                     result.success(1);
                     break;
@@ -137,7 +139,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
             }
 
             @Override
-            public void error(String errorCode, String errorMessage, Object errorDetails) {
+            public void error(@NonNull String errorCode, String errorMessage, Object errorDetails) {
                 printJob.cancelJob(errorMessage);
             }
 

@@ -6,9 +6,6 @@ analyzer:
     missing_return: warning
     public_member_api_docs: ignore
     todo: ignore
-    avoid_print: ignore
-    no_leading_underscores_for_local_identifiers: ignore
-    use_super_parameters: ignore
 
 linter:
   rules:

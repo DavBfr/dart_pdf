@@ -282,6 +282,9 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
   /// Spans the distance between the baseline and the lowest descending glyph
   double get descent;
 
+  /// Height of an empty line
+  double get emptyLineHeight => ascent + (-descent);
+
   /// Internal units per
   int get unitsPerEm;
 

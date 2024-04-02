@@ -20,3 +20,10 @@ import '../format/object_base.dart';
 
 /// Zip compression function
 DeflateCallback defaultDeflate = const ZLibEncoder().encode;
+
+/// The dart:html implementation of [pdfCompute].
+@pragma('dart2js:tryInline')
+Future<R> pdfCompute<R>(Future<R> Function() computation) async {
+  await null;
+  return computation();
+}

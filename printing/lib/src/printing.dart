@@ -88,7 +88,10 @@ mixin Printing {
         return a.name.compareTo(b.name);
       });
 
-      // ignore: use_build_context_synchronously
+      if (!context.mounted) {
+        return null;
+      }
+
       return await showDialog<Printer>(
         context: context,
         builder: (context) => SimpleDialog(
@@ -184,6 +187,7 @@ mixin Printing {
   ///
   /// This is not supported on all platforms. Check the result of [info] to
   /// find at runtime if this feature is available or not.
+  @Deprecated('Please use another method to create your PDF document')
   static Future<Uint8List> convertHtml({
     required String html,
     String? baseUrl,

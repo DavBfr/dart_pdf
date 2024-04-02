@@ -43,7 +43,7 @@ for documentation.
    <true/>
    ```
 
-5. If you want to manually set the PdfJs library version for the web, a small script
+5. If you want to manually set the Pdf.js library version for the web, a small script
    has to be added to your `web/index.html` file, just before `</head>`.
    Otherwise it is loaded automatically:
 
@@ -51,6 +51,20 @@ for documentation.
    <script>
      var dartPdfJsVersion = "3.2.146";
    </script>
+   ```
+    5.1. If you want to manually set the alternative location for loading Pdf.js library for the web, the following script has to be added to your `web/index.html` file, just before `</head>`.
+
+    ```html
+    <script>
+      var dartPdfJsBaseUrl = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.2.146/";
+    </script>
+   ```
+    It is possible to use local directory which will be resolved to the host where the web app is running.
+
+    ```html
+    <script>
+      var dartPdfJsBaseUrl = "assets/js/pdf/3.2.146/";
+    </script>
    ```
 
 6. For Windows and Linux, you can force the pdfium version and architecture
@@ -126,12 +140,27 @@ await Printing.sharePdf(bytes: await doc.save(), filename: 'my-document.pdf');
 
 To print an HTML document:
 
+import [HTMLtoPDFWidgets](https://pub.dev/packages/htmltopdfwidgets)
+
 ```dart
-await Printing.layoutPdf(
-    onLayout: (PdfPageFormat format) async => await Printing.convertHtml(
-          format: format,
-          html: '<html><body><p>Hello!</p></body></html>',
-        ));
+await Printing.layoutPdf(onLayout: (PdfPageFormat format) async {
+  const body = '''
+    <h1>Heading Example</h1>
+    <p>This is a paragraph.</p>
+    <img src="image.jpg" alt="Example Image" />
+    <blockquote>This is a quote.</blockquote>
+    <ul>
+      <li>First item</li>
+      <li>Second item</li>
+      <li>Third item</li>
+    </ul>
+    ''';
+
+  final pdf = pw.Document();
+  final widgets = await HTMLToPdf().convert(body);
+  pdf.addPage(pw.MultiPage(build: (context) => widgets));
+  return await pdf.save();
+});
 ```
 
 Convert a Pdf to images, one image per page, get only pages 1 and 2 at 72 dpi:

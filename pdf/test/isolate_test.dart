@@ -14,63 +14,32 @@
  * limitations under the License.
  */
 
-import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:pdf/widgets.dart';
+import 'package:test/test.dart';
 
 import 'utils.dart';
 
-class Message {
-  Message(this.image, this.sendPort);
-
-  final Uint8List image;
-  final SendPort sendPort;
-}
-
-void compute(Message message) {
-  final pdf = Document();
-
-  final image = MemoryImage(
-    message.image,
-  );
-
-  pdf.addPage(Page(build: (Context context) => Center(child: Image(image))));
-
-  message.sendPort.send(pdf.save());
-}
-
 void main() {
-  noTest('Pdf Isolate', () async {
-    final completer = Completer<void>();
-    final receivePort = ReceivePort();
-
-    receivePort.listen((dynamic data) async {
-      if (data is Uint8List) {
-        print('Received a ${data.length} bytes PDF');
-        final file = File('isolate.pdf');
-        await file.writeAsBytes(data);
-        print('File saved');
-        completer.complete();
-      }
-    });
-
+  test('Pdf Isolate', () async {
     print('Download image');
     final imageBytes = await download('https://www.nfet.net/nfet.jpg');
 
     print('Generate PDF');
-    await Isolate.spawn<Message>(
-      compute,
-      Message(imageBytes, receivePort.sendPort),
-    );
+    // ignore: sdk_version_since
+    final data = await Isolate.run(() async {
+      final pdf = Document();
+      final image = MemoryImage(imageBytes);
+      pdf.addPage(
+          Page(build: (Context context) => Center(child: Image(image))));
+      return await pdf.save();
+    });
 
-    print('Wait PDF to be generated');
-    await completer.future;
-    receivePort.close();
-    print('Done');
+    print('Generated a ${data.length} bytes PDF');
+    final file = File('isolate.pdf');
+    await file.writeAsBytes(data);
+    print('File saved');
   });
 }
-
-void noTest(String s, Future<void> Function() param1) {}

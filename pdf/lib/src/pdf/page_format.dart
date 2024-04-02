@@ -60,6 +60,9 @@ class PdfPageFormat {
   static const double cm = inch / 2.54;
   static const double mm = inch / 25.4;
 
+  /// Flutter's Logical Pixel
+  static const double dp = 72.0 / 150.0;
+
   final double width;
   final double height;
 
