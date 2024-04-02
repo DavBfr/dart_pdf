@@ -170,8 +170,10 @@ class WidgetWrapper extends pw.ImageProvider {
       child: RenderPositionedBox(
           alignment: Alignment.center, child: repaintBoundary),
       configuration: ViewConfiguration(
-          size:
-              Size(computedConstraints.maxWidth, computedConstraints.maxHeight),
+          size: Size(
+            computedConstraints.maxWidth,
+            computedConstraints.maxHeight,
+          ),
           devicePixelRatio: view.devicePixelRatio),
       view: view,
     );
@@ -223,57 +225,6 @@ class WidgetWrapper extends pw.ImageProvider {
       width: width ?? this.width!,
       height: height ?? this.height!,
       orientation: orientation,
-    );
-  }
-}
-
-/// ImageProvider that draws a Flutter Widget on a PDF document
-@Deprecated('Use WidgetWrapper instead')
-class WidgetWraper extends WidgetWrapper {
-  WidgetWraper._(
-    Uint8List bytes,
-    int width,
-    int height,
-    PdfImageOrientation orientation,
-    double? dpi,
-  ) : super._(bytes, width, height, orientation, dpi);
-
-  /// Wrap a Flutter Widget identified by a GlobalKey to an ImageProvider.
-  @Deprecated('Use WidgetWrapper.fromKey instead')
-  static Future<WidgetWrapper> fromKey({
-    required GlobalKey key,
-    int? width,
-    int? height,
-    double pixelRatio = 1.0,
-    PdfImageOrientation? orientation,
-    double? dpi,
-  }) {
-    return WidgetWrapper.fromKey(
-      key: key,
-      width: width,
-      pixelRatio: pixelRatio,
-      orientation: orientation,
-      dpi: dpi,
-    );
-  }
-
-  /// Wrap a Flutter Widget to an ImageProvider.
-  @Deprecated('Use WidgetWrapper.fromWidget instead')
-  static Future<WidgetWrapper> fromWidget({
-    required BuildContext context,
-    required Widget widget,
-    required BoxConstraints constraints,
-    double pixelRatio = 1.0,
-    PdfImageOrientation? orientation,
-    double? dpi,
-  }) {
-    return WidgetWrapper.fromWidget(
-      context: context,
-      widget: widget,
-      constraints: constraints,
-      pixelRatio: pixelRatio,
-      orientation: orientation,
-      dpi: dpi,
     );
   }
 }

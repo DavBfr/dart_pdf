@@ -16,7 +16,6 @@
 
 import 'dart:async';
 import 'dart:html' as html;
-import 'dart:html';
 import 'dart:js' as js;
 import 'dart:js_util';
 import 'dart:typed_data';
@@ -33,6 +32,9 @@ import 'src/pdfjs.dart';
 import 'src/printer.dart';
 import 'src/printing_info.dart';
 import 'src/raster.dart';
+
+const _dartPdfJsVersion = 'dartPdfJsVersion';
+const _dartPdfJsBaseUrl = 'dartPdfJsBaseUrl';
 
 /// Print plugin targeting Flutter on the Web
 class PrintingPlugin extends PrintingPlatform {
@@ -52,14 +54,11 @@ class PrintingPlugin extends PrintingPlatform {
   final _loading = Mutex();
 
   bool get _hasPdfJsLib => js.context.callMethod('eval', <String>[
-        'typeof pdfjsLib !== "undefined" && pdfjsLib.GlobalWorkerOptions.workerSrc!="";'
+        'typeof pdfjsLib !== "undefined" && pdfjsLib.GlobalWorkerOptions.workerSrc != "";'
       ]);
 
-  String get _selectPdfJsVersion => js.context.hasProperty('dartPdfJsVersion')
-      ? js.context['dartPdfJsVersion']
-      : _pdfJsVersion;
-
-  String get _pdfJsUrlBase => '$_pdfJsCdnPath@$_selectPdfJsVersion/';
+  /// The base URL for loading pdf.js library
+  late String _pdfJsUrlBase;
 
   Future<void> _initPlugin() async {
     await _loading.acquire();
@@ -87,12 +86,23 @@ class PrintingPlugin extends PrintingPlatform {
       }
       js.context['module'] = 0;
 
-      final script = ScriptElement()
+      // Check if the source of PDF.js library is overridden via
+      // [dartPdfJsBaseUrl] JavaScript  variable.
+      if (js.context.hasProperty(_dartPdfJsBaseUrl)) {
+        _pdfJsUrlBase = js.context[_dartPdfJsBaseUrl] as String;
+      } else {
+        final pdfJsVersion = js.context.hasProperty(_dartPdfJsVersion)
+            ? js.context[_dartPdfJsVersion]
+            : _pdfJsVersion;
+        _pdfJsUrlBase = '$_pdfJsCdnPath@$pdfJsVersion/build/';
+      }
+
+      final script = html.ScriptElement()
         ..type = 'text/javascript'
         ..async = true
-        ..src = '$_pdfJsUrlBase/build/pdf.min.js';
-      assert(document.head != null);
-      document.head!.append(script);
+        ..src = '${_pdfJsUrlBase}pdf.min.js';
+      assert(html.document.head != null);
+      html.document.head!.append(script);
       await script.onLoad.first;
 
       if (amd != null) {
@@ -101,7 +111,7 @@ class PrintingPlugin extends PrintingPlatform {
       }
 
       js.context['pdfjsLib']['GlobalWorkerOptions']['workerSrc'] =
-          '$_pdfJsUrlBase/build/pdf.worker.min.js';
+          '${_pdfJsUrlBase}pdf.worker.min.js';
 
       // Restore module and exports
       if (module != null) {
@@ -344,10 +354,10 @@ class PrintingPlugin extends PrintingPlatform {
           final completer = Completer<void>();
           final blob = await canvas.toBlob();
           final data = BytesBuilder();
-          final r = FileReader();
+          final r = html.FileReader();
           r.readAsArrayBuffer(blob);
           r.onLoadEnd.listen(
-            (ProgressEvent e) {
+            (html.ProgressEvent e) {
               data.add(r.result as List<int>);
               completer.complete();
             },

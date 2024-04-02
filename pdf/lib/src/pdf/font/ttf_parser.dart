@@ -19,9 +19,11 @@
 import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'package:meta/meta.dart';
-import 'bidi_utils.dart' as bidi;
 
+import 'package:meta/meta.dart';
+
+import '../options.dart';
+import 'bidi_utils.dart' as bidi;
 import 'font_metrics.dart';
 
 enum TtfParserName {
@@ -192,6 +194,8 @@ class TtfParser {
 
   int get descent => bytes.getInt16(tableOffsets[hhea_table]! + 6);
 
+  int get lineGap => bytes.getInt16(tableOffsets[hhea_table]! + 8);
+
   int get numOfLongHorMetrics =>
       bytes.getUint16(tableOffsets[hhea_table]! + 34);
 
@@ -320,7 +324,7 @@ class TtfParser {
         /// Having both the unicode and the isolated form code
         /// point to the same glyph index because some fonts
         /// do not have a glyph for the isolated form.\
-        if (bidi.basicToIsolatedMappings.containsKey(c)) {
+        if (useBidi && bidi.basicToIsolatedMappings.containsKey(c)) {
           charToGlyphIndexMap[bidi.basicToIsolatedMappings[c]!] = glyphIndex;
         }
       }

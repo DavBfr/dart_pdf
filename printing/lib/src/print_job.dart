@@ -80,7 +80,7 @@ class PrintJobs {
     return job;
   }
 
-  /// Retrive an existing job
+  /// Retrieve an existing job
   PrintJob? getJob(int index) {
     return _printJobs[index];
   }

@@ -98,9 +98,9 @@ get: $(FONTS) pdf/pubspec.lock printing/pubspec.lock demo/pubspec.lock test/pubs
 get-all: $(FONTS) demo/assets/logo.svg demo/assets/profile.jpg get
 
 test-pdf: svg $(FONTS) pdf/pubspec.lock .coverage
-	cd pdf; $(DART_BIN)  run --enable-asserts --pause-isolates-on-exit --disable-service-auth-codes --enable-vm-service=$(COV_PORT) test &\
-	$(DART_BIN)  pub global run coverage:collect_coverage --wait-paused --uri=http://127.0.0.1:$(COV_PORT)/ -o coverage.json --resume-isolates --scope-output=pdf
-	cd pdf; $(DART_BIN) pub global run coverage:format_coverage --packages=.dart_tool/package_config.json -i coverage.json --report-on lib --lcov --out lcov.info
+	cd pdf; $(DART_BIN)  test --coverage=coverage
+	cd pdf; $(DART_BIN) pub global run coverage:format_coverage --packages=.dart_tool/package_config.json -i coverage/test --report-on lib --lcov --out lcov.info
+	rm -rf pdf/coverage
 	cd pdf; for EXAMPLE in $(shell cd pdf; find example -name '*.dart'); do $(DART_BIN) $$EXAMPLE; done
 	test/compare-pdf.sh pdf test/golden
 
@@ -136,6 +136,13 @@ publish-printing: format clean
 	cd printing; $(DART_BIN) pub publish -f
 	find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 	git tag $(shell grep version printing/pubspec.yaml | sed 's/version\s*:\s*/printing-/g')
+
+publish-wrapper: format clean
+	test -z "$(shell git status --porcelain)"
+	find widget_wrapper -name pubspec.yaml -exec sed -i -e 's/^dependency_overrides:/_dependency_overrides:/g' '{}' ';'
+	cd widget_wrapper; $(DART_BIN) pub publish -f
+	find widget_wrapper -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
+	git tag $(shell grep version widget_wrapper/pubspec.yaml | sed 's/version\s*:\s*/wrapper-/g')
 
 .pana:
 	which pana || $(DART_BIN) pub global activate pana
@@ -252,6 +259,7 @@ ref: svg
 	cd $@; curl -OL 'https://ia801003.us.archive.org/5/items/pdf320002008/PDF32000_2008.pdf'
 	cd $@; curl -OL 'https://www.adobe.com/content/dam/cc1/en/devnet/pdf/pdfs/adobe_supplement_iso32000_1.pdf'
 	cd $@; curl -OL 'https://ia801001.us.archive.org/1/items/pdf1.7/pdf_reference_1-7.pdf'
+	cd $@; curl -OL 'https://www.adobe.com/devnet-docs/acrobatetk/tools/DigSigDC/Acrobat_DigitalSignatures_in_PDF.pdf'
 
 gh-social: all
 	cd test; $(DART_BIN) --enable-asserts github_social_preview.dart

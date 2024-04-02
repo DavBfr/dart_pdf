@@ -81,7 +81,7 @@ const Map<int, int> basicToIsolatedMappings = {
 /// Applies THE BIDIRECTIONAL ALGORITHM using (https://pub.dev/packages/bidi)
 String logicalToVisual(String input) {
   final buffer = StringBuffer();
-  final paragraphs = bidi.splitStringToParagraphs(input);
+  final paragraphs = bidi.BidiString.fromLogical(input).paragraphs;
   for (final paragraph in paragraphs) {
     final endsWithNewLine = paragraph.separator == 10;
     final endIndex = paragraph.bidiText.length - (endsWithNewLine ? 1 : 0);

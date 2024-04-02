@@ -309,7 +309,6 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
             "directPrint": true,
             "dynamicLayout": true,
             "canPrint": true,
-            "canConvertHtml": true,
             "canShare": true,
             "canRaster": true,
             "canListPrinters": true,

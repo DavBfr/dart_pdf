@@ -18,7 +18,6 @@ import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
-import 'package:pdf/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
@@ -26,6 +25,7 @@ import 'document.dart';
 import 'geometry.dart';
 import 'multi_page.dart';
 import 'page.dart';
+import 'text_style.dart';
 import 'theme.dart';
 
 @immutable

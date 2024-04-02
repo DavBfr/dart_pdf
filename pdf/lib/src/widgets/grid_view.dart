@@ -16,13 +16,13 @@
 
 import 'dart:math' as math;
 
-import 'package:pdf/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
 import 'flex.dart';
 import 'geometry.dart';
 import 'multi_page.dart';
+import 'text.dart';
 import 'text_style.dart';
 import 'widget.dart';
 
