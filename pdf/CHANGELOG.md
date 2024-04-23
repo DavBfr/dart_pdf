@@ -3,6 +3,7 @@
 ## 3.11.0
 
 - Save in an isolate when available
+- NewPage with freeSpace extended [Stefan]
 
 ## 3.10.8
 
