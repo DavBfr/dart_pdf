@@ -206,6 +206,9 @@ abstract class Widget {
   void layout(Context context, BoxConstraints constraints,
       {bool parentUsesSize = false});
 
+  /// Check if a page break is needed for this widget
+  bool newPageNeeded(double availableSpace) => false;
+
   /// Draw itself and its children, according to the calculated
   /// [box.offset]
   @mustCallSuper
