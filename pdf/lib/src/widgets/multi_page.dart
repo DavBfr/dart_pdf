@@ -77,7 +77,6 @@ class NewPage extends Widget {
     box = PdfRect.zero;
   }
 
-  @override
   bool newPageNeeded(double availableSpace) =>
       (freeSpace == null) || (availableSpace < freeSpace!);
 }
@@ -267,7 +266,7 @@ class MultiPage extends Page {
           : offsetStart - offsetEnd;
 
       // Create a new page if we don't already have one
-      if (context == null || child.newPageNeeded(freeSpace)) {
+      if (context == null || (child is NewPage) && child.newPageNeeded(freeSpace)) {
         final pdfPage = PdfPage(
           document.document,
           pageFormat: pageFormat,
