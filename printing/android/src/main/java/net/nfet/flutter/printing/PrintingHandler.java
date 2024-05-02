@@ -7,7 +7,6 @@ import android.print.PrintAttributes;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -35,6 +34,8 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     final PrintingJob printJob =
                             new PrintingJob(context, this, (int) call.argument("job"));
                     assert name != null;
+                    assert width != null;
+                    assert height != null;
                     printJob.printPdf(name, width, height);
 
                     result.success(1);
@@ -138,7 +139,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
             }
 
             @Override
-            public void error(String errorCode, String errorMessage, Object errorDetails) {
+            public void error(@NonNull String errorCode, String errorMessage, Object errorDetails) {
                 printJob.cancelJob(errorMessage);
             }
 

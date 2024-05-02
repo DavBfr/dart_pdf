@@ -98,9 +98,9 @@ get: $(FONTS) pdf/pubspec.lock printing/pubspec.lock demo/pubspec.lock test/pubs
 get-all: $(FONTS) demo/assets/logo.svg demo/assets/profile.jpg get
 
 test-pdf: svg $(FONTS) pdf/pubspec.lock .coverage
-	cd pdf; $(DART_BIN)  run --enable-asserts --pause-isolates-on-exit --disable-service-auth-codes --enable-vm-service=$(COV_PORT) test &\
-	$(DART_BIN)  pub global run coverage:collect_coverage --wait-paused --uri=http://127.0.0.1:$(COV_PORT)/ -o coverage.json --resume-isolates --scope-output=pdf
-	cd pdf; $(DART_BIN) pub global run coverage:format_coverage --packages=.dart_tool/package_config.json -i coverage.json --report-on lib --lcov --out lcov.info
+	cd pdf; $(DART_BIN)  test --coverage=coverage
+	cd pdf; $(DART_BIN) pub global run coverage:format_coverage --packages=.dart_tool/package_config.json -i coverage/test --report-on lib --lcov --out lcov.info
+	rm -rf pdf/coverage
 	cd pdf; for EXAMPLE in $(shell cd pdf; find example -name '*.dart'); do $(DART_BIN) $$EXAMPLE; done
 	test/compare-pdf.sh pdf test/golden
 

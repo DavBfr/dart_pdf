@@ -20,8 +20,6 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import java.lang.ref.WeakReference;
-
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
@@ -59,7 +57,7 @@ public class PrintingPlugin implements FlutterPlugin, ActivityAware {
     }
 
     @Override
-    public void onAttachedToActivity(ActivityPluginBinding binding) {
+    public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
         if (context != null) {
             context = null;
         }

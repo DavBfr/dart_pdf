@@ -27,8 +27,12 @@ Future<Uint8List> generateDocument(
     PdfPageFormat format, CustomData data) async {
   final doc = pw.Document(pageMode: PdfPageMode.outlines);
 
-  final font1 = await PdfGoogleFonts.openSansRegular();
-  final font2 = await PdfGoogleFonts.openSansBold();
+  final font1 = data.testing
+      ? pw.Font.helvetica()
+      : await PdfGoogleFonts.openSansRegular();
+  final font2 = data.testing
+      ? pw.Font.helveticaBold()
+      : await PdfGoogleFonts.openSansBold();
   final shape = await rootBundle.loadString('assets/document.svg');
   final swirls = await rootBundle.loadString('assets/swirls2.svg');
 

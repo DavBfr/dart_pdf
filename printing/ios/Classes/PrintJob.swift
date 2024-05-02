@@ -283,7 +283,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                     // clear WKWebView cache
                     if #available(iOS 9.0, *) {
                         WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
-                            records.forEach { record in
+                            for record in records {
                                 WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {})
                             }
                         }
@@ -396,7 +396,6 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             "directPrint": true,
             "dynamicLayout": true,
             "canPrint": true,
-            "canConvertHtml": true,
             "canShare": true,
             "canRaster": true,
             "canListPrinters": false,
