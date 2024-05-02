@@ -13,6 +13,7 @@ dependencies:
   args:
   flutter:
     sdk: flutter
+  htmltopdfwidgets:
   markdown:
   meta:
   string_scanner:
