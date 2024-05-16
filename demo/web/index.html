@@ -18,7 +18,7 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Pdf Printing Demo">
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -31,8 +31,83 @@
 
   <title>Flutter PDF Demo</title>
   <link rel="manifest" href="manifest.json">
+  <style type="text/css">
+    #loading {
+      position: absolute;
+      width: 400px;
+      height: 300px;
+      top: 50%;
+      left: 50%;
+      margin: -200px 0 0 -200px;
+      text-align: center;
+      font-family: sans-serif
+    }
+
+    #progress {
+      margin-top: 20px;
+      height: 10px;
+      background-color: #ebebeb;
+    }
+
+    #progress div {
+      background-color: #08a5d7;
+      height: 100%;
+      width: 0;
+      transition: width ease-out 300ms;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: black;
+      }
+
+      #loading {
+        color: white;
+      }
+
+      #progress {
+        background-color: #393939;
+      }
+    }
+  </style>
 </head>
+
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+  <div id="loading">
+    <img src="icons/Icon-192.png" width="192" height="192" alt="">
+    <h1>Flutter PDF Demo</h1>
+    <div id="progress">
+      <div></div>
+    </div>
+  </div>
+  <script>
+    {{flutter_js}}
+    {{flutter_build_config}}
+
+    function progress(value) {
+      let el = document.getElementById("progress");
+      if (el) el.firstElementChild.style.width = value + "%";
+    }
+
+    window.addEventListener('load', function (ev) {
+      progress(30);
+    });
+
+
+    window.addEventListener('flutter-first-frame', function () {
+      let el = document.getElementById("loading");
+      if (el) el.remove();
+    });
+
+    _flutter.loader.load({
+      onEntrypointLoaded: async function (engineInitializer) {
+        progress(60);
+        const appRunner = await engineInitializer.initializeEngine();
+        progress(100);
+        await new Promise(resolve => setTimeout(resolve, 200));
+        await appRunner.runApp();
+      }
+    });
+  </script>
 </body>
 </html>
