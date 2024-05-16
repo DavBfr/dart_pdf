@@ -65,7 +65,8 @@ class Printer {
   final bool isAvailable;
 
   @override
-  String toString() => '''$runtimeType $name
+  String toString() => '''
+$runtimeType $name
   url:$url
   location:$location
   model:$model

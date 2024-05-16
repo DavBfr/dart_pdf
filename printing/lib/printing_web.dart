@@ -56,9 +56,10 @@ class PrintingPlugin extends PrintingPlatform {
 
   bool get _hasPdfJsLib => web.window
       .callMethod<js.JSBoolean>(
-          'eval'.toJS,
-          'typeof pdfjsLib !== "undefined" && pdfjsLib.GlobalWorkerOptions.workerSrc != "";'
-              .toJS)
+        'eval'.toJS,
+        'typeof pdfjsLib !== "undefined" && pdfjsLib.GlobalWorkerOptions.workerSrc != "";'
+            .toJS,
+      )
       .toDart;
 
   /// The base URL for loading pdf.js library
@@ -93,11 +94,13 @@ class PrintingPlugin extends PrintingPlatform {
       // Check if the source of PDF.js library is overridden via
       // [dartPdfJsBaseUrl] JavaScript  variable.
       if (web.window.hasProperty(_dartPdfJsBaseUrl.toJS).toDart) {
-        _pdfJsUrlBase = web.window[_dartPdfJsBaseUrl] as String;
+        _pdfJsUrlBase = web.window.getProperty(_dartPdfJsBaseUrl.toJS);
       } else {
         final pdfJsVersion =
             web.window.hasProperty(_dartPdfJsVersion.toJS).toDart
-                ? web.window[_dartPdfJsVersion]
+                ? web.window
+                    .getProperty<js.JSString?>(_dartPdfJsVersion.toJS)!
+                    .toDart
                 : _pdfJsVersion;
         _pdfJsUrlBase = '$_pdfJsCdnPath@$pdfJsVersion/build/';
       }
@@ -119,7 +122,9 @@ class PrintingPlugin extends PrintingPlatform {
           .getProperty<js.JSObject>('pdfjsLib'.toJS)
           .getProperty<js.JSObject>('GlobalWorkerOptions'.toJS)
           .setProperty(
-              'workerSrc'.toJS, '${_pdfJsUrlBase}pdf.worker.min.js'.toJS);
+            'workerSrc'.toJS,
+            '${_pdfJsUrlBase}pdf.worker.min.js'.toJS,
+          );
 
       // Restore module and exports
       if (module != null) {
@@ -165,14 +170,16 @@ class PrintingPlugin extends PrintingPlatform {
         return true;
       }());
 
-      FlutterError.reportError(FlutterErrorDetails(
-        exception: e,
-        stack: s,
-        stackFilter: (input) => input,
-        library: 'printing',
-        context: ErrorDescription('while generating a PDF'),
-        informationCollector: collector,
-      ));
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: e,
+          stack: s,
+          stackFilter: (input) => input,
+          library: 'printing',
+          context: ErrorDescription('while generating a PDF'),
+          informationCollector: collector,
+        ),
+      );
 
       rethrow;
     }
@@ -211,8 +218,10 @@ class PrintingPlugin extends PrintingPlatform {
         // Set the iframe to be is visible on the page (guaranteed by fixed position) but hidden using opacity 0, because
         // this works in Firefox. The height needs to be sufficient for some part of the document other than the PDF
         // viewer's toolbar to be visible in the page
-        frame.setAttribute('style',
-            'width: 1px; height: 100px; position: fixed; left: 0; top: 0; opacity: 0; border-width: 0; margin: 0; padding: 0');
+        frame.setAttribute(
+          'style',
+          'width: 1px; height: 100px; position: fixed; left: 0; top: 0; opacity: 0; border-width: 0; margin: 0; padding: 0',
+        );
       } else {
         // Hide the iframe in other browsers
         frame.setAttribute(
@@ -338,7 +347,7 @@ class PrintingPlugin extends PrintingPlatform {
       final canvas =
           web.window.document.createElement('canvas') as web.HTMLCanvasElement;
 
-      final context = canvas.getContext('2d') as web.CanvasRenderingContext2D;
+      final context = canvas.getContext('2d')! as web.CanvasRenderingContext2D;
       final computedPages =
           pages ?? Iterable<int>.generate(numPages, (index) => index);
 
@@ -360,9 +369,7 @@ class PrintingPlugin extends PrintingPlatform {
           // Convert the image to PNG
           final completer = Completer<void>();
           final blobCompleter = Completer<web.Blob?>();
-          canvas.toBlob((web.Blob? blob) {
-            blobCompleter.complete(blob);
-          }.toJS);
+          canvas.toBlob(blobCompleter.complete.toJS);
           final blob = await blobCompleter.future;
           if (blob == null) {
             continue;
@@ -373,7 +380,7 @@ class PrintingPlugin extends PrintingPlatform {
 
           r.onLoadEnd.listen(
             (web.ProgressEvent e) {
-              data.add((r.result as js.JSArrayBuffer).toDart.asInt8List());
+              data.add((r.result! as js.JSArrayBuffer).toDart.asInt8List());
               completer.complete();
             },
           );
