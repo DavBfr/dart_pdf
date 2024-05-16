@@ -85,7 +85,7 @@ class PdfPreviewPage extends StatelessWidget {
     final scrollbarTrack = Theme.of(context)
             .scrollbarTheme
             .thickness
-            ?.resolve({MaterialState.hovered}) ??
+            ?.resolve({WidgetState.hovered}) ??
         12;
 
     return Container(

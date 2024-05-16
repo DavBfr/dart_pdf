@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.13.0
+
+- Migrate to package:web and dart:js_interop
+
 ## 5.12.0
 
 - Refactor html imports
