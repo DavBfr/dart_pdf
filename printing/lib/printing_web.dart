@@ -369,7 +369,12 @@ class PrintingPlugin extends PrintingPlatform {
           // Convert the image to PNG
           final completer = Completer<void>();
           final blobCompleter = Completer<web.Blob?>();
-          canvas.toBlob(blobCompleter.complete.toJS);
+          canvas.toBlob(
+            // ignore: unnecessary_lambdas
+            (web.Blob? blob) {
+              blobCompleter.complete(blob);
+            }.toJS,
+          );
           final blob = await blobCompleter.future;
           if (blob == null) {
             continue;
