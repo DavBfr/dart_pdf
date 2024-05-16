@@ -3,6 +3,7 @@
 ## 5.13.0
 
 - Migrate to package:web and dart:js_interop
+- Set Flutter 3.19 as minimal version
 
 ## 5.12.0
 
