@@ -34,9 +34,16 @@ import 'text_style.dart';
 import 'theme.dart';
 import 'widget.dart';
 
+import 'package:flutter/widgets.dart' as flutterWidget;
+
 enum TextAlign { left, right, start, end, center, justify }
 
-enum TextDirection { ltr, rtl }
+enum TextDirection {
+  ltr,
+  rtl;
+
+  static TextDirection from(flutterWidget.TextDirection textDirection) => textDirection == flutterWidget.TextDirection.ltr ? ltr : rtl;
+}
 
 /// How overflowing text should be handled.
 enum TextOverflow {
