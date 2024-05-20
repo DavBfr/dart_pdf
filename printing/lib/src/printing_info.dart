@@ -66,7 +66,8 @@ class PrintingInfo {
   final bool canRaster;
 
   @override
-  String toString() => '''$runtimeType:
+  String toString() => '''
+$runtimeType:
   canPrint: $canPrint
   directPrint: $directPrint
   dynamicLayout: $dynamicLayout

@@ -93,13 +93,26 @@ class PdfActionBarTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle));
     properties.add(DoubleProperty('elevation', elevation));
     properties.add(DoubleProperty('actionSpacing', actionSpacing));
-    properties.add(DiagnosticsProperty<WrapAlignment>('alignment', alignment,
-        defaultValue: WrapAlignment.spaceAround));
-    properties.add(DiagnosticsProperty<WrapAlignment>(
-        'runAlignment', runAlignment,
-        defaultValue: WrapAlignment.center));
-    properties.add(DiagnosticsProperty<WrapCrossAlignment>(
-        'crossAxisAlignment', crossAxisAlignment,
-        defaultValue: WrapCrossAlignment.center));
+    properties.add(
+      DiagnosticsProperty<WrapAlignment>(
+        'alignment',
+        alignment,
+        defaultValue: WrapAlignment.spaceAround,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<WrapAlignment>(
+        'runAlignment',
+        runAlignment,
+        defaultValue: WrapAlignment.center,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<WrapCrossAlignment>(
+        'crossAxisAlignment',
+        crossAxisAlignment,
+        defaultValue: WrapCrossAlignment.center,
+      ),
+    );
   }
 }

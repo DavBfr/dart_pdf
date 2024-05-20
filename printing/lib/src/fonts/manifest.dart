@@ -47,7 +47,8 @@ mixin AssetManifest {
           assert(() {
             // ignore: avoid_print
             print(
-                'Error loading AssetManifest.json $e Try to call first:\nWidgetsFlutterBinding.ensureInitialized();');
+              'Error loading AssetManifest.json $e Try to call first:\nWidgetsFlutterBinding.ensureInitialized();',
+            );
             return true;
           }());
 

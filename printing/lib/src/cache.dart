@@ -92,9 +92,7 @@ class PdfMemoryCache extends PdfBaseCache {
 
   void _resetTimer() {
     _timer?.cancel();
-    _timer = Timer(const Duration(minutes: 20), () {
-      clear();
-    });
+    _timer = Timer(const Duration(minutes: 20), clear);
   }
 
   @override
