@@ -49,6 +49,7 @@ class BarDataSet<T extends PointChartValue> extends PointDataSet<T> {
           legend: legend,
           color: pointColor ?? color,
           data: data,
+          offsets: offset,
           buildValue: buildValue,
           drawPoints: drawPoints,
           pointSize: pointSize,
