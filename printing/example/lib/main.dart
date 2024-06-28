@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs
+// ignore_for_file: public_member_api_docs, avoid_redundant_argument_values
 
 import 'dart:typed_data';
 
@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
                 ),
               ),
               pw.SizedBox(height: 20),
-              pw.Flexible(child: pw.FlutterLogo())
+              pw.Flexible(child: pw.FlutterLogo()),
             ],
           );
         },

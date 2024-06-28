@@ -15,11 +15,11 @@ topics:
   - print
   - printing
   - report
-version: 5.13.0
+version: 5.13.1
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
-  flutter: ">=3.19.0"
+  flutter: ">=3.22.0"
 
 dependencies:
   ffi: ">=1.1.0 <3.0.0"

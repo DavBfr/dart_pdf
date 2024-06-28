@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.13.1
+
+- Fix Flutter SDK Minimum version
+
 ## 5.13.0
 
 - Migrate to package:web and dart:js_interop
