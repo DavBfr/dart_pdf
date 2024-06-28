@@ -410,13 +410,23 @@ class Table extends Widget with SpanningWidget {
       var x = 0.0;
 
       var lineHeight = 0.0;
+      var colSpan = 0;
       for (final child in row.children) {
-        final childConstraints = BoxConstraints.tightFor(width: _widths[n]);
+        // Adjust width based on colSpan
+        var width = _getWidth(child, n);
+        if (child is TableCell && child.colSpan != null) {
+          colSpan = child.colSpan! - 1;
+        } else if (colSpan > 0) {
+          width = 0;
+          colSpan--;
+        }
+
+        final childConstraints = BoxConstraints.tightFor(width: width);
         child.layout(context, childConstraints);
         assert(child.box != null);
         child.box =
             PdfRect(x, totalHeight, child.box!.width, child.box!.height);
-        x += _widths[n]!;
+        x += width;
         lineHeight = math.max(lineHeight, child.box!.height);
         n++;
       }
@@ -427,14 +437,24 @@ class Table extends Widget with SpanningWidget {
         // Compute the layout again to give the full height to all cells
         n = 0;
         x = 0;
+        var colSpan = 0;
         for (final child in row.children) {
+          // Adjust width based on colSpan
+          var width = _getWidth(child, n);
+          if (child is TableCell && child.colSpan != null) {
+            colSpan = child.colSpan! - 1;
+          } else if (colSpan > 0) {
+            width = 0;
+            colSpan--;
+          }
+
           final childConstraints =
-              BoxConstraints.tightFor(width: _widths[n], height: lineHeight);
+              BoxConstraints.tightFor(width: width, height: lineHeight);
           child.layout(context, childConstraints);
           assert(child.box != null);
           child.box =
               PdfRect(x, totalHeight, child.box!.width, child.box!.height);
-          x += _widths[n]!;
+          x += width;
           n++;
         }
       }
@@ -451,6 +471,7 @@ class Table extends Widget with SpanningWidget {
     // Compute final y position
     index = 0;
     var heightIndex = 0;
+    final spanIndex = {};
     for (final row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
@@ -458,17 +479,26 @@ class Table extends Widget with SpanningWidget {
 
       final align = row.verticalAlignment ?? defaultVerticalAlignment;
 
+      var n = 0;
       for (final child in row.children) {
         double? childY;
 
+        // Adjust height based on rowSpan
+        var height = _getHeight(child, heightIndex);
+        if (child is TableCell && child.rowSpan != null) {
+          spanIndex[n] = child.rowSpan! - 1;
+        } else if (spanIndex[n] != null && spanIndex[n] > 0) {
+          height = 0;
+          spanIndex[n] -= 1;
+        }
+
         switch (align) {
           case TableCellVerticalAlignment.bottom:
-            childY = totalHeight - child.box!.y - _getHeight(heightIndex);
+            childY = totalHeight - child.box!.y - height;
             break;
           case TableCellVerticalAlignment.middle:
-            childY = totalHeight -
-                child.box!.y -
-                (_getHeight(heightIndex) + child.box!.height) / 2;
+            childY =
+                totalHeight - child.box!.y - (height + child.box!.height) / 2;
             break;
           case TableCellVerticalAlignment.top:
           case TableCellVerticalAlignment.full:
@@ -480,8 +510,9 @@ class Table extends Widget with SpanningWidget {
           child.box!.x,
           childY,
           child.box!.width,
-          child.box!.height,
+          height,
         );
+        n++;
       }
 
       if (index >= _context.lastLine) {
@@ -573,9 +604,51 @@ class Table extends Widget with SpanningWidget {
     }
   }
 
-  double _getHeight(int heightIndex) {
-    return (heightIndex >= 0 && heightIndex < _heights.length)
+  double _getHeight(Widget cell, int heightIndex) {
+    double? height = (heightIndex >= 0 && heightIndex < _heights.length)
         ? _heights[heightIndex]
         : 0.0;
+    if (cell is TableCell && cell.rowSpan != null) {
+      double? newHeight = 0;
+      for (var i = 0; i < cell.rowSpan!; i++) {
+        newHeight = newHeight! + _heights[heightIndex + i];
+      }
+      height = newHeight;
+    }
+    return height ?? 0;
   }
+
+  double _getWidth(Widget cell, int widthIndex) {
+    var width = (widthIndex >= 0 && widthIndex < _widths.length)
+        ? _widths[widthIndex]
+        : 0.0;
+    if (cell is TableCell && cell.colSpan != null) {
+      double? newWidth = 0;
+      for (var i = 0; i < cell.colSpan!; i++) {
+        newWidth = newWidth! + _widths[widthIndex + i]!;
+      }
+      width = newWidth;
+    }
+    return width ?? 0;
+  }
+}
+
+class TableCell extends Container {
+  TableCell({
+    super.alignment,
+    super.padding,
+    super.color,
+    super.decoration,
+    super.foregroundDecoration,
+    super.width,
+    super.height,
+    super.constraints,
+    super.margin,
+    super.transform,
+    super.child,
+    this.colSpan,
+    this.rowSpan,
+  });
+  int? colSpan;
+  int? rowSpan;
 }
