@@ -353,17 +353,38 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                 let rectCrop = page.getBoxRect(.cropBox)
                 let diffHeight = rectCrop.height - rect.height
                 let diffWidth = rectCrop.width - rect.width
-                let width = Int(abs((cos(angle) * rectCrop.width + sin(angle) * rectCrop.height) * scale))
-                let height = Int(abs((cos(angle) * rectCrop.height + sin(angle) * rectCrop.width) * scale))
-                let stride = width * 4
-                var data = Data(repeating: 0, count: stride * height)
+                let width: CGFloat
+                let height: CGFloat
+                if angle == 0 {
+                    width = rectCrop.width * scale
+                    height = rectCrop.height * scale
+                } else {
+                    let cosAngle = cos(angle)
+                    let sinAngle = sin(angle)
+                    let scaledWidth = rectCrop.width * scale
+                    let scaledHeight = rectCrop.height * scale
+                    let widthCalculation = abs(cosAngle * rectCrop.width + sinAngle * rectCrop.height)
+                    let heightCalculation = abs(cosAngle * rectCrop.height + sinAngle * rectCrop.width)
+                    width = widthCalculation * scale
+                    height = heightCalculation * scale
+                }
+                let widthInt = Int(width)
+                let heightInt = Int(height)
+                let stride = widthInt * 4
+                var data = Data(repeating: 0, count: stride * heightInt)
+                let cropXMin = rectCrop.minX
+                let cropYMin = rectCrop.minY
+                let cropXMax = rectCrop.maxX
+                let cropYMax = rectCrop.maxY
+                let cropBoxCenterX = (cropXMin + cropXMax) / 2
+                let cropBoxCenterY = (cropYMin + cropYMax) / 2
 
                 data.withUnsafeMutableBytes { (outputBytes: UnsafeMutableRawBufferPointer) in
                     let rgb = CGColorSpaceCreateDeviceRGB()
                     let context = CGContext(
                         data: outputBytes.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                        width: width,
-                        height: height,
+                        width: widthInt,
+                        height: heightInt,
                         bitsPerComponent: 8,
                         bytesPerRow: stride,
                         space: rgb,
@@ -371,17 +392,17 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                     )
 
                     if context != nil {
-                        context!.translateBy(x: CGFloat(width) / 2, y: CGFloat(height) / 2)
+                        context!.translateBy(x: CGFloat(widthInt) / 2, y: CGFloat(heightInt) / 2)
                         context!.scaleBy(x: scale, y: scale)
                         context!.rotate(by: angle)
-                        context!.translateBy(x: -rectCrop.width / 2, y: -rectCrop.height / 2)
+                        context!.translateBy(x: -cropBoxCenterX, y: -cropBoxCenterY)
                         context!.translateBy(x: diffWidth, y: diffHeight)
                         context!.drawPDFPage(page)
                     }
                 }
 
                 DispatchQueue.main.sync {
-                    self.printing.onPageRasterized(printJob: self, imageData: data, width: width, height: height)
+                    self.printing.onPageRasterized(printJob: self, imageData: data, width: widthInt, height: heightInt)
                 }
             }
 
