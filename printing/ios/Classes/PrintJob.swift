@@ -150,20 +150,13 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         }
 
         for paper in paperList {
-            print("Paper available: \(paper.paperSize.width)x\(paper.paperSize.height)")
-        }
-
-        for paper in paperList {
             if (paper.paperSize.width == currentSize!.width && paper.paperSize.height == currentSize!.height) ||
                 (paper.paperSize.width == currentSize!.height && paper.paperSize.height == currentSize!.width) {
-                print("Use paper: \(paper.paperSize.width)x\(paper.paperSize.height)")
                 return paper
             }   
         }
 
         let bestPaper = UIPrintPaper.bestPaper(forPageSize: currentSize!, withPapersFrom: paperList)
-
-        print("Use best paper: \(bestPaper.paperSize.width)x\(bestPaper.paperSize.height)")
 
         return bestPaper
     }
