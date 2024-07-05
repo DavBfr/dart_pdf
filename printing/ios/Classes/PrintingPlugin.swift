@@ -60,10 +60,9 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             let marginBottom = CGFloat((args["marginBottom"] as! NSNumber).floatValue)
             let printJob = PrintJob(printing: self, index: args["job"] as! Int)
             let dynamic = args["dynamic"] as! Bool
-            
 
             let outputType: UIPrintInfo.OutputType
-            switch (args["outputType"] as! Int) {
+            switch args["outputType"] as! Int {
             case 0:
                 outputType = UIPrintInfo.OutputType.general
             case 1:
