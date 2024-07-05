@@ -29,6 +29,7 @@ import 'package:web/web.dart' as web;
 import 'src/callback.dart';
 import 'src/interface.dart';
 import 'src/mutex.dart';
+import 'src/output_type.dart';
 import 'src/pdfjs.dart';
 import 'src/printer.dart';
 import 'src/printing_info.dart';
@@ -156,6 +157,7 @@ class PrintingPlugin extends PrintingPlatform {
     PdfPageFormat format,
     bool dynamicLayout,
     bool usePrinterSettings,
+    OutputType outputType,
   ) async {
     late Uint8List result;
     try {
