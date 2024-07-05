@@ -149,12 +149,26 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             return paperList[0]
         }
 
+        for paper in paperList {
+            print("Paper available: \(paper.paperSize.width)x\(paper.paperSize.height)")
+        }
+
+        for paper in paperList {
+            if (paper.paperSize.width == currentSize!.width && paper.paperSize.height == currentSize!.height) ||
+                (paper.paperSize.width == currentSize!.height && paper.paperSize.height == currentSize!.width) {
+                print("Use paper: \(paper.paperSize.width)x\(paper.paperSize.height)")
+                return paper
+            }   
+        }
+
         let bestPaper = UIPrintPaper.bestPaper(forPageSize: currentSize!, withPapersFrom: paperList)
+
+        print("Use best paper: \(bestPaper.paperSize.width)x\(bestPaper.paperSize.height)")
 
         return bestPaper
     }
 
-    func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool) {
+    func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool, outputType type: UIPrintInfo.OutputType) {
         currentSize = size
         dynamic = dyn
         let printing = UIPrintInteractionController.isPrintingAvailable
@@ -175,7 +189,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
 
         let printInfo = UIPrintInfo.printInfo()
         printInfo.jobName = jobName!
-        printInfo.outputType = .general
+        printInfo.outputType = type
         if orientation != nil {
             printInfo.orientation = orientation!
             orientation = nil

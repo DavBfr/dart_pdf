@@ -31,6 +31,7 @@ import 'package:pdf/pdf.dart';
 import 'callback.dart';
 import 'interface.dart';
 import 'method_channel_ffi.dart' if (dart.library.js) 'method_channel_js.dart';
+import 'output_type.dart';
 import 'print_job.dart';
 import 'printer.dart';
 import 'printing_info.dart';
@@ -180,6 +181,7 @@ class MethodChannelPrinting extends PrintingPlatform {
     PdfPageFormat format,
     bool dynamicLayout,
     bool usePrinterSettings,
+    OutputType outputType,
   ) async {
     final job = _printJobs.add(
       onCompleted: Completer<bool>(),
@@ -198,6 +200,7 @@ class MethodChannelPrinting extends PrintingPlatform {
       'marginBottom': format.marginBottom,
       'dynamic': dynamicLayout,
       'usePrinterSettings': usePrinterSettings,
+      'outputType': outputType.index,
     };
 
     await _channel.invokeMethod<int>('printPdf', params);

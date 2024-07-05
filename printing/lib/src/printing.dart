@@ -22,6 +22,7 @@ import 'package:pdf/pdf.dart';
 
 import 'callback.dart';
 import 'interface.dart';
+import 'output_type.dart';
 import 'printer.dart';
 import 'printing_info.dart';
 import 'raster.dart';
@@ -39,12 +40,16 @@ mixin Printing {
   /// Set [usePrinterSettings] to true to use the configuration defined by
   /// the printer. May not work for all the printers and can depend on the
   /// drivers. (Supported platforms: Windows)
+  /// Set [outputType] to [OutputType.generic] to use the default printing
+  /// system, or [OutputType.photos] to use the photo printing system.
+  /// (Supported platforms: iOS)
   static Future<bool> layoutPdf({
     required LayoutCallback onLayout,
     String name = 'Document',
     PdfPageFormat format = PdfPageFormat.standard,
     bool dynamicLayout = true,
     bool usePrinterSettings = false,
+    OutputType outputType = OutputType.generic,
   }) {
     return PrintingPlatform.instance.layoutPdf(
       null,
@@ -53,6 +58,7 @@ mixin Printing {
       format,
       dynamicLayout,
       usePrinterSettings,
+      outputType,
     );
   }
 
@@ -139,6 +145,7 @@ mixin Printing {
     PdfPageFormat format = PdfPageFormat.standard,
     bool dynamicLayout = true,
     bool usePrinterSettings = false,
+    OutputType outputType = OutputType.generic,
   }) {
     return PrintingPlatform.instance.layoutPdf(
       printer,
@@ -147,6 +154,7 @@ mixin Printing {
       format,
       dynamicLayout,
       usePrinterSettings,
+      outputType,
     );
   }
 

@@ -60,6 +60,22 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             let marginBottom = CGFloat((args["marginBottom"] as! NSNumber).floatValue)
             let printJob = PrintJob(printing: self, index: args["job"] as! Int)
             let dynamic = args["dynamic"] as! Bool
+            
+
+            let outputType: UIPrintInfo.OutputType
+            switch (args["outputType"] as! Int) {
+            case 0:
+                outputType = UIPrintInfo.OutputType.general
+            case 1:
+                outputType = UIPrintInfo.OutputType.photo
+            case 2:
+                outputType = UIPrintInfo.OutputType.grayscale
+            case 3:
+                outputType = UIPrintInfo.OutputType.photoGrayscale
+            default:
+                outputType = UIPrintInfo.OutputType.general
+            }
+
             jobs[args["job"] as! UInt32] = printJob
             printJob.printPdf(name: name,
                               withPageSize: CGSize(
@@ -71,8 +87,10 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
                                   y: marginTop,
                                   width: width - marginRight - marginLeft,
                                   height: height - marginBottom - marginTop
-                              ), withPrinter: printer,
-                              dynamically: dynamic)
+                              ),
+                              withPrinter: printer,
+                              dynamically: dynamic,
+                              outputType: outputType)
             result(NSNumber(value: 1))
         } else if call.method == "sharePdf" {
             let object = args["doc"] as! FlutterStandardTypedData
