@@ -1,5 +1,19 @@
 # Changelog
 
+## 5.13.2
+
+- Added new printing output type value on iOS [Matteo Ricupero]
+
+## 5.13.1
+
+- Fix Flutter SDK Minimum version
+
+## 5.13.0
+
+- Migrate to package:web and dart:js_interop
+- Set Flutter 3.19 as minimal version
+- Fix lints
+
 ## 5.12.0
 
 - Refactor html imports
@@ -29,7 +43,7 @@
 - Fix raster crash on iOS and MacOS [Eduardo Vital Alencar Cunha]
 - Fix wrong format in directPrintPdf [<AlhasanAlQaisi>]
 - Add compatibility with Android Gradle Plugin 8.0 [asaarnak]
-- Add compatibility with  Flutter 3.10
+- Add compatibility with Flutter 3.10
 - Re-init UIPrinter cause issues with delegate [Hasan]
 
 ## 5.10.3

@@ -106,12 +106,15 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
     if (printingInfo != null && !printingInfo.canRaster) {
       assert(() {
         if (kIsWeb) {
-          FlutterError.reportError(FlutterErrorDetails(
-            exception: Exception(
-                'Unable to find the `pdf.js` library.\nPlease follow the installation instructions at https://github.com/DavBfr/dart_pdf/tree/master/printing#installing'),
-            library: 'printing',
-            context: ErrorDescription('while rendering a PDF'),
-          ));
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: Exception(
+                'Unable to find the `pdf.js` library.\nPlease follow the installation instructions at https://github.com/DavBfr/dart_pdf/tree/master/printing#installing',
+              ),
+              library: 'printing',
+              context: ErrorDescription('while rendering a PDF'),
+            ),
+          );
         }
 
         return true;
@@ -133,13 +136,15 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         return true;
       }());
 
-      FlutterError.reportError(FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'printing',
-        context: ErrorDescription('while generating a PDF'),
-        informationCollector: collector,
-      ));
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'printing',
+          context: ErrorDescription('while generating a PDF'),
+          informationCollector: collector,
+        ),
+      );
       if (mounted) {
         setState(() {
           error = exception;
@@ -168,11 +173,13 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
           return;
         }
         if (pages.length <= pageNum) {
-          pages.add(PdfPreviewPageData(
-            image: MemoryImage(await page.toPng()),
-            width: page.width,
-            height: page.height,
-          ));
+          pages.add(
+            PdfPreviewPageData(
+              image: MemoryImage(await page.toPng()),
+              width: page.width,
+              height: page.height,
+            ),
+          );
         } else {
           pages[pageNum].image.evict();
           pages[pageNum] = PdfPreviewPageData(
@@ -206,13 +213,15 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         return true;
       }());
 
-      FlutterError.reportError(FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'printing',
-        context: ErrorDescription('while rastering a PDF'),
-        informationCollector: collector,
-      ));
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'printing',
+          context: ErrorDescription('while rastering a PDF'),
+          informationCollector: collector,
+        ),
+      );
 
       if (mounted) {
         setState(() {

@@ -28,7 +28,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scrollbarTheme = ScrollbarThemeData(
-      thumbVisibility: MaterialStateProperty.all(true),
+      thumbVisibility: WidgetStateProperty.all(true),
     );
 
     return MaterialApp(

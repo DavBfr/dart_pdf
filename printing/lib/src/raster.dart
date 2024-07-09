@@ -38,7 +38,7 @@ class PdfRaster extends PdfRasterBase {
       width,
       height,
       ui.PixelFormat.rgba8888,
-      (ui.Image image) => comp.complete(image),
+      comp.complete,
     );
     return comp.future;
   }
@@ -62,7 +62,7 @@ class PdfRasterImage extends ImageProvider<PdfRaster> {
 
   Future<ImageInfo> _loadAsync() async {
     final uiImage = await raster.toImage();
-    return ImageInfo(image: uiImage, scale: 1);
+    return ImageInfo(image: uiImage);
   }
 
   @override
