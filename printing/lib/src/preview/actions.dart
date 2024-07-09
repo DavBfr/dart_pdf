@@ -36,7 +36,7 @@ mixin PdfPreviewActionBounds {
   /// Calculate the widget bounds for iPad popup position
   Rect get bounds {
     final referenceBox =
-        childKey.currentContext!.findRenderObject() as RenderBox;
+        childKey.currentContext!.findRenderObject()! as RenderBox;
     final topLeft =
         referenceBox.localToGlobal(referenceBox.paintBounds.topLeft);
     final bottomRight =
@@ -49,10 +49,10 @@ mixin PdfPreviewActionBounds {
 class PdfPreviewAction extends StatelessWidget {
   /// Represents an icon to add to [PdfPreview]
   const PdfPreviewAction({
-    Key? key,
+    super.key,
     required this.icon,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   /// The icon to display
   final Widget icon;
@@ -76,7 +76,7 @@ class PdfPreviewAction extends StatelessWidget {
 
 class PdfPrintAction extends StatelessWidget {
   const PdfPrintAction({
-    Key? key,
+    super.key,
     Widget? icon,
     String? jobName,
     this.onPrinted,
@@ -84,8 +84,7 @@ class PdfPrintAction extends StatelessWidget {
     this.dynamicLayout = true,
     this.usePrinterSettings = false,
   })  : icon = icon ?? const Icon(Icons.print),
-        jobName = jobName ?? 'Document',
-        super(key: key);
+        jobName = jobName ?? 'Document';
 
   final Widget icon;
 
@@ -144,13 +143,15 @@ class PdfPrintAction extends StatelessWidget {
         return true;
       }());
 
-      FlutterError.reportError(FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'printing',
-        context: ErrorDescription('while printing a PDF'),
-        informationCollector: collector,
-      ));
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'printing',
+          context: ErrorDescription('while printing a PDF'),
+          informationCollector: collector,
+        ),
+      );
 
       onPrintError?.call(exception);
     }
@@ -159,7 +160,7 @@ class PdfPrintAction extends StatelessWidget {
 
 class PdfShareAction extends StatelessWidget with PdfPreviewActionBounds {
   PdfShareAction({
-    Key? key,
+    super.key,
     Widget? icon,
     String? filename,
     this.subject,
@@ -168,8 +169,7 @@ class PdfShareAction extends StatelessWidget with PdfPreviewActionBounds {
     this.onShared,
     this.onShareError,
   })  : icon = icon ?? const Icon(Icons.share),
-        filename = filename ?? 'document.pdf',
-        super(key: key);
+        filename = filename ?? 'document.pdf';
 
   final Widget icon;
 
@@ -225,9 +225,9 @@ class PdfShareAction extends StatelessWidget with PdfPreviewActionBounds {
 
 class PdfPageFormatAction extends StatelessWidget {
   const PdfPageFormatAction({
-    Key? key,
+    super.key,
     required this.pageFormats,
-  }) : super(key: key);
+  });
 
   /// List of page formats the user can choose
   final Map<String, PdfPageFormat> pageFormats;
@@ -288,8 +288,8 @@ class PdfPageFormatAction extends StatelessWidget {
 
 class PdfPageOrientationAction extends StatelessWidget {
   const PdfPageOrientationAction({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

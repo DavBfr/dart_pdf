@@ -65,11 +65,11 @@ class PdfPreviewPageData {
 class PdfPreviewPage extends StatelessWidget {
   /// Create a PDF page widget
   const PdfPreviewPage({
-    Key? key,
+    super.key,
     required this.pageData,
     this.pdfPreviewPageDecoration,
     this.pageMargin,
-  }) : super(key: key);
+  });
 
   /// Image representing the content of the page
   final PdfPreviewPageData pageData;
@@ -85,7 +85,7 @@ class PdfPreviewPage extends StatelessWidget {
     final scrollbarTrack = Theme.of(context)
             .scrollbarTheme
             .thickness
-            ?.resolve({MaterialState.hovered}) ??
+            ?.resolve({WidgetState.hovered}) ??
         12;
 
     return Container(
@@ -103,7 +103,6 @@ class PdfPreviewPage extends StatelessWidget {
               BoxShadow(
                 offset: Offset(0, 3),
                 blurRadius: 5,
-                color: Color(0xFF000000),
               ),
             ],
           ),

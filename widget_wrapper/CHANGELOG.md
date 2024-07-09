@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.4
+
+- Add compatibility with Flutter 3.20.0-7.0.pre.48
+
 ## 1.0.3
 
 - Add compatibility with Flutter 3.19.0
