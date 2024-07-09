@@ -56,9 +56,9 @@ import 'object.dart';
 
 class PdfaColorProfile extends PdfObject<PdfDictStream> {
   PdfaColorProfile(
-      PdfDocument pdfDocument,
-      this.icc,
-      ) : super(
+   PdfDocument pdfDocument,
+   this.icc,
+  ) : super(
     pdfDocument,
     params: PdfDictStream(
       compress: false,
@@ -123,10 +123,12 @@ class PdfaRdf {
     offset.inHours > 0 ? offset.inHours : 1; // For fixing divide by 0
     if (!offset.isNegative) {
       createDate =
-      "$createDate+${offset.inHours.toString().padLeft(2, '0')}:${(offset.inMinutes % (hours * 60)).toString().padLeft(2, '0')}";
+      "$createDate+${offset.inHours.toString().padLeft(2, '0')}:${(offset
+          .inMinutes % (hours * 60)).toString().padLeft(2, '0')}";
     } else {
       createDate =
-      "$createDate-${(-offset.inHours).toString().padLeft(2, '0')}:${(offset.inMinutes % (hours * 60)).toString().padLeft(2, '0')}";
+      "$createDate-${(-offset.inHours).toString().padLeft(2, '0')}:${(offset
+          .inMinutes % (hours * 60)).toString().padLeft(2, '0')}";
     }
 
     return XmlDocument.parse('''
@@ -161,7 +163,8 @@ class PdfaRdf {
 class PdfaAttachedFiles {
   PdfaAttachedFiles(
     PdfDocument pdfDocument,
-    Map<String, String> files,
+    Map<String,
+    String> files,
   ) {
     for (var entry in files.entries) {
       _files.add(
@@ -208,9 +211,9 @@ class _AttachedFileNames extends PdfObject<PdfDict> {
     PdfDocument pdfDocument,
     this._files,
   ) : super(
-          pdfDocument,
-          params: PdfDict(),
-        );
+    pdfDocument,
+    params: PdfDict(),
+  );
   final List<_AttachedFileSpec> _files;
 
   @override
@@ -229,9 +232,9 @@ class _AttachedFileSpec extends PdfObject<PdfDict> {
     PdfDocument pdfDocument,
     this._file,
   ) : super(
-          pdfDocument,
-          params: PdfDict(),
-        );
+    pdfDocument,
+    params: PdfDict(),
+  );
   final _AttachedFile _file;
 
   @override
@@ -258,12 +261,12 @@ class _AttachedFile extends PdfObject<PdfDictStream> {
     this.fileName,
     this.content,
   ) : super(
-          pdfDocument,
-          params: PdfDictStream(
-            compress: false,
-            encrypt: false,
-          ),
-        );
+    pdfDocument,
+    params: PdfDictStream(
+      compress: false,
+      encrypt: false,
+    ),
+  );
 
   final String fileName;
   final String content;
@@ -288,26 +291,41 @@ class _AttachedFile extends PdfObject<PdfDictStream> {
 
 class _PdfRaw extends PdfDataType {
   const _PdfRaw(
-    this.nr,
-    this.spec,
+      this.nr,
+      this.spec,
   );
 
   final int nr;
   final _AttachedFileSpec spec;
 
   @override
-  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
-    s.putString('(${nr.toString().padLeft(3, '0')}) ${spec.ref()}');
+  void output(
+    PdfObjectBase o,
+    PdfStream s,
+    [int? indent,]
+  ) {
+    s.putString(
+        '(${nr.toString().padLeft(3, '0')}) ${spec.ref()}'
+    );
   }
 }
 
 class PdfaFacturxRdf {
-  String create() {
+  String create({
+    String filename = 'factur-x.xml',
+    String namespace = 'urn:cen.eu:invoice:1p0:schema#'
+}) {
+
+    // String namespace = 'urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#';
+    // String namespace = 'urn:cen.eu:invoice:1p0:schema#';
+    // String filename = 'factur-x.xml';
+    // String filename = 'xrechnung.xml';
+
     return '''
     
-<rdf:Description xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#" rdf:about="">
+<rdf:Description xmlns:fx="$namespace" rdf:about="">
   <fx:DocumentType>INVOICE</fx:DocumentType>
-  <fx:DocumentFileName>factur-x.xml</fx:DocumentFileName>
+  <fx:DocumentFileName>$filename</fx:DocumentFileName>
   <fx:Version>1.0</fx:Version>
   <fx:ConformanceLevel>BASIC</fx:ConformanceLevel>
 </rdf:Description>
@@ -322,8 +340,8 @@ class PdfaFacturxRdf {
   <pdfaExtension:schemas>
     <rdf:Bag>
       <rdf:li rdf:parseType="Resource">
-        <pdfaSchema:schema>Factur-X PDFA Extension Schema</pdfaSchema:schema>
-        <pdfaSchema:namespaceURI>urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#</pdfaSchema:namespaceURI>
+        <pdfaSchema:schema>Invoice PDFA Extension Schema</pdfaSchema:schema>
+        <pdfaSchema:namespaceURI>$namespace</pdfaSchema:namespaceURI>
         <pdfaSchema:prefix>fx</pdfaSchema:prefix>
         <pdfaSchema:property>
           <rdf:Seq>
