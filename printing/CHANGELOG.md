@@ -3,6 +3,7 @@
 ## 5.13.2
 
 - Added new printing output type value on iOS [Matteo Ricupero]
+- Workaround for iOS bug and force paper size [Matteo Ricupero]
 
 ## 5.13.1
 

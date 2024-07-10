@@ -25,6 +25,9 @@ func dataProviderReleaseDataCallback(info _: UnsafeMutableRawPointer?, data: Uns
 // Each printer will be identified by its URL string
 var selectedPrinters = [String: UIPrinter]()
 
+// Holds the printer after it was picked
+var pickedPrinter: UIPrinter?
+
 public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate {
     private var printing: PrintingPlugin
     public var index: Int
@@ -36,6 +39,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     private let semaphore = DispatchSemaphore(value: 0)
     private var dynamic = false
     private var currentSize: CGSize?
+    private var forceCustomPrintPaper = false
 
     public init(printing: PrintingPlugin, index: Int) {
         self.printing = printing
@@ -149,6 +153,10 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             return paperList[0]
         }
 
+        if forceCustomPrintPaper {
+            return CustomPrintPaper(size: currentSize!)
+        }
+
         for paper in paperList {
             if (paper.paperSize.width == currentSize!.width && paper.paperSize.height == currentSize!.height) ||
                 (paper.paperSize.width == currentSize!.height && paper.paperSize.height == currentSize!.width)
@@ -162,9 +170,11 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         return bestPaper
     }
 
-    func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool, outputType type: UIPrintInfo.OutputType) {
+    func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool, outputType type: UIPrintInfo.OutputType, forceCustomPrintPaper: Bool = false) {
         currentSize = size
         dynamic = dyn
+        self.forceCustomPrintPaper = forceCustomPrintPaper
+
         let printing = UIPrintInteractionController.isPrintingAvailable
         if !printing {
             self.printing.onCompleted(printJob: self, completed: false, error: "Printing not available")
@@ -205,6 +215,14 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
 
             if !selectedPrinters.keys.contains(printerURLString) {
                 selectedPrinters[printerURLString] = UIPrinter(url: printerURL!)
+            }
+
+            // Sometimes using UIPrinter(url:) gives a non-contactable printer.
+            // https://stackoverflow.com/questions/34602302/creating-a-working-uiprinter-object-from-url-for-dialogue-free-printing
+            // This lets use a printer saved during picking and fall back using a printer created with UIPrinter(url:)
+            if pickedPrinter != nil && selectedPrinters[printerURLString]!.url == pickedPrinter?.url {
+                controller.print(to: pickedPrinter!, completionHandler: completionHandler)
+                return
             }
 
             selectedPrinters[printerURLString]!.contactPrinter { available in
@@ -328,6 +346,9 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                 "model": printer.makeAndModel as Any,
                 "location": printer.displayLocation as Any,
             ]
+
+            pickedPrinter = printer
+
             result(data)
         }
 

@@ -158,6 +158,7 @@ class PrintingPlugin extends PrintingPlatform {
     bool dynamicLayout,
     bool usePrinterSettings,
     OutputType outputType,
+    bool forceCustomPrintPaper,
   ) async {
     late Uint8List result;
     try {
