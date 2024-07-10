@@ -7,7 +7,7 @@ homepage: https://github.com/DavBfr/dart_pdf/tree/master/printing
 repository: https://github.com/DavBfr/dart_pdf
 issue_tracker: https://github.com/DavBfr/dart_pdf/issues
 screenshots:
-  - description: 'Printing a document on iOS'
+  - description: "Printing a document on iOS"
     path: example.png
 topics:
   - pdf
@@ -15,7 +15,7 @@ topics:
   - print
   - printing
   - report
-version: 5.13.2
+version: 5.13.3
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -31,7 +31,7 @@ dependencies:
   image: ^4.0.02
   meta: ">=1.3.0 <2.0.0"
   pdf: ^3.10.0
-  pdf_widget_wrapper: '>=1.0.0 <2.0.0'
+  pdf_widget_wrapper: ">=1.0.0 <2.0.0"
   plugin_platform_interface: ^2.1.0
   web: ^0.5.1
 

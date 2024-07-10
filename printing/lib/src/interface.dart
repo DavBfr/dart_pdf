@@ -68,6 +68,7 @@ abstract class PrintingPlatform extends PlatformInterface {
     bool dynamicLayout,
     bool usePrinterSettings,
     OutputType outputType,
+    bool forceCustomPrintPaper,
   );
 
   /// Enumerate the available printers on the system.
