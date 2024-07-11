@@ -30,8 +30,8 @@ dependencies:
   http: ">=0.13.0 <2.0.0"
   image: ^4.0.02
   meta: ">=1.3.0 <2.0.0"
-  pdf: ^3.10.0
-  pdf_widget_wrapper: '>=1.0.0 <2.0.0'
+  pdf:
+  pdf_widget_wrapper:
   plugin_platform_interface: ^2.1.0
   web: ^0.5.1
 
