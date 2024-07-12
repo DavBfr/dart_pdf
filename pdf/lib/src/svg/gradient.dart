@@ -52,6 +52,12 @@ abstract class SvgGradient extends SvgColor {
   @override
   bool get isEmpty => colors.isEmpty;
 
+  @override
+  SvgColor merge(SvgColor other) {
+    if(other.isEmpty) return this;
+    return other;
+  }
+
   PdfPattern buildGradient(
       SvgOperation op, PdfGraphics canvas, List<PdfColor?> colors);
 
