@@ -193,8 +193,8 @@ To save the pdf file (Web):
 ```dart
 var savedFile = await pdf.save();
 List<int> fileInts = List.from(savedFile);
-html.AnchorElement(
-    href: "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(fileInts)}")
+web.HTMLAnchorElement()
+  ..href = "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(fileInts)}"
   ..setAttribute("download", "${DateTime.now().millisecondsSinceEpoch}.pdf")
   ..click();
 ```

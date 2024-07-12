@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.13.0
+
+- Migrate to package:web and dart:js_interop
+- Set Flutter 3.19 as minimal version
+- Fix lints
+
 ## 5.12.0
 
 - Refactor html imports

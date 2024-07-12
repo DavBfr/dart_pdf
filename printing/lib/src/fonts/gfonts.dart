@@ -5503,7 +5503,7 @@ import 'font.dart';
 /// - materialIcons (MaterialIcons)
 /// - notoColorEmoji (NotoColorEmoji)
 class PdfGoogleFonts extends DownloadableFont {
-  const PdfGoogleFonts._(String url, String name) : super(url, name);
+  const PdfGoogleFonts._(super.url, super.name);
 
   /// @nodoc
   /// ABeeZee regular

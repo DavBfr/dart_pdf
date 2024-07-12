@@ -79,10 +79,10 @@ class PdfPreviewData extends ChangeNotifier {
 
 class PdfPreviewController extends InheritedNotifier {
   const PdfPreviewController({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : super(key: key, child: child, notifier: data);
+    required super.child,
+  }) : super(notifier: data);
 
   final PdfPreviewData data;
 

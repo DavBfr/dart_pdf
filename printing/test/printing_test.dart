@@ -38,12 +38,13 @@ void main() {
 
   test('layoutPdf', () async {
     expect(
-        await Printing.layoutPdf(
-          onLayout: (_) => Uint8List(0),
-          name: 'doc',
-          format: PdfPageFormat.letter,
-        ),
-        true);
+      await Printing.layoutPdf(
+        onLayout: (_) => Uint8List(0),
+        name: 'doc',
+        format: PdfPageFormat.letter,
+      ),
+      true,
+    );
   });
 
   test('sharePdf', () async {
@@ -86,7 +87,7 @@ void main() {
       69, 181, 208, 208, 99, 4, 22, 234, 0, 0, 0, 31, 73, 68, 65, 84, 104,
       129, 237, 193, 1, 13, 0, 0, 0, 194, 160, 247, 79, 109, 14, 55, 160, 0, 0,
       0, 0, 0, 0, 0, 0, 190, 13, 33, 0, 0, 1, 154, 96, 225, 213, 0, 0, 0, 0, 73,
-      69, 78, 68, 174, 66, 96, 130
+      69, 78, 68, 174, 66, 96, 130,
     ]);
     final imageProvider = Image.memory(bytes).image;
     expect(await flutterImageProvider(imageProvider), isNotNull);
@@ -97,7 +98,7 @@ class MockPrinting extends Mock
     with MockPlatformInterfaceMixin
     implements PrintingPlatform {
   @override
-  Future<PrintingInfo> info() async => const PrintingInfo();
+  Future<PrintingInfo> info() async => PrintingInfo.unavailable;
 
   @override
   Future<bool> layoutPdf(
@@ -111,8 +112,14 @@ class MockPrinting extends Mock
       true;
 
   @override
-  Future<bool> sharePdf(Uint8List bytes, String filename, Rect bounds,
-          String? subject, String? body, List<String>? emails) async =>
+  Future<bool> sharePdf(
+    Uint8List bytes,
+    String filename,
+    Rect bounds,
+    String? subject,
+    String? body,
+    List<String>? emails,
+  ) async =>
       true;
 
   @override
@@ -120,7 +127,10 @@ class MockPrinting extends Mock
 
   @override
   Stream<PdfRaster> raster(
-      Uint8List document, List<int>? pages, double dpi) async* {}
+    Uint8List document,
+    List<int>? pages,
+    double dpi,
+  ) async* {}
 }
 
 class MockContext extends Mock implements BuildContext {}

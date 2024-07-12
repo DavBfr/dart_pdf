@@ -29,13 +29,15 @@ import 'raster.dart';
 /// Custom widget builder that's used for custom
 /// rasterized pdf pages rendering
 typedef CustomPdfPagesBuilder = Widget Function(
-    BuildContext context, List<PdfPreviewPageData> pages);
+  BuildContext context,
+  List<PdfPreviewPageData> pages,
+);
 
 /// Flutter widget that uses the rasterized pdf pages to display a document.
 class PdfPreviewCustom extends StatefulWidget {
   /// Show a pdf document built on demand
   const PdfPreviewCustom({
-    Key? key,
+    super.key,
     this.pageFormat = PdfPageFormat.a4,
     required this.build,
     this.maxPageWidth,
@@ -53,7 +55,7 @@ class PdfPreviewCustom extends StatefulWidget {
     this.pagesBuilder,
     this.enableScrollToPage = false,
     this.onZoomChanged,
-  }) : super(key: key);
+  });
 
   /// Pdf paper page format
   final PdfPageFormat pageFormat;
@@ -127,9 +129,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
 
   double? updatePosition;
 
-  final scrollController = ScrollController(
-    keepScrollOffset: true,
-  );
+  final scrollController = ScrollController();
 
   final transformationController = TransformationController();
 
@@ -198,8 +198,12 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     assert(index >= 0, 'Index of page cannot be negative');
     final pageContext = _pageGlobalKeys[index].currentContext;
     assert(pageContext != null, 'Context of GlobalKey cannot be null');
-    return Scrollable.ensureVisible(pageContext!,
-        duration: duration, curve: curve, alignmentPolicy: alignmentPolicy);
+    return Scrollable.ensureVisible(
+      pageContext!,
+      duration: duration,
+      curve: curve,
+      alignmentPolicy: alignmentPolicy,
+    );
   }
 
   /// Returns the global key for page with [index].

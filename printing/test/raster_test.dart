@@ -22,9 +22,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:printing/printing.dart';
 
 void main() {
-  setUp(() {
-    TestWidgetsFlutterBinding.ensureInitialized();
-  });
+  setUp(TestWidgetsFlutterBinding.ensureInitialized);
 
   test('PdfRaster', () async {
     final raster =

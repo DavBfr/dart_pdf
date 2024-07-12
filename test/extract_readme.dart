@@ -58,7 +58,7 @@ void buildFile(String src, String dest, bool flutter) {
         'import \'package:htmltopdfwidgets/htmltopdfwidgets.dart\' show HTMLToPdf;');
   } else {
     st.writeln('import \'dart:convert\';');
-    st.writeln('import \'dart:html\' as html;');
+    st.writeln('import \'package:web/web.dart\' as web;');
   }
   st.writeln('import \'package:printing/printing.dart\';');
   st.writeln('import \'package:pdf/pdf.dart\';');

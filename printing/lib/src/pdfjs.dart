@@ -16,24 +16,22 @@
 
 // ignore_for_file: public_member_api_docs
 
-@JS()
-library pdf.js;
-
-import 'dart:html';
-import 'dart:typed_data';
-
-import 'package:js/js.dart';
-
-// ignore: avoid_classes_with_only_static_members
 @JS('pdfjsLib')
-class PdfJs {
-  external static PdfJsDocLoader getDocument(Settings data);
-}
+library;
+
+import 'dart:js_interop';
+
+import 'package:web/web.dart';
+
+@JS()
+external PdfJsDocLoader getDocument(Settings data);
 
 @anonymous
 @JS()
-class Settings {
-  external set data(Uint8List value);
+extension type Settings._(JSObject _) implements JSObject {
+  external factory Settings({JSUint8Array data});
+
+  external set data(JSUint8Array value);
   external set scale(double value);
   external set canvasContext(CanvasRenderingContext2D value);
   external set viewport(PdfJsViewport value);
@@ -43,21 +41,21 @@ class Settings {
 
 @anonymous
 @JS()
-class PdfJsDocLoader {
-  external Future<PdfJsDoc> get promise;
-  external Future<void> destroy();
+extension type PdfJsDocLoader._(JSObject _) implements JSObject {
+  external JSPromise<PdfJsDoc> get promise;
+  external JSPromise<Null> destroy();
 }
 
 @anonymous
 @JS()
-class PdfJsDoc {
-  external Future<PdfJsPage> getPage(int num);
+extension type PdfJsDoc._(JSObject _) implements JSObject {
+  external JSPromise<PdfJsPage> getPage(int num);
   external int get numPages;
 }
 
 @anonymous
 @JS()
-class PdfJsPage {
+extension type PdfJsPage._(JSObject _) implements JSObject {
   external PdfJsViewport getViewport(Settings data);
   external PdfJsRender render(Settings data);
   external bool cleanup();
@@ -65,13 +63,13 @@ class PdfJsPage {
 
 @anonymous
 @JS()
-class PdfJsViewport {
+extension type PdfJsViewport._(JSObject _) implements JSObject {
   external num get width;
   external num get height;
 }
 
 @anonymous
 @JS()
-class PdfJsRender {
-  external Future<void> get promise;
+extension type PdfJsRender._(JSObject _) implements JSObject {
+  external JSPromise<Null> get promise;
 }

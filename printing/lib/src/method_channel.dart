@@ -77,14 +77,16 @@ class MethodChannelPrinting extends PrintingPlatform {
             return true;
           }());
 
-          FlutterError.reportError(FlutterErrorDetails(
-            exception: e,
-            stack: s,
-            stackFilter: (input) => input,
-            library: 'printing',
-            context: ErrorDescription('while generating a PDF'),
-            informationCollector: collector,
-          ));
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: e,
+              stack: s,
+              stackFilter: (input) => input,
+              library: 'printing',
+              context: ErrorDescription('while generating a PDF'),
+              informationCollector: collector,
+            ),
+          );
 
           if (job.useFFI) {
             return setErrorFfi(job, e.toString());
@@ -230,7 +232,9 @@ class MethodChannelPrinting extends PrintingPlatform {
       'h': bounds.height,
     };
     final printer = await _channel.invokeMethod<Map<dynamic, dynamic>>(
-        'pickPrinter', params);
+      'pickPrinter',
+      params,
+    );
     if (printer == null) {
       return null;
     }
@@ -262,7 +266,10 @@ class MethodChannelPrinting extends PrintingPlatform {
 
   @override
   Future<Uint8List> convertHtml(
-      String html, String? baseUrl, PdfPageFormat format) async {
+    String html,
+    String? baseUrl,
+    PdfPageFormat format,
+  ) async {
     final job = _printJobs.add(
       onHtmlRendered: Completer<Uint8List>(),
     );

@@ -15,7 +15,6 @@
  */
 
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart' as rdr;
 import 'package:flutter/services.dart';
@@ -35,30 +34,33 @@ Future<ImageProvider> flutterImageProvider(
   final stream = image.resolve(configuration ?? rdr.ImageConfiguration.empty);
 
   late rdr.ImageStreamListener listener;
-  listener = rdr.ImageStreamListener((rdr.ImageInfo image, bool sync) async {
-    final bytes =
-        await image.image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  listener = rdr.ImageStreamListener(
+    (rdr.ImageInfo image, bool sync) async {
+      final bytes = await image.image.toByteData();
 
-    final result = RawImage(
+      final result = RawImage(
         bytes: bytes!.buffer.asUint8List(),
         width: image.image.width,
-        height: image.image.height);
+        height: image.image.height,
+      );
 
-    if (!completer.isCompleted) {
-      completer.complete(result);
-    }
-    stream.removeListener(listener);
-  }, onError: (dynamic exception, StackTrace? stackTrace) {
-    if (!completer.isCompleted) {
-      completer.completeError('image failed to load');
-    }
-    if (onError != null) {
-      onError(exception, stackTrace);
-    } else {
-      // https://groups.google.com/forum/#!topic/flutter-announce/hp1RNIgej38
-      assert(false, 'image failed to load');
-    }
-  });
+      if (!completer.isCompleted) {
+        completer.complete(result);
+      }
+      stream.removeListener(listener);
+    },
+    onError: (dynamic exception, StackTrace? stackTrace) {
+      if (!completer.isCompleted) {
+        completer.completeError('image failed to load');
+      }
+      if (onError != null) {
+        onError(exception, stackTrace);
+      } else {
+        // https://groups.google.com/forum/#!topic/flutter-announce/hp1RNIgej38
+        assert(false, 'image failed to load');
+      }
+    },
+  );
 
   stream.addListener(listener);
   return completer.future;
