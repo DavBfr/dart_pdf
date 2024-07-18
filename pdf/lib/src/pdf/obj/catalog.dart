@@ -146,9 +146,7 @@ class PdfCatalog extends PdfObject<PdfDict> {
         if (w.annot is PdfTextField) {
           // collect textfield font references
           PdfTextField tf = w.annot as PdfTextField;
-          fontRefs.addAll(PdfDict.values(
-              {tf.font.name: tf.font.ref()}
-          ));
+          fontRefs.addAll(PdfDict.values({tf.font.name: tf.font.ref()}));
         }
         final ref = w.ref();
         if (!fields.values.contains(ref)) {
@@ -156,9 +154,8 @@ class PdfCatalog extends PdfObject<PdfDict> {
         }
       }
       if (fontRefs.isNotEmpty) {
-        acroForm['/DR'] = PdfDict.values( // "Document Resources"
-            {'/Font': fontRefs}
-        );
+        acroForm['/DR'] = PdfDict.values(// "Document Resources"
+            {'/Font': fontRefs});
       }
     }
   }
