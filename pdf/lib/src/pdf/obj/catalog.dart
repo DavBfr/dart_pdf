@@ -154,11 +154,24 @@ class PdfCatalog extends PdfObject<PdfDict> {
       acroForm['/SigFlags'] = PdfNum(pdfDocument.sign?.flagsValue ?? 0) |
           (acroForm['/SigFlags'] as PdfNum? ?? const PdfNum(0));
       final fields = (acroForm['/Fields'] ??= PdfArray()) as PdfArray;
+      final fontRefs = PdfDict();
       for (final w in widgets) {
+        if (w.annot is PdfTextField) {
+          // collect textfield font references
+          PdfTextField tf = w.annot as PdfTextField;
+          fontRefs.addAll(PdfDict.values(
+              {tf.font.name: tf.font.ref()}
+          ));
+        }
         final ref = w.ref();
         if (!fields.values.contains(ref)) {
           fields.add(ref);
         }
+      }
+      if (fontRefs.isNotEmpty) {
+        acroForm['/DR'] = PdfDict.values( // "Document Resources"
+            {'/Font': fontRefs}
+        );
       }
     }
 
