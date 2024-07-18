@@ -26,6 +26,7 @@ import 'object.dart';
 import 'outline.dart';
 import 'page_label.dart';
 import 'page_list.dart';
+import 'pdf_a_3b.dart';
 
 /// Pdf Catalog object
 class PdfCatalog extends PdfObject<PdfDict> {
@@ -53,6 +54,12 @@ class PdfCatalog extends PdfObject<PdfDict> {
 
   /// The document metadata
   PdfMetadata? metadata;
+
+  /// Colorprofile output intent (Pdf/A)
+  PdfaColorProfile? colorProfile;
+
+  /// Attached files (Pdf/A 3b)
+  PdfaAttachedFiles? attached;
 
   /// The initial page mode
   final PdfPageMode? pageMode;
@@ -92,6 +99,12 @@ class PdfCatalog extends PdfObject<PdfDict> {
     // the Names object
     if (names != null) {
       params['/Names'] = names!.ref();
+    }
+
+    // ??? what to do, if /Names is already occupied?
+    if (attached != null && attached!.isNotEmpty) {
+      params['/Names'] = attached!.catalogNames();
+      params['/AF'] = attached!.catalogAF();
     }
 
     // the PageLabels object
@@ -141,12 +154,29 @@ class PdfCatalog extends PdfObject<PdfDict> {
       acroForm['/SigFlags'] = PdfNum(pdfDocument.sign?.flagsValue ?? 0) |
           (acroForm['/SigFlags'] as PdfNum? ?? const PdfNum(0));
       final fields = (acroForm['/Fields'] ??= PdfArray()) as PdfArray;
+      final fontRefs = PdfDict();
       for (final w in widgets) {
+        if (w.annot is PdfTextField) {
+          // collect textfield font references
+          PdfTextField tf = w.annot as PdfTextField;
+          fontRefs.addAll(PdfDict.values(
+              {tf.font.name: tf.font.ref()}
+          ));
+        }
         final ref = w.ref();
         if (!fields.values.contains(ref)) {
           fields.add(ref);
         }
       }
+      if (fontRefs.isNotEmpty) {
+        acroForm['/DR'] = PdfDict.values( // "Document Resources"
+            {'/Font': fontRefs}
+        );
+      }
+    }
+
+    if (colorProfile != null) {
+      params['/OutputIntents'] = colorProfile!.outputIntents();
     }
   }
 }
