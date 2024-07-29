@@ -4,6 +4,7 @@
 
 - Added new printing output type value on iOS [Matteo Ricupero]
 - Workaround for iOS bug and force paper size [Matteo Ricupero]
+- Update package:web [Sabin Neupane]
 
 ## 5.13.1
 
