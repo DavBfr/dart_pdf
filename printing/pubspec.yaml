@@ -33,7 +33,7 @@ dependencies:
   pdf: ^3.10.0
   pdf_widget_wrapper: '>=1.0.0 <2.0.0'
   plugin_platform_interface: ^2.1.0
-  web: ^0.5.1
+  web: ^1.0.0
 
 dev_dependencies:
   flutter_lints: ^4.0.0
