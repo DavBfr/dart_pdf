@@ -5,6 +5,7 @@
 - Added new printing output type value on iOS [Matteo Ricupero]
 - Workaround for iOS bug and force paper size [Matteo Ricupero]
 - Update package:web [Sabin Neupane]
+- Force the latest version of pdf_widget_wrapper
 
 ## 5.13.1
 
