@@ -145,7 +145,7 @@ class PdfCatalog extends PdfObject<PdfDict> {
       for (final w in widgets) {
         if (w.annot is PdfTextField) {
           // collect textfield font references
-          PdfTextField tf = w.annot as PdfTextField;
+          final tf = w.annot as PdfTextField;
           fontRefs.addAll(PdfDict.values({tf.font.name: tf.font.ref()}));
         }
         final ref = w.ref();
