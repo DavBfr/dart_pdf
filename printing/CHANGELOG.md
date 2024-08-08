@@ -7,6 +7,7 @@
 - Update package:web [Sabin Neupane]
 - Force the latest version of pdf_widget_wrapper
 - Tighten dependencies
+- Update Android build settings
 
 ## 5.13.1
 
