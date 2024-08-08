@@ -18,7 +18,7 @@ environment:
   sdk: ">=2.19.0 <4.0.0"
 
 dependencies:
-  archive: ^3.1.0
+  archive: ^3.4.0
   barcode: ">=2.2.3 <3.0.0"
   bidi: ^2.0.10
   crypto: ^3.0.0
