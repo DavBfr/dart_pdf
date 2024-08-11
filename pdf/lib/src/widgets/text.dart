@@ -907,6 +907,7 @@ class RichText extends Widget with SpanningWidget {
 
     var top = 0.0;
     var bottom = 0.0;
+    var minWidth = 0.0;
 
     final lines = <_Line>[];
     var spanCount = 0;
@@ -952,6 +953,8 @@ class RichText extends Widget with SpanningWidget {
                       letterSpacing: style.letterSpacing! /
                           (style.fontSize! * textScaleFactor)) *
                   (style.fontSize! * textScaleFactor);
+
+              minWidth = math.max(minWidth, metrics.width);
 
               if (_softWrap &&
                   offsetX + metrics.width > constraintWidth + 0.00001) {
@@ -1200,7 +1203,7 @@ class RichText extends Widget with SpanningWidget {
     }
 
     box = PdfRect(0, 0, constraints.constrainWidth(width),
-        constraints.constrainHeight(offsetY));
+        constraints.constrainHeight(offsetY), minWidth);
 
     _context
       ..endOffset = offsetY - _context.startOffset
