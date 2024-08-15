@@ -240,12 +240,12 @@ class Lookup {
     pointer += 2;
     List<dynamic> subTables = [];
     if (subTableCount > 0) {
-      int subTableOffsets = offset + data.getUint16(offset + pointer);
+      int subTableBase = offset + pointer;
       pointer += 2;
       for (int i = 0; i < subTableCount; i++) {
+        var subTableOffsets = offset + data.getUint16(subTableBase + 2 * i);
         SubTable table = SubTable.parse(data, subTableOffsets, lookupType);
         subTables.add(table.substituteTable);
-        subTableOffsets += table.pointer;
       }
     }
 
@@ -287,8 +287,8 @@ class LookupFlag {
   }
 }
 
-class SingleSubstitutionSubTable {
-  SingleSubstitutionSubTable(
+class SingleSubstitution {
+  SingleSubstitution(
     this.substFormat,
     this.coverageOffset,
     this.coverage,
@@ -305,7 +305,7 @@ class SingleSubstitutionSubTable {
   final List<int>? substitute;
   final int pointer;
 
-  static SingleSubstitutionSubTable parse(ByteData data, int offset) {
+  static SingleSubstitution parse(ByteData data, int offset) {
     int pointer = 0;
     final substFormat = data.getUint16(offset);
     pointer += 2;
@@ -334,10 +334,10 @@ class SingleSubstitutionSubTable {
       }
     } else {
       throw UnsupportedError(
-          "Unsupported SingleSubstitutionSubTable format: $substFormat");
+          "Unsupported SingleSubstitution format: $substFormat");
     }
 
-    return SingleSubstitutionSubTable(
+    return SingleSubstitution(
       substFormat,
       coverageOffset,
       coverage,
@@ -391,8 +391,8 @@ class AlternateSubstitutionSubTable {
   }
 }
 
-class LigatureSubstitutionSubTable {
-  LigatureSubstitutionSubTable(
+class LigatureSubstitution {
+  LigatureSubstitution(
     this.substFormat,
     this.coverageOffset,
     this.coverage,
@@ -407,7 +407,7 @@ class LigatureSubstitutionSubTable {
   final List<LigatureSet> ligatureSet;
   final int pointer;
 
-  static LigatureSubstitutionSubTable parse(ByteData data, int offset) {
+  static LigatureSubstitution parse(ByteData data, int offset) {
     int pointer = 0;
     final substFormat = data.getUint16(offset);
     pointer += 2;
@@ -419,16 +419,17 @@ class LigatureSubstitutionSubTable {
     List<LigatureSet> ligatureSet = [];
     pointer += 2;
     if (ligatureSetCount > 0) {
-      int ligatureSetOffset = offset + data.getUint16(offset + pointer);
+      int ligatureSetBase = offset + pointer;
       pointer += 2;
       for (int i = 0; i < ligatureSetCount; i++) {
+        var ligatureSetOffset =
+            offset + data.getUint16(ligatureSetBase + 2 * i);
         var ligSet = LigatureSet.parse(data, ligatureSetOffset);
         ligatureSet.add(ligSet);
-        ligatureSetOffset += ligSet.pointer;
       }
     }
 
-    return LigatureSubstitutionSubTable(
+    return LigatureSubstitution(
       substFormat,
       coverageOffset,
       coverage,
@@ -451,12 +452,12 @@ class LigatureSet {
     pointer += 2;
     List<Ligature> ligatures = [];
     if (ligatureCount > 0) {
-      int ligatureOffset = offset + data.getUint16(offset + pointer);
+      int ligatureBase = offset + pointer;
       pointer += 2;
       for (int i = 0; i < ligatureCount; i++) {
+        var ligatureOffset = offset + data.getUint16(ligatureBase + 2 * i);
         Ligature ligature = Ligature.parse(data, ligatureOffset);
         ligatures.add(ligature);
-        ligatureOffset += ligature.pointer;
       }
     }
 
@@ -484,8 +485,8 @@ class Ligature {
       for (int i = 0; i < compCount - 1; i++) {
         components.add(data.getUint16(compOffset));
         compOffset += 2;
+        pointer += 2;
       }
-      pointer = 4 + ((compCount - 1) * 2);
     }
 
     return Ligature(glyph, compCount, components, pointer);
@@ -648,7 +649,7 @@ class ChainingContext {
   final int? lookaheadGlyphCount;
   final List<Coverage>? lookaheadCoverage;
   final int? lookupCount;
-  final List<ChainLookupRecord>? lookupRecords;
+  final List<LookupRecord>? lookupRecords;
   final int pointer;
 
   static ChainingContext parse(ByteData data, int offset) {
@@ -671,7 +672,7 @@ class ChainingContext {
     int? lookaheadGlyphCount;
     List<Coverage>? lookaheadCoverage;
     int? lookupCount;
-    List<ChainLookupRecord>? lookupRecords;
+    List<LookupRecord>? lookupRecords;
 
     if (substFormat == 1) {
       // Simple context glyph substitution
@@ -681,11 +682,11 @@ class ChainingContext {
       chainCount = data.getUint16(offset + pointer);
       pointer += 2;
       if (chainCount > 0) {
-        int chainRuleOffset = offset + pointer;
+        int chainRuleBase = offset + pointer;
         chainRuleSets = [];
         for (int i = 0; i < chainCount; i++) {
+          var chainRuleOffset = offset + data.getUint16(chainRuleBase + 2 * i);
           chainRuleSets.add(ChainRuleSets.parse(data, chainRuleOffset));
-          chainRuleOffset += 2;
         }
       }
     } else if (substFormat == 2) {
@@ -709,11 +710,12 @@ class ChainingContext {
       chainCount = data.getUint16(offset + pointer);
       pointer += 2;
       if (chainCount > 0) {
-        int chainClassOffset = offset + data.getUint16(offset + pointer);
+        int chainClassBase = offset + pointer;
         chainClassSet = [];
         for (int i = 0; i < chainCount; i++) {
+          var chainClassOffset =
+              offset + data.getUint16(chainClassBase + 2 * i);
           chainClassSet.add(ChainRuleSets.parse(data, chainClassOffset));
-          chainClassOffset += 2;
         }
       }
     } else if (substFormat == 3) {
@@ -721,39 +723,39 @@ class ChainingContext {
       backtrackGlyphCount = data.getUint16(offset + pointer);
       pointer += 2;
       if (backtrackGlyphCount > 0) {
-        int backtrackOffset = offset + data.getUint16(offset + pointer);
-        pointer += 2;
+        int backtrackBase = offset + pointer;
+        pointer += backtrackGlyphCount * 2;
         backtrackCoverage = [];
         for (int i = 0; i < backtrackGlyphCount; i++) {
+          var backtrackOffset = offset + data.getUint16(backtrackBase + 2 * i);
           var coverage = Coverage.parse(data, backtrackOffset);
           backtrackCoverage.add(coverage);
-          backtrackOffset += coverage.pointer;
         }
       }
 
       inputGlyphCount = data.getUint16(offset + pointer);
       pointer += 2;
       if (inputGlyphCount > 0) {
-        int inputOffset = offset + data.getUint16(offset + pointer);
-        pointer += 2;
+        int inputBase = offset + pointer;
+        pointer += inputGlyphCount * 2;
         inputCoverage = [];
         for (int i = 0; i < inputGlyphCount; i++) {
+          var inputOffset = offset + data.getUint16(inputBase + 2 * i);
           var coverage = Coverage.parse(data, inputOffset);
           inputCoverage.add(coverage);
-          inputOffset += coverage.pointer;
         }
       }
 
       lookaheadGlyphCount = data.getUint16(offset + pointer);
       pointer += 2;
       if (lookaheadGlyphCount > 0) {
-        int lookaheadOffset = offset + data.getUint16(offset + pointer);
-        pointer += 2;
+        int lookaheadBase = offset + pointer;
+        pointer += lookaheadGlyphCount * 2;
         lookaheadCoverage = [];
         for (int i = 0; i < lookaheadGlyphCount; i++) {
+          var lookaheadOffset = offset + data.getUint16(lookaheadBase + 2 * i);
           var coverage = Coverage.parse(data, lookaheadOffset);
           lookaheadCoverage.add(coverage);
-          lookaheadOffset += coverage.pointer;
         }
       }
 
@@ -762,7 +764,7 @@ class ChainingContext {
       int lookupOffset = offset + pointer;
       lookupRecords = [];
       for (int i = 0; i < lookupCount; i++) {
-        lookupRecords.add(ChainLookupRecord.parse(data, lookupOffset));
+        lookupRecords.add(LookupRecord.parse(data, lookupOffset));
         lookupOffset += 4;
         pointer += 4;
       }
@@ -837,7 +839,7 @@ class ChainRule {
   final int lookaheadGlyphCount;
   final List<int> lookahead;
   final int lookupCount;
-  final List<ChainLookupRecord> lookupRecords;
+  final List<LookupRecord> lookupRecords;
   final int pointer;
 
   static ChainRule parse(ByteData data, int offset) {
@@ -880,11 +882,11 @@ class ChainRule {
 
     int lookupCount = data.getUint16(offset + pointer);
     pointer += 2;
-    List<ChainLookupRecord> lookupRecords = [];
+    List<LookupRecord> lookupRecords = [];
     if (lookupCount > 0) {
       int lookupOffset = offset + pointer;
       for (int i = 0; i < lookupCount; i++) {
-        var record = ChainLookupRecord.parse(data, lookupOffset);
+        var record = LookupRecord.parse(data, lookupOffset);
         lookupRecords.add(record);
         lookupOffset += record.pointer;
         pointer += record.pointer;
@@ -905,19 +907,19 @@ class ChainRule {
   }
 }
 
-class ChainLookupRecord {
-  ChainLookupRecord(this.sequenceIndex, this.lookupListIndex, this.pointer);
+class LookupRecord {
+  LookupRecord(this.sequenceIndex, this.lookupListIndex, this.pointer);
   final int sequenceIndex;
   final int lookupListIndex;
   final int pointer;
 
-  static ChainLookupRecord parse(ByteData data, int offset) {
+  static LookupRecord parse(ByteData data, int offset) {
     int pointer = 0;
     int sequenceIndex = data.getUint16(offset);
     pointer += 2;
     int lookupListIndex = data.getUint16(offset + pointer);
     pointer += 2;
-    return ChainLookupRecord(sequenceIndex, lookupListIndex, pointer);
+    return LookupRecord(sequenceIndex, lookupListIndex, pointer);
   }
 }
 
@@ -1096,7 +1098,7 @@ class SubTable {
     try {
       switch (lookupType) {
         case 1:
-          substituteTable = SingleSubstitutionSubTable.parse(data, offset);
+          substituteTable = SingleSubstitution.parse(data, offset);
           break;
         // case 2:
         //   substituteTable = MultipleSubstitutionSubTable.parse(data, offset);
@@ -1105,7 +1107,7 @@ class SubTable {
         //   substituteTable = AlternateSubstitutionSubTable.parse(data, offset);
         //   break;
         case 4:
-          substituteTable = LigatureSubstitutionSubTable.parse(data, offset);
+          substituteTable = LigatureSubstitution.parse(data, offset);
           break;
         // case 5:
         //   substituteTable = ContextualSubstitutionSubTable.parse(data, offset);
