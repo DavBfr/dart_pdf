@@ -1,5 +1,5 @@
-group 'net.nfet.flutter.printing'
-version '1.0'
+group "net.nfet.flutter.printing"
+version "1.0"
 
 buildscript {
     repositories {
@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath "com.android.tools.build:gradle:7.3.0"
     }
 }
 
@@ -19,24 +19,25 @@ rootProject.allprojects {
     }
 }
 
-apply plugin: 'com.android.library'
+apply plugin: "com.android.library"
 
 android {
-    // Conditional for compatibility with AGP <4.2.
     if (project.android.hasProperty("namespace")) {
-      namespace 'net.nfet.flutter.printing'
+        namespace = "net.nfet.flutter.printing"
     }
-    compileSdkVersion 30
+
+    compileSdk = 34
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     defaultConfig {
-        minSdkVersion 16
+        minSdk = 21
     }
+
     lintOptions {
-        disable 'InvalidPackage'
+        disable "InvalidPackage"
     }
 }

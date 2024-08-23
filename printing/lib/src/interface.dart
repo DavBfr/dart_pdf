@@ -23,6 +23,7 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'callback.dart';
 import 'method_channel.dart';
+import 'output_type.dart';
 import 'printer.dart';
 import 'printing_info.dart';
 import 'raster.dart';
@@ -66,6 +67,8 @@ abstract class PrintingPlatform extends PlatformInterface {
     PdfPageFormat format,
     bool dynamicLayout,
     bool usePrinterSettings,
+    OutputType outputType,
+    bool forceCustomPrintPaper,
   );
 
   /// Enumerate the available printers on the system.
