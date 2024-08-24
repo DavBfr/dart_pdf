@@ -15,6 +15,11 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: 17
       - name: Enable Linux for flutter
         run: flutter config --enable-linux-desktop
       - name: Update repo
@@ -81,6 +86,11 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: master
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: 17
       - name: Enable Linux for flutter
         run: flutter config --enable-linux-desktop
       - name: Update repo
