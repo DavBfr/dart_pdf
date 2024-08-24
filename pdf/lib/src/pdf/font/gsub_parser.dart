@@ -28,13 +28,13 @@ class GsubHeader {
 
 // Scripts
 class ScriptRecord {
-  ScriptRecord(this.scriptTag, this.offset, this.scriptTable);
-  final String scriptTag;
+  ScriptRecord(this.tag, this.offset, this.scriptTable);
+  final String tag;
   final int offset;
   ScriptTable scriptTable;
 
   static ScriptRecord parse(ByteData data, int recordOffset, int baseOffset) {
-    final scriptTag = String.fromCharCodes([
+    final tag = String.fromCharCodes([
       data.getUint8(recordOffset),
       data.getUint8(recordOffset + 1),
       data.getUint8(recordOffset + 2),
@@ -65,7 +65,7 @@ class ScriptRecord {
       defaultLangSys,
     );
 
-    return ScriptRecord(scriptTag, scriptOffset, scriptTable);
+    return ScriptRecord(tag, scriptOffset, scriptTable);
   }
 }
 
@@ -1172,4 +1172,5 @@ class GsubTableParser {
   late ScriptList scriptList;
   late FeatureList featureList;
   late LookupList lookupList;
+  dynamic featureVariations;
 }

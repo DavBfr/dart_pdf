@@ -55,11 +55,15 @@ enum TtfParserName {
 
 @immutable
 class TtfGlyphInfo {
-  const TtfGlyphInfo(this.index, this.data, this.compounds);
+  TtfGlyphInfo(this.index, this.data, this.compounds);
 
   final int index;
   final Uint8List data;
   final List<int> compounds;
+  bool isMark = false;
+  bool isLigature = false;
+  bool isBase = false;
+  int markAttachmentType = 0;
 
   TtfGlyphInfo copy() {
     return TtfGlyphInfo(
@@ -186,7 +190,8 @@ class TtfParser {
   final glyphSizes = <int>[];
   final glyphInfoMap = <int, PdfFontMetrics>{};
   final bitmapOffsets = <int, TtfBitmapInfo>{};
-  late final GsubTableParser gsub;
+  GsubTableParser? gsub;
+  dynamic GDEF;
 
   int get unitsPerEm => bytes.getUint16(tableOffsets[head_table]! + 18);
 
