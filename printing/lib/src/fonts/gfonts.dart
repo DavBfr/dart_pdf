@@ -3250,6 +3250,24 @@ import 'font.dart';
 /// - notoSansExtraBoldItalic (Noto Sans 800italic)
 /// - notoSansBlack (Noto Sans 900)
 /// - notoSansBlackItalic (Noto Sans 900italic)
+/// - notoSansTCThin (Noto Sans TC Thin 100)
+/// - notoSansTCExtraLight (Noto Sans TC ExtraLight 200)
+/// - notoSansTCLight (Noto Sans TC Light 300)
+/// - notoSansTCRegular (Noto Sans TC Regular 400)
+/// - notoSansTCMedium (Noto Sans TC Medium 500)
+/// - notoSansTCSemiBold (Noto Sans TC SemiBold 600)
+/// - notoSansTCBold (Noto Sans TC Bold 700)
+/// - notoSansTCExtraBold (Noto Sans TC ExtraBold 800)
+/// - notoSansTCBlack (Noto Sans TC Black 900)
+/// - notoSansSCThin (Noto Sans SC Thin 100)
+/// - notoSansSCExtraLight (Noto Sans SC ExtraLight 200)
+/// - notoSansSCLight (Noto Sans SC Light 300)
+/// - notoSansSCRegular (Noto Sans SC Regular 400)
+/// - notoSansSCMedium (Noto Sans SC Medium 500)
+/// - notoSansSCSemiBold (Noto Sans SC SemiBold 600)
+/// - notoSansSCBold (Noto Sans SC Bold 700)
+/// - notoSansSCExtraBold (Noto Sans SC ExtraBold 800)
+/// - notoSansSCBlack (Noto Sans SC Black 900)
 /// - notoSansAdlamRegular (Noto Sans Adlam regular)
 /// - notoSansAdlamMedium (Noto Sans Adlam 500)
 /// - notoSansAdlamSemiBold (Noto Sans Adlam 600)
@@ -37771,6 +37789,186 @@ class PdfGoogleFonts extends DownloadableFont {
     const font = PdfGoogleFonts._(
       'https://fonts.gstatic.com/s/notosans/v27/o-0TIpQlx3QUlC5A4PNr4AzBZNyEx2xqPaif.ttf',
       'NotoSans-BlackItalic',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans TC Thin 100
+  static Future<Font> notoSansTCThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanstc/v36/-nFuOG829Oofr2wohFbTp9ifNAn722rq0MXz76Cz_Co.ttf',
+      'NotoSansTC-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans TC ExtraLight 200
+  static Future<Font> notoSansTCExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanstc/v36/-nFuOG829Oofr2wohFbTp9ifNAn722rq0MXz7yCy_Co.ttf',
+      'NotoSansTC-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans TC Light 300
+  static Future<Font> notoSansTCLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanstc/v36/-nFuOG829Oofr2wohFbTp9ifNAn722rq0MXz7_6y_Co.ttf',
+      'NotoSansTC-Light',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans TC Regular 400
+  static Future<Font> notoSansTCRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanstc/v36/-nFuOG829Oofr2wohFbTp9ifNAn722rq0MXz76Cy_Co.ttf',
+      'NotoSansTC-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans TC Medium 500
+  static Future<Font> notoSansTCMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanstc/v36/-nFuOG829Oofr2wohFbTp9ifNAn722rq0MXz75Ky_Co.ttf',
+      'NotoSansTC-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans TC SemiBold 600
+  static Future<Font> notoSansTCSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanstc/v36/-nFuOG829Oofr2wohFbTp9ifNAn722rq0MXz7361_Co.ttf',
+      'NotoSansTC-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans TC Bold 700
+  static Future<Font> notoSansTCBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanstc/v36/-nFuOG829Oofr2wohFbTp9ifNAn722rq0MXz70e1_Co.ttf',
+      'NotoSansTC-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans TC ExtraBold 800
+  static Future<Font> notoSansTCExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanstc/v36/-nFuOG829Oofr2wohFbTp9ifNAn722rq0MXz7yC1_Co.ttf',
+      'NotoSansTC-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans TC Black 900
+  static Future<Font> notoSansTCBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanstc/v36/-nFuOG829Oofr2wohFbTp9ifNAn722rq0MXz7wm1_Co.ttf',
+      'NotoSansTC-Black',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans SC Thin 100
+  static Future<Font> notoSansSCThin() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanssc/v37/k3kCo84MPvpLmixcA63oeAL7Iqp5IZJF9bmaG9_EnYw.ttf',
+      'NotoSansSC-Thin',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans SC ExtraLight 200
+  static Future<Font> notoSansSCExtraLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanssc/v37/k3kCo84MPvpLmixcA63oeAL7Iqp5IZJF9bmaG1_FnYw.ttf',
+      'NotoSansSC-ExtraLight',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans SC Light 300
+  static Future<Font> notoSansSCLight() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanssc/v37/k3kCo84MPvpLmixcA63oeAL7Iqp5IZJF9bmaG4HFnYw.ttf',
+      'NotoSansSC-Light',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans SC Regular 400
+  static Future<Font> notoSansSCRegular() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanssc/v37/k3kCo84MPvpLmixcA63oeAL7Iqp5IZJF9bmaG9_FnYw.ttf',
+      'NotoSansSC-Regular',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans SC Medium 500
+  static Future<Font> notoSansSCMedium() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanssc/v37/k3kCo84MPvpLmixcA63oeAL7Iqp5IZJF9bmaG-3FnYw.ttf',
+      'NotoSansSC-Medium',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans SC SemiBold 600
+  static Future<Font> notoSansSCSemiBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@600&display=swap',
+      'NotoSansSC-SemiBold',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans SC Bold 700
+  static Future<Font> notoSansSCBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanssc/v37/k3kCo84MPvpLmixcA63oeAL7Iqp5IZJF9bmaGzjCnYw.ttf',
+      'NotoSansSC-Bold',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans SC ExtraBold 800
+  static Future<Font> notoSansSCExtraBold() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanssc/v37/k3kCo84MPvpLmixcA63oeAL7Iqp5IZJF9bmaG1_CnYw.ttf',
+      'NotoSansSC-ExtraBold',
+    );
+    return font.getFont();
+  }
+
+  /// @nodoc
+  /// Noto Sans SC Black 900
+  static Future<Font> notoSansSCBlack() {
+    const font = PdfGoogleFonts._(
+      'https://fonts.gstatic.com/s/notosanssc/v37/k3kCo84MPvpLmixcA63oeAL7Iqp5IZJF9bmaG3bCnYw.ttf',
+      'NotoSansSC-Black',
     );
     return font.getFont();
   }
