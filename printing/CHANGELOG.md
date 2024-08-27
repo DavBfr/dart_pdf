@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.13.3
+
+- Update gfonts [Minh-Danh]
+
 ## 5.13.2
 
 - Added new printing output type value on iOS [Matteo Ricupero]
