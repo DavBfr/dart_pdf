@@ -27,6 +27,7 @@ class SvgPainter {
     this._canvas,
     this.document,
     this.boundingBox,
+    this.fonts,
   );
 
   final SvgParser parser;
@@ -36,6 +37,8 @@ class SvgPainter {
   final PdfDocument document;
 
   final PdfRect boundingBox;
+
+  final Map<String, Font>? fonts;
 
   void paint() {
     final brush = parser.colorFilter == null
@@ -59,6 +62,14 @@ class SvgPainter {
   }
 
   Font getFont(String fontFamily, String fontStyle, String fontWeight) {
+    final localFonts = fonts;
+    if(localFonts != null) {
+        final fontKeys = localFonts.keys.where((key) => key.toLowerCase() == fontFamily.toLowerCase());
+        if (fontKeys.isNotEmpty) {
+            return localFonts[fontKeys.first]!;
+        }
+    }
+
     switch (fontFamily) {
       case 'serif':
         switch (fontStyle) {
