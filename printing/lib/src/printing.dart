@@ -22,6 +22,7 @@ import 'package:pdf/pdf.dart';
 
 import 'callback.dart';
 import 'interface.dart';
+import 'output_type.dart';
 import 'printer.dart';
 import 'printing_info.dart';
 import 'raster.dart';
@@ -39,12 +40,23 @@ mixin Printing {
   /// Set [usePrinterSettings] to true to use the configuration defined by
   /// the printer. May not work for all the printers and can depend on the
   /// drivers. (Supported platforms: Windows)
+  ///
+  /// Set [outputType] to [OutputType.generic] to use the default printing
+  /// system, or [OutputType.photos] to use the photo printing system.
+  /// (Supported platforms: iOS)
+  ///
+  /// Use [customPrintPaper] to force the printer to use a custom paper size.
+  /// Use value `true` to use [format] as custom paper size, when the printer
+  /// driver will not allows the user to use papers which are actually supported by the printer.
+  /// (Supported platforms: iOS)
   static Future<bool> layoutPdf({
     required LayoutCallback onLayout,
     String name = 'Document',
     PdfPageFormat format = PdfPageFormat.standard,
     bool dynamicLayout = true,
     bool usePrinterSettings = false,
+    OutputType outputType = OutputType.generic,
+    bool forceCustomPrintPaper = false,
   }) {
     return PrintingPlatform.instance.layoutPdf(
       null,
@@ -53,6 +65,8 @@ mixin Printing {
       format,
       dynamicLayout,
       usePrinterSettings,
+      outputType,
+      forceCustomPrintPaper,
     );
   }
 
@@ -132,6 +146,15 @@ mixin Printing {
   /// Set [usePrinterSettings] to true to use the configuration defined by
   /// the printer. May not work for all the printers and can depend on the
   /// drivers. (Supported platforms: Windows)
+  ///
+  /// Set [outputType] to [OutputType.generic] to use the default printing
+  /// system, or [OutputType.photos] to use the photo printing system.
+  /// (Supported platforms: iOS)
+  ///
+  /// Use [customPrintPaper] to force the printer to use a custom paper size.
+  /// Use value `true` to use [format] as custom paper size, when the printer
+  /// driver will not allows the user to use papers which are actually supported by the printer.
+  /// (Supported platforms: iOS)
   static FutureOr<bool> directPrintPdf({
     required Printer printer,
     required LayoutCallback onLayout,
@@ -139,6 +162,8 @@ mixin Printing {
     PdfPageFormat format = PdfPageFormat.standard,
     bool dynamicLayout = true,
     bool usePrinterSettings = false,
+    OutputType outputType = OutputType.generic,
+    bool forceCustomPrintPaper = false,
   }) {
     return PrintingPlatform.instance.layoutPdf(
       printer,
@@ -147,6 +172,8 @@ mixin Printing {
       format,
       dynamicLayout,
       usePrinterSettings,
+      outputType,
+      forceCustomPrintPaper,
     );
   }
 

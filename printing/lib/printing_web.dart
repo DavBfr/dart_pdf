@@ -29,6 +29,7 @@ import 'package:web/web.dart' as web;
 import 'src/callback.dart';
 import 'src/interface.dart';
 import 'src/mutex.dart';
+import 'src/output_type.dart';
 import 'src/pdfjs.dart';
 import 'src/printer.dart';
 import 'src/printing_info.dart';
@@ -156,6 +157,8 @@ class PrintingPlugin extends PrintingPlatform {
     PdfPageFormat format,
     bool dynamicLayout,
     bool usePrinterSettings,
+    OutputType outputType,
+    bool forceCustomPrintPaper,
   ) async {
     late Uint8List result;
     try {
@@ -210,7 +213,8 @@ class PrintingPlugin extends PrintingPlatform {
       script.setAttribute('id', _scriptId);
       script.setAttribute('type', 'text/javascript');
       script.innerHTML =
-          '''function ${_frameId}_print(){var f=document.getElementById('$_frameId');f.focus();f.contentWindow.print();}''';
+          '''function ${_frameId}_print(){var f=document.getElementById('$_frameId');f.focus();f.contentWindow.print();}'''
+              .toJS;
       doc.body!.append(script);
 
       final frame = doc.getElementById(_frameId) ?? doc.createElement('iframe');
