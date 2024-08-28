@@ -106,17 +106,18 @@ class TtfWriter {
 
     final glyphsInfo = <TtfGlyphInfo>[];
 
-    if (glyphsMap.values.isNotEmpty) {
-      for (final char in chars) {
-        final glyphsIndex = charMap[char];
-        if (glyphsIndex != null) {
+    for (final char in chars) {
+      final glyphsIndex = charMap[char];
+      if (glyphsIndex != null) {
+        final glyph = glyphsMap[glyphsIndex];
+        if (glyph != null || glyphsMap.values.isNotEmpty) {
           glyphsInfo.add(glyphsMap[glyphsIndex] ?? glyphsMap.values.first);
           glyphsMap.remove(glyphsIndex);
         }
       }
-
-      glyphsInfo.addAll(glyphsMap.values);
     }
+
+    glyphsInfo.addAll(glyphsMap.values);
 
     // Add compound glyphs
     for (final compound in compounds.keys) {
