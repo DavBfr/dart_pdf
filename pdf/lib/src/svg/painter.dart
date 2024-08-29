@@ -27,8 +27,8 @@ class SvgPainter {
     this._canvas,
     this.document,
     this.boundingBox,
-    this.fonts,
-  );
+    Map<String, Font>? fonts,
+  ) : fonts = fonts?.map((key, value) => MapEntry(_cleanFontName(key), value));
 
   final SvgParser parser;
 
@@ -61,13 +61,19 @@ class SvgPainter {
     return _fontCache[cache];
   }
 
+  static String _cleanFontName(String fontName) =>
+      fontName.toLowerCase().replaceAll(RegExp(r'''("|'|\s)'''), '');
+
   Font getFont(String fontFamily, String fontStyle, String fontWeight) {
     final localFonts = fonts;
-    if(localFonts != null) {
-        final fontKeys = localFonts.keys.where((key) => key.toLowerCase() == fontFamily.toLowerCase());
-        if (fontKeys.isNotEmpty) {
-            return localFonts[fontKeys.first]!;
-        }
+    if (localFonts != null) {
+      // We perform a lose matching because quotes are not always present in the fontFamily
+      final cleanFontFamily = _cleanFontName(fontFamily);
+      final fontKeys = localFonts.keys
+          .where((key) => key.toLowerCase() == cleanFontFamily.toLowerCase());
+      if (fontKeys.isNotEmpty) {
+        return localFonts[fontKeys.first]!;
+      }
     }
 
     switch (fontFamily) {
