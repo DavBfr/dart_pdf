@@ -25,6 +25,8 @@ import 'parser.dart';
 
 enum SvgTextAnchor { start, middle, end }
 
+enum SvgDominantBaseline { auto, alphabetic, ideographic, middle, central, mathematical, hanging, textTop, textBottom }
+
 @immutable
 class SvgBrush {
   const SvgBrush({
@@ -45,6 +47,7 @@ class SvgBrush {
     required this.fontStyle,
     required this.fontWeight,
     required this.textAnchor,
+    required this.dominantBaseline,
     required this.blendMode,
     this.mask,
   });
@@ -93,6 +96,7 @@ class SvgBrush {
       fontStyle: element.getAttribute('font-style'),
       fontWeight: element.getAttribute('font-weight'),
       textAnchor: _textAnchors[element.getAttribute('text-anchor')],
+      dominantBaseline: _dominantBaselines[element.getAttribute('dominant-baseline')],
     ));
 
     final mask = SvgMaskPath.fromXml(element, painter, result);
@@ -122,6 +126,7 @@ class SvgBrush {
     fontWeight: 'normal',
     fontStyle: 'normal',
     textAnchor: SvgTextAnchor.start,
+    dominantBaseline: SvgDominantBaseline.auto,
     mask: null,
   );
 
@@ -162,6 +167,18 @@ class SvgBrush {
     'end': SvgTextAnchor.end,
   };
 
+  static const _dominantBaselines = <String, SvgDominantBaseline>{
+    'auto':  SvgDominantBaseline.auto,
+    'alphabetic':  SvgDominantBaseline.alphabetic,
+    'ideographic':  SvgDominantBaseline.ideographic,
+    'middle':  SvgDominantBaseline.middle,
+    'central':  SvgDominantBaseline.central,
+    'mathematical':  SvgDominantBaseline.mathematical,
+    'hanging':  SvgDominantBaseline.hanging,
+    'textTop':  SvgDominantBaseline.textTop,
+    'textBottom': SvgDominantBaseline.textBottom,
+  };
+
   final double? opacity;
   final SvgColor? fill;
   final bool? fillEvenOdd;
@@ -179,6 +196,7 @@ class SvgBrush {
   final String? fontStyle;
   final String? fontWeight;
   final SvgTextAnchor? textAnchor;
+  final SvgDominantBaseline? dominantBaseline;
   final PdfBlendMode? blendMode;
   final SvgMaskPath? mask;
 
@@ -215,6 +233,7 @@ class SvgBrush {
       fontStyle: other.fontStyle ?? fontStyle,
       fontWeight: other.fontWeight ?? fontWeight,
       textAnchor: other.textAnchor ?? textAnchor,
+      dominantBaseline: other.dominantBaseline ?? dominantBaseline,
       strokeLineCap: other.strokeLineCap ?? strokeLineCap,
       strokeLineJoin: other.strokeLineJoin ?? strokeLineJoin,
       strokeMiterLimit: other.strokeMiterLimit ?? strokeMiterLimit,
@@ -240,6 +259,7 @@ class SvgBrush {
     String? fontStyle,
     String? fontWeight,
     SvgTextAnchor? textAnchor,
+    SvgDominantBaseline? dominantBaseline,
     PdfBlendMode? blendMode,
     SvgMaskPath? mask,
   }) {
@@ -261,6 +281,7 @@ class SvgBrush {
       fontStyle: fontStyle ?? this.fontStyle,
       fontWeight: fontWeight ?? this.fontWeight,
       textAnchor: textAnchor ?? this.textAnchor,
+      dominantBaseline: dominantBaseline ?? this.dominantBaseline,
       blendMode: blendMode ?? this.blendMode,
       mask: mask ?? this.mask,
     );
