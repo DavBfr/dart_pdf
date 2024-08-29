@@ -69,12 +69,12 @@ class SvgText extends SvgOperation {
     final pdfFont = font.getFont(Context(document: painter.document));
     final metrics = pdfFont.stringMetrics(text) * _brush.fontSize!.sizeValue;
 
-    final baselineOffset = -metrics.ascent;
-    print('>> ${metrics.ascent} // ${metrics.descent} // ${metrics.maxHeight} // ${metrics.size.y} // ${metrics.bottom}');
+    final baselineOffset = 0;//-metrics.ascent;
+    print(
+        '>> ${metrics.ascent} // ${metrics.descent} // ${metrics.maxHeight} // ${metrics.size.y} // ${metrics.bottom}');
 
     offset =
         PdfPoint((x ?? offset.x) + dx, (y ?? offset.y) + dy + baselineOffset);
-
 
     switch (_brush.textAnchor!) {
       case SvgTextAnchor.start:
