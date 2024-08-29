@@ -69,7 +69,7 @@ class SvgText extends SvgOperation {
     final pdfFont = font.getFont(Context(document: painter.document));
     final metrics = pdfFont.stringMetrics(text) * _brush.fontSize!.sizeValue;
 
-    final baselineOffset = -metrics.bottom;
+    final baselineOffset = -metrics.ascent;
     print('>> ${metrics.ascent} // ${metrics.descent} // ${metrics.maxHeight} // ${metrics.size.y} // ${metrics.bottom}');
 
     offset =
