@@ -68,10 +68,13 @@ class SvgText extends SvgOperation {
         _brush.fontFamily!, _brush.fontStyle!, _brush.fontWeight!)!;
     final pdfFont = font.getFont(Context(document: painter.document));
     final metrics = pdfFont.stringMetrics(text) * _brush.fontSize!.sizeValue;
-    offset = PdfPoint(
-        (x ?? offset.x) + dx, (y ?? offset.y) + dy - metrics.maxHeight);
 
-    print('>> ${metrics.ascent} // ${metrics.descent} // ${metrics.maxHeight} // ${metrics.size.y}');
+    final baselineOffset = -metrics.bottom;
+    print('>> ${metrics.ascent} // ${metrics.descent} // ${metrics.maxHeight} // ${metrics.size.y} // ${metrics.bottom}');
+
+    offset =
+        PdfPoint((x ?? offset.x) + dx, (y ?? offset.y) + dy + baselineOffset);
+
 
     switch (_brush.textAnchor!) {
       case SvgTextAnchor.start:
@@ -88,7 +91,7 @@ class SvgText extends SvgOperation {
 
     final tspan = element.children.whereType<XmlElement>().map<SvgText>((e) {
       final child = SvgText.fromXml(e, painter, _brush, childOffset);
-      childOffset = PdfPoint(child.x! + child.dx, child.y! - metrics.maxHeight);
+      childOffset = PdfPoint(child.x! + child.dx, child.y! + baselineOffset);
       return child;
     });
 
