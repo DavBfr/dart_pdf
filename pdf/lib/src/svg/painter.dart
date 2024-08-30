@@ -28,6 +28,7 @@ class SvgPainter {
     this._canvas,
     this.document,
     this.boundingBox,
+    this.fontFallback,
   );
 
   final SvgParser parser;
@@ -37,6 +38,8 @@ class SvgPainter {
   final PdfDocument document;
 
   final PdfRect boundingBox;
+
+  final List<Font> fontFallback;
 
   void paint() {
     final brush = parser.colorFilter == null
@@ -57,8 +60,10 @@ class SvgPainter {
   static String _cleanFontName(String fontName) =>
       fontName.toLowerCase().replaceAll(RegExp(r'''("|'|\s)'''), '');
 
-  List<PdfTtfFont> allTtfFonts() =>
-      document.fonts.whereType<PdfTtfFont>().toList();
+  List<PdfTtfFont> allTtfFonts() => fontFallback
+      .map((f) => f.getFont(Context(document: document)))
+      .whereType<PdfTtfFont>()
+      .toList();
 
   PdfTtfFont? _findBestFont(
       String fontFamily, String fontStyle, String fontWeight) {

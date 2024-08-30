@@ -222,7 +222,8 @@ class RunesAndFont {
   final PdfFont font;
 
   @override
-  String toString() => '(`${String.fromCharCodes(runes)}` ($runes) ${font.fontName})';
+  String toString() =>
+      '(`${String.fromCharCodes(runes)}` ($runes) ${font.fontName})';
 
   void append(RunesAndFont other) {
     assert(isCompatible(other));

@@ -32,6 +32,7 @@ class SvgImage extends Widget {
     double? width,
     double? height,
     PdfColor? colorFilter,
+    List<Font> fontFallback = const [],
   }) {
     final xml = XmlDocument.parse(svg);
     final parser = SvgParser(
@@ -46,6 +47,7 @@ class SvgImage extends Widget {
       clip,
       width,
       height,
+      fontFallback,
     );
   }
 
@@ -56,6 +58,7 @@ class SvgImage extends Widget {
     this.clip,
     this.width,
     this.height,
+    this.fontFallback,
   );
 
   final SvgParser _svgParser;
@@ -69,6 +72,8 @@ class SvgImage extends Widget {
   final double? width;
 
   final double? height;
+
+  final List<Font> fontFallback;
 
   late FittedSizes sizes;
 
@@ -126,6 +131,7 @@ class SvgImage extends Widget {
         context.page.pageFormat.width,
         context.page.pageFormat.height,
       ),
+      fontFallback
     );
     painter.paint();
     context.canvas.restoreContext();
