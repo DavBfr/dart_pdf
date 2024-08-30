@@ -20,7 +20,6 @@ import 'package:vector_math/vector_math_64.dart';
 import 'package:xml/xml.dart';
 
 import '../../pdf.dart';
-import '../widgets/widget.dart';
 import 'brush.dart';
 import 'clip_path.dart';
 import 'operation.dart';
@@ -64,9 +63,8 @@ class SvgText extends SvgOperation {
         .join()
         .trim();
 
-    final font = painter.getFontCache(
-        _brush.fontFamily!, _brush.fontStyle!, _brush.fontWeight!)!;
-    final pdfFont = font.getFont(Context(document: painter.document));
+    final pdfFont = painter.getFontCache(
+        _brush.fontFamily!, _brush.fontStyle!, _brush.fontWeight!);
     final metrics = pdfFont.stringMetrics(text) * _brush.fontSize!.sizeValue;
 
     var baselineOffset = 0.0;
@@ -79,7 +77,8 @@ class SvgText extends SvgOperation {
         break;
     }
 
-    offset = PdfPoint((x ?? offset.x) + dx, (y ?? offset.y) + dy + baselineOffset);
+    offset =
+        PdfPoint((x ?? offset.x) + dx, (y ?? offset.y) + dy + baselineOffset);
 
     switch (_brush.textAnchor!) {
       case SvgTextAnchor.start:
@@ -137,6 +136,9 @@ class SvgText extends SvgOperation {
         ..scale(1.0, -1.0)
         ..translate(x, -y!));
 
+    final fontSpans = _createFontSpans(text, font, painter.allTtfFonts(),
+        fontSize: brush.fontSize!.sizeValue, letterSpacing: null);
+
     if (brush.fill!.isNotEmpty) {
       brush.fill!.setFillColor(this, canvas);
       if (brush.fillOpacity! < 1) {
@@ -144,7 +146,7 @@ class SvgText extends SvgOperation {
           ..saveContext()
           ..setGraphicState(PdfGraphicState(opacity: brush.fillOpacity));
       }
-      canvas.drawString(font, brush.fontSize!.sizeValue, text, 0, 0);
+      _drawFontSpans(canvas, fontSpans);
       if (brush.fillOpacity! < 1) {
         canvas.restoreContext();
       }
@@ -161,14 +163,23 @@ class SvgText extends SvgOperation {
         canvas.setGraphicState(PdfGraphicState(opacity: brush.strokeOpacity));
       }
       brush.stroke!.setStrokeColor(this, canvas);
-      canvas.drawString(font, brush.fontSize!.sizeValue, text, 0, 0,
-          mode: PdfTextRenderingMode.stroke);
+      _drawFontSpans(canvas, fontSpans, mode: PdfTextRenderingMode.stroke);
     }
 
     canvas.restoreContext();
 
     for (final span in tspan) {
       span.paint(canvas);
+    }
+  }
+
+  void _drawFontSpans(PdfGraphics canvas, List<FontSpan> fontSpans,
+      {PdfTextRenderingMode mode = PdfTextRenderingMode.fill}) {
+    var x = 0.0;
+    for (final span in fontSpans) {
+      canvas.drawString(span.font, brush.fontSize!.sizeValue, span.text, x, 0,
+          mode: mode);
+      x += span.width;
     }
   }
 
@@ -202,4 +213,91 @@ class SvgText extends SvgOperation {
 
     return PdfRect(x, y, w, h);
   }
+}
+
+class RunesAndFont {
+  RunesAndFont(this.runes, this.font);
+
+  final List<int> runes;
+  final PdfFont font;
+
+  @override
+  String toString() => '(`${String.fromCharCodes(runes)}` ($runes) ${font.fontName})';
+
+  void append(RunesAndFont other) {
+    assert(isCompatible(other));
+    runes.addAll(other.runes);
+  }
+
+  bool isCompatible(RunesAndFont other) => font == other.font;
+}
+
+class FontSpan {
+  FontSpan(this.text, this.font, this.width);
+
+  factory FontSpan.fromRunesAndFont(RunesAndFont raf,
+      {required double fontSize, double? letterSpacing}) {
+    const textScaleFactor = 1.0;
+    final width = raf.font
+            .stringMetrics(String.fromCharCodes(raf.runes),
+                letterSpacing:
+                    (letterSpacing ?? 0.0) / (fontSize * textScaleFactor))
+            .advanceWidth *
+        (fontSize * textScaleFactor);
+    return FontSpan(String.fromCharCodes(raf.runes), raf.font, width);
+  }
+
+  final String text;
+  final PdfFont font;
+  final double width;
+}
+
+List<FontSpan> _createFontSpans(
+    String text, PdfFont primaryFont, List<PdfFont> fallbackFonts,
+    {required double fontSize, double? letterSpacing}) {
+  final runes = text.runes.toList();
+  final runesAndFonts = _groupRunes(runes, primaryFont, fallbackFonts);
+  return runesAndFonts
+      .map((raf) => FontSpan.fromRunesAndFont(raf,
+          fontSize: fontSize, letterSpacing: letterSpacing))
+      .toList();
+}
+
+List<RunesAndFont> _groupRunes(
+    List<int> runes, PdfFont primaryFont, List<PdfFont> fallbackFonts) {
+  final runesAndFonts = <RunesAndFont>[];
+
+  // Primary, current, then the rest
+  final orderedFonts = <PdfFont?>[
+    primaryFont,
+    primaryFont,
+    ...fallbackFonts,
+    null
+  ];
+
+  for (final rune in runes) {
+    final font =
+        orderedFonts.firstWhere((f) => f?.isRuneSupported(rune) != false);
+    if (font != null) {
+      runesAndFonts.add(RunesAndFont([rune], font));
+      orderedFonts[1] = font;
+    } else {
+      runesAndFonts.add(RunesAndFont('?'.runes.toList(), primaryFont));
+    }
+  }
+
+  if (runesAndFonts.isEmpty) {
+    return [];
+  }
+
+  final groups = [runesAndFonts.first];
+  for (final raf in runesAndFonts.skip(1)) {
+    if (raf.isCompatible(groups.last)) {
+      groups.last.append(raf);
+    } else {
+      groups.add(raf);
+    }
+  }
+
+  return groups;
 }

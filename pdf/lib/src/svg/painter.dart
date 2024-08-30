@@ -16,6 +16,7 @@
 
 import '../../pdf.dart';
 import '../widgets/font.dart';
+import '../widgets/widget.dart';
 import 'brush.dart';
 import 'color.dart';
 import 'group.dart';
@@ -27,8 +28,7 @@ class SvgPainter {
     this._canvas,
     this.document,
     this.boundingBox,
-    Map<String, Font>? fonts,
-  ) : fonts = fonts?.map((key, value) => MapEntry(_cleanFontName(key), value));
+  );
 
   final SvgParser parser;
 
@@ -37,8 +37,6 @@ class SvgPainter {
   final PdfDocument document;
 
   final PdfRect boundingBox;
-
-  final Map<String, Font>? fonts;
 
   void paint() {
     final brush = parser.colorFilter == null
@@ -49,32 +47,72 @@ class SvgPainter {
     SvgGroup.fromXml(parser.root, this, brush).paint(_canvas!);
   }
 
-  final _fontCache = <String, Font>{};
+  final _fontCache = <String, PdfFont>{};
 
-  Font? getFontCache(String fontFamily, String fontStyle, String fontWeight) {
+  PdfFont getFontCache(String fontFamily, String fontStyle, String fontWeight) {
     final cache = '$fontFamily-$fontStyle-$fontWeight';
-
-    if (!_fontCache.containsKey(cache)) {
-      _fontCache[cache] = getFont(fontFamily, fontStyle, fontWeight);
-    }
-
-    return _fontCache[cache];
+    return _fontCache[cache] ??= getFont(fontFamily, fontStyle, fontWeight);
   }
 
   static String _cleanFontName(String fontName) =>
       fontName.toLowerCase().replaceAll(RegExp(r'''("|'|\s)'''), '');
 
-  Font getFont(String fontFamily, String fontStyle, String fontWeight) {
-    final localFonts = fonts;
-    if (localFonts != null) {
-      // We perform a lose matching because quotes are not always present in the fontFamily
-      final cleanFontFamily = _cleanFontName(fontFamily);
-      final fontKeys = localFonts.keys
-          .where((key) => key.toLowerCase() == cleanFontFamily.toLowerCase());
-      if (fontKeys.isNotEmpty) {
-        return localFonts[fontKeys.first]!;
+  List<PdfTtfFont> allTtfFonts() =>
+      document.fonts.whereType<PdfTtfFont>().toList();
+
+  PdfTtfFont? _findBestFont(
+      String fontFamily, String fontStyle, String fontWeight) {
+    final cleanFontFamilyQuery = _cleanFontName(fontFamily);
+
+    // First, filter with family
+    final familyFonts = allTtfFonts().where((font) {
+      final fontFamily =
+          font.font.getNameID(TtfParserName.fontFamily) ?? font.fontName;
+      return cleanFontFamilyQuery.startsWith(_cleanFontName(fontFamily));
+    }).toList();
+
+    if (familyFonts.isEmpty) {
+      return null;
+    }
+
+    // Find best by style or weight
+    // Based on https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=iws-chapter08#3054f18b
+
+    // This is the default font
+    final regularFont = familyFonts.firstWhere(
+        (f) =>
+            (f.font.getNameID(TtfParserName.fontSubfamily)?.toLowerCase() ??
+                'regular') ==
+            'regular',
+        orElse: () => familyFonts.first);
+
+    // Expect normal | italic | oblique
+    final cleanFontStyle = fontStyle.toLowerCase();
+
+    // Expect normal | bold | bolder | lighter | <number>
+    final cleanFontWeight = fontWeight.toLowerCase();
+
+    for (final font in familyFonts) {
+      final fontSubFamily =
+          font.font.getNameID(TtfParserName.fontSubfamily) ?? 'Regular';
+      final cleanSubFamily = _cleanFontName(fontSubFamily);
+
+      if (cleanSubFamily == cleanFontStyle ||
+          cleanSubFamily == cleanFontWeight) {
+        return font;
       }
     }
+
+    return regularFont;
+  }
+
+  PdfFont getFont(String fontFamily, String fontStyle, String fontWeight) {
+    final documentFont = _findBestFont(fontFamily, fontStyle, fontWeight);
+    if (documentFont != null) {
+      return documentFont;
+    }
+
+    final context = Context(document: document);
 
     switch (fontFamily) {
       case 'serif':
@@ -83,16 +121,16 @@ class SvgPainter {
             switch (fontWeight) {
               case 'normal':
               case 'lighter':
-                return Font.times();
+                return Font.times().getFont(context);
             }
-            return Font.timesBold();
+            return Font.timesBold().getFont(context);
         }
         switch (fontWeight) {
           case 'normal':
           case 'lighter':
-            return Font.timesItalic();
+            return Font.timesItalic().getFont(context);
         }
-        return Font.timesBoldItalic();
+        return Font.timesBoldItalic().getFont(context);
 
       case 'monospace':
         switch (fontStyle) {
@@ -100,16 +138,16 @@ class SvgPainter {
             switch (fontWeight) {
               case 'normal':
               case 'lighter':
-                return Font.courier();
+                return Font.courier().getFont(context);
             }
-            return Font.courierBold();
+            return Font.courierBold().getFont(context);
         }
         switch (fontWeight) {
           case 'normal':
           case 'lighter':
-            return Font.courierOblique();
+            return Font.courierOblique().getFont(context);
         }
-        return Font.courierBoldOblique();
+        return Font.courierBoldOblique().getFont(context);
     }
 
     switch (fontStyle) {
@@ -117,15 +155,15 @@ class SvgPainter {
         switch (fontWeight) {
           case 'normal':
           case 'lighter':
-            return Font.helvetica();
+            return Font.helvetica().getFont(context);
         }
-        return Font.helveticaBold();
+        return Font.helveticaBold().getFont(context);
     }
     switch (fontWeight) {
       case 'normal':
       case 'lighter':
-        return Font.helveticaOblique();
+        return Font.helveticaOblique().getFont(context);
     }
-    return Font.helveticaBoldOblique();
+    return Font.helveticaBoldOblique().getFont(context);
   }
 }
