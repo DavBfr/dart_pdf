@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -34,21 +35,21 @@ class SvgImage extends Widget {
     PdfColor? colorFilter,
     List<Font> fontFallback = const [],
   }) {
-    final xml = XmlDocument.parse(svg);
-    final parser = SvgParser(
-      xml: xml,
-      colorFilter: colorFilter,
-    );
-
-    return SvgImage._fromParser(
-      parser,
-      fit,
-      alignment,
-      clip,
-      width,
-      height,
-      fontFallback,
-    );
+    try {
+      final xml = XmlDocument.parse(svg);
+      final parser = SvgParser(xml: xml, colorFilter: colorFilter);
+      return SvgImage._fromParser(
+        parser,
+        fit,
+        alignment,
+        clip,
+        width,
+        height,
+        fontFallback,
+      );
+    } catch (e) {
+      throw ArgumentError.value(svg, 'svg', 'Invalid SVG\n`$svg`\nBase64: ${base64.encode(utf8.encode(svg))}\n$e}');
+    }
   }
 
   SvgImage._fromParser(
