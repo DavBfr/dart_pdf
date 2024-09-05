@@ -73,6 +73,7 @@ class PdfDocument {
     bool compress = true,
     bool verbose = false,
     PdfVersion version = PdfVersion.pdf_1_5,
+    this.userDocumentID,
   })  : prev = null,
         _objser = 1 {
     settings = PdfSettings(
@@ -91,7 +92,8 @@ class PdfDocument {
     DeflateCallback? deflate,
     bool compress = true,
     bool verbose = false,
-  }) : _objser = prev!.size {
+  })  : _objser = prev!.size,
+        userDocumentID = null {
     settings = PdfSettings(
       deflate: compress ? (deflate ?? defaultDeflate) : null,
       verbose: verbose,
@@ -105,6 +107,8 @@ class PdfDocument {
   }
 
   final PdfDocumentParserBase? prev;
+
+  final String? userDocumentID;
 
   /// This is used to allocate objects a unique serial number in the document.
   int _objser;
@@ -175,11 +179,15 @@ class PdfDocument {
   /// Generates the document ID
   Uint8List get documentID {
     if (_documentID == null) {
-      final rnd = math.Random();
-      _documentID = Uint8List.fromList(sha256
-          .convert(DateTime.now().toIso8601String().codeUnits +
-              List<int>.generate(32, (_) => rnd.nextInt(256)))
-          .bytes);
+      if (userDocumentID != null) {
+        _documentID = Uint8List.fromList(userDocumentID!.codeUnits);
+      } else {
+        final rnd = math.Random();
+        _documentID = Uint8List.fromList(sha256
+            .convert(DateTime.now().toIso8601String().codeUnits +
+                List<int>.generate(32, (_) => rnd.nextInt(256)))
+            .bytes);
+      }
     }
 
     return _documentID!;

@@ -37,12 +37,14 @@ class Document {
     String? keywords,
     String? producer,
     XmlDocument? metadata,
+    String? userDocumentID,
   }) : document = PdfDocument(
           pageMode: pageMode,
           deflate: deflate,
           compress: compress,
           verbose: verbose,
           version: version,
+          userDocumentID:userDocumentID,
         ) {
     if (title != null ||
         author != null ||
