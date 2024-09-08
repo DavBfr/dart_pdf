@@ -25,8 +25,11 @@ import 'utils.dart';
 
 late Document pdf;
 
-List<TableRow> buildTable(
-    {required Context? context, int count = 10, bool repeatHeader = false}) {
+List<TableRow> buildTable({
+  required Context? context,
+  int count = 10,
+  bool repeatHeader = false,
+}) {
   final rows = <TableRow>[];
   {
     final tableRow = <Widget>[];
@@ -138,6 +141,48 @@ void main() {
     pdf.addPage(Page(
       build: (Context context) => Table(
         children: buildTable(context: context, count: 20),
+        border: TableBorder.all(),
+        columnWidths: <int, TableColumnWidth>{
+          0: const FixedColumnWidth(80),
+          1: const FlexColumnWidth(2),
+          2: const FractionColumnWidth(.2),
+        },
+      ),
+    ));
+  });
+
+  test('Table Widget Column Span', () {
+    pdf.addPage(Page(
+      build: (Context context) => Table(
+        children: [
+          TableRow(
+            columnSpans: const {0: 2, 2: 1},
+            children: [
+              Container(color: PdfColors.red, height: 20),
+              Container(color: PdfColors.green, height: 20),
+            ],
+          ),
+          TableRow(
+            columnSpans: const {1: 2},
+            children: [
+              Container(color: PdfColors.green, height: 20),
+              Container(color: PdfColors.blue, height: 20),
+            ],
+          ),
+          TableRow(
+            columnSpans: const {0: 3},
+            children: [
+              Container(color: PdfColors.red, height: 20),
+            ],
+          ),
+          TableRow(
+            children: [
+              Container(color: PdfColors.red, height: 20),
+              Container(color: PdfColors.blue, height: 20),
+              Container(color: PdfColors.green, height: 20),
+            ],
+          ),
+        ],
         border: TableBorder.all(),
         columnWidths: <int, TableColumnWidth>{
           0: const FixedColumnWidth(80),
