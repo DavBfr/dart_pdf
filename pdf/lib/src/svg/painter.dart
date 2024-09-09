@@ -69,15 +69,18 @@ class SvgPainter {
       String fontFamily, String fontStyle, String fontWeight) {
     final cleanFontFamilyQuery = _cleanFontName(fontFamily);
 
+    final ttfFonts = allTtfFonts();
+
     // First, filter with family
-    final familyFonts = allTtfFonts().where((font) {
+    final familyFonts = ttfFonts.where((font) {
       final fontFamily =
           font.font.getNameID(TtfParserName.fontFamily) ?? font.fontName;
       return cleanFontFamilyQuery.startsWith(_cleanFontName(fontFamily));
     }).toList();
 
-    if (familyFonts.isEmpty) {
-      return null;
+    if (familyFonts.isEmpty && ttfFonts.isNotEmpty) {
+      // Always return a ttf font because the other fonts do not support unicode
+      return ttfFonts.first;
     }
 
     // Find best by style or weight

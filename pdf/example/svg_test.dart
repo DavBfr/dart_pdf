@@ -41,7 +41,7 @@ const svgRaw = '''
 		<g id="g-root-tx_1q5q08xr8c7in-fill" data-item-order="0" data-item-id="tx_1q5q08xr8c7in" data-item-class="Label Stroke" data-item-index="none" data-renderer-id="0" transform="translate(0, 68)">
 			<g id="tx_1q5q08xr8c7in-fill" stroke="none" fill="#484848">
 				<g xmlns="http://www.w3.org/2000/svg">
-					<text width="500" x="0" y="0" height="24" dominant-baseline="ideographic" text-anchor="start" style="font: 30px Roboto, sans-serif; letter-spacing: 0.01rem; white-space: pre;">
+					<text width="500" x="0" y="0" height="24" dominant-baseline="ideographic" text-anchor="start" style="font: 30px 'Source Code Pro', monospace; letter-spacing: 0.01rem; white-space: pre;">
 						<tspan x="0" y="24">
 							Eng+FçasÜ + 中文+かな+자기+इस
 						</tspan>
