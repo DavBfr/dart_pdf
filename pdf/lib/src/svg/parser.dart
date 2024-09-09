@@ -155,7 +155,7 @@ class SvgParser {
 
     // From https://stackoverflow.com/questions/10135697/regex-to-parse-any-css-font
     final regEx = RegExp(
-        r'^\s*(?=(?:(?:[-a-z]+\s*){0,2}(italic|oblique))?)(?=(?:(?:[-a-z]+\s*){0,2}(small-caps))?)(?=(?:(?:[-a-z]+\s*){0,2}(bold(?:er)?|lighter|[1-9]00))?)(?:(?:normal|\1|\2|\3)\s*){0,3}((?:xx?-)?(?:small|large)|medium|smaller|larger|[.\d]+(?:\%|in|[cem]m|ex|p[ctx]))(?:\s*\/\s*(normal|[.\d]+(?:\%|in|[cem]m|ex|p[ctx])))?\s*([-,\"\sa-z0-9]+?)\s*$',
+        r'''^\s*(?=(?:(?:[-a-z]+\s*){0,2}(italic|oblique))?)(?=(?:(?:[-a-z]+\s*){0,2}(small-caps))?)(?=(?:(?:[-a-z]+\s*){0,2}(bold(?:er)?|lighter|[1-9]00))?)(?:(?:normal|\1|\2|\3)\s*){0,3}((?:xx?-)?(?:small|large)|medium|smaller|larger|[.\d]+(?:\%|in|[cem]m|ex|p[ctx]))(?:\s*\/\s*(normal|[.\d]+(?:\%|in|[cem]m|ex|p[ctx])))?\s*([-,&;'\"\sa-z0-9]+?)\s*$''',
         caseSensitive: false);
 
     final match = regEx.firstMatch(fontString);
@@ -167,15 +167,17 @@ class SvgParser {
     element.setAttribute('font-variant', match.group(2) ?? 'normal');
     element.setAttribute('font-weight', match.group(3) ?? 'normal');
 
-    if(match.group(4) != null) {
-        element.setAttribute('font-size', match.group(4));
+    if (match.group(4) != null) {
+      element.setAttribute('font-size', match.group(4));
     }
-    if(match.group(5) != null) {
-        element.setAttribute('lineHeight', match.group(5));
+    if (match.group(5) != null) {
+      element.setAttribute('lineHeight', match.group(5));
     }
-    if(match.group(6) != null) {
-        element.setAttribute('font-family', match.group(6));
+    if (match.group(6) != null) {
+      element.setAttribute('font-family', match.group(6));
     }
+
+    print(element.attributes);
   }
 }
 
