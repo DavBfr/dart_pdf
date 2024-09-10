@@ -176,8 +176,6 @@ class SvgParser {
     if (match.group(6) != null) {
       element.setAttribute('font-family', match.group(6));
     }
-
-    print(element.attributes);
   }
 }
 
