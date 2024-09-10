@@ -179,7 +179,6 @@ class PdfTtfFont extends PdfFont {
   @override
   void putText(PdfStream stream, String text) {
     _setInUse(true);
-    print('>> inUse $this');
     if (!font.unicode) {
       super.putText(stream, text);
     }

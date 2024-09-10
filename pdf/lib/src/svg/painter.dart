@@ -84,9 +84,6 @@ class SvgPainter {
       return cleanFontFamilyQuery == _cleanFontName(fontFamily);
     }).toList();
 
-    print(
-        '>> _findBestFont $fontFamily $fontStyle $fontWeight => $familyFonts');
-
     if (familyFonts.isEmpty && ttfFonts.isNotEmpty) {
       // Always return a ttf font because the other fonts do not support unicode
       return ttfFonts.first;
@@ -125,7 +122,6 @@ class SvgPainter {
 
   PdfFont getFont(String fontFamily, String fontStyle, String fontWeight) {
     final documentFont = _findBestFont(fontFamily, fontStyle, fontWeight);
-    print('>> getFont $fontFamily $fontStyle $fontWeight => $documentFont');
     if (documentFont != null) {
       return documentFont;
     }
