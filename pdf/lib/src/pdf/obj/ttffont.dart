@@ -47,7 +47,15 @@ class PdfTtfFont extends PdfFont {
     widthsObject = PdfObject<PdfArray>(pdfDocument, params: PdfArray());
 
     // By default the font is not used
-    inUse = false;
+    _setInUse(false);
+  }
+
+  void _setInUse(bool s) {
+    inUse = s;
+    file.inUse = s;
+    unicodeCMap.inUse = s;
+    descriptor.inUse = s;
+    widthsObject.inUse = s;
   }
 
   @override
@@ -170,7 +178,8 @@ class PdfTtfFont extends PdfFont {
 
   @override
   void putText(PdfStream stream, String text) {
-    inUse = true;
+    _setInUse(true);
+    print('>> inUse $this');
     if (!font.unicode) {
       super.putText(stream, text);
     }
