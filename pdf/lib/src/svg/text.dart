@@ -255,7 +255,7 @@ class FontSpan {
 }
 
 List<FontSpan> _createFontSpans(
-    String text, PdfFont primaryFont, List<PdfFont> fallbackFonts,
+    String text, PdfFont primaryFont, List<PdfTtfFont> fallbackFonts,
     {required double fontSize, double? letterSpacing}) {
   final runes = bidi.logicalToVisual(text);
   final runesAndFonts = _groupRunes(runes, primaryFont, fallbackFonts);
@@ -265,15 +265,20 @@ List<FontSpan> _createFontSpans(
       .toList();
 }
 
+String _getFontSubFamily(PdfTtfFont? ttfFont) => ttfFont?.font.getNameID(TtfParserName.fontFamily)?.toLowerCase().trim() ?? 'regular';
+
 List<RunesAndFont> _groupRunes(
-    List<int> runes, PdfFont primaryFont, List<PdfFont> fallbackFonts) {
+    List<int> runes, PdfFont primaryFont, List<PdfTtfFont> fallbackFonts) {
   final runesAndFonts = <RunesAndFont>[];
 
-  // Primary, current, then the rest
+  final primaryFontSubFamily = _getFontSubFamily(primaryFont as PdfTtfFont?) ?? 'regular';
+
+  // Primary, current, fonts with same sub-family, fonts with different sub-family, null
   final orderedFonts = <PdfFont?>[
     primaryFont,
     primaryFont,
-    ...fallbackFonts,
+    ...fallbackFonts.where((f) => _getFontSubFamily(f) == primaryFontSubFamily),
+    ...fallbackFonts.where((f) => _getFontSubFamily(f) != primaryFontSubFamily),
     null
   ];
 
