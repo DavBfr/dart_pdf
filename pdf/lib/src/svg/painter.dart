@@ -57,7 +57,7 @@ class SvgPainter {
     return _fontCache[cache] ??= getFont(fontFamily, fontStyle, fontWeight);
   }
 
-  static String _cleanFontName(String fontName) => font.toLowerCase().replaceAll(RegExp(r'''("|'|\s)'''), '');
+  static String _cleanFontName(String fontName) => fontName.toLowerCase().replaceAll(RegExp(r'''("|'|\s)'''), '');
 
   static String _removeFontFallbacks(String fontName) {
     // Font names may contain fallbacks separated by commas
