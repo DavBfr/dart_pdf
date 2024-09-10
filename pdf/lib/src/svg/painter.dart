@@ -57,8 +57,15 @@ class SvgPainter {
     return _fontCache[cache] ??= getFont(fontFamily, fontStyle, fontWeight);
   }
 
-  static String _cleanFontName(String fontName) =>
-      fontName.toLowerCase().replaceAll(RegExp(r'''("|'|\s)'''), '');
+  static String _cleanFontName(String fontName) => font.toLowerCase().replaceAll(RegExp(r'''("|'|\s)'''), '');
+
+  static String _removeFontFallbacks(String fontName) {
+    // Font names may contain fallbacks separated by commas
+    // We just remove them for now, in the future we may want to use them
+    final regExp = RegExp(r'(?<font>[^,]+)(,.+)?');
+    final match = regExp.firstMatch(fontName);
+    return match?.namedGroup('font') ?? fontName;
+  }
 
   List<PdfTtfFont> allTtfFonts() => fontFallback
       .map((f) => f.getFont(Context(document: document)))
@@ -67,16 +74,16 @@ class SvgPainter {
 
   PdfTtfFont? _findBestFont(
       String fontFamily, String fontStyle, String fontWeight) {
-    final cleanFontFamilyQuery = _cleanFontName(fontFamily);
+    final cleanFontFamilyQuery = _cleanFontName(_removeFontFallbacks(fontFamily));
 
     final ttfFonts = allTtfFonts();
 
     // First, filter with family
     final familyFonts = ttfFonts.where((font) {
-      final fontFamily =
-          font.font.getNameID(TtfParserName.fontFamily) ?? font.fontName;
-      return cleanFontFamilyQuery.startsWith(_cleanFontName(fontFamily));
+      final fontFamily = font.font.getNameID(TtfParserName.fontFamily) ?? font.fontName;
+      return cleanFontFamilyQuery == _cleanFontName(fontFamily);
     }).toList();
+
     print(
         '>> _findBestFont $fontFamily $fontStyle $fontWeight => $familyFonts');
 
