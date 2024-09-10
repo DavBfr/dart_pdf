@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:bidi/bidi.dart' as bidi;
 
 import '../lib/widgets.dart' as pw;
 
@@ -51,15 +52,8 @@ const svgRaw = '''
 		<g id="g-root-tx_1q5q08xr8c7in-fill" data-item-order="0" data-item-id="tx_1q5q08xr8c7in" data-item-class="Label Stroke" data-item-index="none" data-renderer-id="0" transform="translate(0, 68)">
 			<g id="tx_1q5q08xr8c7in-fill" stroke="none" fill="#484848">
 				<g xmlns="http://www.w3.org/2000/svg">
-					<text width="500" x="0" y="0" height="24" dominant-baseline="ideographic" text-anchor="start" style="font: normal 30px 'Comfortaa'; letter-spacing: 0.01rem; white-space: pre;">
-						<tspan x="0" y="24">
-							normal 30px 'Comfortaa'
-						</tspan>
-						</text>
-						<text width="500" x="0" y="0" height="24" dominant-baseline="ideographic" text-anchor="start" style="font: bold 30px 'Comfortaa'; letter-spacing: 0.01rem; white-space: pre;">
-						<tspan x="0" y="48">
-							bold 30px 'Comfortaa'
-						</tspan>
+					<text width="500" x="0" y="0" height="24" dominant-baseline="ideographic" text-anchor="start" style="font: normal 30px 'Roboto'; letter-spacing: 0.01rem; white-space: pre;">
+						<tspan x="0" y="24">A شصش -- شصش Z</tspan>
 					</text>
 				</g>
 			</g>

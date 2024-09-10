@@ -16,6 +16,7 @@
 
 import 'dart:math';
 
+import 'package:bidi/bidi.dart' as bidi;
 import 'package:vector_math/vector_math_64.dart';
 import 'package:xml/xml.dart';
 
@@ -256,7 +257,7 @@ class FontSpan {
 List<FontSpan> _createFontSpans(
     String text, PdfFont primaryFont, List<PdfFont> fallbackFonts,
     {required double fontSize, double? letterSpacing}) {
-  final runes = text.runes.toList();
+  final runes = bidi.logicalToVisual(text);
   final runesAndFonts = _groupRunes(runes, primaryFont, fallbackFonts);
   return runesAndFonts
       .map((raf) => FontSpan.fromRunesAndFont(raf,
