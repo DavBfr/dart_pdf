@@ -45,6 +45,9 @@ class PdfTtfFont extends PdfFont {
     unicodeCMap = PdfUnicodeCmap(pdfDocument, protect);
     descriptor = PdfFontDescriptor(this, file);
     widthsObject = PdfObject<PdfArray>(pdfDocument, params: PdfArray());
+
+    // By default the font is not used
+    inUse = false;
   }
 
   @override
@@ -167,6 +170,7 @@ class PdfTtfFont extends PdfFont {
 
   @override
   void putText(PdfStream stream, String text) {
+    inUse = true;
     if (!font.unicode) {
       super.putText(stream, text);
     }
