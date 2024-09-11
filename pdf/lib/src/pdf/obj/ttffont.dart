@@ -204,11 +204,14 @@ class PdfTtfFont extends PdfFont {
       return super.stringMetrics(s, letterSpacing: letterSpacing);
     }
 
-    final runes = s.runes;
-    final bytes = <int>[];
-    runes.forEach(bytes.add);
+    final runes = s.runes.where((r) => isRuneSupported(r)).toList();
+    if(runes.isEmpty) {
+        // No supported character, sample a few characters from the font and create metrics
+        final glyphs = font.charToGlyphIndexMap.keys.take(16).map(glyphMetrics);
+        return PdfFontMetrics.append(glyphs, letterSpacing: letterSpacing).copyWith(left: 0, top: 0, right: 0, bottom: 0, advanceWidth: 0, leftBearing: 0);
+    }
 
-    final metrics = bytes.map(glyphMetrics);
+    final metrics = runes.map(glyphMetrics);
     return PdfFontMetrics.append(metrics, letterSpacing: letterSpacing);
   }
 
