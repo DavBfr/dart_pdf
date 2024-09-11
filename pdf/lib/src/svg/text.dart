@@ -265,7 +265,7 @@ List<FontSpan> _createFontSpans(
       .toList();
 }
 
-String _getFontSubFamily(PdfTtfFont? ttfFont) => ttfFont?.font.getNameID(TtfParserName.fontFamily)?.toLowerCase().trim() ?? 'regular';
+String _getFontSubFamily(PdfTtfFont? ttfFont) => ttfFont?.font.getNameID(TtfParserName.fontSubfamily)?.toLowerCase().trim() ?? 'regular';
 
 List<RunesAndFont> _groupRunes(
     List<int> runes, PdfFont primaryFont, List<PdfTtfFont> fallbackFonts) {
