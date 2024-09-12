@@ -29,6 +29,7 @@ class SvgPainter {
     this.document,
     this.boundingBox,
     this.fonts,
+    this.fallbackFonts,
   );
 
   final SvgParser parser;
@@ -40,6 +41,8 @@ class SvgPainter {
   final PdfRect boundingBox;
 
   final List<Font> fonts;
+
+  final List<Font> fallbackFonts;
 
   void paint() {
     final brush = parser.colorFilter == null
@@ -67,16 +70,22 @@ class SvgPainter {
     return match?.namedGroup('font') ?? fontName;
   }
 
-  List<PdfTtfFont> allTtfFonts() => fonts
+  List<PdfTtfFont> get fallbackFontsTtf => fallbackFonts
       .map((f) => f.getFont(Context(document: document)))
       .whereType<PdfTtfFont>()
       .toList();
+
+
+    List<PdfTtfFont> get fontsTtf => fonts
+        .map((f) => f.getFont(Context(document: document)))
+        .whereType<PdfTtfFont>()
+        .toList();
 
   PdfTtfFont? _findBestFont(
       String fontFamily, String fontStyle, String fontWeight) {
     final cleanFontFamilyQuery = _cleanFontName(_removeFontFallbacks(fontFamily));
 
-    final ttfFonts = allTtfFonts();
+    final ttfFonts = fontsTtf;
 
     // First, filter with family
     final familyFonts = ttfFonts.where((font) {

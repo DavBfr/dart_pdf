@@ -137,7 +137,7 @@ class SvgText extends SvgOperation {
         ..scale(1.0, -1.0)
         ..translate(x, -y!));
 
-    final fontSpans = _createFontSpans(text, font, painter.allTtfFonts(),
+    final fontSpans = _createFontSpans(text, font, painter.fallbackFontsTtf,
         fontSize: brush.fontSize!.sizeValue, letterSpacing: null);
 
     if (brush.fill!.isNotEmpty) {

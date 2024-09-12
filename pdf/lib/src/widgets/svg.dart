@@ -34,6 +34,7 @@ class SvgImage extends Widget {
     double? height,
     PdfColor? colorFilter,
     List<Font> fonts = const [],
+    List<Font> fallbackFonts = const [],
   }) {
     try {
       final xml = XmlDocument.parse(svg);
@@ -46,6 +47,7 @@ class SvgImage extends Widget {
         width,
         height,
         fonts,
+        fallbackFonts,
       );
     } catch (e) {
       throw ArgumentError.value(svg, 'svg', 'Invalid SVG\n`$svg`\nBase64: ${base64.encode(utf8.encode(svg))}\n$e}');
@@ -60,6 +62,7 @@ class SvgImage extends Widget {
     this.width,
     this.height,
     this.fonts,
+    this.fallbackFonts,
   );
 
   final SvgParser _svgParser;
@@ -75,6 +78,8 @@ class SvgImage extends Widget {
   final double? height;
 
   final List<Font> fonts;
+
+  final List<Font> fallbackFonts;
 
   late FittedSizes sizes;
 
@@ -132,7 +137,8 @@ class SvgImage extends Widget {
         context.page.pageFormat.width,
         context.page.pageFormat.height,
       ),
-      fonts
+      fonts,
+      fallbackFonts,
     );
     painter.paint();
     context.canvas.restoreContext();
