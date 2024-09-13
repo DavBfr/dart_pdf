@@ -33,7 +33,8 @@ class SvgImage extends Widget {
     double? width,
     double? height,
     PdfColor? colorFilter,
-    List<Font> fonts = const [],
+    Map<String, Font> fonts = const {},
+    Font? defaultFont,
     List<Font> fallbackFonts = const [],
   }) {
     try {
@@ -47,6 +48,7 @@ class SvgImage extends Widget {
         width,
         height,
         fonts,
+        defaultFont,
         fallbackFonts,
       );
     } catch (e) {
@@ -62,6 +64,7 @@ class SvgImage extends Widget {
     this.width,
     this.height,
     this.fonts,
+    this.defaultFont,
     this.fallbackFonts,
   );
 
@@ -77,7 +80,9 @@ class SvgImage extends Widget {
 
   final double? height;
 
-  final List<Font> fonts;
+  Font? defaultFont;
+
+  final Map<String, Font> fonts;
 
   final List<Font> fallbackFonts;
 
@@ -138,6 +143,7 @@ class SvgImage extends Widget {
         context.page.pageFormat.height,
       ),
       fonts,
+      defaultFont,
       fallbackFonts,
     );
     painter.paint();

@@ -2,25 +2,31 @@ import 'dart:io';
 import 'package:bidi/bidi.dart' as bidi;
 
 import '../lib/widgets.dart' as pw;
+import '../lib/pdf.dart';
 
 void main() async {
-  final svgImage = pw.SvgImage(svg: svgRaw, fonts: [
-    pw.Font.ttf(File(
+  final svgImage = pw.SvgImage(svg: svgRaw, fonts: {
+    'roboto': pw.Font.ttf(File(
             '../../../secondlayer/napkin-web-client/web/fonts/Roboto/Roboto-Regular.ttf')
         .readAsBytesSync()
         .buffer
         .asByteData()),
-        pw.Font.ttf(File(
+    'roboto': pw.Font.ttf(File(
                 '../../../secondlayer/napkin-web-client/web/fonts/Roboto/Roboto-Bold.ttf')
             .readAsBytesSync()
             .buffer
             .asByteData()),
-    pw.Font.ttf(File(
+    'shantell sans': pw.Font.ttf(File(
             '../../../secondlayer/napkin-web-client/web/fonts/Shantell_Sans/static/ShantellSans-Regular.ttf')
         .readAsBytesSync()
         .buffer
         .asByteData()),
-    ],
+    },
+    defaultFont: pw.Font.ttf(File(
+            '../../../secondlayer/napkin-web-client/web/fonts/Roboto/Roboto-Regular.ttf')
+        .readAsBytesSync()
+        .buffer
+        .asByteData()),
     fallbackFonts: [
     pw.Font.ttf(File(
             '/Users/arnaudbrejeon/secondLayer/src/secondlayer/napkin-web-client/web/fonts/Noto_Sans_JP/static/NotoSansJP-Regular.ttf')

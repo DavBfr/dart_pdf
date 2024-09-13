@@ -29,6 +29,7 @@ class SvgPainter {
     this.document,
     this.boundingBox,
     this.fonts,
+    this.defaultFont,
     this.fallbackFonts,
   );
 
@@ -40,7 +41,9 @@ class SvgPainter {
 
   final PdfRect boundingBox;
 
-  final List<Font> fonts;
+  final Map<String, Font> fonts;
+
+  Font? defaultFont;
 
   final List<Font> fallbackFonts;
 
@@ -76,26 +79,20 @@ class SvgPainter {
       .toList();
 
 
-    List<PdfTtfFont> get fontsTtf => fonts
-        .map((f) => f.getFont(Context(document: document)))
-        .whereType<PdfTtfFont>()
-        .toList();
+    List<PdfTtfFont> _getFamilyFonts(String fontFamily) {
+        final cleanFontFamilyQuery = _cleanFontName(_removeFontFallbacks(fontFamily));
+        return fonts.entries
+            .where((e) => _cleanFontName(e.key) == cleanFontFamilyQuery)
+            .map((e) => e.value.getFont(Context(document: document)))
+            .whereType<PdfTtfFont>()
+            .toList();
+    }
 
   PdfTtfFont? _findBestFont(
       String fontFamily, String fontStyle, String fontWeight) {
-    final cleanFontFamilyQuery = _cleanFontName(_removeFontFallbacks(fontFamily));
-
-    final ttfFonts = fontsTtf;
-
-    // First, filter with family
-    final familyFonts = ttfFonts.where((font) {
-      final fontFamily = font.font.getNameID(TtfParserName.fontFamily) ?? font.fontName;
-      return cleanFontFamilyQuery == _cleanFontName(fontFamily);
-    }).toList();
-
-    if (familyFonts.isEmpty && ttfFonts.isNotEmpty) {
-      // Always return a ttf font because the other fonts do not support unicode
-      return ttfFonts.first;
+    final familyFonts = _getFamilyFonts(fontFamily);
+    if (familyFonts.length <= 1) {
+      return defaultFont?.getFont(Context(document: document)) as PdfTtfFont?;
     }
 
     // Find best by style or weight
