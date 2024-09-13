@@ -28,10 +28,10 @@ class SvgPainter {
     this._canvas,
     this.document,
     this.boundingBox,
-    this.fonts,
+    Map<String, List<Font>> fonts,
     this.defaultFont,
     this.fallbackFonts,
-  );
+  ): fonts = fonts.map((key, value) => MapEntry(_cleanFontName(key), value));
 
   final SvgParser parser;
 
@@ -79,7 +79,7 @@ class SvgPainter {
       .toList();
 
 
-    List<PdfTtfFont> _getFamilyFonts(String fontFamily) {
+  List<PdfTtfFont> _getFamilyFonts(String fontFamily) {
         final cleanFontFamilyQuery = _cleanFontName(_removeFontFallbacks(fontFamily));
         return fonts[cleanFontFamilyQuery]?.map((f) => f.getFont(Context(document: document))).whereType<PdfTtfFont>().toList() ??
             [];
