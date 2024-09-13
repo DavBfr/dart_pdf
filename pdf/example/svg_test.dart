@@ -6,21 +6,21 @@ import '../lib/pdf.dart';
 
 void main() async {
   final svgImage = pw.SvgImage(svg: svgRaw, fonts: {
-    'roboto': pw.Font.ttf(File(
+    'roboto': [pw.Font.ttf(File(
             '../../../secondlayer/napkin-web-client/web/fonts/Roboto/Roboto-Regular.ttf')
         .readAsBytesSync()
         .buffer
         .asByteData()),
-    'roboto': pw.Font.ttf(File(
+    pw.Font.ttf(File(
                 '../../../secondlayer/napkin-web-client/web/fonts/Roboto/Roboto-Bold.ttf')
             .readAsBytesSync()
             .buffer
-            .asByteData()),
-    'shantell sans': pw.Font.ttf(File(
+            .asByteData())],
+    'shantell sans': [pw.Font.ttf(File(
             '../../../secondlayer/napkin-web-client/web/fonts/Shantell_Sans/static/ShantellSans-Regular.ttf')
         .readAsBytesSync()
         .buffer
-        .asByteData()),
+        .asByteData())],
     },
     defaultFont: pw.Font.ttf(File(
             '../../../secondlayer/napkin-web-client/web/fonts/Roboto/Roboto-Regular.ttf')

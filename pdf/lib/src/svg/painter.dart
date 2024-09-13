@@ -41,7 +41,7 @@ class SvgPainter {
 
   final PdfRect boundingBox;
 
-  final Map<String, Font> fonts;
+  final Map<String, List<Font>> fonts;
 
   Font? defaultFont;
 
@@ -81,11 +81,8 @@ class SvgPainter {
 
     List<PdfTtfFont> _getFamilyFonts(String fontFamily) {
         final cleanFontFamilyQuery = _cleanFontName(_removeFontFallbacks(fontFamily));
-        return fonts.entries
-            .where((e) => _cleanFontName(e.key) == cleanFontFamilyQuery)
-            .map((e) => e.value.getFont(Context(document: document)))
-            .whereType<PdfTtfFont>()
-            .toList();
+        return fonts[cleanFontFamilyQuery]?.map((f) => f.getFont(Context(document: document))).whereType<PdfTtfFont>().toList() ??
+            [];
     }
 
   PdfTtfFont? _findBestFont(

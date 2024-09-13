@@ -33,7 +33,7 @@ class SvgImage extends Widget {
     double? width,
     double? height,
     PdfColor? colorFilter,
-    Map<String, Font> fonts = const {},
+    Map<String, List<Font>> fonts = const {},
     Font? defaultFont,
     List<Font> fallbackFonts = const [],
   }) {
@@ -82,7 +82,7 @@ class SvgImage extends Widget {
 
   Font? defaultFont;
 
-  final Map<String, Font> fonts;
+  final Map<String, List<Font>> fonts;
 
   final List<Font> fallbackFonts;
 
