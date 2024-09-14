@@ -100,6 +100,18 @@ void main() {
     );
   });
 
+  test('SVG Widgets Text custom fonts', () {
+    pdf.addPage(
+      Page(
+        build: (context) => SvgImage(
+          svg:
+              '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg" version="1.1"><text x="367.055" y="168.954" font-size="55" fill="dodgerblue" font-family="myfont" >Hello, PDF</text><rect x="1" y="1" width="998" height="298" fill="none" stroke="purple" stroke-width="2" /></svg>',
+          customFonts: _CustomFonts(),
+        ),
+      ),
+    );
+  });
+
   test('SVG Widgets Barcode', () {
     pdf.addPage(
       Page(
@@ -199,4 +211,11 @@ void main() {
     final file = File('widgets-svg.pdf');
     await file.writeAsBytes(await pdf.save());
   });
+}
+
+class _CustomFonts implements SvgCustomFonts {
+  @override
+  Font? getFont(String fontFamily, String fontStyle, String fontWeight) {
+    return null;
+  }
 }

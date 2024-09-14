@@ -32,6 +32,7 @@ class SvgImage extends Widget {
     double? width,
     double? height,
     PdfColor? colorFilter,
+    SvgCustomFonts? customFonts,
   }) {
     final xml = XmlDocument.parse(svg);
     final parser = SvgParser(
@@ -46,6 +47,7 @@ class SvgImage extends Widget {
       clip,
       width,
       height,
+      customFonts,
     );
   }
 
@@ -56,6 +58,7 @@ class SvgImage extends Widget {
     this.clip,
     this.width,
     this.height,
+    this.customFonts,
   );
 
   final SvgParser _svgParser;
@@ -69,6 +72,8 @@ class SvgImage extends Widget {
   final double? width;
 
   final double? height;
+
+  final SvgCustomFonts? customFonts;
 
   late FittedSizes sizes;
 
@@ -126,6 +131,7 @@ class SvgImage extends Widget {
         context.page.pageFormat.width,
         context.page.pageFormat.height,
       ),
+      customFonts: customFonts,
     );
     painter.paint();
     context.canvas.restoreContext();
@@ -153,4 +159,8 @@ class DecorationSvgImage extends DecorationGraphic {
       constraints: BoxConstraints.tight(box.size),
     );
   }
+}
+
+abstract class SvgCustomFonts {
+  Font? getFont(String fontFamily, String fontStyle, String fontWeight);
 }
