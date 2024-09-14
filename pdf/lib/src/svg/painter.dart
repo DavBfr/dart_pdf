@@ -16,6 +16,7 @@
 
 import '../../pdf.dart';
 import '../widgets/font.dart';
+import '../widgets/svg.dart';
 import 'brush.dart';
 import 'color.dart';
 import 'group.dart';
@@ -26,8 +27,9 @@ class SvgPainter {
     this.parser,
     this._canvas,
     this.document,
-    this.boundingBox,
-  );
+    this.boundingBox, {
+    this.customFontLookup,
+  });
 
   final SvgParser parser;
 
@@ -36,6 +38,8 @@ class SvgPainter {
   final PdfDocument document;
 
   final PdfRect boundingBox;
+
+  final SvgCustomFontLookup? customFontLookup;
 
   void paint() {
     final brush = parser.colorFilter == null
@@ -59,6 +63,12 @@ class SvgPainter {
   }
 
   Font getFont(String fontFamily, String fontStyle, String fontWeight) {
+    final customFont =
+        customFontLookup?.call(fontFamily, fontStyle, fontWeight);
+    if (customFont != null) {
+      return customFont;
+    }
+
     switch (fontFamily) {
       case 'serif':
         switch (fontStyle) {

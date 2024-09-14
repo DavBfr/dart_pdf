@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.11.2
+
+- Add support for custom fonts in SVGs. [Tyler Denniston]
+
 ## 3.11.1
 
 - Fixed display problems with textfields [ilaurillard]
