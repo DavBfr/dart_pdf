@@ -48,17 +48,20 @@ void main() async {
   File('example.pdf').writeAsBytesSync(await pdf.save());
 }
 
-// 放送への期待
-
 const svgRaw = '''
-<svg width="1128" height="200" viewBox="0 0 1128 200" style="fill:none;stroke:none;fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="1128" height="500" viewBox="0 0 1128 500" style="fill:none;stroke:none;fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 	<g id="blend" style="mix-blend-mode:blend">
 		<g id="g-root-tx_1q5q08xr8c7in-fill" data-item-order="0" data-item-id="tx_1q5q08xr8c7in" data-item-class="Label Stroke" data-item-index="none" data-renderer-id="0" transform="translate(0, 68)">
 			<g id="tx_1q5q08xr8c7in-fill" stroke="none" fill="#484848">
-			 <text style="font: 30px 'Roboto', cursive; white-space: pre;">
-				<tspan x="33" y="74" dominant-baseline="ideographic">魚</tspan>
-				<tspan x="80" y="74" dominant-baseline="ideographic">a魚</tspan>
-			</text>
+    		 <text style="font: 30px 'Times new roman', serif; white-space: pre;">
+    			<tspan x="80" y="100" dominant-baseline="ideographic">Times new roman犬 è</tspan>
+    		</text>
+     		 <text style="font: 30px 'Helvetica', serif; white-space: pre;">
+     			<tspan x="80" y="150" dominant-baseline="ideographic">Helvetica犬 è</tspan>
+      		</text>
+     		 <text style="font: 30px 'Courier', serif; white-space: pre;">
+     			<tspan x="80" y="200" dominant-baseline="ideographic">Courier犬 è</tspan>
+      		</text>
 			</g>
 		</g>
 	</g>

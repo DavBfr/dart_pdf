@@ -31,7 +31,7 @@ class SvgPainter {
     Map<String, List<Font>> fonts,
     this.defaultFont,
     this.fallbackFonts,
-  ): fonts = fonts.map((key, value) => MapEntry(_cleanFontName(key), value));
+  )    : fonts = fonts.map((key, value) => MapEntry(_cleanFontName(key), value));
 
   final SvgParser parser;
 
@@ -63,7 +63,8 @@ class SvgPainter {
     return _fontCache[cache] ??= getFont(fontFamily, fontStyle, fontWeight);
   }
 
-  static String _cleanFontName(String fontName) => fontName.toLowerCase().replaceAll(RegExp(r'''("|'|\s)'''), '');
+  static String _cleanFontName(String fontName) =>
+      fontName.toLowerCase().replaceAll(RegExp(r'''("|'|\s)'''), '');
 
   static String _removeFontFallbacks(String fontName) {
     // Font names may contain fallbacks separated by commas
@@ -79,17 +80,15 @@ class SvgPainter {
       .toList();
 
 
-  List<PdfTtfFont> _getFamilyFonts(String fontFamily) {
+  List<PdfTtfFont> _getFamilyFonts(Context context, String fontFamily) {
         final cleanFontFamilyQuery = _cleanFontName(_removeFontFallbacks(fontFamily));
-        return fonts[cleanFontFamilyQuery]?.map((f) => f.getFont(Context(document: document))).whereType<PdfTtfFont>().toList() ??
-            [];
-    }
+        return fonts[cleanFontFamilyQuery]?.map((f) => f.getFont(context)).whereType<PdfTtfFont>().toList() ?? [];
+        }
 
-  PdfTtfFont? _findBestFont(
-      String fontFamily, String fontStyle, String fontWeight) {
-    final familyFonts = _getFamilyFonts(fontFamily);
+  PdfTtfFont? _findBestFont(Context context, String fontFamily, String fontStyle, String fontWeight) {
+    final familyFonts = _getFamilyFonts(context, fontFamily);
     if (familyFonts.length <= 1) {
-      return defaultFont?.getFont(Context(document: document)) as PdfTtfFont?;
+      return defaultFont?.getFont(context) as PdfTtfFont?;
     }
 
     // Find best by style or weight
@@ -124,15 +123,11 @@ class SvgPainter {
   }
 
   PdfFont getFont(String fontFamily, String fontStyle, String fontWeight) {
-    final documentFont = _findBestFont(fontFamily, fontStyle, fontWeight);
-    if (documentFont != null) {
-      return documentFont;
-    }
-
     final context = Context(document: document);
 
-    switch (fontFamily) {
+    switch (_cleanFontName(_removeFontFallbacks(fontFamily))) {
       case 'serif':
+      case 'timesnewroman':
         switch (fontStyle) {
           case 'normal':
             switch (fontWeight) {
@@ -150,6 +145,7 @@ class SvgPainter {
         return Font.timesBoldItalic().getFont(context);
 
       case 'monospace':
+      case 'courier':
         switch (fontStyle) {
           case 'normal':
             switch (fontWeight) {
@@ -165,22 +161,30 @@ class SvgPainter {
             return Font.courierOblique().getFont(context);
         }
         return Font.courierBoldOblique().getFont(context);
+
+        case 'helvetica':
+          switch (fontStyle) {
+            case 'normal':
+              switch (fontWeight) {
+                case 'normal':
+                case 'lighter':
+                  return Font.helvetica().getFont(context);
+              }
+              return Font.helveticaBold().getFont(context);
+          }
+          switch (fontWeight) {
+            case 'normal':
+            case 'lighter':
+              return Font.helveticaOblique().getFont(context);
+          }
+          return Font.helveticaBoldOblique().getFont(context);
     }
 
-    switch (fontStyle) {
-      case 'normal':
-        switch (fontWeight) {
-          case 'normal':
-          case 'lighter':
-            return Font.helvetica().getFont(context);
-        }
-        return Font.helveticaBold().getFont(context);
+    final documentFont = _findBestFont(context, fontFamily, fontStyle, fontWeight);
+    if (documentFont != null) {
+      return documentFont;
     }
-    switch (fontWeight) {
-      case 'normal':
-      case 'lighter':
-        return Font.helveticaOblique().getFont(context);
-    }
-    return Font.helveticaBoldOblique().getFont(context);
+
+    return Font.helvetica().getFont(context);
   }
 }

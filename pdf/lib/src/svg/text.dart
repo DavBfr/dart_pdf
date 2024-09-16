@@ -33,8 +33,7 @@ class SvgText extends SvgOperation {
     this.x,
     this.y,
     this.dx,
-    this.text,
-    this.font,
+    this.fontSpans,
     this.tspan,
     this.metrics,
     SvgBrush brush,
@@ -64,9 +63,9 @@ class SvgText extends SvgOperation {
         .join()
         .trim();
 
-    final pdfFont = painter.getFontCache(
-        _brush.fontFamily!, _brush.fontStyle!, _brush.fontWeight!);
-    final metrics = pdfFont.stringMetrics(text) * _brush.fontSize!.sizeValue;
+    final pdfFont = painter.getFontCache(_brush.fontFamily!, _brush.fontStyle!, _brush.fontWeight!);
+    final fontSpans = _createFontSpans(text, pdfFont, painter.fallbackFontsTtf, fontSize: brush.fontSize!.sizeValue, letterSpacing: null);
+    final metrics = PdfFontMetrics.append(fontSpans.map((span) => span.font.stringMetrics(span.text) * _brush.fontSize!.sizeValue));
 
     var baselineOffset = 0.0;
     // Only ideographic is supported
@@ -104,8 +103,7 @@ class SvgText extends SvgOperation {
       offset.x,
       offset.y,
       metrics.advanceWidth,
-      text,
-      pdfFont,
+      fontSpans,
       tspan,
       metrics,
       _brush,
@@ -121,13 +119,11 @@ class SvgText extends SvgOperation {
 
   final double dx;
 
-  final String text;
-
-  final PdfFont font;
-
   final PdfFontMetrics metrics;
 
   final Iterable<SvgText> tspan;
+
+  final List<FontSpan> fontSpans;
 
   @override
   void paintShape(PdfGraphics canvas) {
@@ -137,9 +133,6 @@ class SvgText extends SvgOperation {
         ..scale(1.0, -1.0)
         ..translate(x, -y!));
 
-    final fontSpans = _createFontSpans(text, font, painter.fallbackFontsTtf,
-        fontSize: brush.fontSize!.sizeValue, letterSpacing: null);
-
     if (brush.fill!.isNotEmpty) {
       brush.fill!.setFillColor(this, canvas);
       if (brush.fillOpacity! < 1) {
@@ -147,7 +140,7 @@ class SvgText extends SvgOperation {
           ..saveContext()
           ..setGraphicState(PdfGraphicState(opacity: brush.fillOpacity));
       }
-      _drawFontSpans(canvas, fontSpans);
+      _drawFontSpans(canvas);
       if (brush.fillOpacity! < 1) {
         canvas.restoreContext();
       }
@@ -164,7 +157,7 @@ class SvgText extends SvgOperation {
         canvas.setGraphicState(PdfGraphicState(opacity: brush.strokeOpacity));
       }
       brush.stroke!.setStrokeColor(this, canvas);
-      _drawFontSpans(canvas, fontSpans, mode: PdfTextRenderingMode.stroke);
+      _drawFontSpans(canvas, mode: PdfTextRenderingMode.stroke);
     }
 
     canvas.restoreContext();
@@ -174,8 +167,7 @@ class SvgText extends SvgOperation {
     }
   }
 
-  void _drawFontSpans(PdfGraphics canvas, List<FontSpan> fontSpans,
-      {PdfTextRenderingMode mode = PdfTextRenderingMode.fill}) {
+  void _drawFontSpans(PdfGraphics canvas, {PdfTextRenderingMode mode = PdfTextRenderingMode.fill}) {
     var x = 0.0;
     for (final span in fontSpans) {
       canvas.drawString(span.font, brush.fontSize!.sizeValue, span.text, x, 0,
@@ -190,10 +182,9 @@ class SvgText extends SvgOperation {
       ..saveContext()
       ..setTransform(Matrix4.identity()
         ..scale(1.0, -1.0)
-        ..translate(x, -y!))
-      ..drawString(font, brush.fontSize!.sizeValue, text, 0, 0,
-          mode: PdfTextRenderingMode.clip)
-      ..restoreContext();
+        ..translate(x, -y!));
+    _drawFontSpans(canvas, mode: PdfTextRenderingMode.clip);
+      canvas.restoreContext();
 
     for (final span in tspan) {
       span.draw(canvas);
@@ -265,13 +256,26 @@ List<FontSpan> _createFontSpans(
       .toList();
 }
 
-String _getFontSubFamily(PdfTtfFont? ttfFont) => ttfFont?.font.getNameID(TtfParserName.fontSubfamily)?.toLowerCase().trim() ?? 'regular';
+String _getFontSubFamily(PdfFont font) {
+  if (font is PdfTtfFont) {
+    return font.font
+            .getNameID(TtfParserName.fontSubfamily)
+            ?.toLowerCase()
+            .trim() ??
+        'regular';
+  }
+  final name = font.fontName;
+  if(name.endsWith('-Bold')){
+    return  'bold';
+  }
+  return 'regular';
+}
 
 List<RunesAndFont> _groupRunes(
     List<int> runes, PdfFont primaryFont, List<PdfTtfFont> fallbackFonts) {
   final runesAndFonts = <RunesAndFont>[];
 
-  final primaryFontSubFamily = _getFontSubFamily(primaryFont as PdfTtfFont?) ?? 'regular';
+  final primaryFontSubFamily = _getFontSubFamily(primaryFont);
 
   // Primary, current, fonts with same sub-family, fonts with different sub-family, null
   final orderedFonts = <PdfFont?>[

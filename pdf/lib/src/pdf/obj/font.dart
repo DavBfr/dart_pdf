@@ -305,8 +305,10 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
 
   /// Calculate the [PdfFontMetrics] for this string
   PdfFontMetrics stringMetrics(String s, {double letterSpacing = 0}) {
-    if (s.isEmpty) {
-      return PdfFontMetrics.zero;
+    final runes = s.runes.where((r) => isRuneSupported(r)).toList();
+    if (runes.isEmpty) {
+      // No supported character, sample a few characters from the font and create metrics
+      return PdfFontMetrics.zero.copyWith(ascent: ascent, descent: descent);
     }
 
     try {
