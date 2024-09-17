@@ -125,9 +125,13 @@ class SvgPainter {
   PdfFont getFont(String fontFamily, String fontStyle, String fontWeight) {
     final context = Context(document: document);
 
+    final documentFont = _findBestFont(context, fontFamily, fontStyle, fontWeight);
+    if (documentFont != null) {
+        return documentFont;
+    }
+
     switch (_cleanFontName(_removeFontFallbacks(fontFamily))) {
       case 'serif':
-      case 'timesnewroman':
         switch (fontStyle) {
           case 'normal':
             switch (fontWeight) {
@@ -178,11 +182,6 @@ class SvgPainter {
               return Font.helveticaOblique().getFont(context);
           }
           return Font.helveticaBoldOblique().getFont(context);
-    }
-
-    final documentFont = _findBestFont(context, fontFamily, fontStyle, fontWeight);
-    if (documentFont != null) {
-      return documentFont;
     }
 
     return Font.helvetica().getFont(context);
