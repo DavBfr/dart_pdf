@@ -220,26 +220,38 @@ class TtfParser {
     var pos = basePosition + 6;
     String? _fontName;
 
+    const Platform_Macintosh = 1;
+    const Platform_Windows = 3;
+
     for (var i = 0; i < count; i++) {
       final platformID = bytes.getUint16(pos);
+      final languageID = bytes.getUint16(pos + 4);
       final nameID = bytes.getUint16(pos + 6);
       final length = bytes.getUint16(pos + 8);
       final offset = bytes.getUint16(pos + 10);
       pos += 12;
 
-      if (platformID == 1 && nameID == fontNameID.index) {
+      if (platformID == Platform_Macintosh && nameID == fontNameID.index) {
         try {
-          _fontName = utf8.decode(bytes.buffer
-              .asUint8List(basePosition + stringOffset + offset, length));
+          _fontName = utf8.decode(bytes.buffer.asUint8List(basePosition + stringOffset + offset, length));
+          if (languageID == 0) {
+            // English on Macintosh platform => return as quickly as possible
+            // See: https://learn.microsoft.com/en-us/typography/opentype/otspec150/name
+            return _fontName;
+          }
         } catch (a) {
           print('Error: $platformID $nameID $a');
         }
       }
 
-      if (platformID == 3 && nameID == fontNameID.index) {
+      if (platformID == Platform_Windows && nameID == fontNameID.index) {
         try {
-          return _decodeUtf16(bytes.buffer
-              .asUint8List(basePosition + stringOffset + offset, length));
+          _fontName = _decodeUtf16(bytes.buffer.asUint8List(basePosition + stringOffset + offset, length));
+          if (languageID == 0x0409) {
+            // US English on Windows platform => return as quickly as possible
+            // See: https://learn.microsoft.com/en-us/typography/opentype/otspec150/name
+            return _fontName;
+          }
         } catch (a) {
           print('Error: $platformID $nameID $a');
         }
