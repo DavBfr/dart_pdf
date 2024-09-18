@@ -80,7 +80,7 @@ abstract class SvgOperation {
           return SvgUse.fromXml(element, painter, brush);
       }
     } catch (e, s) {
-      print('[pdf][SvgOperation.fromXml] Error parsing SVG element: ${e}\n${s}');
+      print('[pdf][SvgOperation.fromXml] Error parsing SVG element: $e\n$s');
       return null;
     }
 

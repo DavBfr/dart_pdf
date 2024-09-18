@@ -988,13 +988,21 @@ class PdfGraphics {
   /// Draw an SVG path
   void drawShape(String d) {
     final proxy = _PathProxy(this);
-    writeSvgPathDataToPath(d, proxy);
+    try {
+      writeSvgPathDataToPath(d, proxy);
+    } catch (e, s) {
+      print('[pdf][PdfGraphics.drawShape] Error writing SVG shape $d: $e\n$s');
+    }
   }
 
   /// Calculates the bounding box of an SVG path
   static PdfRect shapeBoundingBox(String d) {
     final proxy = _PathBBProxy();
-    writeSvgPathDataToPath(d, proxy);
+    try {
+      writeSvgPathDataToPath(d, proxy);
+    } catch (e, s) {
+      print('[pdf][PdfGraphics.shapeBoundingBox] Error writing SVG shape $d: $e\n$s');
+    }
     return proxy.box;
   }
 
