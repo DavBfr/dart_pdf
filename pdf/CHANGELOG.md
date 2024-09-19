@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add support for table column spans [gustl22]
+
 ## 3.11.1
 
 - Fixed display problems with textfields [ilaurillard]

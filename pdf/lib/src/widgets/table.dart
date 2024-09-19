@@ -521,6 +521,7 @@ class Table extends Widget with SpanningWidget {
       ..setTransform(mat);
 
     var index = 0;
+    var heightIndex = 0;
     for (final row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
@@ -552,7 +553,10 @@ class Table extends Widget with SpanningWidget {
             cell != row.children.first) {
           border!.verticalInside.style.setStyle(context);
 
-          context.canvas.moveTo(cellBox.x, cellBox.bottom);
+          // Use the height of the current row to determine the bottom of box,
+          // otherwise it will draw gaps for cells which have a smaller height.
+          context.canvas
+              .moveTo(cellBox.x, cellBox.top - _getHeight(heightIndex));
           context.canvas.lineTo(cellBox.x, cellBox.top);
           context.canvas.setStrokeColor(border!.verticalInside.color);
           context.canvas.setLineWidth(border!.verticalInside.width);
@@ -574,6 +578,7 @@ class Table extends Widget with SpanningWidget {
       if (index >= _context.lastLine) {
         break;
       }
+      heightIndex++;
     }
 
     index = 0;
