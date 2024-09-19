@@ -151,48 +151,6 @@ void main() {
     ));
   });
 
-  test('Table Widget Column Span', () {
-    pdf.addPage(Page(
-      build: (Context context) => Table(
-        children: [
-          TableRow(
-            columnSpans: const {0: 2, 2: 1},
-            children: [
-              Container(color: PdfColors.red, height: 20),
-              Container(color: PdfColors.green, height: 20),
-            ],
-          ),
-          TableRow(
-            columnSpans: const {1: 2},
-            children: [
-              Container(color: PdfColors.green, height: 20),
-              Container(color: PdfColors.blue, height: 20),
-            ],
-          ),
-          TableRow(
-            columnSpans: const {0: 3},
-            children: [
-              Container(color: PdfColors.red, height: 20),
-            ],
-          ),
-          TableRow(
-            children: [
-              Container(color: PdfColors.red, height: 20),
-              Container(color: PdfColors.blue, height: 20),
-              Container(color: PdfColors.green, height: 20),
-            ],
-          ),
-        ],
-        border: TableBorder.all(),
-        columnWidths: <int, TableColumnWidth>{
-          0: const FixedColumnWidth(80),
-          1: const FlexColumnWidth(2),
-          2: const FractionColumnWidth(.2),
-        },
-      ),
-    ));
-  });
-
   test('Table Widget TableCellVerticalAlignment', () {
     pdf.addPage(
       MultiPage(
@@ -312,6 +270,90 @@ void main() {
         ),
       ),
     );
+  });
+
+  test('Table Widget Span', () {
+    Widget _buildSpanCell({
+      int columnSpan = 1,
+      int rowSpan = 1,
+      PdfColor? color,
+      double? height,
+    }) {
+      return TableCell(
+        child: Container(
+            color: color,
+            height: height,
+            child: Text(
+                'colSpan: $columnSpan, rowSpan: $rowSpan, height: $height')),
+        columnSpan: columnSpan,
+        rowSpan: rowSpan,
+      );
+    }
+
+    pdf.addPage(Page(
+      build: (Context context) => Table(
+        children: [
+          TableRow(
+            children: [
+              Container(color: PdfColors.blue, height: 20),
+              Container(color: PdfColors.red, height: 20),
+              Container(color: PdfColors.green, height: 30),
+            ],
+          ),
+          TableRow(
+            children: [
+              _buildSpanCell(columnSpan: 2, color: PdfColors.red, height: 20),
+              Container(color: PdfColors.blue, height: 20),
+            ],
+          ),
+          TableRow(
+            children: [
+              Container(color: PdfColors.green, height: 20),
+              _buildSpanCell(columnSpan: 2, color: PdfColors.blue, height: 20),
+            ],
+          ),
+          TableRow(
+            children: [
+              _buildSpanCell(columnSpan: 3, color: PdfColors.blue, height: 20),
+            ],
+          ),
+          TableRow(
+            children: [
+              Container(color: PdfColors.red, height: 20),
+              _buildSpanCell(
+                columnSpan: 2,
+                rowSpan: 2,
+                color: PdfColors.green,
+                height: 60,
+              ),
+            ],
+          ),
+          TableRow(
+            children: [
+              _buildSpanCell(rowSpan: 2, color: PdfColors.green, height: 40),
+            ],
+          ),
+          TableRow(
+            children: [
+              Container(color: PdfColors.blue, height: 20),
+              _buildSpanCell(rowSpan: 2, color: PdfColors.red),
+            ],
+          ),
+          TableRow(
+            children: [
+              Container(color: PdfColors.red, height: 20),
+              Container(color: PdfColors.green, height: 20),
+            ],
+          ),
+        ],
+        border: TableBorder.all(),
+        columnWidths: <int, TableColumnWidth>{
+          0: const FixedColumnWidth(80),
+          1: const FlexColumnWidth(2),
+          2: const FractionColumnWidth(.2),
+        },
+      ),
+    ));
   });
 
   tearDownAll(() async {

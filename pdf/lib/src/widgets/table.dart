@@ -30,7 +30,6 @@ class TableRow {
     this.repeat = false,
     this.verticalAlignment,
     this.decoration,
-    this.columnSpans,
   });
 
   /// The widgets that comprise the cells in this row.
@@ -42,8 +41,25 @@ class TableRow {
   final BoxDecoration? decoration;
 
   final TableCellVerticalAlignment? verticalAlignment;
+}
 
-  final Map<int, int>? columnSpans;
+class TableCell extends StatelessWidget {
+  TableCell({
+    required this.child,
+    this.columnSpan = 1,
+    this.rowSpan = 1,
+  })  : assert(columnSpan >= 1, 'A table cell must at least span one column'),
+        assert(rowSpan >= 1, 'A table cell must at least span one row');
+
+  final Widget child;
+
+  final int columnSpan;
+  final int rowSpan;
+
+  @override
+  Widget build(Context context) {
+    return child;
+  }
 }
 
 enum TableCellVerticalAlignment { bottom, middle, top, full }
@@ -302,73 +318,104 @@ class Table extends Widget with SpanningWidget {
     _context.firstLine = _context.lastLine;
   }
 
-  List<Widget> _getFilledChildrenFromColumnSpans(TableRow row) {
-    if (row.columnSpans == null) {
-      return row.children;
-    }
-    final filledChildren = <Widget>[];
-    var n = 0;
-    // TODO(Gustl22): Handle intrinsic column widths:
-    //  Currently, every cell is calculated by filling the remaining spanned
-    //  cells with empty containers and then sum up their calculated widths.
-    for (final child in row.children) {
-      // Columns, which are currently spanned.
-      final columnSpan = row.columnSpans![n] ?? 1;
-      filledChildren.add(child);
-      if (columnSpan > 1) {
-        filledChildren
-            .addAll(Iterable.generate(columnSpan - 1, (index) => Container()));
+  /// Get column and row spans of the table per unspanned cell (col-span, row-span).
+  /// Also provide the according index of a spanned cell in [children], if present.
+  List<List<(int, int, int?)>> _getTableSpanMatrix() {
+    final tableSpans = <List<(int, int, int?)>>[];
+    var previousSpansOfRow = <(int, int, int?)>[];
+    for (final row in children) {
+      var unspannedColIndex = 0;
+      final spansOfRow = <(int, int, int?)>[];
+      for (var spannedColIndex = 0;
+          spannedColIndex < row.children.length;
+          spannedColIndex++) {
+        final child = row.children[spannedColIndex];
+        if (previousSpansOfRow.length > unspannedColIndex) {
+          final (previousColSpan, previousRowSpan, previousCell) =
+              previousSpansOfRow[unspannedColIndex];
+          if (previousRowSpan > 1) {
+            // Add cell spans from previous row
+            for (var colSpan = previousColSpan; colSpan > 0; colSpan--) {
+              spansOfRow.add((colSpan, previousRowSpan - 1, null));
+              unspannedColIndex++;
+            }
+          }
+        }
+        if (child is TableCell) {
+          for (var colSpan = child.columnSpan; colSpan > 0; colSpan--) {
+            // Define col and row span for this and remember for the following rows, on each column
+            spansOfRow.add((
+              colSpan,
+              child.rowSpan,
+              colSpan == child.columnSpan ? spannedColIndex : null
+            ));
+            unspannedColIndex++;
+          }
+        } else {
+          // Just a regular cell
+          spansOfRow.add((1, 1, spannedColIndex));
+          unspannedColIndex++;
+        }
       }
-      n += columnSpan;
+      tableSpans.add(spansOfRow);
+      previousSpansOfRow = spansOfRow;
     }
-    return filledChildren;
+    return tableSpans;
   }
 
-  List<double?> _getSpannedWidths(List<double?> widths, TableRow row) {
-    final spannedWidths = <double?>[];
-    var n = 0;
-    for (var i = 0; i < row.children.length; i++) {
-      final columnSpan = row.columnSpans?[n] ?? 1;
-      final indices = Iterable.generate(columnSpan, (span) => n + span);
-      final width = indices.fold<double?>(null, (prev, curIndex) {
-        final current = widths[curIndex];
-        if (prev == null && current == null) {
-          return null;
-        }
-        return (prev ?? 0) + (current ?? 0);
-      });
-      spannedWidths.add(width);
-      n += columnSpan;
-    }
-    return spannedWidths;
+  double? _getSpannedWidth(int colIndex, int colSpan, List<double?> widths) {
+    final indices = Iterable.generate(colSpan, (span) => colIndex + span);
+    return indices.fold<double?>(null, (prev, curIndex) {
+      final current = widths[curIndex];
+      if (prev == null && current == null) {
+        return null;
+      }
+      return (prev ?? 0) + (current ?? 0);
+    });
   }
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     // Compute required width for all row/columns width flex
     final flex = <double?>[];
     final widths = <double?>[];
     _heights.clear();
     var index = 0;
-
-    for (final row in children) {
-      var n = 0;
-      for (final child in _getFilledChildrenFromColumnSpans(row)) {
-        final columnWidth = columnWidths != null && columnWidths![n] != null
-            ? columnWidths![n]!
-            : defaultColumnWidth;
-        final columnLayout = columnWidth.layout(child, context, constraints);
-        if (flex.length < n + 1) {
+    final tableCells = _getTableSpanMatrix();
+    for (var rowIndex = 0; rowIndex < tableCells.length; rowIndex++) {
+      final unspannedRow = tableCells[rowIndex];
+      for (var unspannedColIndex = 0;
+          unspannedColIndex < unspannedRow.length;
+          unspannedColIndex++) {
+        final spannedColIndex = unspannedRow[unspannedColIndex].$3;
+        final columnWidth =
+            columnWidths != null && columnWidths![unspannedColIndex] != null
+                ? columnWidths![unspannedColIndex]!
+                : defaultColumnWidth;
+        // TODO(Gustl22): Handle intrinsic column widths:
+        //  Currently, every cell is calculated by filling the remaining spanned
+        //  cells with empty containers and then sum up their calculated widths.
+        final columnLayout = columnWidth.layout(
+            spannedColIndex == null
+                ? Container()
+                : children[rowIndex].children[spannedColIndex],
+            context,
+            constraints);
+        if (flex.length < unspannedColIndex + 1) {
           flex.add(columnLayout.flex);
           widths.add(columnLayout.width);
         } else {
           if (columnLayout.flex! > 0) {
-            flex[n] = math.max(flex[n]!, columnLayout.flex!);
+            flex[unspannedColIndex] =
+                math.max(flex[unspannedColIndex]!, columnLayout.flex!);
           }
-          widths[n] = math.max(widths[n]!, columnLayout.width!);
+          widths[unspannedColIndex] =
+              math.max(widths[unspannedColIndex]!, columnLayout.width!);
         }
-        n++;
       }
     }
 
@@ -407,48 +454,73 @@ class Table extends Widget with SpanningWidget {
 
     final totalWidth = widths.reduce((double? a, double? b) => a! + b!)!;
 
-    // Compute final widths
+    // Compute final widths and heights
     var totalHeight = 0.0;
     index = 0;
-    for (final row in children) {
+
+    // Store the currently maximum mean height of spanned rows
+    final meanRowSpanLineHeights = <int, double>{};
+    for (var rowIndex = 0; rowIndex < children.length; rowIndex++) {
+      final row = children[rowIndex];
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
 
-      final spannedWidths = _getSpannedWidths(widths, row);
-
-      var n = 0;
-      var x = 0.0;
-
       var lineHeight = 0.0;
+      final unspannedRow = tableCells[rowIndex];
+      var x = 0.0;
+      for (var colIndex = 0; colIndex < unspannedRow.length; colIndex++) {
+        final (colSpan, rowSpan, spannedColIndex) = unspannedRow[colIndex];
 
-      for (final child in row.children) {
-        final childConstraints =
-            BoxConstraints.tightFor(width: spannedWidths[n]);
-        child.layout(context, childConstraints);
-        assert(child.box != null);
-        child.box =
-            PdfRect(x, totalHeight, child.box!.width, child.box!.height);
-        x += spannedWidths[n]!;
-        lineHeight = math.max(lineHeight, child.box!.height);
-        n++;
+        if (meanRowSpanLineHeights.isNotEmpty) {
+          // Get the maximum of the mean cell line heights, which are spanning over multiple rows.
+          lineHeight = math.max(
+              lineHeight, meanRowSpanLineHeights.values.reduce(math.max));
+          if (meanRowSpanLineHeights[colIndex] != null && rowSpan <= 1) {
+            // Remove mean row span height when was applied last.
+            meanRowSpanLineHeights.remove(colIndex);
+          }
+        }
+
+        if (spannedColIndex != null) {
+          final cell = children[rowIndex].children[spannedColIndex];
+          assert(colSpan >= 1);
+          final spannedWidth = _getSpannedWidth(colIndex, colSpan, widths);
+          final childConstraints = BoxConstraints.tightFor(width: spannedWidth);
+          cell.layout(context, childConstraints);
+          assert(cell.box != null);
+          cell.box = cell.box!.copyWith(x: x, y: totalHeight);
+
+          assert(rowSpan >= 1);
+          final rowLineHeight = cell.box!.height / rowSpan;
+          if (rowSpan > 1) {
+            // Define row line height, if cell is spanning over multiple rows
+            meanRowSpanLineHeights[colIndex] = rowLineHeight;
+          }
+          lineHeight = math.max(lineHeight, rowLineHeight);
+        }
+        assert(widths[colIndex]! > 0.0);
+        x += widths[colIndex]!;
       }
 
       final align = row.verticalAlignment ?? defaultVerticalAlignment;
 
       if (align == TableCellVerticalAlignment.full) {
         // Compute the layout again to give the full height to all cells
-        n = 0;
+        // Need to compute the width also again, just in case height had an impact on intrinsic width.
         x = 0;
-        for (final child in row.children) {
-          final childConstraints = BoxConstraints.tightFor(
-              width: spannedWidths[n], height: lineHeight);
-          child.layout(context, childConstraints);
-          assert(child.box != null);
-          child.box =
-              PdfRect(x, totalHeight, child.box!.width, child.box!.height);
-          x += spannedWidths[n]!;
-          n++;
+        for (var colIndex = 0; colIndex < unspannedRow.length; colIndex++) {
+          final (colSpan, rowSpan, spannedColIndex) = unspannedRow[colIndex];
+          if (spannedColIndex != null) {
+            final cell = children[rowIndex].children[spannedColIndex];
+            final spannedWidth = _getSpannedWidth(colIndex, colSpan, widths);
+            final childConstraints = BoxConstraints.tightFor(
+                width: spannedWidth, height: lineHeight);
+            cell.layout(context, childConstraints);
+            assert(cell.box != null);
+            cell.box = cell.box!.copyWith(x: x, y: totalHeight);
+          }
+          x += widths[colIndex]!;
         }
       }
 
@@ -463,8 +535,8 @@ class Table extends Widget with SpanningWidget {
 
     // Compute final y position
     index = 0;
-    var heightIndex = 0;
-    for (final row in children) {
+    for (var rowIndex = 0; rowIndex < children.length; rowIndex++) {
+      final row = children[rowIndex];
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
@@ -476,12 +548,12 @@ class Table extends Widget with SpanningWidget {
 
         switch (align) {
           case TableCellVerticalAlignment.bottom:
-            childY = totalHeight - child.box!.y - _getHeight(heightIndex);
+            childY = totalHeight - child.box!.y - _getHeight(rowIndex);
             break;
           case TableCellVerticalAlignment.middle:
             childY = totalHeight -
                 child.box!.y -
-                (_getHeight(heightIndex) + child.box!.height) / 2;
+                (_getHeight(rowIndex) + child.box!.height) / 2;
             break;
           case TableCellVerticalAlignment.top:
           case TableCellVerticalAlignment.full:
@@ -489,18 +561,12 @@ class Table extends Widget with SpanningWidget {
             break;
         }
 
-        child.box = PdfRect(
-          child.box!.x,
-          childY,
-          child.box!.width,
-          child.box!.height,
-        );
+        child.box = child.box!.copyWith(y: childY);
       }
 
       if (index >= _context.lastLine) {
         break;
       }
-      heightIndex++;
     }
 
     box = PdfRect(0, 0, totalWidth, totalHeight);
@@ -521,7 +587,6 @@ class Table extends Widget with SpanningWidget {
       ..setTransform(mat);
 
     var index = 0;
-    var heightIndex = 0;
     for (final row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
@@ -549,36 +614,10 @@ class Table extends Widget with SpanningWidget {
           ..clipPath();
         cell.paint(context);
         context.canvas.restoreContext();
-        if (border?.verticalInside.style.paint == true &&
-            cell != row.children.first) {
-          border!.verticalInside.style.setStyle(context);
-
-          // Use the height of the current row to determine the bottom of box,
-          // otherwise it will draw gaps for cells which have a smaller height.
-          context.canvas
-              .moveTo(cellBox.x, cellBox.top - _getHeight(heightIndex));
-          context.canvas.lineTo(cellBox.x, cellBox.top);
-          context.canvas.setStrokeColor(border!.verticalInside.color);
-          context.canvas.setLineWidth(border!.verticalInside.width);
-          context.canvas.strokePath();
-
-          border!.verticalInside.style.unsetStyle(context);
-        }
-        if (border?.horizontalInside.style.paint == true &&
-            row != children.first) {
-          border!.horizontalInside.style.setStyle(context);
-          context.canvas.moveTo(cellBox.left, cellBox.top);
-          context.canvas.lineTo(cellBox.right, cellBox.top);
-          context.canvas.setStrokeColor(border!.horizontalInside.color);
-          context.canvas.setLineWidth(border!.horizontalInside.width);
-          context.canvas.strokePath();
-          border!.horizontalInside.style.unsetStyle(context);
-        }
       }
       if (index >= _context.lastLine) {
         break;
       }
-      heightIndex++;
     }
 
     index = 0;
@@ -606,10 +645,54 @@ class Table extends Widget with SpanningWidget {
       }
     }
 
+    if (border != null) {
+      // Paint inside borders
+      final tableCells = _getTableSpanMatrix();
+      index = 0;
+      for (var rowIndex = 0; rowIndex < children.length; rowIndex++) {
+        final row = children[rowIndex];
+        if (index++ < _context.firstLine && !row.repeat) {
+          continue;
+        }
+
+        for (var spannedColIndex = 0;
+            spannedColIndex < row.children.length;
+            spannedColIndex++) {
+          final cellBox = row.children[spannedColIndex].box!;
+          if (border!.verticalInside.style.paint &&
+              spannedColIndex != tableCells[rowIndex].first.$3) {
+            border!.verticalInside.style.setStyle(context);
+
+            // Use the height of the current row to determine the bottom of box,
+            // otherwise it will draw gaps for cells which have a smaller height.
+            // Or use height, if cell spans over multiple rows.
+            context.canvas.moveTo(cellBox.x,
+                cellBox.top - math.max(_getHeight(rowIndex), cellBox.height));
+            context.canvas.lineTo(cellBox.x, cellBox.top);
+            context.canvas.setStrokeColor(border!.verticalInside.color);
+            context.canvas.setLineWidth(border!.verticalInside.width);
+            context.canvas.strokePath();
+            border!.verticalInside.style.unsetStyle(context);
+          }
+          if (border!.horizontalInside.style.paint && row != children.first) {
+            border!.horizontalInside.style.setStyle(context);
+            context.canvas.moveTo(cellBox.left, cellBox.top);
+            context.canvas.lineTo(cellBox.right, cellBox.top);
+            context.canvas.setStrokeColor(border!.horizontalInside.color);
+            context.canvas.setLineWidth(border!.horizontalInside.width);
+            context.canvas.strokePath();
+            border!.horizontalInside.style.unsetStyle(context);
+          }
+        }
+        if (index >= _context.lastLine) {
+          break;
+        }
+      }
+    }
     context.canvas.restoreContext();
 
-    // Paint outside borders
     if (border != null) {
+      // Paint outside border
       border!.paint(context, box!);
     }
   }

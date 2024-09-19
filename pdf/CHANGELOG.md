@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Add support for table column spans [gustl22]
+- Add support for table spans [gustl22]
 
 ## 3.11.1
 
