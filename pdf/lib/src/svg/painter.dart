@@ -28,7 +28,7 @@ class SvgPainter {
     this._canvas,
     this.document,
     this.boundingBox, {
-    this.customFonts,
+    this.customFontLookup,
   });
 
   final SvgParser parser;
@@ -39,7 +39,7 @@ class SvgPainter {
 
   final PdfRect boundingBox;
 
-  final SvgCustomFonts? customFonts;
+  final SvgCustomFontLookup? customFontLookup;
 
   void paint() {
     final brush = parser.colorFilter == null
@@ -63,7 +63,8 @@ class SvgPainter {
   }
 
   Font getFont(String fontFamily, String fontStyle, String fontWeight) {
-    final customFont = customFonts?.getFont(fontFamily, fontStyle, fontWeight);
+    final customFont =
+        customFontLookup?.call(fontFamily, fontStyle, fontWeight);
     if (customFont != null) {
       return customFont;
     }
