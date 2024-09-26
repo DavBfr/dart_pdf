@@ -129,10 +129,10 @@ class PrintingPlugin extends PrintingPlatform {
 
       // Restore module and exports
       if (module != null) {
-        web.window['module'] = module;
+        web.window.module = module;
       }
       if (exports != null) {
-        web.window['exports'] = exports;
+        web.window.exports = exports;
       }
     }
 
@@ -192,8 +192,8 @@ class PrintingPlugin extends PrintingPlatform {
     }
 
     final userAgent = web.window.navigator.userAgent;
-    final isChrome = web.window['chrome'] != null;
-    final isSafari = web.window['safari'] != null &&
+    final isChrome = web.window['chrome'].isUndefinedOrNull;
+    final isSafari = web.window['safari'].isUndefinedOrNull &&
         !userAgent.contains(RegExp(r'Version/14\.1\.'));
     final isMobile = userAgent.contains('Mobile');
     final isFirefox = userAgent.contains('Firefox');
@@ -438,4 +438,9 @@ class _WebPdfRaster extends PdfRaster {
   Future<Uint8List> toPng() async {
     return png;
   }
+}
+
+extension _WindowModule on web.Window {
+  external set module(js.JSObject? value);
+  external set exports(js.JSObject? value);
 }

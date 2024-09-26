@@ -3,6 +3,7 @@
 ## 5.13.3
 
 - Update gfonts [Minh-Danh]
+- Add compatibility with web 1.1.0
 
 ## 5.13.2
 

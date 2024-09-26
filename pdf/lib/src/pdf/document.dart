@@ -27,7 +27,9 @@ import 'format/stream.dart';
 import 'format/string.dart';
 import 'format/xref.dart';
 import 'graphic_state.dart';
-import 'io/vm.dart' if (dart.library.js) 'io/js.dart';
+import 'io/na.dart'
+    if (dart.library.io) 'io/vm.dart'
+    if (dart.library.js_interop) 'io/js.dart';
 import 'obj/catalog.dart';
 import 'obj/encryption.dart';
 import 'obj/font.dart';
