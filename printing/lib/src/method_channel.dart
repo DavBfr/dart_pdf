@@ -182,6 +182,7 @@ class MethodChannelPrinting extends PrintingPlatform {
     bool dynamicLayout,
     bool usePrinterSettings,
     OutputType outputType,
+    bool forceCustomPrintPaper,
   ) async {
     final job = _printJobs.add(
       onCompleted: Completer<bool>(),
@@ -201,6 +202,7 @@ class MethodChannelPrinting extends PrintingPlatform {
       'dynamic': dynamicLayout,
       'usePrinterSettings': usePrinterSettings,
       'outputType': outputType.index,
+      'forceCustomPrintPaper': forceCustomPrintPaper,
     };
 
     await _channel.invokeMethod<int>('printPdf', params);

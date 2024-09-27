@@ -109,6 +109,7 @@ class MockPrinting extends Mock
     bool dynamicLayout,
     bool usePrinterSettings,
     OutputType outputType,
+    bool forceCustomPrintPaper,
   ) async =>
       true;
 

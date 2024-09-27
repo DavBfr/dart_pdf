@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.11.1
+
+- Fixed display problems with textfields [ilaurillard]
+- Tighten dependencies
+
 ## 3.11.0
 
 - Save in an isolate when available
