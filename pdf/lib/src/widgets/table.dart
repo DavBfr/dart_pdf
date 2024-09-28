@@ -205,7 +205,9 @@ class FlexColumnWidth extends TableColumnWidth {
   @override
   ColumnLayout layout(
       Widget child, Context context, BoxConstraints? constraints) {
-    return ColumnLayout(0, flex);
+    child.layout(context, const BoxConstraints());
+    assert(child.box != null);
+    return ColumnLayout(0, flex, child.box!.minWidth);
   }
 }
 
@@ -424,7 +426,7 @@ class Table extends Widget with SpanningWidget {
       for (var n = 0; n < _widths.length; n++) {
         if (flex[n]! > 0.0) {
           final newWidth = spacePerFlex * flex[n]!;
-          _widths[n] = newWidth;
+          _widths[n] = math.max(newWidth, _minWidths[n]!);
         }
       }
     }
