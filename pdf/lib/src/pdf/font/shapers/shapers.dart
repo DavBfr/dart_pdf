@@ -86,7 +86,7 @@ Map<String, dynamic> SHAPERS = {
   'DFLT': DefaultShaper() // Default
 };
 
-choose(dynamic script) {
+chooseShaper(dynamic script) {
   if (!(script is List)) {
     script = [script];
   }

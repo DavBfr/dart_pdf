@@ -13,7 +13,7 @@ class OTProcessor {
   }
   int currentIndex = 0;
   final TtfParser font;
-  final GsubTableParser table;
+  final dynamic table;
   int variationsIndex = -1;
   ScriptTable? script;
   String? scriptTag;

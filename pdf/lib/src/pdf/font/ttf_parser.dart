@@ -25,6 +25,7 @@ import 'package:meta/meta.dart';
 import '../options.dart';
 import 'bidi_utils.dart' as bidi;
 import 'font_metrics.dart';
+import 'gpos_parser.dart';
 import 'gsub_parser.dart';
 
 enum TtfParserName {
@@ -191,7 +192,10 @@ class TtfParser {
   final glyphInfoMap = <int, PdfFontMetrics>{};
   final bitmapOffsets = <int, TtfBitmapInfo>{};
   GsubTableParser? gsub;
+  GposTableParser? gpos;
+
   dynamic GDEF;
+  dynamic variationProcessor;
 
   int get unitsPerEm => bytes.getUint16(tableOffsets[head_table]! + 18);
 

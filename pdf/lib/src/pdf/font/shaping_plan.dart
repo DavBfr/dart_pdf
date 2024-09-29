@@ -1,4 +1,5 @@
 import '../../../pdf.dart';
+import 'glyph_info.dart';
 
 /**
  * ShapingPlans are used by the OpenType shapers to store which
@@ -10,12 +11,13 @@ import '../../../pdf.dart';
  * @private
  */
 class ShapingPlan {
-  ShapingPlan(this.font, this.direction) {}
+  ShapingPlan(this.font, this.script, this.direction) {}
   final TtfParser font;
   String direction = 'ltr';
   Map<String, dynamic> globalFeatures = {};
   Map<String, dynamic> allFeatures = {};
   List<dynamic> stages = [];
+  String? script;
 
   /**
    * Adds the given features to the last stage.
@@ -99,7 +101,7 @@ class ShapingPlan {
   /**
    * Executes the planned stages using the given OTProcessor
    */
-  process(processor, glyphs, positions) {
+  process(processor, List<GlyphInfo> glyphs, [positions]) {
     for (var stage in this.stages) {
       if (stage is Function) {
         if (!positions) {

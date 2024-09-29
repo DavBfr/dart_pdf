@@ -2,7 +2,7 @@ import 'gsub_parser.dart';
 import 'ot_processor.dart';
 
 class GSUBProcessor extends OTProcessor {
-  GSUBProcessor(font, table) : super(font, table);
+  GSUBProcessor(super.font, super.table);
 
   @override
   bool applyLookup(int lookupType, SubTable table) {

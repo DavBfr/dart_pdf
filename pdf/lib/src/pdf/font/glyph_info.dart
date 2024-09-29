@@ -1,3 +1,4 @@
+import 'glyph/bbox.dart';
 import 'ot_processor.dart';
 import 'ttf_parser.dart';
 
@@ -6,7 +7,7 @@ bool checkMark(int code) {
 }
 
 class GlyphInfo {
-  GlyphInfo(this.font, int id, List<int>? codePoints, dynamic features) {
+  GlyphInfo(this.font, int id, [List<int>? codePoints, dynamic features]) {
     this.id = id;
     this.codePoints = codePoints ?? [];
     this.features = {};
@@ -36,6 +37,7 @@ class GlyphInfo {
   bool isLigature = false;
   bool isBase = false;
   int markAttachmentType = 0;
+  BBox bbox = BBox();
 
   dynamic ligatureID;
   dynamic ligatureComponent;
