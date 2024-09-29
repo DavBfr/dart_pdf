@@ -26,7 +26,8 @@ import 'object.dart';
 import 'outline.dart';
 import 'page_label.dart';
 import 'page_list.dart';
-import 'pdf_a_3b.dart';
+import 'pdfa/pdfa_attached_files.dart';
+import 'pdfa/pdfa_color_profile.dart';
 
 /// Pdf Catalog object
 class PdfCatalog extends PdfObject<PdfDict> {
