@@ -97,15 +97,16 @@ class PdfCatalog extends PdfObject<PdfDict> {
       params['/Metadata'] = metadata!.ref();
     }
 
+    if (attached != null && attached!.isNotEmpty) {
+      //params['/Names'] = attached!.catalogNames();
+      names ??= PdfNames(pdfDocument);
+      names!.params.merge(attached!.catalogNames());
+      params['/AF'] = attached!.catalogAF();
+    }
+
     // the Names object
     if (names != null) {
       params['/Names'] = names!.ref();
-    }
-
-    // ??? what to do, if /Names is already occupied?
-    if (attached != null && attached!.isNotEmpty) {
-      params['/Names'] = attached!.catalogNames();
-      params['/AF'] = attached!.catalogAF();
     }
 
     // the PageLabels object
