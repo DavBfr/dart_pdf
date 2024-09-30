@@ -1,19 +1,17 @@
 class PdfaFacturxRdf {
-  String create(
-      {String filename = 'factur-x.xml',
-      String namespace = 'urn:cen.eu:invoice:1p0:schema#'}) {
-    // String namespace = 'urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#';
-    // String namespace = 'urn:cen.eu:invoice:1p0:schema#';
-    // String filename = 'factur-x.xml';
-    // String filename = 'xrechnung.xml';
-
+  String create({
+    String filename = 'factur-x.xml',
+    String namespace = 'urn:cen.eu:invoice:1p0:schema#',
+    String conformanceLevel = 'BASIC',
+    String version = '1.0',
+  }) {
     return '''
     
 <rdf:Description xmlns:fx="$namespace" rdf:about="">
   <fx:DocumentType>INVOICE</fx:DocumentType>
   <fx:DocumentFileName>$filename</fx:DocumentFileName>
-  <fx:Version>1.0</fx:Version>
-  <fx:ConformanceLevel>BASIC</fx:ConformanceLevel>
+  <fx:Version>$version</fx:Version>
+  <fx:ConformanceLevel>$conformanceLevel</fx:ConformanceLevel>
 </rdf:Description>
     
 <rdf:Description xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/"
