@@ -113,8 +113,11 @@ class TableBorder extends Border {
 }
 
 class TableContext extends WidgetContext {
+  /// First line to be rendered (inclusive).
   int firstLine = 0;
-  int lastLine = 0;
+
+  /// Last line to be rendered (exclusive).
+  int lastLine = 1;
 
   @override
   void apply(TableContext other) {
@@ -384,7 +387,7 @@ class Table extends Widget with SpanningWidget {
     final flex = <double?>[];
     final widths = <double?>[];
     _heights.clear();
-    var index = 0;
+
     final tableCells = _getTableSpanMatrix();
     for (var rowIndex = 0; rowIndex < tableCells.length; rowIndex++) {
       final unspannedRow = tableCells[rowIndex];
@@ -456,13 +459,12 @@ class Table extends Widget with SpanningWidget {
 
     // Compute final widths and heights
     var totalHeight = 0.0;
-    index = 0;
 
     // Store the currently maximum mean height of spanned rows
     final meanRowSpanLineHeights = <int, double>{};
     for (var rowIndex = 0; rowIndex < children.length; rowIndex++) {
       final row = children[rowIndex];
-      if (index++ < _context.firstLine && !row.repeat) {
+      if (rowIndex < _context.firstLine && !row.repeat) {
         continue;
       }
 
@@ -525,19 +527,21 @@ class Table extends Widget with SpanningWidget {
       }
 
       if (totalHeight + lineHeight > constraints.maxHeight) {
-        index--;
+        _context.lastLine = rowIndex;
         break;
+      } else {
+        _context.lastLine = rowIndex + 1;
       }
       totalHeight += lineHeight;
       _heights.add(lineHeight);
     }
-    _context.lastLine = index;
 
     // Compute final y position
-    index = 0;
-    for (var rowIndex = 0; rowIndex < children.length; rowIndex++) {
+    for (var rowIndex = 0;
+        rowIndex < children.length && rowIndex < _context.lastLine;
+        rowIndex++) {
       final row = children[rowIndex];
-      if (index++ < _context.firstLine && !row.repeat) {
+      if (rowIndex < _context.firstLine && !row.repeat) {
         continue;
       }
 
@@ -548,12 +552,16 @@ class Table extends Widget with SpanningWidget {
 
         switch (align) {
           case TableCellVerticalAlignment.bottom:
-            childY = totalHeight - child.box!.y - _getHeight(rowIndex);
+            childY = totalHeight -
+                child.box!.y -
+                _getHeight(rowIndex - _context.firstLine);
             break;
           case TableCellVerticalAlignment.middle:
             childY = totalHeight -
                 child.box!.y -
-                (_getHeight(rowIndex) + child.box!.height) / 2;
+                (_getHeight(rowIndex - _context.firstLine) +
+                        child.box!.height) /
+                    2;
             break;
           case TableCellVerticalAlignment.top:
           case TableCellVerticalAlignment.full:
@@ -562,10 +570,6 @@ class Table extends Widget with SpanningWidget {
         }
 
         child.box = child.box!.copyWith(y: childY);
-      }
-
-      if (index >= _context.lastLine) {
-        break;
       }
     }
 
@@ -586,9 +590,11 @@ class Table extends Widget with SpanningWidget {
       ..saveContext()
       ..setTransform(mat);
 
-    var index = 0;
-    for (final row in children) {
-      if (index++ < _context.firstLine && !row.repeat) {
+    for (var rowIndex = 0;
+        rowIndex < children.length && rowIndex < _context.lastLine;
+        rowIndex++) {
+      final row = children[rowIndex];
+      if (rowIndex < _context.firstLine && !row.repeat) {
         continue;
       }
 
@@ -615,14 +621,13 @@ class Table extends Widget with SpanningWidget {
         cell.paint(context);
         context.canvas.restoreContext();
       }
-      if (index >= _context.lastLine) {
-        break;
-      }
     }
 
-    index = 0;
-    for (final row in children) {
-      if (index++ < _context.firstLine && !row.repeat) {
+    for (var rowIndex = 0;
+        rowIndex < children.length && rowIndex < _context.lastLine;
+        rowIndex++) {
+      final row = children[rowIndex];
+      if (rowIndex < _context.firstLine && !row.repeat) {
         continue;
       }
 
@@ -639,19 +644,16 @@ class Table extends Widget with SpanningWidget {
           PaintPhase.foreground,
         );
       }
-
-      if (index >= _context.lastLine) {
-        break;
-      }
     }
 
     if (border != null) {
       // Paint inside borders
       final tableCells = _getTableSpanMatrix();
-      index = 0;
-      for (var rowIndex = 0; rowIndex < children.length; rowIndex++) {
+      for (var rowIndex = 0;
+          rowIndex < children.length && rowIndex < _context.lastLine;
+          rowIndex++) {
         final row = children[rowIndex];
-        if (index++ < _context.firstLine && !row.repeat) {
+        if (rowIndex < _context.firstLine && !row.repeat) {
           continue;
         }
 
@@ -666,8 +668,11 @@ class Table extends Widget with SpanningWidget {
             // Use the height of the current row to determine the bottom of box,
             // otherwise it will draw gaps for cells which have a smaller height.
             // Or use height, if cell spans over multiple rows.
-            context.canvas.moveTo(cellBox.x,
-                cellBox.top - math.max(_getHeight(rowIndex), cellBox.height));
+            context.canvas.moveTo(
+                cellBox.x,
+                cellBox.top -
+                    math.max(_getHeight(rowIndex - _context.firstLine),
+                        cellBox.height));
             context.canvas.lineTo(cellBox.x, cellBox.top);
             context.canvas.setStrokeColor(border!.verticalInside.color);
             context.canvas.setLineWidth(border!.verticalInside.width);
@@ -683,9 +688,6 @@ class Table extends Widget with SpanningWidget {
             context.canvas.strokePath();
             border!.horizontalInside.style.unsetStyle(context);
           }
-        }
-        if (index >= _context.lastLine) {
-          break;
         }
       }
     }
