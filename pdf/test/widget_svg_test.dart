@@ -20,6 +20,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
+import 'utils.dart';
+
 late Document pdf;
 
 void main() {
@@ -101,13 +103,26 @@ void main() {
   });
 
   test('SVG Widgets Text custom fonts', () {
+    const customFamilyName1 = 'Test-Font-Family1';
+    const customFamilyName2 = 'Test-Font-Family2';
+    final customFont1 = loadFont('open-sans-bold.ttf');
+    final customFont2 = loadFont('genyomintw.ttf');
     pdf.addPage(
       Page(
         build: (context) => SvgImage(
-          svg:
-              '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg" version="1.1"><text x="367.055" y="168.954" font-size="55" fill="dodgerblue" font-family="myfont" >Hello, PDF</text><rect x="1" y="1" width="998" height="298" fill="none" stroke="purple" stroke-width="2" /></svg>',
-          customFontLookup: (_, __, ___) => null,
-        ),
+            svg:
+                '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg" version="1.1"><text x="367.055" y="168.954" font-size="55" fill="darkgreen" font-family="$customFamilyName1" >Custom <tspan font-family="$customFamilyName2">fonts</tspan></text><rect x="1" y="1" width="998" height="298" fill="none" stroke="purple" stroke-width="2" /></svg>',
+            customFontLookup:
+                (String fontFamily, String fontStyle, String fontWeight) {
+              switch (fontFamily) {
+                case customFamilyName1:
+                  return customFont1;
+                case customFamilyName2:
+                  return customFont2;
+                default:
+                  return null;
+              }
+            }),
       ),
     );
   });
