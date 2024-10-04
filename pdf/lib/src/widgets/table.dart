@@ -330,9 +330,9 @@ class Table extends Widget with SpanningWidget {
       var unspannedColIndex = 0;
       final spansOfRow = <(int, int, int?)>[];
       for (var spannedColIndex = 0;
-          spannedColIndex < row.children.length;
+          // <= , because we have to look one column ahead to check if the cell from the previous row had a rowspan.
+          spannedColIndex <= row.children.length;
           spannedColIndex++) {
-        final child = row.children[spannedColIndex];
         if (previousSpansOfRow.length > unspannedColIndex) {
           final (previousColSpan, previousRowSpan, previousCell) =
               previousSpansOfRow[unspannedColIndex];
@@ -344,20 +344,23 @@ class Table extends Widget with SpanningWidget {
             }
           }
         }
-        if (child is TableCell) {
-          for (var colSpan = child.columnSpan; colSpan > 0; colSpan--) {
-            // Define col and row span for this and remember for the following rows, on each column
-            spansOfRow.add((
-              colSpan,
-              child.rowSpan,
-              colSpan == child.columnSpan ? spannedColIndex : null
-            ));
+        if (spannedColIndex < row.children.length) {
+          final child = row.children[spannedColIndex];
+          if (child is TableCell) {
+            for (var colSpan = child.columnSpan; colSpan > 0; colSpan--) {
+              // Define col and row span for this and remember for the following rows, on each column
+              spansOfRow.add((
+                colSpan,
+                child.rowSpan,
+                colSpan == child.columnSpan ? spannedColIndex : null
+              ));
+              unspannedColIndex++;
+            }
+          } else {
+            // Just a regular cell
+            spansOfRow.add((1, 1, spannedColIndex));
             unspannedColIndex++;
           }
-        } else {
-          // Just a regular cell
-          spansOfRow.add((1, 1, spannedColIndex));
-          unspannedColIndex++;
         }
       }
       tableSpans.add(spansOfRow);
@@ -457,11 +460,9 @@ class Table extends Widget with SpanningWidget {
 
     final totalWidth = widths.reduce((double? a, double? b) => a! + b!)!;
 
-    // Compute final widths and heights
+    // Compute widths and heights
     var totalHeight = 0.0;
 
-    // Store the currently maximum mean height of spanned rows
-    final meanRowSpanLineHeights = <int, double>{};
     for (var rowIndex = 0; rowIndex < children.length; rowIndex++) {
       final row = children[rowIndex];
       if (rowIndex < _context.firstLine && !row.repeat) {
@@ -474,16 +475,6 @@ class Table extends Widget with SpanningWidget {
       for (var colIndex = 0; colIndex < unspannedRow.length; colIndex++) {
         final (colSpan, rowSpan, spannedColIndex) = unspannedRow[colIndex];
 
-        if (meanRowSpanLineHeights.isNotEmpty) {
-          // Get the maximum of the mean cell line heights, which are spanning over multiple rows.
-          lineHeight = math.max(
-              lineHeight, meanRowSpanLineHeights.values.reduce(math.max));
-          if (meanRowSpanLineHeights[colIndex] != null && rowSpan <= 1) {
-            // Remove mean row span height when was applied last.
-            meanRowSpanLineHeights.remove(colIndex);
-          }
-        }
-
         if (spannedColIndex != null) {
           final cell = children[rowIndex].children[spannedColIndex];
           assert(colSpan >= 1);
@@ -492,38 +483,13 @@ class Table extends Widget with SpanningWidget {
           cell.layout(context, childConstraints);
           assert(cell.box != null);
           cell.box = cell.box!.copyWith(x: x, y: totalHeight);
-
-          assert(rowSpan >= 1);
-          final rowLineHeight = cell.box!.height / rowSpan;
-          if (rowSpan > 1) {
-            // Define row line height, if cell is spanning over multiple rows
-            meanRowSpanLineHeights[colIndex] = rowLineHeight;
+          // Ignore row-spanned cells for now
+          if (rowSpan <= 1) {
+            lineHeight = math.max(lineHeight, cell.box!.height);
           }
-          lineHeight = math.max(lineHeight, rowLineHeight);
         }
         assert(widths[colIndex]! > 0.0);
         x += widths[colIndex]!;
-      }
-
-      final align = row.verticalAlignment ?? defaultVerticalAlignment;
-
-      if (align == TableCellVerticalAlignment.full) {
-        // Compute the layout again to give the full height to all cells
-        // Need to compute the width also again, just in case height had an impact on intrinsic width.
-        x = 0;
-        for (var colIndex = 0; colIndex < unspannedRow.length; colIndex++) {
-          final (colSpan, rowSpan, spannedColIndex) = unspannedRow[colIndex];
-          if (spannedColIndex != null) {
-            final cell = children[rowIndex].children[spannedColIndex];
-            final spannedWidth = _getSpannedWidth(colIndex, colSpan, widths);
-            final childConstraints = BoxConstraints.tightFor(
-                width: spannedWidth, height: lineHeight);
-            cell.layout(context, childConstraints);
-            assert(cell.box != null);
-            cell.box = cell.box!.copyWith(x: x, y: totalHeight);
-          }
-          x += widths[colIndex]!;
-        }
       }
 
       if (totalHeight + lineHeight > constraints.maxHeight) {
@@ -536,6 +502,87 @@ class Table extends Widget with SpanningWidget {
       _heights.add(lineHeight);
     }
 
+    // Compute distributed row height in a second round, now that the single cell heights are known.
+    // See: https://www.w3.org/TR/css-tables-3/#height-distribution
+    totalHeight = 0.0;
+    // Save all rows incl. the repeated once.
+    var pageRowIndex = 0;
+    for (var rowIndex = 0;
+        rowIndex < children.length && rowIndex < _context.lastLine;
+        rowIndex++) {
+      final row = children[rowIndex];
+      if (rowIndex < _context.firstLine && !row.repeat) {
+        continue;
+      }
+
+      var lineHeight = _getHeight(pageRowIndex);
+      final unspannedRow = tableCells[rowIndex];
+
+      var x = 0.0;
+      for (var colIndex = 0; colIndex < unspannedRow.length; colIndex++) {
+        final (colSpan, rowSpan, spannedColIndex) = unspannedRow[colIndex];
+
+        if (spannedColIndex != null) {
+          final cell = children[rowIndex].children[spannedColIndex];
+
+          // Calculate cells again
+          final spannedWidth = _getSpannedWidth(colIndex, colSpan, widths);
+          final childConstraints = BoxConstraints.tightFor(width: spannedWidth);
+          cell.layout(context, childConstraints);
+          assert(cell.box != null);
+          cell.box = cell.box!.copyWith(x: x, y: totalHeight);
+          assert(rowSpan >= 1);
+          if (rowSpan > 1) {
+            final rowSpannedHeight = _getSpannedHeight(pageRowIndex, rowSpan);
+            final remainingRowLineHeight = cell.box!.height - rowSpannedHeight;
+            if (remainingRowLineHeight > 0) {
+              // Add remaining row line height, if cell is spanning over multiple rows
+              final distributedCellHeight = remainingRowLineHeight / rowSpan;
+              lineHeight += distributedCellHeight;
+              for (var r = pageRowIndex; r < pageRowIndex + rowSpan; r++) {
+                _heights[r] += distributedCellHeight;
+              }
+            }
+          } else {
+            lineHeight = math.max(lineHeight, cell.box!.height);
+          }
+        }
+        x += widths[colIndex]!;
+      }
+
+      _heights[pageRowIndex] = lineHeight;
+
+      final align = row.verticalAlignment ?? defaultVerticalAlignment;
+
+      if (align == TableCellVerticalAlignment.full) {
+        // Compute the layout again to give the full height to all cells in this row (as lineHeight may has changed on later columns)
+        x = 0;
+        for (var colIndex = 0; colIndex < unspannedRow.length; colIndex++) {
+          final (colSpan, rowSpan, spannedColIndex) = unspannedRow[colIndex];
+          if (spannedColIndex != null) {
+            final cell = children[rowIndex].children[spannedColIndex];
+            final spannedWidth = _getSpannedWidth(colIndex, colSpan, widths);
+            final rowSpannedHeight = _getSpannedHeight(pageRowIndex, rowSpan);
+            final childConstraints = BoxConstraints.tightFor(
+                width: spannedWidth, height: rowSpannedHeight);
+            cell.layout(context, childConstraints);
+            assert(cell.box != null);
+            cell.box = cell.box!.copyWith(x: x, y: totalHeight);
+          }
+          x += widths[colIndex]!;
+        }
+      }
+
+      if (totalHeight + lineHeight > constraints.maxHeight) {
+        // In the second run, heights can still grow (but not shrink), so check again
+        _context.lastLine = rowIndex;
+        break;
+      }
+      totalHeight += lineHeight;
+      pageRowIndex++;
+    }
+
+    pageRowIndex = 0;
     // Compute final y position
     for (var rowIndex = 0;
         rowIndex < children.length && rowIndex < _context.lastLine;
@@ -549,18 +596,19 @@ class Table extends Widget with SpanningWidget {
 
       for (final child in row.children) {
         double? childY;
+        final rowSpan = child is TableCell ? child.rowSpan : 1;
 
+        // Inverse height, now that the totalHeight is known.
         switch (align) {
           case TableCellVerticalAlignment.bottom:
             childY = totalHeight -
                 child.box!.y -
-                _getHeight(rowIndex - _context.firstLine);
+                _getSpannedHeight(pageRowIndex, rowSpan);
             break;
           case TableCellVerticalAlignment.middle:
             childY = totalHeight -
                 child.box!.y -
-                (_getHeight(rowIndex - _context.firstLine) +
-                        child.box!.height) /
+                (_getSpannedHeight(pageRowIndex, rowSpan) + child.box!.height) /
                     2;
             break;
           case TableCellVerticalAlignment.top:
@@ -571,6 +619,7 @@ class Table extends Widget with SpanningWidget {
 
         child.box = child.box!.copyWith(y: childY);
       }
+      pageRowIndex++;
     }
 
     box = PdfRect(0, 0, totalWidth, totalHeight);
@@ -649,6 +698,7 @@ class Table extends Widget with SpanningWidget {
     if (border != null) {
       // Paint inside borders
       final tableCells = _getTableSpanMatrix();
+      var pageRowIndex = 0;
       for (var rowIndex = 0;
           rowIndex < children.length && rowIndex < _context.lastLine;
           rowIndex++) {
@@ -657,23 +707,27 @@ class Table extends Widget with SpanningWidget {
           continue;
         }
 
+        // Cell top may is different from the inner cellBox.top because of their alignment.
+        final rowTop = box!.height - _getSpannedHeight(0, pageRowIndex);
+
         for (var spannedColIndex = 0;
             spannedColIndex < row.children.length;
             spannedColIndex++) {
-          final cellBox = row.children[spannedColIndex].box!;
+          final cell = row.children[spannedColIndex];
+          final cellBox = cell.box!;
           if (border!.verticalInside.style.paint &&
               spannedColIndex != tableCells[rowIndex].first.$3) {
             border!.verticalInside.style.setStyle(context);
 
-            // Use the height of the current row to determine the bottom of box,
+            // Use the height(s) of the (spanned) row to determine the bottom of box,
             // otherwise it will draw gaps for cells which have a smaller height.
-            // Or use height, if cell spans over multiple rows.
             context.canvas.moveTo(
                 cellBox.x,
-                cellBox.top -
-                    math.max(_getHeight(rowIndex - _context.firstLine),
-                        cellBox.height));
-            context.canvas.lineTo(cellBox.x, cellBox.top);
+                rowTop -
+                    (cell is TableCell
+                        ? _getSpannedHeight(pageRowIndex, cell.rowSpan)
+                        : _getHeight(pageRowIndex)));
+            context.canvas.lineTo(cellBox.x, rowTop);
             context.canvas.setStrokeColor(border!.verticalInside.color);
             context.canvas.setLineWidth(border!.verticalInside.width);
             context.canvas.strokePath();
@@ -681,14 +735,15 @@ class Table extends Widget with SpanningWidget {
           }
           if (border!.horizontalInside.style.paint && row != children.first) {
             border!.horizontalInside.style.setStyle(context);
-            context.canvas.moveTo(cellBox.left, cellBox.top);
-            context.canvas.lineTo(cellBox.right, cellBox.top);
+            context.canvas.moveTo(cellBox.left, rowTop);
+            context.canvas.lineTo(cellBox.right, rowTop);
             context.canvas.setStrokeColor(border!.horizontalInside.color);
             context.canvas.setLineWidth(border!.horizontalInside.width);
             context.canvas.strokePath();
             border!.horizontalInside.style.unsetStyle(context);
           }
         }
+        pageRowIndex++;
       }
     }
     context.canvas.restoreContext();
@@ -703,5 +758,14 @@ class Table extends Widget with SpanningWidget {
     return (heightIndex >= 0 && heightIndex < _heights.length)
         ? _heights[heightIndex]
         : 0.0;
+  }
+
+  double _getSpannedHeight(int startIndex, int length) {
+    if (length <= 0) {
+      return 0;
+    }
+    return _heights
+        .sublist(startIndex, startIndex + length)
+        .reduce((prev, next) => prev + next);
   }
 }

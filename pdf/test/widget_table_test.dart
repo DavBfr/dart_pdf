@@ -216,7 +216,7 @@ void main() {
         ),
         headerHeight: 25,
         cellHeight: 40,
-        headerStyle: TextStyle(
+        headerStyle: const TextStyle(
           color: PdfColors.white,
           fontWeight: FontWeight.bold,
         ),
@@ -294,6 +294,7 @@ void main() {
       build: (Context context) => Table(
         children: [
           TableRow(
+            verticalAlignment: TableCellVerticalAlignment.middle,
             children: [
               Container(color: PdfColors.blue, height: 20),
               Container(color: PdfColors.red, height: 20),
@@ -318,6 +319,7 @@ void main() {
             ],
           ),
           TableRow(
+            verticalAlignment: TableCellVerticalAlignment.bottom,
             children: [
               Container(color: PdfColors.red, height: 20),
               _buildSpanCell(
@@ -330,10 +332,11 @@ void main() {
           ),
           TableRow(
             children: [
-              _buildSpanCell(rowSpan: 2, color: PdfColors.green, height: 40),
+              _buildSpanCell(rowSpan: 2, color: PdfColors.green, height: 60),
             ],
           ),
           TableRow(
+            verticalAlignment: TableCellVerticalAlignment.full,
             children: [
               Container(color: PdfColors.blue, height: 20),
               _buildSpanCell(rowSpan: 2, color: PdfColors.red),
