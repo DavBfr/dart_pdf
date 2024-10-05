@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.13.4
+
+- Improve Web Browser detection logic
+
 ## 5.13.3
 
 - Update gfonts [Minh-Danh]
