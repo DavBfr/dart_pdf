@@ -3,6 +3,7 @@
 ## 3.11.2
 
 - Add support for custom fonts in SVGs. [Tyler Denniston]
+- Fix MultiPage.maxPages not checked with release builds
 
 ## 3.11.1
 
