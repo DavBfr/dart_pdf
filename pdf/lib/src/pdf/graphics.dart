@@ -515,6 +515,9 @@ class PdfGraphics {
       return true;
     }());
 
+    // Filter out zero-width spaces (0x200b)
+    s = String.fromCharCodes(s.runes.where((r) => r!=0x200b));
+
     _buf.putString('BT ');
 
     assert(() {
