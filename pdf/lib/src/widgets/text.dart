@@ -794,64 +794,63 @@ class RichText extends Widget with SpanningWidget {
         return true;
       }
 
-      final font = style!.font!.getFont(context);
+      final baseFont = style!.font!.getFont(context);
+      final accumulatedRunes = <int>[];
+      var currentFont = baseFont;
+      var currentTextStyle = style;
 
-      var text = span.text!.runes.toList();
+      void flushAccumulatedRunes() {
+        if (accumulatedRunes.isNotEmpty) {
+          spans.add(_addText(
+            text: accumulatedRunes,
+            style: currentTextStyle,
+            baseline: span.baseline,
+            annotation: annotation,
+          ));
+          accumulatedRunes.clear();
+        }
+      }
 
+      final text = span.text!.runes.toList();
       for (var index = 0; index < text.length; index++) {
         final rune = text[index];
         const spaces = {
           0x0a, 0x09, 0x00A0, 0x1680, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, //
           0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202F, 0x205F, 0x3000
         };
+
         if (spaces.contains(rune)) {
+          accumulatedRunes.add(rune);
           continue;
         }
 
-        if (!font.isRuneSupported(rune)) {
-          if (index > 0) {
-            spans.add(_addText(
-              text: text,
-              end: index,
-              style: style,
-              baseline: span.baseline,
-              annotation: annotation,
-            ));
-          }
+        // Check if the current font supports the rune
+        if (!currentFont.isRuneSupported(rune)) {
           var found = false;
-          for (final fb in style.fontFallback) {
-            final font = fb.getFont(context);
-            if (font.isRuneSupported(rune)) {
-              if (font is PdfTtfFont) {
-                final bitmap = font.font.getBitmap(rune);
-                if (bitmap != null) {
-                  spans.add(_addEmoji(
-                    bitmap: bitmap,
-                    style: style,
-                    baseline: span.baseline,
-                    annotation: annotation,
-                  ));
-                  found = true;
-                  break;
-                }
+          for (final fallback in style.fontFallback) {
+            final fallbackFont = fallback.getFont(context);
+
+            if (fallbackFont.isRuneSupported(rune)) {
+              // Check if the font has changed; only flush if the font is different
+              if (currentFont != fallbackFont) {
+                flushAccumulatedRunes();
+                currentFont = fallbackFont;
+                currentTextStyle = style.copyWith(
+                  font: fallback,
+                  fontNormal: fallback,
+                  fontBold: fallback,
+                  fontBoldItalic: fallback,
+                  fontItalic: fallback,
+                );
               }
-              spans.add(_addText(
-                text: [rune],
-                style: style.copyWith(
-                  font: fb,
-                  fontNormal: fb,
-                  fontBold: fb,
-                  fontBoldItalic: fb,
-                  fontItalic: fb,
-                ),
-                baseline: span.baseline,
-                annotation: annotation,
-              ));
+              accumulatedRunes.add(rune);
               found = true;
               break;
             }
           }
+
           if (!found) {
+            flushAccumulatedRunes();  // Flush before adding placeholder
             spans.add(_addPlaceholder(
               style: style,
               baseline: span.baseline,
@@ -863,17 +862,13 @@ class RichText extends Widget with SpanningWidget {
               return true;
             }());
           }
-          text = text.sublist(index + 1);
-          index = -1;
+        } else {
+          accumulatedRunes.add(rune);  // Accumulate runes supported by current font
         }
       }
 
-      spans.add(_addText(
-        text: text,
-        style: style,
-        baseline: span.baseline,
-        annotation: annotation,
-      ));
+      // Flush any remaining runes
+      flushAccumulatedRunes();
 
       return true;
     }, defaultStyle, null);
