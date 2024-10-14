@@ -40,7 +40,7 @@ class TtfWriter {
     return sum;
   }
 
-  void _updateCompoundGlyph(TtfGlyphInfo glyph, Map<int, int?> compoundMap) {
+  void _updateCompoundGlyph(TtfParser font, TtfGlyphInfo glyph, Map<int, int?> compoundMap) {
     const arg1And2AreWords = 1;
     const moreComponents = 32;
 
@@ -52,8 +52,13 @@ class TtfWriter {
     while (flags & moreComponents != 0) {
       flags = bytes.getUint16(offset);
       final glyphIndex = bytes.getUint16(offset + 2);
-      bytes.setUint16(offset + 2, compoundMap[glyphIndex]!);
-      offset += (flags & arg1And2AreWords != 0) ? 8 : 6;
+      final glyph = compoundMap[glyphIndex];
+      if (glyph != null) {
+        bytes.setUint16(offset + 2, glyph);
+        offset += (flags & arg1And2AreWords != 0) ? 8 : 6;
+      } else {
+        print('[pdf][TtfWriter._updateCompoundGlyph] Error getting glyph $glyphIndex (font: ${font.fontName})');
+      }
     }
   }
 
@@ -62,7 +67,7 @@ class TtfWriter {
   }
 
   /// Write this list of glyphs
-  Uint8List withChars(List<int> chars) {
+  Uint8List withChars(TtfParser font, List<int> chars) {
     final tables = <String, Uint8List>{};
     final tablesLength = <String, int>{};
 
@@ -130,7 +135,7 @@ class TtfWriter {
     // update compound indices
     for (final glyph in glyphsInfo) {
       if (glyph.compounds.isNotEmpty) {
-        _updateCompoundGlyph(glyph, compounds);
+        _updateCompoundGlyph(font, glyph, compounds);
       }
     }
 

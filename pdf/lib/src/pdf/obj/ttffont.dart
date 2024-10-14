@@ -129,7 +129,7 @@ class PdfTtfFont extends PdfFont {
     int charMax;
 
     final ttfWriter = TtfWriter(font);
-    final data = ttfWriter.withChars(unicodeCMap.cmap);
+    final data = ttfWriter.withChars(font, unicodeCMap.cmap);
     file.buf.putBytes(data);
     file.params['/Length1'] = PdfNum(data.length);
 
