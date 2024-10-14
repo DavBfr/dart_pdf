@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.10.3-napkin
+
+- Catch broken fonts (e.g. missing cmap)
+
 ## 3.11.1
 
 - Fixed display problems with textfields [ilaurillard]
