@@ -45,7 +45,8 @@ class PdfMetadata extends PdfObject<PdfDictStream> {
   @override
   void prepare() {
     super.prepare();
-    params['/SubType'] = const PdfName('/XML');
+    params['/Type'] = const PdfName('/Metadata');
+    params['/Subtype'] = const PdfName('/XML');
     params.data = Uint8List.fromList(utf8.encode(metadata.toString()));
   }
 }
