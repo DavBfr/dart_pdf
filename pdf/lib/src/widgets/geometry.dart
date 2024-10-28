@@ -104,10 +104,13 @@ class BoxConstraints {
     return result;
   }
 
-  PdfRect constrainRect(
-      {double width = double.infinity, double height = double.infinity}) {
+  PdfRect constrainRect({
+    double width = double.infinity,
+    double height = double.infinity,
+    double? minWidth,
+  }) {
     final result = PdfPoint(constrainWidth(width), constrainHeight(height));
-    return PdfRect.fromPoints(PdfPoint.zero, result);
+    return PdfRect.fromPoints(PdfPoint.zero, result, minWidth);
   }
 
   double constrainWidth([double width = double.infinity]) {
@@ -672,6 +675,7 @@ class Alignment extends AlignmentGeometry {
       rect.y + halfHeightDelta + y * halfHeightDelta,
       size.x,
       size.y,
+      rect.minWidth,
     );
   }
 
