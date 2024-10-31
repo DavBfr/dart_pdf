@@ -44,9 +44,6 @@ class PdfType1Font extends PdfFont {
       this.missingWidth = 0.600,
       this.widths = const <double>[]})
       : assert(() {
-          // ignore: avoid_print
-          print(
-              '$fontName has no Unicode support see https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management');
           return true;
         }()),
         super.create(pdfDocument, subtype: '/Type1') {
