@@ -191,12 +191,13 @@ class PrintingPlugin extends PrintingPlatform {
       return false;
     }
 
+    // UserAgent can contain both Chrome and Safari for Chrome browser.
+    // UserAgent contains only Safari for Safari browser.
     final userAgent = web.window.navigator.userAgent;
-    final isChrome = web.window['chrome'].isUndefinedOrNull;
-    final isSafari = web.window['safari'].isUndefinedOrNull &&
-        !userAgent.contains(RegExp(r'Version/14\.1\.'));
-    final isMobile = userAgent.contains('Mobile');
+    final isChrome = userAgent.contains('Chrome');
+    final isSafari = userAgent.contains('Safari') && !isChrome;
     final isFirefox = userAgent.contains('Firefox');
+    final isMobile = userAgent.contains('Mobile');
 
     // Chrome, Safari, and Firefox on a desktop computer
     if ((isChrome || isSafari || isFirefox) && !isMobile) {

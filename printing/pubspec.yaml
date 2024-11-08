@@ -15,7 +15,7 @@ topics:
   - print
   - printing
   - report
-version: 5.13.3
+version: 5.13.4
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -36,7 +36,7 @@ dependencies:
   web: ^1.0.0
 
 dev_dependencies:
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
   mockito: ^5.4.4
