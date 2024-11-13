@@ -371,7 +371,7 @@ class Table extends Widget with SpanningWidget {
       return;
     }
 
-    final maxWidth = _widths.reduce((double? a, double? b) => a! + b!);
+    final maxWidth = _widths.fold(0.0, (sum, element) => sum + element);
 
     // Compute column widths using flex and estimated width
     if (constraints.hasBoundedWidth) {
@@ -399,7 +399,7 @@ class Table extends Widget with SpanningWidget {
       }
     }
 
-    final totalWidth = _widths.reduce((double? a, double? b) => a! + b!);
+    final totalWidth = _widths.fold(0.0, (sum, element) => sum + element);
 
     // Compute final widths
     var totalHeight = 0.0;
