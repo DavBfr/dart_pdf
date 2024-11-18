@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.10.4-napkin
+
+- Upgrade bidi dependency to v2.0.13-napkin (Fix crash coming from Normalization.decompose if text.length != lengths.length)
+
 # 1.10.3-napkin
 
 - Catch broken fonts (e.g. missing cmap)
