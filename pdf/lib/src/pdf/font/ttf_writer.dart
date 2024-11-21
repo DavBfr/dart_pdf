@@ -73,15 +73,14 @@ class TtfWriter {
     final compounds = <int, int>{};
 
     for (final char in chars) {
-      if (char == 32) {
-        final glyph = TtfGlyphInfo(
-            ttf.charToGlyphIndexMap[char]!, Uint8List(0), const <int>[]);
+      if (char == ttf.charToGlyphIndexMap[32]) {
+        final glyph = TtfGlyphInfo(char, Uint8List(0), const <int>[]);
         glyphsMap[glyph.index] = glyph;
         charMap[char] = glyph.index;
         continue;
       }
 
-      final glyphIndex = ttf.charToGlyphIndexMap[char] ?? 0;
+      final glyphIndex = char;
       if (glyphIndex >= ttf.glyphOffsets.length) {
         assert(() {
           print('Glyph $glyphIndex not in the font ${ttf.fontName}');
