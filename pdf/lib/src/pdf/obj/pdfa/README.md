@@ -6,7 +6,7 @@ plus embedding Facturx invoices.
 1. Your PDF must only use embedded Fonts,
 2. For now you cannot use any Annotations in your PDF
 3. You must include a special Meta-XML, use below "PdfaRdf" and put the reuslting XML document into your documents metadata
-4. You muss include a Colorprofile, use the below "PdfaColorProfile" and embed the contents of "sRGB2014.icc"
+4. You must include a Colorprofile, use the below "PdfaColorProfile" and embed the contents of "sRGB2014.icc"
 5. Optionally attach an InvoiceXML using "PdfaFacturxRdf" and "PdfaAttachedFiles"
 
 ### Example
