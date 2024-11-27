@@ -3,6 +3,7 @@
 ## 5.13.5
 
 - Fix PdfColorCmyk.fromRgb
+- Table widget refactors [Graham Smith]
 
 ## 5.13.4
 
