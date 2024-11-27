@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.13.5
+
+- Fix PdfColorCmyk.fromRgb
+
 ## 5.13.4
 
 - Improve Web Browser detection logic
