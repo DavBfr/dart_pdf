@@ -26,6 +26,8 @@ import 'object.dart';
 import 'outline.dart';
 import 'page_label.dart';
 import 'page_list.dart';
+import 'pdfa/pdfa_attached_files.dart';
+import 'pdfa/pdfa_color_profile.dart';
 
 /// Pdf Catalog object
 class PdfCatalog extends PdfObject<PdfDict> {
@@ -53,6 +55,12 @@ class PdfCatalog extends PdfObject<PdfDict> {
 
   /// The document metadata
   PdfMetadata? metadata;
+
+  /// Colorprofile output intent (Pdf/A)
+  PdfaColorProfile? colorProfile;
+
+  /// Attached files (Pdf/A 3b)
+  PdfaAttachedFiles? attached;
 
   /// The initial page mode
   final PdfPageMode? pageMode;
@@ -87,6 +95,13 @@ class PdfCatalog extends PdfObject<PdfDict> {
 
     if (metadata != null) {
       params['/Metadata'] = metadata!.ref();
+    }
+
+    if (attached != null && attached!.isNotEmpty) {
+      //params['/Names'] = attached!.catalogNames();
+      names ??= PdfNames(pdfDocument);
+      names!.params.merge(attached!.catalogNames());
+      params['/AF'] = attached!.catalogAF();
     }
 
     // the Names object
@@ -157,6 +172,10 @@ class PdfCatalog extends PdfObject<PdfDict> {
         acroForm['/DR'] = PdfDict.values(// "Document Resources"
             {'/Font': fontRefs});
       }
+    }
+
+    if (colorProfile != null) {
+      params['/OutputIntents'] = colorProfile!.outputIntents();
     }
   }
 }
