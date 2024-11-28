@@ -238,11 +238,11 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         DispatchQueue.main.asyncAfter(deadline: when) {
             webView.createPDF { result in
                 switch result {
-                case .success(let data):
+                case let .success(data):
                     self.printing.onHtmlRendered(printJob: self, pdfData: data)
                     let fileManager = FileManager.default
                     try? fileManager.removeItem(atPath: tempFile)
-                case .failure(let error):
+                case let .failure(error):
                     self.printing.onHtmlError(printJob: self, error: "Unable to create PDF: \(error.localizedDescription)")
                 }
             }
@@ -306,7 +306,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         var html = false
         if #available(macOS 11.0, *) {
             html = true
-    }
+        }
         let data: NSDictionary = [
             "directPrint": true,
             "dynamicLayout": true,
