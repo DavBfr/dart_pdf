@@ -179,9 +179,10 @@ abstract class PdfAnnotBase {
     this.subject,
     this.author,
   }) {
-    this.flags = flags ?? {
-      PdfAnnotFlags.print,
-    };
+    this.flags = flags ??
+        {
+          PdfAnnotFlags.print,
+        };
   }
 
   /// The subtype of the outline, ie text, note, etc
