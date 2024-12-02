@@ -16,7 +16,6 @@
 
 import '../../../pdf.dart';
 import '../geometry.dart';
-import '../page.dart';
 import '../widget.dart';
 import 'chart.dart';
 import 'grid_cartesian.dart';
@@ -38,7 +37,7 @@ class LineDataSet<T extends PointChartValue> extends PointDataSet<T> {
     this.drawLine = true,
     this.lineColor,
     bool drawPoints = true,
-    BuildCallback? shape,
+    LegendBuildCallback? shape,
     Widget Function(Context context, T value)? buildValue,
     ValuePosition valuePosition = ValuePosition.auto,
     this.drawSurface = false,

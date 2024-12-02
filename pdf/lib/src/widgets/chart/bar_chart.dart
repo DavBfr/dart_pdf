@@ -17,7 +17,6 @@
 import '../../../pdf.dart';
 import '../flex.dart';
 import '../geometry.dart';
-import '../page.dart';
 import '../widget.dart';
 import 'chart.dart';
 import 'grid_cartesian.dart';
@@ -39,7 +38,7 @@ class BarDataSet<T extends PointChartValue> extends PointDataSet<T> {
     PdfColor? pointColor,
     double pointSize = 3,
     bool drawPoints = false,
-    BuildCallback? shape,
+    LegendBuildCallback? shape,
     Widget Function(Context context, T value)? buildValue,
     ValuePosition valuePosition = ValuePosition.auto,
   })  : drawBorder = drawBorder ?? borderColor != null && color != borderColor,

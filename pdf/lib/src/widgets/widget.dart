@@ -368,10 +368,13 @@ class InheritedWidget extends SingleChildWidget {
   Widget? _child;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) async {
     _context = inherited != null ? context.inheritFrom(inherited!) : context;
-    _child = build!(_context!);
+    _child = await build!(_context!);
     super.layout(_context!, constraints);
   }
 
@@ -394,14 +397,17 @@ class DelayedWidget extends SingleChildWidget {
   Widget? _child;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
-    _child = build(context);
+  Future<void> layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) async {
+    _child = await build(context);
     super.layout(context, constraints);
   }
 
-  void delayedPaint(Context context) {
-    _child = build(context);
+  Future<void> delayedPaint(Context context) async {
+    _child = await build(context);
     child!.layout(
       context,
       BoxConstraints.tight(box!.size),

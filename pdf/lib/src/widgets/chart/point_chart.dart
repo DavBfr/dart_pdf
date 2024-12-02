@@ -17,11 +17,12 @@
 import '../../../pdf.dart';
 import '../basic.dart';
 import '../geometry.dart';
-import '../page.dart';
 import '../widget.dart';
 import 'chart.dart';
 
 enum ValuePosition { left, top, right, bottom, auto }
+
+typedef LegendBuildCallback = Widget Function(Context context);
 
 class PointChartValue extends ChartValue {
   const PointChartValue(this.x, this.y);
@@ -56,7 +57,7 @@ class PointDataSet<T extends PointChartValue> extends Dataset {
 
   final double pointSize;
 
-  final BuildCallback? shape;
+  final LegendBuildCallback? shape;
 
   final Widget Function(Context context, T value)? buildValue;
 
@@ -94,7 +95,7 @@ class PointDataSet<T extends PointChartValue> extends Dataset {
   }
 
   @override
-  void paintForeground(Context context) {
+  Future<void> paintForeground(Context context) async {
     super.paintForeground(context);
 
     if (data.isEmpty) {
@@ -120,7 +121,7 @@ class PointDataSet<T extends PointChartValue> extends Dataset {
           Widget.draw(
             SizedBox.square(
               dimension: pointSize * 2,
-              child: shape!(context),
+              child: await shape!(context),
             ),
             offset: p,
             alignment: Alignment.center,
