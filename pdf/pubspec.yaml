@@ -4,7 +4,7 @@ homepage: https://github.com/DavBfr/dart_pdf/tree/master/pdf
 repository: https://github.com/DavBfr/dart_pdf
 issue_tracker: https://github.com/DavBfr/dart_pdf/issues
 screenshots:
-  - description: "Example of a generated document"
+  - description: 'Example of a generated document'
     path: example.jpg
 topics:
   - pdf
@@ -18,7 +18,7 @@ environment:
   sdk: ">=2.19.0 <4.0.0"
 
 dependencies:
-  archive: ^4.0.0
+  archive: ">=3.4.0 <4.1.0"
   barcode: ">=2.2.3 <3.0.0"
   bidi: ^2.0.10
   crypto: ^3.0.0
