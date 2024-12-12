@@ -30,7 +30,7 @@ import 'package:pdf/pdf.dart';
 
 import 'callback.dart';
 import 'interface.dart';
-import 'method_channel_ffi.dart' if (dart.library.js) 'method_channel_js.dart';
+import 'method_channel_js.dart' if (dart.library.io) 'method_channel_ffi.dart';
 import 'output_type.dart';
 import 'print_job.dart';
 import 'printer.dart';
