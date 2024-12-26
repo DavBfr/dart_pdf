@@ -8,6 +8,7 @@
 - Table widget refactors [Graham Smith]
 - Add support for creating PDF/A 3b [ilaurillard]
 - Add helper functions to replace text styles and cell content [Brian Kayfitz]
+- Fix TextStyle merge decoration [AtlasAutocode]
 
 ## 3.11.1
 
