@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -28,8 +29,8 @@ import 'text_style.dart';
 import 'theme.dart';
 import 'widget.dart';
 
-typedef BuildCallback = Widget Function(Context context);
-typedef BuildListCallback = List<Widget> Function(Context context);
+typedef BuildCallback = FutureOr<Widget> Function(Context context);
+typedef BuildListCallback = FutureOr<List<Widget>> Function(Context context);
 
 enum PageOrientation { natural, landscape, portrait }
 
@@ -112,7 +113,7 @@ class Page {
     }
   }
 
-  void postProcess(Document document) {
+  Future<void> postProcess(Document document) async {
     final canvas = _pdfPage!.getGraphics();
     canvas.reset();
     final _margin = resolvedMargin;
@@ -139,7 +140,7 @@ class Page {
     Widget? content;
     Widget? foreground;
 
-    content = _build(context);
+    content = await _build(context);
 
     final size = layout(content, context, constraints);
 
@@ -156,12 +157,12 @@ class Page {
     }
 
     if (pageTheme.buildBackground != null) {
-      background = pageTheme.buildBackground!(context);
+      background = await pageTheme.buildBackground!(context);
       layout(background, context, constraints);
     }
 
     if (pageTheme.buildForeground != null) {
-      foreground = pageTheme.buildForeground!(context);
+      foreground = await pageTheme.buildForeground!(context);
       layout(foreground, context, constraints);
     }
 
