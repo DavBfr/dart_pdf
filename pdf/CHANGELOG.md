@@ -9,6 +9,7 @@
 - Add support for creating PDF/A 3b [ilaurillard]
 - Add helper functions to replace text styles and cell content [Brian Kayfitz]
 - Fix TextStyle merge decoration [AtlasAutocode]
+- Use secure random number generator for document ID generation
 
 ## 3.11.1
 

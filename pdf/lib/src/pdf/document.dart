@@ -177,7 +177,7 @@ class PdfDocument {
   /// Generates the document ID
   Uint8List get documentID {
     if (_documentID == null) {
-      final rnd = math.Random();
+      final rnd = math.Random.secure();
       _documentID = Uint8List.fromList(sha256
           .convert(DateTime.now().toIso8601String().codeUnits +
               List<int>.generate(32, (_) => rnd.nextInt(256)))
