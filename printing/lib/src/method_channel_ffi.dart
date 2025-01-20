@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import 'dart:ffi' as ffi;
 import 'dart:io' as io;
 import 'dart:typed_data';
 
-import 'package:ffi/ffi.dart' as ffi;
+import 'package:universal_ffi/ffi.dart' as ffi;
+import 'package:universal_ffi/ffi_utils.dart' as ffi;
 
 import 'print_job.dart';
 
 /// Load the dynamic library
 final ffi.DynamicLibrary _dynamicLibrary = _open();
+
 ffi.DynamicLibrary _open() {
   if (io.Platform.isMacOS || io.Platform.isIOS) {
     return ffi.DynamicLibrary.process();
@@ -39,8 +40,7 @@ void setDocumentFfi(PrintJob job, Uint8List data) {
   ffi.calloc.free(nativeBytes);
 }
 
-final _SetDocumentDart _setDocument =
-    _dynamicLibrary.lookupFunction<_SetDocumentC, _SetDocumentDart>(
+final _SetDocumentDart _setDocument = _dynamicLibrary.lookupFunction<_SetDocumentC, _SetDocumentDart>(
   'net_nfet_printing_set_document',
 );
 
@@ -61,8 +61,7 @@ void setErrorFfi(PrintJob job, String message) {
   _setError(job.index, ffi.StringUtf8Pointer(message).toNativeUtf8());
 }
 
-final _SetErrorDart _setError =
-    _dynamicLibrary.lookupFunction<_SetErrorC, _SetErrorDart>(
+final _SetErrorDart _setError = _dynamicLibrary.lookupFunction<_SetErrorC, _SetErrorDart>(
   'net_nfet_printing_set_error',
 );
 
