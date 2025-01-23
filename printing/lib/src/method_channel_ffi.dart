@@ -40,7 +40,7 @@ void setDocumentFfi(PrintJob job, Uint8List data) {
 }
 
 final _SetDocumentDart _setDocument =
-_dynamicLibrary.lookupFunction<_SetDocumentC, _SetDocumentDart>(
+    _dynamicLibrary.lookupFunction<_SetDocumentC, _SetDocumentDart>(
   'net_nfet_printing_set_document',
 );
 
@@ -62,7 +62,7 @@ void setErrorFfi(PrintJob job, String message) {
 }
 
 final _SetErrorDart _setError =
-_dynamicLibrary.lookupFunction<_SetErrorC, _SetErrorDart>(
+    _dynamicLibrary.lookupFunction<_SetErrorC, _SetErrorDart>(
   'net_nfet_printing_set_error',
 );
 
