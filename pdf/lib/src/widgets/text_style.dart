@@ -355,7 +355,9 @@ class TextStyle {
       lineSpacing: other.lineSpacing,
       height: other.height,
       background: other.background,
-      decoration: decoration==null ? other.decoration : decoration!.merge(other.decoration),
+      decoration: decoration == null
+          ? other.decoration
+          : decoration!.merge(other.decoration),
       decorationColor: other.decorationColor,
       decorationStyle: other.decorationStyle,
       decorationThickness: other.decorationThickness,
