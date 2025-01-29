@@ -36,7 +36,7 @@ class PdfObjectStream extends PdfObject<PdfDict> {
         );
 
   /// This holds the stream's content.
-  final PdfStream buf = PdfStream();
+  final PdfStreamBuffer buf = PdfStreamBuffer();
 
   /// defines if the stream needs to be converted to ascii85
   final bool isBinary;

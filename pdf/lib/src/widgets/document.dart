@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:xml/xml.dart';
@@ -122,6 +123,16 @@ class Document {
     assert(!_paint, 'The document has already been saved.');
     page.generate(this, index: index, insert: false);
     _pages.add(page);
+  }
+
+  Future<void> saveFile(File file) async {
+    if (!_paint) {
+      for (final page in _pages) {
+        page.postProcess(this);
+      }
+      _paint = true;
+    }
+    await document.saveFile(file);
   }
 
   Future<Uint8List> save() async {

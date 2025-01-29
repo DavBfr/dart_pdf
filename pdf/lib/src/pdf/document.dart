@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -251,10 +252,22 @@ class PdfDocument {
     }
   }
 
+  /// Generate the PDF document in a file
+  Future<void> saveFile(File file) async {
+    return pdfCompute(() async {
+      final os = PdfStreamFile(file);
+      if (prev != null) {
+        os.putBytes(prev!.bytes);
+      }
+      await _write(os);
+      os.close();
+    });
+  }
+
   /// Generate the PDF document as a memory file
   Future<Uint8List> save() async {
     return pdfCompute(() async {
-      final os = PdfStream();
+      final os = PdfStreamBuffer();
       if (prev != null) {
         os.putBytes(prev!.bytes);
       }
