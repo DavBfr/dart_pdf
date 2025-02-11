@@ -1,8 +1,19 @@
 # Changelog
 
+## 5.14.0
+
+- Replace WebView with WKWebView on macOS
+- Upgrade archive [CodeDoctor]
+- Fix wasm import [CodeDoctor]
+
+## 5.13.4
+
+- Improve Web Browser detection logic
+
 ## 5.13.3
 
 - Update gfonts [Minh-Danh]
+- Add compatibility with web 1.1.0
 
 ## 5.13.2
 

@@ -129,10 +129,10 @@ class PrintingPlugin extends PrintingPlatform {
 
       // Restore module and exports
       if (module != null) {
-        web.window['module'] = module;
+        web.window.module = module;
       }
       if (exports != null) {
-        web.window['exports'] = exports;
+        web.window.exports = exports;
       }
     }
 
@@ -191,12 +191,13 @@ class PrintingPlugin extends PrintingPlatform {
       return false;
     }
 
+    // UserAgent can contain both Chrome and Safari for Chrome browser.
+    // UserAgent contains only Safari for Safari browser.
     final userAgent = web.window.navigator.userAgent;
-    final isChrome = web.window['chrome'] != null;
-    final isSafari = web.window['safari'] != null &&
-        !userAgent.contains(RegExp(r'Version/14\.1\.'));
-    final isMobile = userAgent.contains('Mobile');
+    final isChrome = userAgent.contains('Chrome');
+    final isSafari = userAgent.contains('Safari') && !isChrome;
     final isFirefox = userAgent.contains('Firefox');
+    final isMobile = userAgent.contains('Mobile');
 
     // Chrome, Safari, and Firefox on a desktop computer
     if ((isChrome || isSafari || isFirefox) && !isMobile) {
@@ -438,4 +439,9 @@ class _WebPdfRaster extends PdfRaster {
   Future<Uint8List> toPng() async {
     return png;
   }
+}
+
+extension _WindowModule on web.Window {
+  external set module(js.JSObject? value);
+  external set exports(js.JSObject? value);
 }

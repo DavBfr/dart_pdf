@@ -254,11 +254,14 @@ class MultiPage extends Page {
     while (_index < children.length) {
       final child = children[_index];
 
-      // Detect too big widgets
-      if (sameCount++ > maxPages) {
-        throw TooManyPagesException(
-            'This widget created more than $maxPages pages. This may be an issue in the widget or the document. See https://pub.dev/documentation/pdf/latest/widgets/MultiPage-class.html');
-      }
+      assert(() {
+        // Detect too big widgets
+        if (sameCount++ > maxPages) {
+          throw TooManyPagesException(
+              'This widget created more than $maxPages pages. This may be an issue in the widget or the document. See https://pub.dev/documentation/pdf/latest/widgets/MultiPage-class.html');
+        }
+        return true;
+      }());
 
       // Calculate available space of the current page
       final freeSpace = (offsetStart == null)

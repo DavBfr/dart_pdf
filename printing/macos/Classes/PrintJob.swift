@@ -215,6 +215,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
 //        }
     }
 
+    @available(macOS 11.0, *)
     public func convertHtml(_ data: String, withPageSize size: CGRect, andMargin margin: CGRect, andBaseUrl baseUrl: URL?) {
         let tempFile = NSTemporaryDirectory() + NSUUID().uuidString
         let directoryURL = URL(fileURLWithPath: tempFile)
@@ -230,23 +231,20 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         printInfo.rightMargin = size.width - margin.maxX
         printInfo.bottomMargin = size.height - margin.maxY
 
-        let webView = WebView()
-        webView.mainFrame.loadHTMLString(data, baseURL: baseUrl)
+        let webView = WKWebView(frame: CGRect.zero)
+        webView.loadHTMLString(data, baseURL: baseUrl)
         let when = DispatchTime.now() + 1
 
         DispatchQueue.main.asyncAfter(deadline: when) {
-            let printOperation = NSPrintOperation(view: webView.mainFrame.frameView.documentView, printInfo: printInfo)
-            printOperation.showsPrintPanel = false
-            printOperation.showsProgressPanel = false
-            printOperation.run()
-
-            do {
-                let data = try Data(contentsOf: directoryURL)
-                self.printing.onHtmlRendered(printJob: self, pdfData: data)
-                let fileManager = FileManager.default
-                try fileManager.removeItem(atPath: tempFile)
-            } catch {
-                self.printing.onHtmlError(printJob: self, error: "Unable to load the pdf file from \(tempFile)")
+            webView.createPDF { result in
+                switch result {
+                case let .success(data):
+                    self.printing.onHtmlRendered(printJob: self, pdfData: data)
+                    let fileManager = FileManager.default
+                    try? fileManager.removeItem(atPath: tempFile)
+                case let .failure(error):
+                    self.printing.onHtmlError(printJob: self, error: "Unable to create PDF: \(error.localizedDescription)")
+                }
             }
         }
     }
@@ -305,10 +303,15 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     }
 
     public static func printingInfo() -> NSDictionary {
+        var html = false
+        if #available(macOS 11.0, *) {
+            html = true
+        }
         let data: NSDictionary = [
             "directPrint": true,
             "dynamicLayout": true,
             "canPrint": true,
+            "canConvertHtml": html,
             "canShare": true,
             "canRaster": true,
             "canListPrinters": true,

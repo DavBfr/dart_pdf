@@ -16,6 +16,7 @@
 
 import '../../pdf.dart';
 import '../widgets/font.dart';
+import '../widgets/svg.dart';
 import '../widgets/widget.dart';
 import 'brush.dart';
 import 'color.dart';
@@ -30,8 +31,9 @@ class SvgPainter {
     this.boundingBox,
     Map<String, List<Font>> fonts,
     this.defaultFont,
-    this.fallbackFonts,
-  ) : fonts = fonts.map((key, value) => MapEntry(_cleanFontName(key), value));
+    this.fallbackFonts, {
+    this.customFontLookup,
+  }) : fonts = fonts.map((key, value) => MapEntry(_cleanFontName(key), value));
 
   final SvgParser parser;
 
@@ -46,6 +48,8 @@ class SvgPainter {
   Font? defaultFont;
 
   final List<Font> fallbackFonts;
+
+  final SvgCustomFontLookup? customFontLookup;
 
   void paint() {
     final brush = parser.colorFilter == null
@@ -134,6 +138,12 @@ class SvgPainter {
         _findBestFont(context, fontFamily, fontStyle, fontWeight);
     if (documentFont != null) {
       return documentFont;
+    }
+
+    final customFont =
+        customFontLookup?.call(fontFamily, fontStyle, fontWeight);
+    if (customFont != null) {
+      return customFont.getFont(context);
     }
 
     switch (_cleanFontName(_removeFontFallbacks(fontFamily))) {

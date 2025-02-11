@@ -1,6 +1,21 @@
 # Changelog
 
-# 1.10.5-napkin
+# 1.11.0-napkin
+
+- Pull in changes from 3.11.2
+
+## 3.11.2
+
+- Add support for custom fonts in SVGs. [Tyler Denniston]
+- Fix MultiPage.maxPages not checked with release builds
+- Fix PdfColorCmyk.fromRgb
+- Table widget refactors [Graham Smith]
+- Add support for creating PDF/A 3b [ilaurillard]
+- Add helper functions to replace text styles and cell content [Brian Kayfitz]
+- Fix TextStyle merge decoration [AtlasAutocode]
+- Use secure random number generator for document ID generation
+
+# 1.10.6-napkin
 
 - Allow fonts with single variation
 

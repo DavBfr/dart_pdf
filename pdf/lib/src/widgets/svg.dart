@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- import 'dart:convert';
+import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -36,6 +36,7 @@ class SvgImage extends Widget {
     Map<String, List<Font>> fonts = const {},
     Font? defaultFont,
     List<Font> fallbackFonts = const [],
+    SvgCustomFontLookup? customFontLookup,
   }) {
     try {
       final xml = XmlDocument.parse(svg);
@@ -50,9 +51,11 @@ class SvgImage extends Widget {
         fonts,
         defaultFont,
         fallbackFonts,
+        customFontLookup,
       );
     } catch (e) {
-      throw ArgumentError.value(svg, 'svg', 'Invalid SVG\n`$svg`\nBase64: ${base64.encode(utf8.encode(svg))}\n$e}');
+      throw ArgumentError.value(svg, 'svg',
+          'Invalid SVG\n`$svg`\nBase64: ${base64.encode(utf8.encode(svg))}\n$e}');
     }
   }
 
@@ -66,6 +69,7 @@ class SvgImage extends Widget {
     this.fonts,
     this.defaultFont,
     this.fallbackFonts,
+    this.customFontLookup,
   );
 
   final SvgParser _svgParser;
@@ -85,6 +89,7 @@ class SvgImage extends Widget {
   final Map<String, List<Font>> fonts;
 
   final List<Font> fallbackFonts;
+  final SvgCustomFontLookup? customFontLookup;
 
   late FittedSizes sizes;
 
@@ -145,6 +150,7 @@ class SvgImage extends Widget {
       fonts,
       defaultFont,
       fallbackFonts,
+      customFontLookup: customFontLookup,
     );
     painter.paint();
     context.canvas.restoreContext();
@@ -173,3 +179,6 @@ class DecorationSvgImage extends DecorationGraphic {
     );
   }
 }
+
+typedef SvgCustomFontLookup = Font? Function(
+    String fontFamily, String fontStyle, String fontWeight);

@@ -27,7 +27,9 @@ import 'format/stream.dart';
 import 'format/string.dart';
 import 'format/xref.dart';
 import 'graphic_state.dart';
-import 'io/vm.dart' if (dart.library.js) 'io/js.dart';
+import 'io/na.dart'
+    if (dart.library.io) 'io/vm.dart'
+    if (dart.library.js_interop) 'io/js.dart';
 import 'obj/catalog.dart';
 import 'obj/encryption.dart';
 import 'obj/font.dart';
@@ -182,7 +184,7 @@ class PdfDocument {
       if (userDocumentID != null) {
         _documentID = Uint8List.fromList(userDocumentID!.codeUnits);
       } else {
-        final rnd = math.Random();
+        final rnd = math.Random.secure();
         _documentID = Uint8List.fromList(sha256
             .convert(DateTime.now().toIso8601String().codeUnits +
                 List<int>.generate(32, (_) => rnd.nextInt(256)))
