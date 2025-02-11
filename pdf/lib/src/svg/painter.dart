@@ -31,7 +31,7 @@ class SvgPainter {
     Map<String, List<Font>> fonts,
     this.defaultFont,
     this.fallbackFonts,
-  )    : fonts = fonts.map((key, value) => MapEntry(_cleanFontName(key), value));
+  ) : fonts = fonts.map((key, value) => MapEntry(_cleanFontName(key), value));
 
   final SvgParser parser;
 
@@ -79,15 +79,20 @@ class SvgPainter {
       .whereType<PdfTtfFont>()
       .toList();
 
-
   List<PdfTtfFont> _getFamilyFonts(Context context, String fontFamily) {
-        final cleanFontFamilyQuery = _cleanFontName(_removeFontFallbacks(fontFamily));
-        return fonts[cleanFontFamilyQuery]?.map((f) => f.getFont(context)).whereType<PdfTtfFont>().toList() ?? [];
-        }
+    final cleanFontFamilyQuery =
+        _cleanFontName(_removeFontFallbacks(fontFamily));
+    return fonts[cleanFontFamilyQuery]
+            ?.map((f) => f.getFont(context))
+            .whereType<PdfTtfFont>()
+            .toList() ??
+        [];
+  }
 
-  PdfTtfFont? _findBestFont(Context context, String fontFamily, String fontStyle, String fontWeight) {
+  PdfTtfFont? _findBestFont(
+      Context context, String fontFamily, String fontStyle, String fontWeight) {
     final familyFonts = _getFamilyFonts(context, fontFamily);
-    if (familyFonts.length <= 1) {
+    if (familyFonts.isEmpty) {
       return defaultFont?.getFont(context) as PdfTtfFont?;
     }
 
@@ -125,9 +130,10 @@ class SvgPainter {
   PdfFont getFont(String fontFamily, String fontStyle, String fontWeight) {
     final context = Context(document: document);
 
-    final documentFont = _findBestFont(context, fontFamily, fontStyle, fontWeight);
+    final documentFont =
+        _findBestFont(context, fontFamily, fontStyle, fontWeight);
     if (documentFont != null) {
-        return documentFont;
+      return documentFont;
     }
 
     switch (_cleanFontName(_removeFontFallbacks(fontFamily))) {
@@ -166,22 +172,22 @@ class SvgPainter {
         }
         return Font.courierBoldOblique().getFont(context);
 
-        case 'helvetica':
-          switch (fontStyle) {
-            case 'normal':
-              switch (fontWeight) {
-                case 'normal':
-                case 'lighter':
-                  return Font.helvetica().getFont(context);
-              }
-              return Font.helveticaBold().getFont(context);
-          }
-          switch (fontWeight) {
-            case 'normal':
-            case 'lighter':
-              return Font.helveticaOblique().getFont(context);
-          }
-          return Font.helveticaBoldOblique().getFont(context);
+      case 'helvetica':
+        switch (fontStyle) {
+          case 'normal':
+            switch (fontWeight) {
+              case 'normal':
+              case 'lighter':
+                return Font.helvetica().getFont(context);
+            }
+            return Font.helveticaBold().getFont(context);
+        }
+        switch (fontWeight) {
+          case 'normal':
+          case 'lighter':
+            return Font.helveticaOblique().getFont(context);
+        }
+        return Font.helveticaBoldOblique().getFont(context);
     }
 
     return Font.helvetica().getFont(context);

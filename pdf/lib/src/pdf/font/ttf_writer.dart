@@ -40,7 +40,8 @@ class TtfWriter {
     return sum;
   }
 
-  void _updateCompoundGlyph(TtfParser font, TtfGlyphInfo glyph, Map<int, int?> compoundMap) {
+  void _updateCompoundGlyph(
+      TtfParser font, TtfGlyphInfo glyph, Map<int, int?> compoundMap) {
     const arg1And2AreWords = 1;
     const moreComponents = 32;
 
@@ -57,7 +58,8 @@ class TtfWriter {
         bytes.setUint16(offset + 2, glyph);
         offset += (flags & arg1And2AreWords != 0) ? 8 : 6;
       } else {
-        print('[pdf][TtfWriter._updateCompoundGlyph] Error getting glyph $glyphIndex (font: ${font.fontName})');
+        print(
+            '[pdf][TtfWriter._updateCompoundGlyph] Error getting glyph $glyphIndex (font: ${font.fontName})');
       }
     }
   }
@@ -96,13 +98,17 @@ class TtfWriter {
       }
 
       void addGlyph(glyphIndex) {
-        final glyph = ttf.readGlyph(glyphIndex).copy();
-        for (final g in glyph.compounds) {
-          compounds[g] = -1;
-          overflow.add(g);
-          addGlyph(g);
+        try {
+          final glyph = ttf.readGlyph(glyphIndex).copy();
+          for (final g in glyph.compounds) {
+            compounds[g] = -1;
+            overflow.add(g);
+            addGlyph(g);
+          }
+          glyphsMap[glyph.index] = glyph;
+        } catch (e) {
+          print('[pdf][TtfWriter.addGlyph] Error adding glyph $glyphIndex: $e');
         }
-        glyphsMap[glyph.index] = glyph;
       }
 
       charMap[char] = glyphIndex;
