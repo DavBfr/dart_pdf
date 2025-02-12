@@ -15,3 +15,4 @@
  */
 
 const useFFI = false;
+const isAndroid = false;
