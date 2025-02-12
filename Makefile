@@ -58,7 +58,7 @@ pdf/hacen-tunisia.ttf:
 format: format-dart format-clang format-swift
 
 format-dart: $(DART_SRC)
-	$(DART_BIN) format --fix $^
+	$(DART_BIN) format $^
 
 format-clang: $(CLNG_SRC)
 	clang-format -style=Chromium -i $^
