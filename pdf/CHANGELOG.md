@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.11.3
+
+- Fix CMYK
+
 ## 3.11.2
 
 - Add support for custom fonts in SVGs. [Tyler Denniston]
