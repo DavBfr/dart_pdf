@@ -134,7 +134,7 @@ mixin PdfGraphicStream on PdfObject<PdfDict> {
       resources['/XObject'] = PdfDict.fromObjectMap(xObjects);
     }
 
-    if (pdfDocument.hasGraphicStates) {
+    if (pdfDocument.hasGraphicStates && !params.containsKey('/Group')) {
       // Declare Transparency Group settings
       params['/Group'] = PdfDict.values({
         '/Type': const PdfName('/Group'),
