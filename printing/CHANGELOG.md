@@ -1,6 +1,6 @@
 # Changelog
 
-## 5.14.1
+## 5.14.2
 
 - Fix wasm dart.pub warning
 

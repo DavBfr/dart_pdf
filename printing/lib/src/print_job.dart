@@ -18,7 +18,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'callback.dart';
-import 'platform_js.dart' if (dart.library.io) 'print_job_platform_ffi.dart';
+import 'platform_js.dart' if (dart.library.io) 'platform_os.dart';
 import 'raster.dart';
 
 /// Represents a print job to communicate with the platform implementation
