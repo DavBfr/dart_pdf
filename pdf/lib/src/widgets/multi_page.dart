@@ -216,7 +216,8 @@ class MultiPage extends Page {
   }
 
   @override
-  void generate(Document document, {bool insert = true, int? index}) {
+  Future<void> generate(Document document,
+      {bool insert = true, int? index}) async {
     assert(pageFormat.width > 0 && pageFormat.width < double.infinity);
     assert(pageFormat.height > 0 && pageFormat.height < double.infinity);
 
@@ -248,7 +249,7 @@ class MultiPage extends Page {
       if (pageTheme.textDirection != null)
         InheritedDirectionality(pageTheme.textDirection),
     ]);
-    final children = _buildList(baseContext);
+    final children = await _buildList(baseContext);
     WidgetContext? widgetContext;
 
     while (_index < children.length) {
@@ -300,7 +301,7 @@ class MultiPage extends Page {
         ));
 
         if (header != null) {
-          final headerWidget = header!(context);
+          final headerWidget = await header!(context);
 
           headerWidget.layout(context, constraints, parentUsesSize: false);
           assert(headerWidget.box != null);
@@ -308,7 +309,7 @@ class MultiPage extends Page {
         }
 
         if (footer != null) {
-          final footerWidget = footer!(context);
+          final footerWidget = await footer!(context);
 
           footerWidget.layout(context, constraints, parentUsesSize: false);
           assert(footerWidget.box != null);
@@ -395,7 +396,7 @@ class MultiPage extends Page {
   }
 
   @override
-  void postProcess(Document document) {
+  Future<void> postProcess(Document document) async {
     final _margin = resolvedMargin!;
     final _mustRotate = mustRotate;
     final pageHeight = _mustRotate ? pageFormat.width : pageFormat.height;
@@ -412,7 +413,7 @@ class MultiPage extends Page {
           _mustRotate ? pageHeightMargin - _margin.left : _margin.bottom;
 
       if (pageTheme.buildBackground != null) {
-        final child = pageTheme.buildBackground!(page.context);
+        final child = await pageTheme.buildBackground!(page.context);
 
         child.layout(page.context, page.fullConstraints, parentUsesSize: false);
         assert(child.box != null);
@@ -444,7 +445,7 @@ class MultiPage extends Page {
       }
 
       if (header != null) {
-        final headerWidget = header!(page.context);
+        final headerWidget = await header!(page.context);
         headerWidget.layout(page.context, page.constraints,
             parentUsesSize: false);
         assert(headerWidget.box != null);
@@ -457,7 +458,7 @@ class MultiPage extends Page {
       }
 
       if (footer != null) {
-        final footerWidget = footer!(page.context);
+        final footerWidget = await footer!(page.context);
         footerWidget.layout(page.context, page.constraints,
             parentUsesSize: false);
         assert(footerWidget.box != null);
@@ -580,7 +581,7 @@ class MultiPage extends Page {
       }
 
       if (pageTheme.buildForeground != null) {
-        final child = pageTheme.buildForeground!(page.context);
+        final child = await pageTheme.buildForeground!(page.context);
 
         child.layout(page.context, page.fullConstraints, parentUsesSize: false);
         assert(child.box != null);
