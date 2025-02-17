@@ -81,7 +81,7 @@ class PdfChoiceField extends PdfAnnotWidget {
       params['/V'] = const PdfNull();
     }
 
-    final buf = PdfStream();
+    final buf = PdfStreamBuffer();
     final g = PdfGraphics(page, buf);
     g.setFillColor(textColor);
     g.setFont(font, fontSize);
@@ -928,7 +928,7 @@ class PdfTextField extends PdfFormField {
       params['/MaxLen'] = PdfNum(maxLength!);
     }
 
-    final buf = PdfStream();
+    final buf = PdfStreamBuffer();
     final g = PdfGraphics(page, buf);
     g.setFillColor(textColor);
     g.setFont(font, fontSize);

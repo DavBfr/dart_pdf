@@ -43,7 +43,7 @@ mixin PdfDiagnostic {
   void writeDebug(PdfStream os) {
     assert(() {
       if (_offset != null) {
-        final o = PdfStream();
+        final o = PdfStreamBuffer();
         _properties.forEach(o.putComment);
         final b = o.output();
         os.setBytes(

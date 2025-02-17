@@ -69,7 +69,7 @@ class Page {
 
   PageOrientation get orientation => pageTheme.orientation;
 
-  final BuildCallback _build;
+  BuildCallback? _build;
 
   ThemeData? get theme => pageTheme.theme;
 
@@ -80,6 +80,8 @@ class Page {
   EdgeInsetsGeometry? get margin => pageTheme.margin;
 
   EdgeInsets? get resolvedMargin => margin?.resolve(pageTheme.textDirection);
+
+  bool processed = false;
 
   @protected
   void debugPaint(Context context) {
@@ -113,6 +115,11 @@ class Page {
   }
 
   void postProcess(Document document) {
+    if (processed) {
+      return;
+    }
+    assert(_build != null);
+
     final canvas = _pdfPage!.getGraphics();
     canvas.reset();
     final _margin = resolvedMargin;
@@ -139,7 +146,7 @@ class Page {
     Widget? content;
     Widget? foreground;
 
-    content = _build(context);
+    content = _build!(context);
 
     final size = layout(content, context, constraints);
 
@@ -181,6 +188,8 @@ class Page {
     if (foreground != null) {
       paint(foreground, context);
     }
+    processed = true;
+    _build = null;
   }
 
   @protected

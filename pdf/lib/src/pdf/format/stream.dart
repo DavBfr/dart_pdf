@@ -14,48 +14,19 @@
  * limitations under the License.
  */
 
+import 'dart:io';
 import 'dart:typed_data';
 
-class PdfStream {
-  static const int _grow = 65536;
+abstract class PdfStream {
+  void putByte(int s);
 
-  Uint8List _stream = Uint8List(_grow);
+  void putBytes(List<int> s);
 
-  int _offset = 0;
+  void setBytes(int offset, Iterable<int> iterable);
 
-  void _ensureCapacity(int size) {
-    if (_stream.length - _offset >= size) {
-      return;
-    }
+  void putStream(PdfStreamBuffer s);
 
-    final newSize = _offset + size + _grow;
-    final newBuffer = Uint8List(newSize);
-    newBuffer.setAll(0, _stream);
-    _stream = newBuffer;
-  }
-
-  void putByte(int s) {
-    _ensureCapacity(1);
-    _stream[_offset++] = s;
-  }
-
-  void putBytes(List<int> s) {
-    _ensureCapacity(s.length);
-    _stream.setAll(_offset, s);
-    _offset += s.length;
-  }
-
-  void setBytes(int offset, Iterable<int> iterable) {
-    _stream.setAll(offset, iterable);
-  }
-
-  void putStream(PdfStream s) {
-    putBytes(s._stream);
-  }
-
-  int get offset => _offset;
-
-  Uint8List output() => _stream.sublist(0, _offset);
+  int get offset;
 
   void putString(String? s) {
     assert(() {
@@ -79,5 +50,92 @@ class PdfStream {
         }
       }
     }
+  }
+}
+
+class PdfStreamBuffer extends PdfStream {
+  static const int _grow = 65536;
+
+  Uint8List _stream = Uint8List(_grow);
+
+  int _offset = 0;
+
+  void _ensureCapacity(int size) {
+    if (_stream.length - _offset >= size) {
+      return;
+    }
+
+    final newSize = _offset + size + _grow;
+    final newBuffer = Uint8List(newSize);
+    newBuffer.setAll(0, _stream);
+    _stream = newBuffer;
+  }
+
+  @override
+  void putByte(int s) {
+    _ensureCapacity(1);
+    _stream[_offset++] = s;
+  }
+
+  @override
+  void putBytes(List<int> s) {
+    _ensureCapacity(s.length);
+    _stream.setAll(_offset, s);
+    _offset += s.length;
+  }
+
+  @override
+  void setBytes(int offset, Iterable<int> iterable) {
+    _stream.setAll(offset, iterable);
+  }
+
+  @override
+  void putStream(PdfStreamBuffer s) {
+    putBytes(s._stream);
+  }
+
+  @override
+  int get offset => _offset;
+
+  Uint8List output() => _stream.sublist(0, _offset);
+}
+
+class PdfStreamFile extends PdfStream {
+  PdfStreamFile(File file) {
+    _raf = file.openSync(mode: FileMode.write);
+  }
+
+  late RandomAccessFile _raf;
+
+  void close() {
+    _raf.closeSync();
+  }
+
+  @override
+  void putByte(int s) {
+    _raf.writeByteSync(s);
+  }
+
+  @override
+  void putBytes(List<int> s) {
+    _raf.writeFromSync(s);
+  }
+
+  @override
+  void setBytes(int offset, Iterable<int> iterable) {
+    final originalOffset = _raf.positionSync();
+    _raf.setPositionSync(offset);
+    _raf.writeFromSync(iterable.toList());
+    _raf.setPositionSync(originalOffset);
+  }
+
+  @override
+  void putStream(PdfStreamBuffer s) {
+    putBytes(s._stream);
+  }
+
+  @override
+  int get offset {
+    return _raf.positionSync();
   }
 }

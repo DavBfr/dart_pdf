@@ -28,8 +28,8 @@ abstract class PdfDataType {
 
   void output(PdfObjectBase o, PdfStream s, [int? indent]);
 
-  PdfStream _toStream([int? indent]) {
-    final s = PdfStream();
+  PdfStreamBuffer _toStream([int? indent]) {
+    final s = PdfStreamBuffer();
     output(
       PdfObjectBase(
         objser: 0,
