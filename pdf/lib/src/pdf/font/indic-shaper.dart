@@ -66,21 +66,25 @@ doGlobalSubstitution(List<int> charIndexes, TtfParser font) {
 }
 
 initialReorder(List<int> glyphIndexes, String lang) {
-  for (int i = 0; i < glyphIndexes.length; i++) {
-    var glyphIndex = glyphIndexes[i];
-    if (lang == 'tamil') {
-      if (glyphIndex == 47 || glyphIndex == 46 || glyphIndex == 48) {
-        // ெ ை ே
-        glyphIndexes[i] = glyphIndexes[i - 1];
-        glyphIndexes[i - 1] = glyphIndex;
-      }
-    } else if (lang == 'hindi') {
-      if (glyphIndex == 67) {
-        glyphIndexes[i] = glyphIndexes[i - 1];
-        glyphIndexes[i - 1] = glyphIndex;
+  try {
+    for (int i = 0; i < glyphIndexes.length; i++) {
+      var glyphIndex = glyphIndexes[i];
+      if (i != 0) {
+        if (lang == 'tamil') {
+          if (glyphIndex == 47 || glyphIndex == 46 || glyphIndex == 48) {
+            // ெ ை ே
+            glyphIndexes[i] = glyphIndexes[i - 1];
+            glyphIndexes[i - 1] = glyphIndex;
+          }
+        } else if (lang == 'hindi') {
+          if (glyphIndex == 67) {
+            glyphIndexes[i] = glyphIndexes[i - 1];
+            glyphIndexes[i - 1] = glyphIndex;
+          }
+        }
       }
     }
-  }
+  } catch (e) {}
   return glyphIndexes;
 }
 
@@ -105,14 +109,22 @@ getLang(String fontName) {
     return 'tamil';
   } else if (fontName.toLowerCase().contains('devanagari')) {
     return 'hindi';
+  } else if (fontName.toLowerCase().contains('telugu')) {
+    return 'telugu';
   }
   return '';
 }
 
+isIndicShaperSupported(String lang) {
+  return ['tamil', 'hindi', 'telugu'].contains(lang);
+}
+
 indicShaper(List<int> glyphIndexes, TtfParser font) {
   var lang = getLang(font.fontName);
-  glyphIndexes = doGlobalSubstitution(glyphIndexes, font);
-  glyphIndexes = initialReorder(glyphIndexes, lang);
-  glyphIndexes = finalReorder(glyphIndexes, lang);
+  if (isIndicShaperSupported(lang)) {
+    glyphIndexes = doGlobalSubstitution(glyphIndexes, font);
+    glyphIndexes = initialReorder(glyphIndexes, lang);
+    glyphIndexes = finalReorder(glyphIndexes, lang);
+  }
   return glyphIndexes;
 }
