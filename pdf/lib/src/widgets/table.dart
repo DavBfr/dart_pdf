@@ -337,7 +337,8 @@ class Table extends Widget with SpanningWidget {
           // <= , because we have to look one column ahead to check if the cell from the previous row had a rowspan.
           spannedColIndex <= row.children.length;
           spannedColIndex++) {
-        if (previousSpansOfRow.length > unspannedColIndex) {
+        // Iterate through previous row cells and look for spans
+        while (previousSpansOfRow.length > unspannedColIndex) {
           final (previousColSpan, previousRowSpan, previousCell) =
               previousSpansOfRow[unspannedColIndex];
           if (previousRowSpan > 1) {
@@ -346,6 +347,8 @@ class Table extends Widget with SpanningWidget {
               spansOfRow.add((colSpan, previousRowSpan - 1, null));
               unspannedColIndex++;
             }
+          } else {
+            break;
           }
         }
         if (spannedColIndex < row.children.length) {
@@ -403,9 +406,7 @@ class Table extends Widget with SpanningWidget {
           unspannedColIndex++) {
         final spannedColIndex = unspannedRow[unspannedColIndex].$3;
         final columnWidth =
-            columnWidths != null && columnWidths![unspannedColIndex] != null
-                ? columnWidths![unspannedColIndex]!
-                : defaultColumnWidth;
+            columnWidths?[unspannedColIndex] ?? defaultColumnWidth;
         // TODO(Gustl22): Handle intrinsic column widths:
         //  Currently, every cell is calculated by filling the remaining spanned
         //  cells with empty containers and then sum up their calculated widths.
