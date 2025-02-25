@@ -138,8 +138,8 @@ class TableContext extends WidgetContext {
 class ColumnLayout {
   ColumnLayout(this.width, this.flex);
 
-  final double? width;
-  final double? flex;
+  final double width;
+  final double flex;
 }
 
 abstract class TableColumnWidth {
@@ -161,7 +161,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
     BoxConstraints constraints,
   ) {
     if (flex != null) {
-      return ColumnLayout(0, flex);
+      return ColumnLayout(0, flex!);
     }
 
     child.layout(context, const BoxConstraints());
@@ -391,8 +391,8 @@ class Table extends Widget with SpanningWidget {
     bool parentUsesSize = false,
   }) {
     // Compute required width for all row/columns width flex
-    final flex = <double?>[];
-    final widths = <double?>[];
+    final flex = <double>[];
+    final widths = <double>[];
     _heights.clear();
 
     final tableCells = _getTableSpanMatrix();
@@ -419,12 +419,12 @@ class Table extends Widget with SpanningWidget {
           flex.add(columnLayout.flex);
           widths.add(columnLayout.width);
         } else {
-          if (columnLayout.flex! > 0) {
+          if (columnLayout.flex > 0) {
             flex[unspannedColIndex] =
-                math.max(flex[unspannedColIndex]!, columnLayout.flex!);
+                math.max(flex[unspannedColIndex], columnLayout.flex);
           }
           widths[unspannedColIndex] =
-              math.max(widths[unspannedColIndex]!, columnLayout.width!);
+              math.max(widths[unspannedColIndex], columnLayout.width);
         }
       }
     }
@@ -438,16 +438,16 @@ class Table extends Widget with SpanningWidget {
 
     // Compute column widths using flex and estimated width
     if (constraints.hasBoundedWidth) {
-      final totalFlex = flex.reduce((double? a, double? b) => a! + b!)!;
+      final totalFlex = flex.reduce((double? a, double? b) => a! + b!);
       var flexSpace = 0.0;
       for (var n = 0; n < widths.length; n++) {
         if (flex[n] == 0.0) {
-          final newWidth = widths[n]! / maxWidth! * constraints.maxWidth;
+          final newWidth = widths[n] / maxWidth * constraints.maxWidth;
           if ((tableWidth == TableWidth.max && totalFlex == 0.0) ||
-              newWidth < widths[n]!) {
+              newWidth < widths[n]) {
             widths[n] = newWidth;
           }
-          flexSpace += widths[n]!;
+          flexSpace += widths[n];
         }
       }
       final spacePerFlex = totalFlex > 0.0
@@ -455,14 +455,14 @@ class Table extends Widget with SpanningWidget {
           : double.nan;
 
       for (var n = 0; n < widths.length; n++) {
-        if (flex[n]! > 0.0) {
-          final newWidth = spacePerFlex * flex[n]!;
+        if (flex[n] > 0.0) {
+          final newWidth = spacePerFlex * flex[n];
           widths[n] = newWidth;
         }
       }
     }
 
-    final totalWidth = widths.reduce((double? a, double? b) => a! + b!)!;
+    final totalWidth = widths.reduce((double? a, double? b) => a! + b!);
 
     // Compute widths and heights
     var totalHeight = 0.0;
@@ -492,8 +492,8 @@ class Table extends Widget with SpanningWidget {
             lineHeight = math.max(lineHeight, cell.box!.height);
           }
         }
-        assert(widths[colIndex]! > 0.0);
-        x += widths[colIndex]!;
+        assert(widths[colIndex] > 0.0);
+        x += widths[colIndex];
       }
 
       if (totalHeight + lineHeight > constraints.maxHeight) {
@@ -551,7 +551,7 @@ class Table extends Widget with SpanningWidget {
             lineHeight = math.max(lineHeight, cell.box!.height);
           }
         }
-        x += widths[colIndex]!;
+        x += widths[colIndex];
       }
 
       _heights[pageRowIndex] = lineHeight;
@@ -573,7 +573,7 @@ class Table extends Widget with SpanningWidget {
             assert(cell.box != null);
             cell.box = cell.box!.copyWith(x: x, y: totalHeight);
           }
-          x += widths[colIndex]!;
+          x += widths[colIndex];
         }
       }
 
