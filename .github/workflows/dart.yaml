@@ -61,7 +61,7 @@ jobs:
         run: cd printing/example; flutter build -v windows
 
   macos:
-    runs-on: macos-12
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -132,7 +132,7 @@ jobs:
         run: cd printing/example; flutter build -v windows
 
   macos-dev:
-    runs-on: macos-12
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v4

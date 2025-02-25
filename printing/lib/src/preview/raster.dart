@@ -15,7 +15,6 @@
  */
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -24,6 +23,7 @@ import 'package:flutter/foundation.dart'
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 
+import '../platform_js.dart' if (dart.library.io) '../platform_os.dart';
 import '../printing.dart';
 import '../printing_info.dart';
 import '../raster.dart';
@@ -74,7 +74,7 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
       } else {
         final mq = MediaQuery.of(context);
         final double dpr;
-        if (!kIsWeb && Platform.isAndroid) {
+        if (isAndroid) {
           if (mq.size.shortestSide * mq.devicePixelRatio < 800) {
             dpr = 2 * mq.devicePixelRatio;
           } else {

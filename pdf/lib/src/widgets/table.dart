@@ -85,12 +85,13 @@ class TableBorder extends Border {
   }) {
     final side = BorderSide(color: color, width: width, style: style);
     return TableBorder(
-        top: side,
-        right: side,
-        bottom: side,
-        left: side,
-        horizontalInside: side,
-        verticalInside: side);
+      top: side,
+      right: side,
+      bottom: side,
+      left: side,
+      horizontalInside: side,
+      verticalInside: side,
+    );
   }
 
   /// Creates a border for a table where all the interior sides use the same styling and all the exterior sides use the same styling.
@@ -155,7 +156,10 @@ class IntrinsicColumnWidth extends TableColumnWidth {
 
   @override
   ColumnLayout layout(
-      Widget child, Context context, BoxConstraints constraints) {
+    Widget child,
+    Context context,
+    BoxConstraints constraints,
+  ) {
     if (flex != null) {
       return ColumnLayout(0, flex);
     }
