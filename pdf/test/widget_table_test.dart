@@ -348,6 +348,20 @@ void main() {
               Container(color: PdfColors.green, height: 20),
             ],
           ),
+          TableRow(
+            verticalAlignment: TableCellVerticalAlignment.full,
+            children: [
+              _buildSpanCell(rowSpan: 2,  color: PdfColors.blue),
+              _buildSpanCell(rowSpan: 2,  color: PdfColors.red),
+              Container(color: PdfColors.green),
+            ],
+          ),
+          TableRow(
+            verticalAlignment: TableCellVerticalAlignment.full,
+            children: [
+              Container(color: PdfColors.blue),
+            ],
+          ),
         ],
         border: TableBorder.all(),
         columnWidths: <int, TableColumnWidth>{
