@@ -20,18 +20,20 @@ import 'point.dart';
 
 @immutable
 class PdfRect {
-  const PdfRect(this.x, this.y, this.width, this.height);
+  const PdfRect(this.x, this.y, this.width, this.height, [this.minWidth]);
 
-  factory PdfRect.fromLTRB(
-      double left, double top, double right, double bottom) {
-    return PdfRect(left, top, right - left, bottom - top);
+  factory PdfRect.fromLTRB(double left, double top, double right, double bottom,
+      [double? minWidth]) {
+    return PdfRect(left, top, right - left, bottom - top, minWidth);
   }
 
-  factory PdfRect.fromPoints(PdfPoint offset, PdfPoint size) {
-    return PdfRect(offset.x, offset.y, size.x, size.y);
+  factory PdfRect.fromPoints(PdfPoint offset, PdfPoint size,
+      [double? minWidth]) {
+    return PdfRect(offset.x, offset.y, size.x, size.y, minWidth);
   }
 
   final double x, y, width, height;
+  final double? minWidth;
 
   static const PdfRect zero = PdfRect(0, 0, 0, 0);
 
@@ -70,9 +72,9 @@ class PdfRect {
   PdfPoint get bottomRight => PdfPoint(right, top);
 
   /// Returns a new rectangle with edges moved outwards by the given delta.
-  PdfRect inflate(double delta) {
+  PdfRect inflate(double delta, [double? minWidth]) {
     return PdfRect.fromLTRB(
-        left - delta, top - delta, right + delta, bottom + delta);
+        left - delta, top - delta, right + delta, bottom + delta, minWidth);
   }
 
   /// Returns a new rectangle with edges moved inwards by the given delta.
@@ -83,12 +85,14 @@ class PdfRect {
     double? y,
     double? width,
     double? height,
+    double? minWidth,
   }) {
     return PdfRect(
       x ?? this.x,
       y ?? this.y,
       width ?? this.width,
       height ?? this.height,
+      minWidth ?? this.minWidth,
     );
   }
 }
