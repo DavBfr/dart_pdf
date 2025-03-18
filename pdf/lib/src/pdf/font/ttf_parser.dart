@@ -25,6 +25,8 @@ import 'package:meta/meta.dart';
 import '../options.dart';
 import 'bidi_utils.dart' as bidi;
 import 'font_metrics.dart';
+import 'gdef_parser.dart';
+import 'gsub_parser.dart';
 
 enum TtfParserName {
   copyright,
@@ -153,6 +155,17 @@ class TtfParser {
         tableOffsets.containsKey(cbdt_table)) {
       _parseBitmaps();
     }
+
+    if (tableOffsets.containsKey(gsub_table)) {
+      _parseGsub();
+    }
+    if (tableOffsets.containsKey(gpos_table)) {
+      _parseGpos();
+    }
+
+    if (tableOffsets.containsKey(gdef_table)) {
+      _parseGdef();
+    }
   }
 
   static const String head_table = 'head';
@@ -167,6 +180,9 @@ class TtfParser {
   static const String cbdt_table = 'CBDT';
   static const String post_table = 'post';
   static const String os_2_table = 'OS/2';
+  static const String gsub_table = 'GSUB';
+  static const String gpos_table = 'GPOS';
+  static const String gdef_table = 'GDEF';
 
   final ByteData bytes;
   final tableOffsets = <String, int>{};
@@ -177,6 +193,8 @@ class TtfParser {
   final glyphSizes = <int>[];
   final glyphInfoMap = <int, PdfFontMetrics>{};
   final bitmapOffsets = <int, TtfBitmapInfo>{};
+  GsubTableParser? gsub;
+  GDEFParser? gdef;
 
   int get unitsPerEm => bytes.getUint16(tableOffsets[head_table]! + 18);
 
@@ -647,4 +665,16 @@ class TtfParser {
 
   TtfBitmapInfo? getBitmap(int charcode) =>
       bitmapOffsets[charToGlyphIndexMap[charcode]];
+
+  void _parseGsub() {
+    final int basePosition = tableOffsets[gsub_table]!;
+    gsub = GsubTableParser(data: bytes, startPosition: basePosition);
+  }
+
+  void _parseGpos() {}
+
+  void _parseGdef() {
+    final int basePosition = tableOffsets[gdef_table]!;
+    gdef = GDEFParser(data: bytes, startPosition: basePosition);
+  }
 }

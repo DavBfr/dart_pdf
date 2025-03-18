@@ -21,6 +21,7 @@ import '../document.dart';
 import '../font/arabic.dart' as arabic;
 import '../font/bidi_utils.dart' as bidi;
 import '../font/font_metrics.dart';
+import '../font/indic_shaper.dart';
 import '../font/ttf_parser.dart';
 import '../font/ttf_writer.dart';
 import '../format/array.dart';
@@ -73,8 +74,9 @@ class PdfTtfFont extends PdfFont {
   int get unitsPerEm => font.unitsPerEm;
 
   @override
-  PdfFontMetrics glyphMetrics(int charCode) {
-    final g = font.charToGlyphIndexMap[charCode];
+  PdfFontMetrics glyphMetrics(int charCode, [bool? isGlyphIndex]) {
+    final g =
+        isGlyphIndex == true ? charCode : font.charToGlyphIndexMap[charCode];
 
     if (g == null) {
       return PdfFontMetrics.zero;
@@ -150,7 +152,8 @@ class PdfTtfFont extends PdfFont {
     charMax = unicodeCMap.cmap.length - 1;
     for (var i = charMin; i <= charMax; i++) {
       widthsObject.params.add(PdfNum(
-          (glyphMetrics(unicodeCMap.cmap[i]).advanceWidth * 1000.0).toInt()));
+          (glyphMetrics(unicodeCMap.cmap[i], true).advanceWidth * 1000.0)
+              .toInt()));
     }
   }
 
@@ -171,7 +174,9 @@ class PdfTtfFont extends PdfFont {
       super.putText(stream, text);
     }
 
-    final runes = text.runes;
+    var charIndexes = getCharIndexes(text.runes);
+    charIndexes = indicShaper(charIndexes, font);
+    final runes = charIndexes;
 
     stream.putByte(0x3c);
     for (final rune in runes) {
@@ -203,5 +208,9 @@ class PdfTtfFont extends PdfFont {
   @override
   bool isRuneSupported(int charCode) {
     return font.charToGlyphIndexMap.containsKey(charCode);
+  }
+
+  getCharIndexes(Runes chars) {
+    return chars.map((char) => font.charToGlyphIndexMap[char] ?? 0).toList();
   }
 }
