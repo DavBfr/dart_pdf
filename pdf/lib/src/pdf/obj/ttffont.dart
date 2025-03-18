@@ -21,7 +21,7 @@ import '../document.dart';
 import '../font/arabic.dart' as arabic;
 import '../font/bidi_utils.dart' as bidi;
 import '../font/font_metrics.dart';
-import '../font/indic-shaper.dart';
+import '../font/indic_shaper.dart';
 import '../font/ttf_parser.dart';
 import '../font/ttf_writer.dart';
 import '../format/array.dart';

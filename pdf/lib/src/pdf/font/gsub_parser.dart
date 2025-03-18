@@ -71,10 +71,10 @@ class ScriptRecord {
 
 class ScriptTable {
   ScriptTable(
-      this.defaultLangSysOffset,
-      this.langSysRecords,
-      this.defaultLangSys,
-      );
+    this.defaultLangSysOffset,
+    this.langSysRecords,
+    this.defaultLangSys,
+  );
   final int defaultLangSysOffset;
   final List<LangSysRecord> langSysRecords;
   final LangSysTable? defaultLangSys;
@@ -215,19 +215,21 @@ class FeatureList {
 // Lookups
 class Lookup {
   Lookup(
-      this.lookupType,
-      this.flags,
-      this.subTableCount,
-      this.subTables,
-      this.markFilteringSet,
-      this.pointer,
-      );
+    this.lookupType,
+    this.flags,
+    this.subTableCount,
+    this.subTables,
+    this.markFilteringSet,
+    this.pointer,
+  );
   final int lookupType;
   final LookupFlag flags;
   final int subTableCount;
   final List<dynamic> subTables;
   final int? markFilteringSet;
   final int pointer;
+  String feature = '';
+  int index = -1;
 
   static Lookup parse(ByteData data, int offset) {
     int pointer = 0;
@@ -273,15 +275,14 @@ class LookupFlag {
   final Map<String, bool> flags;
 
   static LookupFlag parse(ByteData data, int offset) {
-    int markAttachmentType = data.getUint8(offset);
-    int bitFlag = data.getUint8(offset + 1);
-    String bitString = bitFlag.toRadixString(2).padLeft(8, '0');
+    int markAttachmentType = data.getUint8(offset + 1);
+    int bitFlag = data.getUint8(offset + 2);
+    String bitString = bitFlag.toRadixString(2).padLeft(4, '0');
     Map<String, bool> flags = {
-      'rightToLeft': bitString[0] == '1',
-      'ignoreBaseGlyphs': bitString[1] == '1',
-      'ignoreLigatures': bitString[2] == '1',
-      'ignoreMarks': bitString[3] == '1',
-      'useMarkFilteringSet': bitString[4] == '1',
+      'rightToLeft': bitString[3] == '1',
+      'ignoreBaseGlyphs': bitString[2] == '1',
+      'ignoreLigatures': bitString[1] == '1',
+      'ignoreMarks': bitString[0] == '1',
     };
     return LookupFlag(markAttachmentType, bitFlag, flags);
   }
@@ -289,14 +290,14 @@ class LookupFlag {
 
 class SingleSubstitution {
   SingleSubstitution(
-      this.substFormat,
-      this.coverageOffset,
-      this.coverage,
-      this.deltaGlyphID,
-      this.glyphCount,
-      this.substitute,
-      this.pointer,
-      );
+    this.substFormat,
+    this.coverageOffset,
+    this.coverage,
+    this.deltaGlyphID,
+    this.glyphCount,
+    this.substitute,
+    this.pointer,
+  );
   final int substFormat;
   final int coverageOffset;
   final Coverage coverage;
@@ -393,13 +394,13 @@ class AlternateSubstitutionSubTable {
 
 class LigatureSubstitution {
   LigatureSubstitution(
-      this.substFormat,
-      this.coverageOffset,
-      this.coverage,
-      this.ligatureSetCount,
-      this.ligatureSet,
-      this.pointer,
-      );
+    this.substFormat,
+    this.coverageOffset,
+    this.coverage,
+    this.ligatureSetCount,
+    this.ligatureSet,
+    this.pointer,
+  );
   final int substFormat;
   final int coverageOffset;
   final Coverage coverage;
@@ -495,13 +496,13 @@ class Ligature {
 
 class Coverage {
   Coverage(
-      this.format,
-      this.glyphCount,
-      this.glyphs,
-      this.rangeCount,
-      this.rangeRecords,
-      this.pointer,
-      );
+    this.format,
+    this.glyphCount,
+    this.glyphs,
+    this.rangeCount,
+    this.rangeRecords,
+    this.pointer,
+  );
   final int format;
   final int? glyphCount;
   final List<int>? glyphs;
@@ -614,25 +615,25 @@ class ContextualSubstitutionSubTable {
 
 class ChainingContext {
   ChainingContext(
-      this.substFormat,
-      this.coverageOffset,
-      this.coverage,
-      this.chainCount,
-      this.chainRuleSets,
-      this.backtrackClassDef,
-      this.inputClassDef,
-      this.lookaheadClassDef,
-      this.chainClassSet,
-      this.backtrackGlyphCount,
-      this.backtrackCoverage,
-      this.inputGlyphCount,
-      this.inputCoverage,
-      this.lookaheadGlyphCount,
-      this.lookaheadCoverage,
-      this.lookupCount,
-      this.lookupRecords,
-      this.pointer,
-      );
+    this.substFormat,
+    this.coverageOffset,
+    this.coverage,
+    this.chainCount,
+    this.chainRuleSets,
+    this.backtrackClassDef,
+    this.inputClassDef,
+    this.lookaheadClassDef,
+    this.chainClassSet,
+    this.backtrackGlyphCount,
+    this.backtrackCoverage,
+    this.inputGlyphCount,
+    this.inputCoverage,
+    this.lookaheadGlyphCount,
+    this.lookaheadCoverage,
+    this.lookupCount,
+    this.lookupRecords,
+    this.pointer,
+  );
   final int substFormat;
   final int? coverageOffset;
   final Coverage? coverage;
@@ -824,16 +825,16 @@ class ChainRuleSets {
 
 class ChainRule {
   ChainRule(
-      this.backtrackGlyphCount,
-      this.backtrack,
-      this.inputGlyphCount,
-      this.input,
-      this.lookaheadGlyphCount,
-      this.lookahead,
-      this.lookupCount,
-      this.lookupRecords,
-      this.pointer,
-      );
+    this.backtrackGlyphCount,
+    this.backtrack,
+    this.inputGlyphCount,
+    this.input,
+    this.lookaheadGlyphCount,
+    this.lookahead,
+    this.lookupCount,
+    this.lookupRecords,
+    this.pointer,
+  );
   final int backtrackGlyphCount;
   final List<int> backtrack;
   final int inputGlyphCount;
@@ -927,14 +928,14 @@ class LookupRecord {
 
 class ClassDef {
   ClassDef(
-      this.classDefFormat,
-      this.startGlyph,
-      this.glyphCount,
-      this.classValueArray,
-      this.classRangeCount,
-      this.classRangeRecord,
-      this.pointer,
-      );
+    this.classDefFormat,
+    this.startGlyph,
+    this.glyphCount,
+    this.classValueArray,
+    this.classRangeCount,
+    this.classRangeRecord,
+    this.pointer,
+  );
   final int classDefFormat;
   final int? startGlyph;
   final int? glyphCount;
@@ -1060,7 +1061,7 @@ class ReverseChainedContextualSingleSubstitutionSubTable {
     }
 
     final lookaheadGlyphCount =
-    data.getUint16(offset + 6 + (backtrackGlyphCount * 2));
+        data.getUint16(offset + 6 + (backtrackGlyphCount * 2));
     List<int> lookaheadCoverageOffsets = [];
     for (int i = 0; i < lookaheadGlyphCount; i++) {
       lookaheadCoverageOffsets.add(
@@ -1102,31 +1103,31 @@ class SubTable {
         case 1:
           substituteTable = SingleSubstitution.parse(data, offset);
           break;
-      // case 2:
-      //   substituteTable = MultipleSubstitutionSubTable.parse(data, offset);
-      //   break;
-      // case 3:
-      //   substituteTable = AlternateSubstitutionSubTable.parse(data, offset);
-      //   break;
+        // case 2:
+        //   substituteTable = MultipleSubstitutionSubTable.parse(data, offset);
+        //   break;
+        // case 3:
+        //   substituteTable = AlternateSubstitutionSubTable.parse(data, offset);
+        //   break;
         case 4:
           substituteTable = LigatureSubstitution.parse(data, offset);
           break;
-      // case 5:
-      //   substituteTable = ContextualSubstitutionSubTable.parse(data, offset);
-      //   break;
+        // case 5:
+        //   substituteTable = ContextualSubstitutionSubTable.parse(data, offset);
+        //   break;
         case 6:
           substituteTable = ChainingContext.parse(data, offset);
           break;
-      // case 7:
-      //   substituteTable = ExtensionSubstitutionSubTable.parse(data, offset);
-      //   break;
-      // case 8:
-      //   substituteTable =
-      //       ReverseChainedContextualSingleSubstitutionSubTable.parse(
-      //           data, offset);
-      //   break;
-      // default:
-      // throw UnsupportedError("Unsupported lookupType: $lookupType");
+        // case 7:
+        //   substituteTable = ExtensionSubstitutionSubTable.parse(data, offset);
+        //   break;
+        // case 8:
+        //   substituteTable =
+        //       ReverseChainedContextualSingleSubstitutionSubTable.parse(
+        //           data, offset);
+        //   break;
+        // default:
+        // throw UnsupportedError("Unsupported lookupType: $lookupType");
       }
     } catch (e) {
       print(e);
