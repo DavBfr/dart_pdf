@@ -147,9 +147,12 @@ class SvgImage extends Widget {
         context.page.pageFormat.width,
         context.page.pageFormat.height,
       ),
+<<<<<<< HEAD
       fonts,
       defaultFont,
       fallbackFonts,
+=======
+>>>>>>> 9f54667c6a19e3579495c4a5c185d0642dd6c6fb
       customFontLookup: customFontLookup,
     );
     painter.paint();

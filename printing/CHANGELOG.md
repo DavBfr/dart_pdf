@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.14.2
+
+- Fix wasm dart.pub warning
+
 ## 5.14.0
 
 - Replace WebView with WKWebView on macOS

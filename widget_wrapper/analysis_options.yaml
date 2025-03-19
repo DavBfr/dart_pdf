@@ -21,7 +21,6 @@ linter:
     - flutter_style_todos
     - no_adjacent_strings_in_list
     - omit_local_variable_types
-    - package_api_docs
     - prefer_asserts_in_initializer_lists
     - prefer_final_locals
     - prefer_foreach

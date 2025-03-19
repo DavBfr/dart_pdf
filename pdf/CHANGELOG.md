@@ -1,5 +1,13 @@
 # Changelog
 
+# 1.11.1-napkin
+
+- Pull in changes from 3.11.3
+
+## 3.11.3
+
+- Fix CMYK
+
 # 1.11.0-napkin
 
 - Pull in changes from 3.11.2
