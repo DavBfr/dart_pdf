@@ -437,6 +437,15 @@ class TtfParser {
 
     final start = tableOffsets[glyf_table]! + glyphOffsets[index];
 
+    // https://gist.github.com/smhanov/f009a02c00eb27d99479a1e37c1b3354
+    // apply check on line 757
+    // return the same TtfGlyphInfo object used when char is 32
+    // ie lib/src/pdf/font/ttf_writer.dart line 77
+    if (start >= tableSize[glyf_table]! + tableOffsets[glyf_table]! ||
+        start == 0) {
+      return TtfGlyphInfo(index, Uint8List(0), const <int>[]);
+    }
+
     final numberOfContours = bytes.getInt16(start);
     assert(numberOfContours >= -1);
 
