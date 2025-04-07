@@ -98,8 +98,6 @@ class PdfCatalog extends PdfObject<PdfDict> {
     }
 
     if (attached != null && attached!.isNotEmpty) {
-      //params['/Names'] = attached!.catalogNames();
-      names ??= PdfNames(pdfDocument);
       names!.params.merge(attached!.catalogNames());
       params['/AF'] = attached!.catalogAF();
     }
