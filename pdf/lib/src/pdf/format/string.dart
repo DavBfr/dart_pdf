@@ -39,7 +39,7 @@ class PdfString extends PdfDataType {
   }
 
   factory PdfString.fromStream(
-    PdfStream value, {
+    PdfStreamBuffer value, {
     PdfStringFormat format = PdfStringFormat.literal,
     bool encrypted = true,
   }) {

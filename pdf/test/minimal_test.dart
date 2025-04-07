@@ -70,7 +70,7 @@ void main() {
           '/Pages': pages.ref(),
         }));
 
-    final os = PdfStream();
+    final os = PdfStreamBuffer();
 
     final xref = PdfXrefTable();
     xref.objects.addAll([
