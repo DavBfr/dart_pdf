@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add support for table spans [gustl22]
+
 ## 3.11.3
 
 - Fix CMYK
