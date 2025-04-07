@@ -121,14 +121,14 @@ class Header extends StatelessWidget {
       return container;
     }
 
-    return Outline(
+    return DelayedWidget(build: (_) => Outline(
       name: text.hashCode.toString(),
       title: title!,
       child: container,
       level: level,
       color: outlineColor,
       style: outlineStyle,
-    );
+    ));
   }
 }
 
