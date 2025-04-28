@@ -41,33 +41,38 @@ class PdfColor {
   /// * RRGGBB
   /// * RGB
   factory PdfColor.fromHex(String color) {
-    if (color.startsWith('#')) {
-      color = color.substring(1);
-    }
+    try {
+      if (color.startsWith('#')) {
+        color = color.substring(1);
+      }
 
-    double red;
-    double green;
-    double blue;
-    var alpha = 1.0;
+      double red;
+      double green;
+      double blue;
+      var alpha = 1.0;
 
-    if (color.length == 3) {
-      red = int.parse(color.substring(0, 1) * 2, radix: 16) / 255;
-      green = int.parse(color.substring(1, 2) * 2, radix: 16) / 255;
-      blue = int.parse(color.substring(2, 3) * 2, radix: 16) / 255;
+      if (color.length == 3) {
+        red = int.parse(color.substring(0, 1) * 2, radix: 16) / 255;
+        green = int.parse(color.substring(1, 2) * 2, radix: 16) / 255;
+        blue = int.parse(color.substring(2, 3) * 2, radix: 16) / 255;
+        return PdfColor(red, green, blue, alpha);
+      }
+
+      assert(color.length == 3 || color.length == 6 || color.length == 8);
+
+      red = int.parse(color.substring(0, 2), radix: 16) / 255;
+      green = int.parse(color.substring(2, 4), radix: 16) / 255;
+      blue = int.parse(color.substring(4, 6), radix: 16) / 255;
+
+      if (color.length == 8) {
+        alpha = int.parse(color.substring(6, 8), radix: 16) / 255;
+      }
+
       return PdfColor(red, green, blue, alpha);
+    } catch (e) {
+      print('[pdf][PdfColor.fromHex] Cannot parse color `$color`: $e');
+      return const PdfColor(0, 0, 0, 1);
     }
-
-    assert(color.length == 3 || color.length == 6 || color.length == 8);
-
-    red = int.parse(color.substring(0, 2), radix: 16) / 255;
-    green = int.parse(color.substring(2, 4), radix: 16) / 255;
-    blue = int.parse(color.substring(4, 6), radix: 16) / 255;
-
-    if (color.length == 8) {
-      alpha = int.parse(color.substring(6, 8), radix: 16) / 255;
-    }
-
-    return PdfColor(red, green, blue, alpha);
   }
 
   /// Load an RGB color from a RYB color

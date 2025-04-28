@@ -36,6 +36,7 @@ class PdfaAttachedFiles {
       pdfDocument,
       _files,
     );
+    pdfDocument.pdfNames;
     pdfDocument.catalog.attached = this;
   }
 

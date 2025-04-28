@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.11.2-napkin
+
+- Handle crashes from PdfColor.fromHex
+
 # 1.11.1-napkin
 
 - Pull in changes from 3.11.3
