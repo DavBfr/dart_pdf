@@ -449,6 +449,11 @@ class TtfParser {
 
     final start = tableOffsets[glyf_table]! + glyphOffsets[index];
 
+    if (start >= tableSize[glyf_table]! + tableOffsets[glyf_table]! ||
+        start == 0) {
+      return TtfGlyphInfo(index, Uint8List(0), const <int>[]);
+    }
+
     final numberOfContours = bytes.getInt16(start);
     assert(numberOfContours >= -1);
 
