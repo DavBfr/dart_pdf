@@ -35,7 +35,10 @@ dependencies:
     git:
       url: https://github.com/hbatalhaStch/dart_pdf.git
       path: pdf
-  pdf_widget_wrapper: '>=1.0.4 <2.0.0'
+  pdf_widget_wrapper: 
+    git:
+      url: https://github.com/hbatalhaStch/dart_pdf.git
+      path: pdf_widget_wrapper
   plugin_platform_interface: ^2.1.0
   web: ^1.0.0
 
