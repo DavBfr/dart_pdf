@@ -25,8 +25,7 @@ import 'theme.dart';
 import 'widget.dart';
 
 typedef OnCell = Widget? Function(int index, dynamic data, int rowNum);
-typedef OnCellTextStyle = TextStyle? Function(
-    int index, dynamic data, int rowNum);
+typedef OnCellTextStyle = TextStyle? Function(int index, dynamic data, int rowNum);
 
 mixin TableHelper {
   static TextAlign _textAlign(Alignment align) {
@@ -39,45 +38,45 @@ mixin TableHelper {
     }
   }
 
-  static Table fromTextArray({
-    Context? context,
-    required List<List<dynamic>> data,
-    EdgeInsetsGeometry cellPadding = const EdgeInsets.all(5),
-    double cellHeight = 0,
-    AlignmentGeometry cellAlignment = Alignment.topLeft,
-    Map<int, AlignmentGeometry>? cellAlignments,
-    TextStyle? cellStyle,
-    TextStyle? oddCellStyle,
-    OnCellFormat? cellFormat,
-    OnCellDecoration? cellDecoration,
-    int headerCount = 1,
-    List<dynamic>? headers,
-    EdgeInsetsGeometry? headerPadding,
-    double? headerHeight,
-    AlignmentGeometry headerAlignment = Alignment.center,
-    Map<int, AlignmentGeometry>? headerAlignments,
-    TextStyle? headerStyle,
-    OnCellFormat? headerFormat,
-    TableBorder? border = const TableBorder(
-      left: BorderSide(),
-      right: BorderSide(),
-      top: BorderSide(),
-      bottom: BorderSide(),
-      horizontalInside: BorderSide(),
-      verticalInside: BorderSide(),
-    ),
-    Map<int, TableColumnWidth>? columnWidths,
-    TableColumnWidth defaultColumnWidth = const IntrinsicColumnWidth(),
-    TableWidth tableWidth = TableWidth.max,
-    BoxDecoration? headerDecoration,
-    BoxDecoration? headerCellDecoration,
-    BoxDecoration? rowDecoration,
-    BoxDecoration? oddRowDecoration,
-    TextDirection? headerDirection,
-    TextDirection? tableDirection,
-    OnCell? cellBuilder,
-    OnCellTextStyle? textStyleBuilder,
-  }) {
+  static Table fromTextArray(
+      {Context? context,
+      required List<List<dynamic>> data,
+      EdgeInsetsGeometry cellPadding = const EdgeInsets.all(5),
+      double cellHeight = 0,
+      AlignmentGeometry cellAlignment = Alignment.topLeft,
+      Map<int, AlignmentGeometry>? cellAlignments,
+      TextStyle? cellStyle,
+      TextStyle? oddCellStyle,
+      OnCellFormat? cellFormat,
+      OnCellDecoration? cellDecoration,
+      int headerCount = 1,
+      List<dynamic>? headers,
+      EdgeInsetsGeometry? headerPadding,
+      double? headerHeight,
+      AlignmentGeometry headerAlignment = Alignment.center,
+      Map<int, AlignmentGeometry>? headerAlignments,
+      TextStyle? headerStyle,
+      OnCellFormat? headerFormat,
+      TableBorder? border = const TableBorder(
+        left: BorderSide(),
+        right: BorderSide(),
+        top: BorderSide(),
+        bottom: BorderSide(),
+        horizontalInside: BorderSide(),
+        verticalInside: BorderSide(),
+      ),
+      Map<int, TableColumnWidth>? columnWidths,
+      TableColumnWidth defaultColumnWidth = const IntrinsicColumnWidth(),
+      TableWidth tableWidth = TableWidth.max,
+      BoxDecoration? headerDecoration,
+      BoxDecoration? headerCellDecoration,
+      BoxDecoration? rowDecoration,
+      BoxDecoration? oddRowDecoration,
+      TextDirection? headerDirection,
+      TextDirection? tableDirection,
+      OnCell? cellBuilder,
+      OnCellTextStyle? textStyleBuilder,
+      void Function({required int pageNumber, required int rowCount})? onPageBreak}) {
     assert(headerCount >= 0);
 
     if (context != null) {
@@ -109,9 +108,7 @@ mixin TableHelper {
             child: cell is Widget
                 ? cell
                 : Text(
-                    headerFormat == null
-                        ? cell.toString()
-                        : headerFormat(tableRow.length, cell),
+                    headerFormat == null ? cell.toString() : headerFormat(tableRow.length, cell),
                     style: headerStyle,
                     textDirection: headerDirection,
                   ),
@@ -126,8 +123,7 @@ mixin TableHelper {
       rowNum++;
     }
 
-    final textDirection =
-        context == null ? TextDirection.ltr : Directionality.of(context);
+    final textDirection = context == null ? TextDirection.ltr : Directionality.of(context);
     for (final row in data) {
       final tableRow = <Widget>[];
       final isOdd = (rowNum - headerCount) % 2 != 0;
@@ -144,9 +140,7 @@ mixin TableHelper {
               child: cell is Widget
                   ? cell
                   : Text(
-                      headerFormat == null
-                          ? cell.toString()
-                          : headerFormat(tableRow.length, cell),
+                      headerFormat == null ? cell.toString() : headerFormat(tableRow.length, cell),
                       style: headerStyle,
                       textAlign: textAlign,
                       textDirection: headerDirection,
@@ -162,19 +156,14 @@ mixin TableHelper {
               alignment: align,
               padding: cellPadding,
               constraints: BoxConstraints(minHeight: cellHeight),
-              decoration: cellDecoration == null
-                  ? null
-                  : cellDecoration(tableRow.length, cell, rowNum),
+              decoration: cellDecoration == null ? null : cellDecoration(tableRow.length, cell, rowNum),
               child: cell is Widget
                   ? cell
                   : cellBuilder?.call(tableRow.length, cell, rowNum) ??
                       Text(
-                        cellFormat == null
-                            ? cell.toString()
-                            : cellFormat(tableRow.length, cell),
-                        style: textStyleBuilder?.call(
-                                tableRow.length, cell, rowNum) ??
-                            (isOdd ? oddCellStyle : cellStyle),
+                        cellFormat == null ? cell.toString() : cellFormat(tableRow.length, cell),
+                        style:
+                            textStyleBuilder?.call(tableRow.length, cell, rowNum) ?? (isOdd ? oddCellStyle : cellStyle),
                         textAlign: _textAlign(align.resolve(textDirection)),
                         textDirection: tableDirection,
                       ),
@@ -202,6 +191,7 @@ mixin TableHelper {
       columnWidths: columnWidths,
       defaultColumnWidth: defaultColumnWidth,
       defaultVerticalAlignment: TableCellVerticalAlignment.full,
+      onPageBreak: onPageBreak,
     );
   }
 }
