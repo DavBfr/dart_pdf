@@ -218,7 +218,10 @@ class PdfDocument {
   bool get hasGraphicStates => _graphicStates != null;
 
   /// This writes the document to an OutputStream.
-  Future<void> _write(PdfStream os) async {
+  Future<void> _write(
+    PdfStream os, {
+    bool enableEventLoopBalancing = false,
+  }) async {
     PdfSignature? signature;
 
     final xref = PdfXrefTable(lastObjectId: _objser);
@@ -244,21 +247,35 @@ class PdfDocument {
       xref.params['/Prev'] = PdfNum(prev!.xrefOffset);
     }
 
-    xref.output(catalog, os);
+    if (enableEventLoopBalancing) {
+      await xref.outputAsync(catalog, os);
+    } else {
+      xref.output(catalog, os);
+    }
 
     if (signature != null) {
       await signature.writeSignature(os);
     }
   }
 
-  /// Generate the PDF document as a memory file
-  Future<Uint8List> save() async {
+  /// Generates the PDF document as a memory file.
+  ///
+  /// Runs in a background isolate when supported (e.g., on Dart VM),
+  /// or on the main isolate when isolate support is unavailable
+  /// (e.g., on the web).
+  ///
+  /// If [enableEventLoopBalancing] is `true`, the method yields periodically
+  /// during processing to keep the event loop responsive. This helps reduce
+  /// blocking when the operation runs on the main isolate.
+  ///
+  /// Returns a [Uint8List] containing the document data.
+  Future<Uint8List> save({bool enableEventLoopBalancing = false}) async {
     return pdfCompute(() async {
       final os = PdfStream();
       if (prev != null) {
         os.putBytes(prev!.bytes);
       }
-      await _write(os);
+      await _write(os, enableEventLoopBalancing: enableEventLoopBalancing);
       return os.output();
     });
   }
