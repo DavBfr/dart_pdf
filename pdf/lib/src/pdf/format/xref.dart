@@ -269,7 +269,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
       return true;
     }());
 
-    // the reference to the xref object
+    // The reference to the xref object.
     s.putString('startxref\n$xrefOffset\n%%EOF\n');
 
     balancer.stop();
