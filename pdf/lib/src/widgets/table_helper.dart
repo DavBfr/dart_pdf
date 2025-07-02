@@ -25,8 +25,8 @@ import 'theme.dart';
 import 'widget.dart';
 
 typedef OnCell = Widget? Function(int index, dynamic data, int rowNum);
-typedef OnCellTextStyle = TextStyle? Function(
-    int index, dynamic data, int rowNum);
+typedef OnCellTextStyle =
+    TextStyle? Function(int index, dynamic data, int rowNum);
 
 mixin TableHelper {
   static TextAlign _textAlign(Alignment align) {
@@ -53,6 +53,7 @@ mixin TableHelper {
     int headerCount = 1,
     List<dynamic>? headers,
     EdgeInsetsGeometry? headerPadding,
+    EdgeInsetsGeometry? headerMargin,
     double? headerHeight,
     AlignmentGeometry headerAlignment = Alignment.center,
     Map<int, AlignmentGeometry>? headerAlignments,
@@ -104,6 +105,7 @@ mixin TableHelper {
           Container(
             alignment: headerAlignments[tableRow.length] ?? headerAlignment,
             padding: headerPadding,
+            margin: headerMargin,
             decoration: headerCellDecoration,
             constraints: BoxConstraints(minHeight: headerHeight),
             child: cell is Widget
@@ -118,16 +120,19 @@ mixin TableHelper {
           ),
         );
       }
-      rows.add(TableRow(
-        children: tableRow,
-        repeat: true,
-        decoration: headerDecoration,
-      ));
+      rows.add(
+        TableRow(
+          children: tableRow,
+          repeat: true,
+          decoration: headerDecoration,
+        ),
+      );
       rowNum++;
     }
 
-    final textDirection =
-        context == null ? TextDirection.ltr : Directionality.of(context);
+    final textDirection = context == null
+        ? TextDirection.ltr
+        : Directionality.of(context);
     for (final row in data) {
       final tableRow = <Widget>[];
       final isOdd = (rowNum - headerCount) % 2 != 0;
@@ -168,16 +173,20 @@ mixin TableHelper {
               child: cell is Widget
                   ? cell
                   : cellBuilder?.call(tableRow.length, cell, rowNum) ??
-                      Text(
-                        cellFormat == null
-                            ? cell.toString()
-                            : cellFormat(tableRow.length, cell),
-                        style: textStyleBuilder?.call(
-                                tableRow.length, cell, rowNum) ??
-                            (isOdd ? oddCellStyle : cellStyle),
-                        textAlign: _textAlign(align.resolve(textDirection)),
-                        textDirection: tableDirection,
-                      ),
+                        Text(
+                          cellFormat == null
+                              ? cell.toString()
+                              : cellFormat(tableRow.length, cell),
+                          style:
+                              textStyleBuilder?.call(
+                                tableRow.length,
+                                cell,
+                                rowNum,
+                              ) ??
+                              (isOdd ? oddCellStyle : cellStyle),
+                          textAlign: _textAlign(align.resolve(textDirection)),
+                          textDirection: tableDirection,
+                        ),
             ),
           );
         }
@@ -188,11 +197,13 @@ mixin TableHelper {
         decoration = headerDecoration;
       }
 
-      rows.add(TableRow(
-        children: tableRow,
-        repeat: rowNum < headerCount,
-        decoration: decoration,
-      ));
+      rows.add(
+        TableRow(
+          children: tableRow,
+          repeat: rowNum < headerCount,
+          decoration: decoration,
+        ),
+      );
       rowNum++;
     }
     return Table(
