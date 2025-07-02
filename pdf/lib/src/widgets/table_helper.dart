@@ -166,6 +166,7 @@ mixin TableHelper {
             Container(
               alignment: align,
               padding: cellPadding,
+              margin: headerMargin,
               constraints: BoxConstraints(minHeight: cellHeight),
               decoration: cellDecoration == null
                   ? null
