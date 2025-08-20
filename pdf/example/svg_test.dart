@@ -4,6 +4,7 @@ import 'package:bidi/bidi.dart' as bidi;
 import '../lib/widgets.dart' as pw;
 import '../lib/pdf.dart';
 
+
 void main() async {
   final svgImage = pw.SvgImage(svg: svgRaw, fonts: {
     'roboto': [pw.Font.ttf(File(
@@ -29,11 +30,11 @@ void main() async {
         .asByteData()),
     fallbackFonts: [
     pw.Font.ttf(File(
-            '/Users/arnaudbrejeon/secondLayer/src/secondlayer/napkin-web-client/web/fonts/Noto_Sans_JP/static/NotoSansJP-Regular.ttf')
+            '/Users/arnaudbrejeon/secondLayer/src/secondlayer/napkin-web-client/web/fonts/Noto_Sans_Kannada/static/NotoSansKannada-Regular.ttf')
         .readAsBytesSync()
         .buffer
         .asByteData()),pw.Font.ttf(File(
-                '/Users/arnaudbrejeon/secondLayer/src/secondlayer/napkin-web-client/web/fonts/Noto_Sans_JP/static/NotoSansJP-Bold.ttf')
+                '/Users/arnaudbrejeon/secondLayer/src/secondlayer/napkin-web-client/web/fonts/Noto_Sans_Kannada/static/NotoSansKannada-Bold.ttf')
             .readAsBytesSync()
             .buffer
             .asByteData()),
@@ -46,6 +47,8 @@ void main() async {
           pw.Positioned(left: 100, top: 300, child: svgImage)));
 
   File('example.pdf').writeAsBytesSync(await pdf.save());
+
+  // Shaping().dispose();
 }
 
 const svgRaw = '''
@@ -54,13 +57,13 @@ const svgRaw = '''
 		<g id="g-root-tx_1q5q08xr8c7in-fill" data-item-order="0" data-item-id="tx_1q5q08xr8c7in" data-item-class="Label Stroke" data-item-index="none" data-renderer-id="0" transform="translate(0, 68)">
 			<g id="tx_1q5q08xr8c7in-fill" stroke="none" fill="#484848">
     		 <text style="font: 30px 'Times new roman', serif; white-space: pre;">
-    			<tspan x="80" y="100" dominant-baseline="ideographic">Times new roman犬 è</tspan>
+    			<tspan x="80" y="100" dominant-baseline="ideographic"> ಇಲ್ಲ ಪಕ್ಕದಲ್ಲಿ ಹಾಂ ಬಳ ನೀವು ಹಾಂ </tspan>
     		</text>
      		 <text style="font: 30px 'Helvetica', serif; white-space: pre;">
-     			<tspan x="80" y="150" dominant-baseline="ideographic">Helvetica犬 è</tspan>
+     			<tspan x="80" y="150" dominant-baseline="ideographic">ABC DEF</tspan>
       		</text>
      		 <text style="font: 30px 'Courier', serif; white-space: pre;">
-     			<tspan x="80" y="200" dominant-baseline="ideographic">Courier犬 è</tspan>
+     			<tspan x="80" y="200" dominant-baseline="ideographic">HIJ</tspan>
       		</text>
 			</g>
 		</g>

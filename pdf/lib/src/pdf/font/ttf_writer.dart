@@ -69,26 +69,16 @@ class TtfWriter {
   }
 
   /// Write this list of glyphs
-  Uint8List withChars(TtfParser font, List<int> chars) {
+  Uint8List withChars(TtfParser font, List<int> glyphIndices) {
     final tables = <String, Uint8List>{};
     final tablesLength = <String, int>{};
 
     // Create the glyphs table
     final glyphsMap = <int, TtfGlyphInfo>{};
-    final charMap = <int, int>{};
     final overflow = <int>{};
     final compounds = <int, int>{};
 
-    for (final char in chars) {
-      if (char == 32) {
-        final glyph = TtfGlyphInfo(
-            ttf.charToGlyphIndexMap[char]!, Uint8List(0), const <int>[]);
-        glyphsMap[glyph.index] = glyph;
-        charMap[char] = glyph.index;
-        continue;
-      }
-
-      final glyphIndex = ttf.charToGlyphIndexMap[char] ?? 0;
+    for (final glyphIndex in glyphIndices) {
       if (glyphIndex >= ttf.glyphOffsets.length) {
         assert(() {
           print('Glyph $glyphIndex not in the font ${ttf.fontName}');
@@ -97,34 +87,33 @@ class TtfWriter {
         continue;
       }
 
-      void addGlyph(glyphIndex) {
+      void addGlyph(int glyphIndex) {
         try {
-          final glyph = ttf.readGlyph(glyphIndex).copy();
+          final glyphSize = font.glyphSizes[glyphIndex];
+          final glyph = glyphSize != 0
+              ? ttf.readGlyph(glyphIndex).copy()
+              : TtfGlyphInfo(glyphIndex, Uint8List(0), const <int>[]);
           for (final g in glyph.compounds) {
             compounds[g] = -1;
             overflow.add(g);
             addGlyph(g);
           }
-          glyphsMap[glyph.index] = glyph;
+          glyphsMap[glyphIndex] = glyph;
         } catch (e) {
           print('[pdf][TtfWriter.addGlyph] Error adding glyph $glyphIndex: $e');
         }
       }
 
-      charMap[char] = glyphIndex;
       addGlyph(glyphIndex);
     }
 
     final glyphsInfo = <TtfGlyphInfo>[];
 
-    for (final char in chars) {
-      final glyphsIndex = charMap[char];
-      if (glyphsIndex != null) {
-        final glyph = glyphsMap[glyphsIndex];
-        if (glyph != null || glyphsMap.values.isNotEmpty) {
-          glyphsInfo.add(glyphsMap[glyphsIndex] ?? glyphsMap.values.first);
-          glyphsMap.remove(glyphsIndex);
-        }
+    for (final glyphsIndex in glyphIndices) {
+      final glyph = glyphsMap[glyphsIndex];
+      if (glyph != null || glyphsMap.values.isNotEmpty) {
+        glyphsInfo.add(glyphsMap[glyphsIndex] ?? glyphsMap.values.first);
+        glyphsMap.remove(glyphsIndex);
       }
     }
 
@@ -271,7 +260,7 @@ class TtfWriter {
       cmapData.setUint32(20, 1); // Table language
       cmapData.setUint32(24, 1); // numGroups
       cmapData.setUint32(28, 32); // startCharCode
-      cmapData.setUint32(32, chars.length + 31); // endCharCode
+      cmapData.setUint32(32, glyphIndices.length + 31); // endCharCode
       cmapData.setUint32(36, 0); // startGlyphID
 
       tables[TtfParser.cmap_table] = cmap;

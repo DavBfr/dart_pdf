@@ -248,7 +248,8 @@ class FontSpan {
 List<FontSpan> _createFontSpans(
     String text, PdfFont primaryFont, List<PdfTtfFont> fallbackFonts,
     {required double fontSize, double? letterSpacing}) {
-  final runes = bidi.logicalToVisual(text);
+  // final runes = bidi.logicalToVisual(text);
+  final runes = text.runes.toList();
   final runesAndFonts = _groupRunes(runes, primaryFont, fallbackFonts);
   return runesAndFonts
       .map((raf) => FontSpan.fromRunesAndFont(raf,

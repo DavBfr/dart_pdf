@@ -17,6 +17,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import '../../shaping/shaping.dart';
 import '../document.dart';
 import '../font/arabic.dart' as arabic;
 import '../font/bidi_utils.dart' as bidi;
@@ -48,6 +49,8 @@ class PdfTtfFont extends PdfFont {
 
     // By default the font is not used
     _setInUse(false);
+
+    Shaping().addFont(this);
   }
 
   void _setInUse(bool s) {
@@ -91,15 +94,15 @@ class PdfTtfFont extends PdfFont {
       return PdfFontMetrics.zero;
     }
 
-    if (useBidi && bidi.isArabicDiacriticValue(charCode)) {
-      final metric = font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
-      return metric.copyWith(advanceWidth: 0);
-    }
+    // if (useBidi && bidi.isArabicDiacriticValue(charCode)) {
+    //   final metric = font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
+    //   return metric.copyWith(advanceWidth: 0);
+    // }
 
-    if (useArabic && arabic.isArabicDiacriticValue(charCode)) {
-      final metric = font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
-      return metric.copyWith(advanceWidth: 0);
-    }
+    // if (useArabic && arabic.isArabicDiacriticValue(charCode)) {
+    //   final metric = font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
+    //   return metric.copyWith(advanceWidth: 0);
+    // }
 
     return font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
   }
@@ -183,17 +186,16 @@ class PdfTtfFont extends PdfFont {
       super.putText(stream, text);
     }
 
-    final runes = text.runes;
+    final chars = Shaping().shape(this, text);
 
     stream.putByte(0x3c);
-    for (final rune in runes) {
-      var char = unicodeCMap.cmap.indexOf(rune);
-      if (char == -1) {
-        char = unicodeCMap.cmap.length;
-        unicodeCMap.cmap.add(rune);
+    for (final char in chars) {
+      var indexInCMap = unicodeCMap.cmap.indexOf(char.index);
+      if (indexInCMap == -1) {
+        indexInCMap = unicodeCMap.cmap.length;
+        unicodeCMap.cmap.add(char.index);
       }
-
-      stream.putBytes(latin1.encode(char.toRadixString(16).padLeft(4, '0')));
+      stream.putBytes(latin1.encode(indexInCMap.toRadixString(16).padLeft(4, '0')));
     }
     stream.putByte(0x3e);
   }
@@ -204,16 +206,27 @@ class PdfTtfFont extends PdfFont {
       return super.stringMetrics(s, letterSpacing: letterSpacing);
     }
 
-    final runes = s.runes.where((r) => isRuneSupported(r)).toList();
-    if(runes.isEmpty) {
-        // No supported character, sample a few characters from the font and create metrics
-        final glyphs = font.charToGlyphIndexMap.keys.take(16).map(glyphMetrics);
-        return PdfFontMetrics.append(glyphs, letterSpacing: letterSpacing).copyWith(left: 0, top: 0, right: 0, bottom: 0, advanceWidth: 0, leftBearing: 0);
+    final glyphIndices = Shaping().shape(this, s);
+
+    if (glyphIndices.isEmpty) {
+      // No supported character, sample a few characters from the font and create metrics
+      final glyphs = font.charToGlyphIndexMap.keys.take(16).map(glyphMetrics);
+      return PdfFontMetrics.append(glyphs, letterSpacing: letterSpacing)
+          .copyWith(
+              left: 0,
+              top: 0,
+              right: 0,
+              bottom: 0,
+              advanceWidth: 0,
+              leftBearing: 0);
     }
 
-    final metrics = runes.map(glyphMetrics);
+    final metrics = glyphIndices.map(_glyphMetrics);
     return PdfFontMetrics.append(metrics, letterSpacing: letterSpacing);
   }
+
+  PdfFontMetrics _glyphMetrics(GlyphIndex glyphIndex) =>
+      font.glyphInfoMap[glyphIndex.index] ?? PdfFontMetrics.zero;
 
   @override
   bool isRuneSupported(int charCode) {
