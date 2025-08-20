@@ -69,7 +69,7 @@ class TtfWriter {
   }
 
   /// Write this list of glyphs
-  Uint8List withChars(TtfParser font, List<int> glyphIndices) {
+  Uint8List withGlyphIndices(TtfParser font, List<int> glyphIndices) {
     final tables = <String, Uint8List>{};
     final tablesLength = <String, int>{};
 
@@ -109,11 +109,11 @@ class TtfWriter {
 
     final glyphsInfo = <TtfGlyphInfo>[];
 
-    for (final glyphsIndex in glyphIndices) {
-      final glyph = glyphsMap[glyphsIndex];
+    for (final glyphIndex in glyphIndices) {
+      final glyph = glyphsMap[glyphIndex];
       if (glyph != null || glyphsMap.values.isNotEmpty) {
-        glyphsInfo.add(glyphsMap[glyphsIndex] ?? glyphsMap.values.first);
-        glyphsMap.remove(glyphsIndex);
+        glyphsInfo.add(glyphsMap[glyphIndex] ?? glyphsMap.values.first);
+        glyphsMap.remove(glyphIndex);
       }
     }
 

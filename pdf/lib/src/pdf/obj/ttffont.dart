@@ -132,7 +132,7 @@ class PdfTtfFont extends PdfFont {
     int charMax;
 
     final ttfWriter = TtfWriter(font);
-    final data = ttfWriter.withChars(font, unicodeCMap.cmap);
+    final data = ttfWriter.withGlyphIndices(font, unicodeCMap.cmap);
     file.buf.putBytes(data);
     file.params['/Length1'] = PdfNum(data.length);
 
@@ -164,7 +164,8 @@ class PdfTtfFont extends PdfFont {
     charMax = unicodeCMap.cmap.length - 1;
     for (var i = charMin; i <= charMax; i++) {
       widthsObject.params.add(PdfNum(
-          (glyphMetrics(unicodeCMap.cmap[i]).advanceWidth * 1000.0).toInt()));
+          (_glyphMetrics(GlyphIndex(unicodeCMap.cmap[i])).advanceWidth * 1000.0)
+              .toInt()));
     }
   }
 
@@ -186,14 +187,14 @@ class PdfTtfFont extends PdfFont {
       super.putText(stream, text);
     }
 
-    final chars = Shaping().shape(this, text);
+    final glyphIndices = Shaping().shape(this, text);
 
     stream.putByte(0x3c);
-    for (final char in chars) {
-      var indexInCMap = unicodeCMap.cmap.indexOf(char.index);
+    for (final glyphIndex in glyphIndices) {
+      var indexInCMap = unicodeCMap.cmap.indexOf(glyphIndex.index);
       if (indexInCMap == -1) {
         indexInCMap = unicodeCMap.cmap.length;
-        unicodeCMap.cmap.add(char.index);
+        unicodeCMap.cmap.add(glyphIndex.index);
       }
       stream.putBytes(latin1.encode(indexInCMap.toRadixString(16).padLeft(4, '0')));
     }

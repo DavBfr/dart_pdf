@@ -57,8 +57,8 @@ String svgRaw() => '''
 		<g id="g-root-tx_1q5q08xr8c7in-fill" data-item-order="0" data-item-id="tx_1q5q08xr8c7in" data-item-class="Label Stroke" data-item-index="none" data-renderer-id="0" transform="translate(0, 68)">
 			<g id="tx_1q5q08xr8c7in-fill" stroke="none" fill="#484848">
     		 <text style="font: 30px 'Times new roman', serif; white-space: pre;">
-    			<!-- <tspan x="80" y="100" dominant-baseline="ideographic"> ಇಲ್ಲ ಪಕ್ಕದಲ್ಲಿ ಹಾಂ ಬಳ ನೀವು ಹಾಂ </tspan> -->
-          <tspan x="80" y="100" dominant-baseline="ideographic"> ABCDE</tspan>
+    			<tspan x="80" y="100" dominant-baseline="ideographic"> ಇಲ್ಲ ಪಕ್ಕದಲ್ಲಿ ಹಾಂ ಬಳ ನೀವು ಹಾಂ </tspan>
+          <!-- <tspan x="80" y="100" dominant-baseline="ideographic">HIJKL</tspan> -->
     		</text>
      		 <text style="font: 30px 'Helvetica', serif; white-space: pre;">
      			<tspan x="80" y="150" dominant-baseline="ideographic">ABC !!</tspan>
