@@ -20,6 +20,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'package:xml/xml.dart';
 
 import '../../pdf.dart';
+import '../shaping/shaping.dart';
 import 'brush.dart';
 import 'clip_path.dart';
 import 'operation.dart';
@@ -32,7 +33,7 @@ class SvgText extends SvgOperation {
     this.x,
     this.y,
     this.dx,
-    this.fontSpans,
+    this.shapingResults,
     this.tspan,
     this.metrics,
     SvgBrush brush,
@@ -62,9 +63,14 @@ class SvgText extends SvgOperation {
         .join()
         .trim();
 
-    final pdfFont = painter.getFontCache(_brush.fontFamily!, _brush.fontStyle!, _brush.fontWeight!);
-    final fontSpans = _createFontSpans(text, pdfFont, painter.fallbackFontsTtf, fontSize: brush.fontSize!.sizeValue, letterSpacing: null);
-    final metrics = PdfFontMetrics.append(fontSpans.map((span) => span.font.stringMetrics(span.text) * _brush.fontSize!.sizeValue));
+    final pdfFont = painter.getFontCache(
+        _brush.fontFamily!, _brush.fontStyle!, _brush.fontWeight!);
+
+    final shapingResults =
+        Shaping().shape(text, pdfFont, painter.fallbackFontsTtf);
+    final metrics =
+        PdfFontMetrics.append(shapingResults.map((sr) => sr.metrics)) *
+            _brush.fontSize!.sizeValue;
 
     var baselineOffset = 0.0;
     // Only ideographic is supported
@@ -102,7 +108,7 @@ class SvgText extends SvgOperation {
       offset.x,
       offset.y,
       metrics.advanceWidth,
-      fontSpans,
+      shapingResults,
       tspan,
       metrics,
       _brush,
@@ -122,7 +128,7 @@ class SvgText extends SvgOperation {
 
   final Iterable<SvgText> tspan;
 
-  final List<FontSpan> fontSpans;
+  final List<ShapingResult> shapingResults;
 
   @override
   void paintShape(PdfGraphics canvas) {
@@ -166,12 +172,15 @@ class SvgText extends SvgOperation {
     }
   }
 
-  void _drawFontSpans(PdfGraphics canvas, {PdfTextRenderingMode mode = PdfTextRenderingMode.fill}) {
+  void _drawFontSpans(PdfGraphics canvas,
+      {PdfTextRenderingMode mode = PdfTextRenderingMode.fill}) {
+    final fontSize = brush.fontSize!.sizeValue;
     var x = 0.0;
-    for (final span in fontSpans) {
-      canvas.drawString(span.font, brush.fontSize!.sizeValue, span.text, x, 0,
+    for (final shapingResult in shapingResults) {
+      canvas.drawGlyphs(
+          shapingResult.font, fontSize, shapingResult.glyphIndices, x, 0,
           mode: mode);
-      x += span.width;
+      x += shapingResult.metrics.advanceWidth * fontSize;
     }
   }
 
@@ -204,119 +213,4 @@ class SvgText extends SvgOperation {
 
     return PdfRect(x, y, w, h);
   }
-}
-
-class RunesAndFont {
-  RunesAndFont(this.runes, this.font);
-
-  final List<int> runes;
-  final PdfFont font;
-
-  @override
-  String toString() =>
-      '(`${String.fromCharCodes(runes)}` ($runes) ${font.fontName})';
-
-  void append(RunesAndFont other) {
-    assert(isCompatible(other));
-    runes.addAll(other.runes);
-  }
-
-  bool isCompatible(RunesAndFont other) => font == other.font;
-}
-
-class FontSpan {
-  FontSpan(this.text, this.font, this.width);
-
-  factory FontSpan.fromRunesAndFont(RunesAndFont raf,
-      {required double fontSize, double? letterSpacing}) {
-    const textScaleFactor = 1.0;
-    final width = raf.font
-            .stringMetrics(String.fromCharCodes(raf.runes),
-                letterSpacing:
-                    (letterSpacing ?? 0.0) / (fontSize * textScaleFactor))
-            .advanceWidth *
-        (fontSize * textScaleFactor);
-    return FontSpan(String.fromCharCodes(raf.runes), raf.font, width);
-  }
-
-  final String text;
-  final PdfFont font;
-  final double width;
-}
-
-List<FontSpan> _createFontSpans(
-    String text, PdfFont primaryFont, List<PdfTtfFont> fallbackFonts,
-    {required double fontSize, double? letterSpacing}) {
-  final runes = text.runes.toList();
-  final runesAndFonts = _groupRunes(runes, primaryFont, fallbackFonts);
-  return runesAndFonts
-      .map((raf) => FontSpan.fromRunesAndFont(raf,
-          fontSize: fontSize, letterSpacing: letterSpacing))
-      .toList();
-}
-
-String _getFontSubFamily(PdfFont font) {
-  if (font is PdfTtfFont) {
-    return font.font
-            .getNameID(TtfParserName.fontSubfamily)
-            ?.toLowerCase()
-            .trim() ??
-        'regular';
-  }
-  final name = font.fontName;
-  if (name.endsWith('-Bold')) {
-    return 'bold';
-  }
-  return 'regular';
-}
-
-List<RunesAndFont> _groupRunes(
-    List<int> runes, PdfFont primaryFont, List<PdfTtfFont> fallbackFonts) {
-  final primaryFontSubFamily = _getFontSubFamily(primaryFont);
-
-  // Current, primary, fonts with same sub-family, fonts with different sub-family, null
-  final orderedFonts = <PdfFont?>[
-    primaryFont,
-    primaryFont,
-    ...fallbackFonts.where((f) => _getFontSubFamily(f) == primaryFontSubFamily),
-    ...fallbackFonts.where((f) => _getFontSubFamily(f) != primaryFontSubFamily),
-    null
-  ];
-
-  // Is there a font that supports all runes?
-  // Skip first one because it's given twice in the ordered fonts
-  final allSupportedFont = orderedFonts.skip(1).firstWhere(
-      (f) => runes.every((rune) => f?.isRuneSupported(rune) == true),
-      orElse: () => null);
-  if (allSupportedFont != null) {
-    return [RunesAndFont(runes, allSupportedFont)];
-  }
-
-  // Split into groups of runes that can be rendered with the same font
-  final runesAndFonts = <RunesAndFont>[];
-  for (final rune in runes) {
-    final font =
-        orderedFonts.firstWhere((f) => f?.isRuneSupported(rune) != false);
-    if (font != null) {
-      runesAndFonts.add(RunesAndFont([rune], font));
-      orderedFonts[0] = font;
-    } else {
-      runesAndFonts.add(RunesAndFont('?'.runes.toList(), primaryFont));
-    }
-  }
-
-  if (runesAndFonts.isEmpty) {
-    return [];
-  }
-
-  final groups = [runesAndFonts.first];
-  for (final raf in runesAndFonts.skip(1)) {
-    if (raf.isCompatible(groups.last)) {
-      groups.last.append(raf);
-    } else {
-      groups.add(raf);
-    }
-  }
-
-  return groups;
 }

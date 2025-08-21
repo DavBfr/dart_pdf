@@ -19,8 +19,6 @@ import 'dart:typed_data';
 
 import '../../shaping/shaping.dart';
 import '../document.dart';
-import '../font/arabic.dart' as arabic;
-import '../font/bidi_utils.dart' as bidi;
 import '../font/font_metrics.dart';
 import '../font/ttf_parser.dart';
 import '../font/ttf_writer.dart';
@@ -30,7 +28,6 @@ import '../format/name.dart';
 import '../format/num.dart';
 import '../format/stream.dart';
 import '../format/string.dart';
-import '../options.dart';
 import 'font.dart';
 import 'font_descriptor.dart';
 import 'object.dart';
@@ -164,7 +161,7 @@ class PdfTtfFont extends PdfFont {
     charMax = unicodeCMap.cmap.length - 1;
     for (var i = charMin; i <= charMax; i++) {
       widthsObject.params.add(PdfNum(
-          (_glyphMetrics(GlyphIndex(unicodeCMap.cmap[i])).advanceWidth * 1000.0)
+          (glyphIndexMetrics(GlyphIndex(unicodeCMap.cmap[i])).advanceWidth * 1000.0)
               .toInt()));
     }
   }
@@ -181,52 +178,32 @@ class PdfTtfFont extends PdfFont {
   }
 
   @override
-  void putText(PdfStream stream, String text) {
+  void putGlyphs(PdfStream stream, List<int> glyphIndices) {
     _setInUse(true);
-    if (!font.unicode) {
-      super.putText(stream, text);
-    }
-
-    final glyphIndices = Shaping().shape(this, text);
-
     stream.putByte(0x3c);
     for (final glyphIndex in glyphIndices) {
-      var indexInCMap = unicodeCMap.cmap.indexOf(glyphIndex.index);
+      var indexInCMap = unicodeCMap.cmap.indexOf(glyphIndex);
       if (indexInCMap == -1) {
         indexInCMap = unicodeCMap.cmap.length;
-        unicodeCMap.cmap.add(glyphIndex.index);
+        unicodeCMap.cmap.add(glyphIndex);
       }
-      stream.putBytes(latin1.encode(indexInCMap.toRadixString(16).padLeft(4, '0')));
+      stream.putBytes(
+          latin1.encode(indexInCMap.toRadixString(16).padLeft(4, '0')));
     }
     stream.putByte(0x3e);
   }
 
   @override
-  PdfFontMetrics stringMetrics(String s, {double letterSpacing = 0}) {
-    if (s.isEmpty || !font.unicode) {
-      return super.stringMetrics(s, letterSpacing: letterSpacing);
-    }
-
-    final glyphIndices = Shaping().shape(this, s);
-
-    if (glyphIndices.isEmpty) {
-      // No supported character, sample a few characters from the font and create metrics
-      final glyphs = font.charToGlyphIndexMap.keys.take(16).map(glyphMetrics);
-      return PdfFontMetrics.append(glyphs, letterSpacing: letterSpacing)
-          .copyWith(
-              left: 0,
-              top: 0,
-              right: 0,
-              bottom: 0,
-              advanceWidth: 0,
-              leftBearing: 0);
-    }
-
-    final metrics = glyphIndices.map(_glyphMetrics);
-    return PdfFontMetrics.append(metrics, letterSpacing: letterSpacing);
+  void putText(PdfStream stream, String text) {
+    throw UnsupportedError('putText is not supported for TTF fonts');
   }
 
-  PdfFontMetrics _glyphMetrics(GlyphIndex glyphIndex) =>
+  @override
+  PdfFontMetrics stringMetrics(String s, {double letterSpacing = 0}) {
+    throw UnsupportedError('putText is not supported for TTF fonts');
+  }
+
+  PdfFontMetrics glyphIndexMetrics(GlyphIndex glyphIndex) =>
       font.glyphInfoMap[glyphIndex.index] ?? PdfFontMetrics.zero;
 
   @override

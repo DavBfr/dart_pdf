@@ -347,4 +347,6 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
       rethrow;
     }
   }
+
+  void putGlyphs(PdfStream stream, List<int> glyphIndices) {}
 }

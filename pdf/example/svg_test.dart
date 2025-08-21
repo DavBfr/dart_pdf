@@ -33,7 +33,7 @@ void main() async {
         .readAsBytesSync()
         .buffer
         .asByteData()),pw.Font.ttf(File(
-                '/Users/arnaudbrejeon/secondLayer/src/secondlayer/napkin-web-client/web/fonts/Lateef/Lateef-Regular.ttf')
+                '/Users/arnaudbrejeon/secondLayer/src/secondlayer/napkin-web-client/web/fonts/Geeza_Pro/GeezaPro-01.ttf')
             .readAsBytesSync()
             .buffer
             .asByteData()),

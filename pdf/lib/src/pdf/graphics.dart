@@ -586,6 +586,42 @@ class PdfGraphics {
     _page.altered = true;
   }
 
+
+  void drawGlyphs(
+    PdfFont font,
+    double size,
+    List<int> glyphIndices,
+    double x,
+    double y, {
+    double? charSpace,
+    double? wordSpace,
+    double? scale,
+    PdfTextRenderingMode mode = PdfTextRenderingMode.fill,
+    double? rise,
+  }) {
+    _buf.putString('BT ');
+
+    setFont(font, size,
+        charSpace: charSpace,
+        mode: mode,
+        rise: rise,
+        scale: scale,
+        wordSpace: wordSpace);
+
+    PdfNumList([x, y]).output(_page, _buf);
+    _buf.putString(' Td ');
+
+    _buf.putString('[');
+    font.putGlyphs(_buf, glyphIndices);
+    _buf.putString(']TJ ');
+
+    _buf.putString('ET ');
+
+    _page.altered = true;
+  }
+
+
+
   void reset() {
     assert(() {
       if (_page.settings.verbose) {
