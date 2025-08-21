@@ -1,8 +1,7 @@
 import 'dart:io';
-import 'package:bidi/bidi.dart' as bidi;
 
+import '../lib/src/shaping/shaping.dart';
 import '../lib/widgets.dart' as pw;
-import '../lib/pdf.dart';
 
 
 void main() async {
@@ -48,7 +47,7 @@ void main() async {
 
   File('example.pdf').writeAsBytesSync(await pdf.save());
 
-  // Shaping().dispose();
+  Shaping().dispose();
 }
 
 String svgRaw() => '''
@@ -61,7 +60,7 @@ String svgRaw() => '''
           <!-- <tspan x="80" y="100" dominant-baseline="ideographic">HIJKL</tspan> -->
     		</text>
      		 <text style="font: 30px 'Helvetica', serif; white-space: pre;">
-     			<tspan x="80" y="150" dominant-baseline="ideographic"> ثم كان عملية أوراقهم التنازلي </tspan>
+     			<tspan x="80" y="150" dominant-baseline="ideographic">ثم كان عملية أوراقهم 123 التنازلي</tspan>
       		</text>
      		 <text style="font: 30px 'Courier', serif; white-space: pre;">
      			<tspan x="80" y="200" dominant-baseline="ideographic">HIJ ${DateTime.now().millisecond}</tspan>

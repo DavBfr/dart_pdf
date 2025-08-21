@@ -16,7 +16,6 @@
 
 import 'dart:math';
 
-import 'package:bidi/bidi.dart' as bidi;
 import 'package:vector_math/vector_math_64.dart';
 import 'package:xml/xml.dart';
 
@@ -273,8 +272,6 @@ String _getFontSubFamily(PdfFont font) {
 
 List<RunesAndFont> _groupRunes(
     List<int> runes, PdfFont primaryFont, List<PdfTtfFont> fallbackFonts) {
-  final runesAndFonts = <RunesAndFont>[];
-
   final primaryFontSubFamily = _getFontSubFamily(primaryFont);
 
   // Current, primary, fonts with same sub-family, fonts with different sub-family, null
@@ -286,6 +283,17 @@ List<RunesAndFont> _groupRunes(
     null
   ];
 
+  // Is there a font that supports all runes?
+  // Skip first one because it's given twice in the ordered fonts
+  final allSupportedFont = orderedFonts.skip(1).firstWhere(
+      (f) => runes.every((rune) => f?.isRuneSupported(rune) == true),
+      orElse: () => null);
+  if (allSupportedFont != null) {
+    return [RunesAndFont(runes, allSupportedFont)];
+  }
+
+  // Split into groups of runes that can be rendered with the same font
+  final runesAndFonts = <RunesAndFont>[];
   for (final rune in runes) {
     final font =
         orderedFonts.firstWhere((f) => f?.isRuneSupported(rune) != false);
