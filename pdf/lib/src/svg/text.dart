@@ -184,7 +184,7 @@ class SvgText extends SvgOperation {
         ..scale(1.0, -1.0)
         ..translate(x, -y!));
     _drawFontSpans(canvas, mode: PdfTextRenderingMode.clip);
-      canvas.restoreContext();
+    canvas.restoreContext();
 
     for (final span in tspan) {
       span.draw(canvas);
@@ -248,7 +248,6 @@ class FontSpan {
 List<FontSpan> _createFontSpans(
     String text, PdfFont primaryFont, List<PdfTtfFont> fallbackFonts,
     {required double fontSize, double? letterSpacing}) {
-  // final runes = bidi.logicalToVisual(text);
   final runes = text.runes.toList();
   final runesAndFonts = _groupRunes(runes, primaryFont, fallbackFonts);
   return runesAndFonts
@@ -266,8 +265,8 @@ String _getFontSubFamily(PdfFont font) {
         'regular';
   }
   final name = font.fontName;
-  if(name.endsWith('-Bold')){
-    return  'bold';
+  if (name.endsWith('-Bold')) {
+    return 'bold';
   }
   return 'regular';
 }
@@ -278,7 +277,7 @@ List<RunesAndFont> _groupRunes(
 
   final primaryFontSubFamily = _getFontSubFamily(primaryFont);
 
-  // Primary, current, fonts with same sub-family, fonts with different sub-family, null
+  // Current, primary, fonts with same sub-family, fonts with different sub-family, null
   final orderedFonts = <PdfFont?>[
     primaryFont,
     primaryFont,
@@ -292,7 +291,7 @@ List<RunesAndFont> _groupRunes(
         orderedFonts.firstWhere((f) => f?.isRuneSupported(rune) != false);
     if (font != null) {
       runesAndFonts.add(RunesAndFont([rune], font));
-      orderedFonts[1] = font;
+      orderedFonts[0] = font;
     } else {
       runesAndFonts.add(RunesAndFont('?'.runes.toList(), primaryFont));
     }
