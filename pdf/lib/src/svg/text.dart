@@ -64,7 +64,8 @@ class SvgText extends SvgOperation {
         .trim();
 
     final pdfFont = painter.getFontCache(
-        _brush.fontFamily!, _brush.fontStyle!, _brush.fontWeight!);
+            _brush.fontFamily!, _brush.fontStyle!, _brush.fontWeight!)
+        as PdfTtfFont;
 
     final shapingResults =
         Shaping().shape(text, pdfFont, painter.fallbackFontsTtf);

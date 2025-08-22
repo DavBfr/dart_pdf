@@ -11,13 +11,19 @@ import 'harfbuzz.dart';
 extension type GlyphIndex(int index) {}
 
 class ShapingResult {
-  ShapingResult(this.glyphs, this.font);
+  ShapingResult(this.text, this.font, this.glyphs);
 
-  final List<GlyphIndex> glyphs;
+  String text;
   final PdfTtfFont font;
+  final List<GlyphIndex> glyphs;
 
-  PdfFontMetrics get metrics => PdfFontMetrics.append(glyphs.map((g) => font.glyphIndexMetrics(g)));
+  PdfFontMetrics get metrics =>
+      PdfFontMetrics.append(glyphs.map((g) => font.glyphIndexMetrics(g)));
   List<int> get glyphIndices => glyphs.map((g) => g.index).toList();
+
+  @override
+  String toString() =>
+      'ShapingResult(text: ` $text `, font: ${font.fontName}, glyphs: $glyphs)';
 }
 
 class Shaping {
@@ -35,14 +41,19 @@ class Shaping {
   }
 
   List<ShapingResult> shape(
-      String text, PdfFont primaryFont, List<PdfTtfFont> fallbackFonts) {
+      String text, PdfTtfFont primaryFont, List<PdfTtfFont> fallbackFonts) {
+    for (final font in [primaryFont, ...fallbackFonts]) {
+      if (_faces.containsKey(font.fontName)) continue;
+      addFont(font);
+    }
+
     final paragraphs = bidi.BidiString.fromLogical(text).paragraphs;
     if (paragraphs.isEmpty) {
       return [];
     }
 
     final primaryFontSubFamily = _getFontSubFamily(primaryFont);
-    final orderedFonts = <PdfFont?>[
+    final orderedFonts = <PdfTtfFont?>[
       primaryFont,
       primaryFont,
       ...fallbackFonts
@@ -60,28 +71,34 @@ class Shaping {
 
     final bidiSpans = _BidiSpan.createBidiSpans(text);
 
-    final runeAndFonts = <_RuneAndFont>[];
+    final runeAndFonts = <_RunesAndFont>[];
     for (final span in bidiSpans) {
-      for (final rune in span.text.runes) {
-        final font = commonFont ??
+      final spanRuneAndFonts = <_RunesAndFont>[];
+      for (var rune in span.text.runes) {
+        var font = commonFont ??
             orderedFonts.firstWhere((f) => f?.isRuneSupported(rune) != false);
-        runeAndFonts.add(font != null
-            ? _RuneAndFont(rune, font as PdfTtfFont)
-            : _RuneAndFont('?'.runes.first, primaryFont as PdfTtfFont));
         if (font != null) {
-          orderedFonts[0] = font;
+          orderedFonts[1] = font;
+        }
+        if (font == null) {
+          rune = '?'.runes.first;
+          font = primaryFont;
+        }
+
+        if (spanRuneAndFonts.isEmpty || font != spanRuneAndFonts.last.font) {
+          spanRuneAndFonts
+              .add(_RunesAndFont([rune], font, leftToRight: span.leftToRight));
+        } else {
+          spanRuneAndFonts.last.runes.add(rune);
         }
       }
+      runeAndFonts.addAll(spanRuneAndFonts);
     }
 
-    final textsAndFonts = <_TextAndFont>[runeAndFonts.first.toTextAndFont()];
-    for (final text in runeAndFonts.skip(1)) {
-      if (text.font == textsAndFonts.last.font) {
-        textsAndFonts.last.addRune(text.rune);
-      } else {
-        textsAndFonts.add(text.toTextAndFont());
-      }
-    }
+    final textsAndFonts =
+        runeAndFonts.map((raf) => raf.toTextAndFont()).toList();
+
+    _reverseLtrSpans(textsAndFonts);
 
     final output = <ShapingResult>[];
 
@@ -100,11 +117,13 @@ class Shaping {
       _hb.shape(faceFont, buffer);
 
       output.add(ShapingResult(
-          _hb
-              .getGlyphInfos(buffer)
-              .map((info) => GlyphIndex(info.codepoint))
-              .toList(),
-          textAndFont.font));
+        textAndFont.text,
+        textAndFont.font,
+        _hb
+            .getGlyphInfos(buffer)
+            .map((info) => GlyphIndex(info.codepoint))
+            .toList(),
+      ));
 
       _hb.bufferDestroy(buffer);
       _hb.fontDestroy(faceFont);
@@ -136,24 +155,49 @@ String _getFontSubFamily(PdfFont font) {
   return 'regular';
 }
 
-class _RuneAndFont {
-  _RuneAndFont(this.rune, this.font);
+class _RunesAndFont {
+  _RunesAndFont(this.runes, this.font, {required this.leftToRight});
 
-  final int rune;
+  final List<int> runes;
   final PdfTtfFont font;
+  final bool leftToRight;
 
-  _TextAndFont toTextAndFont() => _TextAndFont(String.fromCharCode(rune), font);
+  _TextAndFont toTextAndFont() =>
+      _TextAndFont(String.fromCharCodes(runes), font, leftToRight: leftToRight);
+
+  @override
+  String toString() =>
+      'RuneAndFont(font: ${font.fontName}, LTR: $leftToRight, runes: $runes)';
 }
 
 class _TextAndFont {
-  _TextAndFont(this.text, this.font);
+  _TextAndFont(this.text, this.font, {required this.leftToRight});
 
   String text;
   final PdfTtfFont font;
+  final bool leftToRight;
 
   void addRune(int rune) {
     text += String.fromCharCode(rune);
   }
+
+  @override
+  String toString() =>
+      'TextAndFont(font: ${font.fontName}, LTR: $leftToRight, text: ` $text ` )';
+}
+
+void _reverseLtrSpans(List<_TextAndFont> items) {
+  final newItems = <_TextAndFont>[];
+
+  while (items.isNotEmpty) {
+    final newItemsSizeLength = newItems.length;
+    newItems.addAll(items.takeWhile((item) => item.leftToRight));
+    newItems
+        .addAll(items.takeWhile((item) => !item.leftToRight).toList().reversed);
+    items.removeRange(0, newItems.length - newItemsSizeLength);
+  }
+
+  items.addAll(newItems);
 }
 
 class _BidiSpan {
@@ -166,7 +210,7 @@ class _BidiSpan {
   bool get isNotEmpty => text.isNotEmpty;
 
   @override
-  String toString() => 'BidiSpan(text: $text, leftToRight: $leftToRight)';
+  String toString() => 'BidiSpan(text: ` $text `  , leftToRight: $leftToRight)';
 
   static List<_BidiSpan> createBidiSpans(String text) {
     final paragraphs = bidi.BidiString.fromLogical(text).paragraphs;
@@ -197,14 +241,7 @@ class _BidiSpan {
       paragraphSpans
           .add(_BidiSpan(text.substring(start, levels.length), level));
 
-      switch (paragraph.embeddingLevel) {
-        case 0:
-          spans.addAll(paragraphSpans);
-          break;
-        default:
-          spans.addAll(paragraphSpans.reversed);
-          break;
-      }
+      spans.addAll(paragraphSpans);
     }
 
     return spans.toList();
