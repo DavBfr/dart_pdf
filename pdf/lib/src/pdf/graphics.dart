@@ -15,6 +15,7 @@
  */
 
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -516,7 +517,12 @@ class PdfGraphics {
     }());
 
     // Filter out zero-width spaces (0x200b)
-    s = String.fromCharCodes(s.runes.where((r) => r!=0x200b));
+    s = String.fromCharCodes(s.runes.where((r) => r != 0x200b));
+    final sUtf8 = Utf8Encoder()
+        .convert(s)
+        .map((code) => code.toRadixString(16).padLeft(2, '0'))
+        .join('')
+        .toUpperCase();
 
     _buf.putString('BT ');
 
@@ -558,6 +564,7 @@ class PdfGraphics {
       return true;
     }());
 
+    _buf.putString('/Span <</ActualText <EFBBBF$sUtf8>>> BDC');
     _buf.putString('[');
     font.putText(_buf, s);
     _buf.putString(']TJ ');
@@ -590,6 +597,7 @@ class PdfGraphics {
   void drawGlyphs(
     PdfFont font,
     double size,
+    String actualText,
     List<int> glyphIndices,
     double x,
     double y, {
@@ -599,6 +607,12 @@ class PdfGraphics {
     PdfTextRenderingMode mode = PdfTextRenderingMode.fill,
     double? rise,
   }) {
+    final actualTextUtf8 = Utf8Encoder()
+        .convert(actualText)
+        .map((code) => code.toRadixString(16).padLeft(2, '0'))
+        .join('')
+        .toUpperCase();
+
     _buf.putString('BT ');
 
     setFont(font, size,
@@ -611,6 +625,7 @@ class PdfGraphics {
     PdfNumList([x, y]).output(_page, _buf);
     _buf.putString(' Td ');
 
+    _buf.putString('/Span <</ActualText <EFBBBF$actualTextUtf8>>> BDC');
     _buf.putString('[');
     font.putGlyphs(_buf, glyphIndices);
     _buf.putString(']TJ ');

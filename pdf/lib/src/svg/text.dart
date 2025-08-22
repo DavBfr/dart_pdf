@@ -178,8 +178,8 @@ class SvgText extends SvgOperation {
     final fontSize = brush.fontSize!.sizeValue;
     var x = 0.0;
     for (final shapingResult in shapingResults) {
-      canvas.drawGlyphs(
-          shapingResult.font, fontSize, shapingResult.glyphIndices, x, 0,
+      canvas.drawGlyphs(shapingResult.font, fontSize, shapingResult.text,
+          shapingResult.glyphIndices, x, 0,
           mode: mode);
       x += shapingResult.metrics.advanceWidth * fontSize;
     }
