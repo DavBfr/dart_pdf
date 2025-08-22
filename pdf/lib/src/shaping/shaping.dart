@@ -69,7 +69,7 @@ class Shaping {
         (f) => text.runes.every((rune) => f?.isRuneSupported(rune) == true),
         orElse: () => null);
 
-    final bidiSpans = _BidiSpan.createBidiSpans(text);
+    final bidiSpans = BidiSpan.createBidiSpans(text);
 
     final runeAndFonts = <_RunesAndFont>[];
     for (final span in bidiSpans) {
@@ -200,8 +200,8 @@ void _reverseLtrSpans(List<_TextAndFont> items) {
   items.addAll(newItems);
 }
 
-class _BidiSpan {
-  const _BidiSpan(this.text, int level) : leftToRight = level % 2 == 0;
+class BidiSpan {
+  const BidiSpan(this.text, int level) : leftToRight = level % 2 == 0;
 
   final String text;
   final bool leftToRight;
@@ -212,13 +212,14 @@ class _BidiSpan {
   @override
   String toString() => 'BidiSpan(text: ` $text `  , leftToRight: $leftToRight)';
 
-  static List<_BidiSpan> createBidiSpans(String text) {
+  static List<BidiSpan> createBidiSpans(String text) {
     final paragraphs = bidi.BidiString.fromLogical(text).paragraphs;
 
-    final spans = <_BidiSpan>[];
+    final spans = <BidiSpan>[];
 
     for (final paragraph in paragraphs) {
-      final paragraphSpans = <_BidiSpan>[];
+      final paragraphText = String.fromCharCodes(paragraph.text);
+      final paragraphSpans = <BidiSpan>[];
       final levels = paragraph.embeddingLevels;
       if (levels.isEmpty) {
         continue;
@@ -233,13 +234,13 @@ class _BidiSpan {
           continue;
         }
 
-        paragraphSpans.add(_BidiSpan(text.substring(start, i), level));
+        paragraphSpans.add(BidiSpan(paragraphText.substring(start, i), level));
         start = i;
         level = curLevel;
       }
 
       paragraphSpans
-          .add(_BidiSpan(text.substring(start, levels.length), level));
+          .add(BidiSpan(paragraphText.substring(start, levels.length), level));
 
       spans.addAll(paragraphSpans);
     }

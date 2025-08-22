@@ -27,9 +27,13 @@ void main() async {
         .asByteData()),
   ];
 
+  BidiSpan.createBidiSpans(str2);
+
   final context = Context(document: PdfDocument());
 
   print(str.runes.toList());
+
+  print('---------------');
 
   final results = Shaping().shape(
       str,
@@ -55,3 +59,24 @@ void main() async {
 }
 
 const str = 'مرحبا بالعالم AAA';
+
+final str2 = String.fromCharCodes([
+  3607,
+  3635,
+  3652,
+  3617,
+  3592,
+  3638,
+  3591,
+  3605,
+  3657,
+  3629,
+  3591,
+  3609,
+  3635,
+  3617,
+  3634,
+  3651,
+  3594,
+  3657
+]);

@@ -195,12 +195,17 @@ class PdfTtfFont extends PdfFont {
 
   @override
   void putText(PdfStream stream, String text) {
-    throw UnsupportedError('putText is not supported for TTF fonts');
+    final results = Shaping().shape(text, this, []);
+    putGlyphs(stream, results.expand((result) => result.glyphIndices).toList());
   }
 
   @override
   PdfFontMetrics stringMetrics(String s, {double letterSpacing = 0}) {
-    throw UnsupportedError('putText is not supported for TTF fonts');
+    final results = Shaping().shape(s, this, []);
+    return PdfFontMetrics.append(
+      results.map((result) => result.metrics),
+      letterSpacing: letterSpacing,
+    );
   }
 
   PdfFontMetrics glyphIndexMetrics(GlyphIndex glyphIndex) =>
