@@ -348,9 +348,8 @@ class Table extends Widget with SpanningWidget {
     var index = 0;
 
     for (final row in children) {
-      for (final entry in row.children.asMap().entries) {
-        final index = entry.key;
-        final child = entry.value;
+      for (var index = 0; index < row.children.length; index++) {
+        final child = row.children[index];
         final columnWidth = columnWidths?[index] ?? defaultColumnWidth;
         final columnLayout = columnWidth.layout(child, context, constraints);
 
