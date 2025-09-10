@@ -17,6 +17,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import '../io/event_loop_balancer.dart';
 import 'array.dart';
 import 'base.dart';
 import 'diagnostic.dart';
@@ -182,6 +183,96 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
 
     // the reference to the xref object
     s.putString('startxref\n$xrefOffset\n%%EOF\n');
+
+    assert(() {
+      if (o.settings.verbose) {
+        stopStopwatch();
+        debugFill(
+            'Creation time: ${elapsedStopwatch / Duration.microsecondsPerSecond} seconds');
+        debugFill('File size: ${s.offset} bytes');
+        debugFill('Objects: ${objects.length}');
+        writeDebug(s);
+      }
+      return true;
+    }());
+  }
+
+  Future<void> outputAsync(PdfObjectBase o, PdfStream s, [int? indent]) async {
+    final balancer = EventLoopBalancer()..start();
+
+    String v;
+    switch (o.settings.version) {
+      case PdfVersion.pdf_1_4:
+        v = '1.4';
+        break;
+      case PdfVersion.pdf_1_5:
+        v = '1.5';
+        break;
+    }
+
+    s.putString('%PDF-$v\n');
+    s.putBytes(const <int>[0x25, 0xC2, 0xA5, 0xC2, 0xB1, 0xC3, 0xAB, 0x0A]);
+    s.putComment(libraryName);
+    assert(() {
+      if (o.settings.verbose) {
+        setInsertion(s, 350);
+        startStopwatch();
+        debugFill('Verbose dart_pdf');
+        debugFill('Producer $libraryName');
+        debugFill('Creation date: ${DateTime.now()}');
+        debugFill('Compress: ${o.settings.compress}');
+        debugFill('Crypto: ${o.settings.encryptCallback != null}');
+      }
+      return true;
+    }());
+
+    final xrefList = <PdfXref>[];
+    for (final ob in objects) {
+      await balancer.yieldIfNeeded();
+
+      final offset = ob.output(s);
+      xrefList.add(PdfXref(ob.objser, offset, gen: ob.objgen));
+    }
+
+    assert(() {
+      if (o.settings.verbose) {
+        s.putComment('');
+        s.putComment('-' * 78);
+        s.putComment('$runtimeType ${o.settings.version.name}');
+        for (final x in xrefList) {
+          s.putComment('  $x');
+        }
+      }
+      return true;
+    }());
+
+    final int xrefOffset;
+
+    params['/Root'] = o.ref();
+
+    switch (o.settings.version) {
+      case PdfVersion.pdf_1_4:
+        xrefOffset = _outputLegacy(o, s, xrefList);
+        break;
+      case PdfVersion.pdf_1_5:
+        xrefOffset = _outputCompressed(o, s, xrefList);
+        break;
+    }
+
+    await balancer.yieldIfNeeded();
+
+    assert(() {
+      if (o.settings.verbose) {
+        s.putComment('');
+        s.putComment('-' * 78);
+      }
+      return true;
+    }());
+
+    // The reference to the xref object.
+    s.putString('startxref\n$xrefOffset\n%%EOF\n');
+
+    balancer.stop();
 
     assert(() {
       if (o.settings.verbose) {
