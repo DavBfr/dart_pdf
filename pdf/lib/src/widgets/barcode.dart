@@ -152,8 +152,8 @@ class _BarcodeWidget extends Widget {
       for (final element in barcodeDraw) {
         if (element is BarcodeText) {
           context.canvas.drawRect(
-            box!.x + element.left,
-            box!.y + box!.height - element.top - element.height,
+            box!.left + element.left,
+            box!.bottom + box!.height - element.top - element.height,
             element.width,
             element.height,
           );

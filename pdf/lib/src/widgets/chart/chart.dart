@@ -122,7 +122,7 @@ class Chart extends Widget implements Inherited {
     super.paint(_context!);
 
     final mat = Matrix4.identity();
-    mat.translate(box!.x, box!.y);
+    mat.translate(box!.left, box!.bottom);
     _context!.canvas
       ..saveContext()
       ..setTransform(mat);

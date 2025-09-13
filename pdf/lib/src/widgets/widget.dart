@@ -115,7 +115,7 @@ class Context {
     final rb = mat.transform3(Vector3(box.right, box.top, 0));
     final x = <double>[lt.x, lb.x, rt.x, rb.x];
     final y = <double>[lt.y, lb.y, rt.y, rb.y];
-    return PdfRect.fromLTRB(
+    return PdfRect.fromLBRT(
       x.reduce(math.min),
       y.reduce(math.min),
       x.reduce(math.max),
@@ -253,7 +253,7 @@ abstract class StatelessWidget extends Widget with SpanningWidget {
 
     if (_child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box!.x, box!.y);
+      mat.translate(box!.left, box!.bottom);
       context.canvas
         ..saveContext()
         ..setTransform(mat);
@@ -313,7 +313,7 @@ abstract class SingleChildWidget extends Widget with SpanningWidget {
   void paintChild(Context context) {
     if (child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box!.x, box!.y);
+      mat.translate(box!.left, box!.bottom);
       context.canvas
         ..saveContext()
         ..setTransform(mat);

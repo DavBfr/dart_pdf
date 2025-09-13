@@ -99,10 +99,10 @@ class TableBorder extends Border {
 
     if (verticalInside.style.paint) {
       verticalInside.style.setStyle(context);
-      var offset = box.x;
+      var offset = box.left;
       for (final width in widths!.sublist(0, widths.length - 1)) {
         offset += width!;
-        context.canvas.moveTo(offset, box.y);
+        context.canvas.moveTo(offset, box.bottom);
         context.canvas.lineTo(offset, box.top);
       }
       context.canvas.setStrokeColor(verticalInside.color);
@@ -117,7 +117,7 @@ class TableBorder extends Border {
       var offset = box.top;
       for (final height in heights!.sublist(0, heights.length - 1)) {
         offset -= height;
-        context.canvas.moveTo(box.x, offset);
+        context.canvas.moveTo(box.left, offset);
         context.canvas.lineTo(box.right, offset);
       }
       context.canvas.setStrokeColor(horizontalInside.color);
@@ -465,21 +465,21 @@ class Table extends Widget with SpanningWidget {
 
         switch (align) {
           case TableCellVerticalAlignment.bottom:
-            childY = totalHeight - child.box!.y - _getHeight(heightIndex);
+            childY = totalHeight - child.box!.bottom - _getHeight(heightIndex);
             break;
           case TableCellVerticalAlignment.middle:
             childY = totalHeight -
-                child.box!.y -
+                child.box!.bottom -
                 (_getHeight(heightIndex) + child.box!.height) / 2;
             break;
           case TableCellVerticalAlignment.top:
           case TableCellVerticalAlignment.full:
-            childY = totalHeight - child.box!.y - child.box!.height;
+            childY = totalHeight - child.box!.bottom - child.box!.height;
             break;
         }
 
         child.box = PdfRect(
-          child.box!.x,
+          child.box!.left,
           childY,
           child.box!.width,
           child.box!.height,
@@ -504,7 +504,7 @@ class Table extends Widget with SpanningWidget {
     }
 
     final mat = Matrix4.identity();
-    mat.translate(box!.x, box!.y);
+    mat.translate(box!.left, box!.bottom);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
@@ -519,7 +519,7 @@ class Table extends Widget with SpanningWidget {
         var y = double.infinity;
         var h = 0.0;
         for (final child in row.children) {
-          y = math.min(y, child.box!.y);
+          y = math.min(y, child.box!.bottom);
           h = math.max(h, child.box!.height);
         }
         row.decoration!.paint(
@@ -532,8 +532,8 @@ class Table extends Widget with SpanningWidget {
       for (final child in row.children) {
         context.canvas
           ..saveContext()
-          ..drawRect(
-              child.box!.x, child.box!.y, child.box!.width, child.box!.height)
+          ..drawRect(child.box!.left, child.box!.bottom, child.box!.width,
+              child.box!.height)
           ..clipPath();
         child.paint(context);
         context.canvas.restoreContext();
@@ -553,7 +553,7 @@ class Table extends Widget with SpanningWidget {
         var y = double.infinity;
         var h = 0.0;
         for (final child in row.children) {
-          y = math.min(y, child.box!.y);
+          y = math.min(y, child.box!.bottom);
           h = math.max(h, child.box!.height);
         }
         row.decoration!.paint(

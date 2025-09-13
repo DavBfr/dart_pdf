@@ -216,15 +216,15 @@ class Page {
     if (pageTheme.clip) {
       context.canvas
         ..saveContext()
-        ..drawRect(box.x, box.y, box.width, box.height)
+        ..drawRect(box.left, box.bottom, box.width, box.height)
         ..clipPath();
     }
 
     if (pageTheme.textDirection == TextDirection.rtl) {
       child.box = PdfRect(
         ((mustRotate ? box.height : box.width) - child.box!.width) +
-            child.box!.x,
-        child.box!.y,
+            child.box!.left,
+        child.box!.bottom,
         child.box!.width,
         child.box!.height,
       );

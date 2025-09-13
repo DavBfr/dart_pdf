@@ -210,7 +210,7 @@ class MultiPage extends Page {
       child.paint(context);
       context.canvas.restoreContext();
     } else {
-      child.box = child.box!.copyWith(x: x, y: y);
+      child.box = child.box!.copyWith(left: x, bottom: y);
       child.paint(context);
     }
   }

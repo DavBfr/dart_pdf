@@ -103,13 +103,13 @@ class SvgImage extends Widget {
     final sourceRect = _alignment.inscribe(sizes.source!, _svgParser.viewBox);
     final sx = sizes.destination!.x / sizes.source!.x;
     final sy = sizes.destination!.y / sizes.source!.y;
-    final dx = sourceRect.x * sx;
-    final dy = sourceRect.y * sy;
+    final dx = sourceRect.left * sx;
+    final dy = sourceRect.bottom * sy;
 
     final mat = Matrix4.identity()
       ..translate(
-        box!.x - dx,
-        box!.y + dy + box!.height,
+        box!.left - dx,
+        box!.bottom + dy + box!.height,
       )
       ..scale(sx, -sy);
 

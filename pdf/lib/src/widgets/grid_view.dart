@@ -327,7 +327,7 @@ class GridView extends MultiChildWidget with SpanningWidget {
     super.paint(context);
 
     final mat = Matrix4.identity();
-    mat.translate(box!.x, box!.y);
+    mat.translate(box!.left, box!.bottom);
     context.canvas
       ..saveContext()
       ..setTransform(mat);

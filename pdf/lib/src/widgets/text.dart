@@ -118,7 +118,7 @@ class _TextDecoration {
       y2 = math.max(y2, ny2);
     }
 
-    _box = PdfRect.fromLTRB(x1, y1, x2, y2);
+    _box = PdfRect.fromLBRT(x1, y1, x2, y2);
     return _box;
   }
 
@@ -135,7 +135,7 @@ class _TextDecoration {
 
     if (annotation != null) {
       final spanBox = PdfRect(
-        globalBox!.x + box!.left,
+        globalBox!.left + box!.left,
         globalBox.top + box.bottom,
         box.width,
         box.height,
@@ -145,7 +145,7 @@ class _TextDecoration {
 
     if (style.background != null) {
       final boundingBox = PdfRect(
-        globalBox!.x + box!.left,
+        globalBox!.left + box!.left,
         globalBox.top + box.bottom,
         box.width,
         box.height,
@@ -182,7 +182,7 @@ class _TextDecoration {
       final base = -font.descent * style.fontSize! * textScaleFactor / 2;
       final l = box!.left;
       final r = box.right;
-      final x = globalBox!.x;
+      final x = globalBox!.left;
       context.canvas.drawLine(
         x + l,
         globalBox.top + box.bottom + base,
@@ -191,9 +191,9 @@ class _TextDecoration {
       );
       if (style.decorationStyle == TextDecorationStyle.double) {
         context.canvas.drawLine(
-          globalBox.x + box.left,
+          globalBox.left + box.left,
           globalBox.top + box.bottom + base + space,
-          globalBox.x + box.right,
+          globalBox.left + box.right,
           globalBox.top + box.bottom + base + space,
         );
       }
@@ -203,16 +203,16 @@ class _TextDecoration {
     if (style.decoration!.contains(TextDecoration.overline)) {
       final base = style.fontSize! * textScaleFactor;
       context.canvas.drawLine(
-        globalBox!.x + box!.left,
+        globalBox!.left + box!.left,
         globalBox.top + box.bottom + base,
-        globalBox.x + box.right,
+        globalBox.left + box.right,
         globalBox.top + box.bottom + base,
       );
       if (style.decorationStyle == TextDecorationStyle.double) {
         context.canvas.drawLine(
-          globalBox.x + box.left,
+          globalBox.left + box.left,
           globalBox.top + box.bottom + base - space,
-          globalBox.x + box.right,
+          globalBox.left + box.right,
           globalBox.top + box.bottom + base - space,
         );
       }
@@ -222,16 +222,16 @@ class _TextDecoration {
     if (style.decoration!.contains(TextDecoration.lineThrough)) {
       final base = (1 - font.descent) * style.fontSize! * textScaleFactor / 2;
       context.canvas.drawLine(
-        globalBox!.x + box!.left,
+        globalBox!.left + box!.left,
         globalBox.top + box.bottom + base,
-        globalBox.x + box.right,
+        globalBox.left + box.right,
         globalBox.top + box.bottom + base,
       );
       if (style.decorationStyle == TextDecorationStyle.double) {
         context.canvas.drawLine(
-          globalBox.x + box.left,
+          globalBox.left + box.left,
           globalBox.top + box.bottom + base + space,
-          globalBox.x + box.right,
+          globalBox.left + box.right,
           globalBox.top + box.bottom + base + space,
         );
       }
@@ -249,8 +249,8 @@ class _TextDecoration {
 
     context.canvas
       ..setLineWidth(.5)
-      ..drawRect(
-          globalBox.x + box.x, globalBox.top + box.y, box.width, box.height)
+      ..drawRect(globalBox.left + box.left, globalBox.top + box.bottom,
+          box.width, box.height)
       ..setStrokeColor(PdfColors.yellow)
       ..strokePath();
   }
@@ -312,14 +312,14 @@ class _Word extends _Span {
 
     context.canvas
       ..setLineWidth(.5)
-      ..drawRect(globalBox!.x + offset.x + metrics.left,
+      ..drawRect(globalBox!.left + offset.x + metrics.left,
           globalBox.top + offset.y + metrics.top, metrics.width, metrics.height)
       ..setStrokeColor(PdfColors.orange)
       ..strokePath()
       ..drawLine(
-          globalBox.x + offset.x - deb,
+          globalBox.left + offset.x - deb,
           globalBox.top + offset.y,
-          globalBox.x + offset.x + metrics.right + deb,
+          globalBox.left + offset.x + metrics.right + deb,
           globalBox.top + offset.y)
       ..setStrokeColor(PdfColors.deepPurple)
       ..strokePath();
@@ -383,13 +383,13 @@ class _WidgetSpan extends _Span {
     context.canvas
       ..setLineWidth(.5)
       ..drawRect(
-          globalBox!.x + offset.x, globalBox.top + offset.y, width, height)
+          globalBox!.left + offset.x, globalBox.top + offset.y, width, height)
       ..setStrokeColor(PdfColors.orange)
       ..strokePath()
       ..drawLine(
-        globalBox.x + offset.x - deb,
+        globalBox.left + offset.x - deb,
         globalBox.top + offset.y - baseline,
-        globalBox.x + offset.x + width + deb,
+        globalBox.left + offset.x + width + deb,
         globalBox.top + offset.y - baseline,
       )
       ..setStrokeColor(PdfColors.deepPurple)
@@ -1234,8 +1234,8 @@ class RichText extends Widget with SpanningWidget {
       ..setStrokeColor(PdfColors.blue)
       ..setLineWidth(1)
       ..drawRect(
-        box!.x,
-        box!.y,
+        box!.left,
+        box!.bottom,
         box!.width == double.infinity ? 1000 : box!.width,
         box!.height == double.infinity ? 1000 : box!.height,
       )

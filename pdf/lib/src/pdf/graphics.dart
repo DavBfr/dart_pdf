@@ -424,7 +424,7 @@ class PdfGraphics {
 
   /// Draws a Rectangle
   void drawBox(PdfRect box) {
-    drawRect(box.x, box.y, box.width, box.height);
+    drawRect(box.left, box.bottom, box.width, box.height);
   }
 
   /// Draws a Rounded Rectangle
@@ -1195,7 +1195,7 @@ class _PathBBProxy extends PathProxy {
     if (_xMin > _xMax || _yMin > _yMax) {
       return PdfRect.zero;
     }
-    return PdfRect.fromLTRB(_xMin, _yMin, _xMax, _yMax);
+    return PdfRect.fromLBRT(_xMin, _yMin, _xMax, _yMax);
   }
 
   @override

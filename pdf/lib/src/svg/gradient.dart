@@ -199,7 +199,7 @@ class SvgLinearGradient extends SvgGradient {
     if (gradientUnits != GradientUnits.userSpaceOnUse) {
       final bb = op.boundingBox();
       mat
-        ..translate(bb.x, bb.y)
+        ..translate(bb.left, bb.bottom)
         ..scale(bb.width, bb.height);
     }
 
@@ -348,7 +348,7 @@ class SvgRadialGradient extends SvgGradient {
     if (gradientUnits != GradientUnits.userSpaceOnUse) {
       final bb = op.boundingBox();
       mat
-        ..translate(bb.x, bb.y)
+        ..translate(bb.left, bb.bottom)
         ..scale(bb.width, bb.height);
     }
 

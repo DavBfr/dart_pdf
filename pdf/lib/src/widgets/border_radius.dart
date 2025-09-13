@@ -261,47 +261,47 @@ class BorderRadius extends BorderRadiusGeometry {
 
     context.canvas
       // Start
-      ..moveTo(box.x, box.y + bottomLeft.y)
+      ..moveTo(box.left, box.bottom + bottomLeft.y)
       // bottomLeft
       ..curveTo(
-          box.x,
-          box.y - _m4 * bottomLeft.y + bottomLeft.y,
-          box.x - _m4 * bottomLeft.x + bottomLeft.x,
-          box.y,
-          box.x + bottomLeft.x,
-          box.y)
+          box.left,
+          box.bottom - _m4 * bottomLeft.y + bottomLeft.y,
+          box.left - _m4 * bottomLeft.x + bottomLeft.x,
+          box.bottom,
+          box.left + bottomLeft.x,
+          box.bottom)
       // bottom
-      ..lineTo(box.x + box.width - bottomRight.x, box.y)
+      ..lineTo(box.left + box.width - bottomRight.x, box.bottom)
       // bottomRight
       ..curveTo(
-          box.x + _m4 * bottomRight.x + box.width - bottomRight.x,
-          box.y,
-          box.x + box.width,
-          box.y - _m4 * bottomRight.y + bottomRight.y,
-          box.x + box.width,
-          box.y + bottomRight.y)
+          box.left + _m4 * bottomRight.x + box.width - bottomRight.x,
+          box.bottom,
+          box.left + box.width,
+          box.bottom - _m4 * bottomRight.y + bottomRight.y,
+          box.left + box.width,
+          box.bottom + bottomRight.y)
       // right
-      ..lineTo(box.x + box.width, box.y + box.height - topRight.y)
+      ..lineTo(box.left + box.width, box.bottom + box.height - topRight.y)
       // topRight
       ..curveTo(
-          box.x + box.width,
-          box.y + _m4 * topRight.y + box.height - topRight.y,
-          box.x + _m4 * topRight.x + box.width - topRight.x,
-          box.y + box.height,
-          box.x + box.width - topRight.x,
-          box.y + box.height)
+          box.left + box.width,
+          box.bottom + _m4 * topRight.y + box.height - topRight.y,
+          box.left + _m4 * topRight.x + box.width - topRight.x,
+          box.bottom + box.height,
+          box.left + box.width - topRight.x,
+          box.bottom + box.height)
       // top
-      ..lineTo(box.x + topLeft.x, box.y + box.height)
+      ..lineTo(box.left + topLeft.x, box.bottom + box.height)
       // topLeft
       ..curveTo(
-          box.x - _m4 * topLeft.x + topLeft.x,
-          box.y + box.height,
-          box.x,
-          box.y + _m4 * topLeft.y + box.height - topLeft.y,
-          box.x,
-          box.y + box.height - topLeft.y)
+          box.left - _m4 * topLeft.x + topLeft.x,
+          box.bottom + box.height,
+          box.left,
+          box.bottom + _m4 * topLeft.y + box.height - topLeft.y,
+          box.left,
+          box.bottom + box.height - topLeft.y)
       // left
-      ..lineTo(box.x, box.y + bottomLeft.y);
+      ..lineTo(box.left, box.bottom + bottomLeft.y);
   }
 
   @override

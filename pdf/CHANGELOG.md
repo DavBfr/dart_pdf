@@ -6,6 +6,7 @@
 - Reduce freezes on web [Kostia Sokolovskyi]
 - creates catalog.names earlier for attached files [ilaurillard]
 - fix: Prevent "Index out of range" error when reading simple glyphs in certain fonts  [Eghosa Osayande]
+- Improve PdfRect naming consistency
 
 ## 3.11.3
 

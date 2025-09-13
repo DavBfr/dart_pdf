@@ -83,20 +83,20 @@ class ColorWheel extends Widget {
     assert(radius1 > radius2);
 
     final startTop = PdfPoint(
-      box!.x + centerX + math.cos(angleStart) * radius1,
-      box!.y + centerY + math.sin(angleStart) * radius1,
+      box!.left + centerX + math.cos(angleStart) * radius1,
+      box!.bottom + centerY + math.sin(angleStart) * radius1,
     );
     final endTop = PdfPoint(
-      box!.x + centerX + math.cos(angleEnd) * radius1,
-      box!.y + centerY + math.sin(angleEnd) * radius1,
+      box!.left + centerX + math.cos(angleEnd) * radius1,
+      box!.bottom + centerY + math.sin(angleEnd) * radius1,
     );
     final startBottom = PdfPoint(
-      box!.x + centerX + math.cos(angleStart) * radius2,
-      box!.y + centerY + math.sin(angleStart) * radius2,
+      box!.left + centerX + math.cos(angleStart) * radius2,
+      box!.bottom + centerY + math.sin(angleStart) * radius2,
     );
     final endBottom = PdfPoint(
-      box!.x + centerX + math.cos(angleEnd) * radius2,
-      box!.y + centerY + math.sin(angleEnd) * radius2,
+      box!.left + centerX + math.cos(angleEnd) * radius2,
+      box!.bottom + centerY + math.sin(angleEnd) * radius2,
     );
 
     context.canvas

@@ -100,16 +100,17 @@ class Padding extends SingleChildWidget {
     final resolvedPadding = padding.resolve(Directionality.of(context));
     context.canvas
       ..setFillColor(PdfColors.lime)
-      ..moveTo(box!.x, box!.y)
-      ..lineTo(box!.right, box!.y)
+      ..moveTo(box!.left, box!.bottom)
+      ..lineTo(box!.right, box!.bottom)
       ..lineTo(box!.right, box!.top)
-      ..lineTo(box!.x, box!.top)
-      ..moveTo(box!.x + resolvedPadding.left, box!.y + resolvedPadding.bottom)
-      ..lineTo(box!.x + resolvedPadding.left, box!.top - resolvedPadding.top)
+      ..lineTo(box!.left, box!.top)
+      ..moveTo(box!.left + resolvedPadding.left,
+          box!.bottom + resolvedPadding.bottom)
+      ..lineTo(box!.left + resolvedPadding.left, box!.top - resolvedPadding.top)
       ..lineTo(
           box!.right - resolvedPadding.right, box!.top - resolvedPadding.top)
-      ..lineTo(
-          box!.right - resolvedPadding.right, box!.y + resolvedPadding.bottom)
+      ..lineTo(box!.right - resolvedPadding.right,
+          box!.bottom + resolvedPadding.bottom)
       ..fillPath();
   }
 
@@ -119,8 +120,8 @@ class Padding extends SingleChildWidget {
     final resolvedPadding = padding.resolve(Directionality.of(context));
     if (child != null) {
       final mat = Matrix4.identity();
-      mat.translate(
-          box!.x + resolvedPadding.left, box!.y + resolvedPadding.bottom);
+      mat.translate(box!.left + resolvedPadding.left,
+          box!.bottom + resolvedPadding.bottom);
       context.canvas
         ..saveContext()
         ..setTransform(mat);
@@ -204,7 +205,7 @@ class Transform extends SingleChildWidget {
     if (origin != null) {
       result.translate(origin!.x, origin!.y);
     }
-    result.translate(box!.x, box!.y);
+    result.translate(box!.left, box!.bottom);
     late PdfPoint translation;
     if (alignment != null) {
       final resolvedAlignment = alignment!.resolve(Directionality.of(context));
@@ -257,7 +258,7 @@ class Transform extends SingleChildWidget {
       final dy = -math.min(
           math.min(math.min(values[1], values[4]), values[7]), values[10]);
 
-      box = PdfRect.fromLTRB(
+      box = PdfRect.fromLBRT(
         0,
         0,
         math.max(math.max(math.max(values[0], values[3]), values[6]),
@@ -500,10 +501,10 @@ class FittedBox extends SingleChildWidget {
       final destinationRect =
           resolvedAlignment.inscribe(sizes.destination!, box!);
 
-      final mat =
-          Matrix4.translationValues(destinationRect.x, destinationRect.y, 0)
-            ..scale(scaleX, scaleY, 1)
-            ..translate(-sourceRect.x, -sourceRect.y);
+      final mat = Matrix4.translationValues(
+          destinationRect.left, destinationRect.bottom, 0)
+        ..scale(scaleX, scaleY, 1)
+        ..translate(-sourceRect.left, -sourceRect.bottom);
 
       context.canvas
         ..saveContext()
@@ -609,7 +610,7 @@ class CustomPaint extends SingleChildWidget {
     super.paint(context);
 
     final mat = Matrix4.identity();
-    mat.translate(box!.x, box!.y);
+    mat.translate(box!.left, box!.bottom);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
@@ -775,7 +776,7 @@ class FullPage extends SingleChildWidget {
 
     final box = _getBox(context);
     final mat = Matrix4.tryInvert(context.canvas.getTransform())!;
-    mat.translate(box.x, box.y);
+    mat.translate(box.left, box.bottom);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
@@ -798,7 +799,7 @@ class Opacity extends SingleChildWidget {
 
     if (child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box!.x, box!.y);
+      mat.translate(box!.left, box!.bottom);
       context.canvas
         ..saveContext()
         ..setTransform(mat)

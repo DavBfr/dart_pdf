@@ -264,7 +264,7 @@ class Stack extends MultiChildWidget {
         } else if (positioned.right != null) {
           x = box!.width - positioned.right! - positioned.width!;
         } else {
-          x = resolvedAlignment.inscribe(positioned.box!.size, box!).x;
+          x = resolvedAlignment.inscribe(positioned.box!.size, box!).left;
         }
 
         double? y;
@@ -273,7 +273,7 @@ class Stack extends MultiChildWidget {
         } else if (positioned.top != null) {
           y = box!.height - positioned.top! - positioned.height!;
         } else {
-          y = resolvedAlignment.inscribe(positioned.box!.size, box!).y;
+          y = resolvedAlignment.inscribe(positioned.box!.size, box!).bottom;
         }
 
         positioned.box =
@@ -287,7 +287,7 @@ class Stack extends MultiChildWidget {
     super.paint(context);
 
     final mat = Matrix4.identity();
-    mat.translate(box!.x, box!.y);
+    mat.translate(box!.left, box!.bottom);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
