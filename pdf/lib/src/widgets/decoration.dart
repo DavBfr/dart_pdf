@@ -59,8 +59,8 @@ class DecorationImage extends DecorationGraphic {
     final destinationRect = alignment.inscribe(sizes.destination!, box);
     final mat = Matrix4.translationValues(
         destinationRect.left, destinationRect.bottom, 0)
-      ..scale(scaleX, scaleY, 1)
-      ..translate(-sourceRect.left, -sourceRect.bottom);
+      ..scaleByDouble(scaleX, scaleY, 1, 1)
+      ..translateByDouble(-sourceRect.left, -sourceRect.bottom, 0, 1);
 
     context.canvas
       ..saveContext()

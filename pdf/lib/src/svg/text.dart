@@ -123,8 +123,8 @@ class SvgText extends SvgOperation {
     canvas
       ..saveContext()
       ..setTransform(Matrix4.identity()
-        ..scale(1.0, -1.0)
-        ..translate(x, -y!));
+        ..scaleByDouble(1, -1, 1, 1)
+        ..translateByDouble(x!, -y!, 0, 1));
 
     if (brush.fill!.isNotEmpty) {
       brush.fill!.setFillColor(this, canvas);
@@ -166,8 +166,8 @@ class SvgText extends SvgOperation {
     canvas
       ..saveContext()
       ..setTransform(Matrix4.identity()
-        ..scale(1.0, -1.0)
-        ..translate(x, -y!))
+        ..scaleByDouble(1, -1, 1, 1)
+        ..translateByDouble(x!, -y!, 0, 1))
       ..drawString(font, brush.fontSize!.sizeValue, text, 0, 0,
           mode: PdfTextRenderingMode.clip)
       ..restoreContext();

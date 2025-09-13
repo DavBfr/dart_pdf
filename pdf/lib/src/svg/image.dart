@@ -118,8 +118,8 @@ class SvgImg extends SvgOperation {
     canvas
       ..setTransform(
         Matrix4.identity()
-          ..translate(x, y + height, 0)
-          ..scale(sx, -sy),
+          ..translateByDouble(x, y + height, 0, 1)
+          ..scaleByDouble(sx, -sy, 1, 1),
       )
       ..drawImage(image!, 0, 0);
   }

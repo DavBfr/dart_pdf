@@ -504,7 +504,7 @@ class Table extends Widget with SpanningWidget {
     }
 
     final mat = Matrix4.identity();
-    mat.translate(box!.left, box!.bottom);
+    mat.translateByDouble(box!.left, box!.bottom, 0, 1);
     context.canvas
       ..saveContext()
       ..setTransform(mat);

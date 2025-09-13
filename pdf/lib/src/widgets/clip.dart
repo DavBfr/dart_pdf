@@ -37,7 +37,7 @@ class ClipRect extends SingleChildWidget {
 
     if (child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box!.left, box!.bottom);
+      mat.translateByDouble(box!.left, box!.bottom, 0, 1);
       context.canvas
         ..saveContext()
         ..drawBox(box!)
@@ -75,7 +75,7 @@ class ClipRRect extends SingleChildWidget {
 
     if (child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box!.left, box!.bottom);
+      mat.translateByDouble(box!.left, box!.bottom, 0, 1);
       context.canvas
         ..saveContext()
         ..drawRRect(box!.left, box!.bottom, box!.width, box!.height,
@@ -112,7 +112,7 @@ class ClipOval extends SingleChildWidget {
 
     if (child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box!.left, box!.bottom);
+      mat.translateByDouble(box!.left, box!.bottom, 0, 1);
       context.canvas
         ..saveContext()
         ..drawEllipse(box!.left + rx, box!.bottom + ry, rx, ry)

@@ -107,11 +107,8 @@ class SvgImage extends Widget {
     final dy = sourceRect.bottom * sy;
 
     final mat = Matrix4.identity()
-      ..translate(
-        box!.left - dx,
-        box!.bottom + dy + box!.height,
-      )
-      ..scale(sx, -sy);
+      ..translateByDouble(box!.left - dx, box!.bottom + dy + box!.height, 0, 1)
+      ..scaleByDouble(sx, -sy, 1, 1);
 
     context.canvas.saveContext();
     if (clip) {

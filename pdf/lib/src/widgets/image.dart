@@ -186,12 +186,10 @@ class Shape extends Widget {
       ..saveContext()
       ..setTransform(
         Matrix4.identity()
-          ..translate(box!.left, box!.bottom + box!.height)
-          ..scale(
-            box!.width / _boundingBox.width,
-            -box!.height / _boundingBox.height,
-          )
-          ..translate(-_boundingBox.left, -_boundingBox.bottom),
+          ..translateByDouble(box!.left, box!.bottom + box!.height, 0, 1)
+          ..scaleByDouble(box!.width / _boundingBox.width,
+              -box!.height / _boundingBox.height, 1, 1)
+          ..translateByDouble(-_boundingBox.left, -_boundingBox.bottom, 0, 1),
       );
 
     if (fillColor != null) {

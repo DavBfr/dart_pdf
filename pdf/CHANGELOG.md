@@ -7,6 +7,7 @@
 - creates catalog.names earlier for attached files [ilaurillard]
 - fix: Prevent "Index out of range" error when reading simple glyphs in certain fonts  [Eghosa Osayande]
 - Improve PdfRect naming consistency
+- Migrate to vector_math 2.2.0
 
 ## 3.11.3
 

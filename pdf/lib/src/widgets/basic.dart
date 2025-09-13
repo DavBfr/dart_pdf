@@ -120,8 +120,8 @@ class Padding extends SingleChildWidget {
     final resolvedPadding = padding.resolve(Directionality.of(context));
     if (child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box!.left + resolvedPadding.left,
-          box!.bottom + resolvedPadding.bottom);
+      mat.translateByDouble(box!.left + resolvedPadding.left,
+          box!.bottom + resolvedPadding.bottom, 0, 1);
       context.canvas
         ..saveContext()
         ..setTransform(mat);
@@ -203,21 +203,21 @@ class Transform extends SingleChildWidget {
   Matrix4 _effectiveTransform(Context context) {
     final result = Matrix4.identity();
     if (origin != null) {
-      result.translate(origin!.x, origin!.y);
+      result.translateByDouble(origin!.x, origin!.y, 0, 1);
     }
-    result.translate(box!.left, box!.bottom);
+    result.translateByDouble(box!.left, box!.bottom, 0, 1);
     late PdfPoint translation;
     if (alignment != null) {
       final resolvedAlignment = alignment!.resolve(Directionality.of(context));
       translation = resolvedAlignment.alongSize(box!.size);
-      result.translate(translation.x, translation.y);
+      result.translateByDouble(translation.x, translation.y, 0, 1);
     }
     result.multiply(transform);
     if (alignment != null) {
-      result.translate(-translation.x, -translation.y);
+      result.translateByDouble(-translation.x, -translation.y, 0, 1);
     }
     if (origin != null) {
-      result.translate(-origin!.x, -origin!.y);
+      result.translateByDouble(-origin!.x, -origin!.y, 0, 1);
     }
     return result;
   }
@@ -269,7 +269,7 @@ class Transform extends SingleChildWidget {
             dy,
       );
 
-      transform.leftTranslate(dx, dy);
+      transform.leftTranslateByDouble(dx, dy, 0, 1);
     } else {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
     }
@@ -503,8 +503,8 @@ class FittedBox extends SingleChildWidget {
 
       final mat = Matrix4.translationValues(
           destinationRect.left, destinationRect.bottom, 0)
-        ..scale(scaleX, scaleY, 1)
-        ..translate(-sourceRect.left, -sourceRect.bottom);
+        ..scaleByDouble(scaleX, scaleY, 1, 1)
+        ..translateByDouble(-sourceRect.left, -sourceRect.bottom, 0, 1);
 
       context.canvas
         ..saveContext()
@@ -610,7 +610,7 @@ class CustomPaint extends SingleChildWidget {
     super.paint(context);
 
     final mat = Matrix4.identity();
-    mat.translate(box!.left, box!.bottom);
+    mat.translateByDouble(box!.left, box!.bottom, 0, 1);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
@@ -776,7 +776,7 @@ class FullPage extends SingleChildWidget {
 
     final box = _getBox(context);
     final mat = Matrix4.tryInvert(context.canvas.getTransform())!;
-    mat.translate(box.left, box.bottom);
+    mat.translateByDouble(box.left, box.bottom, 0, 1);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
@@ -799,7 +799,7 @@ class Opacity extends SingleChildWidget {
 
     if (child != null) {
       final mat = Matrix4.identity();
-      mat.translate(box!.left, box!.bottom);
+      mat.translateByDouble(box!.left, box!.bottom, 0, 1);
       context.canvas
         ..saveContext()
         ..setTransform(mat)

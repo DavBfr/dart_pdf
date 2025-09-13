@@ -976,7 +976,7 @@ class PdfGraphics {
       // Our box bézier arcs can't handle rotations directly
       // move to a well known point, eliminate phi and transform the other point
       final mat = Matrix4.identity();
-      mat.translate(-x1, -y1);
+      mat.translateByDouble(-x1, -y1, 0, 1);
       mat.rotateZ(-phi);
       final tr = mat.transform3(Vector3(x2, y2, 0));
       _endToCenterParameters(0, 0, tr[0], tr[1], large, sweep, rx, ry);
