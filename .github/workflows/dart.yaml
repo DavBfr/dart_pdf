@@ -45,6 +45,45 @@ jobs:
       - name: Build demo for Web
         run: cd demo; flutter build -v web
 
+  linux-arm:
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          # Remove checks when arm is supported on stable: https://github.com/flutter/flutter/issues/114349
+          flutter-version: '1c6c6f4'
+          channel: 'master'
+      # doctor is needed to download the arm master artifacts:
+      - run: flutter doctor
+      - run: flutter --version
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: 17
+      - name: Enable Linux for flutter
+        run: flutter config --enable-linux-desktop
+      - name: Update repo
+        run: sudo apt update
+      - name: Install utils
+        run: sudo apt install poppler-utils imagemagick clang cmake ninja-build pkg-config libgtk-3-dev
+      - name: Run analysis
+        run: make analyze
+      - name: Run tests
+        run: make test
+      - name: Run readme tests
+        run: make test-readme
+      - name: Verify that nothing changed
+        run: test -z "$(git status --porcelain | tee /dev/stderr)"
+      - name: Push to codecov
+        run: bash <(curl -s https://codecov.io/bash)
+      - name: Prepare build
+        run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
+      - name: Build example for Linux
+        run: cd printing/example; flutter build -v linux
+
   windows:
     runs-on: windows-latest
 
@@ -53,6 +92,26 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+      - name: Enable Windows for flutter
+        run: flutter config --enable-windows-desktop
+      - name: Prepare build
+        run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
+      - name: Build example for Windows
+        run: cd printing/example; flutter build -v windows
+
+  windows-arm:
+    runs-on: windows-11-arm
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          # Remove checks when arm is supported on stable: https://github.com/flutter/flutter/issues/164431
+          flutter-version: '1c6c6f4'
+          channel: 'master'
+      # doctor is needed to download the arm master artifacts:
+      - run: flutter doctor
+      - run: flutter --version
       - name: Enable Windows for flutter
         run: flutter config --enable-windows-desktop
       - name: Prepare build

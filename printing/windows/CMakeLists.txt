@@ -17,7 +17,8 @@ set(PROJECT_NAME "printing")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
 set(PDFIUM_VERSION "5200" CACHE STRING "Version of pdfium used")
-set(PDFIUM_ARCH "x64" CACHE STRING "Architecture of pdfium used")
+string(REPLACE "windows-" "" TARGET_ARCH ${FLUTTER_TARGET_PLATFORM})
+set(PDFIUM_ARCH ${TARGET_ARCH} CACHE STRING "Architecture of pdfium used")
 
 if(${PDFIUM_VERSION} STREQUAL "latest")
   set(
