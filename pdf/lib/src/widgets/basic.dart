@@ -322,6 +322,7 @@ class Align extends SingleChildWidget {
     if (child != null) {
       child!.layout(context, constraints.loosen(), parentUsesSize: true);
       assert(child!.box != null);
+      assert(constraints.debugAssertIsValid());
 
       box = constraints.constrainRect(
           width: shrinkWrapWidth
