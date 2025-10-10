@@ -476,7 +476,7 @@ class Table extends Widget with SpanningWidget {
 
       var lineHeight = 0.0;
       final unspannedRow = tableCells[rowIndex];
-      var x = 0.0;
+      var left = 0.0;
       for (var colIndex = 0; colIndex < unspannedRow.length; colIndex++) {
         final (colSpan, rowSpan, spannedColIndex) = unspannedRow[colIndex];
 
@@ -487,14 +487,14 @@ class Table extends Widget with SpanningWidget {
           final childConstraints = BoxConstraints.tightFor(width: spannedWidth);
           cell.layout(context, childConstraints);
           assert(cell.box != null);
-          cell.box = cell.box!.copyWith(x: x, y: totalHeight);
+          cell.box = cell.box!.copyWith(left: left, bottom: totalHeight);
           // Ignore row-spanned cells for now
           if (rowSpan <= 1) {
             lineHeight = math.max(lineHeight, cell.box!.height);
           }
         }
         assert(widths[colIndex] > 0.0);
-        x += widths[colIndex];
+        left += widths[colIndex];
       }
 
       if (totalHeight + lineHeight > constraints.maxHeight) {
@@ -523,7 +523,7 @@ class Table extends Widget with SpanningWidget {
       var lineHeight = _getHeight(pageRowIndex);
       final unspannedRow = tableCells[rowIndex];
 
-      var x = 0.0;
+      var left = 0.0;
       for (var colIndex = 0; colIndex < unspannedRow.length; colIndex++) {
         final (colSpan, rowSpan, spannedColIndex) = unspannedRow[colIndex];
 
@@ -535,7 +535,7 @@ class Table extends Widget with SpanningWidget {
           final childConstraints = BoxConstraints.tightFor(width: spannedWidth);
           cell.layout(context, childConstraints);
           assert(cell.box != null);
-          cell.box = cell.box!.copyWith(x: x, y: totalHeight);
+          cell.box = cell.box!.copyWith(left: left, bottom: totalHeight);
           assert(rowSpan >= 1);
           if (rowSpan > 1) {
             final rowSpannedHeight = _getSpannedHeight(pageRowIndex, rowSpan);
@@ -552,7 +552,7 @@ class Table extends Widget with SpanningWidget {
             lineHeight = math.max(lineHeight, cell.box!.height);
           }
         }
-        x += widths[colIndex];
+        left += widths[colIndex];
       }
 
       _heights[pageRowIndex] = lineHeight;
@@ -561,7 +561,7 @@ class Table extends Widget with SpanningWidget {
 
       if (align == TableCellVerticalAlignment.full) {
         // Compute the layout again to give the full height to all cells in this row (as lineHeight may has changed on later columns)
-        x = 0;
+        left = 0;
         for (var colIndex = 0; colIndex < unspannedRow.length; colIndex++) {
           final (colSpan, rowSpan, spannedColIndex) = unspannedRow[colIndex];
           if (spannedColIndex != null) {
@@ -572,9 +572,9 @@ class Table extends Widget with SpanningWidget {
                 width: spannedWidth, height: rowSpannedHeight);
             cell.layout(context, childConstraints);
             assert(cell.box != null);
-            cell.box = cell.box!.copyWith(x: x, y: totalHeight);
+            cell.box = cell.box!.copyWith(left: left, bottom: totalHeight);
           }
-          x += widths[colIndex];
+          left += widths[colIndex];
         }
       }
 
@@ -607,22 +607,22 @@ class Table extends Widget with SpanningWidget {
         switch (align) {
           case TableCellVerticalAlignment.bottom:
             childY = totalHeight -
-                child.box!.y -
+                child.box!.bottom -
                 _getSpannedHeight(pageRowIndex, rowSpan);
             break;
           case TableCellVerticalAlignment.middle:
             childY = totalHeight -
-                child.box!.y -
+                child.box!.bottom -
                 (_getSpannedHeight(pageRowIndex, rowSpan) + child.box!.height) /
                     2;
             break;
           case TableCellVerticalAlignment.top:
           case TableCellVerticalAlignment.full:
-            childY = totalHeight - child.box!.y - child.box!.height;
+            childY = totalHeight - child.box!.bottom - child.box!.height;
             break;
         }
 
-        child.box = child.box!.copyWith(y: childY);
+        child.box = child.box!.copyWith(bottom: childY);
       }
       pageRowIndex++;
     }
@@ -639,7 +639,7 @@ class Table extends Widget with SpanningWidget {
     }
 
     final mat = Matrix4.identity();
-    mat.translate(box!.x, box!.y);
+    mat.translateByDouble(box!.left, box!.bottom, 0, 1);
     context.canvas
       ..saveContext()
       ..setTransform(mat);
@@ -656,7 +656,7 @@ class Table extends Widget with SpanningWidget {
         var y = double.infinity;
         var h = 0.0;
         for (final child in row.children) {
-          y = math.min(y, child.box!.y);
+          y = math.min(y, child.box!.bottom);
           h = math.max(h, child.box!.height);
         }
         row.decoration!.paint(
@@ -670,7 +670,7 @@ class Table extends Widget with SpanningWidget {
         final cellBox = cell.box!;
         context.canvas
           ..saveContext()
-          ..drawRect(cellBox.x, cellBox.y, cellBox.width, cellBox.height)
+          ..drawRect(cellBox.left, cellBox.bottom, cellBox.width, cellBox.height)
           ..clipPath();
         cell.paint(context);
         context.canvas.restoreContext();
@@ -689,7 +689,7 @@ class Table extends Widget with SpanningWidget {
         var y = double.infinity;
         var h = 0.0;
         for (final child in row.children) {
-          y = math.min(y, child.box!.y);
+          y = math.min(y, child.box!.bottom);
           h = math.max(h, child.box!.height);
         }
         row.decoration!.paint(
@@ -727,12 +727,12 @@ class Table extends Widget with SpanningWidget {
             // Use the height(s) of the (spanned) row to determine the bottom of box,
             // otherwise it will draw gaps for cells which have a smaller height.
             context.canvas.moveTo(
-                cellBox.x,
+                cellBox.left,
                 rowTop -
                     (cell is TableCell
                         ? _getSpannedHeight(pageRowIndex, cell.rowSpan)
                         : _getHeight(pageRowIndex)));
-            context.canvas.lineTo(cellBox.x, rowTop);
+            context.canvas.lineTo(cellBox.left, rowTop);
             context.canvas.setStrokeColor(border!.verticalInside.color);
             context.canvas.setLineWidth(border!.verticalInside.width);
             context.canvas.strokePath();

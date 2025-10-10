@@ -43,7 +43,7 @@ void _paintImage({
   final dx = halfWidthDelta + alignment.x * halfWidthDelta;
   final dy = halfHeightDelta + alignment.y * halfHeightDelta;
 
-  final destinationPosition = rect.topLeft.translate(dx, dy);
+  final destinationPosition = rect.leftBottom.translate(dx, dy);
   final destinationRect =
       PdfRect.fromPoints(destinationPosition, destinationSize);
   final sourceRect = alignment.inscribe(
@@ -64,8 +64,8 @@ void _drawImageRect(PdfGraphics canvas, PdfImage image, PdfRect sourceRect,
     ..clipPath()
     ..drawImage(
       image,
-      destinationRect.x - sourceRect.x * fw,
-      destinationRect.y - sourceRect.y * fh,
+      destinationRect.left - sourceRect.left * fw,
+      destinationRect.bottom - sourceRect.bottom * fh,
       image.width.toDouble() * fw,
       image.height.toDouble() * fh,
     )
@@ -186,12 +186,10 @@ class Shape extends Widget {
       ..saveContext()
       ..setTransform(
         Matrix4.identity()
-          ..translate(box!.x, box!.y + box!.height)
-          ..scale(
-            box!.width / _boundingBox.width,
-            -box!.height / _boundingBox.height,
-          )
-          ..translate(-_boundingBox.x, -_boundingBox.y),
+          ..translateByDouble(box!.left, box!.bottom + box!.height, 0, 1)
+          ..scaleByDouble(box!.width / _boundingBox.width,
+              -box!.height / _boundingBox.height, 1, 1)
+          ..translateByDouble(-_boundingBox.left, -_boundingBox.bottom, 0, 1),
       );
 
     if (fillColor != null) {

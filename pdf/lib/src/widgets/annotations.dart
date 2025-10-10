@@ -63,7 +63,7 @@ class Anchor extends SingleChildWidget {
 
     if (description != null) {
       final rb = mat.transform3(Vector3(box!.right, box!.top, 0));
-      final iBox = PdfRect.fromLTRB(lt.x, lt.y, rb.x, rb.y);
+      final iBox = PdfRect.fromLBRT(lt.x, lt.y, rb.x, rb.y);
       PdfAnnot(
         context.page,
         PdfAnnotText(rect: iBox, content: description!),

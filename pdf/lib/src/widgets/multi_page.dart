@@ -202,15 +202,13 @@ class MultiPage extends Page {
         ..setTransform(
           Matrix4.identity()
             ..rotateZ(-math.pi / 2)
-            ..translate(
-              x - pageHeight + _margin.top - _margin.left,
-              y + _margin.left - _margin.bottom,
-            ),
+            ..translateByDouble(x - pageHeight + _margin.top - _margin.left,
+                y + _margin.left - _margin.bottom, 0, 1),
         );
       child.paint(context);
       context.canvas.restoreContext();
     } else {
-      child.box = child.box!.copyWith(x: x, y: y);
+      child.box = child.box!.copyWith(left: x, bottom: y);
       child.paint(context);
     }
   }

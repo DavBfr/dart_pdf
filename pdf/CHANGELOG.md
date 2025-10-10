@@ -4,6 +4,15 @@
 
 - Add support for table spans [gustl22]
 
+## 3.11.4
+
+- Improve performance of table layout [Pieter van Loon]
+- Reduce freezes on web [Kostia Sokolovskyi]
+- creates catalog.names earlier for attached files [ilaurillard]
+- fix: Prevent "Index out of range" error when reading simple glyphs in certain fonts  [Eghosa Osayande]
+- Improve PdfRect naming consistency
+- Migrate to vector_math 2.2.0
+
 ## 3.11.3
 
 - Fix CMYK

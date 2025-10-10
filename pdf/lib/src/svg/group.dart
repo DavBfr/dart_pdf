@@ -75,8 +75,8 @@ class SvgGroup extends SvgOperation {
     var x = double.infinity, y = double.infinity, w = 0.0, h = 0.0;
     for (final child in children) {
       final b = child.boundingBox();
-      x = min(b.x, x);
-      y = min(b.y, y);
+      x = min(b.left, x);
+      y = min(b.bottom, y);
       w = max(b.width, w);
       h = max(b.height, w);
     }
