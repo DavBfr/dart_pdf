@@ -25,6 +25,8 @@ import 'package:meta/meta.dart';
 import '../options.dart';
 import 'bidi_utils.dart' as bidi;
 import 'font_metrics.dart';
+import 'gpos_parser.dart';
+import 'gsub_parser.dart';
 
 enum TtfParserName {
   copyright,
@@ -54,11 +56,15 @@ enum TtfParserName {
 
 @immutable
 class TtfGlyphInfo {
-  const TtfGlyphInfo(this.index, this.data, this.compounds);
+  TtfGlyphInfo(this.index, this.data, this.compounds);
 
   final int index;
   final Uint8List data;
   final List<int> compounds;
+  bool isMark = false;
+  bool isLigature = false;
+  bool isBase = false;
+  int markAttachmentType = 0;
 
   TtfGlyphInfo copy() {
     return TtfGlyphInfo(
@@ -153,6 +159,12 @@ class TtfParser {
         tableOffsets.containsKey(cbdt_table)) {
       _parseBitmaps();
     }
+    if (tableOffsets.containsKey(gsub_table)) {
+      _parseGsub();
+    }
+    if (tableOffsets.containsKey(gpos_table)) {
+      _parseGpos();
+    }
   }
 
   static const String head_table = 'head';
@@ -167,6 +179,8 @@ class TtfParser {
   static const String cbdt_table = 'CBDT';
   static const String post_table = 'post';
   static const String os_2_table = 'OS/2';
+  static const String gsub_table = 'GSUB';
+  static const String gpos_table = 'GPOS';
 
   final ByteData bytes;
   final tableOffsets = <String, int>{};
@@ -177,6 +191,11 @@ class TtfParser {
   final glyphSizes = <int>[];
   final glyphInfoMap = <int, PdfFontMetrics>{};
   final bitmapOffsets = <int, TtfBitmapInfo>{};
+  GsubTableParser? gsub;
+  GposTableParser? gpos;
+
+  dynamic GDEF;
+  dynamic variationProcessor;
 
   int get unitsPerEm => bytes.getUint16(tableOffsets[head_table]! + 18);
 
@@ -652,4 +671,16 @@ class TtfParser {
 
   TtfBitmapInfo? getBitmap(int charcode) =>
       bitmapOffsets[charToGlyphIndexMap[charcode]];
+
+  void _parseGsub() {
+    final int basePosition = tableOffsets[gsub_table]!;
+    final int length = tableSize[gsub_table]!;
+
+    gsub = GsubTableParser(data: bytes, startPosition: basePosition);
+    print(gsub);
+  }
+
+  void _parseGpos() {
+    print("This font has GPOS");
+  }
 }
