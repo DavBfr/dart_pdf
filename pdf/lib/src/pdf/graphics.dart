@@ -28,6 +28,7 @@ import 'format/num.dart';
 import 'format/stream.dart';
 import 'graphic_state.dart';
 import 'obj/font.dart';
+import 'obj/formxobject.dart';
 import 'obj/graphic_stream.dart';
 import 'obj/image.dart';
 import 'obj/page.dart';
