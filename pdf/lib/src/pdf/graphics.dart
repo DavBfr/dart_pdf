@@ -316,6 +316,46 @@ class PdfGraphics {
     }());
   }
 
+  void drawXObject(PdfFormXObject xobj, double x, double y,
+      {double? w, double? h}) {
+    _page.addXObject(xobj);
+    final String name = xobj.name;
+    final bbox = xobj.params['/BBox'] as PdfArray;
+    final origW = (bbox.values[2] as PdfNum).value.toDouble();
+    final origH = (bbox.values[3] as PdfNum).value.toDouble();
+    final targetW = w ?? origW;
+    final targetH = h ?? origH;
+
+    final scaleX = targetW / origW;
+    final scaleY = targetH / origH;
+
+    var o = 0;
+    assert(() {
+      if (_page.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
+      }
+      return true;
+    }());
+
+    _buf.putString('q ');
+    PdfNumList(<double>[scaleX, 0, 0, scaleY, x, y]).output(_page, _buf);
+    _buf.putString(' cm ');
+    _buf.putString('/$name Do ');
+    _buf.putString('Q ');
+
+    _page.altered = true;
+
+    assert(() {
+      if (_page.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment(
+            'drawXObject2(${xobj.ref()}, x: $x, y: $y, w: $targetW, h: $targetH)');
+      }
+      return true;
+    }());
+  }
+
   /// Draws an image onto the page.
   void drawImage(PdfImage img, double x, double y, [double? w, double? h]) {
     var o = 0;
