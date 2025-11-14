@@ -17,6 +17,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
@@ -76,6 +77,35 @@ void main() {
         ],
       ),
       index: 1,
+    );
+  });
+
+  test('page number with footer', () {
+    pdf.addPage(
+      Page(
+        build: (final context) {
+          return Column(
+            children: [TableOfContent()],
+          );
+        },
+      ),
+    );
+    pdf.addPage(
+      MultiPage(
+        footer: (final Context context) {
+          return Container(
+            margin: const EdgeInsets.only(top: 1.0 * PdfPageFormat.cm),
+            child: Text(
+              'Page ${context.pageNumber} of ${context.pagesCount}',
+            ),
+          );
+        },
+        build: (final context) => [
+          Header(text: 'a', level: 1),
+          Text(LoremText().paragraph(600)),
+          Header(text: 'b', level: 1),
+        ],
+      ),
     );
   });
 
