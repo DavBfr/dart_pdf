@@ -581,3 +581,18 @@ class Table extends Widget with SpanningWidget {
         : 0.0;
   }
 }
+
+extension RtlList<E> on List<E> {
+  List<E> showRTL() {
+    var result = <E>[];
+    for (var i = length - 1; i >= 0; i--) {
+      dynamic element;
+      element = elementAt(i);
+      if (element is List) {
+        element = element.showRTL();
+      }
+      result.add(element);
+    }
+    return result;
+  }
+}
