@@ -57,7 +57,7 @@ class PdfColor {
       return PdfColor(red, green, blue, alpha);
     }
 
-    assert(color.length == 3 || color.length == 6 || color.length == 8);
+    assert(color.length == 6 || color.length == 8);
 
     red = int.parse(color.substring(0, 2), radix: 16) / 255;
     green = int.parse(color.substring(2, 4), radix: 16) / 255;
