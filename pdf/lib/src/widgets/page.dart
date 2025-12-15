@@ -43,6 +43,7 @@ class Page {
     EdgeInsetsGeometry? margin,
     bool clip = false,
     TextDirection? textDirection,
+    List<Inherited>? inherited,
   })  : assert(
             pageTheme == null ||
                 (pageFormat == null &&
@@ -61,6 +62,7 @@ class Page {
               clip: clip,
               textDirection: textDirection,
             ),
+        inherited = inherited ?? <Inherited>[],
         _build = build;
 
   final PageTheme pageTheme;
@@ -80,6 +82,8 @@ class Page {
   EdgeInsetsGeometry? get margin => pageTheme.margin;
 
   EdgeInsets? get resolvedMargin => margin?.resolve(pageTheme.textDirection);
+
+  final List<Inherited> inherited;
 
   @protected
   void debugPaint(Context context) {
@@ -133,6 +137,7 @@ class Page {
       calculatedTheme,
       if (pageTheme.textDirection != null)
         InheritedDirectionality(pageTheme.textDirection),
+      ...inherited,
     ]);
 
     Widget? background;

@@ -161,6 +161,7 @@ class MultiPage extends Page {
     PageOrientation? orientation,
     EdgeInsetsGeometry? margin,
     TextDirection? textDirection,
+    List<Inherited>? inherited,
   })  : _buildList = build,
         assert(maxPages > 0),
         super(
@@ -171,6 +172,7 @@ class MultiPage extends Page {
           theme: theme,
           orientation: orientation,
           textDirection: textDirection,
+          inherited: inherited,
         );
 
   final BuildListCallback _buildList;
@@ -245,6 +247,7 @@ class MultiPage extends Page {
       calculatedTheme,
       if (pageTheme.textDirection != null)
         InheritedDirectionality(pageTheme.textDirection),
+      ...inherited,
     ]);
     final children = _buildList(baseContext);
     WidgetContext? widgetContext;
