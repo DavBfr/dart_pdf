@@ -180,15 +180,15 @@ class SvgText extends SvgOperation {
   @override
   PdfRect boundingBox() {
     final b = metrics.toPdfRect();
-    var x = b.left, y = b.bottom, w = b.width, h = b.height;
+    var left = b.left, bottom = b.bottom, right = b.right, top = b.top;
     for (final child in tspan) {
       final b = child.boundingBox();
-      x = min(b.left, x);
-      y = min(b.bottom, y);
-      w = max(b.width, w);
-      h = max(b.height, w);
+      left = min(b.left, left);
+      bottom = min(b.bottom, bottom);
+      right = max(b.right, right);
+      top = max(b.top, top);
     }
 
-    return PdfRect(x, y, w, h);
+    return PdfRect.fromLBRT(left, bottom, right, top);
   }
 }
