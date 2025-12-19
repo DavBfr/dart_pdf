@@ -28,7 +28,7 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
   http: ">=0.13.0 <2.0.0"
-  image: ">=4.1.0 <4.7.1"
+  image: ">=4.1.0 <=4.7.1"
   meta: ">=1.3.0 <2.0.0"
   pdf: ^3.10.0
   pdf_widget_wrapper: '>=1.0.4 <2.0.0'
