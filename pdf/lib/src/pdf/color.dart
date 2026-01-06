@@ -142,6 +142,31 @@ class PdfColor {
   /// Blue component
   final double blue;
 
+  /// Create a copy of this color with a different alpha value
+  PdfColor withAlpha(double alpha) {
+    return PdfColor(red, green, blue, alpha);
+  }
+
+  /// Create a copy of this color with a different red value
+  PdfColor withRed(double red) {
+    return PdfColor(red, green, blue, alpha);
+  }
+
+  /// Create a copy of this color with a different green value
+  PdfColor withGreen(double green) {
+    return PdfColor(red, green, blue, alpha);
+  }
+
+  /// Create a copy of this color with a different blue value
+  PdfColor withBlue(double blue) {
+    return PdfColor(red, green, blue, alpha);
+  }
+
+  /// Create a copy of this color with different values
+  PdfColor withValues(double? alpha, double? red, double? green, double? blue) {
+    return PdfColor(red ?? this.red, green ?? this.green, blue ?? this.blue, alpha ?? this.alpha);
+  }
+
   /// Get the int32 representation of this color
   int toInt() =>
       ((((alpha * 255.0).round() & 0xff) << 24) |
@@ -456,6 +481,21 @@ class PdfColorHsv extends PdfColor {
   /// Brightness
   final double value;
 
+  /// Create a copy of this HSV color with a different hue value
+  PdfColorHsv withHue(double hue) {
+    return PdfColorHsv(hue, saturation, value, alpha);
+  }
+
+  /// Create a copy of this HSV color with a different saturation value
+  PdfColorHsv withSaturation(double saturation) {
+    return PdfColorHsv(hue, saturation, value, alpha);
+  }
+
+  /// Create a copy of this HSV color with a different value (brightness) value
+  PdfColorHsv withValue(double value) {
+    return PdfColorHsv(hue, saturation, value, alpha);
+  }
+
   @override
   PdfColorHsv toHsv() {
     return this;
@@ -594,6 +634,21 @@ class PdfColorHsl extends PdfColor {
 
   /// Lightness component
   final double lightness;
+
+  /// Create a copy of this HSL color with a different hue value
+  PdfColorHsl withHue(double hue) {
+    return PdfColorHsl(hue, saturation, lightness, alpha);
+  }
+
+  /// Create a copy of this HSL color with a different saturation value
+  PdfColorHsl withSaturation(double saturation) {
+    return PdfColorHsl(hue, saturation, lightness, alpha);
+  }
+
+  /// Create a copy of this HSL color with a different lightness value
+  PdfColorHsl withLightness(double lightness) {
+    return PdfColorHsl(hue, saturation, lightness, alpha);
+  }
 
   @override
   PdfColorHsl toHsl() {

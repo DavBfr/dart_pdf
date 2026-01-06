@@ -15,9 +15,8 @@
  */
 
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' as services;
 
 import '../mutex.dart';
 
@@ -40,19 +39,21 @@ mixin AssetManifest {
     try {
       if (!_ready) {
         try {
-          final jsonString = await rootBundle.loadString('AssetManifest.json');
-          final jsonData = json.decode(jsonString) as Map<String, dynamic>;
-          _assets.addAll(jsonData.keys);
+          final assetManifest = await services.AssetManifest.loadFromAssetBundle(services.rootBundle);
+          final assets = assetManifest.listAssets();
+          if (assets.isNotEmpty) {
+            _assets.addAll(assets);
+          }
         } catch (e) {
           assert(() {
             // ignore: avoid_print
             print(
-              'Error loading AssetManifest.json $e Try to call first:\nWidgetsFlutterBinding.ensureInitialized();',
+              'Error loading AssetManifest API: $e\n'
+                  'Make sure you called WidgetsFlutterBinding.ensureInitialized() in main()',
             );
             return true;
           }());
 
-          rootBundle.evict('AssetManifest.json');
           _failed = true;
           _ready = true;
           return false;

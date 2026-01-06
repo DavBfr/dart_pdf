@@ -20,73 +20,90 @@ import 'point.dart';
 
 @immutable
 class PdfRect {
-  const PdfRect(this.x, this.y, this.width, this.height);
+  const PdfRect(this.left, this.bottom, this.width, this.height);
 
+  @Deprecated('Use PdfRect.fromLBRT instead')
   factory PdfRect.fromLTRB(
-      double left, double top, double right, double bottom) {
-    return PdfRect(left, top, right - left, bottom - top);
+      double left, double bottom, double right, double top) = PdfRect.fromLBRT;
+
+  factory PdfRect.fromLBRT(
+      double left, double bottom, double right, double top) {
+    return PdfRect(left, bottom, right - left, top - bottom);
   }
 
   factory PdfRect.fromPoints(PdfPoint offset, PdfPoint size) {
     return PdfRect(offset.x, offset.y, size.x, size.y);
   }
 
-  final double x, y, width, height;
+  final double left, bottom, width, height;
 
   static const PdfRect zero = PdfRect(0, 0, 0, 0);
 
-  double get left => x;
+  @Deprecated('Use left instead')
+  double get x => left;
 
-  double get bottom => y;
+  @Deprecated('Use bottom instead')
+  double get y => bottom;
 
-  double get right => x + width;
+  double get right => left + width;
 
-  double get top => y + height;
+  double get top => bottom + height;
 
   @Deprecated('type => horizontalCenter')
   double get horizondalCenter => horizontalCenter;
 
-  double get horizontalCenter => x + width / 2;
+  double get horizontalCenter => left + width / 2;
 
-  double get verticalCenter => y + height / 2;
+  double get verticalCenter => bottom + height / 2;
 
   @override
-  String toString() => 'PdfRect($x, $y, $width, $height)';
+  String toString() => 'PdfRect($left, $bottom, $width, $height)';
 
   PdfRect operator *(double factor) {
-    return PdfRect(x * factor, y * factor, width * factor, height * factor);
+    return PdfRect(
+        left * factor, bottom * factor, width * factor, height * factor);
   }
 
-  PdfPoint get offset => PdfPoint(x, y);
+  PdfPoint get offset => PdfPoint(left, bottom);
 
   PdfPoint get size => PdfPoint(width, height);
 
-  PdfPoint get topLeft => PdfPoint(x, y);
+  @Deprecated('Use leftBottom instead')
+  PdfPoint get topLeft => PdfPoint(left, bottom);
+  PdfPoint get leftBottom => PdfPoint(left, bottom);
 
-  PdfPoint get topRight => PdfPoint(right, y);
+  @Deprecated('Use rightBottom instead')
+  PdfPoint get topRight => PdfPoint(right, bottom);
+  PdfPoint get rightBottom => PdfPoint(right, bottom);
 
-  PdfPoint get bottomLeft => PdfPoint(x, top);
+  @Deprecated('Use leftTop instead')
+  PdfPoint get bottomLeft => PdfPoint(left, top);
+  PdfPoint get leftTop => PdfPoint(left, top);
 
+  @Deprecated('Use rightTop instead')
   PdfPoint get bottomRight => PdfPoint(right, top);
+  PdfPoint get rightTop => PdfPoint(right, top);
 
   /// Returns a new rectangle with edges moved outwards by the given delta.
   PdfRect inflate(double delta) {
-    return PdfRect.fromLTRB(
-        left - delta, top - delta, right + delta, bottom + delta);
+    return PdfRect.fromLBRT(
+        left - delta, bottom - delta, right + delta, top + delta);
   }
 
   /// Returns a new rectangle with edges moved inwards by the given delta.
   PdfRect deflate(double delta) => inflate(-delta);
 
   PdfRect copyWith({
-    double? x,
-    double? y,
+    @Deprecated('Use left instead') double? x,
+    double? left,
+    @Deprecated('Use bottom instead') double? y,
+    double? bottom,
     double? width,
     double? height,
   }) {
     return PdfRect(
-      x ?? this.x,
-      y ?? this.y,
+      left ?? x ?? this.left,
+      bottom ?? y ?? this.bottom,
       width ?? this.width,
       height ?? this.height,
     );

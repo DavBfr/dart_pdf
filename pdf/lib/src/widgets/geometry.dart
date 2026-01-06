@@ -215,6 +215,20 @@ class BoxConstraints {
         maxHeight: maxHeight ?? this.maxHeight);
   }
 
+  bool debugAssertIsValid() {
+    if (minWidth.isInfinite && minHeight.isInfinite) {
+      throw AssertionError(
+          'BoxConstraints forces an infinite width and infinite height.');
+    }
+    if (minWidth.isInfinite) {
+      throw AssertionError('BoxConstraints forces an infinite width.');
+    }
+    if (minHeight.isInfinite) {
+      throw AssertionError('BoxConstraints forces an infinite height.');
+    }
+    return true;
+  }
+
   @override
   String toString() {
     return 'BoxConstraint <$minWidth, $maxWidth> <$minHeight, $maxHeight>';
@@ -668,8 +682,8 @@ class Alignment extends AlignmentGeometry {
     final halfWidthDelta = (rect.width - size.x) / 2.0;
     final halfHeightDelta = (rect.height - size.y) / 2.0;
     return PdfRect(
-      rect.x + halfWidthDelta + x * halfWidthDelta,
-      rect.y + halfHeightDelta + y * halfHeightDelta,
+      rect.left + halfWidthDelta + x * halfWidthDelta,
+      rect.bottom + halfHeightDelta + y * halfHeightDelta,
       size.x,
       size.y,
     );
@@ -934,11 +948,11 @@ PdfPoint transformPoint(Matrix4 transform, PdfPoint point) {
 }
 
 PdfRect transformRect(Matrix4 transform, PdfRect rect) {
-  final point1 = transformPoint(transform, rect.topLeft);
-  final point2 = transformPoint(transform, rect.topRight);
-  final point3 = transformPoint(transform, rect.bottomLeft);
-  final point4 = transformPoint(transform, rect.bottomRight);
-  return PdfRect.fromLTRB(
+  final point1 = transformPoint(transform, rect.leftBottom);
+  final point2 = transformPoint(transform, rect.rightBottom);
+  final point3 = transformPoint(transform, rect.leftTop);
+  final point4 = transformPoint(transform, rect.rightTop);
+  return PdfRect.fromLBRT(
       math.min(point1.x, math.min(point2.x, math.min(point3.x, point4.x))),
       math.min(point1.y, math.min(point2.y, math.min(point3.y, point4.y))),
       math.max(point1.x, math.max(point2.x, math.max(point3.x, point4.x))),

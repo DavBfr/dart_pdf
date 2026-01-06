@@ -176,5 +176,5 @@ class PdfFontMetrics {
   }
 
   /// Get the bounding box
-  PdfRect toPdfRect() => PdfRect.fromLTRB(left, top, right, bottom);
+  PdfRect toPdfRect() => PdfRect.fromLBRT(left, top, right, bottom);
 }

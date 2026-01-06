@@ -19,6 +19,7 @@ import 'dart:typed_data';
 import 'package:xml/xml.dart';
 
 import '../../pdf.dart';
+import '../pdf/io/event_loop_balancer.dart';
 import 'page.dart';
 import 'theme.dart';
 
@@ -124,13 +125,29 @@ class Document {
     _pages.add(page);
   }
 
-  Future<Uint8List> save() async {
+  /// Generates the PDF document as a memory file.
+  ///
+  /// If [enableEventLoopBalancing] is `true`, the method yields periodically
+  /// during processing to keep the event loop responsive. This can help
+  /// avoid blocking during the processing of large documents.
+  ///
+  /// Returns a [Uint8List] containing the document data.
+  Future<Uint8List> save({bool enableEventLoopBalancing = false}) async {
     if (!_paint) {
+      final balancer = enableEventLoopBalancing ? EventLoopBalancer() : null;
+      balancer?.start();
+
       for (final page in _pages) {
+        await balancer?.yieldIfNeeded();
         page.postProcess(this);
       }
+
+      balancer?.stop();
       _paint = true;
     }
-    return await document.save();
+
+    return await document.save(
+      enableEventLoopBalancing: enableEventLoopBalancing,
+    );
   }
 }

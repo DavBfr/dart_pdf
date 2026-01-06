@@ -382,7 +382,7 @@ class Wrap extends MultiChildWidget with SpanningWidget {
     context.canvas.saveContext();
 
     final mat = Matrix4.identity();
-    mat.translate(box!.x, box!.y);
+    mat.translateByDouble(box!.left, box!.bottom, 0, 1);
     context.canvas.setTransform(mat);
     for (var child
         in children.sublist(_context.firstChild, _context.lastChild)) {

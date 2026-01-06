@@ -83,7 +83,7 @@ abstract class BoxBorder {
     context.canvas
       ..setStrokeColor(side.color)
       ..setLineWidth(side.width)
-      ..drawEllipse(box.x + box.width / 2.0, box.y + box.height / 2.0,
+      ..drawEllipse(box.left + box.width / 2.0, box.bottom + box.height / 2.0,
           box.width / 2.0, box.height / 2.0)
       ..strokePath();
     side.style.unsetStyle(context);

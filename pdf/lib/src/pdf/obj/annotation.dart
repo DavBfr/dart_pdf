@@ -268,7 +268,7 @@ abstract class PdfAnnotBase {
 
     final bBox = boundingBox ?? PdfRect.fromPoints(PdfPoint.zero, rect.size);
     s.params['/BBox'] =
-        PdfArray.fromNum([bBox.x, bBox.y, bBox.width, bBox.height]);
+        PdfArray.fromNum([bBox.left, bBox.bottom, bBox.width, bBox.height]);
     final g = PdfGraphics(s, s.buf);
 
     if (selected && name != null) {

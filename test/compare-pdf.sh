@@ -24,6 +24,7 @@ for PDF in "$SRC"/*.pdf; do
   for PNG in "$DST"/"$T"/gold*.png; do
     S="$DST"/"$T"/src-"${PNG##*-}"
     RES=$($COMPARE -metric AE "$PNG" "$S" null: 2>&1)
+    RES=$(echo "$RES" | awk '{print $1}')
     if [ "$RES" != "0" ]; then
       D="$DST"/"$T"/diff-"${PNG##*-}"
       $COMPARE "$PNG" "$S" -highlight-color red "$D"

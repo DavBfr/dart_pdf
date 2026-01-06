@@ -57,10 +57,10 @@ class DecorationImage extends DecorationGraphic {
     final sourceRect = alignment.inscribe(
         sizes.source!, PdfRect.fromPoints(PdfPoint.zero, imageSize));
     final destinationRect = alignment.inscribe(sizes.destination!, box);
-    final mat =
-        Matrix4.translationValues(destinationRect.x, destinationRect.y, 0)
-          ..scale(scaleX, scaleY, 1)
-          ..translate(-sourceRect.x, -sourceRect.y);
+    final mat = Matrix4.translationValues(
+        destinationRect.left, destinationRect.bottom, 0)
+      ..scaleByDouble(scaleX, scaleY, 1, 1)
+      ..translateByDouble(-sourceRect.left, -sourceRect.bottom, 0, 1);
 
     context.canvas
       ..saveContext()
@@ -291,8 +291,8 @@ class BoxDecoration {
                   final m = PdfImage.fromImage(context.document, image: i);
                   context.canvas.drawImage(
                     m,
-                    box.x + s.offset.x - s.spreadRadius,
-                    box.y - s.offset.y - s.spreadRadius,
+                    box.left + s.offset.x - s.spreadRadius,
+                    box.bottom - s.offset.y - s.spreadRadius,
                   );
                 }
               }
@@ -305,8 +305,8 @@ class BoxDecoration {
                   final m = PdfImage.fromImage(context.document, image: i);
                   context.canvas.drawImage(
                     m,
-                    box.x + s.offset.x - s.spreadRadius,
-                    box.y - s.offset.y - s.spreadRadius,
+                    box.left + s.offset.x - s.spreadRadius,
+                    box.bottom - s.offset.y - s.spreadRadius,
                   );
                 }
               }
@@ -321,13 +321,16 @@ class BoxDecoration {
                 final m = PdfImage.fromImage(context.document, image: i);
                 context.canvas.drawImage(
                   m,
-                  box.x + s.offset.x - s.spreadRadius,
-                  box.y - s.offset.y - s.spreadRadius,
+                  box.left + s.offset.x - s.spreadRadius,
+                  box.bottom - s.offset.y - s.spreadRadius,
                 );
               }
             }
-            context.canvas.drawEllipse(box.x + box.width / 2.0,
-                box.y + box.height / 2.0, box.width / 2.0, box.height / 2.0);
+            context.canvas.drawEllipse(
+                box.left + box.width / 2.0,
+                box.bottom + box.height / 2.0,
+                box.width / 2.0,
+                box.height / 2.0);
             break;
         }
         context.canvas
@@ -345,8 +348,11 @@ class BoxDecoration {
             }
             break;
           case BoxShape.circle:
-            context.canvas.drawEllipse(box.x + box.width / 2.0,
-                box.y + box.height / 2.0, box.width / 2.0, box.height / 2.0);
+            context.canvas.drawEllipse(
+                box.left + box.width / 2.0,
+                box.bottom + box.height / 2.0,
+                box.width / 2.0,
+                box.height / 2.0);
             break;
         }
 
@@ -358,8 +364,11 @@ class BoxDecoration {
         switch (shape) {
           case BoxShape.circle:
             context.canvas
-              ..drawEllipse(box.x + box.width / 2.0, box.y + box.height / 2.0,
-                  box.width / 2.0, box.height / 2.0)
+              ..drawEllipse(
+                  box.left + box.width / 2.0,
+                  box.bottom + box.height / 2.0,
+                  box.width / 2.0,
+                  box.height / 2.0)
               ..clipPath();
 
             break;

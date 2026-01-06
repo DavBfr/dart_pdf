@@ -123,8 +123,8 @@ class SvgText extends SvgOperation {
     canvas
       ..saveContext()
       ..setTransform(Matrix4.identity()
-        ..scale(1.0, -1.0)
-        ..translate(x, -y!));
+        ..scaleByDouble(1, -1, 1, 1)
+        ..translateByDouble(x!, -y!, 0, 1));
 
     if (brush.fill!.isNotEmpty) {
       brush.fill!.setFillColor(this, canvas);
@@ -166,8 +166,8 @@ class SvgText extends SvgOperation {
     canvas
       ..saveContext()
       ..setTransform(Matrix4.identity()
-        ..scale(1.0, -1.0)
-        ..translate(x, -y!))
+        ..scaleByDouble(1, -1, 1, 1)
+        ..translateByDouble(x!, -y!, 0, 1))
       ..drawString(font, brush.fontSize!.sizeValue, text, 0, 0,
           mode: PdfTextRenderingMode.clip)
       ..restoreContext();
@@ -180,11 +180,11 @@ class SvgText extends SvgOperation {
   @override
   PdfRect boundingBox() {
     final b = metrics.toPdfRect();
-    var x = b.x, y = b.y, w = b.width, h = b.height;
+    var x = b.left, y = b.bottom, w = b.width, h = b.height;
     for (final child in tspan) {
       final b = child.boundingBox();
-      x = min(b.x, x);
-      y = min(b.y, y);
+      x = min(b.left, x);
+      y = min(b.bottom, y);
       w = max(b.width, w);
       h = max(b.height, w);
     }

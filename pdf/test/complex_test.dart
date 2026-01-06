@@ -39,8 +39,8 @@ void main() {
 
     g.saveContext();
     var tm = Matrix4.identity();
-    tm.translate(10.0, 290);
-    tm.scale(1.0, -1);
+    tm.translateByDouble(10.0, 290, 0, 1);
+    tm.scaleByDouble(1, -1, 1, 1);
     g.setTransform(tm);
     g.setColor(const PdfColor(0, 0, 0));
     g.drawShape(
@@ -51,8 +51,8 @@ void main() {
 
     g.saveContext();
     tm = Matrix4.identity();
-    tm.translate(200.0, 290);
-    tm.scale(.1, -.1);
+    tm.translateByDouble(200, 290, 0, 1);
+    tm.scaleByDouble(.1, -.1, 1, 1);
     g.setTransform(tm);
     g.setColor(const PdfColor(0, 0, 0));
     g.drawShape(
@@ -88,7 +88,7 @@ void main() {
       g.saveContext();
       final tm = Matrix4.identity();
       tm.rotateZ(i * pi / 360.0);
-      tm.translate(300.0, -100);
+      tm.translateByDouble(300, -100, 0, 1);
       g.setTransform(tm);
       g.drawString(font1!, 12, 'Hello $i', 20, 100);
       g.drawImage(image, 100, 100);

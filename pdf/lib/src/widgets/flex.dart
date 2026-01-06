@@ -456,8 +456,11 @@ class Flex extends MultiChildWidget with SpanningWidget {
       }
       switch (direction) {
         case Axis.horizontal:
-          child.box = PdfRect(box!.x + childMainPosition,
-              box!.y + childCrossPosition, child.box!.width, child.box!.height);
+          child.box = PdfRect(
+              box!.left + childMainPosition,
+              box!.bottom + childCrossPosition,
+              child.box!.width,
+              child.box!.height);
           break;
         case Axis.vertical:
           child.box = PdfRect(childCrossPosition, childMainPosition,
@@ -511,7 +514,7 @@ class Flex extends MultiChildWidget with SpanningWidget {
     super.paint(context);
 
     final mat = Matrix4.identity();
-    mat.translate(box!.x, box!.y);
+    mat.translateByDouble(box!.left, box!.bottom, 0, 1);
     context.canvas
       ..saveContext()
       ..setTransform(mat);

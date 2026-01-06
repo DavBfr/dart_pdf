@@ -216,15 +216,15 @@ class Page {
     if (pageTheme.clip) {
       context.canvas
         ..saveContext()
-        ..drawRect(box.x, box.y, box.width, box.height)
+        ..drawRect(box.left, box.bottom, box.width, box.height)
         ..clipPath();
     }
 
     if (pageTheme.textDirection == TextDirection.rtl) {
       child.box = PdfRect(
         ((mustRotate ? box.height : box.width) - child.box!.width) +
-            child.box!.x,
-        child.box!.y,
+            child.box!.left,
+        child.box!.bottom,
         child.box!.width,
         child.box!.height,
       );
@@ -236,10 +236,14 @@ class Page {
         ..saveContext()
         ..setTransform(Matrix4.identity()
           ..rotateZ(-math.pi / 2)
-          ..translate(
-            -pageFormat.height - _margin.left + _margin.top,
-            -pageFormat.height + pageFormat.width + _margin.top - _margin.right,
-          ));
+          ..translateByDouble(
+              -pageFormat.height - _margin.left + _margin.top,
+              -pageFormat.height +
+                  pageFormat.width +
+                  _margin.top -
+                  _margin.right,
+              0,
+              1));
       child.paint(context);
       context.canvas.restoreContext();
     } else {

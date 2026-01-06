@@ -55,20 +55,20 @@ class CircularProgressIndicator extends Widget {
     const angleStart = math.pi / 2;
     final angleEnd = angleStart - math.pi * 2 * adjustedValue;
     final startTop = PdfPoint(
-      box!.x + rx + math.cos(angleStart) * rx,
-      box!.y + ry + math.sin(angleStart) * ry,
+      box!.left + rx + math.cos(angleStart) * rx,
+      box!.bottom + ry + math.sin(angleStart) * ry,
     );
     final endTop = PdfPoint(
-      box!.x + rx + math.cos(angleEnd) * rx,
-      box!.y + ry + math.sin(angleEnd) * ry,
+      box!.left + rx + math.cos(angleEnd) * rx,
+      box!.bottom + ry + math.sin(angleEnd) * ry,
     );
     final startBottom = PdfPoint(
-      box!.x + rx + math.cos(angleStart) * (rx - strokeWidth),
-      box!.y + ry + math.sin(angleStart) * (ry - strokeWidth),
+      box!.left + rx + math.cos(angleStart) * (rx - strokeWidth),
+      box!.bottom + ry + math.sin(angleStart) * (ry - strokeWidth),
     );
     final endBottom = PdfPoint(
-      box!.x + rx + math.cos(angleEnd) * (rx - strokeWidth),
-      box!.y + ry + math.sin(angleEnd) * (ry - strokeWidth),
+      box!.left + rx + math.cos(angleEnd) * (rx - strokeWidth),
+      box!.bottom + ry + math.sin(angleEnd) * (ry - strokeWidth),
     );
 
     if (backgroundColor != null && value < 1) {
