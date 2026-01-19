@@ -72,15 +72,15 @@ class SvgGroup extends SvgOperation {
 
   @override
   PdfRect boundingBox() {
-    var x = double.infinity, y = double.infinity, w = 0.0, h = 0.0;
+    var left = double.infinity, bottom = double.infinity, right = -double.infinity, top = -double.infinity;
     for (final child in children) {
       final b = child.boundingBox();
-      x = min(b.left, x);
-      y = min(b.bottom, y);
-      w = max(b.width, w);
-      h = max(b.height, w);
+      left = min(b.left, left);
+      bottom = min(b.bottom, bottom);
+      right = max(b.right, right);
+      top = max(b.top, top);
     }
 
-    return PdfRect(x, y, w, h);
+    return PdfRect.fromLBRT(left, bottom, right, top);
   }
 }
