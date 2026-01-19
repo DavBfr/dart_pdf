@@ -28,7 +28,7 @@ class PdfName extends PdfDataType {
     assert(value[0] == '/');
     final bytes = <int>[];
     for (final c in value.codeUnits) {
-      assert(c < 0xff && c > 0x00);
+      assert(c > 0x00 && c < 0xff);
 
       if (c < 0x21 ||
           c > 0x7E ||
