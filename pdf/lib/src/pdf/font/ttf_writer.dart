@@ -116,6 +116,18 @@ class TtfWriter {
 
     glyphsInfo.addAll(glyphsMap.values);
 
+    for (int i = 0; i < glyphsInfo.length; i++) {
+      try {
+        if (glyphsInfo[i].index == 52 && glyphsInfo[i + 1].index == 38) {
+          glyphsInfo.removeAt(i + 1);
+          glyphsInfo.removeAt(i);
+          glyphsInfo.add(ttf.readGlyph(76).copy());
+        }
+      } catch (e) {
+        continue;
+      }
+    }
+
     // Add compound glyphs
     for (final compound in compounds.keys) {
       final index = glyphsInfo
@@ -257,7 +269,7 @@ class TtfWriter {
       cmapData.setUint32(20, 1); // Table language
       cmapData.setUint32(24, 1); // numGroups
       cmapData.setUint32(28, 32); // startCharCode
-      cmapData.setUint32(32, chars.length + 31); // endCharCode
+      cmapData.setUint32(32, glyphsInfo.length + 31); // endCharCode
       cmapData.setUint32(36, 0); // startGlyphID
 
       tables[TtfParser.cmap_table] = cmap;
