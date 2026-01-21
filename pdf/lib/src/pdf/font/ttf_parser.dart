@@ -399,7 +399,7 @@ class TtfParser {
           : bytes.getInt16(hmtxOffset +
               numOfLongHorMetrics * 4 +
               (glyphIndex - numOfLongHorMetrics) * 2);
-      if (glyphSizes[glyphIndex] == 0) {
+      if (glyphSizes[glyphIndex] == 0 && advanceWidth == 0) {
         glyphInfoMap[glyphIndex] = PdfFontMetrics(
           left: 0,
           top: 0,
@@ -407,7 +407,7 @@ class TtfParser {
           bottom: 0,
           ascent: 0,
           descent: 0,
-          advanceWidth: advanceWidth / unitsPerEm,
+          advanceWidth: 0,
           leftBearing: leftBearing / unitsPerEm,
         );
         continue;
