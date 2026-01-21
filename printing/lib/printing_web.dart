@@ -95,7 +95,7 @@ class PrintingPlugin extends PrintingPlatform {
       // Check if the source of PDF.js library is overridden via
       // [dartPdfJsBaseUrl] JavaScript  variable.
       if (web.window.hasProperty(_dartPdfJsBaseUrl.toJS).toDart) {
-        _pdfJsUrlBase = web.window.getProperty(_dartPdfJsBaseUrl.toJS);
+        _pdfJsUrlBase = web.window.getProperty<js.JSString?>(_dartPdfJsBaseUrl.toJS)!.toDart;
       } else {
         final pdfJsVersion =
             web.window.hasProperty(_dartPdfJsVersion.toJS).toDart
