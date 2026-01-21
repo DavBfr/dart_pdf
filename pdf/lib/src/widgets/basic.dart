@@ -139,7 +139,9 @@ class Transform extends SingleChildWidget {
     this.adjustLayout = false,
     this.unconstrained = false,
     Widget? child,
-  }) : super(child: child);
+  }) :  transformHitTests = false,
+        filterQuality = FilterQuality.none,
+        super(child: child);
 
   /// Creates a widget that transforms its child using a rotation around the
   /// center.
@@ -151,6 +153,8 @@ class Transform extends SingleChildWidget {
   })  : transform = Matrix4.rotationZ(angle),
         adjustLayout = false,
         unconstrained = false,
+        transformHitTests = false,
+        filterQuality = FilterQuality.none,
         super(child: child);
 
   /// Creates a widget that transforms its child using a rotation around the
@@ -163,6 +167,8 @@ class Transform extends SingleChildWidget {
         adjustLayout = true,
         alignment = null,
         origin = null,
+        transformHitTests = false,
+        filterQuality = FilterQuality.none,
         super(child: child);
 
   /// Creates a widget that transforms its child using a translation.
@@ -174,6 +180,8 @@ class Transform extends SingleChildWidget {
         alignment = null,
         adjustLayout = false,
         unconstrained = false,
+        transformHitTests = false,
+        filterQuality = FilterQuality.none,
         super(child: child);
 
   /// Creates a widget that scales its child uniformly.
@@ -185,7 +193,27 @@ class Transform extends SingleChildWidget {
   })  : transform = Matrix4.diagonal3Values(scale, scale, 1),
         adjustLayout = false,
         unconstrained = false,
+        transformHitTests = false,
+        filterQuality = FilterQuality.none,
         super(child: child);
+
+
+  /// Creates a widget that mirrors its child about the widget's center point.
+
+  Transform.flip({
+    bool flipX = false,
+    bool flipY = false,
+    Widget? child,
+    this.origin,
+    this.transformHitTests = true,
+    this.filterQuality,
+  }) :  transform = Matrix4.diagonal3Values(flipX ? -1.0 : 1.0, flipY ? -1.0 : 1.0, 1.0),
+        alignment = Alignment.center,
+        adjustLayout = false,
+        unconstrained = false,
+        super(child: child);
+
+
 
   /// The matrix to transform the child by during painting.
   final Matrix4 transform;
@@ -199,6 +227,14 @@ class Transform extends SingleChildWidget {
   final bool adjustLayout;
 
   final bool unconstrained;
+
+
+  /// Whether to apply the transformation when performing hit tests.
+  final bool transformHitTests;
+
+  /// The filter quality with which to apply the transform as a bitmap operation.
+
+  final FilterQuality? filterQuality;
 
   Matrix4 _effectiveTransform(Context context) {
     final result = Matrix4.identity();
@@ -991,4 +1027,83 @@ class OverflowBox extends SingleChildWidget {
     super.paint(context);
     paintChild(context);
   }
+}
+
+
+/// Quality levels for image sampling in [ImageFilter] and [Shader] objects that sample
+/// images and for [Canvas] operations that render images.
+///
+/// When scaling up typically the quality is lowest at [none], higher at [low] and [medium],
+/// and for very large scale factors (over 10x) the highest at [high].
+///
+/// When scaling down, [medium] provides the best quality especially when scaling an
+/// image to less than half its size or for animating the scale factor between such
+/// reductions. Otherwise, [low] and [high] provide similar effects for reductions of
+/// between 50% and 100% but the image may lose detail and have dropouts below 50%.
+///
+/// To get high quality when scaling images up and down, or when the scale is
+/// unknown, [medium] is typically a good balanced choice.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/filter_quality.png)
+///
+/// When building for the web using the `--web-renderer=html` option, filter
+/// quality has no effect. All images are rendered using the respective
+/// browser's default setting.
+///
+/// See also:
+///
+///  * [Paint.filterQuality], which is used to pass [FilterQuality] to the
+///    engine while using drawImage calls on a [Canvas].
+///  * [ImageShader].
+///  * [ImageFilter.matrix].
+///  * [Canvas.drawImage].
+///  * [Canvas.drawImageRect].
+///  * [Canvas.drawImageNine].
+///  * [Canvas.drawAtlas].
+enum FilterQuality {
+  // This list and the values (order) should be kept in sync with the equivalent list
+  // in lib/ui/painting/image_filter.cc
+
+  /// The fastest filtering method, albeit also the lowest quality.
+  ///
+  /// This value results in a "Nearest Neighbor" algorithm which just
+  /// repeats or eliminates pixels as an image is scaled up or down.
+  none,
+
+  /// Better quality than [none], faster than [medium].
+  ///
+  /// This value results in a "Bilinear" algorithm which smoothly
+  /// interpolates between pixels in an image.
+  low,
+
+  /// The best all around filtering method that is only worse than [high]
+  /// at extremely large scale factors.
+  ///
+  /// This value improves upon the "Bilinear" algorithm specified by [low]
+  /// by utilizing a Mipmap that pre-computes high quality lower resolutions
+  /// of the image at half (and quarter and eighth, etc.) sizes and then
+  /// blends between those to prevent loss of detail at small scale sizes.
+  ///
+  /// {@template dart.ui.filterQuality.seeAlso}
+  /// See also:
+  ///
+  ///  * [FilterQuality] class-level documentation that goes into detail about
+  ///    relative qualities of the constant values.
+  /// {@endtemplate}
+  medium,
+
+  /// Best possible quality when scaling up images by scale factors larger than
+  /// 5-10x.
+  ///
+  /// When images are scaled down, this can be worse than [medium] for scales
+  /// smaller than 0.5x, or when animating the scale factor.
+  ///
+  /// This option is also the slowest.
+  ///
+  /// This value results in a standard "Bicubic" algorithm which uses a 3rd order
+  /// equation to smooth the abrupt transitions between pixels while preserving
+  /// some of the sense of an edge and avoiding sharp peaks in the result.
+  ///
+  /// {@macro dart.ui.filterQuality.seeAlso}
+  high,
 }
