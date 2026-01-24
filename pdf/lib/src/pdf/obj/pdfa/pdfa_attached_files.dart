@@ -15,20 +15,36 @@ import '../../format/string.dart';
 import '../object.dart';
 import 'pdfa_date_format.dart';
 
+class PdfaAttachedFile {
+  final String name;
+  final String data;
+  final String AFRelationship;
+  final String subType;
+
+  PdfaAttachedFile({
+    required this.name,
+    required this.data,
+    this.subType = '/text/xml',
+    this.AFRelationship = '/Alternative',
+  });
+}
+
 class PdfaAttachedFiles {
   PdfaAttachedFiles(
     PdfDocument pdfDocument,
-    Map<String, String> files,
+    List<PdfaAttachedFile> files, 
   ) {
-    for (var entry in files.entries) {
+    for (var file in files) {
       _files.add(
         _AttachedFileSpec(
           pdfDocument,
           _AttachedFile(
             pdfDocument,
-            entry.key,
-            entry.value,
+            file.name,
+            file.data,
+            file.subType,
           ),
+          file.AFRelationship,
         ),
       );
     }
@@ -41,7 +57,6 @@ class PdfaAttachedFiles {
   }
 
   final List<_AttachedFileSpec> _files = [];
-
   late final _AttachedFileNames _names;
 
   bool get isNotEmpty => _files.isNotEmpty;
@@ -75,9 +90,7 @@ class _AttachedFileNames extends PdfObject<PdfDict> {
   void prepare() {
     super.prepare();
     params['/Names'] = PdfArray(
-      [
-        _PdfRaw(0, _files.first),
-      ],
+      _files.map((spec) => _PdfRaw(spec._file.fileName, spec)).toList(),
     );
   }
 }
@@ -86,27 +99,24 @@ class _AttachedFileSpec extends PdfObject<PdfDict> {
   _AttachedFileSpec(
     PdfDocument pdfDocument,
     this._file,
+    this.relationship,
   ) : super(
           pdfDocument,
           params: PdfDict(),
         );
   final _AttachedFile _file;
+  final String relationship;
 
   @override
   void prepare() {
     super.prepare();
 
     params['/Type'] = const PdfName('/Filespec');
-    params['/F'] = PdfString(
-      Uint8List.fromList(_file.fileName.codeUnits),
-    );
-    params['/UF'] = PdfString(
-      Uint8List.fromList(_file.fileName.codeUnits),
-    );
-    params['/EF'] = PdfDict({
-      '/F': _file.ref(),
-    });
-    params['/AFRelationship'] = const PdfName('/Unspecified');
+    params['/F'] = PdfString(Uint8List.fromList(_file.fileName.codeUnits));
+    params['/UF'] = PdfString(Uint8List.fromList(_file.fileName.codeUnits));
+    params['/EF'] = PdfDict({'/F': _file.ref()});
+    
+    params['/AFRelationship'] = PdfName(relationship);
   }
 }
 
@@ -115,6 +125,7 @@ class _AttachedFile extends PdfObject<PdfDictStream> {
     PdfDocument pdfDocument,
     this.fileName,
     this.content,
+    this.subType,
   ) : super(
           pdfDocument,
           params: PdfDictStream(
@@ -125,6 +136,7 @@ class _AttachedFile extends PdfObject<PdfDictStream> {
 
   final String fileName;
   final String content;
+  final String subType;
 
   @override
   void prepare() {
@@ -132,7 +144,9 @@ class _AttachedFile extends PdfObject<PdfDictStream> {
 
     final modDate = PdfaDateFormat().format(dt: DateTime.now());
     params['/Type'] = const PdfName('/EmbeddedFile');
-    params['/Subtype'] = const PdfName('/application/octet-stream');
+    
+    params['/Subtype'] = PdfName(subType);
+    
     params['/Params'] = PdfDict({
       '/Size': PdfNum(content.codeUnits.length),
       '/ModDate': PdfString(
@@ -145,20 +159,13 @@ class _AttachedFile extends PdfObject<PdfDictStream> {
 }
 
 class _PdfRaw extends PdfDataType {
-  const _PdfRaw(
-    this.nr,
-    this.spec,
-  );
+  const _PdfRaw(this.name, this.spec);
 
-  final int nr;
+  final String name;
   final _AttachedFileSpec spec;
 
   @override
-  void output(
-    PdfObjectBase o,
-    PdfStream s, [
-    int? indent,
-  ]) {
-    s.putString('(${nr.toString().padLeft(3, '0')}) ${spec.ref()}');
+  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
+    s.putString('($name) ${spec.ref()}');
   }
 }
