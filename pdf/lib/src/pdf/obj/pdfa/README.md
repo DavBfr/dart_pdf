@@ -26,11 +26,17 @@ PdfaColorProfile(
 );
 
 PdfaAttachedFiles(
-  pdf.document,
-  {
-    'factur-x.xml': myInvoiceXmlDocument,
-  },
+     pdf.document,
+     [
+       PdfaAttachedFile(
+         name: 'factur-x.xml',
+         data: invoiceXML.toXMLString(),
+         AFRelationship: '/Alternative',
+         subType: '/text/xml',
+       )
+     ],
 );
+
 ```
 
 ### Validating
@@ -38,3 +44,4 @@ PdfaAttachedFiles(
 https://demo.verapdf.org
 https://avepdf.com/pdfa-validation
 https://www.mustangproject.org
+https://services.fnfe-mpe.org/
