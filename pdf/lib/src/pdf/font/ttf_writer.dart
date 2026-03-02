@@ -42,7 +42,10 @@ class TtfWriter {
 
   void _updateCompoundGlyph(TtfGlyphInfo glyph, Map<int, int?> compoundMap) {
     const arg1And2AreWords = 1;
+    const weHaveAScale = 8;
     const moreComponents = 32;
+    const weHaveAnXAndYScale = 64;
+    const weHaveATwoByTwo = 128;
 
     var offset = 10;
     final bytes = glyph.data.buffer
@@ -50,10 +53,23 @@ class TtfWriter {
     var flags = moreComponents;
 
     while (flags & moreComponents != 0) {
+      if (offset + 4 > bytes.lengthInBytes) {
+        break;
+      }
       flags = bytes.getUint16(offset);
       final glyphIndex = bytes.getUint16(offset + 2);
-      bytes.setUint16(offset + 2, compoundMap[glyphIndex]!);
+      final newIndex = compoundMap[glyphIndex];
+      if (newIndex != null) {
+        bytes.setUint16(offset + 2, newIndex);
+      }
       offset += (flags & arg1And2AreWords != 0) ? 8 : 6;
+      if (flags & weHaveAScale != 0) {
+        offset += 2;
+      } else if (flags & weHaveAnXAndYScale != 0) {
+        offset += 4;
+      } else if (flags & weHaveATwoByTwo != 0) {
+        offset += 8;
+      }
     }
   }
 
