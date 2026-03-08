@@ -180,6 +180,7 @@ class MethodChannelPrinting extends PrintingPlatform {
     bool usePrinterSettings,
     OutputType outputType,
     bool forceCustomPrintPaper,
+    bool fitToPage,
   ) async {
     final job = _printJobs.add(
       onCompleted: Completer<bool>(),
@@ -200,6 +201,7 @@ class MethodChannelPrinting extends PrintingPlatform {
       'usePrinterSettings': usePrinterSettings,
       'outputType': outputType.index,
       'forceCustomPrintPaper': forceCustomPrintPaper,
+      'fitToPage': fitToPage,
     };
 
     await _channel.invokeMethod<int>('printPdf', params);

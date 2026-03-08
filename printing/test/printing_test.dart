@@ -99,6 +99,7 @@ class MockPrinting extends Mock
     bool usePrinterSettings,
     OutputType outputType,
     bool forceCustomPrintPaper,
+    bool fitToPage,
   ) async => true;
 
   @override
