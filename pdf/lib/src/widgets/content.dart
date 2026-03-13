@@ -151,7 +151,9 @@ class TableOfContent extends StatelessWidget {
                   thickness: 0.2,
                 )),
                 SizedBox(width: 8),
-                DelayedWidget(build: (_) => Text('${c.page}')),
+                DelayedWidget(build: (_) => 
+                  Text('${c.page}')
+                ),
               ],
             ),
           ),

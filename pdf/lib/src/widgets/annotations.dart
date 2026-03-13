@@ -661,8 +661,14 @@ class Outline extends Anchor {
   }
 
   void _buildOutline(Context context) {
-    if (_outline != null) {
-      return;
+    final outline = _outline;
+    // a footer may have pushed this outline to the next page. if that happens, we have to replace it with a new outline with the correct page number
+    var shouldRemove = false;
+    if (outline != null) {
+      if (outline.page == context.pageLabel) {
+        return;
+      }
+      shouldRemove=true;
     }
 
     _outline = PdfOutline(
@@ -693,7 +699,9 @@ class Outline extends Anchor {
       candidate = candidate.parent!;
       actualLevel--;
     }
-
+    if (shouldRemove) {
+      candidate.outlines.remove(outline);
+    }
     candidate.add(_outline!);
   }
 }
