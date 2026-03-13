@@ -33,6 +33,7 @@ class PdfJpegInfo {
     int? width;
     int? height;
     int? color;
+    int? adobeColorTransform;
     var offset = 0;
     while (offset < buffer.lengthInBytes) {
       while (buffer.getUint8(offset) == 0xff) {
@@ -67,6 +68,18 @@ class PdfJpegInfo {
         color = buffer.getUint8(offset + 5);
         break;
       }
+
+      // Adobe APP14 marker
+      if (mrkr == 0xee && len >= 14) {
+        if (buffer.getUint8(offset) == 0x41 &&
+            buffer.getUint8(offset + 1) == 0x64 &&
+            buffer.getUint8(offset + 2) == 0x6F &&
+            buffer.getUint8(offset + 3) == 0x62 &&
+            buffer.getUint8(offset + 4) == 0x65) {
+          adobeColorTransform = buffer.getUint8(offset + 11);
+        }
+      }
+
       offset += len - 2;
     }
 
@@ -76,10 +89,12 @@ class PdfJpegInfo {
 
     final tags = _findExifInJpeg(buffer);
 
-    return PdfJpegInfo._(width, height, color, tags);
+    return PdfJpegInfo._(width, height, color, adobeColorTransform, tags);
   }
 
-  PdfJpegInfo._(this.width, this.height, this._color, this.tags);
+  PdfJpegInfo._(
+      this.width, this.height, this._color, this._adobeColorTransform,
+      this.tags);
 
   /// Width of the image
   final int? width;
@@ -89,8 +104,18 @@ class PdfJpegInfo {
 
   final int? _color;
 
+  final int? _adobeColorTransform;
+
   /// Is the image color or greyscale
   bool get isRGB => _color == 3;
+
+  /// Whether the image uses CMYK color space (4 components)
+  bool get isCMYK => _color == 4;
+
+  /// Whether this CMYK JPEG uses inverted color values (Adobe YCCK convention).
+  /// Returns true when there is no Adobe APP14 marker (assumed inverted, the
+  /// most common case) or when the marker explicitly indicates YCCK encoding.
+  bool get isCMYKInverted => isCMYK && _adobeColorTransform != 0;
 
   /// Exif tags discovered
   final Map<PdfExifTag, dynamic>? tags;

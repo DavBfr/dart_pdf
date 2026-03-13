@@ -215,6 +215,20 @@ class BoxConstraints {
         maxHeight: maxHeight ?? this.maxHeight);
   }
 
+  bool debugAssertIsValid() {
+    if (minWidth.isInfinite && minHeight.isInfinite) {
+      throw AssertionError(
+          'BoxConstraints forces an infinite width and infinite height.');
+    }
+    if (minWidth.isInfinite) {
+      throw AssertionError('BoxConstraints forces an infinite width.');
+    }
+    if (minHeight.isInfinite) {
+      throw AssertionError('BoxConstraints forces an infinite height.');
+    }
+    return true;
+  }
+
   @override
   String toString() {
     return 'BoxConstraint <$minWidth, $maxWidth> <$minHeight, $maxHeight>';
