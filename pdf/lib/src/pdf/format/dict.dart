@@ -31,7 +31,8 @@ class PdfDict<T extends PdfDataType> extends PdfDataType {
   PdfDict.values([Map<String, T>? values]) : values = values ?? {};
 
   static PdfDict<PdfIndirect> fromObjectMap(
-      Map<String, PdfObjectBase> objects) {
+    Map<String, PdfObjectBase> objects,
+  ) {
     return PdfDict.values(
       objects.map<String, PdfIndirect>(
         (key, value) => MapEntry<String, PdfIndirect>(key, value.ref()),

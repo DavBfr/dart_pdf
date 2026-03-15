@@ -32,23 +32,23 @@ void main() {
   });
 
   test('Container Widgets Flat', () {
-    pdf.addPage(Page(
-      build: (Context context) => Container(
-        alignment: Alignment.center,
-        margin: const EdgeInsets.all(30),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
+    pdf.addPage(
+      Page(
+        build: (Context context) => Container(
+          alignment: Alignment.center,
+          margin: const EdgeInsets.all(30),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
             color: PdfColors.blue,
             borderRadius: const BorderRadius.all(Radius.circular(20)),
-            border: Border.all(
-              color: PdfColors.blue800,
-              width: 2,
-            )),
-        width: 200,
-        height: 400,
-        // child: Placeholder(),
+            border: Border.all(color: PdfColors.blue800, width: 2),
+          ),
+          width: 200,
+          height: 400,
+          // child: Placeholder(),
+        ),
       ),
-    ));
+    );
   });
 
   test('Container Widgets Image', () {
@@ -81,52 +81,54 @@ void main() {
       }
     }
 
-    pdf.addPage(MultiPage(
+    pdf.addPage(
+      MultiPage(
         build: (Context context) => <Widget>[
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: widgets,
-              )
-            ]));
+          Wrap(spacing: 10, runSpacing: 10, children: widgets),
+        ],
+      ),
+    );
   });
 
   test('Container Widgets BoxShape Border', () {
-    pdf.addPage(Page(
-      build: (Context context) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Container(
-              height: 200.0,
-              width: 200.0,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: PdfColors.blue, width: 3),
+    pdf.addPage(
+      Page(
+        build: (Context context) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Container(
+                height: 200.0,
+                width: 200.0,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: PdfColors.blue, width: 3),
+                ),
               ),
-            ),
-            Container(
-              height: 200.0,
-              width: 200.0,
-              decoration: BoxDecoration(
-                shape: BoxShape.rectangle,
-                borderRadius: const BorderRadius.all(Radius.circular(40)),
-                border: Border.all(color: PdfColors.blue, width: 3),
+              Container(
+                height: 200.0,
+                width: 200.0,
+                decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  borderRadius: const BorderRadius.all(Radius.circular(40)),
+                  border: Border.all(color: PdfColors.blue, width: 3),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ));
+    );
   });
 
   test('Container Widgets LinearGradient', () {
-    pdf.addPage(Page(
-      build: (Context context) => Container(
-        alignment: Alignment.center,
-        margin: const EdgeInsets.all(30),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
+    pdf.addPage(
+      Page(
+        build: (Context context) => Container(
+          alignment: Alignment.center,
+          margin: const EdgeInsets.all(30),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(20)),
             gradient: const LinearGradient(
               colors: <PdfColor>[
@@ -139,23 +141,23 @@ void main() {
               stops: <double>[0, .8, 1.0],
               tileMode: TileMode.clamp,
             ),
-            border: Border.all(
-              color: PdfColors.blue800,
-              width: 2,
-            )),
-        width: 200,
-        height: 400,
+            border: Border.all(color: PdfColors.blue800, width: 2),
+          ),
+          width: 200,
+          height: 400,
+        ),
       ),
-    ));
+    );
   });
 
   test('Container Widgets RadialGradient', () {
-    pdf.addPage(Page(
-      build: (Context context) => Container(
-        alignment: Alignment.center,
-        margin: const EdgeInsets.all(30),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
+    pdf.addPage(
+      Page(
+        build: (Context context) => Container(
+          alignment: Alignment.center,
+          margin: const EdgeInsets.all(30),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(20)),
             gradient: const RadialGradient(
               colors: <PdfColor>[
@@ -168,58 +170,61 @@ void main() {
               focal: FractionalOffset(.7, .45),
               focalRadius: 1,
             ),
-            border: Border.all(
-              color: PdfColors.blue800,
-              width: 2,
-            )),
-        width: 200,
-        height: 400,
-        // child: Placeholder(),
+            border: Border.all(color: PdfColors.blue800, width: 2),
+          ),
+          width: 200,
+          height: 400,
+          // child: Placeholder(),
+        ),
       ),
-    ));
+    );
   });
 
   test('Container Widgets BoxShadow Rectangle', () {
-    pdf.addPage(Page(
-      build: (Context context) => Container(
-        margin: const EdgeInsets.all(30),
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              blurRadius: 4,
-              spreadRadius: 10,
-              offset: PdfPoint(2, 2),
-            ),
-          ],
-          color: PdfColors.blue,
+    pdf.addPage(
+      Page(
+        build: (Context context) => Container(
+          margin: const EdgeInsets.all(30),
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                blurRadius: 4,
+                spreadRadius: 10,
+                offset: PdfPoint(2, 2),
+              ),
+            ],
+            color: PdfColors.blue,
+          ),
+          width: 200,
+          height: 400,
         ),
-        width: 200,
-        height: 400,
       ),
-    ));
+    );
   });
 
   test('Container Widgets BoxShadow Ellipse', () {
-    pdf.addPage(Page(
-      build: (Context context) => Container(
-        margin: const EdgeInsets.all(30),
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              blurRadius: 4,
-              spreadRadius: 10,
-              offset: PdfPoint(2, 2),
-            ),
-          ],
-          color: PdfColors.blue,
+    pdf.addPage(
+      Page(
+        build: (Context context) => Container(
+          margin: const EdgeInsets.all(30),
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                blurRadius: 4,
+                spreadRadius: 10,
+                offset: PdfPoint(2, 2),
+              ),
+            ],
+            color: PdfColors.blue,
+          ),
+          width: 200,
+          height: 200,
         ),
-        width: 200,
-        height: 200,
       ),
-    ));
+    );
   });
 
   tearDownAll(() async {

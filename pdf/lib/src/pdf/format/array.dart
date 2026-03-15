@@ -46,11 +46,7 @@ class PdfArray<T extends PdfDataType> extends PdfDataType {
         color.black,
       ]);
     } else {
-      return PdfArray.fromNum(<double>[
-        color.red,
-        color.green,
-        color.blue,
-      ]);
+      return PdfArray.fromNum(<double>[color.red, color.green, color.blue]);
     }
   }
 

@@ -24,10 +24,18 @@ class PdfRect {
 
   @Deprecated('Use PdfRect.fromLBRT instead')
   factory PdfRect.fromLTRB(
-      double left, double bottom, double right, double top) = PdfRect.fromLBRT;
+    double left,
+    double bottom,
+    double right,
+    double top,
+  ) = PdfRect.fromLBRT;
 
   factory PdfRect.fromLBRT(
-      double left, double bottom, double right, double top) {
+    double left,
+    double bottom,
+    double right,
+    double top,
+  ) {
     return PdfRect(left, bottom, right - left, top - bottom);
   }
 
@@ -61,7 +69,11 @@ class PdfRect {
 
   PdfRect operator *(double factor) {
     return PdfRect(
-        left * factor, bottom * factor, width * factor, height * factor);
+      left * factor,
+      bottom * factor,
+      width * factor,
+      height * factor,
+    );
   }
 
   PdfPoint get offset => PdfPoint(left, bottom);
@@ -87,7 +99,11 @@ class PdfRect {
   /// Returns a new rectangle with edges moved outwards by the given delta.
   PdfRect inflate(double delta) {
     return PdfRect.fromLBRT(
-        left - delta, bottom - delta, right + delta, top + delta);
+      left - delta,
+      bottom - delta,
+      right + delta,
+      top + delta,
+    );
   }
 
   /// Returns a new rectangle with edges moved inwards by the given delta.

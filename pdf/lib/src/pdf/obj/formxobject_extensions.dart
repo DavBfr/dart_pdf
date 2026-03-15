@@ -85,4 +85,3 @@ class WidgetPdfFormXObject extends PdfFormXObject {
   @override
   String get name => '/X$objser';
 }
-

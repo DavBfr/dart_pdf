@@ -53,19 +53,22 @@ Future<Uint8List> generateResume(PdfPageFormat format, CustomData data) async {
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: <pw.Widget>[
-                        pw.Text('Parnella Charlesbois',
-                            textScaleFactor: 2,
-                            style: pw.Theme.of(context)
-                                .defaultTextStyle
-                                .copyWith(fontWeight: pw.FontWeight.bold)),
+                        pw.Text(
+                          'Parnella Charlesbois',
+                          textScaleFactor: 2,
+                          style: pw.Theme.of(context).defaultTextStyle.copyWith(
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
                         pw.Padding(padding: const pw.EdgeInsets.only(top: 10)),
-                        pw.Text('Electrotyper',
-                            textScaleFactor: 1.2,
-                            style: pw.Theme.of(context)
-                                .defaultTextStyle
-                                .copyWith(
-                                    fontWeight: pw.FontWeight.bold,
-                                    color: green)),
+                        pw.Text(
+                          'Electrotyper',
+                          textScaleFactor: 1.2,
+                          style: pw.Theme.of(context).defaultTextStyle.copyWith(
+                            fontWeight: pw.FontWeight.bold,
+                            color: green,
+                          ),
+                        ),
                         pw.Padding(padding: const pw.EdgeInsets.only(top: 20)),
                         pw.Row(
                           crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -83,13 +86,17 @@ Future<Uint8List> generateResume(PdfPageFormat format, CustomData data) async {
                               crossAxisAlignment: pw.CrossAxisAlignment.start,
                               children: <pw.Widget>[
                                 pw.Text('+1 403-721-6898'),
-                                _UrlText('p.charlesbois@yahoo.com',
-                                    'mailto:p.charlesbois@yahoo.com'),
                                 _UrlText(
-                                    'wholeprices.ca', 'https://wholeprices.ca'),
+                                  'p.charlesbois@yahoo.com',
+                                  'mailto:p.charlesbois@yahoo.com',
+                                ),
+                                _UrlText(
+                                  'wholeprices.ca',
+                                  'https://wholeprices.ca',
+                                ),
                               ],
                             ),
-                            pw.Padding(padding: pw.EdgeInsets.zero)
+                            pw.Padding(padding: pw.EdgeInsets.zero),
                           ],
                         ),
                       ],
@@ -97,17 +104,22 @@ Future<Uint8List> generateResume(PdfPageFormat format, CustomData data) async {
                   ),
                   _Category(title: 'Work Experience'),
                   _Block(
-                      title: 'Tour bus driver',
-                      icon: const pw.IconData(0xe530)),
+                    title: 'Tour bus driver',
+                    icon: const pw.IconData(0xe530),
+                  ),
                   _Block(
-                      title: 'Logging equipment operator',
-                      icon: const pw.IconData(0xe30d)),
+                    title: 'Logging equipment operator',
+                    icon: const pw.IconData(0xe30d),
+                  ),
                   _Block(title: 'Foot doctor', icon: const pw.IconData(0xe3f3)),
                   _Block(
-                      title: 'Unicorn trainer',
-                      icon: const pw.IconData(0xf0cf)),
+                    title: 'Unicorn trainer',
+                    icon: const pw.IconData(0xf0cf),
+                  ),
                   _Block(
-                      title: 'Chief chatter', icon: const pw.IconData(0xe0ca)),
+                    title: 'Chief chatter',
+                    icon: const pw.IconData(0xe0ca),
+                  ),
                   pw.SizedBox(height: 20),
                   _Category(title: 'Education'),
                   _Block(title: 'Bachelor Of Commerce'),
@@ -133,11 +145,20 @@ Future<Uint8List> generateResume(PdfPageFormat format, CustomData data) async {
                             child: pw.Image(profileImage),
                           ),
                         ),
-                        pw.Column(children: <pw.Widget>[
-                          _Percent(size: 60, value: .7, title: pw.Text('Word')),
-                          _Percent(
-                              size: 60, value: .4, title: pw.Text('Excel')),
-                        ]),
+                        pw.Column(
+                          children: <pw.Widget>[
+                            _Percent(
+                              size: 60,
+                              value: .7,
+                              title: pw.Text('Word'),
+                            ),
+                            _Percent(
+                              size: 60,
+                              value: .4,
+                              title: pw.Text('Excel'),
+                            ),
+                          ],
+                        ),
                         pw.BarcodeWidget(
                           data: 'Parnella Charlesbois',
                           width: 60,
@@ -150,7 +171,7 @@ Future<Uint8List> generateResume(PdfPageFormat format, CustomData data) async {
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ],
@@ -163,10 +184,11 @@ Future<pw.PageTheme> _myPageTheme(PdfPageFormat format) async {
   final bgShape = await rootBundle.loadString('assets/resume.svg');
 
   format = format.applyMargin(
-      left: 2.0 * PdfPageFormat.cm,
-      top: 4.0 * PdfPageFormat.cm,
-      right: 2.0 * PdfPageFormat.cm,
-      bottom: 2.0 * PdfPageFormat.cm);
+    left: 2.0 * PdfPageFormat.cm,
+    top: 4.0 * PdfPageFormat.cm,
+    right: 2.0 * PdfPageFormat.cm,
+    bottom: 2.0 * PdfPageFormat.cm,
+  );
   return pw.PageTheme(
     pageFormat: format,
     theme: pw.ThemeData.withFont(
@@ -179,14 +201,12 @@ Future<pw.PageTheme> _myPageTheme(PdfPageFormat format) async {
         ignoreMargins: true,
         child: pw.Stack(
           children: [
-            pw.Positioned(
-              child: pw.SvgImage(svg: bgShape),
-              left: 0,
-              top: 0,
-            ),
+            pw.Positioned(child: pw.SvgImage(svg: bgShape), left: 0, top: 0),
             pw.Positioned(
               child: pw.Transform.rotate(
-                  angle: pi, child: pw.SvgImage(svg: bgShape)),
+                angle: pi,
+                child: pw.SvgImage(svg: bgShape),
+              ),
               right: 0,
               bottom: 0,
             ),
@@ -198,10 +218,7 @@ Future<pw.PageTheme> _myPageTheme(PdfPageFormat format) async {
 }
 
 class _Block extends pw.StatelessWidget {
-  _Block({
-    required this.title,
-    this.icon,
-  });
+  _Block({required this.title, this.icon});
 
   final String title;
 
@@ -210,39 +227,43 @@ class _Block extends pw.StatelessWidget {
   @override
   pw.Widget build(pw.Context context) {
     return pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: <pw.Widget>[
-          pw.Row(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: <pw.Widget>[
-                pw.Container(
-                  width: 6,
-                  height: 6,
-                  margin: const pw.EdgeInsets.only(top: 5.5, left: 2, right: 5),
-                  decoration: const pw.BoxDecoration(
-                    color: green,
-                    shape: pw.BoxShape.circle,
-                  ),
-                ),
-                pw.Text(title,
-                    style: pw.Theme.of(context)
-                        .defaultTextStyle
-                        .copyWith(fontWeight: pw.FontWeight.bold)),
-                pw.Spacer(),
-                if (icon != null) pw.Icon(icon!, color: lightGreen, size: 18),
-              ]),
-          pw.Container(
-            decoration: const pw.BoxDecoration(
-                border: pw.Border(left: pw.BorderSide(color: green, width: 2))),
-            padding: const pw.EdgeInsets.only(left: 10, top: 5, bottom: 5),
-            margin: const pw.EdgeInsets.only(left: 5),
-            child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: <pw.Widget>[
-                  pw.Lorem(length: 20),
-                ]),
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: <pw.Widget>[
+        pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: <pw.Widget>[
+            pw.Container(
+              width: 6,
+              height: 6,
+              margin: const pw.EdgeInsets.only(top: 5.5, left: 2, right: 5),
+              decoration: const pw.BoxDecoration(
+                color: green,
+                shape: pw.BoxShape.circle,
+              ),
+            ),
+            pw.Text(
+              title,
+              style: pw.Theme.of(
+                context,
+              ).defaultTextStyle.copyWith(fontWeight: pw.FontWeight.bold),
+            ),
+            pw.Spacer(),
+            if (icon != null) pw.Icon(icon!, color: lightGreen, size: 18),
+          ],
+        ),
+        pw.Container(
+          decoration: const pw.BoxDecoration(
+            border: pw.Border(left: pw.BorderSide(color: green, width: 2)),
           ),
-        ]);
+          padding: const pw.EdgeInsets.only(left: 10, top: 5, bottom: 5),
+          margin: const pw.EdgeInsets.only(left: 5),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: <pw.Widget>[pw.Lorem(length: 20)],
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -260,20 +281,13 @@ class _Category extends pw.StatelessWidget {
       ),
       margin: const pw.EdgeInsets.only(bottom: 10, top: 20),
       padding: const pw.EdgeInsets.fromLTRB(10, 4, 10, 4),
-      child: pw.Text(
-        title,
-        textScaleFactor: 1.5,
-      ),
+      child: pw.Text(title, textScaleFactor: 1.5),
     );
   }
 }
 
 class _Percent extends pw.StatelessWidget {
-  _Percent({
-    required this.size,
-    required this.value,
-    required this.title,
-  });
+  _Percent({required this.size, required this.value, required this.title});
 
   final double size;
 
@@ -313,7 +327,7 @@ class _Percent extends pw.StatelessWidget {
             ),
           ],
         ),
-      )
+      ),
     ];
 
     widgets.add(title);
@@ -332,11 +346,13 @@ class _UrlText extends pw.StatelessWidget {
   pw.Widget build(pw.Context context) {
     return pw.UrlLink(
       destination: url,
-      child: pw.Text(text,
-          style: const pw.TextStyle(
-            decoration: pw.TextDecoration.underline,
-            color: PdfColors.blue,
-          )),
+      child: pw.Text(
+        text,
+        style: const pw.TextStyle(
+          decoration: pw.TextDecoration.underline,
+          color: PdfColors.blue,
+        ),
+      ),
     );
   }
 }

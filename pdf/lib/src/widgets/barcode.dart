@@ -55,8 +55,11 @@ class _BarcodeWidget extends Widget {
   final double? textPadding;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
   }
 
@@ -109,7 +112,8 @@ class _BarcodeWidget extends Widget {
       for (final text in textList) {
         final metrics = font.stringMetrics(text.text);
 
-        final top = box!.top -
+        final top =
+            box!.top -
             text.top -
             metrics.descent * textStyle!.fontSize! -
             text.height;
@@ -120,12 +124,14 @@ class _BarcodeWidget extends Widget {
             left = text.left + box!.left;
             break;
           case BarcodeTextAlign.center:
-            left = text.left +
+            left =
+                text.left +
                 box!.left +
                 (text.width - metrics.width * text.height) / 2;
             break;
           case BarcodeTextAlign.right:
-            left = text.left +
+            left =
+                text.left +
                 box!.left +
                 (text.width - metrics.width * text.height);
             break;
@@ -133,13 +139,7 @@ class _BarcodeWidget extends Widget {
 
         context.canvas
           ..setFillColor(textStyle!.color)
-          ..drawString(
-            font,
-            text.height,
-            text.text,
-            left,
-            top,
-          );
+          ..drawString(font, text.height, text.text, left, top);
       }
     }
   }
@@ -184,8 +184,8 @@ class BarcodeWidget extends StatelessWidget {
     this.drawText = true,
     this.textStyle,
     this.textPadding = 0,
-  })  : dataBytes = null,
-        dataString = data;
+  }) : dataBytes = null,
+       dataString = data;
 
   /// Draw a barcode using Uint8List data
   BarcodeWidget.fromBytes({
@@ -201,8 +201,8 @@ class BarcodeWidget extends StatelessWidget {
     this.drawText = true,
     this.textStyle,
     this.textPadding = 0,
-  })  : dataBytes = data,
-        dataString = null;
+  }) : dataBytes = data,
+       dataString = null;
 
   /// the barcode data
   final String? dataString;
@@ -252,14 +252,14 @@ class BarcodeWidget extends StatelessWidget {
   @override
   Widget build(Context context) {
     final defaultStyle = Theme.of(context).defaultTextStyle.copyWith(
-          font: Font.courier(),
-          fontNormal: Font.courier(),
-          fontBold: Font.courierBold(),
-          fontItalic: Font.courierOblique(),
-          fontBoldItalic: Font.courierBoldOblique(),
-          lineSpacing: 1,
-          fontSize: height != null ? height! * 0.2 : null,
-        );
+      font: Font.courier(),
+      fontNormal: Font.courier(),
+      fontBold: Font.courierBold(),
+      fontItalic: Font.courierOblique(),
+      fontBoldItalic: Font.courierBoldOblique(),
+      lineSpacing: 1,
+      fontSize: height != null ? height! * 0.2 : null,
+    );
     final _textStyle = defaultStyle.merge(textStyle);
 
     Widget child = _BarcodeWidget(
@@ -277,10 +277,7 @@ class BarcodeWidget extends StatelessWidget {
     }
 
     if (decoration != null) {
-      child = DecoratedBox(
-        decoration: decoration!,
-        child: child,
-      );
+      child = DecoratedBox(decoration: decoration!, child: child);
     } else if (backgroundColor != null) {
       child = DecoratedBox(
         decoration: BoxDecoration(color: backgroundColor),

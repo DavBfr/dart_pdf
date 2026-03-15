@@ -368,11 +368,7 @@ class PdfPreviewState extends State<PdfPreview> {
     }
 
     if (widget.useActions && widget.canChangePageFormat) {
-      actions.add(
-        PdfPageFormatAction(
-          pageFormats: widget.pageFormats,
-        ),
-      );
+      actions.add(PdfPageFormatAction(pageFormats: widget.pageFormats));
     }
 
     if (widget.useActions && widget.canChangeOrientation) {

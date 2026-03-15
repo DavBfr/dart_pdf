@@ -58,10 +58,7 @@ class ChartLegend extends StatelessWidget {
           margin: const EdgeInsets.only(right: 5),
           child: dataset.legendShape(context),
         ),
-        Text(
-          dataset.legend!,
-          style: textStyle,
-        ),
+        Text(dataset.legend!, style: textStyle),
       ],
     );
   }
@@ -79,7 +76,7 @@ class ChartLegend extends StatelessWidget {
           : WrapCrossAlignment.start,
       children: <Widget>[
         for (final Dataset dataset in datasets)
-          if (dataset.legend != null) _buildLegend(context, dataset)
+          if (dataset.legend != null) _buildLegend(context, dataset),
       ],
     );
 

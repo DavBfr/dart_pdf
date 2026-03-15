@@ -39,8 +39,8 @@ import 'unicode_cmap.dart';
 class PdfTtfFont extends PdfFont {
   /// Constructs a [PdfTtfFont]
   PdfTtfFont(PdfDocument pdfDocument, ByteData bytes, {bool protect = false})
-      : font = TtfParser(bytes),
-        super.create(pdfDocument, subtype: '/TrueType') {
+    : font = TtfParser(bytes),
+      super.create(pdfDocument, subtype: '/TrueType') {
     file = PdfObjectStream(pdfDocument, isBinary: true);
     unicodeCMap = PdfUnicodeCmap(pdfDocument, protect);
     descriptor = PdfFontDescriptor(this, file);
@@ -105,8 +105,9 @@ class PdfTtfFont extends PdfFont {
     charMin = 32;
     charMax = 255;
     for (var i = charMin; i <= charMax; i++) {
-      widthsObject.params
-          .add(PdfNum((glyphMetrics(i).advanceWidth * 1000.0).toInt()));
+      widthsObject.params.add(
+        PdfNum((glyphMetrics(i).advanceWidth * 1000.0).toInt()),
+      );
     }
     params['/FirstChar'] = PdfNum(charMin);
     params['/LastChar'] = PdfNum(charMax);
@@ -127,10 +128,7 @@ class PdfTtfFont extends PdfFont {
       '/BaseFont': PdfName('/$fontName'),
       '/FontFile2': file.ref(),
       '/FontDescriptor': descriptor.ref(),
-      '/W': PdfArray([
-        const PdfNum(0),
-        widthsObject.ref(),
-      ]),
+      '/W': PdfArray([const PdfNum(0), widthsObject.ref()]),
       '/CIDToGIDMap': const PdfName('/Identity'),
       '/DW': const PdfNum(1000),
       '/Subtype': const PdfName('/CIDFontType2'),
@@ -138,7 +136,7 @@ class PdfTtfFont extends PdfFont {
         '/Supplement': const PdfNum(0),
         '/Registry': PdfString.fromString('Adobe'),
         '/Ordering': PdfString.fromString('Identity-H'),
-      })
+      }),
     });
 
     params['/BaseFont'] = PdfName('/$fontName');
@@ -149,8 +147,11 @@ class PdfTtfFont extends PdfFont {
     charMin = 0;
     charMax = unicodeCMap.cmap.length - 1;
     for (var i = charMin; i <= charMax; i++) {
-      widthsObject.params.add(PdfNum(
-          (glyphMetrics(unicodeCMap.cmap[i]).advanceWidth * 1000.0).toInt()));
+      widthsObject.params.add(
+        PdfNum(
+          (glyphMetrics(unicodeCMap.cmap[i]).advanceWidth * 1000.0).toInt(),
+        ),
+      );
     }
   }
 

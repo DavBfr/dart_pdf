@@ -83,18 +83,18 @@ class ThemeData extends Inherited {
     required this.iconTheme,
     this.textAlign,
     this.maxLines,
-  })  : assert(defaultTextStyle.inherit == false),
-        assert(paragraphStyle.inherit == false),
-        assert(header0.inherit == false),
-        assert(header1.inherit == false),
-        assert(header2.inherit == false),
-        assert(header3.inherit == false),
-        assert(header4.inherit == false),
-        assert(header5.inherit == false),
-        assert(bulletStyle.inherit == false),
-        assert(tableHeader.inherit == false),
-        assert(tableCell.inherit == false),
-        assert(maxLines == null || maxLines > 0);
+  }) : assert(defaultTextStyle.inherit == false),
+       assert(paragraphStyle.inherit == false),
+       assert(header0.inherit == false),
+       assert(header1.inherit == false),
+       assert(header2.inherit == false),
+       assert(header3.inherit == false),
+       assert(header4.inherit == false),
+       assert(header5.inherit == false),
+       assert(bulletStyle.inherit == false),
+       assert(tableHeader.inherit == false),
+       assert(tableCell.inherit == false),
+       assert(maxLines == null || maxLines > 0);
 
   factory ThemeData.withFont({
     Font? base,
@@ -125,7 +125,9 @@ class ThemeData extends Inherited {
       header4: defaultStyle.copyWith(fontSize: fontSize * 1.2),
       header5: defaultStyle.copyWith(fontSize: fontSize * 1.1),
       tableHeader: defaultStyle.copyWith(
-          fontSize: fontSize * 0.8, fontWeight: FontWeight.bold),
+        fontSize: fontSize * 0.8,
+        fontWeight: FontWeight.bold,
+      ),
       tableCell: defaultStyle.copyWith(fontSize: fontSize * 0.8),
       softWrap: true,
       overflow: TextOverflow.visible,
@@ -179,32 +181,28 @@ class ThemeData extends Inherited {
     int? maxLines,
     TextOverflow? overflow,
     IconThemeData? iconTheme,
-  }) =>
-      ThemeData._(
-        defaultTextStyle: this.defaultTextStyle.merge(defaultTextStyle),
-        paragraphStyle: this.paragraphStyle.merge(paragraphStyle),
-        bulletStyle: this.bulletStyle.merge(bulletStyle),
-        header0: this.header0.merge(header0),
-        header1: this.header1.merge(header1),
-        header2: this.header2.merge(header2),
-        header3: this.header3.merge(header3),
-        header4: this.header4.merge(header4),
-        header5: this.header5.merge(header5),
-        tableHeader: this.tableHeader.merge(tableHeader),
-        tableCell: this.tableCell.merge(tableCell),
-        softWrap: softWrap ?? this.softWrap,
-        overflow: overflow ?? this.overflow,
-        textAlign: textAlign ?? this.textAlign,
-        maxLines: maxLines ?? this.maxLines,
-        iconTheme: iconTheme ?? this.iconTheme,
-      );
+  }) => ThemeData._(
+    defaultTextStyle: this.defaultTextStyle.merge(defaultTextStyle),
+    paragraphStyle: this.paragraphStyle.merge(paragraphStyle),
+    bulletStyle: this.bulletStyle.merge(bulletStyle),
+    header0: this.header0.merge(header0),
+    header1: this.header1.merge(header1),
+    header2: this.header2.merge(header2),
+    header3: this.header3.merge(header3),
+    header4: this.header4.merge(header4),
+    header5: this.header5.merge(header5),
+    tableHeader: this.tableHeader.merge(tableHeader),
+    tableCell: this.tableCell.merge(tableCell),
+    softWrap: softWrap ?? this.softWrap,
+    overflow: overflow ?? this.overflow,
+    textAlign: textAlign ?? this.textAlign,
+    maxLines: maxLines ?? this.maxLines,
+    iconTheme: iconTheme ?? this.iconTheme,
+  );
 }
 
 class Theme extends StatelessWidget {
-  Theme({
-    required this.data,
-    required this.child,
-  });
+  Theme({required this.data, required this.child});
 
   final ThemeData data;
 
@@ -216,10 +214,7 @@ class Theme extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    return InheritedWidget(
-      inherited: data,
-      build: (Context context) => child,
-    );
+    return InheritedWidget(inherited: data, build: (Context context) => child);
   }
 }
 
@@ -279,9 +274,6 @@ class DefaultTextStyle extends StatelessWidget implements Inherited {
       maxLines: maxLines,
     );
 
-    return InheritedWidget(
-      inherited: theme,
-      build: (Context context) => child,
-    );
+    return InheritedWidget(inherited: theme, build: (Context context) => child);
   }
 }

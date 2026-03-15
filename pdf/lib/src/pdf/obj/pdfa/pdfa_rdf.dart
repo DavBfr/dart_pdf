@@ -28,8 +28,9 @@ class PdfaRdf {
   XmlDocument? create() {
     var createDate = PdfaDateFormat().format(dt: creationDate, asIso: true);
     final offset = creationDate.timeZoneOffset;
-    final hours =
-        offset.inHours > 0 ? offset.inHours : 1; // For fixing divide by 0
+    final hours = offset.inHours > 0
+        ? offset.inHours
+        : 1; // For fixing divide by 0
     if (!offset.isNegative) {
       createDate =
           "$createDate+${offset.inHours.toString().padLeft(2, '0')}:${(offset.inMinutes % (hours * 60)).toString().padLeft(2, '0')}";

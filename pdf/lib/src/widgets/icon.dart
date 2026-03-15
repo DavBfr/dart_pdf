@@ -30,10 +30,7 @@ import 'widget.dart';
 @immutable
 class IconData {
   /// Creates icon data.
-  const IconData(
-    this.codePoint, {
-    this.matchTextDirection = false,
-  });
+  const IconData(this.codePoint, {this.matchTextDirection = false});
 
   /// The Unicode code point at which this icon is stored in the icon font.
   final int codePoint;
@@ -51,14 +48,18 @@ class IconThemeData {
 
   /// Creates an icon them with some reasonable default values.
   const IconThemeData.fallback(this.font)
-      : color = PdfColors.black,
-        opacity = 1.0,
-        size = 24.0;
+    : color = PdfColors.black,
+      opacity = 1.0,
+      size = 24.0;
 
   /// Creates a copy of this icon theme but with the given fields replaced with
   /// the new values.
-  IconThemeData copyWith(
-      {PdfColor? color, double? opacity, double? size, Font? font}) {
+  IconThemeData copyWith({
+    PdfColor? color,
+    double? opacity,
+    double? size,
+    Font? font,
+  }) {
     return IconThemeData(
       color: color ?? this.color,
       opacity: opacity ?? this.opacity,
@@ -84,13 +85,8 @@ class IconThemeData {
 /// an [IconData] such as material's predefined [IconData]s in [Icons].
 class Icon extends StatelessWidget {
   /// Creates an icon.
-  Icon(
-    this.icon, {
-    this.size,
-    this.color,
-    this.textDirection,
-    this.font,
-  }) : super();
+  Icon(this.icon, {this.size, this.color, this.textDirection, this.font})
+    : super();
 
   /// The icon to display. The available icons are described in [Icons].
   final IconData icon;
@@ -143,10 +139,7 @@ class Icon extends StatelessWidget {
     }
 
     if (iconOpacity < 1.0) {
-      iconWidget = Opacity(
-        opacity: iconOpacity,
-        child: iconWidget,
-      );
+      iconWidget = Opacity(opacity: iconOpacity, child: iconWidget);
     }
     return iconWidget;
   }

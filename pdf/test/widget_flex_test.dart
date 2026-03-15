@@ -35,11 +35,7 @@ void main() {
         build: (Context context) => ListView(
           spacing: 20,
           padding: const EdgeInsets.all(10),
-          children: <Widget>[
-            Text('Line 1'),
-            Text('Line 2'),
-            Text('Line 3'),
-          ],
+          children: <Widget>[Text('Line 1'), Text('Line 2'), Text('Line 3')],
         ),
       ),
     );

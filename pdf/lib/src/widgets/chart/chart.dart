@@ -93,10 +93,7 @@ class Chart extends Widget implements Inherited {
               Expanded(
                 child: Stack(
                   overflow: Overflow.visible,
-                  children: <Widget>[
-                    grid,
-                    if (overlay != null) overlay!,
-                  ],
+                  children: <Widget>[grid, if (overlay != null) overlay!],
                 ),
               ),
               if (right != null) right!,
@@ -109,8 +106,11 @@ class Chart extends Widget implements Inherited {
   }
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     box = PdfRect.fromPoints(PdfPoint.zero, _computeSize(constraints));
     _context = context.inheritFrom(this);
     _child = _build(_context!);
@@ -135,8 +135,11 @@ class Chart extends Widget implements Inherited {
 
 abstract class ChartGrid extends Widget {
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
   }
 
@@ -149,12 +152,7 @@ abstract class ChartValue {
 }
 
 abstract class Dataset extends Widget {
-  Dataset({
-    this.legend,
-    this.color,
-    this.borderColor,
-    this.borderWidth = .5,
-  });
+  Dataset({this.legend, this.color, this.borderColor, this.borderWidth = .5});
 
   final String? legend;
 

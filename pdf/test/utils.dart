@@ -46,7 +46,9 @@ Future<Uint8List> download(
   final request = await client.getUrl(Uri.parse(url));
   final response = await request.close();
   final builder = await response.fold(
-      BytesBuilder(), (BytesBuilder b, List<int> d) => b..add(d));
+    BytesBuilder(),
+    (BytesBuilder b, List<int> d) => b..add(d),
+  );
   final List<int> data = builder.takeBytes();
 
   if (cache) {
@@ -61,18 +63,15 @@ ImageProvider generateBitmap(int w, int h) {
   final dh = h.toDouble();
   for (var y = 0; y < h; y++) {
     for (var x = 0; x < w; x++) {
-      bm[y * w + x] = (math.sin(x / dw) * 256).toInt() |
+      bm[y * w + x] =
+          (math.sin(x / dw) * 256).toInt() |
           (math.sin(y / dh) * 256).toInt() << 8 |
           (math.sin(x / dw * y / dh) * 256).toInt() << 16 |
           0xff000000;
     }
   }
 
-  return RawImage(
-    bytes: bm.buffer.asUint8List(),
-    width: w,
-    height: h,
-  );
+  return RawImage(bytes: bm.buffer.asUint8List(), width: w, height: h);
 }
 
 Font loadFont(String filename) {

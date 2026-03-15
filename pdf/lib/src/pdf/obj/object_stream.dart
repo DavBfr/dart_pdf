@@ -29,11 +29,9 @@ class PdfObjectStream extends PdfObject<PdfDict> {
     String? type,
     this.isBinary = false,
   }) : super(
-          pdfDocument,
-          params: PdfDict.values({
-            if (type != null) '/Type': PdfName(type),
-          }),
-        );
+         pdfDocument,
+         params: PdfDict.values({if (type != null) '/Type': PdfName(type)}),
+       );
 
   /// This holds the stream's content.
   final PdfStream buf = PdfStream();

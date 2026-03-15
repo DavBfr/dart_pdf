@@ -30,12 +30,12 @@ class PdfString extends PdfDataType {
     this.encrypted = true,
   });
 
-  factory PdfString.fromString(
-    String value, {
-    bool encrypted = true,
-  }) {
-    return PdfString(_string(value),
-        format: PdfStringFormat.literal, encrypted: encrypted);
+  factory PdfString.fromString(String value, {bool encrypted = true}) {
+    return PdfString(
+      _string(value),
+      format: PdfStringFormat.literal,
+      encrypted: encrypted,
+    );
   }
 
   factory PdfString.fromStream(
@@ -46,10 +46,7 @@ class PdfString extends PdfDataType {
     return PdfString(value.output(), format: format, encrypted: encrypted);
   }
 
-  factory PdfString.fromDate(
-    DateTime date, {
-    bool encrypted = true,
-  }) {
+  factory PdfString.fromDate(DateTime date, {bool encrypted = true}) {
     return PdfString(_date(date), encrypted: encrypted);
   }
 
@@ -106,8 +103,9 @@ class PdfString extends PdfDataType {
         add(unit);
       } else if (unit > unicodePlaneOneMax && unit <= unicodeValidRangeMax) {
         final base = unit - unicodeUtf16Offset;
-        add(unicodeUtf16SurrogateUnit0Base +
-            ((base & unicodeUtf16HiMask) >> 10));
+        add(
+          unicodeUtf16SurrogateUnit0Base + ((base & unicodeUtf16HiMask) >> 10),
+        );
         add(unicodeUtf16SurrogateUnit1Base + (base & unicodeUtf16LoMask));
       } else {
         add(unicodeReplacementCharacterCodePoint);

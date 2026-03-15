@@ -36,9 +36,9 @@ class Positioned extends SingleChildWidget {
     double? right,
     this.bottom,
     required Widget child,
-  })  : _left = left,
-        _right = right,
-        super(child: child);
+  }) : _left = left,
+       _right = right,
+       super(child: child);
 
   /// Creates a Positioned object with left, top, right, and bottom set to 0.0
   /// unless a value for them is passed.
@@ -48,9 +48,9 @@ class Positioned extends SingleChildWidget {
     double? right = 0.0,
     this.bottom = 0.0,
     required Widget child,
-  })  : _left = left,
-        _right = right,
-        super(child: child);
+  }) : _left = left,
+       _right = right,
+       super(child: child);
 
   /// Creates a widget that controls where a child of a [Stack] is positioned.
   factory Positioned.directional({
@@ -113,11 +113,7 @@ class PositionedDirectional extends Positioned {
     double? top,
     double? bottom,
     required Widget child,
-  }) : super(
-          child: child,
-          top: top,
-          bottom: bottom,
-        );
+  }) : super(child: child, top: top, bottom: bottom);
 
   PositionedDirectional.fill({
     this.start = 0.0,
@@ -125,11 +121,7 @@ class PositionedDirectional extends Positioned {
     double? top = 0.0,
     double? bottom = 0.0,
     required Widget child,
-  }) : super(
-          child: child,
-          top: top,
-          bottom: bottom,
-        );
+  }) : super(child: child, top: top, bottom: bottom);
 
   final double? start;
 
@@ -146,8 +138,11 @@ class PositionedDirectional extends Positioned {
   final double? end;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     super.layout(context, constraints, parentUsesSize: parentUsesSize);
     switch (Directionality.of(context)) {
       case TextDirection.rtl:
@@ -182,8 +177,11 @@ class Stack extends MultiChildWidget {
   final Overflow overflow;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     final childCount = children.length;
 
     var hasNonPositionedChildren = false;
@@ -233,8 +231,9 @@ class Stack extends MultiChildWidget {
     for (final child in children) {
       if (child is! Positioned) {
         child.box = PdfRect.fromPoints(
-            resolvedAlignment.inscribe(child.box!.size, box!).offset,
-            child.box!.size);
+          resolvedAlignment.inscribe(child.box!.size, box!).offset,
+          child.box!.size,
+        );
       } else {
         final positioned = child;
 
@@ -242,17 +241,20 @@ class Stack extends MultiChildWidget {
 
         if (positioned.left != null && positioned.right != null) {
           childConstraints = childConstraints.tighten(
-              width: box!.width - positioned.right! - positioned.left!);
+            width: box!.width - positioned.right! - positioned.left!,
+          );
         } else if (positioned.width != null) {
           childConstraints = childConstraints.tighten(width: positioned.width);
         }
 
         if (positioned.top != null && positioned.bottom != null) {
           childConstraints = childConstraints.tighten(
-              height: box!.height - positioned.bottom! - positioned.top!);
+            height: box!.height - positioned.bottom! - positioned.top!,
+          );
         } else if (positioned.height != null) {
-          childConstraints =
-              childConstraints.tighten(height: positioned.height);
+          childConstraints = childConstraints.tighten(
+            height: positioned.height,
+          );
         }
 
         positioned.layout(context, childConstraints, parentUsesSize: true);
@@ -276,8 +278,10 @@ class Stack extends MultiChildWidget {
           y = resolvedAlignment.inscribe(positioned.box!.size, box!).bottom;
         }
 
-        positioned.box =
-            PdfRect.fromPoints(PdfPoint(x!, y!), positioned.box!.size);
+        positioned.box = PdfRect.fromPoints(
+          PdfPoint(x!, y!),
+          positioned.box!.size,
+        );
       }
     }
   }

@@ -61,8 +61,10 @@ mixin AnnotationAppearance on Widget {
       offset: PdfPoint.zero,
       canvas: canvas,
       page: context.page,
-      constraints:
-          BoxConstraints.tightFor(width: box!.width, height: box!.height),
+      constraints: BoxConstraints.tightFor(
+        width: box!.width,
+        height: box!.height,
+      ),
     );
 
     if (tag != null) {
@@ -153,20 +155,21 @@ class Checkbox extends SingleChildWidget with AnnotationAppearance {
     double height = 13,
     BoxDecoration? decoration,
     this.replaces,
-  })  : radius = decoration?.shape == BoxShape.circle
-            ? Radius.circular(math.max(height, width) / 2)
-            : decoration?.borderRadius?.uniform ?? Radius.zero,
-        super(
-            child: Container(
-                width: width,
-                height: height,
-                margin: const EdgeInsets.all(1),
-                decoration: decoration ??
-                    BoxDecoration(
-                        border: Border.all(
-                      color: PdfColors.grey600,
-                      width: 2,
-                    ))));
+  }) : radius = decoration?.shape == BoxShape.circle
+           ? Radius.circular(math.max(height, width) / 2)
+           : decoration?.borderRadius?.uniform ?? Radius.zero,
+       super(
+         child: Container(
+           width: width,
+           height: height,
+           margin: const EdgeInsets.all(1),
+           decoration:
+               decoration ??
+               BoxDecoration(
+                 border: Border.all(color: PdfColors.grey600, width: 2),
+               ),
+         ),
+       );
 
   final bool value;
 
@@ -206,7 +209,13 @@ class Checkbox extends SingleChildWidget with AnnotationAppearance {
         size: bf.rect.size,
         painter: (canvas, size) {
           canvas.drawRRect(
-              0, 0, bf.rect.width, bf.rect.height, radius.y, radius.x);
+            0,
+            0,
+            bf.rect.width,
+            bf.rect.height,
+            radius.y,
+            radius.x,
+          );
           canvas.setFillColor(activeColor);
           canvas.fillPath();
           canvas.moveTo(2, bf.rect.height / 2);
@@ -219,14 +228,7 @@ class Checkbox extends SingleChildWidget with AnnotationAppearance {
       ),
     );
 
-    drawAppearance(
-      context,
-      bf,
-      mat,
-      name: '/Off',
-      selected: !value,
-      child!,
-    );
+    drawAppearance(context, bf, mat, name: '/Off', selected: !value, child!);
 
     PdfAnnot(
       context.page,
@@ -249,47 +251,51 @@ class FlatButton extends SingleChildWidget with AnnotationAppearance {
     required Widget child,
     required this.name,
     this.replaces,
-  })  : _childDown = Container(
-          child: DefaultTextStyle(
-            style: TextStyle(color: textColor),
-            child: child,
-          ),
-          decoration: decoration ??
-              BoxDecoration(
-                color: colorDown,
-                borderRadius: const BorderRadius.all(Radius.circular(2)),
-              ),
-          padding: padding ??
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-        ),
-        _childRollover = Container(
-          child: DefaultTextStyle(
-            style: TextStyle(color: textColor),
-            child: child,
-          ),
-          decoration: decoration ??
-              BoxDecoration(
-                color: colorRollover,
-                borderRadius: const BorderRadius.all(Radius.circular(2)),
-              ),
-          padding: padding ??
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-        ),
-        super(
-          child: Container(
-            child: DefaultTextStyle(
-              style: TextStyle(color: textColor),
-              child: child,
-            ),
-            decoration: decoration ??
-                BoxDecoration(
-                  color: color,
-                  borderRadius: const BorderRadius.all(Radius.circular(2)),
-                ),
-            padding: padding ??
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-          ),
-        );
+  }) : _childDown = Container(
+         child: DefaultTextStyle(
+           style: TextStyle(color: textColor),
+           child: child,
+         ),
+         decoration:
+             decoration ??
+             BoxDecoration(
+               color: colorDown,
+               borderRadius: const BorderRadius.all(Radius.circular(2)),
+             ),
+         padding:
+             padding ?? const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+       ),
+       _childRollover = Container(
+         child: DefaultTextStyle(
+           style: TextStyle(color: textColor),
+           child: child,
+         ),
+         decoration:
+             decoration ??
+             BoxDecoration(
+               color: colorRollover,
+               borderRadius: const BorderRadius.all(Radius.circular(2)),
+             ),
+         padding:
+             padding ?? const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+       ),
+       super(
+         child: Container(
+           child: DefaultTextStyle(
+             style: TextStyle(color: textColor),
+             child: child,
+           ),
+           decoration:
+               decoration ??
+               BoxDecoration(
+                 color: color,
+                 borderRadius: const BorderRadius.all(Radius.circular(2)),
+               ),
+           padding:
+               padding ??
+               const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+         ),
+       );
 
   final String name;
 
@@ -316,8 +322,13 @@ class FlatButton extends SingleChildWidget with AnnotationAppearance {
 
     drawAppearance(context, bf, mat, child!);
     drawAppearance(context, bf, mat, _childDown, type: PdfAnnotAppearance.down);
-    drawAppearance(context, bf, mat, _childRollover,
-        type: PdfAnnotAppearance.rollover);
+    drawAppearance(
+      context,
+      bf,
+      mat,
+      _childRollover,
+      type: PdfAnnotAppearance.rollover,
+    );
 
     PdfAnnot(
       context.page,
@@ -437,8 +448,8 @@ class Signature extends SingleChildWidget with AnnotationAppearance {
     this.cert,
     this.ocsp,
     this.replaces,
-  })  : value = value ?? crypto,
-        super(child: child);
+  }) : value = value ?? crypto,
+       super(child: child);
 
   /// Field name
   final String name;

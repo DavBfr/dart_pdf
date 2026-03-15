@@ -25,11 +25,8 @@ import 'multi_page.dart';
 import 'widget.dart';
 
 class Partition extends Widget with SpanningWidget {
-  Partition({
-    required this.child,
-    this.width,
-    int flex = 1,
-  }) : flex = width == null ? flex : 0;
+  Partition({required this.child, this.width, int flex = 1})
+    : flex = width == null ? flex : 0;
 
   final double? width;
 
@@ -52,8 +49,11 @@ class Partition extends Widget with SpanningWidget {
   }
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     child.layout(context, constraints, parentUsesSize: parentUsesSize);
   }
 
@@ -79,7 +79,7 @@ class Partition extends Widget with SpanningWidget {
 
 class PartitionsContext extends WidgetContext {
   PartitionsContext(int count)
-      : partitionContext = List<WidgetContext?>.filled(count, null);
+    : partitionContext = List<WidgetContext?>.filled(count, null);
 
   final List<WidgetContext?> partitionContext;
 
@@ -102,11 +102,9 @@ class PartitionsContext extends WidgetContext {
 }
 
 class Partitions extends Widget with SpanningWidget {
-  Partitions({
-    required this.children,
-    this.mainAxisSize = MainAxisSize.max,
-  })  : _context = PartitionsContext(children.length),
-        super();
+  Partitions({required this.children, this.mainAxisSize = MainAxisSize.max})
+    : _context = PartitionsContext(children.length),
+      super();
 
   final List<Partition> children;
 
@@ -122,8 +120,11 @@ class Partitions extends Widget with SpanningWidget {
       !children.any((Partition part) => !part.hasMoreWidgets);
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     // Determine used flex factor, size inflexible items, calculate free space.
     final maxMainSize = constraints.maxWidth;
     final canFlex = maxMainSize < double.infinity;
@@ -138,7 +139,8 @@ class Partitions extends Widget with SpanningWidget {
         assert(() {
           if (!canFlex) {
             throw Exception(
-                'Partition children have non-zero flex but incoming width constraints are unbounded.');
+              'Partition children have non-zero flex but incoming width constraints are unbounded.',
+            );
           } else {
             return true;
           }
@@ -153,8 +155,10 @@ class Partitions extends Widget with SpanningWidget {
 
     // Distribute free space to flexible children, and determine baseline.
     if (totalFlex > 0 && canFlex) {
-      final freeSpace =
-          math.max(0, (canFlex ? maxMainSize : 0.0) - allocatedSize);
+      final freeSpace = math.max(
+        0,
+        (canFlex ? maxMainSize : 0.0) - allocatedSize,
+      );
       final spacePerFlex = freeSpace / totalFlex;
 
       index = 0;
@@ -174,9 +178,10 @@ class Partitions extends Widget with SpanningWidget {
     for (final child in children) {
       if (widths[index]! > 0) {
         final innerConstraints = BoxConstraints(
-            minWidth: widths[index]!,
-            maxWidth: widths[index]!,
-            maxHeight: constraints.maxHeight);
+          minWidth: widths[index]!,
+          maxWidth: widths[index]!,
+          maxHeight: constraints.maxHeight,
+        );
 
         child.layout(context, innerConstraints);
         assert(child.box != null);
@@ -192,7 +197,9 @@ class Partitions extends Widget with SpanningWidget {
       if (widths[index]! > 0) {
         final offsetY = totalHeight - child.box!.height;
         child.box = PdfRect.fromPoints(
-            PdfPoint(allocatedSize, offsetY), child.box!.size);
+          PdfPoint(allocatedSize, offsetY),
+          child.box!.size,
+        );
         totalHeight = math.max(totalHeight, child.box!.height);
         allocatedSize += widths[index]!;
       }

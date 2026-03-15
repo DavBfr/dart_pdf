@@ -164,8 +164,6 @@ mixin PdfGraphicStream on PdfObject<PdfDict> {
 /// Graphic XObject
 class PdfGraphicXObject extends PdfXObject with PdfGraphicStream {
   /// Creates a Graphic XObject
-  PdfGraphicXObject(
-    PdfDocument pdfDocument, [
-    String? subtype,
-  ]) : super(pdfDocument, subtype);
+  PdfGraphicXObject(PdfDocument pdfDocument, [String? subtype])
+    : super(pdfDocument, subtype);
 }

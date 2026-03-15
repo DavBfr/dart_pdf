@@ -31,7 +31,7 @@ enum PdfOutlineMode {
   fitPage,
 
   /// When jumping to the destination, display the specified region
-  fitRect
+  fitRect,
 }
 
 /// Outline style
@@ -63,9 +63,9 @@ class PdfOutline extends PdfObject<PdfDict> {
     this.destMode = PdfOutlineMode.fitPage,
     this.style = PdfOutlineStyle.normal,
     PdfPage? page,
-  })  : assert(anchor == null || (dest == null && rect == null)),
-        _page = page,
-        super(pdfDocument, params: PdfDict());
+  }) : assert(anchor == null || (dest == null && rect == null)),
+       _page = page,
+       super(pdfDocument, params: PdfDict());
 
   /// This holds any outlines below us
   List<PdfOutline> outlines = <PdfOutline>[];

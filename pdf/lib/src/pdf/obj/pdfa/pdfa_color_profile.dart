@@ -10,16 +10,11 @@ import '../../format/string.dart';
 import '../object.dart';
 
 class PdfaColorProfile extends PdfObject<PdfDictStream> {
-  PdfaColorProfile(
-    PdfDocument pdfDocument,
-    this.icc,
-  ) : super(
-          pdfDocument,
-          params: PdfDictStream(
-            compress: false,
-            encrypt: false,
-          ),
-        ) {
+  PdfaColorProfile(PdfDocument pdfDocument, this.icc)
+    : super(
+        pdfDocument,
+        params: PdfDictStream(compress: false, encrypt: false),
+      ) {
     pdfDocument.catalog.colorProfile = this;
   }
 
@@ -37,11 +32,13 @@ class PdfaColorProfile extends PdfObject<PdfDictStream> {
       PdfDict({
         '/Type': const PdfName('/OutputIntent'),
         '/S': const PdfName('/GTS_PDFA1'),
-        '/OutputConditionIdentifier':
-            PdfString(Uint8List.fromList('sRGB2014.icc'.codeUnits)),
+        '/OutputConditionIdentifier': PdfString(
+          Uint8List.fromList('sRGB2014.icc'.codeUnits),
+        ),
         '/Info': PdfString(Uint8List.fromList('sRGB2014.icc'.codeUnits)),
-        '/RegistryName':
-            PdfString(Uint8List.fromList('http://www.color.org'.codeUnits)),
+        '/RegistryName': PdfString(
+          Uint8List.fromList('http://www.color.org'.codeUnits),
+        ),
         '/DestOutputProfile': ref(),
       }),
     ]);

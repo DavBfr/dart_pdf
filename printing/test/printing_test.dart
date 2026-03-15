@@ -48,19 +48,11 @@ void main() {
   });
 
   test('sharePdf', () async {
-    expect(
-      await Printing.sharePdf(
-        bytes: Uint8List(0),
-      ),
-      true,
-    );
+    expect(await Printing.sharePdf(bytes: Uint8List(0)), true);
   });
 
   test('pickPrinter', () async {
-    expect(
-      await Printing.pickPrinter(context: MockContext()),
-      null,
-    );
+    expect(await Printing.pickPrinter(context: MockContext()), null);
   });
 
   test('directPrintPdf', () async {
@@ -74,10 +66,7 @@ void main() {
   });
 
   test('raster', () async {
-    expect(
-      Printing.raster(Uint8List(0)),
-      isInstanceOf<Stream>(),
-    );
+    expect(Printing.raster(Uint8List(0)), isInstanceOf<Stream>());
   });
 
   test('test image', () async {
@@ -110,8 +99,7 @@ class MockPrinting extends Mock
     bool usePrinterSettings,
     OutputType outputType,
     bool forceCustomPrintPaper,
-  ) async =>
-      true;
+  ) async => true;
 
   @override
   Future<bool> sharePdf(
@@ -121,8 +109,7 @@ class MockPrinting extends Mock
     String? subject,
     String? body,
     List<String>? emails,
-  ) async =>
-      true;
+  ) async => true;
 
   @override
   Future<Printer?> pickPrinter(Rect bounds) async => null;

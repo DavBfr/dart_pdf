@@ -156,10 +156,7 @@ class MethodChannelPrinting extends PrintingPlatform {
     Map<dynamic, dynamic>? result;
 
     try {
-      result = await _channel.invokeMethod(
-        'printingInfo',
-        <String, dynamic>{},
-      );
+      result = await _channel.invokeMethod('printingInfo', <String, dynamic>{});
     } catch (e) {
       assert(() {
         // ignore: avoid_print
@@ -216,8 +213,10 @@ class MethodChannelPrinting extends PrintingPlatform {
   @override
   Future<List<Printer>> listPrinters() async {
     final params = <String, dynamic>{};
-    final list =
-        await _channel.invokeMethod<List<dynamic>>('listPrinters', params);
+    final list = await _channel.invokeMethod<List<dynamic>>(
+      'listPrinters',
+      params,
+    );
 
     final printers = <Printer>[];
 
@@ -275,9 +274,7 @@ class MethodChannelPrinting extends PrintingPlatform {
     String? baseUrl,
     PdfPageFormat format,
   ) async {
-    final job = _printJobs.add(
-      onHtmlRendered: Completer<Uint8List>(),
-    );
+    final job = _printJobs.add(onHtmlRendered: Completer<Uint8List>());
 
     final params = <String, dynamic>{
       'html': html,
@@ -298,14 +295,8 @@ class MethodChannelPrinting extends PrintingPlatform {
   }
 
   @override
-  Stream<PdfRaster> raster(
-    Uint8List document,
-    List<int>? pages,
-    double dpi,
-  ) {
-    final job = _printJobs.add(
-      onPageRasterized: StreamController<PdfRaster>(),
-    );
+  Stream<PdfRaster> raster(Uint8List document, List<int>? pages, double dpi) {
+    final job = _printJobs.add(onPageRasterized: StreamController<PdfRaster>());
 
     final params = <String, dynamic>{
       'doc': Uint8List.fromList(document),

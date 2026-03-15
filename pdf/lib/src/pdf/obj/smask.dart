@@ -25,11 +25,13 @@ import 'function.dart';
 import 'graphic_stream.dart';
 
 class PdfSoftMask {
-  PdfSoftMask(this.document,
-      {required PdfRect boundingBox,
-      bool isolated = false,
-      bool knockout = false,
-      bool invert = false}) {
+  PdfSoftMask(
+    this.document, {
+    required PdfRect boundingBox,
+    bool isolated = false,
+    bool knockout = false,
+    bool invert = false,
+  }) {
     _mask = PdfGraphicXObject(document, '/Form');
     _mask.params['/BBox'] = PdfArray.fromNum([
       boundingBox.left,
@@ -46,10 +48,7 @@ class PdfSoftMask {
     _graphics = PdfGraphics(_mask, _mask.buf);
 
     if (invert) {
-      _tr = PdfFunction(
-        document,
-        data: [255, 0],
-      );
+      _tr = PdfFunction(document, data: [255, 0]);
     }
   }
 

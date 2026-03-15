@@ -63,16 +63,30 @@ class SvgPath extends SvgOperation {
   ) {
     final _brush = SvgBrush.fromXml(element, brush, painter);
 
-    final x =
-        SvgParser.getNumeric(element, 'x', _brush, defaultValue: 0)!.sizeValue;
-    final y =
-        SvgParser.getNumeric(element, 'y', _brush, defaultValue: 0)!.sizeValue;
-    final width =
-        SvgParser.getNumeric(element, 'width', _brush, defaultValue: 0)!
-            .sizeValue;
-    final height =
-        SvgParser.getNumeric(element, 'height', _brush, defaultValue: 0)!
-            .sizeValue;
+    final x = SvgParser.getNumeric(
+      element,
+      'x',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final y = SvgParser.getNumeric(
+      element,
+      'y',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final width = SvgParser.getNumeric(
+      element,
+      'width',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final height = SvgParser.getNumeric(
+      element,
+      'height',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
     var rx = SvgParser.getNumeric(element, 'rx', _brush)?.sizeValue;
     var ry = SvgParser.getNumeric(element, 'ry', _brush)?.sizeValue;
 
@@ -80,8 +94,9 @@ class SvgPath extends SvgOperation {
     rx ??= ry;
     final topRight = rx != 0 || ry != 0 ? 'a $rx $ry 0 0 1 $rx $ry' : '';
     final bottomRight = rx != 0 || ry != 0 ? 'a $rx $ry 0 0 1 ${-rx} $ry' : '';
-    final bottomLeft =
-        rx != 0 || ry != 0 ? 'a $rx $ry 0 0 1 ${-rx} ${-ry}' : '';
+    final bottomLeft = rx != 0 || ry != 0
+        ? 'a $rx $ry 0 0 1 ${-rx} ${-ry}'
+        : '';
     final topLeft = rx != 0 || ry != 0 ? 'a $rx $ry 0 0 1 $rx ${-ry}' : '';
     final d =
         'M${x + rx} ${y}h${width - rx * 2}${topRight}v${height - ry * 2}${bottomRight}h${-(width - rx * 2)}${bottomLeft}v${-(height - ry * 2)}${topLeft}z';
@@ -229,7 +244,9 @@ class SvgPath extends SvgOperation {
         ..setLineJoin(brush.strokeLineJoin!)
         ..setMiterLimit(math.max(1.0, brush.strokeMiterLimit!))
         ..setLineDashPattern(
-            brush.strokeDashArray!, brush.strokeDashOffset!.toInt())
+          brush.strokeDashArray!,
+          brush.strokeDashOffset!.toInt(),
+        )
         ..setLineWidth(brush.strokeWidth!.sizeValue)
         ..strokePath();
     }

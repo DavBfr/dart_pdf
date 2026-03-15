@@ -46,18 +46,18 @@ abstract class GridAxis extends Widget {
     bool? axisTick,
     this.angle = 0,
     this.buildLabel,
-  })  : format = format ?? _defaultFormat,
-        color = color ?? PdfColors.black,
-        width = width ?? 1,
-        divisions = divisions ?? false,
-        divisionsWidth = divisionsWidth ?? .5,
-        divisionsColor = divisionsColor ?? PdfColors.grey,
-        _marginStart = marginStart ?? 0,
-        _marginEnd = marginEnd ?? 0,
-        ticks = ticks ?? false,
-        _axisTick = axisTick,
-        divisionsDashed = divisionsDashed ?? false,
-        direction = Axis.horizontal;
+  }) : format = format ?? _defaultFormat,
+       color = color ?? PdfColors.black,
+       width = width ?? 1,
+       divisions = divisions ?? false,
+       divisionsWidth = divisionsWidth ?? .5,
+       divisionsColor = divisionsColor ?? PdfColors.grey,
+       _marginStart = marginStart ?? 0,
+       _marginEnd = marginEnd ?? 0,
+       ticks = ticks ?? false,
+       _axisTick = axisTick,
+       divisionsDashed = divisionsDashed ?? false,
+       direction = Axis.horizontal;
 
   Axis direction;
 
@@ -126,24 +126,24 @@ class FixedAxis<T extends num> extends GridAxis {
     bool? axisTick,
     double angle = 0,
     GridAxisBuildLabel? buildLabel,
-  })  : assert(_isSortedAscending(values)),
-        super(
-          format: format,
-          textStyle: textStyle,
-          margin: margin,
-          marginStart: marginStart,
-          marginEnd: marginEnd,
-          color: color,
-          width: width,
-          divisions: divisions,
-          divisionsWidth: divisionsWidth,
-          divisionsColor: divisionsColor,
-          divisionsDashed: divisionsDashed,
-          ticks: ticks,
-          axisTick: axisTick,
-          angle: angle,
-          buildLabel: buildLabel,
-        );
+  }) : assert(_isSortedAscending(values)),
+       super(
+         format: format,
+         textStyle: textStyle,
+         margin: margin,
+         marginStart: marginStart,
+         marginEnd: marginEnd,
+         color: color,
+         width: width,
+         divisions: divisions,
+         divisionsWidth: divisionsWidth,
+         divisionsColor: divisionsColor,
+         divisionsDashed: divisionsDashed,
+         ticks: ticks,
+         axisTick: axisTick,
+         angle: angle,
+         buildLabel: buildLabel,
+       );
 
   static FixedAxis<int> fromStrings(
     List<String> values, {
@@ -224,10 +224,7 @@ class FixedAxis<T extends num> extends GridAxis {
       return t;
     }
 
-    return Transform.rotateBox(
-      angle: angle,
-      child: t,
-    );
+    return Transform.rotateBox(angle: angle, child: t);
   }
 
   int _angleDirection() {
@@ -241,8 +238,11 @@ class FixedAxis<T extends num> extends GridAxis {
   }
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     final size = constraints.biggest;
 
     var maxWidth = 0.0;
@@ -265,7 +265,9 @@ class FixedAxis<T extends num> extends GridAxis {
         _axisTick ??= false;
         final minStart = ad == 0 ? first!.x / 2 : (ad > 0 ? first!.x : 0.0);
         _marginEnd = math.max(
-            _marginEnd, ad == 0 ? last!.x / 2 : (ad > 0 ? 0.0 : last!.x));
+          _marginEnd,
+          ad == 0 ? last!.x / 2 : (ad > 0 ? 0.0 : last!.x),
+        );
         crossAxisPosition = math.max(crossAxisPosition, minStart);
         axisPosition = math.max(axisPosition, maxHeight + _textMargin);
         box = PdfRect(0, 0, size.x, axisPosition);
@@ -274,7 +276,9 @@ class FixedAxis<T extends num> extends GridAxis {
         _textMargin = margin ?? 10;
         _axisTick ??= true;
         _marginEnd = math.max(
-            _marginEnd, ad == 0 ? last!.x / 2 : (ad < 0 ? last!.x : 0.0));
+          _marginEnd,
+          ad == 0 ? last!.x / 2 : (ad < 0 ? last!.x : 0.0),
+        );
         final minStart = ad == 0 ? first!.y / 2 : (ad > 0 ? first!.x : 0.0);
         crossAxisPosition = math.max(crossAxisPosition, minStart);
         axisPosition = math.max(axisPosition, maxWidth + _textMargin);
@@ -292,7 +296,9 @@ class FixedAxis<T extends num> extends GridAxis {
       context.canvas
         ..moveTo(axisPosition, box!.bottom + crossAxisPosition)
         ..lineTo(
-            axisPosition - _textMargin / 2, box!.bottom + crossAxisPosition);
+          axisPosition - _textMargin / 2,
+          box!.bottom + crossAxisPosition,
+        );
     }
 
     if (ticks && _textMargin > 0) {
@@ -420,8 +426,12 @@ class FixedAxis<T extends num> extends GridAxis {
       case Axis.vertical:
         context.canvas
           ..setFillColor(PdfColors.grey300)
-          ..drawRect(box!.left, box!.bottom + crossAxisPosition, box!.width,
-              box!.height - crossAxisPosition)
+          ..drawRect(
+            box!.left,
+            box!.bottom + crossAxisPosition,
+            box!.width,
+            box!.height - crossAxisPosition,
+          )
           ..fillPath();
         break;
     }

@@ -25,16 +25,22 @@ void main() {
   setUp(TestWidgetsFlutterBinding.ensureInitialized);
 
   test('PdfRaster', () async {
-    final raster =
-        PdfRaster(10, 10, Uint8List.fromList(List<int>.filled(10 * 10 * 4, 0)));
+    final raster = PdfRaster(
+      10,
+      10,
+      Uint8List.fromList(List<int>.filled(10 * 10 * 4, 0)),
+    );
     expect(raster.toString(), 'Image 10x10 400 bytes');
     expect(await raster.toImage(), isA<ui.Image>());
     expect(await raster.toPng(), isA<Uint8List>());
   });
 
   testWidgets('PdfRasterImage', (WidgetTester tester) async {
-    final raster =
-        PdfRaster(10, 10, Uint8List.fromList(List<int>.filled(10 * 10 * 4, 0)));
+    final raster = PdfRaster(
+      10,
+      10,
+      Uint8List.fromList(List<int>.filled(10 * 10 * 4, 0)),
+    );
 
     await tester.pumpWidget(Image(image: PdfRasterImage(raster)));
     await tester.pumpAndSettle();

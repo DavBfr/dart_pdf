@@ -82,36 +82,32 @@ class PdfPreviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scrollbarTrack = Theme.of(context)
-            .scrollbarTheme
-            .thickness
-            ?.resolve({WidgetState.hovered}) ??
+    final scrollbarTrack =
+        Theme.of(
+          context,
+        ).scrollbarTheme.thickness?.resolve({WidgetState.hovered}) ??
         12;
 
     return Container(
-      margin: pageMargin ??
+      margin:
+          pageMargin ??
           EdgeInsets.only(
             left: 8 + scrollbarTrack,
             top: 8,
             right: 8 + scrollbarTrack,
             bottom: 12,
           ),
-      decoration: pdfPreviewPageDecoration ??
+      decoration:
+          pdfPreviewPageDecoration ??
           const BoxDecoration(
             color: Colors.white,
             boxShadow: <BoxShadow>[
-              BoxShadow(
-                offset: Offset(0, 3),
-                blurRadius: 5,
-              ),
+              BoxShadow(offset: Offset(0, 3), blurRadius: 5),
             ],
           ),
       child: AspectRatio(
         aspectRatio: pageData.aspectRatio,
-        child: Image(
-          image: pageData.image,
-          fit: BoxFit.cover,
-        ),
+        child: Image(image: pageData.image, fit: BoxFit.cover),
       ),
     );
   }
