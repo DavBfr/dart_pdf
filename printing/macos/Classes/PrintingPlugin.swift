@@ -21,7 +21,9 @@ import Foundation
 public class PrintingPlugin: NSObject, FlutterPlugin {
     private static var instance: PrintingPlugin?
     private var channel: FlutterMethodChannel
-    public var jobs = [UInt32: PrintJob]()
+    // Shared jobs across all plugin instances (for multi-window support)
+    private static var sharedJobs = [UInt32: PrintJob]()
+    private static let jobsLock = NSLock()
     private var registrar: FlutterPluginRegistrar
 
     init(_ channel: FlutterMethodChannel, _ registrar: FlutterPluginRegistrar) {
@@ -33,12 +35,18 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
 
     @objc
     public static func setDocument(job: UInt32, doc: UnsafePointer<UInt8>, size: UInt64) {
-        instance!.jobs[job]?.setDocument(Data(bytes: doc, count: Int(size)))
+        jobsLock.lock()
+        let printJob = sharedJobs[job]
+        jobsLock.unlock()
+        printJob?.setDocument(Data(bytes: doc, count: Int(size)))
     }
 
     @objc
     public static func setError(job: UInt32, message: UnsafePointer<CChar>) {
-        instance!.jobs[job]?.cancelJob(String(cString: message))
+        jobsLock.lock()
+        let printJob = sharedJobs[job]
+        jobsLock.unlock()
+        printJob?.cancelJob(String(cString: message))
     }
 
     /// Entry point
@@ -62,7 +70,10 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             let marginBottom = CGFloat((args["marginBottom"] as! NSNumber).floatValue)
             let printJob = PrintJob(printing: self, index: args["job"] as! Int)
             let dynamic = args["dynamic"] as! Bool
-            jobs[args["job"] as! UInt32] = printJob
+            
+            PrintingPlugin.jobsLock.lock()
+            PrintingPlugin.sharedJobs[args["job"] as! UInt32] = printJob
+            PrintingPlugin.jobsLock.unlock()
 
             guard let window = registrar.view?.window else {
                 result(NSNumber(value: 0))
@@ -175,7 +186,10 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             "job": printJob.index,
         ]
         channel.invokeMethod("onCompleted", arguments: data)
-        jobs.removeValue(forKey: UInt32(printJob.index))
+        
+        PrintingPlugin.jobsLock.lock()
+        PrintingPlugin.sharedJobs.removeValue(forKey: UInt32(printJob.index))
+        PrintingPlugin.jobsLock.unlock()
     }
 
     /// send html to pdf data result to flutter
