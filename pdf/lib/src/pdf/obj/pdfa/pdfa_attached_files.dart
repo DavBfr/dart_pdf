@@ -16,17 +16,19 @@ import '../object.dart';
 import 'pdfa_date_format.dart';
 
 class PdfaAttachedFile {
-  final String name;
-  final String data;
-  final String AFRelationship;
-  final String subType;
-
   PdfaAttachedFile({
     required this.name,
     required this.data,
     this.subType = '/text/xml',
-    this.AFRelationship = '/Alternative',
-  });
+    // ignore: non_constant_identifier_names
+    @Deprecated('Use afRelationship instead') String? AFRelationship,
+    String afRelationship = '/Alternative',
+  }) : afRelationship = AFRelationship ?? afRelationship;
+
+  final String name;
+  final String data;
+  final String afRelationship;
+  final String subType;
 }
 
 class PdfaAttachedFiles {
@@ -36,7 +38,7 @@ class PdfaAttachedFiles {
         _AttachedFileSpec(
           pdfDocument,
           _AttachedFile(pdfDocument, file.name, file.data, file.subType),
-          file.AFRelationship,
+          file.afRelationship,
         ),
       );
     }
@@ -65,7 +67,7 @@ class PdfaAttachedFiles {
 
 class _AttachedFileNames extends PdfObject<PdfDict> {
   _AttachedFileNames(PdfDocument pdfDocument, this._files)
-    : super(pdfDocument, params: PdfDict());
+      : super(pdfDocument, params: PdfDict());
   final List<_AttachedFileSpec> _files;
 
   @override
@@ -79,7 +81,7 @@ class _AttachedFileNames extends PdfObject<PdfDict> {
 
 class _AttachedFileSpec extends PdfObject<PdfDict> {
   _AttachedFileSpec(PdfDocument pdfDocument, this._file, this.relationship)
-    : super(pdfDocument, params: PdfDict());
+      : super(pdfDocument, params: PdfDict());
   final _AttachedFile _file;
   final String relationship;
 
@@ -103,9 +105,9 @@ class _AttachedFile extends PdfObject<PdfDictStream> {
     this.content,
     this.subType,
   ) : super(
-        pdfDocument,
-        params: PdfDictStream(compress: false, encrypt: false),
-      );
+          pdfDocument,
+          params: PdfDictStream(compress: false, encrypt: false),
+        );
 
   final String fileName;
   final String content;

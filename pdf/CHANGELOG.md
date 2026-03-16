@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Fix lint issues
+
 ## 3.12.0
 
 - Imroved assertion readability [tmbenhura]

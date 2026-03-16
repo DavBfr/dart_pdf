@@ -321,7 +321,7 @@ class PdfGraphics {
     double? h,
   }) {
     _page.addXObject(xobj);
-    final String name = xobj.name;
+    final name = xobj.name;
     final bbox = xobj.params['/BBox'] as PdfArray;
     final origW = (bbox.values[2] as PdfNum).value.toDouble();
     final origH = (bbox.values[3] as PdfNum).value.toDouble();
@@ -987,8 +987,7 @@ class PdfGraphics {
     final cy = cyd + 0.5 * (y1 + y2);
 
     final theta = _vectorAngle(1, 0, (x1d - cxd) / rx, (y1d - cyd) / ry);
-    var dTheta =
-        _vectorAngle(
+    var dTheta = _vectorAngle(
           (x1d - cxd) / rx,
           (y1d - cyd) / ry,
           (-x1d - cxd) / rx,

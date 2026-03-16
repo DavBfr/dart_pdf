@@ -46,7 +46,7 @@ class PdfDict<T extends PdfDataType> extends PdfDataType {
 
   bool get isEmpty => values.isEmpty;
 
-  operator []=(String k, T v) {
+  void operator []=(String k, T v) {
     values[k] = v;
   }
 
