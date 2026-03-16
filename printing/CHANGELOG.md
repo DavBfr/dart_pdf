@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fix lint issues
+- Add Swift Package Manager support
 
 ## 5.14.3
 
