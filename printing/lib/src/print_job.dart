@@ -15,6 +15,7 @@
  */
 
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'callback.dart';
@@ -57,7 +58,7 @@ class PrintJobs {
   /// Create a list print jobs
   PrintJobs();
 
-  static var _currentIndex = 0;
+  static int _currentIndex = Random().nextInt(0x7FFFFFFF);
 
   final _printJobs = <int, PrintJob>{};
 
