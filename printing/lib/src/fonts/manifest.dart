@@ -39,7 +39,8 @@ mixin AssetManifest {
     try {
       if (!_ready) {
         try {
-          final assetManifest = await services.AssetManifest.loadFromAssetBundle(services.rootBundle);
+          final assetManifest = await services
+              .AssetManifest.loadFromAssetBundle(services.rootBundle);
           final assets = assetManifest.listAssets();
           if (assets.isNotEmpty) {
             _assets.addAll(assets);
@@ -49,7 +50,7 @@ mixin AssetManifest {
             // ignore: avoid_print
             print(
               'Error loading AssetManifest API: $e\n'
-                  'Make sure you called WidgetsFlutterBinding.ensureInitialized() in main()',
+              'Make sure you called WidgetsFlutterBinding.ensureInitialized() in main()',
             );
             return true;
           }());

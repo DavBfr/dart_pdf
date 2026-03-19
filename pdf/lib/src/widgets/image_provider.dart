@@ -23,12 +23,7 @@ import 'widget.dart';
 
 /// Identifies an image without committing to the precise final asset
 abstract class ImageProvider {
-  ImageProvider(
-    this._width,
-    this._height,
-    this.orientation,
-    this.dpi,
-  );
+  ImageProvider(this._width, this._height, this.orientation, this.dpi);
 
   final double? dpi;
 
@@ -80,10 +75,8 @@ abstract class ImageProvider {
 }
 
 class ImageProxy extends ImageProvider {
-  ImageProxy(
-    this._image, {
-    double? dpi,
-  }) : super(_image.width, _image.height, _image.orientation, dpi);
+  ImageProxy(this._image, {double? dpi})
+    : super(_image.width, _image.height, _image.orientation, dpi);
 
   /// The proxy image
   final PdfImage _image;
@@ -159,12 +152,13 @@ class MemoryImage extends ImageProvider {
 }
 
 class ImageImage extends ImageProvider {
-  ImageImage(
-    this._image, {
-    double? dpi,
-    PdfImageOrientation? orientation,
-  }) : super(_image.width, _image.height,
-            orientation ?? PdfImageOrientation.topLeft, dpi);
+  ImageImage(this._image, {double? dpi, PdfImageOrientation? orientation})
+    : super(
+        _image.width,
+        _image.height,
+        orientation ?? PdfImageOrientation.topLeft,
+        dpi,
+      );
 
   /// The image data
   final im.Image _image;
@@ -187,6 +181,9 @@ class RawImage extends ImageImage {
     required int height,
     PdfImageOrientation? orientation,
     double? dpi,
-  }) : super(PdfRasterBase(width, height, true, bytes).asImage(),
-            orientation: orientation, dpi: dpi);
+  }) : super(
+         PdfRasterBase(width, height, true, bytes).asImage(),
+         orientation: orientation,
+         dpi: dpi,
+       );
 }

@@ -22,10 +22,8 @@ import 'object.dart';
 @Deprecated('Use PdfObject<PdfArray> instead')
 class PdfArrayObject extends PdfObject<PdfArray> {
   /// Creates an array object
-  PdfArrayObject(
-    PdfDocument pdfDocument,
-    PdfArray array,
-  ) : super(pdfDocument, params: array);
+  PdfArrayObject(PdfDocument pdfDocument, PdfArray array)
+    : super(pdfDocument, params: array);
 
   /// The array
   PdfArray get array => params;

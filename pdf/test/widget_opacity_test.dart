@@ -35,10 +35,7 @@ void main() {
           alignment: Alignment.center,
           children: <Widget>[
             Text('Background', textScaleFactor: 5),
-            Opacity(
-              opacity: .5,
-              child: PdfLogo(),
-            ),
+            Opacity(opacity: .5, child: PdfLogo()),
           ],
         ),
       ),

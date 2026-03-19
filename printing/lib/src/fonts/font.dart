@@ -47,10 +47,7 @@ class DownloadableFont {
     if (await manifest.AssetManifest.contains(asset)) {
       bundle ??= rootBundle;
       final data = await bundle.load(asset);
-      return TtfFont(
-        data,
-        protect: protect,
-      );
+      return TtfFont(data, protect: protect);
     }
 
     pdfCache ??= PdfBaseCache.defaultCache;

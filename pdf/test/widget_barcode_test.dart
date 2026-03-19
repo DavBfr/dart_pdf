@@ -32,9 +32,7 @@ Widget barcode(
     children: <Widget>[
       Flexible(
         fit: FlexFit.tight,
-        child: Center(
-          child: Text(barcode.name),
-        ),
+        child: Center(child: Text(barcode.name)),
       ),
       Flexible(
         fit: FlexFit.tight,

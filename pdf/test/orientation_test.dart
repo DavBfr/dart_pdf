@@ -27,26 +27,20 @@ Widget content(Context context) {
 }
 
 Widget footer(Context context) {
-  return Footer(
-    trailing: Text('Page ${context.pageNumber}'),
-  );
+  return Footer(trailing: Text('Page ${context.pageNumber}'));
 }
 
 Widget header(Context context) {
-  return Footer(
-    title: Text('Test document'),
-  );
+  return Footer(title: Text('Test document'));
 }
 
 List<Widget> contentMultiPage(Context context) {
   return List<Widget>.generate(
     150,
     (int n) => Container(
-        height: 20,
-        child: Text(
-          'Hello World $n!',
-          style: const TextStyle(fontSize: 15),
-        )),
+      height: 20,
+      child: Text('Hello World $n!', style: const TextStyle(fontSize: 15)),
+    ),
   );
 }
 
@@ -58,82 +52,93 @@ void main() {
   });
 
   test('Orientation normal', () {
-    pdf.addPage(Page(
-      clip: true,
-      build: content,
-    ));
+    pdf.addPage(Page(clip: true, build: content));
   });
 
   test('Orientation landscape', () {
-    pdf.addPage(Page(
-      clip: true,
-      pageFormat: PdfPageFormat.standard.portrait,
-      orientation: PageOrientation.landscape,
-      build: content,
-    ));
-    pdf.addPage(Page(
-      clip: true,
-      pageFormat: PdfPageFormat.standard.landscape,
-      orientation: PageOrientation.landscape,
-      build: content,
-    ));
+    pdf.addPage(
+      Page(
+        clip: true,
+        pageFormat: PdfPageFormat.standard.portrait,
+        orientation: PageOrientation.landscape,
+        build: content,
+      ),
+    );
+    pdf.addPage(
+      Page(
+        clip: true,
+        pageFormat: PdfPageFormat.standard.landscape,
+        orientation: PageOrientation.landscape,
+        build: content,
+      ),
+    );
   });
 
   test('Orientation portrait', () {
-    pdf.addPage(Page(
-      clip: true,
-      pageFormat: PdfPageFormat.standard.portrait,
-      orientation: PageOrientation.portrait,
-      build: content,
-    ));
-    pdf.addPage(Page(
-      clip: true,
-      pageFormat: PdfPageFormat.standard.landscape,
-      orientation: PageOrientation.portrait,
-      build: content,
-    ));
+    pdf.addPage(
+      Page(
+        clip: true,
+        pageFormat: PdfPageFormat.standard.portrait,
+        orientation: PageOrientation.portrait,
+        build: content,
+      ),
+    );
+    pdf.addPage(
+      Page(
+        clip: true,
+        pageFormat: PdfPageFormat.standard.landscape,
+        orientation: PageOrientation.portrait,
+        build: content,
+      ),
+    );
   });
 
   test('Orientation MultiPage normal', () {
-    pdf.addPage(MultiPage(
-      build: contentMultiPage,
-      header: header,
-      footer: footer,
-    ));
+    pdf.addPage(
+      MultiPage(build: contentMultiPage, header: header, footer: footer),
+    );
   });
 
   test('Orientation MultiPage landscape', () {
-    pdf.addPage(MultiPage(
-      pageFormat: PdfPageFormat.standard.portrait,
-      orientation: PageOrientation.landscape,
-      build: contentMultiPage,
-      header: header,
-      footer: footer,
-    ));
-    pdf.addPage(MultiPage(
-      pageFormat: PdfPageFormat.standard.landscape,
-      orientation: PageOrientation.landscape,
-      build: contentMultiPage,
-      header: header,
-      footer: footer,
-    ));
+    pdf.addPage(
+      MultiPage(
+        pageFormat: PdfPageFormat.standard.portrait,
+        orientation: PageOrientation.landscape,
+        build: contentMultiPage,
+        header: header,
+        footer: footer,
+      ),
+    );
+    pdf.addPage(
+      MultiPage(
+        pageFormat: PdfPageFormat.standard.landscape,
+        orientation: PageOrientation.landscape,
+        build: contentMultiPage,
+        header: header,
+        footer: footer,
+      ),
+    );
   });
 
   test('Orientation MultiPage portrait', () {
-    pdf.addPage(MultiPage(
-      pageFormat: PdfPageFormat.standard.portrait,
-      orientation: PageOrientation.portrait,
-      build: contentMultiPage,
-      header: header,
-      footer: footer,
-    ));
-    pdf.addPage(MultiPage(
-      pageFormat: PdfPageFormat.standard.landscape,
-      orientation: PageOrientation.portrait,
-      build: contentMultiPage,
-      header: header,
-      footer: footer,
-    ));
+    pdf.addPage(
+      MultiPage(
+        pageFormat: PdfPageFormat.standard.portrait,
+        orientation: PageOrientation.portrait,
+        build: contentMultiPage,
+        header: header,
+        footer: footer,
+      ),
+    );
+    pdf.addPage(
+      MultiPage(
+        pageFormat: PdfPageFormat.standard.landscape,
+        orientation: PageOrientation.portrait,
+        build: contentMultiPage,
+        header: header,
+        footer: footer,
+      ),
+    );
   });
 
   tearDownAll(() async {

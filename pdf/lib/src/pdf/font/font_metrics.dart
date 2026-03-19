@@ -34,10 +34,10 @@ class PdfFontMetrics {
     double? descent,
     double? advanceWidth,
     double? leftBearing,
-  })  : ascent = ascent ?? bottom,
-        descent = descent ?? top,
-        advanceWidth = advanceWidth ?? right - left,
-        leftBearing = leftBearing ?? left;
+  }) : ascent = ascent ?? bottom,
+       descent = descent ?? top,
+       advanceWidth = advanceWidth ?? right - left,
+       leftBearing = leftBearing ?? left;
 
   /// Add another metric
   factory PdfFontMetrics.append(
@@ -84,8 +84,12 @@ class PdfFontMetrics {
   }
 
   /// Zero-sized dimensions
-  static const PdfFontMetrics zero =
-      PdfFontMetrics(left: 0, top: 0, right: 0, bottom: 0);
+  static const PdfFontMetrics zero = PdfFontMetrics(
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+  );
 
   /// Left most of the bounding box
   final double left;

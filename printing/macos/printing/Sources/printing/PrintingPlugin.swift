@@ -17,6 +17,22 @@
 import FlutterMacOS
 import Foundation
 
+@_cdecl("net_nfet_printing_set_document")
+public func net_nfet_printing_set_document(job: UInt32, doc: UnsafePointer<UInt8>?, size: UInt64) {
+    guard let doc else {
+        return
+    }
+    PrintingPlugin.setDocument(job: job, doc: doc, size: size)
+}
+
+@_cdecl("net_nfet_printing_set_error")
+public func net_nfet_printing_set_error(job: UInt32, message: UnsafePointer<CChar>?) {
+    guard let message else {
+        return
+    }
+    PrintingPlugin.setError(job: job, message: message)
+}
+
 @objc
 public class PrintingPlugin: NSObject, FlutterPlugin {
     private static var instance: PrintingPlugin?

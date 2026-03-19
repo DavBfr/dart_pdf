@@ -187,18 +187,15 @@ abstract class BorderRadiusGeometry {
 class BorderRadius extends BorderRadiusGeometry {
   /// Creates a border radius where all radii are [radius].
   const BorderRadius.all(Radius radius)
-      : this.only(
-          topLeft: radius,
-          topRight: radius,
-          bottomLeft: radius,
-          bottomRight: radius,
-        );
+    : this.only(
+        topLeft: radius,
+        topRight: radius,
+        bottomLeft: radius,
+        bottomRight: radius,
+      );
 
   /// Creates a border radius where all radii are [Radius.circular(radius)].
-  BorderRadius.circular(double radius)
-      : this.all(
-          Radius.circular(radius),
-        );
+  BorderRadius.circular(double radius) : this.all(Radius.circular(radius));
 
   /// Creates a vertically symmetric border radius where the top and bottom
   /// sides of the rectangle have the same radii.
@@ -206,11 +203,11 @@ class BorderRadius extends BorderRadiusGeometry {
     Radius top = Radius.zero,
     Radius bottom = Radius.zero,
   }) : this.only(
-          topLeft: top,
-          topRight: top,
-          bottomLeft: bottom,
-          bottomRight: bottom,
-        );
+         topLeft: top,
+         topRight: top,
+         bottomLeft: bottom,
+         bottomRight: bottom,
+       );
 
   /// Creates a horizontally symmetrical border radius where the left and right
   /// sides of the rectangle have the same radii.
@@ -218,11 +215,11 @@ class BorderRadius extends BorderRadiusGeometry {
     Radius left = Radius.zero,
     Radius right = Radius.zero,
   }) : this.only(
-          topLeft: left,
-          topRight: right,
-          bottomLeft: left,
-          bottomRight: right,
-        );
+         topLeft: left,
+         topRight: right,
+         bottomLeft: left,
+         bottomRight: right,
+       );
 
   /// Creates a border radius with only the given non-zero values. The other
   /// corners will be right angles.
@@ -264,42 +261,46 @@ class BorderRadius extends BorderRadiusGeometry {
       ..moveTo(box.left, box.bottom + bottomLeft.y)
       // bottomLeft
       ..curveTo(
-          box.left,
-          box.bottom - _m4 * bottomLeft.y + bottomLeft.y,
-          box.left - _m4 * bottomLeft.x + bottomLeft.x,
-          box.bottom,
-          box.left + bottomLeft.x,
-          box.bottom)
+        box.left,
+        box.bottom - _m4 * bottomLeft.y + bottomLeft.y,
+        box.left - _m4 * bottomLeft.x + bottomLeft.x,
+        box.bottom,
+        box.left + bottomLeft.x,
+        box.bottom,
+      )
       // bottom
       ..lineTo(box.left + box.width - bottomRight.x, box.bottom)
       // bottomRight
       ..curveTo(
-          box.left + _m4 * bottomRight.x + box.width - bottomRight.x,
-          box.bottom,
-          box.left + box.width,
-          box.bottom - _m4 * bottomRight.y + bottomRight.y,
-          box.left + box.width,
-          box.bottom + bottomRight.y)
+        box.left + _m4 * bottomRight.x + box.width - bottomRight.x,
+        box.bottom,
+        box.left + box.width,
+        box.bottom - _m4 * bottomRight.y + bottomRight.y,
+        box.left + box.width,
+        box.bottom + bottomRight.y,
+      )
       // right
       ..lineTo(box.left + box.width, box.bottom + box.height - topRight.y)
       // topRight
       ..curveTo(
-          box.left + box.width,
-          box.bottom + _m4 * topRight.y + box.height - topRight.y,
-          box.left + _m4 * topRight.x + box.width - topRight.x,
-          box.bottom + box.height,
-          box.left + box.width - topRight.x,
-          box.bottom + box.height)
+        box.left + box.width,
+        box.bottom + _m4 * topRight.y + box.height - topRight.y,
+        box.left + _m4 * topRight.x + box.width - topRight.x,
+        box.bottom + box.height,
+        box.left + box.width - topRight.x,
+        box.bottom + box.height,
+      )
       // top
       ..lineTo(box.left + topLeft.x, box.bottom + box.height)
       // topLeft
       ..curveTo(
-          box.left - _m4 * topLeft.x + topLeft.x,
-          box.bottom + box.height,
-          box.left,
-          box.bottom + _m4 * topLeft.y + box.height - topLeft.y,
-          box.left,
-          box.bottom + box.height - topLeft.y)
+        box.left - _m4 * topLeft.x + topLeft.x,
+        box.bottom + box.height,
+        box.left,
+        box.bottom + _m4 * topLeft.y + box.height - topLeft.y,
+        box.left,
+        box.bottom + box.height - topLeft.y,
+      )
       // left
       ..lineTo(box.left, box.bottom + bottomLeft.y);
   }
@@ -347,18 +348,16 @@ class BorderRadius extends BorderRadiusGeometry {
 class BorderRadiusDirectional extends BorderRadiusGeometry {
   /// Creates a border radius where all radii are [radius].
   const BorderRadiusDirectional.all(Radius radius)
-      : this.only(
-          topStart: radius,
-          topEnd: radius,
-          bottomStart: radius,
-          bottomEnd: radius,
-        );
+    : this.only(
+        topStart: radius,
+        topEnd: radius,
+        bottomStart: radius,
+        bottomEnd: radius,
+      );
 
   /// Creates a border radius where all radii are [Radius.circular(radius)].
   BorderRadiusDirectional.circular(double radius)
-      : this.all(
-          Radius.circular(radius),
-        );
+    : this.all(Radius.circular(radius));
 
   /// Creates a vertically symmetric border radius where the top and bottom
   /// sides of the rectangle have the same radii.
@@ -366,11 +365,11 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
     Radius top = Radius.zero,
     Radius bottom = Radius.zero,
   }) : this.only(
-          topStart: top,
-          topEnd: top,
-          bottomStart: bottom,
-          bottomEnd: bottom,
-        );
+         topStart: top,
+         topEnd: top,
+         bottomStart: bottom,
+         bottomEnd: bottom,
+       );
 
   /// Creates a horizontally symmetrical border radius where the start and end
   /// sides of the rectangle have the same radii.
@@ -378,11 +377,11 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
     Radius start = Radius.zero,
     Radius end = Radius.zero,
   }) : this.only(
-          topStart: start,
-          topEnd: end,
-          bottomStart: start,
-          bottomEnd: end,
-        );
+         topStart: start,
+         topEnd: end,
+         bottomStart: start,
+         bottomEnd: end,
+       );
 
   /// Creates a border radius with only the given non-zero values. The other
   /// corners will be right angles.
@@ -397,8 +396,9 @@ class BorderRadiusDirectional extends BorderRadiusGeometry {
   ///
   /// Consider using [BorderRadius.zero] instead, since that object has the same
   /// effect, but will be cheaper to [resolve].
-  static const BorderRadiusDirectional zero =
-      BorderRadiusDirectional.all(Radius.zero);
+  static const BorderRadiusDirectional zero = BorderRadiusDirectional.all(
+    Radius.zero,
+  );
 
   /// The top-start [Radius].
   final Radius topStart;

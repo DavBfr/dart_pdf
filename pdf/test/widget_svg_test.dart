@@ -32,13 +32,7 @@ void main() {
   });
 
   test('SVG Widgets Flutter logo', () {
-    pdf.addPage(
-      Page(
-        build: (context) => Center(
-          child: FlutterLogo(),
-        ),
-      ),
-    );
+    pdf.addPage(Page(build: (context) => Center(child: FlutterLogo())));
   });
 
   test('SVG Widgets', () {
@@ -46,12 +40,13 @@ void main() {
     if (!dir.existsSync()) {
       return;
     }
-    final files = dir
-        .listSync()
-        .where((file) => file.path.endsWith('.svg'))
-        .map<String>((file) => file.path)
-        .toList()
-      ..sort();
+    final files =
+        dir
+            .listSync()
+            .where((file) => file.path.endsWith('.svg'))
+            .map<String>((file) => file.path)
+            .toList()
+          ..sort();
 
     pdf.addPage(
       MultiPage(
@@ -61,31 +56,27 @@ void main() {
             childAspectRatio: 1,
             mainAxisSpacing: 10,
             crossAxisSpacing: 10,
-            children: files.map<Widget>(
-              (file) {
-                return Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: PdfColors.blue),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-                      Expanded(
-                        child: Center(
-                          child: SvgImage(
-                            svg: File(file).readAsStringSync(),
-                          ),
-                        ),
+            children: files.map<Widget>((file) {
+              return Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: PdfColors.blue),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Expanded(
+                      child: Center(
+                        child: SvgImage(svg: File(file).readAsStringSync()),
                       ),
-                      ClipRect(
-                        child: Text(file.substring(file.lastIndexOf('/') + 1)),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ).toList(),
-          )
+                    ),
+                    ClipRect(
+                      child: Text(file.substring(file.lastIndexOf('/') + 1)),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
         ],
       ),
     );
@@ -105,9 +96,7 @@ void main() {
   test('SVG Widgets Barcode', () {
     pdf.addPage(
       Page(
-        build: (context) => SvgImage(
-          svg: Barcode.isbn().toSvg('135459869354'),
-        ),
+        build: (context) => SvgImage(svg: Barcode.isbn().toSvg('135459869354')),
       ),
     );
   });
@@ -137,11 +126,7 @@ void main() {
                   Alignment.bottomCenter,
                   Alignment.bottomRight,
                 ])
-                  SvgImage(
-                    svg: svg,
-                    fit: BoxFit.cover,
-                    alignment: align,
-                  ),
+                  SvgImage(svg: svg, fit: BoxFit.cover, alignment: align),
               ],
             ),
             SizedBox(height: 10),
@@ -164,11 +149,7 @@ void main() {
                     Alignment.bottomCenter,
                     Alignment.bottomRight,
                   ])
-                    SvgImage(
-                      svg: svg,
-                      fit: BoxFit.cover,
-                      alignment: align,
-                    ),
+                    SvgImage(svg: svg, fit: BoxFit.cover, alignment: align),
                 ],
               ),
             ),
@@ -205,19 +186,20 @@ void main() {
     pdf.addPage(
       Page(
         build: (context) => SvgImage(
-            svg:
-                '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg" version="1.1"><text x="367.055" y="168.954" font-size="55" fill="darkgreen" font-family="$customFamilyName1" >Custom <tspan font-family="$customFamilyName2">fonts</tspan></text><rect x="1" y="1" width="998" height="298" fill="none" stroke="purple" stroke-width="2" /></svg>',
-            customFontLookup:
-                (String fontFamily, String fontStyle, String fontWeight) {
-              switch (fontFamily) {
-                case customFamilyName1:
-                  return customFont1;
-                case customFamilyName2:
-                  return customFont2;
-                default:
-                  return null;
-              }
-            }),
+          svg:
+              '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg" version="1.1"><text x="367.055" y="168.954" font-size="55" fill="darkgreen" font-family="$customFamilyName1" >Custom <tspan font-family="$customFamilyName2">fonts</tspan></text><rect x="1" y="1" width="998" height="298" fill="none" stroke="purple" stroke-width="2" /></svg>',
+          customFontLookup:
+              (String fontFamily, String fontStyle, String fontWeight) {
+                switch (fontFamily) {
+                  case customFamilyName1:
+                    return customFont1;
+                  case customFamilyName2:
+                    return customFont2;
+                  default:
+                    return null;
+                }
+              },
+        ),
       ),
     );
   });

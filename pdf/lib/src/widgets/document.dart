@@ -39,12 +39,12 @@ class Document {
     String? producer,
     XmlDocument? metadata,
   }) : document = PdfDocument(
-          pageMode: pageMode,
-          deflate: deflate,
-          compress: compress,
-          verbose: verbose,
-          version: version,
-        ) {
+         pageMode: pageMode,
+         deflate: deflate,
+         compress: compress,
+         verbose: verbose,
+         version: version,
+       ) {
     if (title != null ||
         author != null ||
         creator != null ||
@@ -80,11 +80,11 @@ class Document {
     String? keywords,
     String? producer,
   }) : document = PdfDocument.load(
-          parser,
-          deflate: deflate,
-          compress: compress,
-          verbose: verbose,
-        ) {
+         parser,
+         deflate: deflate,
+         compress: compress,
+         verbose: verbose,
+       ) {
     if (title != null ||
         author != null ||
         creator != null ||

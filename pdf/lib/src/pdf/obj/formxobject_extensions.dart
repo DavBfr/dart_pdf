@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+
 import 'package:vector_math/vector_math_64.dart';
 import 'package:xml/xml.dart';
 
@@ -19,8 +20,6 @@ import 'formxobject.dart';
 /// other resources from the SVG are not automatically collected—ensure they are
 /// handled via the owning [PdfDocument] if needed.
 class SvgPdfFormXObject extends PdfFormXObject {
-  @override
-  String get name => '/X$objser';
   SvgPdfFormXObject(
     super.doc,
     Uint8List svgBytes,
@@ -48,6 +47,9 @@ class SvgPdfFormXObject extends PdfFormXObject {
     g.restoreContext();
     //_printContent(buf);
   }
+
+  @override
+  String get name => '/X$objser';
 }
 
 /// A [PdfFormXObject] that renders a  PDF widget into the form's content stream.
@@ -85,4 +87,3 @@ class WidgetPdfFormXObject extends PdfFormXObject {
   @override
   String get name => '/X$objser';
 }
-

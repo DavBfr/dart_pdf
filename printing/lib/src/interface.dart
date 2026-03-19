@@ -107,9 +107,5 @@ abstract class PrintingPlatform extends PlatformInterface {
   );
 
   /// Convert a Pdf document to bitmap images
-  Stream<PdfRaster> raster(
-    Uint8List document,
-    List<int>? pages,
-    double dpi,
-  );
+  Stream<PdfRaster> raster(Uint8List document, List<int>? pages, double dpi);
 }

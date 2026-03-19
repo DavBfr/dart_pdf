@@ -1,8 +1,5 @@
 class PdfaDateFormat {
-  String format({
-    required DateTime dt,
-    bool asIso = false,
-  }) {
+  String format({required DateTime dt, bool asIso = false}) {
     final year = dt.year.toString().padLeft(4, '0');
     final month = dt.month.toString().padLeft(2, '0');
     final day = dt.day.toString().padLeft(2, '0');

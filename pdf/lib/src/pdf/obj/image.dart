@@ -66,12 +66,7 @@ class PdfImage extends PdfXObject {
     bool alpha = true,
     PdfImageOrientation orientation = PdfImageOrientation.topLeft,
   }) {
-    final im = PdfImage._(
-      pdfDocument,
-      width,
-      height,
-      orientation,
-    );
+    final im = PdfImage._(pdfDocument, width, height, orientation);
 
     assert(() {
       im.startStopwatch();
@@ -149,8 +144,7 @@ class PdfImage extends PdfXObject {
       if (info.isCMYKInverted) {
         // CMYK JPEGs from Adobe use inverted values (YCCK encoding).
         // The /Decode array inverts each component back to proper CMYK.
-        im.params['/Decode'] =
-            PdfArray.fromNum(<int>[1, 0, 1, 0, 1, 0, 1, 0]);
+        im.params['/Decode'] = PdfArray.fromNum(<int>[1, 0, 1, 0, 1, 0, 1, 0]);
       }
     } else if (info.isRGB) {
       im.params['/ColorSpace'] = const PdfName('/DeviceRGB');
@@ -211,12 +205,7 @@ class PdfImage extends PdfXObject {
     int height,
     PdfImageOrientation orientation,
   ) {
-    final im = PdfImage._(
-      pdfDocument,
-      width,
-      height,
-      orientation,
-    );
+    final im = PdfImage._(pdfDocument, width, height, orientation);
 
     assert(() {
       im.startStopwatch();

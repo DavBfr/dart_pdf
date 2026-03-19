@@ -30,7 +30,9 @@ late Font asian;
 late Font emoji;
 
 Iterable<TextDecoration> permute(
-    List<TextDecoration> prefix, List<TextDecoration> remaining) sync* {
+  List<TextDecoration> prefix,
+  List<TextDecoration> remaining,
+) sync* {
   yield TextDecoration.combine(prefix);
   if (remaining.isNotEmpty) {
     for (final decoration in remaining) {
@@ -54,14 +56,18 @@ void main() {
   });
 
   test('Text Widgets Quotes', () {
-    pdf.addPage(Page(
-        build: (Context context) => Text('Text containing \' or " works!')));
+    pdf.addPage(
+      Page(build: (Context context) => Text('Text containing \' or " works!')),
+    );
   });
 
   test('Text Widgets Unicode Quotes', () {
-    pdf.addPage(Page(
-        build: (Context context) => Text('Text containing ’ and ” works!',
-            style: TextStyle(font: ttf))));
+    pdf.addPage(
+      Page(
+        build: (Context context) =>
+            Text('Text containing ’ and ” works!', style: TextStyle(font: ttf)),
+      ),
+    );
   });
 
   test('Text Widgets softWrap', () {
@@ -70,28 +76,10 @@ void main() {
     pdf.addPage(
       MultiPage(
         build: (Context context) => <Widget>[
-          Text(
-            'Text with\nsoft wrap\nenabled',
-            softWrap: true,
-          ),
-          Text(
-            'Text with\nsoft wrap\ndisabled',
-            softWrap: false,
-          ),
-          SizedBox(
-            width: 120,
-            child: Text(
-              para,
-              softWrap: false,
-            ),
-          ),
-          SizedBox(
-            width: 120,
-            child: Text(
-              para,
-              softWrap: true,
-            ),
-          ),
+          Text('Text with\nsoft wrap\nenabled', softWrap: true),
+          Text('Text with\nsoft wrap\ndisabled', softWrap: false),
+          SizedBox(width: 120, child: Text(para, softWrap: false)),
+          SizedBox(width: 120, child: Text(para, softWrap: true)),
         ],
       ),
     );
@@ -102,12 +90,7 @@ void main() {
 
     final widgets = <Widget>[];
     for (final align in TextAlign.values) {
-      widgets.add(
-        Text(
-          '$align:\n$para',
-          textAlign: align,
-        ),
-      );
+      widgets.add(Text('$align:\n$para', textAlign: align));
     }
 
     pdf.addPage(MultiPage(build: (Context context) => widgets));
@@ -119,11 +102,12 @@ void main() {
     final widgets = <Widget>[];
     for (var spacing = 0.0; spacing < 10.0; spacing += 2.0) {
       widgets.add(
-        Text(para, style: TextStyle(font: ttf, lineSpacing: spacing)),
+        Text(
+          para,
+          style: TextStyle(font: ttf, lineSpacing: spacing),
+        ),
       );
-      widgets.add(
-        SizedBox(height: 30),
-      );
+      widgets.add(SizedBox(height: 30));
     }
 
     pdf.addPage(MultiPage(build: (Context context) => widgets));
@@ -135,11 +119,12 @@ void main() {
     final widgets = <Widget>[];
     for (var spacing = 0.0; spacing < 10.0; spacing += 2.0) {
       widgets.add(
-        Text(para, style: TextStyle(font: ttf, wordSpacing: spacing)),
+        Text(
+          para,
+          style: TextStyle(font: ttf, wordSpacing: spacing),
+        ),
       );
-      widgets.add(
-        SizedBox(height: 30),
-      );
+      widgets.add(SizedBox(height: 30));
     }
 
     pdf.addPage(MultiPage(build: (Context context) => widgets));
@@ -156,9 +141,7 @@ void main() {
           style: TextStyle(font: ttf, letterSpacing: spacing),
         ),
       );
-      widgets.add(
-        SizedBox(height: 30),
-      );
+      widgets.add(SizedBox(height: 30));
     }
 
     pdf.addPage(MultiPage(build: (Context context) => widgets));
@@ -166,16 +149,19 @@ void main() {
 
   test('Text Widgets background', () {
     final para = LoremText().paragraph(40);
-    pdf.addPage(MultiPage(
+    pdf.addPage(
+      MultiPage(
         build: (Context context) => <Widget>[
-              Text(
-                para,
-                style: TextStyle(
-                  font: ttf,
-                  background: const BoxDecoration(color: PdfColors.purple50),
-                ),
-              ),
-            ]));
+          Text(
+            para,
+            style: TextStyle(
+              font: ttf,
+              background: const BoxDecoration(color: PdfColors.purple50),
+            ),
+          ),
+        ],
+      ),
+    );
   });
 
   test('Text Widgets decoration', () {
@@ -183,14 +169,11 @@ void main() {
     final decorations = <TextDecoration>[
       TextDecoration.underline,
       TextDecoration.lineThrough,
-      TextDecoration.overline
+      TextDecoration.overline,
     ];
 
     final decorationSet = Set<TextDecoration>.from(
-      permute(
-        <TextDecoration>[],
-        decorations,
-      ),
+      permute(<TextDecoration>[], decorations),
     );
 
     for (final decorationStyle in TextDecorationStyle.values) {
@@ -199,15 +182,14 @@ void main() {
           Text(
             decoration.toString().replaceAll('.', ' '),
             style: TextStyle(
-                font: ttf,
-                decoration: decoration,
-                decorationColor: PdfColors.red,
-                decorationStyle: decorationStyle),
+              font: ttf,
+              decoration: decoration,
+              decorationColor: PdfColors.red,
+              decorationStyle: decorationStyle,
+            ),
           ),
         );
-        widgets.add(
-          SizedBox(height: 5),
-        );
+        widgets.add(SizedBox(height: 5));
       }
     }
 
@@ -224,70 +206,72 @@ void main() {
         TextSpan(
           text: word,
           style: TextStyle(
-              font: ttf,
-              fontSize: rnd.nextDouble() * 20 + 20,
-              color:
-                  PdfColors.primaries[rnd.nextInt(PdfColors.primaries.length)]),
+            font: ttf,
+            fontSize: rnd.nextDouble() * 20 + 20,
+            color: PdfColors.primaries[rnd.nextInt(PdfColors.primaries.length)],
+          ),
         ),
       );
       spans.add(const TextSpan(text: ' '));
     }
 
-    pdf.addPage(MultiPage(
+    pdf.addPage(
+      MultiPage(
         build: (Context context) => <Widget>[
-              RichText(
-                text: TextSpan(
-                  text: 'Hello ',
+          RichText(
+            text: TextSpan(
+              text: 'Hello ',
+              style: TextStyle(
+                font: ttf,
+                fontSize: 20,
+                decoration: TextDecoration.underline,
+              ),
+              children: <InlineSpan>[
+                TextSpan(
+                  text: 'bold',
                   style: TextStyle(
-                    font: ttf,
-                    fontSize: 20,
-                    decoration: TextDecoration.underline,
+                    font: ttfBold,
+                    fontSize: 40,
+                    color: PdfColors.blue,
                   ),
                   children: <InlineSpan>[
-                    TextSpan(
-                        text: 'bold',
-                        style: TextStyle(
-                            font: ttfBold, fontSize: 40, color: PdfColors.blue),
-                        children: <InlineSpan>[
-                          const TextSpan(text: '*', baseline: 20),
-                          WidgetSpan(child: PdfLogo(), baseline: -10),
-                        ]),
-                    TextSpan(
-                      text: ' world!\n',
-                      children: spans,
-                    ),
-                    WidgetSpan(
-                        child: PdfLogo(),
-                        annotation: AnnotationUrl(
-                          'https://github.com/DavBfr/dart_pdf',
-                        )),
+                    const TextSpan(text: '*', baseline: 20),
+                    WidgetSpan(child: PdfLogo(), baseline: -10),
                   ],
                 ),
-              ),
-            ]));
+                TextSpan(text: ' world!\n', children: spans),
+                WidgetSpan(
+                  child: PdfLogo(),
+                  annotation: AnnotationUrl(
+                    'https://github.com/DavBfr/dart_pdf',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   });
 
   test('Text Widgets RichText Multiple lang', () {
-    pdf.addPage(Page(
-      build: (Context context) => RichText(
-        text: TextSpan(
-          text: 'Hello ',
-          style: TextStyle(
-            font: ttf,
-            fontSize: 20,
+    pdf.addPage(
+      Page(
+        build: (Context context) => RichText(
+          text: TextSpan(
+            text: 'Hello ',
+            style: TextStyle(font: ttf, fontSize: 20),
+            children: <InlineSpan>[
+              TextSpan(
+                text: '中文',
+                style: TextStyle(font: asian),
+              ),
+              const TextSpan(text: ' world!'),
+            ],
           ),
-          children: <InlineSpan>[
-            TextSpan(
-              text: '中文',
-              style: TextStyle(font: asian),
-            ),
-            const TextSpan(
-              text: ' world!',
-            ),
-          ],
         ),
       ),
-    ));
+    );
   });
 
   test('Text Widgets RichText maxLines', () {
@@ -350,10 +334,7 @@ void main() {
       Page(
         build: (Context context) => SizedBox(
           width: 200,
-          child: Text(
-            para,
-            textAlign: TextAlign.justify,
-          ),
+          child: Text(para, textAlign: TextAlign.justify),
         ),
       ),
     );
@@ -364,10 +345,7 @@ void main() {
       Page(
         build: (Context context) => Text(
           'Hello 🐈! Dancing 💃🏃',
-          style: TextStyle(
-            fontSize: 30,
-            fontFallback: [emoji],
-          ),
+          style: TextStyle(fontSize: 30, fontFallback: [emoji]),
         ),
       ),
     );

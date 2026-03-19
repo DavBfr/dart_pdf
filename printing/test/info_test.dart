@@ -34,11 +34,7 @@ void main() {
   });
 
   test('PrintingInfo.fromMap', () async {
-    final info = PrintingInfo.fromMap(
-      <dynamic, dynamic>{
-        'canPrint': true,
-      },
-    );
+    final info = PrintingInfo.fromMap(<dynamic, dynamic>{'canPrint': true});
 
     expect(info.canConvertHtml, false);
     expect(info.directPrint, false);

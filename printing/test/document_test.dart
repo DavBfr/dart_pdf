@@ -33,10 +33,10 @@ void main() {
   setUp(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-      // ignore: avoid_print
-      print(methodCall);
-      return '1';
-    });
+          // ignore: avoid_print
+          print(methodCall);
+          return '1';
+        });
   });
 
   tearDown(() {
@@ -45,16 +45,14 @@ void main() {
   });
 
   test('flutterImageProvider(FileImage)', () async {
-    final image =
-        await flutterImageProvider(FileImage(File('$path/example.png')));
+    final image = await flutterImageProvider(
+      FileImage(File('$path/example.png')),
+    );
 
     doc.addPage(
       pw.Page(
-        build: (pw.Context context) => pw.Center(
-          child: pw.Container(
-            child: pw.Image(image),
-          ),
-        ),
+        build: (pw.Context context) =>
+            pw.Center(child: pw.Container(child: pw.Image(image))),
       ),
     );
   });

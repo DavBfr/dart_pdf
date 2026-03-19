@@ -22,10 +22,7 @@ import 'brush.dart';
 class SvgParser {
   /// Create an SVG parser
 
-  factory SvgParser({
-    required XmlDocument xml,
-    PdfColor? colorFilter,
-  }) {
+  factory SvgParser({required XmlDocument xml, PdfColor? colorFilter}) {
     final root = xml.rootElement;
 
     final vbattr = root.getAttribute('viewBox');
@@ -41,20 +38,11 @@ class SvgParser {
       throw Exception('viewBox must contain 1..4 parameters');
     }
 
-    final fvb = [
-      ...List<double>.filled(4 - vb.length, 0),
-      ...vb,
-    ];
+    final fvb = [...List<double>.filled(4 - vb.length, 0), ...vb];
 
     final viewBox = PdfRect(fvb[0], fvb[1], fvb[2], fvb[3]);
 
-    return SvgParser._(
-      width,
-      height,
-      viewBox,
-      root,
-      colorFilter,
-    );
+    return SvgParser._(width, height, viewBox, root, colorFilter);
   }
 
   SvgParser._(
@@ -75,21 +63,26 @@ class SvgParser {
 
   final PdfColor? colorFilter;
 
-  static final _transformParameterRegExp =
-      RegExp(r'[\w.-]+(px|pt|em|cm|mm|in|%|)');
+  static final _transformParameterRegExp = RegExp(
+    r'[\w.-]+(px|pt|em|cm|mm|in|%|)',
+  );
 
   XmlElement? findById(String id) {
     try {
       return root.descendants.whereType<XmlElement>().firstWhere(
-            (e) => e.getAttribute('id') == id,
-          );
+        (e) => e.getAttribute('id') == id,
+      );
     } on StateError {
       return null;
     }
   }
 
-  static double? getDouble(XmlElement xml, String name,
-      {String? namespace, double? defaultValue = 0}) {
+  static double? getDouble(
+    XmlElement xml,
+    String name, {
+    String? namespace,
+    double? defaultValue = 0,
+  }) {
     final attr = xml.getAttribute(name, namespace: namespace);
 
     if (attr == null) {
@@ -99,8 +92,13 @@ class SvgParser {
     return double.parse(attr);
   }
 
-  static SvgNumeric? getNumeric(XmlElement xml, String name, SvgBrush? brush,
-      {String? namespace, double? defaultValue}) {
+  static SvgNumeric? getNumeric(
+    XmlElement xml,
+    String name,
+    SvgBrush? brush, {
+    String? namespace,
+    double? defaultValue,
+  }) {
     final attr = xml.getAttribute(name, namespace: namespace);
 
     if (attr == null) {
@@ -154,24 +152,23 @@ enum SvgUnit {
   em,
   percent,
   points,
-  direct
+  direct,
 }
 
 class SvgNumeric {
   factory SvgNumeric(String value, SvgBrush? brush) {
-    final r = RegExp(r'([-+]?[\d\.]+)\s*(px|pt|em|cm|mm|in|%|)')
-        .allMatches(value)
-        .first;
+    final r = RegExp(
+      r'([-+]?[\d\.]+)\s*(px|pt|em|cm|mm|in|%|)',
+    ).allMatches(value).first;
 
     return SvgNumeric.value(
-        double.parse(r.group(1)!), brush, _svgUnits[r.group(2)]!);
+      double.parse(r.group(1)!),
+      brush,
+      _svgUnits[r.group(2)]!,
+    );
   }
 
-  const SvgNumeric.value(
-    this.value,
-    this.brush, [
-    this.unit = SvgUnit.direct,
-  ]);
+  const SvgNumeric.value(this.value, this.brush, [this.unit = SvgUnit.direct]);
 
   static const _svgUnits = <String, SvgUnit>{
     'px': SvgUnit.pixels,

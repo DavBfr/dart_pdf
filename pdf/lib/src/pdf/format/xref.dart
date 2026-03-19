@@ -188,7 +188,8 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
       if (o.settings.verbose) {
         stopStopwatch();
         debugFill(
-            'Creation time: ${elapsedStopwatch / Duration.microsecondsPerSecond} seconds');
+          'Creation time: ${elapsedStopwatch / Duration.microsecondsPerSecond} seconds',
+        );
         debugFill('File size: ${s.offset} bytes');
         debugFill('Objects: ${objects.length}');
         writeDebug(s);
@@ -278,7 +279,8 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
       if (o.settings.verbose) {
         stopStopwatch();
         debugFill(
-            'Creation time: ${elapsedStopwatch / Duration.microsecondsPerSecond} seconds');
+          'Creation time: ${elapsedStopwatch / Duration.microsecondsPerSecond} seconds',
+        );
         debugFill('File size: ${s.offset} bytes');
         debugFill('Objects: ${objects.length}');
         writeDebug(s);
@@ -297,12 +299,7 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
     final block = <PdfXref>[]; // xrefs in this block
 
     // We need block 0 to exist
-    block.add(const PdfXref(
-      0,
-      0,
-      gen: 65535,
-      type: PdfCrossRefEntryType.free,
-    ));
+    block.add(const PdfXref(0, 0, gen: 65535, type: PdfCrossRefEntryType.free));
 
     final objOffset = s.offset;
     s.putString('xref\n');

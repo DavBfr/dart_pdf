@@ -35,7 +35,7 @@ enum Type1Fonts {
   timesBoldItalic,
   timesItalic,
   symbol,
-  zapfDingbats
+  zapfDingbats,
 }
 
 /// Lazy font declaration, registers the font in the document only if needed.
@@ -79,7 +79,7 @@ class Font {
     Type1Fonts.timesBoldItalic: 'Times-BoldItalic',
     Type1Fonts.timesItalic: 'Times-Italic',
     Type1Fonts.symbol: 'Symbol',
-    Type1Fonts.zapfDingbats: 'ZapfDingbats'
+    Type1Fonts.zapfDingbats: 'ZapfDingbats',
   };
 
   String get fontName => _type1Map[font]!;

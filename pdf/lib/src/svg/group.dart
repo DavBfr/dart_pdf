@@ -35,14 +35,18 @@ class SvgGroup extends SvgOperation {
   ) : super(brush, clip, transform, painter);
 
   factory SvgGroup.fromXml(
-      XmlElement element, SvgPainter painter, SvgBrush brush) {
+    XmlElement element,
+    SvgPainter painter,
+    SvgBrush brush,
+  ) {
     final _brush = SvgBrush.fromXml(element, brush, painter);
 
     final children = element.children
         .whereType<XmlElement>()
         .where((element) => element.name.local != 'symbol')
         .map<SvgOperation?>(
-            (child) => SvgOperation.fromXml(child, painter, _brush))
+          (child) => SvgOperation.fromXml(child, painter, _brush),
+        )
         .whereType<SvgOperation>();
 
     return SvgGroup(
@@ -72,7 +76,10 @@ class SvgGroup extends SvgOperation {
 
   @override
   PdfRect boundingBox() {
-    var left = double.infinity, bottom = double.infinity, right = -double.infinity, top = -double.infinity;
+    var left = double.infinity,
+        bottom = double.infinity,
+        right = -double.infinity,
+        top = -double.infinity;
     for (final child in children) {
       final b = child.boundingBox();
       left = min(b.left, left);

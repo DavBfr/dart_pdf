@@ -39,13 +39,11 @@ class PdfCatalog extends PdfObject<PdfDict> {
     int objgen = 0,
     int? objser,
   }) : super(
-          pdfDocument,
-          params: PdfDict.values({
-            '/Type': const PdfName('/Catalog'),
-          }),
-          objser: objser,
-          objgen: objgen,
-        );
+         pdfDocument,
+         params: PdfDict.values({'/Type': const PdfName('/Catalog')}),
+         objser: objser,
+         objgen: objgen,
+       );
 
   /// The pages of the document
   final PdfPageList pdfPageList;
@@ -76,7 +74,7 @@ class PdfCatalog extends PdfObject<PdfDict> {
     '/UseNone',
     '/UseOutlines',
     '/UseThumbs',
-    '/FullScreen'
+    '/FullScreen',
   ];
 
   @override
@@ -119,9 +117,7 @@ class PdfCatalog extends PdfObject<PdfDict> {
 
     if (pdfDocument.sign != null) {
       if (pdfDocument.sign!.value.hasMDP) {
-        params['/Perms'] = PdfDict.values({
-          '/DocMDP': pdfDocument.sign!.ref(),
-        });
+        params['/Perms'] = PdfDict.values({'/DocMDP': pdfDocument.sign!.ref()});
       }
 
       final dss = PdfDict();
@@ -151,7 +147,8 @@ class PdfCatalog extends PdfObject<PdfDict> {
 
     if (widgets.isNotEmpty) {
       final acroForm = (params['/AcroForm'] ??= PdfDict()) as PdfDict;
-      acroForm['/SigFlags'] = PdfNum(pdfDocument.sign?.flagsValue ?? 0) |
+      acroForm['/SigFlags'] =
+          PdfNum(pdfDocument.sign?.flagsValue ?? 0) |
           (acroForm['/SigFlags'] as PdfNum? ?? const PdfNum(0));
       final fields = (acroForm['/Fields'] ??= PdfArray()) as PdfArray;
       final fontRefs = PdfDict();
@@ -167,8 +164,10 @@ class PdfCatalog extends PdfObject<PdfDict> {
         }
       }
       if (fontRefs.isNotEmpty) {
-        acroForm['/DR'] = PdfDict.values(// "Document Resources"
-            {'/Font': fontRefs});
+        acroForm['/DR'] = PdfDict.values(
+          // "Document Resources"
+          {'/Font': fontRefs},
+        );
       }
     }
 

@@ -43,25 +43,27 @@ class Page {
     EdgeInsetsGeometry? margin,
     bool clip = false,
     TextDirection? textDirection,
-  })  : assert(
-            pageTheme == null ||
-                (pageFormat == null &&
-                    theme == null &&
-                    orientation == null &&
-                    margin == null &&
-                    clip == false &&
-                    textDirection == null),
-            'Don\'t set both pageTheme and other settings'),
-        pageTheme = pageTheme ??
-            PageTheme(
-              pageFormat: pageFormat,
-              orientation: orientation,
-              margin: margin,
-              theme: theme,
-              clip: clip,
-              textDirection: textDirection,
-            ),
-        _build = build;
+  }) : assert(
+         pageTheme == null ||
+             (pageFormat == null &&
+                 theme == null &&
+                 orientation == null &&
+                 margin == null &&
+                 clip == false &&
+                 textDirection == null),
+         'Don\'t set both pageTheme and other settings',
+       ),
+       pageTheme =
+           pageTheme ??
+           PageTheme(
+             pageFormat: pageFormat,
+             orientation: orientation,
+             margin: margin,
+             theme: theme,
+             clip: clip,
+             textDirection: textDirection,
+           ),
+       _build = build;
 
   final PageTheme pageTheme;
 
@@ -94,7 +96,9 @@ class Page {
       ..moveTo(_margin.left, _margin.bottom)
       ..lineTo(_margin.left, pageFormat.height - _margin.top)
       ..lineTo(
-          pageFormat.width - _margin.right, pageFormat.height - _margin.top)
+        pageFormat.width - _margin.right,
+        pageFormat.height - _margin.top,
+      )
       ..lineTo(pageFormat.width - _margin.right, _margin.bottom)
       ..fillPath();
   }
@@ -102,8 +106,11 @@ class Page {
   void generate(Document document, {bool insert = true, int? index}) {
     if (index != null) {
       if (insert) {
-        _pdfPage =
-            PdfPage(document.document, pageFormat: pageFormat, index: index);
+        _pdfPage = PdfPage(
+          document.document,
+          pageFormat: pageFormat,
+          index: index,
+        );
       } else {
         _pdfPage = document.document.page(index);
       }
@@ -119,21 +126,24 @@ class Page {
     var constraints = mustRotate
         ? BoxConstraints(
             maxWidth: pageFormat.height - _margin!.vertical,
-            maxHeight: pageFormat.width - _margin.horizontal)
+            maxHeight: pageFormat.width - _margin.horizontal,
+          )
         : BoxConstraints(
             maxWidth: pageFormat.width - _margin!.horizontal,
-            maxHeight: pageFormat.height - _margin.vertical);
+            maxHeight: pageFormat.height - _margin.vertical,
+          );
 
     final calculatedTheme = theme ?? document.theme ?? ThemeData.base();
-    final context = Context(
-      document: document.document,
-      page: _pdfPage!,
-      canvas: canvas,
-    ).inheritFromAll(<Inherited>[
-      calculatedTheme,
-      if (pageTheme.textDirection != null)
-        InheritedDirectionality(pageTheme.textDirection),
-    ]);
+    final context =
+        Context(
+          document: document.document,
+          page: _pdfPage!,
+          canvas: canvas,
+        ).inheritFromAll(<Inherited>[
+          calculatedTheme,
+          if (pageTheme.textDirection != null)
+            InheritedDirectionality(pageTheme.textDirection),
+        ]);
 
     Widget? background;
     Widget? content;
@@ -144,15 +154,19 @@ class Page {
     final size = layout(content, context, constraints);
 
     if (_pdfPage!.pageFormat.height == double.infinity) {
-      _pdfPage!.pageFormat =
-          _pdfPage!.pageFormat.copyWith(width: size.x, height: size.y);
+      _pdfPage!.pageFormat = _pdfPage!.pageFormat.copyWith(
+        width: size.x,
+        height: size.y,
+      );
       constraints = mustRotate
           ? BoxConstraints(
               maxWidth: _pdfPage!.pageFormat.height - _margin.vertical,
-              maxHeight: _pdfPage!.pageFormat.width - _margin.horizontal)
+              maxHeight: _pdfPage!.pageFormat.width - _margin.horizontal,
+            )
           : BoxConstraints(
               maxWidth: _pdfPage!.pageFormat.width - _margin.horizontal,
-              maxHeight: _pdfPage!.pageFormat.height - _margin.vertical);
+              maxHeight: _pdfPage!.pageFormat.height - _margin.vertical,
+            );
     }
 
     if (pageTheme.buildBackground != null) {
@@ -184,8 +198,12 @@ class Page {
   }
 
   @protected
-  PdfPoint layout(Widget child, Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  PdfPoint layout(
+    Widget child,
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     final _margin = resolvedMargin!;
     child.layout(context, constraints, parentUsesSize: parentUsesSize);
     assert(child.box != null);
@@ -198,8 +216,12 @@ class Page {
         ? child.box!.height + _margin.top + _margin.bottom
         : pageFormat.height;
 
-    child.box = PdfRect(_margin.left, height - child.box!.height - _margin.top,
-        child.box!.width, child.box!.height);
+    child.box = PdfRect(
+      _margin.left,
+      height - child.box!.height - _margin.top,
+      child.box!.width,
+      child.box!.height,
+    );
 
     return PdfPoint(width, height);
   }
@@ -234,16 +256,19 @@ class Page {
       final _margin = resolvedMargin!;
       context.canvas
         ..saveContext()
-        ..setTransform(Matrix4.identity()
-          ..rotateZ(-math.pi / 2)
-          ..translateByDouble(
+        ..setTransform(
+          Matrix4.identity()
+            ..rotateZ(-math.pi / 2)
+            ..translateByDouble(
               -pageFormat.height - _margin.left + _margin.top,
               -pageFormat.height +
                   pageFormat.width +
                   _margin.top -
                   _margin.right,
               0,
-              1));
+              1,
+            ),
+        );
       child.paint(context);
       context.canvas.restoreContext();
     } else {

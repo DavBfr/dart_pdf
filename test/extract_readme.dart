@@ -27,8 +27,10 @@ Iterable<String> getCode(List<md.Node>? nodes, [bool isCode = false]) sync* {
     if (node is md.Element) {
       // print(node.tag);
       // print(node.attributes);
-      yield* getCode(node.children,
-          node.tag == 'code' && node.attributes['class'] == 'language-dart');
+      yield* getCode(
+        node.children,
+        node.tag == 'code' && node.attributes['class'] == 'language-dart',
+      );
     } else if (node is md.Text) {
       if (isCode && !node.text.startsWith('import')) {
         yield '// ------------';
@@ -55,7 +57,8 @@ void buildFile(String src, String dest, bool flutter) {
   if (flutter) {
     st.writeln('import \'package:path_provider/path_provider.dart\';');
     st.writeln(
-        'import \'package:htmltopdfwidgets/htmltopdfwidgets.dart\' show HTMLToPdf;');
+      'import \'package:htmltopdfwidgets/htmltopdfwidgets.dart\' show HTMLToPdf;',
+    );
   } else {
     st.writeln('import \'dart:convert\';');
     st.writeln('import \'package:web/web.dart\' as web;');

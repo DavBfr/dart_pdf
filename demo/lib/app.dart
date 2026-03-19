@@ -94,17 +94,13 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
   void _showPrintedToast(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Document printed successfully'),
-      ),
+      const SnackBar(content: Text('Document printed successfully')),
     );
   }
 
   void _showSharedToast(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Document shared successfully'),
-      ),
+      const SnackBar(content: Text('Document shared successfully')),
     );
   }
 
@@ -133,10 +129,7 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
     final actions = <PdfPreviewAction>[
       if (!kIsWeb)
-        PdfPreviewAction(
-          icon: const Icon(Icons.save),
-          onPressed: _saveAsFile,
-        )
+        PdfPreviewAction(icon: const Icon(Icons.save), onPressed: _saveAsFile),
     ];
 
     return Scaffold(
@@ -173,29 +166,30 @@ class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
   Future<String?> askName(BuildContext context) {
     return showDialog<String>(
-        barrierDismissible: false,
-        context: context,
-        builder: (context) {
-          final controller = TextEditingController();
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        final controller = TextEditingController();
 
-          return AlertDialog(
-            title: const Text('Please type your name:'),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-            content: TextField(
-              decoration: const InputDecoration(hintText: '[your name]'),
-              controller: controller,
+        return AlertDialog(
+          title: const Text('Please type your name:'),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+          content: TextField(
+            decoration: const InputDecoration(hintText: '[your name]'),
+            controller: controller,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                if (controller.text != '') {
+                  Navigator.pop(context, controller.text);
+                }
+              },
+              child: const Text('OK'),
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  if (controller.text != '') {
-                    Navigator.pop(context, controller.text);
-                  }
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        });
+          ],
+        );
+      },
+    );
   }
 }

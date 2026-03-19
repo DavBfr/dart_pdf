@@ -42,9 +42,9 @@ class Header extends StatelessWidget {
     String? title,
     this.outlineColor,
     this.outlineStyle = PdfOutlineStyle.normal,
-  })  : assert(level >= 0 && level <= 5),
-        assert(child != null || text != null),
-        title = title ?? text;
+  }) : assert(level >= 0 && level <= 5),
+       assert(child != null || text != null),
+       title = title ?? text;
 
   final String? title;
 
@@ -76,35 +76,47 @@ class Header extends StatelessWidget {
       case 0:
         _margin ??= const EdgeInsets.only(bottom: 5.0 * PdfPageFormat.mm);
         _padding ??= const EdgeInsets.only(bottom: 1.0 * PdfPageFormat.mm);
-        _decoration ??=
-            const BoxDecoration(border: Border(bottom: BorderSide()));
+        _decoration ??= const BoxDecoration(
+          border: Border(bottom: BorderSide()),
+        );
         _textStyle ??= Theme.of(context).header0;
         break;
       case 1:
         _margin ??= const EdgeInsets.only(
-            top: 3.0 * PdfPageFormat.mm, bottom: 5.0 * PdfPageFormat.mm);
-        _decoration ??=
-            const BoxDecoration(border: Border(bottom: BorderSide(width: 0.2)));
+          top: 3.0 * PdfPageFormat.mm,
+          bottom: 5.0 * PdfPageFormat.mm,
+        );
+        _decoration ??= const BoxDecoration(
+          border: Border(bottom: BorderSide(width: 0.2)),
+        );
         _textStyle ??= Theme.of(context).header1;
         break;
       case 2:
         _margin ??= const EdgeInsets.only(
-            top: 2.0 * PdfPageFormat.mm, bottom: 4.0 * PdfPageFormat.mm);
+          top: 2.0 * PdfPageFormat.mm,
+          bottom: 4.0 * PdfPageFormat.mm,
+        );
         _textStyle ??= Theme.of(context).header2;
         break;
       case 3:
         _margin ??= const EdgeInsets.only(
-            top: 2.0 * PdfPageFormat.mm, bottom: 4.0 * PdfPageFormat.mm);
+          top: 2.0 * PdfPageFormat.mm,
+          bottom: 4.0 * PdfPageFormat.mm,
+        );
         _textStyle ??= Theme.of(context).header3;
         break;
       case 4:
         _margin ??= const EdgeInsets.only(
-            top: 2.0 * PdfPageFormat.mm, bottom: 4.0 * PdfPageFormat.mm);
+          top: 2.0 * PdfPageFormat.mm,
+          bottom: 4.0 * PdfPageFormat.mm,
+        );
         _textStyle ??= Theme.of(context).header4;
         break;
       case 5:
         _margin ??= const EdgeInsets.only(
-            top: 2.0 * PdfPageFormat.mm, bottom: 4.0 * PdfPageFormat.mm);
+          top: 2.0 * PdfPageFormat.mm,
+          bottom: 4.0 * PdfPageFormat.mm,
+        );
         _textStyle ??= Theme.of(context).header5;
         break;
     }
@@ -146,10 +158,11 @@ class TableOfContent extends StatelessWidget {
                 Text(c.title!),
                 SizedBox(width: 8),
                 Expanded(
-                    child: Divider(
-                  borderStyle: BorderStyle.dotted,
-                  thickness: 0.2,
-                )),
+                  child: Divider(
+                    borderStyle: BorderStyle.dotted,
+                    thickness: 0.2,
+                  ),
+                ),
                 SizedBox(width: 8),
                 DelayedWidget(build: (_) => Text('${c.page}')),
               ],
@@ -163,14 +176,14 @@ class TableOfContent extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    assert(context.page is! MultiPage,
-        '$runtimeType will not work with MultiPage');
+    assert(
+      context.page is! MultiPage,
+      '$runtimeType will not work with MultiPage',
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ..._buildToc(context.document.outline, 0),
-      ],
+      children: [..._buildToc(context.document.outline, 0)],
     );
   }
 }
@@ -266,7 +279,7 @@ class Bullet extends StatelessWidget {
                     textAlign: textAlign,
                     style: Theme.of(context).bulletStyle.merge(style),
                   ),
-          )
+          ),
         ],
       ),
     );
@@ -274,11 +287,7 @@ class Bullet extends StatelessWidget {
 }
 
 class Watermark extends StatelessWidget {
-  Watermark({
-    required this.child,
-    this.fit = BoxFit.contain,
-    this.angle = 0,
-  });
+  Watermark({required this.child, this.fit = BoxFit.contain, this.angle = 0});
 
   Watermark.text(
     String text, {
@@ -286,13 +295,11 @@ class Watermark extends StatelessWidget {
     this.fit = BoxFit.contain,
     this.angle = math.pi / 4,
   }) : child = Text(
-          text,
-          style: style ??
-              TextStyle(
-                color: PdfColors.grey200,
-                fontWeight: FontWeight.bold,
-              ),
-        );
+         text,
+         style:
+             style ??
+             TextStyle(color: PdfColors.grey200, fontWeight: FontWeight.bold),
+       );
 
   final Widget child;
 
@@ -305,10 +312,7 @@ class Watermark extends StatelessWidget {
     return SizedBox.expand(
       child: FittedBox(
         fit: fit,
-        child: Transform.rotateBox(
-          angle: angle,
-          child: child,
-        ),
+        child: Transform.rotateBox(angle: angle, child: child),
       ),
     );
   }
@@ -339,17 +343,18 @@ class Footer extends StatelessWidget {
   @override
   Widget build(Context context) {
     return Container(
-        margin: margin,
-        padding: padding,
-        decoration: decoration,
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            leading ?? SizedBox(),
-            title ?? SizedBox(),
-            trailing ?? SizedBox(),
-          ],
-        ));
+      margin: margin,
+      padding: padding,
+      decoration: decoration,
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          leading ?? SizedBox(),
+          title ?? SizedBox(),
+          trailing ?? SizedBox(),
+        ],
+      ),
+    );
   }
 }

@@ -36,8 +36,9 @@ void main() {
           children: [
             Link(child: Text('A link'), destination: 'destination'),
             UrlLink(
-                child: Text('GitHub'),
-                destination: 'https://github.com/DavBfr/dart_pdf/'),
+              child: Text('GitHub'),
+              destination: 'https://github.com/DavBfr/dart_pdf/',
+            ),
           ],
         ),
       ),
@@ -62,9 +63,7 @@ void main() {
             SizedBox(
               width: 200,
               height: 200,
-              child: SquareAnnotation(
-                color: PdfColors.red,
-              ),
+              child: SquareAnnotation(color: PdfColors.red),
             ),
             SizedBox(
               width: 200,
@@ -73,7 +72,7 @@ void main() {
                 points: const [
                   PdfPoint(10, 10),
                   PdfPoint(10, 30),
-                  PdfPoint(50, 70)
+                  PdfPoint(50, 70),
                 ],
                 color: PdfColors.purple,
               ),
@@ -85,7 +84,7 @@ void main() {
                 points: const [
                   PdfPoint(10, 10),
                   PdfPoint(10, 30),
-                  PdfPoint(50, 70)
+                  PdfPoint(50, 70),
                 ],
                 color: PdfColors.orange,
               ),
@@ -108,10 +107,12 @@ void main() {
   });
 
   test('Pdf Anchor Annotation', () async {
-    pdf.addPage(Page(
-      build: (context) =>
-          Anchor(child: Text('The destination'), name: 'destination'),
-    ));
+    pdf.addPage(
+      Page(
+        build: (context) =>
+            Anchor(child: Text('The destination'), name: 'destination'),
+      ),
+    );
   });
 
   tearDownAll(() async {

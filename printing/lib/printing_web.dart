@@ -99,10 +99,10 @@ class PrintingPlugin extends PrintingPlatform {
       } else {
         final pdfJsVersion =
             web.window.hasProperty(_dartPdfJsVersion.toJS).toDart
-                ? web.window
-                    .getProperty<js.JSString?>(_dartPdfJsVersion.toJS)!
-                    .toDart
-                : _pdfJsVersion;
+            ? web.window
+                  .getProperty<js.JSString?>(_dartPdfJsVersion.toJS)!
+                  .toDart
+            : _pdfJsVersion;
         _pdfJsUrlBase = '$_pdfJsCdnPath@$pdfJsVersion/build/';
       }
 
@@ -322,9 +322,7 @@ class PrintingPlugin extends PrintingPlatform {
   }
 
   @override
-  Future<Printer> pickPrinter(
-    Rect bounds,
-  ) {
+  Future<Printer> pickPrinter(Rect bounds) {
     throw UnimplementedError();
   }
 
@@ -359,8 +357,9 @@ class PrintingPlugin extends PrintingPlatform {
       for (final pageIndex in computedPages) {
         final page = await doc.getPage(pageIndex + 1).toDart;
         try {
-          final viewport =
-              page.getViewport(Settings()..scale = dpi / PdfPageFormat.inch);
+          final viewport = page.getViewport(
+            Settings()..scale = dpi / PdfPageFormat.inch,
+          );
 
           canvas.height = viewport.height.toInt();
           canvas.width = viewport.width.toInt();
@@ -388,19 +387,13 @@ class PrintingPlugin extends PrintingPlatform {
           final r = web.FileReader();
           r.readAsArrayBuffer(blob);
 
-          r.onLoadEnd.listen(
-            (web.ProgressEvent e) {
-              data.add((r.result! as js.JSArrayBuffer).toDart.asInt8List());
-              completer.complete();
-            },
-          );
+          r.onLoadEnd.listen((web.ProgressEvent e) {
+            data.add((r.result! as js.JSArrayBuffer).toDart.asInt8List());
+            completer.complete();
+          });
           await completer.future;
 
-          yield _WebPdfRaster(
-            canvas.width,
-            canvas.height,
-            data.toBytes(),
-          );
+          yield _WebPdfRaster(canvas.width, canvas.height, data.toBytes());
         } finally {
           page.cleanup();
         }
@@ -412,11 +405,8 @@ class PrintingPlugin extends PrintingPlatform {
 }
 
 class _WebPdfRaster extends PdfRaster {
-  _WebPdfRaster(
-    int width,
-    int height,
-    this.png,
-  ) : super(width, height, Uint8List(0));
+  _WebPdfRaster(int width, int height, this.png)
+    : super(width, height, Uint8List(0));
 
   final Uint8List png;
 

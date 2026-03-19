@@ -28,7 +28,7 @@ enum WrapAlignment {
   center,
   spaceBetween,
   spaceAround,
-  spaceEvenly
+  spaceEvenly,
 }
 
 /// Who [Wrap] should align children within a run in the cross axis.
@@ -136,8 +136,11 @@ class Wrap extends MultiChildWidget with SpanningWidget {
     }
   }
 
-  double _getChildCrossAxisOffset(bool flipCrossAxis, double runCrossAxisExtent,
-      double childCrossAxisExtent) {
+  double _getChildCrossAxisOffset(
+    bool flipCrossAxis,
+    double runCrossAxisExtent,
+    double childCrossAxisExtent,
+  ) {
     final freeSpace = runCrossAxisExtent - childCrossAxisExtent;
     switch (crossAxisAlignment) {
       case WrapCrossAlignment.start:
@@ -150,8 +153,11 @@ class Wrap extends MultiChildWidget with SpanningWidget {
   }
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     if (children.isEmpty || _context.firstChild >= children.length) {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
       return;
@@ -207,7 +213,8 @@ class Wrap extends MultiChildWidget with SpanningWidget {
           crossAxisExtent += runSpacing;
         }
         runMetrics.add(
-            _RunMetrics(runMainAxisExtent, runCrossAxisExtent, childCount));
+          _RunMetrics(runMainAxisExtent, runCrossAxisExtent, childCount),
+        );
         runMainAxisExtent = 0.0;
         runCrossAxisExtent = 0.0;
         childCount = 0;
@@ -231,8 +238,9 @@ class Wrap extends MultiChildWidget with SpanningWidget {
       if (runMetrics.isNotEmpty) {
         crossAxisExtent += runSpacing;
       }
-      runMetrics
-          .add(_RunMetrics(runMainAxisExtent, runCrossAxisExtent, childCount));
+      runMetrics.add(
+        _RunMetrics(runMainAxisExtent, runCrossAxisExtent, childCount),
+      );
     }
 
     final runCount = runMetrics.length;
@@ -243,21 +251,27 @@ class Wrap extends MultiChildWidget with SpanningWidget {
 
     switch (direction) {
       case Axis.horizontal:
-        box = PdfRect.fromPoints(PdfPoint.zero,
-            constraints.constrain(PdfPoint(mainAxisExtent, crossAxisExtent)));
+        box = PdfRect.fromPoints(
+          PdfPoint.zero,
+          constraints.constrain(PdfPoint(mainAxisExtent, crossAxisExtent)),
+        );
         containerMainAxisExtent = box!.width;
         containerCrossAxisExtent = box!.height;
         break;
       case Axis.vertical:
-        box = PdfRect.fromPoints(PdfPoint.zero,
-            constraints.constrain(PdfPoint(crossAxisExtent, mainAxisExtent)));
+        box = PdfRect.fromPoints(
+          PdfPoint.zero,
+          constraints.constrain(PdfPoint(crossAxisExtent, mainAxisExtent)),
+        );
         containerMainAxisExtent = box!.height;
         containerCrossAxisExtent = box!.width;
         break;
     }
 
-    final crossAxisFreeSpace =
-        math.max(0.0, containerCrossAxisExtent - crossAxisExtent);
+    final crossAxisFreeSpace = math.max(
+      0.0,
+      containerCrossAxisExtent - crossAxisExtent,
+    );
     var runLeadingSpace = 0.0;
     var runBetweenSpace = 0.0;
 
@@ -271,8 +285,9 @@ class Wrap extends MultiChildWidget with SpanningWidget {
         runLeadingSpace = crossAxisFreeSpace / 2.0;
         break;
       case WrapAlignment.spaceBetween:
-        runBetweenSpace =
-            runCount > 1 ? crossAxisFreeSpace / (runCount - 1) : 0.0;
+        runBetweenSpace = runCount > 1
+            ? crossAxisFreeSpace / (runCount - 1)
+            : 0.0;
         break;
       case WrapAlignment.spaceAround:
         runBetweenSpace = crossAxisFreeSpace / runCount;
@@ -296,8 +311,10 @@ class Wrap extends MultiChildWidget with SpanningWidget {
       final runCrossAxisExtent = metrics.crossAxisExtent;
       final childCount = metrics.childCount;
 
-      final mainAxisFreeSpace =
-          math.max(0.0, containerMainAxisExtent - runMainAxisExtent);
+      final mainAxisFreeSpace = math.max(
+        0.0,
+        containerMainAxisExtent - runMainAxisExtent,
+      );
       var childLeadingSpace = 0.0;
       var childBetweenSpace = 0.0;
 
@@ -311,8 +328,9 @@ class Wrap extends MultiChildWidget with SpanningWidget {
           childLeadingSpace = mainAxisFreeSpace / 2.0;
           break;
         case WrapAlignment.spaceBetween:
-          childBetweenSpace =
-              childCount > 1 ? mainAxisFreeSpace / (childCount - 1) : 0.0;
+          childBetweenSpace = childCount > 1
+              ? mainAxisFreeSpace / (childCount - 1)
+              : 0.0;
           break;
         case WrapAlignment.spaceAround:
           childBetweenSpace = mainAxisFreeSpace / childCount;
@@ -350,14 +368,17 @@ class Wrap extends MultiChildWidget with SpanningWidget {
         final childMainAxisExtent = _getMainAxisExtent(child);
         final childCrossAxisExtent = _getCrossAxisExtent(child)!;
         final childCrossAxisOffset = _getChildCrossAxisOffset(
-            flipCrossAxis, runCrossAxisExtent, childCrossAxisExtent);
+          flipCrossAxis,
+          runCrossAxisExtent,
+          childCrossAxisExtent,
+        );
         if (flipMainAxis) {
           childMainPosition -= childMainAxisExtent!;
         }
         child.box = PdfRect.fromPoints(
-            _getOffset(
-                childMainPosition, crossAxisOffset + childCrossAxisOffset),
-            child.box!.size);
+          _getOffset(childMainPosition, crossAxisOffset + childCrossAxisOffset),
+          child.box!.size,
+        );
         if (flipMainAxis) {
           childMainPosition -= childBetweenSpace;
         } else {
@@ -384,8 +405,10 @@ class Wrap extends MultiChildWidget with SpanningWidget {
     final mat = Matrix4.identity();
     mat.translateByDouble(box!.left, box!.bottom, 0, 1);
     context.canvas.setTransform(mat);
-    for (var child
-        in children.sublist(_context.firstChild, _context.lastChild)) {
+    for (var child in children.sublist(
+      _context.firstChild,
+      _context.lastChild,
+    )) {
       child.paint(context);
     }
 
