@@ -49,6 +49,11 @@ mixin Printing {
   /// Use value `true` to use [format] as custom paper size, when the printer
   /// driver will not allows the user to use papers which are actually supported by the printer.
   /// (Supported platforms: iOS)
+  ///
+  /// Set [fitToPage] to true to scale the PDF content to fit the paper size
+  /// while preserving aspect ratio. Without this, the PDF is rendered at its
+  /// native point size which may not match the selected paper.
+  /// (Supported platforms: iOS)
   static Future<bool> layoutPdf({
     required LayoutCallback onLayout,
     String name = 'Document',
@@ -57,6 +62,7 @@ mixin Printing {
     bool usePrinterSettings = false,
     OutputType outputType = OutputType.generic,
     bool forceCustomPrintPaper = false,
+    bool fitToPage = false,
   }) {
     return PrintingPlatform.instance.layoutPdf(
       null,
@@ -67,6 +73,7 @@ mixin Printing {
       usePrinterSettings,
       outputType,
       forceCustomPrintPaper,
+      fitToPage,
     );
   }
 
@@ -164,6 +171,7 @@ mixin Printing {
     bool usePrinterSettings = false,
     OutputType outputType = OutputType.generic,
     bool forceCustomPrintPaper = false,
+    bool fitToPage = false,
   }) {
     return PrintingPlatform.instance.layoutPdf(
       printer,
@@ -174,6 +182,7 @@ mixin Printing {
       usePrinterSettings,
       outputType,
       forceCustomPrintPaper,
+      fitToPage,
     );
   }
 
