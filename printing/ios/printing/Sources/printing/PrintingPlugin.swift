@@ -185,7 +185,9 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             "job": printJob.index,
         ] as [String: Any]
 
-        channel.invokeMethod("onLayout", arguments: arg)
+        DispatchQueue.main.async {
+            self.channel.invokeMethod("onLayout", arguments: arg)
+        }
     }
 
     /// send completion status to flutter
@@ -195,8 +197,10 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             "error": error as Any,
             "job": printJob.index,
         ]
-        channel.invokeMethod("onCompleted", arguments: data)
         jobs.removeValue(forKey: UInt32(printJob.index))
+        DispatchQueue.main.async {
+            self.channel.invokeMethod("onCompleted", arguments: data)
+        }
     }
 
     /// send html to pdf data result to flutter
@@ -205,7 +209,9 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             "doc": FlutterStandardTypedData(bytes: pdfData),
             "job": printJob.index,
         ]
-        channel.invokeMethod("onHtmlRendered", arguments: data)
+        DispatchQueue.main.async {
+            self.channel.invokeMethod("onHtmlRendered", arguments: data)
+        }
     }
 
     /// send html to pdf conversion error to flutter
@@ -214,7 +220,9 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             "error": error,
             "job": printJob.index,
         ]
-        channel.invokeMethod("onHtmlError", arguments: data)
+        DispatchQueue.main.async {
+            self.channel.invokeMethod("onHtmlError", arguments: data)
+        }
     }
 
     /// send pdf to raster data result to flutter
@@ -225,7 +233,9 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             "height": height,
             "job": printJob.index,
         ]
-        channel.invokeMethod("onPageRasterized", arguments: data)
+        DispatchQueue.main.async {
+            self.channel.invokeMethod("onPageRasterized", arguments: data)
+        }
     }
 
     public func onPageRasterEnd(printJob: PrintJob, error: String?) {
@@ -233,6 +243,8 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             "job": printJob.index,
             "error": error as Any,
         ]
-        channel.invokeMethod("onPageRasterEnd", arguments: data)
+        DispatchQueue.main.async {
+            self.channel.invokeMethod("onPageRasterEnd", arguments: data)
+        }
     }
 }
