@@ -81,16 +81,16 @@ class PrintingPlugin : public flutter::Plugin {
       auto usePrinterSettings = std::get<bool>(
           arguments->find(flutter::EncodableValue("usePrinterSettings"))
               ->second);
-      bool useModernDialog = false;
-      auto it = arguments->find(flutter::EncodableValue("useModernDialog"));
+      bool windowsModernDialog = false;
+      auto it = arguments->find(flutter::EncodableValue("windowsModernDialog"));
       if (it != arguments->end() && !it->second.IsNull()) {
-        useModernDialog = std::get<bool>(it->second);
+        windowsModernDialog = std::get<bool>(it->second);
       }
       auto vJob = arguments->find(flutter::EncodableValue("job"));
       auto jobNum = vJob != arguments->end() ? std::get<int>(vJob->second) : -1;
       auto job = new PrintJob{&printing, jobNum};
       auto res =
-          job->printPdf(name, printer, width, height, usePrinterSettings, useModernDialog);
+          job->printPdf(name, printer, width, height, usePrinterSettings, windowsModernDialog);
       if (!res) {
         delete job;
       }

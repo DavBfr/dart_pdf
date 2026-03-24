@@ -76,7 +76,7 @@ class PrintJob {
                 double width,
                 double height,
                 bool usePrinterSettings,
-                bool useModernDialog);
+                bool windowsModernDialog);
 
   void writeJob(std::vector<uint8_t> data);
 
