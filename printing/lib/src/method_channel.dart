@@ -180,6 +180,7 @@ class MethodChannelPrinting extends PrintingPlatform {
     bool usePrinterSettings,
     OutputType outputType,
     bool forceCustomPrintPaper,
+    bool useModernDialog,
   ) async {
     final job = _printJobs.add(
       onCompleted: Completer<bool>(),
@@ -200,6 +201,7 @@ class MethodChannelPrinting extends PrintingPlatform {
       'usePrinterSettings': usePrinterSettings,
       'outputType': outputType.index,
       'forceCustomPrintPaper': forceCustomPrintPaper,
+      'useModernDialog': useModernDialog,
     };
 
     await _channel.invokeMethod<int>('printPdf', params);
