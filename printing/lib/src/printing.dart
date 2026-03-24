@@ -57,7 +57,7 @@ mixin Printing {
     bool usePrinterSettings = false,
     OutputType outputType = OutputType.generic,
     bool forceCustomPrintPaper = false,
-    bool useModernDialog = false,
+    bool windowsModernDialog = false,
   }) {
     return PrintingPlatform.instance.layoutPdf(
       null,
@@ -68,7 +68,7 @@ mixin Printing {
       usePrinterSettings,
       outputType,
       forceCustomPrintPaper,
-      useModernDialog,
+      windowsModernDialog,
     );
   }
 
@@ -166,7 +166,7 @@ mixin Printing {
     bool usePrinterSettings = false,
     OutputType outputType = OutputType.generic,
     bool forceCustomPrintPaper = false,
-    bool useModernDialog = false,
+    bool windowsModernDialog = false,
   }) {
     return PrintingPlatform.instance.layoutPdf(
       printer,
@@ -177,7 +177,7 @@ mixin Printing {
       usePrinterSettings,
       outputType,
       forceCustomPrintPaper,
-      useModernDialog,
+      windowsModernDialog,
     );
   }
 

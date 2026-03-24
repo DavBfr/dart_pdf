@@ -78,7 +78,7 @@ bool PrintJob::printPdf(const std::string& name,
                         double width,
                         double height,
                         bool usePrinterSettings,
-                        bool useModernDialog) {
+                        bool windowsModernDialog) {
   
   documentName = name;
 
@@ -113,7 +113,7 @@ bool PrintJob::printPdf(const std::string& name,
   }
 
   if (printer.empty()) {
-    if (useModernDialog) {
+    if (windowsModernDialog) {
       // --- MODERN OPTION (PrintDlgEx) ---
       PRINTDLGEX pdx = {0};
       pdx.lStructSize = sizeof(PRINTDLGEX);
