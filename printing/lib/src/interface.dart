@@ -69,6 +69,7 @@ abstract class PrintingPlatform extends PlatformInterface {
     bool usePrinterSettings,
     OutputType outputType,
     bool forceCustomPrintPaper,
+    bool windowsModernDialog,
   );
 
   /// Enumerate the available printers on the system.

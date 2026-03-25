@@ -78,7 +78,8 @@ bool PrintJob::printPdf(const std::string& name,
                         std::string printer,
                         double width,
                         double height,
-                        bool usePrinterSettings) {
+                        bool usePrinterSettings,
+                        bool windowsModernDialog) {
   documentName = name;
 
   std::size_t dmSize = sizeof(DEVMODE);
@@ -112,39 +113,71 @@ bool PrintJob::printPdf(const std::string& name,
   }
 
   if (printer.empty()) {
-    PRINTDLG pd;
+    if (windowsModernDialog) {
+      // --- MODERN OPTION (PrintDlgEx) ---
+      PRINTDLGEX pdx = {0};
+      pdx.lStructSize = sizeof(PRINTDLGEX);
+      pdx.hwndOwner = GetActiveWindow();
+      pdx.hDevMode = dm;
+      dm = nullptr; // dialog takes ownership; may replace with new alloc
+      pdx.hDevNames = nullptr;
+      pdx.hDC = nullptr;
+      
+      // Flags: Use PD_RETURNDC to get the context we need for PDFium
+      pdx.Flags = PD_RETURNDC | PD_USEDEVMODECOPIESANDCOLLATE | PD_NOPAGENUMS | PD_NOSELECTION;
+      
+      pdx.nStartPage = START_PAGE_GENERAL;
+      pdx.nMaxPageRanges = 1;
+      PRINTPAGERANGE ranges[1] = {{1, 1}}; // Required structure for PDX
+      pdx.lpPageRanges = ranges;
+      
+      HRESULT hr = PrintDlgEx(&pdx);
 
-    // Initialize PRINTDLG
-    ZeroMemory(&pd, sizeof(pd));
-    pd.lStructSize = sizeof(pd);
+      // Check if the user actually clicked "Print"
+      if (hr == S_OK && pdx.dwResultAction == PD_RESULT_PRINT) {
+        this->hDC = pdx.hDC;
+        this->hDevMode = pdx.hDevMode;
+        this->hDevNames = pdx.hDevNames;
+        //success = true;
+      } else {
+        // User cancelled or error occurred — notify Dart so its future completes.
+        if (pdx.hDC) DeleteDC(pdx.hDC);
+        if (pdx.hDevMode) GlobalFree(pdx.hDevMode);
+        if (pdx.hDevNames) GlobalFree(pdx.hDevNames);
+        printing->onCompleted(this, false, "");
+        return false;
+      }
+    } else {
+      // --- CLASSIC DEFAULT  ---
+      PRINTDLG pd;
+      ZeroMemory(&pd, sizeof(pd));
+      pd.lStructSize = sizeof(pd);
+      pd.hwndOwner = nullptr;
+      pd.hDevMode = dm;
+      pd.hDevNames = nullptr;
+      pd.hDC = nullptr;
+      pd.Flags = PD_USEDEVMODECOPIES | PD_RETURNDC | PD_PRINTSETUP |
+                 PD_NOSELECTION | PD_NOPAGENUMS;
+      pd.nCopies = 1;
+      pd.nFromPage = 0xFFFF;
+      pd.nToPage = 0xFFFF;
+      pd.nMinPage = 1;
+      pd.nMaxPage = 0xFFFF;
 
-    // Initialize PRINTDLG
-    pd.hwndOwner = nullptr;
-    pd.hDevMode = dm;
-    pd.hDevNames = nullptr;  // Don't forget to free or store hDevNames.
-    pd.hDC = nullptr;
-    pd.Flags = PD_USEDEVMODECOPIES | PD_RETURNDC | PD_PRINTSETUP |
-               PD_NOSELECTION | PD_NOPAGENUMS;
-    pd.nCopies = 1;
-    pd.nFromPage = 0xFFFF;
-    pd.nToPage = 0xFFFF;
-    pd.nMinPage = 1;
-    pd.nMaxPage = 0xFFFF;
+      auto r = PrintDlg(&pd);
 
-    auto r = PrintDlg(&pd);
+      if (r != 1) {
+        printing->onCompleted(this, false, "");
+        DeleteDC(hDC);
+        GlobalFree(hDevNames);
+        GlobalFree(hDevMode);
+        return true;
+      }
 
-    if (r != 1) {
-      printing->onCompleted(this, false, "");
-      DeleteDC(hDC);
-      GlobalFree(hDevNames);
-      ClosePrinter(hDevMode);
-      return true;
+      hDC = pd.hDC;
+      hDevMode = pd.hDevMode;
+      hDevNames = pd.hDevNames;
     }
-
-    hDC = pd.hDC;
-    hDevMode = pd.hDevMode;
-    hDevNames = pd.hDevNames;
-
   } else {
     hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), nullptr, dm);
     if (!hDC) {
@@ -280,7 +313,7 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
 
   DeleteDC(hDC);
   GlobalFree(hDevNames);
-  ClosePrinter(hDevMode);
+  GlobalFree(hDevMode);
 
   printing->onCompleted(this, true, "");
 }
