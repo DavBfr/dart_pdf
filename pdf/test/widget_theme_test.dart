@@ -45,36 +45,34 @@ void main() {
 
   test('Theme FontStyle', () {
     final style = TextStyle(
-        font: roboto,
-        fontBold: openSansBold,
-        fontNormal: openSans,
-        fontItalic: notoSans,
-        fontBoldItalic: genyomintw,
-        fontWeight: FontWeight.bold,
-        fontSize: 20,
-        color: PdfColors.blue);
+      font: roboto,
+      fontBold: openSansBold,
+      fontNormal: openSans,
+      fontItalic: notoSans,
+      fontBoldItalic: genyomintw,
+      fontWeight: FontWeight.bold,
+      fontSize: 20,
+      color: PdfColors.blue,
+    );
 
-    pdf.addPage(Page(
-      build: (Context context) => ListView(
-        children: <Widget>[
-          Text(
-            style.font!.fontName,
-            style: style,
-          ),
-        ],
+    pdf.addPage(
+      Page(
+        build: (Context context) => ListView(
+          children: <Widget>[Text(style.font!.fontName, style: style)],
+        ),
       ),
-    ));
+    );
   });
 
   test('Theme Page 1', () {
     final theme = ThemeData.withFont(base: roboto);
 
-    pdf.addPage(Page(
-      theme: theme,
-      build: (Context context) => Center(
-        child: Text('Hello'),
+    pdf.addPage(
+      Page(
+        theme: theme,
+        build: (Context context) => Center(child: Text('Hello')),
       ),
-    ));
+    );
   });
 
   test('Theme Page 2', () {
@@ -83,38 +81,44 @@ void main() {
       tableCell: TextStyle(font: roboto),
     );
 
-    pdf.addPage(Page(
-      theme: theme,
-      build: (Context context) => Center(
-        child: TableHelper.fromTextArray(context: context, data: <List<String>>[
-          <String>['Header', '123'],
-          <String>['Cell', '456']
-        ]),
+    pdf.addPage(
+      Page(
+        theme: theme,
+        build: (Context context) => Center(
+          child: TableHelper.fromTextArray(
+            context: context,
+            data: <List<String>>[
+              <String>['Header', '123'],
+              <String>['Cell', '456'],
+            ],
+          ),
+        ),
       ),
-    ));
+    );
   });
 
   test('Theme Page 3', () {
-    pdf.addPage(Page(
-      build: (Context context) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Text('Hello default'),
-            Theme(
-              data: ThemeData.withFont(
-                base: roboto,
+    pdf.addPage(
+      Page(
+        build: (Context context) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Text('Hello default'),
+              Theme(
+                data: ThemeData.withFont(base: roboto),
+                child: Text('Hello themed'),
               ),
-              child: Text('Hello themed'),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ));
+    );
   });
 
   test('Theme Page 4', () {
-    pdf.addPage(Page(
+    pdf.addPage(
+      Page(
         pageFormat: PdfPageFormat.a4,
         orientation: PageOrientation.portrait,
         margin: const EdgeInsets.all(8.0),
@@ -123,7 +127,9 @@ void main() {
         ),
         build: (Context context) {
           return Center(child: Text('Text'));
-        }));
+        },
+      ),
+    );
   });
 
   tearDownAll(() async {

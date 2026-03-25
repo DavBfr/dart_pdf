@@ -20,8 +20,11 @@ class PieGrid extends ChartGrid {
   double get radius => _radius;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     super.layout(context, constraints, parentUsesSize: parentUsesSize);
 
     final datasets = Chart.of(context).datasets;
@@ -132,19 +135,21 @@ class PieDataSet extends Dataset {
     Widget? legendWidget,
     this.legendOffset = 20,
     this.innerRadius = 0,
-  })  : assert(innerRadius >= 0),
-        assert(offset >= 0),
-        drawBorder = drawBorder ?? borderColor != null && color != borderColor,
-        assert((drawBorder ?? borderColor != null && color != borderColor) ||
-            drawSurface),
-        _legendWidget = legendWidget,
-        legendLineColor = legendLineColor ?? color,
-        super(
-          legend: legend,
-          color: color,
-          borderColor: borderColor,
-          borderWidth: borderWidth,
-        );
+  }) : assert(innerRadius >= 0),
+       assert(offset >= 0),
+       drawBorder = drawBorder ?? borderColor != null && color != borderColor,
+       assert(
+         (drawBorder ?? borderColor != null && color != borderColor) ||
+             drawSurface,
+       ),
+       _legendWidget = legendWidget,
+       legendLineColor = legendLineColor ?? color,
+       super(
+         legend: legend,
+         color: color,
+         borderColor: borderColor,
+         borderWidth: borderWidth,
+       );
 
   final num value;
 
@@ -182,8 +187,11 @@ class PieDataSet extends Dataset {
   bool get _isFullCircle => angleEnd - angleStart >= pi * 2;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     final _offset = _isFullCircle ? 0 : offset;
 
     final grid = Chart.of(context).grid as PieGrid;
@@ -195,14 +203,15 @@ class PieDataSet extends Dataset {
 
     final lp = legendPosition == PieLegendPosition.auto
         ? (angleEnd - angleStart > pi / 6
-            ? PieLegendPosition.inside
-            : PieLegendPosition.outside)
+              ? PieLegendPosition.inside
+              : PieLegendPosition.outside)
         : legendPosition;
 
     // Find the legend position
     final bisect = _isFullCircle ? 1 / 4 * pi : (angleStart + angleEnd) / 2;
 
-    final _legendAlign = legendAlign ??
+    final _legendAlign =
+        legendAlign ??
         (lp == PieLegendPosition.inside
             ? TextAlign.center
             : (bisect > pi ? TextAlign.right : TextAlign.left));
@@ -213,18 +222,21 @@ class PieDataSet extends Dataset {
             text: TextSpan(
               children: [TextSpan(text: legend!, style: legendStyle)],
               style: TextStyle(
-                  color: lp == PieLegendPosition.inside
-                      ? color!.isLight
+                color: lp == PieLegendPosition.inside
+                    ? color!.isLight
                           ? PdfColors.white
                           : PdfColors.black
-                      : null),
+                    : null,
+              ),
             ),
             textAlign: _legendAlign,
           );
 
     if (_legendWidget != null) {
-      _legendWidget!.layout(context,
-          BoxConstraints(maxWidth: grid.radius, maxHeight: grid.radius));
+      _legendWidget!.layout(
+        context,
+        BoxConstraints(maxWidth: grid.radius, maxHeight: grid.radius),
+      );
       assert(_legendWidget!.box != null);
 
       final ls = _legendWidget!.box!.size;
@@ -244,31 +256,21 @@ class PieDataSet extends Dataset {
 
           _legendPivot = PdfPoint(cx, cy);
           if (bisect > pi) {
-            _legendAnchor = PdfPoint(
-              cx - legendOffset / 2 * 0.8,
-              cy,
-            );
+            _legendAnchor = PdfPoint(cx - legendOffset / 2 * 0.8, cy);
             _legendWidget!.box = PdfRect.fromPoints(
-                PdfPoint(
-                  cx - legendOffset / 2 - ls.x,
-                  cy - ls.y / 2,
-                ),
-                ls);
+              PdfPoint(cx - legendOffset / 2 - ls.x, cy - ls.y / 2),
+              ls,
+            );
             w = max(w, (-cx + legendOffset / 2 + ls.x) * 2);
             h = max(h, cy.abs() * 2 + ls.y);
             x = -w / 2;
             y = -h / 2;
           } else {
-            _legendAnchor = PdfPoint(
-              cx + legendOffset / 2 * 0.8,
-              cy,
-            );
+            _legendAnchor = PdfPoint(cx + legendOffset / 2 * 0.8, cy);
             _legendWidget!.box = PdfRect.fromPoints(
-                PdfPoint(
-                  cx + legendOffset / 2,
-                  cy - ls.y / 2,
-                ),
-                ls);
+              PdfPoint(cx + legendOffset / 2, cy - ls.y / 2),
+              ls,
+            );
             w = max(w, (cx + legendOffset / 2 + ls.x) * 2);
             h = max(h, cy.abs() * 2 + ls.y);
             x = -w / 2;
@@ -294,11 +296,9 @@ class PieDataSet extends Dataset {
             }
           }
           _legendWidget!.box = PdfRect.fromPoints(
-              PdfPoint(
-                cx - ls.x / 2,
-                cy - ls.y / 2,
-              ),
-              ls);
+            PdfPoint(cx - ls.x / 2, cy - ls.y / 2),
+            ls,
+          );
           break;
         default:
           break;
@@ -327,8 +327,15 @@ class PieDataSet extends Dataset {
       context.canvas
         ..moveTo(cx, cy)
         ..lineTo(sx, sy)
-        ..bezierArc(sx, sy, grid.radius, grid.radius, ex, ey,
-            large: angleEnd - angleStart > pi);
+        ..bezierArc(
+          sx,
+          sy,
+          grid.radius,
+          grid.radius,
+          ex,
+          ey,
+          large: angleEnd - angleStart > pi,
+        );
     }
   }
 
@@ -351,16 +358,36 @@ class PieDataSet extends Dataset {
 
     if (_isFullCircle) {
       context.canvas.drawEllipse(0, 0, grid.radius, grid.radius);
-      context.canvas
-          .drawEllipse(0, 0, innerRadius, innerRadius, clockwise: false);
+      context.canvas.drawEllipse(
+        0,
+        0,
+        innerRadius,
+        innerRadius,
+        clockwise: false,
+      );
     } else {
       context.canvas
         ..moveTo(stx, sty)
-        ..bezierArc(stx, sty, grid.radius, grid.radius, etx, ety,
-            large: angleEnd - angleStart > pi)
+        ..bezierArc(
+          stx,
+          sty,
+          grid.radius,
+          grid.radius,
+          etx,
+          ety,
+          large: angleEnd - angleStart > pi,
+        )
         ..lineTo(ebx, eby)
-        ..bezierArc(ebx, eby, innerRadius, innerRadius, sbx, sby,
-            large: angleEnd - angleStart > pi, sweep: true)
+        ..bezierArc(
+          ebx,
+          eby,
+          innerRadius,
+          innerRadius,
+          sbx,
+          sby,
+          large: angleEnd - angleStart > pi,
+          sweep: true,
+        )
         ..lineTo(stx, sty);
     }
   }
@@ -382,9 +409,7 @@ class PieDataSet extends Dataset {
       if (surfaceOpacity != 1) {
         context.canvas
           ..saveContext()
-          ..setGraphicState(
-            PdfGraphicState(opacity: surfaceOpacity),
-          );
+          ..setGraphicState(PdfGraphicState(opacity: surfaceOpacity));
       }
 
       context.canvas

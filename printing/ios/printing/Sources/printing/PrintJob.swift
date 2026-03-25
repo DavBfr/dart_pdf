@@ -222,7 +222,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             // Sometimes using UIPrinter(url:) gives a non-contactable printer.
             // https://stackoverflow.com/questions/34602302/creating-a-working-uiprinter-object-from-url-for-dialogue-free-printing
             // This lets use a printer saved during picking and fall back using a printer created with UIPrinter(url:)
-            if pickedPrinter != nil && selectedPrinters[printerURLString]!.url == pickedPrinter?.url {
+            if pickedPrinter != nil, selectedPrinters[printerURLString]!.url == pickedPrinter?.url {
                 controller.print(to: pickedPrinter!, completionHandler: completionHandler)
                 return
             }

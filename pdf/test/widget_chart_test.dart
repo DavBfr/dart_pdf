@@ -31,102 +31,10 @@ void main() {
 
   group('LineChart test', () {
     test('Default LineChart', () {
-      pdf.addPage(Page(
-        pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context context) => Chart(
-          grid: CartesianGrid(
-            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
-            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
-          ),
-          datasets: <Dataset>[
-            LineDataSet(
-              data: const <PointChartValue>[
-                PointChartValue(1, 1),
-                PointChartValue(2, 3),
-                PointChartValue(3, 7),
-              ],
-            ),
-          ],
-        ),
-      ));
-    });
-
-    test('Default LineChart without lines connecting points', () {
-      pdf.addPage(Page(
-        pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context context) => Chart(
-          grid: CartesianGrid(
-            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
-            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
-          ),
-          datasets: <Dataset>[
-            LineDataSet(
-              data: const <PointChartValue>[
-                PointChartValue(1, 1),
-                PointChartValue(2, 3),
-                PointChartValue(3, 7),
-              ],
-              drawLine: false,
-            ),
-          ],
-        ),
-      ));
-    });
-
-    test('Default ScatterChart without dots', () {
-      pdf.addPage(Page(
-        build: (Context context) => Chart(
-          grid: CartesianGrid(
-            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
-            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
-          ),
-          datasets: <Dataset>[
-            LineDataSet(
-              data: const <PointChartValue>[
-                PointChartValue(1, 1),
-                PointChartValue(2, 3),
-                PointChartValue(3, 7),
-              ],
-              drawPoints: false,
-            ),
-          ],
-        ),
-      ));
-    });
-
-    test('ScatterChart with custom points and lines', () {
-      pdf.addPage(Page(
-        pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context context) => Chart(
-          grid: CartesianGrid(
-            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
-            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
-          ),
-          datasets: <Dataset>[
-            LineDataSet(
-              data: const <PointChartValue>[
-                PointChartValue(1, 1),
-                PointChartValue(2, 3),
-                PointChartValue(3, 7),
-              ],
-              drawLine: false,
-              pointColor: PdfColors.red,
-              pointSize: 4,
-              color: PdfColors.purple,
-              lineWidth: 4,
-            ),
-          ],
-        ),
-      ));
-    });
-
-    test('ScatterChart with custom size', () {
-      pdf.addPage(Page(
-        pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context context) => SizedBox(
-          width: 200,
-          height: 100,
-          child: Chart(
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.standard.landscape,
+          build: (Context context) => Chart(
             grid: CartesianGrid(
               xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
               yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
@@ -142,75 +50,183 @@ void main() {
             ],
           ),
         ),
-      ));
+      );
+    });
+
+    test('Default LineChart without lines connecting points', () {
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.standard.landscape,
+          build: (Context context) => Chart(
+            grid: CartesianGrid(
+              xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+              yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
+            ),
+            datasets: <Dataset>[
+              LineDataSet(
+                data: const <PointChartValue>[
+                  PointChartValue(1, 1),
+                  PointChartValue(2, 3),
+                  PointChartValue(3, 7),
+                ],
+                drawLine: false,
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+
+    test('Default ScatterChart without dots', () {
+      pdf.addPage(
+        Page(
+          build: (Context context) => Chart(
+            grid: CartesianGrid(
+              xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+              yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
+            ),
+            datasets: <Dataset>[
+              LineDataSet(
+                data: const <PointChartValue>[
+                  PointChartValue(1, 1),
+                  PointChartValue(2, 3),
+                  PointChartValue(3, 7),
+                ],
+                drawPoints: false,
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+
+    test('ScatterChart with custom points and lines', () {
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.standard.landscape,
+          build: (Context context) => Chart(
+            grid: CartesianGrid(
+              xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+              yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
+            ),
+            datasets: <Dataset>[
+              LineDataSet(
+                data: const <PointChartValue>[
+                  PointChartValue(1, 1),
+                  PointChartValue(2, 3),
+                  PointChartValue(3, 7),
+                ],
+                drawLine: false,
+                pointColor: PdfColors.red,
+                pointSize: 4,
+                color: PdfColors.purple,
+                lineWidth: 4,
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+
+    test('ScatterChart with custom size', () {
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.standard.landscape,
+          build: (Context context) => SizedBox(
+            width: 200,
+            height: 100,
+            child: Chart(
+              grid: CartesianGrid(
+                xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+                yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
+              ),
+              datasets: <Dataset>[
+                LineDataSet(
+                  data: const <PointChartValue>[
+                    PointChartValue(1, 1),
+                    PointChartValue(2, 3),
+                    PointChartValue(3, 7),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
     });
 
     test('LineChart with curved lines', () {
-      pdf.addPage(Page(
-        pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context context) => Chart(
-          grid: CartesianGrid(
-            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
-            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
-          ),
-          datasets: <Dataset>[
-            LineDataSet(
-              drawPoints: false,
-              isCurved: true,
-              data: const <PointChartValue>[
-                PointChartValue(1, 1),
-                PointChartValue(3, 7),
-                PointChartValue(5, 3),
-              ],
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.standard.landscape,
+          build: (Context context) => Chart(
+            grid: CartesianGrid(
+              xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+              yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
             ),
-          ],
+            datasets: <Dataset>[
+              LineDataSet(
+                drawPoints: false,
+                isCurved: true,
+                data: const <PointChartValue>[
+                  PointChartValue(1, 1),
+                  PointChartValue(3, 7),
+                  PointChartValue(5, 3),
+                ],
+              ),
+            ],
+          ),
         ),
-      ));
+      );
     });
   });
 
   group('BarChart test', () {
     test('Default BarChart', () {
-      pdf.addPage(Page(
-        pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context context) => Chart(
-          grid: CartesianGrid(
-            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
-            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
-          ),
-          datasets: <Dataset>[
-            BarDataSet(
-              data: const <PointChartValue>[
-                PointChartValue(1, 1),
-                PointChartValue(2, 3),
-                PointChartValue(3, 7),
-              ],
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.standard.landscape,
+          build: (Context context) => Chart(
+            grid: CartesianGrid(
+              xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+              yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
             ),
-          ],
+            datasets: <Dataset>[
+              BarDataSet(
+                data: const <PointChartValue>[
+                  PointChartValue(1, 1),
+                  PointChartValue(2, 3),
+                  PointChartValue(3, 7),
+                ],
+              ),
+            ],
+          ),
         ),
-      ));
+      );
     });
 
     test('Vertical BarChart', () {
-      pdf.addPage(Page(
-        pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context context) => Chart(
-          grid: CartesianGrid(
-            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
-            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
-          ),
-          datasets: <Dataset>[
-            BarDataSet(
-              axis: Axis.vertical,
-              data: const <PointChartValue>[
-                PointChartValue(1, 1),
-                PointChartValue(2, 3),
-                PointChartValue(3, 7),
-              ],
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.standard.landscape,
+          build: (Context context) => Chart(
+            grid: CartesianGrid(
+              xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+              yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
             ),
-          ],
+            datasets: <Dataset>[
+              BarDataSet(
+                axis: Axis.vertical,
+                data: const <PointChartValue>[
+                  PointChartValue(1, 1),
+                  PointChartValue(2, 3),
+                  PointChartValue(3, 7),
+                ],
+              ),
+            ],
+          ),
         ),
-      ));
+      );
     });
   });
 

@@ -44,8 +44,9 @@ class SvgPainter {
   void paint() {
     final brush = parser.colorFilter == null
         ? SvgBrush.defaultContext
-        : SvgBrush.defaultContext
-            .copyWith(fill: SvgColor(color: parser.colorFilter));
+        : SvgBrush.defaultContext.copyWith(
+            fill: SvgColor(color: parser.colorFilter),
+          );
 
     SvgGroup.fromXml(parser.root, this, brush).paint(_canvas!);
   }
@@ -63,8 +64,11 @@ class SvgPainter {
   }
 
   Font getFont(String fontFamily, String fontStyle, String fontWeight) {
-    final customFont =
-        customFontLookup?.call(fontFamily, fontStyle, fontWeight);
+    final customFont = customFontLookup?.call(
+      fontFamily,
+      fontStyle,
+      fontWeight,
+    );
     if (customFont != null) {
       return customFont;
     }

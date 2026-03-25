@@ -25,15 +25,11 @@ import 'ttffont.dart';
 /// Font descriptor object
 class PdfFontDescriptor extends PdfObject<PdfDict> {
   /// Create a Font descriptor object
-  PdfFontDescriptor(
-    this.ttfFont,
-    this.file,
-  ) : super(
-          ttfFont.pdfDocument,
-          params: PdfDict.values({
-            '/Type': const PdfName('/FontDescriptor'),
-          }),
-        );
+  PdfFontDescriptor(this.ttfFont, this.file)
+    : super(
+        ttfFont.pdfDocument,
+        params: PdfDict.values({'/Type': const PdfName('/FontDescriptor')}),
+      );
 
   /// File data
   final PdfObjectStream file;
@@ -52,7 +48,7 @@ class PdfFontDescriptor extends PdfObject<PdfDict> {
       (ttfFont.font.xMin / ttfFont.font.unitsPerEm * 1000).toInt(),
       (ttfFont.font.yMin / ttfFont.font.unitsPerEm * 1000).toInt(),
       (ttfFont.font.xMax / ttfFont.font.unitsPerEm * 1000).toInt(),
-      (ttfFont.font.yMax / ttfFont.font.unitsPerEm * 1000).toInt()
+      (ttfFont.font.yMax / ttfFont.font.unitsPerEm * 1000).toInt(),
     ]);
     params['/Ascent'] = PdfNum((ttfFont.ascent * 1000).toInt());
     params['/Descent'] = PdfNum((ttfFont.descent * 1000).toInt());

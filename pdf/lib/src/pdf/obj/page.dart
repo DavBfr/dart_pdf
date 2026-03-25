@@ -53,12 +53,12 @@ class PdfPage extends PdfObject<PdfDict> with PdfGraphicStream {
     int? index,
     int? objser,
     int objgen = 0,
-  }) : super(pdfDocument,
-            params: PdfDict.values({
-              '/Type': const PdfName('/Page'),
-            }),
-            objser: objser,
-            objgen: objgen) {
+  }) : super(
+         pdfDocument,
+         params: PdfDict.values({'/Type': const PdfName('/Page')}),
+         objser: objser,
+         objgen: objgen,
+       ) {
     if (index != null) {
       pdfDocument.pdfPageList.pages.insert(index, this);
     } else {
@@ -109,8 +109,12 @@ class PdfPage extends PdfObject<PdfDict> with PdfGraphicStream {
     }
 
     // the /MediaBox for the page size
-    params['/MediaBox'] =
-        PdfArray.fromNum(<double>[0, 0, pageFormat.width, pageFormat.height]);
+    params['/MediaBox'] = PdfArray.fromNum(<double>[
+      0,
+      0,
+      pageFormat.width,
+      pageFormat.height,
+    ]);
 
     for (final content in contents) {
       if (!_contentGraphics[content]!.altered) {
@@ -119,14 +123,17 @@ class PdfPage extends PdfObject<PdfDict> with PdfGraphicStream {
     }
 
     // The graphic operations to draw the page
-    final contentList =
-        PdfArray.fromObjects(contents.where((e) => e.inUse).toList());
+    final contentList = PdfArray.fromObjects(
+      contents.where((e) => e.inUse).toList(),
+    );
 
     if (params.containsKey('/Contents')) {
       final prevContent = params['/Contents']!;
       if (prevContent is PdfArray) {
-        contentList.values
-            .insertAll(0, prevContent.values.whereType<PdfIndirect>());
+        contentList.values.insertAll(
+          0,
+          prevContent.values.whereType<PdfIndirect>(),
+        );
       } else if (prevContent is PdfIndirect) {
         contentList.values.insert(0, prevContent);
       }
@@ -145,8 +152,9 @@ class PdfPage extends PdfObject<PdfDict> with PdfGraphicStream {
       if (params.containsKey('/Annots')) {
         final annotationList = params['/Annots'];
         if (annotationList is PdfArray) {
-          annotationList.values
-              .addAll(PdfArray.fromObjects(annotations).values);
+          annotationList.values.addAll(
+            PdfArray.fromObjects(annotations).values,
+          );
         }
       } else {
         params['/Annots'] = PdfArray.fromObjects(annotations);

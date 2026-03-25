@@ -24,11 +24,12 @@ import '../../printing.dart';
 import 'controller.dart';
 
 /// Base Action callback
-typedef OnPdfPreviewActionPressed = void Function(
-  BuildContext context,
-  LayoutCallback build,
-  PdfPageFormat pageFormat,
-);
+typedef OnPdfPreviewActionPressed =
+    void Function(
+      BuildContext context,
+      LayoutCallback build,
+      PdfPageFormat pageFormat,
+    );
 
 mixin PdfPreviewActionBounds {
   final childKey = GlobalKey();
@@ -37,10 +38,12 @@ mixin PdfPreviewActionBounds {
   Rect get bounds {
     final referenceBox =
         childKey.currentContext!.findRenderObject()! as RenderBox;
-    final topLeft =
-        referenceBox.localToGlobal(referenceBox.paintBounds.topLeft);
-    final bottomRight =
-        referenceBox.localToGlobal(referenceBox.paintBounds.bottomRight);
+    final topLeft = referenceBox.localToGlobal(
+      referenceBox.paintBounds.topLeft,
+    );
+    final bottomRight = referenceBox.localToGlobal(
+      referenceBox.paintBounds.bottomRight,
+    );
     return Rect.fromPoints(topLeft, bottomRight);
   }
 }
@@ -83,8 +86,8 @@ class PdfPrintAction extends StatelessWidget {
     this.onPrintError,
     this.dynamicLayout = true,
     this.usePrinterSettings = false,
-  })  : icon = icon ?? const Icon(Icons.print),
-        jobName = jobName ?? 'Document';
+  }) : icon = icon ?? const Icon(Icons.print),
+       jobName = jobName ?? 'Document';
 
   final Widget icon;
 
@@ -108,10 +111,7 @@ class PdfPrintAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PdfPreviewAction(
-      icon: icon,
-      onPressed: _print,
-    );
+    return PdfPreviewAction(icon: icon, onPressed: _print);
   }
 
   Future<void> _print(
@@ -168,8 +168,8 @@ class PdfShareAction extends StatelessWidget with PdfPreviewActionBounds {
     this.emails,
     this.onShared,
     this.onShareError,
-  })  : icon = icon ?? const Icon(Icons.share),
-        filename = filename ?? 'document.pdf';
+  }) : icon = icon ?? const Icon(Icons.share),
+       filename = filename ?? 'document.pdf';
 
   final Widget icon;
 
@@ -194,11 +194,7 @@ class PdfShareAction extends StatelessWidget with PdfPreviewActionBounds {
 
   @override
   Widget build(BuildContext context) {
-    return PdfPreviewAction(
-      key: childKey,
-      icon: icon,
-      onPressed: _share,
-    );
+    return PdfPreviewAction(key: childKey, icon: icon, onPressed: _share);
   }
 
   Future<void> _share(
@@ -224,10 +220,7 @@ class PdfShareAction extends StatelessWidget with PdfPreviewActionBounds {
 }
 
 class PdfPageFormatAction extends StatelessWidget {
-  const PdfPageFormatAction({
-    super.key,
-    required this.pageFormats,
-  });
+  const PdfPageFormatAction({super.key, required this.pageFormats});
 
   /// List of page formats the user can choose
   final Map<String, PdfPageFormat> pageFormats;
@@ -260,10 +253,7 @@ class PdfPageFormatAction extends StatelessWidget {
 
     return DropdownButton<PdfPageFormat>(
       dropdownColor: theme.primaryColor,
-      icon: Icon(
-        Icons.arrow_drop_down,
-        color: iconColor,
-      ),
+      icon: Icon(Icons.arrow_drop_down, color: iconColor),
       value: format,
       items: List<DropdownMenuItem<PdfPageFormat>>.generate(
         allPageFormats.length,
@@ -278,8 +268,9 @@ class PdfPageFormatAction extends StatelessWidget {
       ),
       onChanged: (PdfPageFormat? pageFormat) {
         if (pageFormat != null) {
-          data.pageFormat =
-              orientation ? pageFormat.landscape : pageFormat.portrait;
+          data.pageFormat = orientation
+              ? pageFormat.landscape
+              : pageFormat.portrait;
         }
       },
     );
@@ -287,9 +278,7 @@ class PdfPageFormatAction extends StatelessWidget {
 }
 
 class PdfPageOrientationAction extends StatelessWidget {
-  const PdfPageOrientationAction({
-    super.key,
-  });
+  const PdfPageOrientationAction({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -312,9 +301,7 @@ class PdfPageOrientationAction extends StatelessWidget {
       children: <Widget>[
         Transform.rotate(
           angle: -math.pi / 2,
-          child: const Icon(
-            Icons.note_outlined,
-          ),
+          child: const Icon(Icons.note_outlined),
         ),
         const Icon(Icons.note_outlined),
       ],

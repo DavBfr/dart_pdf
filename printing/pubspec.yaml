@@ -19,7 +19,7 @@ version: 5.14.3
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
-  flutter: ">=3.22.0"
+  flutter: ">=3.41.0"
 
 dependencies:
   ffi: ">=1.1.0 <3.0.0"
@@ -44,7 +44,7 @@ dependencies:
   web: ^1.0.0
 
 dev_dependencies:
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
   mockito: ^5.4.4

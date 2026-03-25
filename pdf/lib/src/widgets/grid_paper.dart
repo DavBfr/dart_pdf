@@ -27,44 +27,46 @@ class GridPaper extends SingleChildWidget {
     int divisions = 5,
     int subdivisions = 2,
     Widget? child,
-  })  : assert(divisions > 0,
-            'The "divisions" property must be greater than zero. If there were no divisions, the grid paper would not paint anything.'),
-        assert(subdivisions > 0,
-            'The "subdivisions" property must be greater than zero. If there were no subdivisions, the grid paper would not paint anything.'),
-        horizontalColor = color,
-        verticalColor = color,
-        horizontalInterval = interval,
-        verticalInterval = interval,
-        horizontalDivisions = divisions,
-        verticalDivisions = divisions,
-        horizontalSubdivisions = subdivisions,
-        verticalSubdivisions = subdivisions,
-        margin = EdgeInsets.zero,
-        horizontalOffset = 0,
-        verticalOffset = 0,
-        border = const Border(),
-        scale = 1,
-        opacity = 0.5,
-        super(child: child);
+  }) : assert(
+         divisions > 0,
+         'The "divisions" property must be greater than zero. If there were no divisions, the grid paper would not paint anything.',
+       ),
+       assert(
+         subdivisions > 0,
+         'The "subdivisions" property must be greater than zero. If there were no subdivisions, the grid paper would not paint anything.',
+       ),
+       horizontalColor = color,
+       verticalColor = color,
+       horizontalInterval = interval,
+       verticalInterval = interval,
+       horizontalDivisions = divisions,
+       verticalDivisions = divisions,
+       horizontalSubdivisions = subdivisions,
+       verticalSubdivisions = subdivisions,
+       margin = EdgeInsets.zero,
+       horizontalOffset = 0,
+       verticalOffset = 0,
+       border = const Border(),
+       scale = 1,
+       opacity = 0.5,
+       super(child: child);
 
-  GridPaper.millimeter({
-    PdfColor color = lineColor,
-    Widget? child,
-  })  : horizontalColor = color,
-        verticalColor = color,
-        horizontalInterval = 5 * PdfPageFormat.cm,
-        verticalInterval = 5 * PdfPageFormat.cm,
-        horizontalDivisions = 5,
-        verticalDivisions = 5,
-        horizontalSubdivisions = 10,
-        verticalSubdivisions = 10,
-        margin = EdgeInsets.zero,
-        horizontalOffset = 0,
-        verticalOffset = 0,
-        border = const Border(),
-        scale = 1,
-        opacity = 0.5,
-        super(child: child);
+  GridPaper.millimeter({PdfColor color = lineColor, Widget? child})
+    : horizontalColor = color,
+      verticalColor = color,
+      horizontalInterval = 5 * PdfPageFormat.cm,
+      verticalInterval = 5 * PdfPageFormat.cm,
+      horizontalDivisions = 5,
+      verticalDivisions = 5,
+      horizontalSubdivisions = 10,
+      verticalSubdivisions = 10,
+      margin = EdgeInsets.zero,
+      horizontalOffset = 0,
+      verticalOffset = 0,
+      border = const Border(),
+      scale = 1,
+      opacity = 0.5,
+      super(child: child);
 
   GridPaper.seyes({
     this.margin = const EdgeInsets.only(
@@ -74,23 +76,22 @@ class GridPaper extends SingleChildWidget {
       right: 0,
     ),
     Widget? child,
-  })  : horizontalColor = const PdfColor.fromInt(0xffc8c8de),
-        verticalColor = const PdfColor.fromInt(0xffc8c8de),
-        horizontalInterval = 8 * PdfPageFormat.mm,
-        verticalInterval = 8 * PdfPageFormat.mm,
-        horizontalDivisions = 1,
-        verticalDivisions = 4,
-        horizontalSubdivisions = 1,
-        verticalSubdivisions = 1,
-        horizontalOffset = 0,
-        verticalOffset = 1,
-        border = const Border(
-            left: BorderSide(
-          color: PdfColor.fromInt(0xfff6bbcf),
-        )),
-        scale = 1,
-        opacity = 1,
-        super(child: child);
+  }) : horizontalColor = const PdfColor.fromInt(0xffc8c8de),
+       verticalColor = const PdfColor.fromInt(0xffc8c8de),
+       horizontalInterval = 8 * PdfPageFormat.mm,
+       verticalInterval = 8 * PdfPageFormat.mm,
+       horizontalDivisions = 1,
+       verticalDivisions = 4,
+       horizontalSubdivisions = 1,
+       verticalSubdivisions = 1,
+       horizontalOffset = 0,
+       verticalOffset = 1,
+       border = const Border(
+         left: BorderSide(color: PdfColor.fromInt(0xfff6bbcf)),
+       ),
+       scale = 1,
+       opacity = 1,
+       super(child: child);
 
   GridPaper.collegeRuled({
     this.margin = const EdgeInsets.only(
@@ -100,61 +101,54 @@ class GridPaper extends SingleChildWidget {
       right: 0,
     ),
     Widget? child,
-  })  : horizontalColor = lineColor,
-        verticalColor = lineColor,
-        horizontalInterval = double.infinity,
-        verticalInterval = 9 / 32 * PdfPageFormat.inch,
-        horizontalDivisions = 1,
-        verticalDivisions = 1,
-        horizontalSubdivisions = 1,
-        verticalSubdivisions = 1,
-        horizontalOffset = 0,
-        verticalOffset = 1,
-        border = const Border(
-            left: BorderSide(
-          color: PdfColors.red,
-        )),
-        scale = 1,
-        opacity = 1,
-        super(child: child);
+  }) : horizontalColor = lineColor,
+       verticalColor = lineColor,
+       horizontalInterval = double.infinity,
+       verticalInterval = 9 / 32 * PdfPageFormat.inch,
+       horizontalDivisions = 1,
+       verticalDivisions = 1,
+       horizontalSubdivisions = 1,
+       verticalSubdivisions = 1,
+       horizontalOffset = 0,
+       verticalOffset = 1,
+       border = const Border(left: BorderSide(color: PdfColors.red)),
+       scale = 1,
+       opacity = 1,
+       super(child: child);
 
-  GridPaper.quad({
-    PdfColor color = lineColor,
-    Widget? child,
-  })  : horizontalColor = color,
-        verticalColor = color,
-        horizontalInterval = PdfPageFormat.inch,
-        verticalInterval = PdfPageFormat.inch,
-        horizontalDivisions = 4,
-        verticalDivisions = 4,
-        horizontalSubdivisions = 1,
-        verticalSubdivisions = 1,
-        margin = EdgeInsets.zero,
-        horizontalOffset = 0,
-        verticalOffset = 0,
-        border = const Border(),
-        scale = 1,
-        opacity = 0.5,
-        super(child: child);
+  GridPaper.quad({PdfColor color = lineColor, Widget? child})
+    : horizontalColor = color,
+      verticalColor = color,
+      horizontalInterval = PdfPageFormat.inch,
+      verticalInterval = PdfPageFormat.inch,
+      horizontalDivisions = 4,
+      verticalDivisions = 4,
+      horizontalSubdivisions = 1,
+      verticalSubdivisions = 1,
+      margin = EdgeInsets.zero,
+      horizontalOffset = 0,
+      verticalOffset = 0,
+      border = const Border(),
+      scale = 1,
+      opacity = 0.5,
+      super(child: child);
 
-  GridPaper.engineering({
-    PdfColor color = lineColor,
-    Widget? child,
-  })  : horizontalColor = color,
-        verticalColor = color,
-        horizontalInterval = PdfPageFormat.inch,
-        verticalInterval = PdfPageFormat.inch,
-        horizontalDivisions = 5,
-        verticalDivisions = 5,
-        horizontalSubdivisions = 2,
-        verticalSubdivisions = 2,
-        margin = EdgeInsets.zero,
-        horizontalOffset = 0,
-        verticalOffset = 0,
-        border = const Border(),
-        scale = 1,
-        opacity = 0.5,
-        super(child: child);
+  GridPaper.engineering({PdfColor color = lineColor, Widget? child})
+    : horizontalColor = color,
+      verticalColor = color,
+      horizontalInterval = PdfPageFormat.inch,
+      verticalInterval = PdfPageFormat.inch,
+      horizontalDivisions = 5,
+      verticalDivisions = 5,
+      horizontalSubdivisions = 2,
+      verticalSubdivisions = 2,
+      margin = EdgeInsets.zero,
+      horizontalOffset = 0,
+      verticalOffset = 0,
+      border = const Border(),
+      scale = 1,
+      opacity = 0.5,
+      super(child: child);
 
   static const lineColor = PdfColor.fromInt(0xffc3e8f3);
 
@@ -198,8 +192,11 @@ class GridPaper extends SingleChildWidget {
   final double opacity;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     final resolvedMargin = margin.resolve(Directionality.of(context));
     box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
     if (child != null) {
@@ -215,9 +212,12 @@ class GridPaper extends SingleChildWidget {
 
       assert(child!.box != null);
       child!.box = PdfRect.fromPoints(
-          PdfPoint(resolvedMargin.left,
-              box!.top - resolvedMargin.top - child!.box!.height),
-          child!.box!.size);
+        PdfPoint(
+          resolvedMargin.left,
+          box!.top - resolvedMargin.top - child!.box!.height,
+        ),
+        child!.box!.size,
+      );
     }
   }
 
@@ -236,33 +236,41 @@ class GridPaper extends SingleChildWidget {
     final allHorizontalDivisions =
         (horizontalDivisions * horizontalSubdivisions).toDouble();
     var n = horizontalOffset;
-    for (var x = box!.left + resolvedMargin.left;
-        x <= box!.right - resolvedMargin.right;
-        x += horizontalInterval / allHorizontalDivisions) {
+    for (
+      var x = box!.left + resolvedMargin.left;
+      x <= box!.right - resolvedMargin.right;
+      x += horizontalInterval / allHorizontalDivisions
+    ) {
       context.canvas
-        ..setLineWidth((n % (horizontalSubdivisions * horizontalDivisions) == 0)
-            ? l
-            : (n % horizontalSubdivisions == 0)
-                ? m
-                : s)
+        ..setLineWidth(
+          (n % (horizontalSubdivisions * horizontalDivisions) == 0)
+              ? l
+              : (n % horizontalSubdivisions == 0)
+              ? m
+              : s,
+        )
         ..drawLine(x, box!.top, x, box!.bottom)
         ..strokePath();
       n++;
     }
 
     context.canvas.setStrokeColor(verticalColor);
-    final allVerticalDivisions =
-        (verticalDivisions * verticalSubdivisions).toDouble();
+    final allVerticalDivisions = (verticalDivisions * verticalSubdivisions)
+        .toDouble();
     n = verticalOffset;
-    for (var y = box!.top - resolvedMargin.top;
-        y >= box!.bottom + resolvedMargin.bottom;
-        y -= verticalInterval / allVerticalDivisions) {
+    for (
+      var y = box!.top - resolvedMargin.top;
+      y >= box!.bottom + resolvedMargin.bottom;
+      y -= verticalInterval / allVerticalDivisions
+    ) {
       context.canvas
-        ..setLineWidth((n % (verticalSubdivisions * verticalDivisions) == 0)
-            ? l
-            : (n % verticalSubdivisions == 0)
-                ? m
-                : s)
+        ..setLineWidth(
+          (n % (verticalSubdivisions * verticalDivisions) == 0)
+              ? l
+              : (n % verticalSubdivisions == 0)
+              ? m
+              : s,
+        )
         ..drawLine(box!.left, y, box!.right, y)
         ..strokePath();
       n++;
@@ -273,8 +281,12 @@ class GridPaper extends SingleChildWidget {
       context.canvas
         ..setStrokeColor(border.left.color)
         ..setLineWidth(border.left.width)
-        ..drawLine(box!.left + resolvedMargin.left, box!.top,
-            box!.left + resolvedMargin.left, box!.bottom)
+        ..drawLine(
+          box!.left + resolvedMargin.left,
+          box!.top,
+          box!.left + resolvedMargin.left,
+          box!.bottom,
+        )
         ..strokePath();
       border.left.style.unsetStyle(context);
     }
@@ -283,8 +295,12 @@ class GridPaper extends SingleChildWidget {
       context.canvas
         ..setStrokeColor(border.right.color)
         ..setLineWidth(border.right.width)
-        ..drawLine(box!.right - resolvedMargin.right, box!.top,
-            box!.right - resolvedMargin.right, box!.bottom)
+        ..drawLine(
+          box!.right - resolvedMargin.right,
+          box!.top,
+          box!.right - resolvedMargin.right,
+          box!.bottom,
+        )
         ..strokePath();
       border.right.style.unsetStyle(context);
     }
@@ -293,8 +309,12 @@ class GridPaper extends SingleChildWidget {
       context.canvas
         ..setStrokeColor(border.top.color)
         ..setLineWidth(border.top.width)
-        ..drawLine(box!.left, box!.top - resolvedMargin.top, box!.right,
-            box!.top - resolvedMargin.top)
+        ..drawLine(
+          box!.left,
+          box!.top - resolvedMargin.top,
+          box!.right,
+          box!.top - resolvedMargin.top,
+        )
         ..strokePath();
       border.top.style.unsetStyle(context);
     }
@@ -303,8 +323,12 @@ class GridPaper extends SingleChildWidget {
       context.canvas
         ..setStrokeColor(border.bottom.color)
         ..setLineWidth(border.bottom.width)
-        ..drawLine(box!.left, box!.bottom + resolvedMargin.bottom, box!.right,
-            box!.bottom + resolvedMargin.bottom)
+        ..drawLine(
+          box!.left,
+          box!.bottom + resolvedMargin.bottom,
+          box!.right,
+          box!.bottom + resolvedMargin.bottom,
+        )
         ..strokePath();
       border.bottom.style.unsetStyle(context);
     }

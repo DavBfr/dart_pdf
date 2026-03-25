@@ -27,7 +27,10 @@ class SvgMaskPath {
   const SvgMaskPath(this.children, this.painter);
 
   static SvgMaskPath? fromXml(
-      XmlElement element, SvgPainter painter, SvgBrush brush) {
+    XmlElement element,
+    SvgPainter painter,
+    SvgBrush brush,
+  ) {
     final maskPathAttr = element.getAttribute('mask');
     if (maskPathAttr == null) {
       return null;
@@ -41,7 +44,8 @@ class SvgMaskPath {
       if (maskPath != null) {
         final maskBrush = SvgBrush.fromXml(maskPath, brush, painter);
         children = maskPath.children.whereType<XmlElement>().map<SvgOperation?>(
-            (c) => SvgOperation.fromXml(c, painter, maskBrush));
+          (c) => SvgOperation.fromXml(c, painter, maskBrush),
+        );
         return SvgMaskPath(children, painter);
       }
     }

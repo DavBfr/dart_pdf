@@ -53,16 +53,16 @@ class PdfActionBarTheme with Diagnosticable {
 
   @override
   int get hashCode => Object.hashAll([
-        backgroundColor,
-        iconColor,
-        height,
-        textStyle,
-        elevation,
-        actionSpacing,
-        alignment,
-        runAlignment,
-        crossAxisAlignment,
-      ]);
+    backgroundColor,
+    iconColor,
+    height,
+    textStyle,
+    elevation,
+    actionSpacing,
+    alignment,
+    runAlignment,
+    crossAxisAlignment,
+  ]);
 
   @override
   bool operator ==(Object other) {

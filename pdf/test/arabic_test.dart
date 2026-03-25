@@ -47,17 +47,20 @@ void main() {
 
   test('Arabic Diacritics', () {
     final a = ArabicText('السلام', <int>[65249, 65276, 65204, 65247, 65165]);
-    final b = ArabicText('السَلَاْمٌ',
-        <int>[1612, 65249, 1618, 1614, 65276, 1614, 65204, 65247, 65165]);
+    final b = ArabicText('السَلَاْمٌ', <int>[
+      1612,
+      65249,
+      1618,
+      1614,
+      65276,
+      1614,
+      65204,
+      65247,
+      65165,
+    ]);
 
-    expect(
-      bidi.logicalToVisual(a.original).codeUnits,
-      equals(a.reshaped),
-    );
-    expect(
-      bidi.logicalToVisual(b.original).codeUnits,
-      equals(b.reshaped),
-    );
+    expect(bidi.logicalToVisual(a.original).codeUnits, equals(a.reshaped));
+    expect(bidi.logicalToVisual(b.original).codeUnits, equals(b.reshaped));
   });
 
   test('Arabic Default Reshaping', () {
@@ -84,7 +87,7 @@ void main() {
         1614,
         65248,
         1614,
-        65227
+        65227,
       ]),
       ArabicText('الــلغـة العــربيَّة هي أكثرُ اللغاتِ', <int>[
         65172,
@@ -122,7 +125,7 @@ void main() {
         65232,
         65248,
         65247,
-        65165
+        65165,
       ]),
       ArabicText('تحدُّثاً ونُطقاً ضِمْنَ مَجمُوعَة', <int>[
         1611,
@@ -156,7 +159,7 @@ void main() {
         65252,
         65184,
         1614,
-        65251
+        65251,
       ]),
       ArabicText('اللغات السامية', <int>[
         65173,
@@ -196,7 +199,7 @@ void main() {
         65197,
         32,
         65266,
-        65235
+        65235,
       ]),
       ArabicText('كلِّ دولِ الوطنِ العربيِّ', <int>[
         64610,
@@ -221,7 +224,7 @@ void main() {
         65198,
         65228,
         65247,
-        65165
+        65165,
       ]),
       ArabicText('إضافة إلىّٰ كونها لغة؟', <int>[
         65172,
@@ -268,7 +271,7 @@ void main() {
         65267,
         65197,
         65159,
-        65261
+        65261,
       ]),
       ArabicText('وإسرائيل. وهي إحدى اللغات', <int>[
         46,
@@ -295,7 +298,7 @@ void main() {
         65232,
         65248,
         65247,
-        65165
+        65165,
       ]),
       ArabicText('الرسمية الست في منظمة', <int>[
         65172,
@@ -318,7 +321,7 @@ void main() {
         65252,
         65224,
         65256,
-        65251
+        65251,
       ]),
       ArabicText('الأمم المتحدة، ويُحتفل', <int>[
         65250,
@@ -341,7 +344,7 @@ void main() {
         65188,
         1615,
         65267,
-        65261
+        65261,
       ]),
       ArabicText('باليوم العالمي للغة العربية', <int>[
         65249,
@@ -370,7 +373,7 @@ void main() {
         65198,
         65228,
         65247,
-        65165
+        65165,
       ]),
       ArabicText('في 18 ديسمبر كذكرى اعتماد', <int>[
         65266,
@@ -397,7 +400,7 @@ void main() {
         65252,
         65176,
         65227,
-        65165
+        65165,
       ]),
       ArabicText('العربية بين لغات العمل في', <int>[
         65172,
@@ -424,7 +427,7 @@ void main() {
         65165,
         32,
         65266,
-        65235
+        65235,
       ]),
       ArabicText('الأمم المتحدة.', <int>[
         65250,
@@ -469,125 +472,113 @@ void main() {
   });
 
   test('Text Widgets Arabic', () {
-    pdf.addPage(Page(
-      build: (Context context) => RichText(
-        textDirection: TextDirection.rtl,
-        text: TextSpan(
-          text: 'قهوة\n',
-          style: TextStyle(
-            font: arabicFont,
-            fontSize: 30,
-          ),
-          children: const <TextSpan>[
-            TextSpan(
-              text:
-                  'القهوة مشروب يعد من بذور الب المحمصة، وينمو في أكثر من 70 بلداً. خصوصاً في المناطق الاستوائية في أمريكا الشمالية والجنوبية وجنوب شرق آسيا وشبه القارة الهندية وأفريقيا. ويقال أن البن الأخضر هو ثاني أكثر السلع تداولاً في العالم بعد النفط الخام.',
-              style: TextStyle(
-                fontSize: 20,
+    pdf.addPage(
+      Page(
+        build: (Context context) => RichText(
+          textDirection: TextDirection.rtl,
+          text: TextSpan(
+            text: 'قهوة\n',
+            style: TextStyle(font: arabicFont, fontSize: 30),
+            children: const <TextSpan>[
+              TextSpan(
+                text:
+                    'القهوة مشروب يعد من بذور الب المحمصة، وينمو في أكثر من 70 بلداً. خصوصاً في المناطق الاستوائية في أمريكا الشمالية والجنوبية وجنوب شرق آسيا وشبه القارة الهندية وأفريقيا. ويقال أن البن الأخضر هو ثاني أكثر السلع تداولاً في العالم بعد النفط الخام.',
+                style: TextStyle(fontSize: 20),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ));
+    );
   });
 
   test('Text Widgets Arabic with TextAlign.justify', () {
-    pdf.addPage(Page(
-      build: (Context context) => RichText(
-        textDirection: TextDirection.rtl,
-        textAlign: TextAlign.justify,
-        text: TextSpan(
-          text: 'قهوة\n',
-          style: TextStyle(
-            font: arabicFont,
-            fontSize: 30,
-          ),
-          children: const <TextSpan>[
-            TextSpan(
-              text:
-                  'القهوة مشروب يعد من بذور الب المحمصة، وينمو في أكثر من 70 بلداً. خصوصاً في المناطق الاستوائية في أمريكا الشمالية والجنوبية وجنوب شرق آسيا وشبه القارة الهندية وأفريقيا. ويقال أن البن الأخضر هو ثاني أكثر السلع تداولاً في العالم بعد النفط الخام.',
-              style: TextStyle(
-                fontSize: 20,
+    pdf.addPage(
+      Page(
+        build: (Context context) => RichText(
+          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.justify,
+          text: TextSpan(
+            text: 'قهوة\n',
+            style: TextStyle(font: arabicFont, fontSize: 30),
+            children: const <TextSpan>[
+              TextSpan(
+                text:
+                    'القهوة مشروب يعد من بذور الب المحمصة، وينمو في أكثر من 70 بلداً. خصوصاً في المناطق الاستوائية في أمريكا الشمالية والجنوبية وجنوب شرق آسيا وشبه القارة الهندية وأفريقيا. ويقال أن البن الأخضر هو ثاني أكثر السلع تداولاً في العالم بعد النفط الخام.',
+                style: TextStyle(fontSize: 20),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ));
+    );
   });
 
   test('Text Widgets, Arabic Text with Tashkeel', () {
-    pdf.addPage(Page(
-      textDirection: TextDirection.rtl,
-      build: (Context context) => RichText(
-        text: TextSpan(
-          text: 'الفَرَاشَةُ\n',
-          style: TextStyle(
-            font: arabicFont,
-            fontSize: 30,
-          ),
-          children: const <TextSpan>[
-            if (true)
-              TextSpan(
-                text:
-                    'فَرَاشَةٌ مُلَوَّنَةٌ تَطِيْرُ في البُسْتَانِ، حُلْوَةٌ مُهَنْدَمَةٌ تُدْهِشُ الإِنْسَانَ، أَهْدَافُهَا مُحَدَّدَةٌ، حَرَكَاتُها مُرَتَّبَةٌ، تَحُوْمُ بِانْتِظَامٍ،'
-                    ' تَحُطُّ فِي نُعُومَةٍ تَنْشُرُ السَّلاَمَ. فَرَاشَةٌ مُلَوَّنَةٌ تَطِيرُ بِلا اُنْقِطَاعٍ، بِالنَّهارِ المُشْرِقِ تَمْلَأُ البِقَاعَ، تُحِبُّ الوَرْدَ '
-                    'المَزْرُوعَ، تَلْثُمُهُ فِي وَقْتِ الجُوعِ، تَمْتَصُّ رَحِيْقَ الأَزْهَارِ، تُحْيي جَنْيَ الأَشْجَارِ، مِنْ وَرْدَةٍ لِوَرْدَةٍ، تَطِيْرُ بِانْتِظَامٍ.',
-                style: TextStyle(
-                  fontSize: 18,
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        build: (Context context) => RichText(
+          text: TextSpan(
+            text: 'الفَرَاشَةُ\n',
+            style: TextStyle(font: arabicFont, fontSize: 30),
+            children: const <TextSpan>[
+              if (true)
+                TextSpan(
+                  text:
+                      'فَرَاشَةٌ مُلَوَّنَةٌ تَطِيْرُ في البُسْتَانِ، حُلْوَةٌ مُهَنْدَمَةٌ تُدْهِشُ الإِنْسَانَ، أَهْدَافُهَا مُحَدَّدَةٌ، حَرَكَاتُها مُرَتَّبَةٌ، تَحُوْمُ بِانْتِظَامٍ،'
+                      ' تَحُطُّ فِي نُعُومَةٍ تَنْشُرُ السَّلاَمَ. فَرَاشَةٌ مُلَوَّنَةٌ تَطِيرُ بِلا اُنْقِطَاعٍ، بِالنَّهارِ المُشْرِقِ تَمْلَأُ البِقَاعَ، تُحِبُّ الوَرْدَ '
+                      'المَزْرُوعَ، تَلْثُمُهُ فِي وَقْتِ الجُوعِ، تَمْتَصُّ رَحِيْقَ الأَزْهَارِ، تُحْيي جَنْيَ الأَشْجَارِ، مِنْ وَرْدَةٍ لِوَرْدَةٍ، تَطِيْرُ بِانْتِظَامٍ.',
+                  style: TextStyle(fontSize: 18),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
-    ));
+    );
   });
 
-  test('Text Widgets, Mixed Arabic and Latin words should be rendered in order',
-      () {
-    pdf.addPage(Page(
-      textDirection: TextDirection.rtl,
-      build: (Context context) => RichText(
-        text: TextSpan(
-          text: 'النصوص ثنائية الإتجاه Bidirectional Text\n',
-          style: TextStyle(
-            font: arabicFont,
-            fontSize: 30,
-          ),
-          children: const <TextSpan>[
-            if (true)
-              TextSpan(
-                text: r'''
+  test(
+    'Text Widgets, Mixed Arabic and Latin words should be rendered in order',
+    () {
+      pdf.addPage(
+        Page(
+          textDirection: TextDirection.rtl,
+          build: (Context context) => RichText(
+            text: TextSpan(
+              text: 'النصوص ثنائية الإتجاه Bidirectional Text\n',
+              style: TextStyle(font: arabicFont, fontSize: 30),
+              children: const <TextSpan>[
+                if (true)
+                  TextSpan(
+                    text: r'''
 الكلمات اللاتينية المضافة إلى نص عربي يجب أن توضع في الترتيب الصحيح Right Order مهما كان موضعها في النص.
  في منتصفها In the middle of the sentence حيث يكون بعدها كلام عربي
 أو في نهاية النص At the end of the sentence
 أيضا ترتيب الأرقام والرموز يجب  1 أن 2 يكون 3 صحيحاً$.
 ولا ننسى أيضا فواصل السطور Line breakers حيث وجودها في موضعها الصحيح مهم جدا في النصوص ثنائية الاتجاه Bidirectional
               ''',
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
-          ],
+                    style: TextStyle(fontSize: 18),
+                  ),
+              ],
+            ),
+          ),
         ),
-      ),
-    ));
-  });
+      );
+    },
+  );
 
   test('Text Widgets Arabic with weak/natural Chars', () {
-    pdf.addPage(Page(
-      build: (Context context) => SizedBox.expand(
+    pdf.addPage(
+      Page(
+        build: (Context context) => SizedBox.expand(
           child: RichText(
-        textDirection: TextDirection.rtl,
-        text: TextSpan(
-          style: TextStyle(
-            font: arabicFont,
-            fontSize: 18,
-          ),
-          children: const <TextSpan>[
-            TextSpan(
-              text: '''
+            textDirection: TextDirection.rtl,
+            text: TextSpan(
+              style: TextStyle(font: arabicFont, fontSize: 18),
+              children: const <TextSpan>[
+                TextSpan(
+                  text: '''
 اضف العدد (5) إلى العدد (40)
 ثم اطرح منه العدد (10)
 الناتج = 35
@@ -596,11 +587,13 @@ void main() {
 حاصل العملية  (5 * 2) + (2 - 4) يساوي 12
 العدد 9 > 5 والعدد 9 < 10
                     ''',
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      )),
-    ));
+      ),
+    );
   });
 
   tearDownAll(() async {

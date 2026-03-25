@@ -27,26 +27,26 @@ enum PdfPageLabelStyle {
   romanUpper,
   romanLower,
   lettersUpper,
-  lettersLower
+  lettersLower,
 }
 
 class PdfPageLabel {
   PdfPageLabel(this.prefix, {this.style, this.subsequent});
 
   PdfPageLabel.arabic({this.prefix, this.subsequent})
-      : style = PdfPageLabelStyle.arabic;
+    : style = PdfPageLabelStyle.arabic;
 
   PdfPageLabel.romanUpper({this.prefix, this.subsequent})
-      : style = PdfPageLabelStyle.romanUpper;
+    : style = PdfPageLabelStyle.romanUpper;
 
   PdfPageLabel.romanLower({this.prefix, this.subsequent})
-      : style = PdfPageLabelStyle.romanLower;
+    : style = PdfPageLabelStyle.romanLower;
 
   PdfPageLabel.lettersUpper({this.prefix, this.subsequent})
-      : style = PdfPageLabelStyle.lettersUpper;
+    : style = PdfPageLabelStyle.lettersUpper;
 
   PdfPageLabel.lettersLower({this.prefix, this.subsequent})
-      : style = PdfPageLabelStyle.lettersLower;
+    : style = PdfPageLabelStyle.lettersLower;
 
   final PdfPageLabelStyle? style;
   final String? prefix;
@@ -77,7 +77,7 @@ class PdfPageLabel {
       if (s != null) '/S': s,
       if (prefix != null && prefix!.isNotEmpty)
         '/P': PdfString.fromString(prefix!),
-      if (subsequent != null) '/St': PdfNum(subsequent!)
+      if (subsequent != null) '/St': PdfNum(subsequent!),
     });
   }
 
@@ -95,11 +95,13 @@ class PdfPageLabel {
       9: 'IX',
       5: 'V',
       4: 'IV',
-      1: 'I'
+      1: 'I',
     };
 
-    assert(decimal > 0 && decimal < 3999,
-        'Roman numerals are limited to the inclusive range of 1 to 3999.');
+    assert(
+      decimal > 0 && decimal < 3999,
+      'Roman numerals are limited to the inclusive range of 1 to 3999.',
+    );
 
     var result = '';
     dictionary.forEach((k, v) {
@@ -148,7 +150,7 @@ class PdfPageLabel {
 class PdfPageLabels extends PdfObject<PdfDict> {
   /// Constructs a Pdf PageLabels object.
   PdfPageLabels(PdfDocument pdfDocument)
-      : super(pdfDocument, params: PdfDict());
+    : super(pdfDocument, params: PdfDict());
 
   final labels = <int, PdfPageLabel>{};
 

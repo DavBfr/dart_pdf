@@ -26,11 +26,12 @@ import 'text_style.dart';
 import 'widget.dart';
 
 class Placeholder extends Widget {
-  Placeholder(
-      {this.color = const PdfColor.fromInt(0xFF455A64),
-      this.strokeWidth = 2.0,
-      this.fallbackWidth = 400.0,
-      this.fallbackHeight = 400.0});
+  Placeholder({
+    this.color = const PdfColor.fromInt(0xFF455A64),
+    this.strokeWidth = 2.0,
+    this.fallbackWidth = 400.0,
+    this.fallbackHeight = 400.0,
+  });
 
   final PdfColor color;
 
@@ -41,16 +42,21 @@ class Placeholder extends Widget {
   final double fallbackHeight;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     box = PdfRect(
-        0,
-        0,
-        constraints.constrainWidth(
-            constraints.hasBoundedWidth ? constraints.maxWidth : fallbackWidth),
-        constraints.constrainHeight(constraints.hasBoundedHeight
-            ? constraints.maxHeight
-            : fallbackHeight));
+      0,
+      0,
+      constraints.constrainWidth(
+        constraints.hasBoundedWidth ? constraints.maxWidth : fallbackWidth,
+      ),
+      constraints.constrainHeight(
+        constraints.hasBoundedHeight ? constraints.maxHeight : fallbackHeight,
+      ),
+    );
   }
 
   @override
@@ -134,8 +140,10 @@ class LoremText {
       if (n > 100) {
         break;
       }
-      final count = math.min(length,
-          math.max(10, math.min(3, random.nextInt(length - wordsCount))));
+      final count = math.min(
+        length,
+        math.max(10, math.min(3, random.nextInt(length - wordsCount))),
+      );
       sentenceList.add(sentence(count));
       wordsCount += count;
     }
@@ -144,14 +152,15 @@ class LoremText {
 }
 
 class Lorem extends StatelessWidget {
-  Lorem(
-      {this.length = 50,
-      this.random,
-      this.style,
-      this.textAlign = TextAlign.left,
-      this.softWrap = true,
-      this.textScaleFactor = 1.0,
-      this.maxLines});
+  Lorem({
+    this.length = 50,
+    this.random,
+    this.style,
+    this.textAlign = TextAlign.left,
+    this.softWrap = true,
+    this.textScaleFactor = 1.0,
+    this.maxLines,
+  });
 
   final int length;
   final math.Random? random;
@@ -166,11 +175,13 @@ class Lorem extends StatelessWidget {
     final lorem = LoremText(random: random);
     final text = lorem.paragraph(length);
 
-    return Text(text,
-        style: style,
-        textAlign: textAlign,
-        softWrap: softWrap,
-        textScaleFactor: textScaleFactor,
-        maxLines: maxLines);
+    return Text(
+      text,
+      style: style,
+      textAlign: textAlign,
+      softWrap: softWrap,
+      textScaleFactor: textScaleFactor,
+      maxLines: maxLines,
+    );
   }
 }

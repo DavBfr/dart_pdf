@@ -62,38 +62,55 @@ class SvgBrush {
     final strokeLineJoin = element.getAttribute('stroke-linejoin');
     final blendMode = element.getAttribute('mix-blend-mode');
 
-    final result = parent.merge(SvgBrush(
-      opacity: SvgParser.getDouble(element, 'opacity', defaultValue: null),
-      blendMode: blendMode == null ? null : _blendModes[blendMode],
-      fillOpacity:
-          SvgParser.getDouble(element, 'fill-opacity', defaultValue: null),
-      strokeOpacity:
-          SvgParser.getDouble(element, 'stroke-opacity', defaultValue: null),
-      strokeLineCap:
-          strokeLineCap == null ? null : _strokeLineCap[strokeLineCap],
-      strokeLineJoin:
-          strokeLineJoin == null ? null : _strokeLineJoin[strokeLineJoin],
-      strokeMiterLimit:
-          SvgParser.getDouble(element, 'stroke-miterlimit', defaultValue: null),
-      fill: SvgColor.fromXml(element.getAttribute('fill'), painter),
-      fillEvenOdd: fillRule == null ? null : fillRule == 'evenodd',
-      stroke: SvgColor.fromXml(element.getAttribute('stroke'), painter),
-      strokeWidth: SvgParser.getNumeric(element, 'stroke-width', parent),
-      strokeDashArray: strokeDashArray == null
-          ? null
-          : (strokeDashArray == 'none'
-              ? []
-              : SvgParser.splitNumeric(strokeDashArray, parent)
-                  .map((e) => e.value)
-                  .toList()),
-      strokeDashOffset:
-          SvgParser.getNumeric(element, 'stroke-dashoffset', parent)?.sizeValue,
-      fontSize: SvgParser.getNumeric(element, 'font-size', parent),
-      fontFamily: element.getAttribute('font-family'),
-      fontStyle: element.getAttribute('font-style'),
-      fontWeight: element.getAttribute('font-weight'),
-      textAnchor: _textAnchors[element.getAttribute('text-anchor')],
-    ));
+    final result = parent.merge(
+      SvgBrush(
+        opacity: SvgParser.getDouble(element, 'opacity', defaultValue: null),
+        blendMode: blendMode == null ? null : _blendModes[blendMode],
+        fillOpacity: SvgParser.getDouble(
+          element,
+          'fill-opacity',
+          defaultValue: null,
+        ),
+        strokeOpacity: SvgParser.getDouble(
+          element,
+          'stroke-opacity',
+          defaultValue: null,
+        ),
+        strokeLineCap: strokeLineCap == null
+            ? null
+            : _strokeLineCap[strokeLineCap],
+        strokeLineJoin: strokeLineJoin == null
+            ? null
+            : _strokeLineJoin[strokeLineJoin],
+        strokeMiterLimit: SvgParser.getDouble(
+          element,
+          'stroke-miterlimit',
+          defaultValue: null,
+        ),
+        fill: SvgColor.fromXml(element.getAttribute('fill'), painter),
+        fillEvenOdd: fillRule == null ? null : fillRule == 'evenodd',
+        stroke: SvgColor.fromXml(element.getAttribute('stroke'), painter),
+        strokeWidth: SvgParser.getNumeric(element, 'stroke-width', parent),
+        strokeDashArray: strokeDashArray == null
+            ? null
+            : (strokeDashArray == 'none'
+                  ? []
+                  : SvgParser.splitNumeric(
+                      strokeDashArray,
+                      parent,
+                    ).map((e) => e.value).toList()),
+        strokeDashOffset: SvgParser.getNumeric(
+          element,
+          'stroke-dashoffset',
+          parent,
+        )?.sizeValue,
+        fontSize: SvgParser.getNumeric(element, 'font-size', parent),
+        fontFamily: element.getAttribute('font-family'),
+        fontStyle: element.getAttribute('font-style'),
+        fontWeight: element.getAttribute('font-weight'),
+        textAnchor: _textAnchors[element.getAttribute('text-anchor')],
+      ),
+    );
 
     final mask = SvgMaskPath.fromXml(element, painter, result);
     if (mask != null) {

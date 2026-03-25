@@ -34,22 +34,21 @@ class Context {
     required PdfDocument document,
     PdfPage? page,
     PdfGraphics? canvas,
-  }) =>
-      Context._(
-        document: document,
-        page: page,
-        canvas: canvas,
-        inherited: HashMap<Type, Inherited>(),
-      );
+  }) => Context._(
+    document: document,
+    page: page,
+    canvas: canvas,
+    inherited: HashMap<Type, Inherited>(),
+  );
 
   const Context._({
     required this.document,
     PdfPage? page,
     PdfGraphics? canvas,
     required HashMap<Type, Inherited> inherited,
-  })  : _page = page,
-        _canvas = canvas,
-        _inherited = inherited;
+  }) : _page = page,
+       _canvas = canvas,
+       _inherited = inherited;
 
   final PdfPage? _page;
 
@@ -79,16 +78,18 @@ class Context {
   /// But can be used in Header and Footer.
   int get pagesCount => document.pdfPageList.pages.length;
 
-  Context copyWith(
-      {PdfPage? page,
-      PdfGraphics? canvas,
-      Matrix4? ctm,
-      HashMap<Type, Inherited>? inherited}) {
+  Context copyWith({
+    PdfPage? page,
+    PdfGraphics? canvas,
+    Matrix4? ctm,
+    HashMap<Type, Inherited>? inherited,
+  }) {
     return Context._(
-        document: document,
-        page: page ?? _page,
-        canvas: canvas ?? _canvas,
-        inherited: inherited ?? _inherited);
+      document: document,
+      page: page ?? _page,
+      canvas: canvas ?? _canvas,
+      inherited: inherited ?? _inherited,
+    );
   }
 
   T? dependsOn<T>() {
@@ -154,14 +155,9 @@ abstract class Widget {
       document: page!.pdfDocument,
       page: page,
       canvas: canvas!,
-    ).inheritFromAll(<Inherited>[
-      ThemeData.base(),
-    ]);
+    ).inheritFromAll(<Inherited>[ThemeData.base()]);
 
-    widget.layout(
-      context,
-      constraints ?? const BoxConstraints(),
-    );
+    widget.layout(context, constraints ?? const BoxConstraints());
 
     assert(widget.box != null);
 
@@ -188,14 +184,9 @@ abstract class Widget {
       document: page!.pdfDocument,
       page: page,
       canvas: canvas!,
-    ).inheritFromAll(<Inherited>[
-      ThemeData.base(),
-    ]);
+    ).inheritFromAll(<Inherited>[ThemeData.base()]);
 
-    widget.layout(
-      context,
-      constraints ?? const BoxConstraints(),
-    );
+    widget.layout(context, constraints ?? const BoxConstraints());
 
     assert(widget.box != null);
     return widget.box!.size;
@@ -203,8 +194,11 @@ abstract class Widget {
 
   /// First widget pass to calculate the children layout and
   /// bounding [box]
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false});
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  });
 
   /// Draw itself and its children, according to the calculated
   /// [box.offset]
@@ -234,8 +228,11 @@ abstract class StatelessWidget extends Widget with SpanningWidget {
   Widget? _child;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     _child ??= build(context);
 
     if (_child != null) {
@@ -298,8 +295,11 @@ abstract class SingleChildWidget extends Widget with SpanningWidget {
   final Widget? child;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     if (child != null) {
       child!.layout(context, constraints, parentUsesSize: parentUsesSize);
       assert(child!.box != null);
@@ -368,8 +368,11 @@ class InheritedWidget extends SingleChildWidget {
   Widget? _child;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     _context = inherited != null ? context.inheritFrom(inherited!) : context;
     _child = build!(_context!);
     super.layout(_context!, constraints);
@@ -394,8 +397,11 @@ class DelayedWidget extends SingleChildWidget {
   Widget? _child;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     _child = build(context);
     super.layout(context, constraints);
   }
@@ -419,8 +425,8 @@ class DelayedWidget extends SingleChildWidget {
 
 class Inseparable extends SingleChildWidget {
   Inseparable({required Widget child, bool canSpan = false})
-      : _canSpan = canSpan,
-        super(child: child);
+    : _canSpan = canSpan,
+      super(child: child);
 
   final bool _canSpan;
 

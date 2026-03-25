@@ -25,7 +25,9 @@ import 'package:printing/printing.dart';
 import '../data.dart';
 
 Future<Uint8List> generateInvoice(
-    PdfPageFormat pageFormat, CustomData data) async {
+  PdfPageFormat pageFormat,
+  CustomData data,
+) async {
   final lorem = pw.LoremText();
 
   final products = <Product>[
@@ -154,12 +156,17 @@ class Invoice {
                   ),
                   pw.Container(
                     decoration: pw.BoxDecoration(
-                      borderRadius:
-                          const pw.BorderRadius.all(pw.Radius.circular(2)),
+                      borderRadius: const pw.BorderRadius.all(
+                        pw.Radius.circular(2),
+                      ),
                       color: accentColor,
                     ),
                     padding: const pw.EdgeInsets.only(
-                        left: 40, top: 10, bottom: 10, right: 20),
+                      left: 40,
+                      top: 10,
+                      bottom: 10,
+                      right: 20,
+                    ),
                     alignment: pw.Alignment.centerLeft,
                     height: 50,
                     child: pw.DefaultTextStyle(
@@ -189,8 +196,9 @@ class Invoice {
                     alignment: pw.Alignment.topRight,
                     padding: const pw.EdgeInsets.only(bottom: 8, left: 30),
                     height: 72,
-                    child:
-                        _logo != null ? pw.SvgImage(svg: _logo!) : pw.PdfLogo(),
+                    child: _logo != null
+                        ? pw.SvgImage(svg: _logo!)
+                        : pw.PdfLogo(),
                   ),
                   // pw.Container(
                   //   color: baseColor,
@@ -201,7 +209,7 @@ class Invoice {
             ),
           ],
         ),
-        if (context.pageNumber > 1) pw.SizedBox(height: 20)
+        if (context.pageNumber > 1) pw.SizedBox(height: 20),
       ],
     );
   }
@@ -222,28 +230,23 @@ class Invoice {
         ),
         pw.Text(
           'Page ${context.pageNumber}/${context.pagesCount}',
-          style: const pw.TextStyle(
-            fontSize: 12,
-            color: PdfColors.white,
-          ),
+          style: const pw.TextStyle(fontSize: 12, color: PdfColors.white),
         ),
       ],
     );
   }
 
   pw.PageTheme _buildTheme(
-      PdfPageFormat pageFormat, pw.Font base, pw.Font bold, pw.Font italic) {
+    PdfPageFormat pageFormat,
+    pw.Font base,
+    pw.Font bold,
+    pw.Font italic,
+  ) {
     return pw.PageTheme(
       pageFormat: pageFormat,
-      theme: pw.ThemeData.withFont(
-        base: base,
-        bold: bold,
-        italic: italic,
-      ),
-      buildBackground: (context) => pw.FullPage(
-        ignoreMargins: true,
-        child: pw.SvgImage(svg: _bgShape!),
-      ),
+      theme: pw.ThemeData.withFont(base: base, bold: bold, italic: italic),
+      buildBackground: (context) =>
+          pw.FullPage(ignoreMargins: true, child: pw.SvgImage(svg: _bgShape!)),
     );
   }
 
@@ -285,19 +288,17 @@ class Invoice {
                 child: pw.Container(
                   height: 70,
                   child: pw.RichText(
-                      text: pw.TextSpan(
-                          text: '$customerName\n',
-                          style: pw.TextStyle(
-                            color: _darkColor,
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                          children: [
+                    text: pw.TextSpan(
+                      text: '$customerName\n',
+                      style: pw.TextStyle(
+                        color: _darkColor,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                      children: [
                         const pw.TextSpan(
                           text: '\n',
-                          style: pw.TextStyle(
-                            fontSize: 5,
-                          ),
+                          style: pw.TextStyle(fontSize: 5),
                         ),
                         pw.TextSpan(
                           text: customerAddress,
@@ -306,7 +307,9 @@ class Invoice {
                             fontSize: 10,
                           ),
                         ),
-                      ])),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -356,10 +359,7 @@ class Invoice {
         pw.Expanded(
           flex: 1,
           child: pw.DefaultTextStyle(
-            style: const pw.TextStyle(
-              fontSize: 10,
-              color: _darkColor,
-            ),
+            style: const pw.TextStyle(fontSize: 10, color: _darkColor),
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
@@ -435,9 +435,7 @@ class Invoice {
             ],
           ),
         ),
-        pw.Expanded(
-          child: pw.SizedBox(),
-        ),
+        pw.Expanded(child: pw.SizedBox()),
       ],
     );
   }
@@ -448,7 +446,7 @@ class Invoice {
       'Item Description',
       'Price',
       'Quantity',
-      'Total'
+      'Total',
     ];
 
     return pw.TableHelper.fromTextArray(
@@ -472,17 +470,9 @@ class Invoice {
         fontSize: 10,
         fontWeight: pw.FontWeight.bold,
       ),
-      cellStyle: const pw.TextStyle(
-        color: _darkColor,
-        fontSize: 10,
-      ),
+      cellStyle: const pw.TextStyle(color: _darkColor, fontSize: 10),
       rowDecoration: pw.BoxDecoration(
-        border: pw.Border(
-          bottom: pw.BorderSide(
-            color: accentColor,
-            width: .5,
-          ),
-        ),
+        border: pw.Border(bottom: pw.BorderSide(color: accentColor, width: .5)),
       ),
       headers: List<String>.generate(
         tableHeaders.length,
@@ -509,12 +499,7 @@ String _formatDate(DateTime date) {
 }
 
 class Product {
-  const Product(
-    this.sku,
-    this.productName,
-    this.price,
-    this.quantity,
-  );
+  const Product(this.sku, this.productName, this.price, this.quantity);
 
   final String sku;
   final String productName;

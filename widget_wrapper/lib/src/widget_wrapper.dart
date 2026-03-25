@@ -137,13 +137,11 @@ class WidgetWrapper extends pw.ImageProvider {
 
     if (!constraints.hasBoundedHeight || !constraints.hasBoundedHeight) {
       throw Exception(
-          'Unable to convert an unbounded widget. Add maxWidth and maxHeight to the constraints.');
+        'Unable to convert an unbounded widget. Add maxWidth and maxHeight to the constraints.',
+      );
     }
 
-    widget = ConstrainedBox(
-      constraints: constraints,
-      child: widget,
-    );
+    widget = ConstrainedBox(constraints: constraints, child: widget);
 
     final prop = DiagnosticPropertiesBuilder();
     widget.debugFillProperties(prop);
@@ -168,7 +166,9 @@ class WidgetWrapper extends pw.ImageProvider {
 
     final renderView = RenderView(
       child: RenderPositionedBox(
-          alignment: Alignment.center, child: repaintBoundary),
+        alignment: Alignment.center,
+        child: repaintBoundary,
+      ),
       configuration: ViewConfiguration.fromView(view),
       view: view,
     );

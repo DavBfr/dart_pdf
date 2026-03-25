@@ -35,10 +35,7 @@ class SvgImage extends Widget {
     SvgCustomFontLookup? customFontLookup,
   }) {
     final xml = XmlDocument.parse(svg);
-    final parser = SvgParser(
-      xml: xml,
-      colorFilter: colorFilter,
-    );
+    final parser = SvgParser(xml: xml, colorFilter: colorFilter);
 
     return SvgImage._fromParser(
       parser,
@@ -78,18 +75,21 @@ class SvgImage extends Widget {
   late FittedSizes sizes;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     final w = width != null || _svgParser.width != null
         ? constraints.constrainWidth(width ?? _svgParser.width!)
         : constraints.hasBoundedWidth
-            ? constraints.maxWidth
-            : constraints.constrainWidth(_svgParser.viewBox.width);
+        ? constraints.maxWidth
+        : constraints.constrainWidth(_svgParser.viewBox.width);
     final h = height != null || _svgParser.height != null
         ? constraints.constrainHeight(height ?? _svgParser.height!)
         : constraints.hasBoundedHeight
-            ? constraints.maxHeight
-            : constraints.constrainHeight(_svgParser.viewBox.height);
+        ? constraints.maxHeight
+        : constraints.constrainHeight(_svgParser.viewBox.height);
 
     sizes = applyBoxFit(fit, _svgParser.viewBox.size, PdfPoint(w, h));
     box = PdfRect.fromPoints(PdfPoint.zero, sizes.destination!);
@@ -158,5 +158,5 @@ class DecorationSvgImage extends DecorationGraphic {
   }
 }
 
-typedef SvgCustomFontLookup = Font? Function(
-    String fontFamily, String fontStyle, String fontWeight);
+typedef SvgCustomFontLookup =
+    Font? Function(String fontFamily, String fontStyle, String fontWeight);

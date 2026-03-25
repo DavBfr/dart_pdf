@@ -21,11 +21,12 @@ import 'geometry.dart';
 import 'widget.dart';
 
 class CircularProgressIndicator extends Widget {
-  CircularProgressIndicator(
-      {required this.value,
-      this.color,
-      this.strokeWidth = 4.0,
-      this.backgroundColor});
+  CircularProgressIndicator({
+    required this.value,
+    this.color,
+    this.strokeWidth = 4.0,
+    this.backgroundColor,
+  });
 
   /// The value of this progress indicator.
   /// A value of 0.0 means no progress and 1.0 means that progress is complete.
@@ -40,8 +41,11 @@ class CircularProgressIndicator extends Widget {
   final double strokeWidth;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
   }
 
@@ -74,12 +78,26 @@ class CircularProgressIndicator extends Widget {
     if (backgroundColor != null && value < 1) {
       context.canvas
         ..moveTo(startTop.x, startTop.y)
-        ..bezierArc(startTop.x, startTop.y, rx, ry, endTop.x, endTop.y,
-            large: adjustedValue < .5, sweep: true)
+        ..bezierArc(
+          startTop.x,
+          startTop.y,
+          rx,
+          ry,
+          endTop.x,
+          endTop.y,
+          large: adjustedValue < .5,
+          sweep: true,
+        )
         ..lineTo(endBottom.x, endBottom.y)
-        ..bezierArc(endBottom.x, endBottom.y, rx - strokeWidth,
-            ry - strokeWidth, startBottom.x, startBottom.y,
-            large: adjustedValue < .5)
+        ..bezierArc(
+          endBottom.x,
+          endBottom.y,
+          rx - strokeWidth,
+          ry - strokeWidth,
+          startBottom.x,
+          startBottom.y,
+          large: adjustedValue < .5,
+        )
         ..lineTo(startTop.x, startTop.y)
         ..setFillColor(backgroundColor)
         ..fillPath();
@@ -88,12 +106,26 @@ class CircularProgressIndicator extends Widget {
     if (value > 0) {
       context.canvas
         ..moveTo(startTop.x, startTop.y)
-        ..bezierArc(startTop.x, startTop.y, rx, ry, endTop.x, endTop.y,
-            large: adjustedValue > .5)
+        ..bezierArc(
+          startTop.x,
+          startTop.y,
+          rx,
+          ry,
+          endTop.x,
+          endTop.y,
+          large: adjustedValue > .5,
+        )
         ..lineTo(endBottom.x, endBottom.y)
-        ..bezierArc(endBottom.x, endBottom.y, rx - strokeWidth,
-            ry - strokeWidth, startBottom.x, startBottom.y,
-            large: adjustedValue > .5, sweep: true)
+        ..bezierArc(
+          endBottom.x,
+          endBottom.y,
+          rx - strokeWidth,
+          ry - strokeWidth,
+          startBottom.x,
+          startBottom.y,
+          large: adjustedValue > .5,
+          sweep: true,
+        )
         ..lineTo(startTop.x, startTop.y)
         ..setFillColor(color ?? PdfColors.indigo)
         ..fillPath();
@@ -125,8 +157,11 @@ class LinearProgressIndicator extends Widget {
   final PdfColor? valueColor;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     box = PdfRect.fromPoints(
       PdfPoint.zero,
       BoxConstraints(
@@ -147,8 +182,12 @@ class LinearProgressIndicator extends Widget {
     if (vc < 1.0) {
       final epsilon = vc == 0 ? 0 : 0.01;
       context.canvas
-        ..drawRect(box!.left + box!.width * vc - epsilon, box!.bottom,
-            box!.width * (1 - vc) + epsilon, box!.height)
+        ..drawRect(
+          box!.left + box!.width * vc - epsilon,
+          box!.bottom,
+          box!.width * (1 - vc) + epsilon,
+          box!.height,
+        )
         ..setFillColor(_backgroundColor)
         ..fillPath();
     }

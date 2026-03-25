@@ -44,10 +44,7 @@ abstract class PdfBaseCache {
   Future<void> clear();
 
   /// Download the font
-  Future<Uint8List?> _download(
-    Uri uri, {
-    Map<String, String>? headers,
-  }) async {
+  Future<Uint8List?> _download(Uri uri, {Map<String, String>? headers}) async {
     final response = await http.get(uri, headers: headers);
     if (response.statusCode != 200) {
       return null;

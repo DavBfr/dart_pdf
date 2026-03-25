@@ -83,13 +83,21 @@ class PdfShading extends PdfObject<PdfDict> {
     } else if (shadingType == PdfShadingType.radial) {
       assert(radius0 != null);
       assert(radius1 != null);
-      params['/Coords'] = PdfArray.fromNum(
-          [start.x, start.y, radius0!, end.x, end.y, radius1!]);
+      params['/Coords'] = PdfArray.fromNum([
+        start.x,
+        start.y,
+        radius0!,
+        end.x,
+        end.y,
+        radius1!,
+      ]);
     }
     // params['/Domain'] = PdfArray.fromNum(<num>[0, 1]);
     if (extendStart || extendEnd) {
-      params['/Extend'] =
-          PdfArray(<PdfBool>[PdfBool(extendStart), PdfBool(extendEnd)]);
+      params['/Extend'] = PdfArray(<PdfBool>[
+        PdfBool(extendStart),
+        PdfBool(extendEnd),
+      ]);
     }
     params['/Function'] = function.ref();
   }

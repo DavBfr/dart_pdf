@@ -25,40 +25,41 @@ import '../../widgets.dart';
 @immutable
 class BoxConstraints {
   /// Creates box constraints with the given constraints.
-  const BoxConstraints(
-      {this.minWidth = 0.0,
-      this.maxWidth = double.infinity,
-      this.minHeight = 0.0,
-      this.maxHeight = double.infinity});
+  const BoxConstraints({
+    this.minWidth = 0.0,
+    this.maxWidth = double.infinity,
+    this.minHeight = 0.0,
+    this.maxHeight = double.infinity,
+  });
 
   /// Creates box constraints that require the given width or height.
   const BoxConstraints.tightFor({double? width, double? height})
-      : minWidth = width ?? 0.0,
-        maxWidth = width ?? double.infinity,
-        minHeight = height ?? 0.0,
-        maxHeight = height ?? double.infinity;
+    : minWidth = width ?? 0.0,
+      maxWidth = width ?? double.infinity,
+      minHeight = height ?? 0.0,
+      maxHeight = height ?? double.infinity;
 
   /// Creates box constraints that is respected only by the given size.
   BoxConstraints.tight(PdfPoint size)
-      : minWidth = size.x,
-        maxWidth = size.x,
-        minHeight = size.y,
-        maxHeight = size.y;
+    : minWidth = size.x,
+      maxWidth = size.x,
+      minHeight = size.y,
+      maxHeight = size.y;
 
   /// Creates box constraints that expand to fill another box constraints.
   const BoxConstraints.expand({double? width, double? height})
-      : minWidth = width ?? double.infinity,
-        maxWidth = width ?? double.infinity,
-        minHeight = height ?? double.infinity,
-        maxHeight = height ?? double.infinity;
+    : minWidth = width ?? double.infinity,
+      maxWidth = width ?? double.infinity,
+      minHeight = height ?? double.infinity,
+      maxHeight = height ?? double.infinity;
 
   const BoxConstraints.tightForFinite({
     double width = double.infinity,
     double height = double.infinity,
-  })  : minWidth = width != double.infinity ? width : 0.0,
-        maxWidth = width != double.infinity ? width : double.infinity,
-        minHeight = height != double.infinity ? height : 0.0,
-        maxHeight = height != double.infinity ? height : double.infinity;
+  }) : minWidth = width != double.infinity ? width : 0.0,
+       maxWidth = width != double.infinity ? width : double.infinity,
+       minHeight = height != double.infinity ? height : 0.0,
+       maxHeight = height != double.infinity ? height : double.infinity;
 
   /// The minimum width that satisfies the constraints.
   final double minWidth;
@@ -104,8 +105,10 @@ class BoxConstraints {
     return result;
   }
 
-  PdfRect constrainRect(
-      {double width = double.infinity, double height = double.infinity}) {
+  PdfRect constrainRect({
+    double width = double.infinity,
+    double height = double.infinity,
+  }) {
     final result = PdfPoint(constrainWidth(width), constrainHeight(height));
     return PdfRect.fromPoints(PdfPoint.zero, result);
   }
@@ -160,12 +163,15 @@ class BoxConstraints {
   /// box constraints.
   BoxConstraints tighten({double? width, double? height}) {
     return BoxConstraints(
-        minWidth: width == null ? minWidth : width.clamp(minWidth, maxWidth),
-        maxWidth: width == null ? maxWidth : width.clamp(minWidth, maxWidth),
-        minHeight:
-            height == null ? minHeight : height.clamp(minHeight, maxHeight),
-        maxHeight:
-            height == null ? maxHeight : height.clamp(minHeight, maxHeight));
+      minWidth: width == null ? minWidth : width.clamp(minWidth, maxWidth),
+      maxWidth: width == null ? maxWidth : width.clamp(minWidth, maxWidth),
+      minHeight: height == null
+          ? minHeight
+          : height.clamp(minHeight, maxHeight),
+      maxHeight: height == null
+          ? maxHeight
+          : height.clamp(minHeight, maxHeight),
+    );
   }
 
   /// Returns new box constraints that are smaller by the given edge dimensions.
@@ -175,10 +181,11 @@ class BoxConstraints {
     final deflatedMinWidth = math.max(0.0, minWidth - horizontal);
     final deflatedMinHeight = math.max(0.0, minHeight - vertical);
     return BoxConstraints(
-        minWidth: deflatedMinWidth,
-        maxWidth: math.max(deflatedMinWidth, maxWidth - horizontal),
-        minHeight: deflatedMinHeight,
-        maxHeight: math.max(deflatedMinHeight, maxHeight - vertical));
+      minWidth: deflatedMinWidth,
+      maxWidth: math.max(deflatedMinWidth, maxWidth - horizontal),
+      minHeight: deflatedMinHeight,
+      maxHeight: math.max(deflatedMinHeight, maxHeight - vertical),
+    );
   }
 
   /// Returns new box constraints that remove the minimum width and height requirements.
@@ -195,30 +202,32 @@ class BoxConstraints {
   /// as close as possible to the original constraints.
   BoxConstraints enforce(BoxConstraints constraints) {
     return BoxConstraints(
-        minWidth: minWidth.clamp(constraints.minWidth, constraints.maxWidth),
-        maxWidth: maxWidth.clamp(constraints.minWidth, constraints.maxWidth),
-        minHeight:
-            minHeight.clamp(constraints.minHeight, constraints.maxHeight),
-        maxHeight:
-            maxHeight.clamp(constraints.minHeight, constraints.maxHeight));
+      minWidth: minWidth.clamp(constraints.minWidth, constraints.maxWidth),
+      maxWidth: maxWidth.clamp(constraints.minWidth, constraints.maxWidth),
+      minHeight: minHeight.clamp(constraints.minHeight, constraints.maxHeight),
+      maxHeight: maxHeight.clamp(constraints.minHeight, constraints.maxHeight),
+    );
   }
 
-  BoxConstraints copyWith(
-      {double? minWidth,
-      double? maxWidth,
-      double? minHeight,
-      double? maxHeight}) {
+  BoxConstraints copyWith({
+    double? minWidth,
+    double? maxWidth,
+    double? minHeight,
+    double? maxHeight,
+  }) {
     return BoxConstraints(
-        minWidth: minWidth ?? this.minWidth,
-        maxWidth: maxWidth ?? this.maxWidth,
-        minHeight: minHeight ?? this.minHeight,
-        maxHeight: maxHeight ?? this.maxHeight);
+      minWidth: minWidth ?? this.minWidth,
+      maxWidth: maxWidth ?? this.maxWidth,
+      minHeight: minHeight ?? this.minHeight,
+      maxHeight: maxHeight ?? this.maxHeight,
+    );
   }
 
   bool debugAssertIsValid() {
     if (minWidth.isInfinite && minHeight.isInfinite) {
       throw AssertionError(
-          'BoxConstraints forces an infinite width and infinite height.');
+        'BoxConstraints forces an infinite width and infinite height.',
+      );
     }
     if (minWidth.isInfinite) {
       throw AssertionError('BoxConstraints forces an infinite width.');
@@ -329,19 +338,23 @@ class EdgeInsets extends EdgeInsetsGeometry {
   const EdgeInsets.fromLTRB(this.left, this.top, this.right, this.bottom);
 
   const EdgeInsets.all(double value)
-      : left = value,
-        top = value,
-        right = value,
-        bottom = value;
+    : left = value,
+      top = value,
+      right = value,
+      bottom = value;
 
-  const EdgeInsets.only(
-      {this.left = 0.0, this.top = 0.0, this.right = 0.0, this.bottom = 0.0});
+  const EdgeInsets.only({
+    this.left = 0.0,
+    this.top = 0.0,
+    this.right = 0.0,
+    this.bottom = 0.0,
+  });
 
   const EdgeInsets.symmetric({double vertical = 0.0, double horizontal = 0.0})
-      : left = horizontal,
-        top = vertical,
-        right = horizontal,
-        bottom = vertical;
+    : left = horizontal,
+      top = vertical,
+      right = horizontal,
+      bottom = vertical;
 
   static const EdgeInsets zero = EdgeInsets.only();
 
@@ -413,7 +426,13 @@ class EdgeInsets extends EdgeInsetsGeometry {
 
 class _MixedEdgeInsets extends EdgeInsetsGeometry {
   const _MixedEdgeInsets.fromLRSETB(
-      this._left, this._right, this._start, this._end, this._top, this._bottom);
+    this._left,
+    this._right,
+    this._start,
+    this._end,
+    this._top,
+    this._bottom,
+  );
 
   @override
   final double _left;
@@ -439,10 +458,18 @@ class _MixedEdgeInsets extends EdgeInsetsGeometry {
     switch (direction!) {
       case TextDirection.rtl:
         return EdgeInsets.fromLTRB(
-            _end + _left, _top, _start + _right, _bottom);
+          _end + _left,
+          _top,
+          _start + _right,
+          _bottom,
+        );
       case TextDirection.ltr:
         return EdgeInsets.fromLTRB(
-            _start + _left, _top, _end + _right, _bottom);
+          _start + _left,
+          _top,
+          _end + _right,
+          _bottom,
+        );
     }
   }
 }
@@ -461,7 +488,11 @@ class _MixedEdgeInsets extends EdgeInsetsGeometry {
 class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   /// Creates insets from offsets from the start, top, end, and bottom.
   const EdgeInsetsDirectional.fromSTEB(
-      this.start, this.top, this.end, this.bottom);
+    this.start,
+    this.top,
+    this.end,
+    this.bottom,
+  );
 
   /// Creates insets with only the given values non-zero.
   ///
@@ -496,10 +527,10 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   const EdgeInsetsDirectional.symmetric({
     double horizontal = 0.0,
     double vertical = 0.0,
-  })  : start = horizontal,
-        end = horizontal,
-        top = vertical,
-        bottom = vertical;
+  }) : start = horizontal,
+       end = horizontal,
+       top = vertical,
+       bottom = vertical;
 
   /// Creates insets where all the offsets are `value`.
   ///
@@ -512,10 +543,10 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   /// ```
   /// {@end-tool}
   const EdgeInsetsDirectional.all(double value)
-      : start = value,
-        top = value,
-        end = value,
-        bottom = value;
+    : start = value,
+      top = value,
+      end = value,
+      bottom = value;
 
   /// An [EdgeInsetsDirectional] with zero offsets in each direction.
   ///
@@ -782,8 +813,10 @@ class AlignmentDirectional extends AlignmentGeometry {
   static const AlignmentDirectional topEnd = AlignmentDirectional(1.0, -1.0);
 
   /// The center point along the "start" edge.
-  static const AlignmentDirectional centerStart =
-      AlignmentDirectional(-1.0, 0.0);
+  static const AlignmentDirectional centerStart = AlignmentDirectional(
+    -1.0,
+    0.0,
+  );
 
   /// The center point, both horizontally and vertically.
   ///
@@ -795,15 +828,19 @@ class AlignmentDirectional extends AlignmentGeometry {
   static const AlignmentDirectional centerEnd = AlignmentDirectional(1.0, 0.0);
 
   /// The bottom corner on the "start" side.
-  static const AlignmentDirectional bottomStart =
-      AlignmentDirectional(-1.0, 1.0);
+  static const AlignmentDirectional bottomStart = AlignmentDirectional(
+    -1.0,
+    1.0,
+  );
 
   /// The center point along the bottom edge.
   ///
   /// Consider using [Alignment.bottomCenter] instead, as it does not
   /// need to be [resolve]d to be used.
-  static const AlignmentDirectional bottomCenter =
-      AlignmentDirectional(0.0, 1.0);
+  static const AlignmentDirectional bottomCenter = AlignmentDirectional(
+    0.0,
+    1.0,
+  );
 
   /// The bottom corner on the "end" side.
   static const AlignmentDirectional bottomEnd = AlignmentDirectional(1.0, 1.0);
@@ -845,8 +882,10 @@ class AlignmentDirectional extends AlignmentGeometry {
 
   @override
   Alignment resolve(TextDirection? direction) {
-    assert(direction != null,
-        'Cannot resolve $runtimeType without a TextDirection.');
+    assert(
+      direction != null,
+      'Cannot resolve $runtimeType without a TextDirection.',
+    );
     switch (direction!) {
       case TextDirection.rtl:
         return Alignment(-start, y);
@@ -892,38 +931,56 @@ FittedSizes applyBoxFit(BoxFit fit, PdfPoint inputSize, PdfPoint outputSize) {
     case BoxFit.contain:
       sourceSize = inputSize;
       if (outputSize.x / outputSize.y > sourceSize.x / sourceSize.y) {
-        destinationSize =
-            PdfPoint(sourceSize.x * outputSize.y / sourceSize.y, outputSize.y);
+        destinationSize = PdfPoint(
+          sourceSize.x * outputSize.y / sourceSize.y,
+          outputSize.y,
+        );
       } else {
-        destinationSize =
-            PdfPoint(outputSize.x, sourceSize.y * outputSize.x / sourceSize.x);
+        destinationSize = PdfPoint(
+          outputSize.x,
+          sourceSize.y * outputSize.x / sourceSize.x,
+        );
       }
       break;
     case BoxFit.cover:
       if (outputSize.x / outputSize.y > inputSize.x / inputSize.y) {
-        sourceSize =
-            PdfPoint(inputSize.x, inputSize.x * outputSize.y / outputSize.x);
+        sourceSize = PdfPoint(
+          inputSize.x,
+          inputSize.x * outputSize.y / outputSize.x,
+        );
       } else {
-        sourceSize =
-            PdfPoint(inputSize.y * outputSize.x / outputSize.y, inputSize.y);
+        sourceSize = PdfPoint(
+          inputSize.y * outputSize.x / outputSize.y,
+          inputSize.y,
+        );
       }
       destinationSize = outputSize;
       break;
     case BoxFit.fitWidth:
-      sourceSize =
-          PdfPoint(inputSize.x, inputSize.x * outputSize.y / outputSize.x);
-      destinationSize =
-          PdfPoint(outputSize.x, sourceSize.y * outputSize.x / sourceSize.x);
+      sourceSize = PdfPoint(
+        inputSize.x,
+        inputSize.x * outputSize.y / outputSize.x,
+      );
+      destinationSize = PdfPoint(
+        outputSize.x,
+        sourceSize.y * outputSize.x / sourceSize.x,
+      );
       break;
     case BoxFit.fitHeight:
-      sourceSize =
-          PdfPoint(inputSize.y * outputSize.x / outputSize.y, inputSize.y);
-      destinationSize =
-          PdfPoint(sourceSize.x * outputSize.y / sourceSize.y, outputSize.y);
+      sourceSize = PdfPoint(
+        inputSize.y * outputSize.x / outputSize.y,
+        inputSize.y,
+      );
+      destinationSize = PdfPoint(
+        sourceSize.x * outputSize.y / sourceSize.y,
+        outputSize.y,
+      );
       break;
     case BoxFit.none:
-      sourceSize = PdfPoint(math.min(inputSize.x, outputSize.x),
-          math.min(inputSize.y, outputSize.y));
+      sourceSize = PdfPoint(
+        math.min(inputSize.x, outputSize.x),
+        math.min(inputSize.y, outputSize.y),
+      );
       destinationSize = sourceSize;
       break;
     case BoxFit.scaleDown:
@@ -953,8 +1010,9 @@ PdfRect transformRect(Matrix4 transform, PdfRect rect) {
   final point3 = transformPoint(transform, rect.leftTop);
   final point4 = transformPoint(transform, rect.rightTop);
   return PdfRect.fromLBRT(
-      math.min(point1.x, math.min(point2.x, math.min(point3.x, point4.x))),
-      math.min(point1.y, math.min(point2.y, math.min(point3.y, point4.y))),
-      math.max(point1.x, math.max(point2.x, math.max(point3.x, point4.x))),
-      math.max(point1.y, math.max(point2.y, math.max(point3.y, point4.y))));
+    math.min(point1.x, math.min(point2.x, math.min(point3.x, point4.x))),
+    math.min(point1.y, math.min(point2.y, math.min(point3.y, point4.y))),
+    math.max(point1.x, math.max(point2.x, math.max(point3.x, point4.x))),
+    math.max(point1.y, math.max(point2.y, math.max(point3.y, point4.y))),
+  );
 }

@@ -22,11 +22,7 @@ import 'decoration.dart';
 import 'widget.dart';
 
 class BorderStyle {
-  const BorderStyle({
-    this.paint = true,
-    this.pattern,
-    this.phase = 0,
-  });
+  const BorderStyle({this.paint = true, this.pattern, this.phase = 0});
 
   static const none = BorderStyle(paint: false);
   static const solid = BorderStyle();
@@ -78,19 +74,30 @@ abstract class BoxBorder {
   });
 
   static void _paintUniformBorderWithCircle(
-      Context context, PdfRect box, BorderSide side) {
+    Context context,
+    PdfRect box,
+    BorderSide side,
+  ) {
     side.style.setStyle(context);
     context.canvas
       ..setStrokeColor(side.color)
       ..setLineWidth(side.width)
-      ..drawEllipse(box.left + box.width / 2.0, box.bottom + box.height / 2.0,
-          box.width / 2.0, box.height / 2.0)
+      ..drawEllipse(
+        box.left + box.width / 2.0,
+        box.bottom + box.height / 2.0,
+        box.width / 2.0,
+        box.height / 2.0,
+      )
       ..strokePath();
     side.style.unsetStyle(context);
   }
 
-  static void _paintUniformBorderWithRadius(Context context, PdfRect box,
-      BorderSide side, BorderRadius borderRadius) {
+  static void _paintUniformBorderWithRadius(
+    Context context,
+    PdfRect box,
+    BorderSide side,
+    BorderRadius borderRadius,
+  ) {
     side.style.setStyle(context);
     context.canvas
       ..setLineJoin(PdfLineJoin.miter)
@@ -103,7 +110,10 @@ abstract class BoxBorder {
   }
 
   static void _paintUniformBorderWithRectangle(
-      Context context, PdfRect box, BorderSide side) {
+    Context context,
+    PdfRect box,
+    BorderSide side,
+  ) {
     side.style.setStyle(context);
     context.canvas
       ..setLineJoin(PdfLineJoin.miter)
@@ -126,8 +136,10 @@ class BorderSide {
   });
 
   /// A hairline black border that is not rendered.
-  static const BorderSide none =
-      BorderSide(width: 0.0, style: BorderStyle.none);
+  static const BorderSide none = BorderSide(
+    width: 0.0,
+    style: BorderStyle.none,
+  );
 
   /// The color of this side of the border.
   final PdfColor color;
@@ -138,11 +150,7 @@ class BorderSide {
   /// The style of this side of the border.
   final BorderStyle style;
 
-  BorderSide copyWith({
-    PdfColor? color,
-    double? width,
-    BorderStyle? style,
-  }) =>
+  BorderSide copyWith({PdfColor? color, double? width, BorderStyle? style}) =>
       BorderSide(
         color: color ?? this.color,
         width: width ?? this.width,
@@ -181,28 +189,27 @@ class Border extends BoxBorder {
     PdfColor color = PdfColors.black,
     double width = 1.0,
     BorderStyle style = BorderStyle.solid,
-  }) =>
-      Border.fromBorderSide(
-        BorderSide(color: color, width: width, style: style),
-      );
+  }) => Border.fromBorderSide(
+    BorderSide(color: color, width: width, style: style),
+  );
 
   /// Creates a border whose sides are all the same.
   const Border.fromBorderSide(BorderSide side)
-      : top = side,
-        right = side,
-        bottom = side,
-        left = side,
-        super();
+    : top = side,
+      right = side,
+      bottom = side,
+      left = side,
+      super();
 
   /// Creates a border with symmetrical vertical and horizontal sides.
   const Border.symmetric({
     BorderSide vertical = BorderSide.none,
     BorderSide horizontal = BorderSide.none,
-  })  : left = vertical,
-        top = horizontal,
-        right = vertical,
-        bottom = horizontal,
-        super();
+  }) : left = vertical,
+       top = horizontal,
+       right = vertical,
+       bottom = horizontal,
+       super();
 
   @override
   final BorderSide top;
@@ -233,14 +240,20 @@ class Border extends BoxBorder {
 
       switch (shape) {
         case BoxShape.circle:
-          assert(borderRadius == null,
-              'A borderRadius can only be given for rectangular boxes.');
+          assert(
+            borderRadius == null,
+            'A borderRadius can only be given for rectangular boxes.',
+          );
           BoxBorder._paintUniformBorderWithCircle(context, box, top);
           break;
         case BoxShape.rectangle:
           if (borderRadius != null) {
             BoxBorder._paintUniformBorderWithRadius(
-                context, box, top, borderRadius);
+              context,
+              box,
+              top,
+              borderRadius,
+            );
             return;
           }
           BoxBorder._paintUniformBorderWithRectangle(context, box, top);
@@ -249,8 +262,10 @@ class Border extends BoxBorder {
       return;
     }
 
-    assert(borderRadius == null,
-        'A borderRadius can only be given for a uniform Border.');
+    assert(
+      borderRadius == null,
+      'A borderRadius can only be given for a uniform Border.',
+    );
 
     context.canvas
       ..setLineCap(PdfLineCap.square)

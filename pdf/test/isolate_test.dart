@@ -33,7 +33,8 @@ void main() {
       final pdf = Document();
       final image = MemoryImage(imageBytes);
       pdf.addPage(
-          Page(build: (Context context) => Center(child: Image(image))));
+        Page(build: (Context context) => Center(child: Image(image))),
+      );
       return await pdf.save();
     });
 

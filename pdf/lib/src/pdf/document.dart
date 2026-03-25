@@ -59,7 +59,7 @@ enum PdfPageMode {
   /// This page mode indicates that when the document is opened, it is displayed
   /// in full-screen-mode. There is no menu bar, window controls nor any other
   /// window present.
-  fullscreen
+  fullscreen,
 }
 
 /// This class is the base of the Pdf generator. A [PdfDocument] class is
@@ -75,8 +75,8 @@ class PdfDocument {
     bool compress = true,
     bool verbose = false,
     PdfVersion version = PdfVersion.pdf_1_5,
-  })  : prev = null,
-        _objser = 1 {
+  }) : prev = null,
+       _objser = 1 {
     settings = PdfSettings(
       deflate: compress ? (deflate ?? defaultDeflate) : null,
       verbose: verbose,
@@ -178,10 +178,14 @@ class PdfDocument {
   Uint8List get documentID {
     if (_documentID == null) {
       final rnd = math.Random.secure();
-      _documentID = Uint8List.fromList(sha256
-          .convert(DateTime.now().toIso8601String().codeUnits +
-              List<int>.generate(32, (_) => rnd.nextInt(256)))
-          .bytes);
+      _documentID = Uint8List.fromList(
+        sha256
+            .convert(
+              DateTime.now().toIso8601String().codeUnits +
+                  List<int>.generate(32, (_) => rnd.nextInt(256)),
+            )
+            .bytes,
+      );
     }
 
     return _documentID!;
@@ -239,8 +243,11 @@ class PdfDocument {
       xref.objects.add(ob);
     }
 
-    final id =
-        PdfString(documentID, format: PdfStringFormat.binary, encrypted: false);
+    final id = PdfString(
+      documentID,
+      format: PdfStringFormat.binary,
+      encrypted: false,
+    );
     xref.params['/ID'] = PdfArray([id, id]);
 
     if (prev != null) {

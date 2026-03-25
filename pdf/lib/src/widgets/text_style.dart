@@ -125,38 +125,42 @@ class TextStyle {
     this.decorationStyle,
     this.decorationThickness,
     this.renderingMode,
-  })  : assert(inherit || color != null),
-        assert(inherit || fontNormal != null),
-        assert(inherit || fontBold != null),
-        assert(inherit || fontItalic != null),
-        assert(inherit || fontBoldItalic != null),
-        assert(inherit || fontSize != null),
-        assert(inherit || fontWeight != null),
-        assert(inherit || fontStyle != null),
-        assert(inherit || letterSpacing != null),
-        assert(inherit || wordSpacing != null),
-        assert(inherit || lineSpacing != null),
-        assert(inherit || height != null),
-        assert(inherit || decoration != null),
-        assert(inherit || decorationStyle != null),
-        assert(inherit || decorationThickness != null),
-        assert(inherit || renderingMode != null),
-        fontNormal = fontNormal ??
-            (fontStyle != FontStyle.italic && fontWeight != FontWeight.bold
-                ? font
-                : null),
-        fontBold = fontBold ??
-            (fontStyle != FontStyle.italic && fontWeight == FontWeight.bold
-                ? font
-                : null),
-        fontItalic = fontItalic ??
-            (fontStyle == FontStyle.italic && fontWeight != FontWeight.bold
-                ? font
-                : null),
-        fontBoldItalic = fontBoldItalic ??
-            (fontStyle == FontStyle.italic && fontWeight == FontWeight.bold
-                ? font
-                : null);
+  }) : assert(inherit || color != null),
+       assert(inherit || fontNormal != null),
+       assert(inherit || fontBold != null),
+       assert(inherit || fontItalic != null),
+       assert(inherit || fontBoldItalic != null),
+       assert(inherit || fontSize != null),
+       assert(inherit || fontWeight != null),
+       assert(inherit || fontStyle != null),
+       assert(inherit || letterSpacing != null),
+       assert(inherit || wordSpacing != null),
+       assert(inherit || lineSpacing != null),
+       assert(inherit || height != null),
+       assert(inherit || decoration != null),
+       assert(inherit || decorationStyle != null),
+       assert(inherit || decorationThickness != null),
+       assert(inherit || renderingMode != null),
+       fontNormal =
+           fontNormal ??
+           (fontStyle != FontStyle.italic && fontWeight != FontWeight.bold
+               ? font
+               : null),
+       fontBold =
+           fontBold ??
+           (fontStyle != FontStyle.italic && fontWeight == FontWeight.bold
+               ? font
+               : null),
+       fontItalic =
+           fontItalic ??
+           (fontStyle == FontStyle.italic && fontWeight != FontWeight.bold
+               ? font
+               : null),
+       fontBoldItalic =
+           fontBoldItalic ??
+           (fontStyle == FontStyle.italic && fontWeight == FontWeight.bold
+               ? font
+               : null);
 
   factory TextStyle.defaultStyle() {
     return TextStyle(
@@ -298,10 +302,14 @@ class TextStyle {
     TextDecoration decoration = TextDecoration.none,
   }) {
     assert(fontSize != null || (fontSizeFactor == 1.0 && fontSizeDelta == 0.0));
-    assert(letterSpacing != null ||
-        (letterSpacingFactor == 1.0 && letterSpacingDelta == 0.0));
-    assert(wordSpacing != null ||
-        (wordSpacingFactor == 1.0 && wordSpacingDelta == 0.0));
+    assert(
+      letterSpacing != null ||
+          (letterSpacingFactor == 1.0 && letterSpacingDelta == 0.0),
+    );
+    assert(
+      wordSpacing != null ||
+          (wordSpacingFactor == 1.0 && wordSpacingDelta == 0.0),
+    );
     assert(heightFactor == 1.0 && heightDelta == 0.0);
 
     return TextStyle(
@@ -312,8 +320,9 @@ class TextStyle {
       fontBold: fontBold ?? this.fontBold,
       fontItalic: fontItalic ?? this.fontItalic,
       fontBoldItalic: fontBoldItalic ?? this.fontBoldItalic,
-      fontSize:
-          fontSize == null ? null : fontSize! * fontSizeFactor + fontSizeDelta,
+      fontSize: fontSize == null
+          ? null
+          : fontSize! * fontSizeFactor + fontSizeDelta,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       letterSpacing: letterSpacing == null
@@ -402,10 +411,7 @@ class Directionality extends StatelessWidget {
   /// text-direction-sensitive render objects.
   ///
   /// The [textDirection] and [child] arguments must not be null.
-  Directionality({
-    required this.textDirection,
-    required this.child,
-  });
+  Directionality({required this.textDirection, required this.child});
 
   /// The subtree
   final Widget child;

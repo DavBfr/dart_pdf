@@ -34,9 +34,14 @@ void _paintImage({
   final inputSize = PdfPoint(image.width.toDouble(), image.height.toDouble());
   fit ??= BoxFit.scaleDown;
   final fittedSizes = applyBoxFit(
-      fit, PdfPoint(inputSize.x / scale, inputSize.y / scale), outputSize);
-  final sourceSize =
-      PdfPoint(fittedSizes.source!.x * scale, fittedSizes.source!.y * scale);
+    fit,
+    PdfPoint(inputSize.x / scale, inputSize.y / scale),
+    outputSize,
+  );
+  final sourceSize = PdfPoint(
+    fittedSizes.source!.x * scale,
+    fittedSizes.source!.y * scale,
+  );
   final destinationSize = fittedSizes.destination!;
   final halfWidthDelta = (outputSize.x - destinationSize.x) / 2.0;
   final halfHeightDelta = (outputSize.y - destinationSize.y) / 2.0;
@@ -44,8 +49,10 @@ void _paintImage({
   final dy = halfHeightDelta + alignment.y * halfHeightDelta;
 
   final destinationPosition = rect.leftBottom.translate(dx, dy);
-  final destinationRect =
-      PdfRect.fromPoints(destinationPosition, destinationSize);
+  final destinationRect = PdfRect.fromPoints(
+    destinationPosition,
+    destinationSize,
+  );
   final sourceRect = alignment.inscribe(
     sourceSize,
     PdfRect.fromPoints(PdfPoint.zero, inputSize),
@@ -53,8 +60,12 @@ void _paintImage({
   _drawImageRect(canvas, image, sourceRect, destinationRect);
 }
 
-void _drawImageRect(PdfGraphics canvas, PdfImage image, PdfRect sourceRect,
-    PdfRect destinationRect) {
+void _drawImageRect(
+  PdfGraphics canvas,
+  PdfImage image,
+  PdfRect sourceRect,
+  PdfRect destinationRect,
+) {
   final fw = destinationRect.width / sourceRect.width;
   final fh = destinationRect.height / sourceRect.height;
 
@@ -95,21 +106,27 @@ class Image extends Widget {
   final double? dpi;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
-    final w = width ??
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
+    final w =
+        width ??
         (constraints.hasBoundedWidth
             ? constraints.maxWidth
             : constraints.constrainWidth(image.width!.toDouble()));
-    final h = height ??
+    final h =
+        height ??
         (constraints.hasBoundedHeight
             ? constraints.maxHeight
             : constraints.constrainHeight(image.height!.toDouble()));
 
     final sizes = applyBoxFit(
-        fit,
-        PdfPoint(image.width!.toDouble(), image.height!.toDouble()),
-        PdfPoint(w, h));
+      fit,
+      PdfPoint(image.width!.toDouble(), image.height!.toDouble()),
+      PdfPoint(w, h),
+    );
     box = PdfRect.fromPoints(PdfPoint.zero, sizes.destination!);
   }
 
@@ -137,8 +154,8 @@ class Shape extends Widget {
     this.width,
     this.height,
     this.fit = BoxFit.contain,
-  })  : assert(width == null || width > 0.0),
-        assert(height == null || height > 0.0);
+  }) : assert(width == null || width > 0.0),
+       assert(height == null || height > 0.0);
 
   final String shape;
 
@@ -155,8 +172,11 @@ class Shape extends Widget {
   late PdfRect _boundingBox;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     if (width == null || height == null) {
       // Compute the bounding box
       _boundingBox = PdfGraphics.shapeBoundingBox(shape);
@@ -172,10 +192,7 @@ class Shape extends Widget {
         : constraints.constrainHeight(_boundingBox.height);
 
     final sizes = applyBoxFit(fit, _boundingBox.size, PdfPoint(w, h));
-    box = PdfRect.fromPoints(
-      PdfPoint.zero,
-      sizes.destination!,
-    );
+    box = PdfRect.fromPoints(PdfPoint.zero, sizes.destination!);
   }
 
   @override
@@ -187,8 +204,12 @@ class Shape extends Widget {
       ..setTransform(
         Matrix4.identity()
           ..translateByDouble(box!.left, box!.bottom + box!.height, 0, 1)
-          ..scaleByDouble(box!.width / _boundingBox.width,
-              -box!.height / _boundingBox.height, 1, 1)
+          ..scaleByDouble(
+            box!.width / _boundingBox.width,
+            -box!.height / _boundingBox.height,
+            1,
+            1,
+          )
           ..translateByDouble(-_boundingBox.left, -_boundingBox.bottom, 0, 1),
       );
 

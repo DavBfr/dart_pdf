@@ -93,8 +93,12 @@ class PdfJpegInfo {
   }
 
   PdfJpegInfo._(
-      this.width, this.height, this._color, this._adobeColorTransform,
-      this.tags);
+    this.width,
+    this.height,
+    this._color,
+    this._adobeColorTransform,
+    this.tags,
+  );
 
   /// Width of the image
   final int? width;
@@ -123,14 +127,14 @@ class PdfJpegInfo {
   /// EXIF version
   String? get exifVersion =>
       tags == null || tags![PdfExifTag.ExifVersion] == null
-          ? null
-          : utf8.decode(tags![PdfExifTag.ExifVersion]);
+      ? null
+      : utf8.decode(tags![PdfExifTag.ExifVersion]);
 
   /// Flashpix format version
   String? get flashpixVersion =>
       tags == null || tags![PdfExifTag.FlashpixVersion] == null
-          ? null
-          : utf8.decode(tags![PdfExifTag.FlashpixVersion]);
+      ? null
+      : utf8.decode(tags![PdfExifTag.FlashpixVersion]);
 
   /// Rotation angle of this image
   PdfImageOrientation get orientation {
@@ -153,31 +157,32 @@ class PdfJpegInfo {
   /// Exif horizontal resolution
   double? get xResolution =>
       tags == null || tags![PdfExifTag.XResolution] == null
-          ? null
-          : tags![PdfExifTag.XResolution][0].toDouble() /
-              tags![PdfExifTag.XResolution][1].toDouble();
+      ? null
+      : tags![PdfExifTag.XResolution][0].toDouble() /
+            tags![PdfExifTag.XResolution][1].toDouble();
 
   /// Exif vertical resolution
   double? get yResolution =>
       tags == null || tags![PdfExifTag.YResolution] == null
-          ? null
-          : tags![PdfExifTag.YResolution][0].toDouble() /
-              tags![PdfExifTag.YResolution][1].toDouble();
+      ? null
+      : tags![PdfExifTag.YResolution][0].toDouble() /
+            tags![PdfExifTag.YResolution][1].toDouble();
 
   /// Exif horizontal pixel dimension
   int? get pixelXDimension =>
       tags == null || tags![PdfExifTag.PixelXDimension] == null
-          ? width
-          : tags![PdfExifTag.PixelXDimension];
+      ? width
+      : tags![PdfExifTag.PixelXDimension];
 
   /// Exif vertical pixel dimension
   int? get pixelYDimension =>
       tags == null || tags![PdfExifTag.PixelYDimension] == null
-          ? height
-          : tags![PdfExifTag.PixelYDimension];
+      ? height
+      : tags![PdfExifTag.PixelYDimension];
 
   @override
-  String toString() => '''width: $width height: $height
+  String toString() =>
+      '''width: $width height: $height
 exifVersion: $exifVersion flashpixVersion: $flashpixVersion
 xResolution: $xResolution yResolution: $yResolution
 pixelXDimension: $pixelXDimension pixelYDimension: $pixelYDimension
@@ -195,8 +200,10 @@ orientation: $orientation''';
     while (offset < length) {
       final lastValue = buffer.getUint8(offset);
       if (lastValue != 0xFF) {
-        return <PdfExifTag,
-            dynamic>{}; // Not a valid marker at offset $offset, found: $lastValue
+        return <
+          PdfExifTag,
+          dynamic
+        >{}; // Not a valid marker at offset $offset, found: $lastValue
       }
 
       marker = buffer.getUint8(offset + 1);
@@ -349,8 +356,9 @@ orientation: $orientation''';
 
   static String _getStringFromDB(ByteData buffer, int start, int length) {
     return utf8.decode(
-        List<int>.generate(length, (int i) => buffer.getUint8(start + i)),
-        allowMalformed: true);
+      List<int>.generate(length, (int i) => buffer.getUint8(start + i)),
+      allowMalformed: true,
+    );
   }
 
   static Map<PdfExifTag, dynamic>? _readEXIFData(ByteData buffer, int start) {
@@ -385,12 +393,20 @@ orientation: $orientation''';
       return null;
     }
 
-    final tags =
-        _readTags(buffer, tiffOffset, tiffOffset + firstIFDOffset, bigEnd);
+    final tags = _readTags(
+      buffer,
+      tiffOffset,
+      tiffOffset + firstIFDOffset,
+      bigEnd,
+    );
 
     if (tags.containsKey(PdfExifTag.ExifIFDPointer)) {
-      final exifData = _readTags(buffer, tiffOffset,
-          tiffOffset + tags[PdfExifTag.ExifIFDPointer] as int, bigEnd);
+      final exifData = _readTags(
+        buffer,
+        tiffOffset,
+        tiffOffset + tags[PdfExifTag.ExifIFDPointer] as int,
+        bigEnd,
+      );
       tags.addAll(exifData);
     }
 

@@ -31,35 +31,39 @@ import 'ttffont.dart';
 /// see https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
 class PdfType1Font extends PdfFont {
   /// Constructs a [PdfTtfFont]
-  PdfType1Font.create(PdfDocument pdfDocument,
-      {required this.fontName,
-      required this.ascent,
-      required this.descent,
-      required List<int> fontBBox,
-      double italicAngle = 0,
-      required int capHeight,
-      required int stdHW,
-      required int stdVW,
-      bool isFixedPitch = false,
-      this.missingWidth = 0.600,
-      this.widths = const <double>[]})
-      : assert(() {
-          // ignore: avoid_print
-          print(
-              '$fontName has no Unicode support see https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management');
-          return true;
-        }()),
-        super.create(pdfDocument, subtype: '/Type1') {
+  PdfType1Font.create(
+    PdfDocument pdfDocument, {
+    required this.fontName,
+    required this.ascent,
+    required this.descent,
+    required List<int> fontBBox,
+    double italicAngle = 0,
+    required int capHeight,
+    required int stdHW,
+    required int stdVW,
+    bool isFixedPitch = false,
+    this.missingWidth = 0.600,
+    this.widths = const <double>[],
+  }) : assert(() {
+         // ignore: avoid_print
+         print(
+           '$fontName has no Unicode support see https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management',
+         );
+         return true;
+       }()),
+       super.create(pdfDocument, subtype: '/Type1') {
     params['/BaseFont'] = PdfName('/$fontName');
     if (settings.version.index >= PdfVersion.pdf_1_5.index) {
       params['/FirstChar'] = const PdfNum(0);
       params['/LastChar'] = const PdfNum(255);
       if (widths.isNotEmpty) {
-        params['/Widths'] =
-            PdfArray.fromNum(widths.map((e) => (e * unitsPerEm).toInt()));
+        params['/Widths'] = PdfArray.fromNum(
+          widths.map((e) => (e * unitsPerEm).toInt()),
+        );
       } else {
         params['/Widths'] = PdfArray.fromNum(
-            List<int>.filled(256, (missingWidth * unitsPerEm).toInt()));
+          List<int>.filled(256, (missingWidth * unitsPerEm).toInt()),
+        );
       }
 
       final fontDescriptor = PdfObject<PdfDict>(
@@ -105,7 +109,8 @@ class PdfType1Font extends PdfFont {
   PdfFontMetrics glyphMetrics(int charCode) {
     if (!isRuneSupported(charCode)) {
       throw Exception(
-          'Unable to display U+${charCode.toRadixString(16)} with $fontName');
+        'Unable to display U+${charCode.toRadixString(16)} with $fontName',
+      );
     }
 
     return PdfFontMetrics(

@@ -24,7 +24,7 @@ import 'object_stream.dart';
 
 abstract class PdfBaseFunction extends PdfObject<PdfDict> {
   PdfBaseFunction(PdfDocument pdfDocument)
-      : super(pdfDocument, params: PdfDict());
+    : super(pdfDocument, params: PdfDict());
 
   factory PdfBaseFunction.colorsAndStops(
     PdfDocument pdfDocument,
@@ -53,7 +53,8 @@ abstract class PdfBaseFunction extends PdfObject<PdfDict> {
 
     if (_stops.length != _colors.length) {
       throw Exception(
-          'The number of colors in a gradient must match the number of stops');
+        'The number of colors in a gradient must match the number of stops',
+      );
     }
 
     for (final c in _colors.sublist(1)) {
@@ -82,7 +83,9 @@ class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
   }) : super(pdfDocument);
 
   factory PdfFunction.fromColors(
-      PdfDocument pdfDocument, List<PdfColor?> colors) {
+    PdfDocument pdfDocument,
+    List<PdfColor?> colors,
+  ) {
     final data = <int>[];
     for (final color in colors) {
       data.add((color!.red * 255.0).round() & 0xff);
@@ -151,7 +154,8 @@ class PdfStitchingFunction extends PdfBaseFunction {
     params['/Domain'] = PdfArray.fromNum(<num>[domainStart, domainEnd]);
     params['/Bounds'] = PdfArray.fromNum(bounds);
     params['/Encode'] = PdfArray.fromNum(
-        List<int>.generate(functions.length * 2, (int i) => i % 2));
+      List<int>.generate(functions.length * 2, (int i) => i % 2),
+    );
   }
 
   @override

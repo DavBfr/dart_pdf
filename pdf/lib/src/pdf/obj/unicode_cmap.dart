@@ -34,32 +34,37 @@ class PdfUnicodeCmap extends PdfObjectStream {
       cmap.fillRange(1, cmap.length, 0x20);
     }
 
-    buf.putString('/CIDInit/ProcSet\nfindresource begin\n'
-        '12 dict begin\n'
-        'begincmap\n'
-        '/CIDSystemInfo<<\n'
-        '/Registry (Adobe)\n'
-        '/Ordering (UCS)\n'
-        '/Supplement 0\n'
-        '>> def\n'
-        '/CMapName/Adobe-Identity-UCS def\n'
-        '/CMapType 2 def\n'
-        '1 begincodespacerange\n'
-        '<0000> <FFFF>\n'
-        'endcodespacerange\n'
-        '${cmap.length} beginbfchar\n');
+    buf.putString(
+      '/CIDInit/ProcSet\nfindresource begin\n'
+      '12 dict begin\n'
+      'begincmap\n'
+      '/CIDSystemInfo<<\n'
+      '/Registry (Adobe)\n'
+      '/Ordering (UCS)\n'
+      '/Supplement 0\n'
+      '>> def\n'
+      '/CMapName/Adobe-Identity-UCS def\n'
+      '/CMapType 2 def\n'
+      '1 begincodespacerange\n'
+      '<0000> <FFFF>\n'
+      'endcodespacerange\n'
+      '${cmap.length} beginbfchar\n',
+    );
 
     for (var key = 0; key < cmap.length; key++) {
       final value = cmap[key];
       buf.putString(
-          '<${key.toRadixString(16).toUpperCase().padLeft(4, '0')}> <${value.toRadixString(16).toUpperCase().padLeft(4, '0')}>\n');
+        '<${key.toRadixString(16).toUpperCase().padLeft(4, '0')}> <${value.toRadixString(16).toUpperCase().padLeft(4, '0')}>\n',
+      );
     }
 
-    buf.putString('endbfchar\n'
-        'endcmap\n'
-        'CMapName currentdict /CMap defineresource pop\n'
-        'end\n'
-        'end');
+    buf.putString(
+      'endbfchar\n'
+      'endcmap\n'
+      'CMapName currentdict /CMap defineresource pop\n'
+      'end\n'
+      'end',
+    );
     super.prepare();
   }
 }

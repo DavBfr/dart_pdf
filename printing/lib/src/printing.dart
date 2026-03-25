@@ -224,11 +224,7 @@ mixin Printing {
     String? baseUrl,
     PdfPageFormat format = PdfPageFormat.standard,
   }) {
-    return PrintingPlatform.instance.convertHtml(
-      html,
-      baseUrl,
-      format,
-    );
+    return PrintingPlatform.instance.convertHtml(html, baseUrl, format);
   }
 
   /// Returns a [PrintingInfo] object representing the capabilities

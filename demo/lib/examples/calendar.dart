@@ -25,11 +25,7 @@ import 'package:printing/printing.dart';
 import '../data.dart';
 
 class Calendar extends StatelessWidget {
-  Calendar({
-    this.date,
-    this.month,
-    this.year,
-  });
+  Calendar({this.date, this.month, this.year});
 
   final DateTime? date;
 
@@ -37,35 +33,24 @@ class Calendar extends StatelessWidget {
 
   final int? year;
 
-  Widget title(
-    Context context,
-    DateTime date,
-  ) {
+  Widget title(Context context, DateTime date) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 8),
       child: Text(
         DateFormat.yMMMM().format(date),
-        style: const TextStyle(
-          color: PdfColors.deepPurple,
-          fontSize: 40,
-        ),
+        style: const TextStyle(color: PdfColors.deepPurple, fontSize: 40),
       ),
     );
   }
 
-  Widget header(
-    Context context,
-    DateTime date,
-  ) {
+  Widget header(Context context, DateTime date) {
     return Container(
       color: PdfColors.blue200,
       padding: const EdgeInsets.only(top: 8, left: 8, bottom: 8),
       child: Text(
         DateFormat.EEEE().format(date),
-        style: const TextStyle(
-          fontSize: 15,
-        ),
+        style: const TextStyle(fontSize: 15),
         maxLines: 1,
         overflow: TextOverflow.clip,
       ),
@@ -99,11 +84,7 @@ class Calendar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       color: color,
-      child: Text(
-        text,
-        textAlign: TextAlign.right,
-        style: style,
-      ),
+      child: Text(text, textAlign: TextAlign.right, style: style),
     );
   }
 
@@ -114,9 +95,12 @@ class Calendar extends StatelessWidget {
     final localMnth = month ?? localDate.month;
 
     final start = DateTime(localYear, localMnth, 1, 12);
-    final end = DateTime(localYear, localMnth + 1, 1, 12).subtract(
-      const Duration(days: 1),
-    );
+    final end = DateTime(
+      localYear,
+      localMnth + 1,
+      1,
+      12,
+    ).subtract(const Duration(days: 1));
 
     final startId = start.weekday - 1;
     final endId = end.difference(start).inDays + startId + 1;
@@ -148,18 +132,20 @@ class Calendar extends StatelessWidget {
       children: List<Widget>.generate(42, (int index) {
         final d = start.add(Duration(days: index - startId));
         final currentMonth = index >= startId && index < endId;
-        final currentDay = d.year == localDate.year &&
+        final currentDay =
+            d.year == localDate.year &&
             d.month == localDate.month &&
             d.day == localDate.day;
         return Container(
           foregroundDecoration: BoxDecoration(
-              border: Border(
-            left: const BorderSide(color: PdfColors.grey),
-            right: index % 7 == 6
-                ? const BorderSide(color: PdfColors.grey)
-                : BorderSide.none,
-            bottom: const BorderSide(color: PdfColors.grey),
-          )),
+            border: Border(
+              left: const BorderSide(color: PdfColors.grey),
+              right: index % 7 == 6
+                  ? const BorderSide(color: PdfColors.grey)
+                  : BorderSide.none,
+              bottom: const BorderSide(color: PdfColors.grey),
+            ),
+          ),
           child: day(context, d, currentMonth, currentDay),
         );
       }),
@@ -180,7 +166,9 @@ class Calendar extends StatelessWidget {
 }
 
 Future<Uint8List> generateCalendar(
-    PdfPageFormat pageFormat, CustomData data) async {
+  PdfPageFormat pageFormat,
+  CustomData data,
+) async {
   //Create a PDF document.
   final document = Document();
   final date = DateTime.now();
@@ -204,13 +192,11 @@ Future<Uint8List> generateCalendar(
         buildForeground: bg == null
             ? null
             : (context) =>
-                FullPage(ignoreMargins: true, child: SvgImage(svg: bg!)),
+                  FullPage(ignoreMargins: true, child: SvgImage(svg: bg!)),
       ),
       build: (context) => Padding(
         padding: const EdgeInsets.only(right: 20),
-        child: Calendar(
-          date: date,
-        ),
+        child: Calendar(date: date),
       ),
     ),
   );

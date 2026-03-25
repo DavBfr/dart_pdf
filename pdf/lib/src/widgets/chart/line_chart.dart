@@ -46,17 +46,17 @@ class LineDataSet<T extends PointChartValue> extends PointDataSet<T> {
     this.surfaceColor,
     this.isCurved = false,
     this.smoothness = 0.35,
-  })  : assert(drawLine || drawPoints || drawSurface),
-        super(
-          legend: legend,
-          color: pointColor ?? color,
-          data: data,
-          drawPoints: drawPoints,
-          pointSize: pointSize,
-          buildValue: buildValue,
-          shape: shape,
-          valuePosition: valuePosition,
-        );
+  }) : assert(drawLine || drawPoints || drawSurface),
+       super(
+         legend: legend,
+         color: pointColor ?? color,
+         data: data,
+         drawPoints: drawPoints,
+         pointSize: pointSize,
+         buildValue: buildValue,
+         shape: shape,
+         valuePosition: valuePosition,
+       );
 
   final bool drawLine;
   final PdfColor? lineColor;
@@ -70,8 +70,11 @@ class LineDataSet<T extends PointChartValue> extends PointDataSet<T> {
   final double smoothness;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
   }
 
@@ -103,7 +106,9 @@ class LineDataSet<T extends PointChartValue> extends PointDataSet<T> {
       final c1 = PdfPoint(pp.x + t.x, pp.y + t.y);
 
       t = PdfPoint(
-          (pn.x - pp.x) / 2 * smoothness, (pn.y - pp.y) / 2 * smoothness);
+        (pn.x - pp.x) / 2 * smoothness,
+        (pn.y - pp.y) / 2 * smoothness,
+      );
 
       final c2 = PdfPoint(p.x - t.x, p.y - t.y);
 
@@ -139,9 +144,7 @@ class LineDataSet<T extends PointChartValue> extends PointDataSet<T> {
       if (surfaceOpacity != 1) {
         context.canvas
           ..saveContext()
-          ..setGraphicState(
-            PdfGraphicState(opacity: surfaceOpacity),
-          );
+          ..setGraphicState(PdfGraphicState(opacity: surfaceOpacity));
       }
 
       context.canvas
