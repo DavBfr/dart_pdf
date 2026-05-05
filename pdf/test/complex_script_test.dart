@@ -397,6 +397,51 @@ void main() {
     });
   });
 
+  // ─── Mixed Script Tests ─────────────────────────────────────────────
+
+  group('Mixed script rendering', () {
+    late Font devaFont;
+    late Font malaFont;
+
+    setUpAll(() async {
+      devaFont = await _downloadFont('NotoSansDevanagari');
+      malaFont = await _downloadFont('NotoSansMalayalam');
+    });
+
+    test('Devanagari mixed with Latin', () {
+      final style = TextStyle(font: devaFont, fontSize: 20);
+      pdf.addPage(Page(
+        build: (ctx) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Mixed Scripts Test', style: TextStyle(fontSize: 18)),
+            SizedBox(height: 10),
+            // Latin + Devanagari + Latin in one span
+            Text('Hello नमस्ते World', style: style),
+            SizedBox(height: 8),
+            Text('India (भारत) is great', style: style),
+            SizedBox(height: 8),
+            Text('1234 हिन्दी 5678', style: style),
+          ],
+        ),
+      ));
+    });
+
+    test('Malayalam mixed with Latin', () {
+      final style = TextStyle(font: malaFont, fontSize: 20);
+      pdf.addPage(Page(
+        build: (ctx) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Kerala (കേരളം) is beautiful', style: style),
+            SizedBox(height: 8),
+            Text('100% മലയാളം supported!', style: style),
+          ],
+        ),
+      ));
+    });
+  });
+
   // ─── Save PDF ──────────────────────────────────────────────────────
 
   tearDownAll(() async {

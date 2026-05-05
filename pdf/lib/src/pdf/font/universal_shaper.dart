@@ -76,7 +76,88 @@ class ShapingResult {
   final List<String> scriptTags;
 }
 
-/// Shape complex script text using character reordering + GSUB.
+/// A run of codepoints that all belong to the same script.
+class _ScriptRun {
+  _ScriptRun(this.codepoints, this.indicConfig, this.nonIndicScript);
+
+  final List<int> codepoints;
+  final indic.ScriptConfig? indicConfig;
+  final _NonIndicScript? nonIndicScript;
+
+  bool get isCommon => indicConfig == null && nonIndicScript == null;
+  bool get isIndic => indicConfig != null;
+  bool get isNonIndic => nonIndicScript != null;
+}
+
+/// Segment codepoints into runs by script.
+/// Common characters (Latin, numbers, punctuation, spaces) get their own
+/// runs that are passed through without shaping.
+List<_ScriptRun> _segmentByScript(List<int> codepoints) {
+  final runs = <_ScriptRun>[];
+  if (codepoints.isEmpty) return runs;
+
+  var currentCps = <int>[];
+  indic.ScriptConfig? currentIndic;
+  _NonIndicScript? currentNonIndic;
+  var currentIsCommon = true;
+
+  void flushRun() {
+    if (currentCps.isNotEmpty) {
+      runs.add(_ScriptRun(
+        List.from(currentCps),
+        currentIndic,
+        currentNonIndic,
+      ));
+      currentCps.clear();
+    }
+  }
+
+  for (final cp in codepoints) {
+    final indicScript = indic.detectScript(cp);
+    final nonIndicScript = indicScript == null ? _detectNonIndic(cp) : null;
+    final isCommon = indicScript == null && nonIndicScript == null;
+
+    if (isCommon) {
+      // Common characters (Latin, space, punctuation) —
+      // continue the current run
+      currentCps.add(cp);
+    } else if (indicScript != null) {
+      // Indic character
+      if (!currentIsCommon && currentIndic != indicScript) {
+        // Different Indic script — start new run
+        flushRun();
+      } else if (currentIsCommon && currentCps.isNotEmpty) {
+        // Was common, now switching to Indic — flush common
+        flushRun();
+      }
+      currentIndic = indicScript;
+      currentNonIndic = null;
+      currentIsCommon = false;
+      currentCps.add(cp);
+    } else {
+      // Non-Indic complex script
+      if (!currentIsCommon && currentNonIndic != nonIndicScript) {
+        flushRun();
+      } else if (currentIsCommon && currentCps.isNotEmpty) {
+        flushRun();
+      }
+      currentIndic = null;
+      currentNonIndic = nonIndicScript;
+      currentIsCommon = false;
+      currentCps.add(cp);
+    }
+  }
+
+  flushRun();
+  return runs;
+}
+
+/// Shape complex script text using per-script-run segmentation.
+///
+/// Segments the text into runs of the same script, shapes each
+/// independently with the correct reordering + GSUB rules, then
+/// concatenates the results. This correctly handles mixed text
+/// like "Hello नमस्ते தமிழ் World".
 ///
 /// Returns the shaped glyph ID sequence, or null if no shaping was applied.
 ///
@@ -91,53 +172,55 @@ ShapingResult? shapeText(
   final codepoints = text.runes.toList();
   if (codepoints.isEmpty) return null;
 
-  // Try Indic script detection first
-  indic.ScriptConfig? indicConfig;
-  for (final cp in codepoints) {
-    indicConfig = indic.detectScript(cp);
-    if (indicConfig != null) break;
-  }
+  final runs = _segmentByScript(codepoints);
 
-  if (indicConfig != null) {
-    // Indic script: reorder + GSUB
-    final reordered = indic.reorder(codepoints);
-    final glyphIds = reordered.map(charToGlyph).toList();
+  // If no run has a complex script, no shaping needed
+  final hasComplex = runs.any((r) => !r.isCommon);
+  if (!hasComplex) return null;
 
-    // Apply GSUB
-    final gsubData = font.getGsubData(indicConfig.scriptTags);
-    if (gsubData != null) {
-      final shaped = gsubData.applyFeatures(
-        glyphIds,
-        indic.indicGsubFeatures,
-      );
-      return ShapingResult(shaped, indicConfig.scriptTags);
+  final allGlyphIds = <int>[];
+  var primaryScriptTags = <String>[];
+
+  for (final run in runs) {
+    if (run.isCommon) {
+      // Common text (Latin, spaces, etc.) — just convert to glyph IDs
+      allGlyphIds.addAll(run.codepoints.map(charToGlyph));
+    } else if (run.isIndic) {
+      // Indic script: reorder + GSUB
+      final reordered = indic.reorder(run.codepoints);
+      var glyphIds = reordered.map(charToGlyph).toList();
+
+      final gsubData = font.getGsubData(run.indicConfig!.scriptTags);
+      if (gsubData != null) {
+        glyphIds = gsubData.applyFeatures(
+          glyphIds,
+          indic.indicGsubFeatures,
+        );
+      }
+
+      allGlyphIds.addAll(glyphIds);
+      if (primaryScriptTags.isEmpty) {
+        primaryScriptTags = run.indicConfig!.scriptTags;
+      }
+    } else if (run.isNonIndic) {
+      // Non-Indic: GSUB-only
+      var glyphIds = run.codepoints.map(charToGlyph).toList();
+
+      final gsubData = font.getGsubData(run.nonIndicScript!.scriptTags);
+      if (gsubData != null) {
+        glyphIds = gsubData.applyFeatures(
+          glyphIds,
+          run.nonIndicScript!.features,
+        );
+      }
+
+      allGlyphIds.addAll(glyphIds);
+      if (primaryScriptTags.isEmpty) {
+        primaryScriptTags = run.nonIndicScript!.scriptTags;
+      }
     }
-
-    return ShapingResult(glyphIds, indicConfig.scriptTags);
   }
 
-  // Try non-Indic complex script detection
-  _NonIndicScript? nonIndicScript;
-  for (final cp in codepoints) {
-    nonIndicScript = _detectNonIndic(cp);
-    if (nonIndicScript != null) break;
-  }
-
-  if (nonIndicScript != null) {
-    // Non-Indic: GSUB-only (no character reordering)
-    final glyphIds = codepoints.map(charToGlyph).toList();
-
-    final gsubData = font.getGsubData(nonIndicScript.scriptTags);
-    if (gsubData != null) {
-      final shaped = gsubData.applyFeatures(
-        glyphIds,
-        nonIndicScript.features,
-      );
-      return ShapingResult(shaped, nonIndicScript.scriptTags);
-    }
-
-    return ShapingResult(glyphIds, nonIndicScript.scriptTags);
-  }
-
-  return null;
+  return ShapingResult(allGlyphIds, primaryScriptTags);
 }
+
