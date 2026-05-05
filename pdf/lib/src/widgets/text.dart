@@ -21,6 +21,7 @@ import 'package:meta/meta.dart';
 import '../../pdf.dart';
 import '../pdf/font/arabic.dart' as arabic;
 import '../pdf/font/bidi_utils.dart' as bidi;
+import '../pdf/font/malayalam.dart' as malayalam;
 import '../pdf/options.dart';
 import 'annotations.dart';
 import 'basic.dart';
@@ -953,12 +954,24 @@ class RichText extends Widget with SpanningWidget {
           final space =
               font.stringMetrics(' ') * (style.fontSize! * textScaleFactor);
 
+          // Apply text shaping
+          String? shapedText = span.text;
+
+          // Malayalam shaping (auto-detect, works for any direction)
+          if (useMalayalam &&
+              font is PdfTtfFont &&
+              malayalam.containsMalayalam(shapedText!)) {
+            shapedText =
+                (font as PdfTtfFont).shapeMalayalam(shapedText) ??
+                    shapedText;
+          }
+
           final spanLines =
               (useArabic && _textDirection == TextDirection.rtl
-                      ? arabic.convert(span.text!)
+                      ? arabic.convert(shapedText!)
                       : useBidi && _textDirection == TextDirection.rtl
-                      ? bidi.logicalToVisual(span.text!)
-                      : span.text)!
+                      ? bidi.logicalToVisual(shapedText!)
+                      : shapedText)!
                   .split('\n');
 
           for (var line = 0; line < spanLines.length; line++) {

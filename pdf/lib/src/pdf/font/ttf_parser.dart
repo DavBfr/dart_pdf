@@ -25,6 +25,7 @@ import 'package:meta/meta.dart';
 import '../options.dart';
 import 'bidi_utils.dart' as bidi;
 import 'font_metrics.dart';
+import 'gsub_parser.dart';
 
 enum TtfParserName {
   copyright,
@@ -179,6 +180,7 @@ class TtfParser {
   static const String cbdt_table = 'CBDT';
   static const String post_table = 'post';
   static const String os_2_table = 'OS/2';
+  static const String gsub_table = 'GSUB';
 
   final ByteData bytes;
   final tableOffsets = <String, int>{};
@@ -189,6 +191,22 @@ class TtfParser {
   final glyphSizes = <int>[];
   final glyphInfoMap = <int, PdfFontMetrics>{};
   final bitmapOffsets = <int, TtfBitmapInfo>{};
+
+  GsubData? _gsubData;
+  bool _gsubParsed = false;
+
+  /// Lazily parsed GSUB data for the given script tags.
+  GsubData? getGsubData(List<String> scriptTags) {
+    if (_gsubParsed) return _gsubData;
+    _gsubParsed = true;
+
+    final gsubOffset = tableOffsets[gsub_table];
+    if (gsubOffset == null) return null;
+
+    final parser = GsubParser(bytes);
+    _gsubData = parser.parse(gsubOffset, scriptTags);
+    return _gsubData;
+  }
 
   int get unitsPerEm => bytes.getUint16(tableOffsets[head_table]! + 18);
 

@@ -21,6 +21,8 @@ import '../document.dart';
 import '../font/arabic.dart' as arabic;
 import '../font/bidi_utils.dart' as bidi;
 import '../font/font_metrics.dart';
+import '../font/gsub_parser.dart';
+import '../font/malayalam.dart' as malayalam;
 import '../font/ttf_parser.dart';
 import '../font/ttf_writer.dart';
 import '../format/array.dart';
@@ -60,6 +62,15 @@ class PdfTtfFont extends PdfFont {
 
   final TtfParser font;
 
+  /// Map of glyph ID → PUA codepoint for GSUB-derived glyphs
+  final _glyphToPua = <int, int>{};
+
+  /// Reverse map: PUA codepoint → glyph ID
+  final _puaToGlyph = <int, int>{};
+
+  /// Next available PUA codepoint (Private Use Area: U+E000–U+F8FF)
+  int _nextPua = 0xE000;
+
   @override
   String get fontName => font.fontName;
 
@@ -91,6 +102,77 @@ class PdfTtfFont extends PdfFont {
     }
 
     return font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
+  }
+
+  /// Get glyph metrics by glyph ID directly (for GSUB-derived glyphs).
+  PdfFontMetrics _glyphMetricsByGlyphId(int glyphId) {
+    return font.glyphInfoMap[glyphId] ?? PdfFontMetrics.zero;
+  }
+
+  /// Get or create a PUA codepoint for a glyph ID.
+  int _getPuaForGlyph(int glyphId) {
+    return _glyphToPua.putIfAbsent(glyphId, () {
+      final pua = _nextPua++;
+      _puaToGlyph[pua] = glyphId;
+      // Register in the font's char→glyph map so metrics work
+      font.charToGlyphIndexMap[pua] = glyphId;
+      return pua;
+    });
+  }
+
+  /// Shape Malayalam text: reorder characters, apply GSUB, return
+  /// a string of codepoints (possibly including PUA codes for ligatures)
+  /// that can be passed to putText.
+  String? shapeMalayalam(String text) {
+    if (!useMalayalam || !malayalam.containsMalayalam(text)) return null;
+
+    final codepoints = text.runes.toList();
+    final reordered = malayalam.reorder(codepoints);
+
+    // Convert to glyph IDs for GSUB processing
+    final glyphIds = reordered
+        .map((cp) => font.charToGlyphIndexMap[cp] ?? 0)
+        .toList();
+
+    // Apply GSUB substitutions
+    final gsubData =
+        font.getGsubData(const ['mlm2', 'mlym']);
+    List<int> shapedGlyphs;
+    if (gsubData != null) {
+      shapedGlyphs = gsubData.applyFeatures(
+        glyphIds,
+        malayalam.malayalamFeatures,
+      );
+    } else {
+      shapedGlyphs = glyphIds;
+    }
+
+    // Convert shaped glyph IDs back to codepoints.
+    // For glyphs that came from the original codepoints, use original.
+    // For GSUB-derived glyphs, use PUA codepoints.
+    final resultCodepoints = <int>[];
+    for (var i = 0; i < shapedGlyphs.length; i++) {
+      final glyphId = shapedGlyphs[i];
+      if (glyphId == 0) continue; // skip null glyphs
+
+      // Check if this glyph ID corresponds to an original codepoint
+      int? originalCp;
+      for (final entry in font.charToGlyphIndexMap.entries) {
+        if (entry.value == glyphId && entry.key < 0xE000) {
+          originalCp = entry.key;
+          break;
+        }
+      }
+
+      if (originalCp != null) {
+        resultCodepoints.add(originalCp);
+      } else {
+        // GSUB-derived glyph — assign PUA codepoint
+        resultCodepoints.add(_getPuaForGlyph(glyphId));
+      }
+    }
+
+    return String.fromCharCodes(resultCodepoints);
   }
 
   void _buildTrueType(PdfDict params) {

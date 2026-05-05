@@ -6,3 +6,9 @@ const bool useArabic = bool.fromEnvironment(
   'use_arabic',
   defaultValue: !useBidi,
 );
+
+/// Whether to use Malayalam shaping with OpenType GSUB.
+const bool useMalayalam = bool.fromEnvironment(
+  'use_malayalam',
+  defaultValue: true,
+);
