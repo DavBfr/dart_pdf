@@ -100,13 +100,26 @@ class PdfTtfFont extends PdfFont {
       return metric.copyWith(advanceWidth: 0);
     }
 
-    return font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
+    var metrics = font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
+
+    // Apply GPOS advance width adjustment if available
+    final adjustment = _gposAdvanceAdjust[charCode];
+    if (adjustment != null && adjustment != 0) {
+      metrics = metrics.copyWith(
+        advanceWidth: metrics.advanceWidth + adjustment / font.unitsPerEm,
+      );
+    }
+
+    return metrics;
   }
 
   /// Get glyph metrics by glyph ID directly (for GSUB-derived glyphs).
   PdfFontMetrics _glyphMetricsByGlyphId(int glyphId) {
     return font.glyphInfoMap[glyphId] ?? PdfFontMetrics.zero;
   }
+
+  /// GPOS advance width adjustments per codepoint (kerning, etc.)
+  final _gposAdvanceAdjust = <int, int>{};
 
   /// Get or create a PUA codepoint for a glyph ID.
   int _getPuaForGlyph(int glyphId) {
@@ -119,9 +132,9 @@ class PdfTtfFont extends PdfFont {
     });
   }
 
-  /// Shape complex script text: reorder characters, apply GSUB, return
-  /// a string of codepoints (possibly including PUA codes for ligatures)
-  /// that can be passed to putText.
+  /// Shape complex script text: reorder characters, apply GSUB + GPOS,
+  /// return a string of codepoints (possibly including PUA codes for
+  /// ligatures) that can be passed to putText.
   ///
   /// Supports all Indic scripts (Devanagari, Bengali, Tamil, Telugu,
   /// Kannada, Malayalam, Gujarati, Gurmukhi, Oriya) and other complex
@@ -153,11 +166,21 @@ class PdfTtfFont extends PdfFont {
         }
       }
 
+      int cp;
       if (originalCp != null) {
-        resultCodepoints.add(originalCp);
+        cp = originalCp;
       } else {
         // GSUB-derived glyph — assign PUA codepoint
-        resultCodepoints.add(_getPuaForGlyph(glyphId));
+        cp = _getPuaForGlyph(glyphId);
+      }
+      resultCodepoints.add(cp);
+
+      // Store GPOS advance adjustment for this codepoint
+      if (result.positions != null && i < result.positions!.length) {
+        final pos = result.positions![i];
+        if (pos.xAdvanceAdjust != 0) {
+          _gposAdvanceAdjust[cp] = pos.xAdvanceAdjust;
+        }
       }
     }
 

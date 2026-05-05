@@ -28,6 +28,9 @@ class CoverageTable {
   /// Whether [glyphId] is covered.
   bool covers(int glyphId) => _glyphToIndex.containsKey(glyphId);
 
+  /// All glyph-to-index entries in the coverage table.
+  Iterable<MapEntry<int, int>> get entries => _glyphToIndex.entries;
+
   /// Parse a coverage table at [offset] in [bytes].
   factory CoverageTable.parse(ByteData bytes, int offset) {
     final format = bytes.getUint16(offset);

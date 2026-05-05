@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import 'gpos_parser.dart';
 import 'gsub_parser.dart';
 import 'indic.dart' as indic;
 import 'ttf_parser.dart';
@@ -67,13 +68,17 @@ bool containsComplexScript(String text) {
   return false;
 }
 
-/// Result of shaping text — contains the glyph IDs and the script
-/// that was detected.
+/// Result of shaping text — contains the glyph IDs, positioning
+/// adjustments, and the script that was detected.
 class ShapingResult {
-  const ShapingResult(this.glyphIds, this.scriptTags);
+  const ShapingResult(this.glyphIds, this.scriptTags, [this.positions]);
 
   final List<int> glyphIds;
   final List<String> scriptTags;
+
+  /// Per-glyph positioning adjustments from GPOS.
+  /// null if no GPOS data was found.
+  final List<GlyphPosition>? positions;
 }
 
 /// A run of codepoints that all belong to the same script.
@@ -221,6 +226,14 @@ ShapingResult? shapeText(
     }
   }
 
-  return ShapingResult(allGlyphIds, primaryScriptTags);
-}
+  // Apply GPOS positioning
+  List<GlyphPosition>? positions;
+  if (primaryScriptTags.isNotEmpty) {
+    final gposData = font.getGposData(primaryScriptTags);
+    if (gposData != null) {
+      positions = gposData.position(allGlyphIds);
+    }
+  }
 
+  return ShapingResult(allGlyphIds, primaryScriptTags, positions);
+}
