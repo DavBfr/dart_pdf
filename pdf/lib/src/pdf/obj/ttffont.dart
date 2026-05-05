@@ -21,8 +21,7 @@ import '../document.dart';
 import '../font/arabic.dart' as arabic;
 import '../font/bidi_utils.dart' as bidi;
 import '../font/font_metrics.dart';
-import '../font/gsub_parser.dart';
-import '../font/malayalam.dart' as malayalam;
+import '../font/universal_shaper.dart' as shaper;
 import '../font/ttf_parser.dart';
 import '../font/ttf_writer.dart';
 import '../format/array.dart';
@@ -120,39 +119,29 @@ class PdfTtfFont extends PdfFont {
     });
   }
 
-  /// Shape Malayalam text: reorder characters, apply GSUB, return
+  /// Shape complex script text: reorder characters, apply GSUB, return
   /// a string of codepoints (possibly including PUA codes for ligatures)
   /// that can be passed to putText.
-  String? shapeMalayalam(String text) {
-    if (!useMalayalam || !malayalam.containsMalayalam(text)) return null;
+  ///
+  /// Supports all Indic scripts (Devanagari, Bengali, Tamil, Telugu,
+  /// Kannada, Malayalam, Gujarati, Gurmukhi, Oriya) and other complex
+  /// scripts (Thai, Khmer, Myanmar, Tibetan, Sinhala, Lao).
+  String? shapeComplexText(String text) {
+    if (!useComplexScripts) return null;
 
-    final codepoints = text.runes.toList();
-    final reordered = malayalam.reorder(codepoints);
-
-    // Convert to glyph IDs for GSUB processing
-    final glyphIds = reordered
-        .map((cp) => font.charToGlyphIndexMap[cp] ?? 0)
-        .toList();
-
-    // Apply GSUB substitutions
-    final gsubData =
-        font.getGsubData(const ['mlm2', 'mlym']);
-    List<int> shapedGlyphs;
-    if (gsubData != null) {
-      shapedGlyphs = gsubData.applyFeatures(
-        glyphIds,
-        malayalam.malayalamFeatures,
-      );
-    } else {
-      shapedGlyphs = glyphIds;
-    }
+    final result = shaper.shapeText(
+      text,
+      font,
+      (cp) => font.charToGlyphIndexMap[cp] ?? 0,
+    );
+    if (result == null) return null;
 
     // Convert shaped glyph IDs back to codepoints.
     // For glyphs that came from the original codepoints, use original.
     // For GSUB-derived glyphs, use PUA codepoints.
     final resultCodepoints = <int>[];
-    for (var i = 0; i < shapedGlyphs.length; i++) {
-      final glyphId = shapedGlyphs[i];
+    for (var i = 0; i < result.glyphIds.length; i++) {
+      final glyphId = result.glyphIds[i];
       if (glyphId == 0) continue; // skip null glyphs
 
       // Check if this glyph ID corresponds to an original codepoint

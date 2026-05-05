@@ -21,7 +21,7 @@ import 'package:meta/meta.dart';
 import '../../pdf.dart';
 import '../pdf/font/arabic.dart' as arabic;
 import '../pdf/font/bidi_utils.dart' as bidi;
-import '../pdf/font/malayalam.dart' as malayalam;
+import '../pdf/font/universal_shaper.dart' as shaper;
 import '../pdf/options.dart';
 import 'annotations.dart';
 import 'basic.dart';
@@ -957,12 +957,15 @@ class RichText extends Widget with SpanningWidget {
           // Apply text shaping
           String? shapedText = span.text;
 
-          // Malayalam shaping (auto-detect, works for any direction)
-          if (useMalayalam &&
+          // Complex script shaping (auto-detect, works for any direction)
+          // Supports: Devanagari, Bengali, Tamil, Telugu, Kannada,
+          // Malayalam, Gujarati, Gurmukhi, Oriya, Thai, Khmer,
+          // Myanmar, Tibetan, Sinhala, Lao
+          if (useComplexScripts &&
               font is PdfTtfFont &&
-              malayalam.containsMalayalam(shapedText!)) {
+              shaper.containsComplexScript(shapedText!)) {
             shapedText =
-                (font as PdfTtfFont).shapeMalayalam(shapedText) ??
+                (font as PdfTtfFont).shapeComplexText(shapedText) ??
                     shapedText;
           }
 
