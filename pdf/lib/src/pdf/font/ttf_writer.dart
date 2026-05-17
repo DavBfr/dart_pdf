@@ -130,7 +130,24 @@ class TtfWriter {
     for (final char in chars) {
       final glyphsIndex = charMap[char];
       if (glyphsIndex != null) {
-        glyphsInfo.add(glyphsMap[glyphsIndex] ?? glyphsMap.values.first);
+        final glyph = glyphsMap[glyphsIndex];
+        if (glyph != null) {
+          glyphsInfo.add(glyph);
+        } else if (glyphsMap.isNotEmpty) {
+          glyphsInfo.add(glyphsMap.values.first);
+        } else {
+          // The font has no glyph reachable for [char] AND every other glyph in the
+          // subset has already been consumed, so `glyphsMap.values.first` would throw
+          // `Bad state: No element`. Surface a clearer diagnostic that names the
+          // offending codepoint — this is typically a font/charset mismatch
+          // (e.g. Arabic Presentation Forms in a font with no Presentation glyphs).
+          throw Exception(
+            "Missing glyph for character '${String.fromCharCode(char)}' "
+            '(U+${char.toRadixString(16).toUpperCase().padLeft(4, '0')}) '
+            'in font ${ttf.fontName}. Use a font that includes this codepoint, '
+            "or strip/normalize the character before passing it to the PDF.",
+          );
+        }
         glyphsMap.remove(glyphsIndex);
       }
     }
