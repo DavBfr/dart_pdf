@@ -29,9 +29,11 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     private var printOperation: NSPrintOperation?
     private var pdfDocument: CGPDFDocument?
     private var page: CGPDFPage?
-    private let semaphore = DispatchSemaphore(value: 0)
+    private var isWaitingForDocument = false
+    private var documentReceived = false
     private var dynamic = false
     private var _window: NSWindow?
+    private var lastLayoutParams: (width: CGFloat, height: CGFloat, marginLeft: CGFloat, marginTop: CGFloat, marginRight: CGFloat, marginBottom: CGFloat)?
 
     public init(printing: PrintingPlugin, index: Int) {
         self.printing = printing
@@ -44,6 +46,13 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         fatalError("init(coder:) has not been implemented")
     }
 
+    private func layoutParamsChanged(_ new: (width: CGFloat, height: CGFloat, marginLeft: CGFloat, marginTop: CGFloat, marginRight: CGFloat, marginBottom: CGFloat)) -> Bool {
+        guard let last = lastLayoutParams else { return true }
+        return last.width != new.width || last.height != new.height ||
+               last.marginLeft != new.marginLeft || last.marginTop != new.marginTop ||
+               last.marginRight != new.marginRight || last.marginBottom != new.marginBottom
+    }
+
     // Return the number of pages available for printing
     override public func knowsPageRange(_ range: NSRangePointer) -> Bool {
         let size = printOperation!.showsPrintPanel ? printOperation!.printPanel.printInfo.paperSize : printOperation!.printInfo.paperSize
@@ -52,8 +61,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         setBoundsSize(size)
 
         if dynamic {
-            printing.onLayout(
-                printJob: self,
+            let currentParams = (
                 width: printOperation!.printInfo.paperSize.width,
                 height: printOperation!.printInfo.paperSize.height,
                 marginLeft: printOperation!.printInfo.leftMargin,
@@ -61,9 +69,30 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
                 marginRight: printOperation!.printInfo.rightMargin,
                 marginBottom: printOperation!.printInfo.bottomMargin
             )
+            
+            if layoutParamsChanged(currentParams) {
+                lastLayoutParams = currentParams
+                
+                printing.onLayout(
+                    printJob: self,
+                    width: currentParams.width,
+                    height: currentParams.height,
+                    marginLeft: currentParams.marginLeft,
+                    marginTop: currentParams.marginTop,
+                    marginRight: currentParams.marginRight,
+                    marginBottom: currentParams.marginBottom
+                )
 
-            // Block the main thread, waiting for a document
-            semaphore.wait()
+                // Wait for document using RunLoop to keep main thread responsive
+                isWaitingForDocument = true
+                documentReceived = false
+                let runLoop = RunLoop.current
+                let timeout = Date(timeIntervalSinceNow: 30.0)
+                while !documentReceived && Date() < timeout {
+                    runLoop.run(mode: .default, before: Date(timeIntervalSinceNow: 0.1))
+                }
+                isWaitingForDocument = false
+            }
         }
 
         if pdfDocument != nil {
@@ -95,8 +124,8 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         pdfDocument = CGPDFDocument(dataProvider!)
 
         if dynamic {
-            // Unblock the main thread
-            semaphore.signal()
+            // Signal that document is ready
+            documentReceived = true
             return
         }
 
@@ -136,6 +165,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     public func printPdf(name: String, withPageSize size: CGSize, andMargin _: CGRect, withPrinter printer: String?, dynamically dyn: Bool, andWindow window: NSWindow) {
         dynamic = dyn
         _window = window
+        lastLayoutParams = nil
         let sharedInfo = NSPrintInfo.shared
         let sharedDict = sharedInfo.dictionary()
         let printInfoDict = NSMutableDictionary(dictionary: sharedDict)
@@ -184,8 +214,9 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
 
     func cancelJob(_ error: String?) {
         pdfDocument = nil
+        lastLayoutParams = nil
         if dynamic {
-            semaphore.signal()
+            documentReceived = true
         } else {
             printing.onCompleted(printJob: self, completed: false, error: error as NSString?)
         }

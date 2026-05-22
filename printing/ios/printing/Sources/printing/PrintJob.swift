@@ -84,7 +84,8 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             controller.delegate = self
 
             let printInfo = UIPrintInfo.printInfo()
-            printInfo.jobName = jobName!
+            let strippedJobName = jobName!.hasSuffix(".pdf") ? String(jobName!.dropLast(4)) : jobName!
+            printInfo.jobName = strippedJobName
             printInfo.outputType = .general
             if orientation != nil {
                 printInfo.orientation = orientation!
@@ -185,7 +186,8 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             orientation = UIPrintInfo.Orientation.landscape
         }
 
-        jobName = name
+        // Strip .pdf extension as UIPrintInteractionController appends it automatically
+        jobName = name.hasSuffix(".pdf") ? String(name.dropLast(4)) : name
         printerName = printerID
 
         let controller = UIPrintInteractionController.shared
