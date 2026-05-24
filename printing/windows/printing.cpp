@@ -17,14 +17,24 @@
 #include "printing.h"
 
 #include "print_job.h"
+#include <fpdfview.h>
 
 namespace nfet {
 
 extern std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel;
 
-Printing::Printing() {}
+Printing::Printing() {
+  FPDF_LIBRARY_CONFIG config;
+  config.version = 2;
+  config.m_pUserFontPaths = nullptr;
+  config.m_pIsolate = nullptr;
+  config.m_v8EmbedderSlot = 0;
+  FPDF_InitLibraryWithConfig(&config);
+}
 
-Printing::~Printing() {}
+Printing::~Printing() {
+  FPDF_DestroyLibrary();
+}
 
 void Printing::onPageRasterized(std::vector<uint8_t> data,
                                 int width,

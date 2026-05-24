@@ -79,7 +79,7 @@ bool PrintJob::printPdf(const std::string& name,
                         double height,
                         bool usePrinterSettings,
                         bool windowsModernDialog) {
-  
+
   documentName = name;
 
   std::size_t dmSize = sizeof(DEVMODE);
@@ -122,15 +122,15 @@ bool PrintJob::printPdf(const std::string& name,
       dm = nullptr; // dialog takes ownership; may replace with new alloc
       pdx.hDevNames = nullptr;
       pdx.hDC = nullptr;
-      
+
       // Flags: Use PD_RETURNDC to get the context we need for PDFium
       pdx.Flags = PD_RETURNDC | PD_USEDEVMODECOPIESANDCOLLATE | PD_NOPAGENUMS | PD_NOSELECTION;
-      
+
       pdx.nStartPage = START_PAGE_GENERAL;
       pdx.nMaxPageRanges = 1;
       PRINTPAGERANGE ranges[1] = {{1, 1}}; // Required structure for PDX
       pdx.lpPageRanges = ranges;
-      
+
       HRESULT hr = PrintDlgEx(&pdx);
 
       // Check if the user actually clicked "Print"
@@ -168,9 +168,9 @@ bool PrintJob::printPdf(const std::string& name,
 
       if (r != 1) {
         printing->onCompleted(this, false, "");
-        DeleteDC(hDC);
-        GlobalFree(hDevNames);
-        GlobalFree(hDevMode);
+        if (pd.hDC) DeleteDC(pd.hDC);
+        if (pd.hDevNames) GlobalFree(pd.hDevNames);
+        if (pd.hDevMode) GlobalFree(pd.hDevMode);
         return true;
       }
 
@@ -268,16 +268,8 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
 
   auto r = StartDoc(hDC, &docInfo);
 
-  FPDF_LIBRARY_CONFIG config;
-  config.version = 2;
-  config.m_pUserFontPaths = nullptr;
-  config.m_pIsolate = nullptr;
-  config.m_v8EmbedderSlot = 0;
-  FPDF_InitLibraryWithConfig(&config);
-
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
-    FPDF_DestroyLibrary();
     return;
   }
 
@@ -307,7 +299,6 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
   }
 
   FPDF_CloseDocument(doc);
-  FPDF_DestroyLibrary();
 
   EndDoc(hDC);
 
@@ -356,16 +347,8 @@ void PrintJob::pickPrinter(void* result) {}
 void PrintJob::rasterPdf(std::vector<uint8_t> data,
                           std::vector<int> pages,
                           double scale) {
-  FPDF_LIBRARY_CONFIG config;
-  config.version = 2;
-  config.m_pUserFontPaths = nullptr;
-  config.m_pIsolate = nullptr;
-  config.m_v8EmbedderSlot = 0;
-  FPDF_InitLibraryWithConfig(&config);
-
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
-    FPDF_DestroyLibrary();
     printing->onPageRasterEnd(this, "Cannot raster a malformed PDF file");
     return;
   }
@@ -423,8 +406,6 @@ void PrintJob::rasterPdf(std::vector<uint8_t> data,
   }
 
   FPDF_CloseDocument(doc);
-
-  FPDF_DestroyLibrary();
 
   printing->onPageRasterEnd(this, "");
 }
