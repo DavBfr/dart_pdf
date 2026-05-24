@@ -13,11 +13,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  pdf:
-    git:
-      url: https://github.com/ptech/dart_pdf.git
-      ref: v3.11.3-ptech # Fix thread issues on iOS and MacOS printing plugin
-      path: pdf
+  pdf: ^3.12.0
 
 dependency_overrides:
   pdf:
