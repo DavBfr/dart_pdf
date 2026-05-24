@@ -99,7 +99,9 @@ class MockPrinting extends Mock
     bool usePrinterSettings,
     OutputType outputType,
     bool forceCustomPrintPaper,
-  ) async => true;
+    bool windowsModernDialog,
+  ) async =>
+      true;
 
   @override
   Future<bool> sharePdf(
@@ -109,7 +111,8 @@ class MockPrinting extends Mock
     String? subject,
     String? body,
     List<String>? emails,
-  ) async => true;
+  ) async =>
+      true;
 
   @override
   Future<Printer?> pickPrinter(Rect bounds) async => null;
