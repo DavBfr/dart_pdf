@@ -1,3 +1,5 @@
+import UIKit
+
 public class CustomPrintPaper: UIPrintPaper {
     private let size: CGSize
 
