@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import '../../base/exceptions.dart';
 import '../../priv.dart';
 import '../document.dart';
 import '../font/font_metrics.dart';
@@ -44,14 +45,14 @@ class PdfType1Font extends PdfFont {
     bool isFixedPitch = false,
     this.missingWidth = 0.600,
     this.widths = const <double>[],
-  }) : assert(() {
-         // ignore: avoid_print
-         print(
-           '$fontName has no Unicode support see https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management',
-         );
-         return true;
-       }()),
-       super.create(pdfDocument, subtype: '/Type1') {
+  })  : assert(() {
+          // ignore: avoid_print
+          print(
+            '$fontName has no Unicode support see https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management',
+          );
+          return true;
+        }()),
+        super.create(pdfDocument, subtype: '/Type1') {
     params['/BaseFont'] = PdfName('/$fontName');
     if (settings.version.index >= PdfVersion.pdf_1_5.index) {
       params['/FirstChar'] = const PdfNum(0);
@@ -108,7 +109,7 @@ class PdfType1Font extends PdfFont {
   @override
   PdfFontMetrics glyphMetrics(int charCode) {
     if (!isRuneSupported(charCode)) {
-      throw Exception(
+      throw PdfException(
         'Unable to display U+${charCode.toRadixString(16)} with $fontName',
       );
     }
