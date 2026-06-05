@@ -19,6 +19,7 @@ import 'dart:typed_data';
 import 'package:image/image.dart' as im;
 
 import '../../pdf.dart';
+import '../base/exceptions.dart';
 import 'widget.dart';
 
 /// Identifies an image without committing to the precise final asset
@@ -76,7 +77,7 @@ abstract class ImageProvider {
 
 class ImageProxy extends ImageProvider {
   ImageProxy(this._image, {double? dpi})
-    : super(_image.width, _image.height, _image.orientation, dpi);
+      : super(_image.width, _image.height, _image.orientation, dpi);
 
   /// The proxy image
   final PdfImage _image;
@@ -93,7 +94,8 @@ class MemoryImage extends ImageProvider {
   }) {
     final decoder = im.findDecoderForData(bytes);
     if (decoder == null) {
-      throw Exception('Unable to guess the image type ${bytes.length} bytes');
+      throw PdfException(
+          'Unable to guess the image type ${bytes.length} bytes');
     }
 
     if (decoder is im.JpegDecoder) {
@@ -111,7 +113,7 @@ class MemoryImage extends ImageProvider {
     final info = decoder.startDecode(bytes);
 
     if (info == null) {
-      throw Exception('Unable decode the image');
+      throw PdfException('Unable decode the image');
     }
 
     return MemoryImage._(
@@ -143,7 +145,7 @@ class MemoryImage extends ImageProvider {
     final image = im.decodeImage(bytes);
 
     if (image == null) {
-      throw Exception('Unable decode the image');
+      throw PdfException('Unable decode the image');
     }
 
     final resized = im.copyResize(image, width: width);
@@ -153,12 +155,12 @@ class MemoryImage extends ImageProvider {
 
 class ImageImage extends ImageProvider {
   ImageImage(this._image, {double? dpi, PdfImageOrientation? orientation})
-    : super(
-        _image.width,
-        _image.height,
-        orientation ?? PdfImageOrientation.topLeft,
-        dpi,
-      );
+      : super(
+          _image.width,
+          _image.height,
+          orientation ?? PdfImageOrientation.topLeft,
+          dpi,
+        );
 
   /// The image data
   final im.Image _image;
@@ -182,8 +184,8 @@ class RawImage extends ImageImage {
     PdfImageOrientation? orientation,
     double? dpi,
   }) : super(
-         PdfRasterBase(width, height, true, bytes).asImage(),
-         orientation: orientation,
-         dpi: dpi,
-       );
+          PdfRasterBase(width, height, true, bytes).asImage(),
+          orientation: orientation,
+          dpi: dpi,
+        );
 }

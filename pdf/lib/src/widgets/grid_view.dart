@@ -19,6 +19,7 @@ import 'dart:math' as math;
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
+import '../base/exceptions.dart';
 import 'flex.dart';
 import 'geometry.dart';
 import 'multi_page.dart';
@@ -112,8 +113,7 @@ class GridView extends MultiChildWidget with SpanningWidget {
       _mainAxisCount =
           ((children.length - _context.firstChild) / crossAxisCount).ceil();
 
-      _context.childCrossAxis =
-          crossAxisExtent / crossAxisCount -
+      _context.childCrossAxis = crossAxisExtent / crossAxisCount -
           (crossAxisSpacing * (crossAxisCount - 1) / crossAxisCount);
 
       _context.childMainAxis = math.min(
@@ -123,15 +123,14 @@ class GridView extends MultiChildWidget with SpanningWidget {
       );
 
       if (_context.childCrossAxis!.isInfinite) {
-        throw Exception(
+        throw PdfException(
           'Unable to calculate child height as the height constraint is infinite.',
         );
       }
     } else {
-      _mainAxisCount =
-          ((mainAxisExtent + mainAxisSpacing) /
-                  (mainAxisSpacing + _context.childMainAxis!))
-              .floor();
+      _mainAxisCount = ((mainAxisExtent + mainAxisSpacing) /
+              (mainAxisSpacing + _context.childMainAxis!))
+          .floor();
 
       if (_mainAxisCount! < 0) {
         // Not enough space to put one line, try to ask for more space.
@@ -141,10 +140,10 @@ class GridView extends MultiChildWidget with SpanningWidget {
 
     final totalMain =
         (_context.childMainAxis! + mainAxisSpacing) * _mainAxisCount! -
-        mainAxisSpacing;
+            mainAxisSpacing;
     final totalCross =
         (_context.childCrossAxis! + crossAxisSpacing) * crossAxisCount -
-        crossAxisSpacing;
+            crossAxisSpacing;
 
     final startX = resolvedPadding.left;
     const startY = 0.0;
@@ -191,7 +190,7 @@ class GridView extends MultiChildWidget with SpanningWidget {
               isRtl
                   ? (_context.childCrossAxis! + child.box!.width - crossAxis)
                   : (_context.childCrossAxis! - child.box!.width) / 2.0 +
-                        crossAxis,
+                      crossAxis,
               totalMain +
                   resolvedPadding.bottom -
                   (_context.childMainAxis! - child.box!.height) / 2.0 -
@@ -208,7 +207,7 @@ class GridView extends MultiChildWidget with SpanningWidget {
               isRtl
                   ? totalMain - (child.box!.width + mainAxis)
                   : (_context.childMainAxis! - child.box!.width) / 2.0 +
-                        mainAxis,
+                      mainAxis,
               totalCross +
                   resolvedPadding.bottom -
                   (_context.childCrossAxis! - child.box!.height) / 2.0 -

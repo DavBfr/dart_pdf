@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export 'src/base/exceptions.dart';
 export 'src/pdf/color.dart';
 export 'src/pdf/colors.dart';
 export 'src/pdf/document.dart';

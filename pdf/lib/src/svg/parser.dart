@@ -17,6 +17,7 @@
 import 'package:xml/xml.dart';
 
 import '../../pdf.dart';
+import '../base/exceptions.dart';
 import 'brush.dart';
 
 class SvgParser {
@@ -35,7 +36,7 @@ class SvgParser {
         : splitDoubles(vbattr);
 
     if (vb.isEmpty || vb.length > 4) {
-      throw Exception('viewBox must contain 1..4 parameters');
+      throw PdfException('ViewBox must contain 1..4 parameters');
     }
 
     final fvb = [...List<double>.filled(4 - vb.length, 0), ...vb];
@@ -70,8 +71,8 @@ class SvgParser {
   XmlElement? findById(String id) {
     try {
       return root.descendants.whereType<XmlElement>().firstWhere(
-        (e) => e.getAttribute('id') == id,
-      );
+            (e) => e.getAttribute('id') == id,
+          );
     } on StateError {
       return null;
     }
@@ -194,7 +195,7 @@ class SvgNumeric {
       case SvgUnit.direct:
         return value / 255.0;
       default:
-        throw Exception('Invalid color value $value ($unit)');
+        throw PdfException('Invalid color value $value ($unit)');
     }
   }
 
