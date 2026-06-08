@@ -51,7 +51,7 @@ class PrintingPlugin extends PrintingPlatform {
 
   static const _pdfJsCdnPath = 'https://unpkg.com/pdfjs-dist';
 
-  static const _pdfJsVersion = '3.2.146';
+  static const _pdfJsVersion = '4.2.67';
 
   final _loading = Mutex();
 
@@ -70,30 +70,8 @@ class PrintingPlugin extends PrintingPlatform {
     await _loading.acquire();
 
     if (!_hasPdfJsLib) {
-      js.JSObject? amd;
-      js.JSObject? define;
-      js.JSObject? module;
-      js.JSObject? exports;
-      if (web.window.hasProperty('define'.toJS).toDart) {
-        // In dev, requireJs is loaded in. Disable it here.
-        define = web.window.getProperty('define'.toJS);
-        amd = define!.getProperty('amd'.toJS);
-        define.setProperty('amd'.toJS, false.toJS);
-      }
-
-      // Save Webpack values and make typeof module != object
-      if (web.window.hasProperty('exports'.toJS).toDart) {
-        exports = web.window.getProperty('exports'.toJS);
-      }
-      web.window.setProperty('exports'.toJS, 0.toJS);
-
-      if (web.window.hasProperty('module'.toJS).toDart) {
-        module = web.window.getProperty('module'.toJS);
-      }
-      web.window.setProperty('module'.toJS, 0.toJS);
-
       // Check if the source of PDF.js library is overridden via
-      // [dartPdfJsBaseUrl] JavaScript  variable.
+      // [dartPdfJsBaseUrl] JavaScript variable.
       if (web.window.hasProperty(_dartPdfJsBaseUrl.toJS).toDart) {
         _pdfJsUrlBase = web.window.getProperty(_dartPdfJsBaseUrl.toJS);
       } else {
@@ -106,34 +84,21 @@ class PrintingPlugin extends PrintingPlatform {
         _pdfJsUrlBase = '$_pdfJsCdnPath@$pdfJsVersion/build/';
       }
 
-      final script = web.HTMLScriptElement()
-        ..type = 'text/javascript'
-        ..async = true
-        ..src = '${_pdfJsUrlBase}pdf.min.js';
-      assert(web.document.head != null);
-      web.document.head!.append(script);
-      await script.onLoad.first;
-
-      if (amd != null) {
-        // Re-enable requireJs
-        define!.setProperty('amd'.toJS, amd);
-      }
-
-      web.window
-          .getProperty<js.JSObject>('pdfjsLib'.toJS)
-          .getProperty<js.JSObject>('GlobalWorkerOptions'.toJS)
-          .setProperty(
-            'workerSrc'.toJS,
-            '${_pdfJsUrlBase}pdf.worker.min.js'.toJS,
-          );
-
-      // Restore module and exports
-      if (module != null) {
-        web.window.module = module;
-      }
-      if (exports != null) {
-        web.window.exports = exports;
-      }
+      // pdf.js 4+ ships ES modules only (.mjs), so load it with a dynamic
+      // import() instead of a classic <script> tag.
+      final importUrl = '${_pdfJsUrlBase}pdf.min.mjs';
+      final workerUrl = '${_pdfJsUrlBase}pdf.worker.min.mjs';
+      await web.window
+          .callMethod<js.JSPromise>(
+            'eval'.toJS,
+            '''(async function() {
+              var m = await import("$importUrl");
+              window.pdfjsLib = m;
+              m.GlobalWorkerOptions.workerSrc = "$workerUrl";
+            })()'''
+                .toJS,
+          )
+          .toDart;
     }
 
     _loading.release();
@@ -429,9 +394,4 @@ class _WebPdfRaster extends PdfRaster {
   Future<Uint8List> toPng() async {
     return png;
   }
-}
-
-extension _WindowModule on web.Window {
-  external set module(js.JSObject? value);
-  external set exports(js.JSObject? value);
 }
