@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fix CVE-2024-4367: load pdf.js via ESM import (pdf.js 5.7.284)
 - Fix lint issues
 - Add Swift Package Manager support
 
