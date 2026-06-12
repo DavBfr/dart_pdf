@@ -5,6 +5,7 @@
 - Fix CVE-2024-4367: load pdf.js via ESM import (pdf.js 5.7.284)
 - Fix lint issues
 - Add Swift Package Manager support
+- Fix iOS crash in pickPrinter when the selected printer has a nil URL
 
 ## 5.14.3
 

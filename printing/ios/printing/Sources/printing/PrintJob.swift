@@ -342,8 +342,15 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             }
 
             let printer = printerPickerController.selectedPrinter!
+            // UIPrinter.url is non-optional in Swift but the underlying ObjC NSURL can be
+            // nil for partially resolved printers (e.g. discovered over a personal hotspot);
+            // force-bridging a nil NSURL to URL traps at runtime. Read it via KVC instead.
+            guard let url = printer.value(forKey: "URL") as? URL else {
+                result(nil)
+                return
+            }
             let data: NSDictionary = [
-                "url": printer.url.absoluteString as Any,
+                "url": url.absoluteString as Any,
                 "name": printer.displayName as Any,
                 "model": printer.makeAndModel as Any,
                 "location": printer.displayLocation as Any,
