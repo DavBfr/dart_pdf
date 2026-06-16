@@ -6,6 +6,7 @@
 - Update xml dependency
 - Add PdfException over the pdf classes
 - Made svg path xml functions safer for malformed documents
+- Update min dart sdk to 3.12.0
 
 ## 3.12.0
 

@@ -52,9 +52,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          # Remove checks when arm is supported on stable: https://github.com/flutter/flutter/issues/114349
-          flutter-version: '1c6c6f4'
-          channel: 'master'
+          channel: 'stable'
       # doctor is needed to download the arm master artifacts:
       - run: flutter doctor
       - run: flutter --version
@@ -106,9 +104,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          # Remove checks when arm is supported on stable: https://github.com/flutter/flutter/issues/164431
-          flutter-version: '1c6c6f4'
-          channel: 'master'
+          channel: stable
       # doctor is needed to download the arm master artifacts:
       - run: flutter doctor
       - run: flutter --version

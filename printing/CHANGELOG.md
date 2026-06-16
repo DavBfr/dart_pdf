@@ -13,6 +13,7 @@
 - Use random starting point for job IDs
 - PrintJob list shared between instances to avoid problems with multiple windows.
 - Fixed deadlock on macOS with newer Flutter versions & added filtering of redundant pdf layout requests.
+- Update min dart sdk to 3.12.0
 
 ## 5.14.3
 
