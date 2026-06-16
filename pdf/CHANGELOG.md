@@ -1,10 +1,11 @@
 # Changelog
 
-## Unreleased
+## 3.13.0
 
 - Fix lint issues
 - Update xml dependency
 - Add PdfException over the pdf classes
+- Made svg path xml functions safer for malformed documents
 
 ## 3.12.0
 

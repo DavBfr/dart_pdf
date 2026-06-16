@@ -1,11 +1,18 @@
 # Changelog
 
-## Unreleased
+## 5.15.0
 
 - Fix CVE-2024-4367: load pdf.js via ESM import (pdf.js 5.7.284)
 - Fix lint issues
 - Add Swift Package Manager support
 - Fix iOS crash in pickPrinter when the selected printer has a nil URL
+- fix printing web override and update pdf dependencies
+- Fix Windows PDFium lifecycle
+- Implementing support for modern print dialog on windows
+- Fix thread issues on iOS and MacOS printing plugin
+- Use random starting point for job IDs
+- PrintJob list shared between instances to avoid problems with multiple windows.
+- Fixed deadlock on macOS with newer Flutter versions & added filtering of redundant pdf layout requests.
 
 ## 5.14.3
 
