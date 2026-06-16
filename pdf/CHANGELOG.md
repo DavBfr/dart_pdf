@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fix lint issues
+- Update xml dependency
 
 ## 3.12.0
 
