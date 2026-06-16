@@ -83,7 +83,7 @@ class SvgParser {
     String? namespace,
     double? defaultValue = 0,
   }) {
-    final attr = xml.getAttribute(name, namespace: namespace);
+    final attr = xml.getAttribute(name, namespaceUri: namespace);
 
     if (attr == null) {
       return defaultValue;
@@ -99,7 +99,7 @@ class SvgParser {
     String? namespace,
     double? defaultValue,
   }) {
-    final attr = xml.getAttribute(name, namespace: namespace);
+    final attr = xml.getAttribute(name, namespaceUri: namespace);
 
     if (attr == null) {
       return defaultValue == null ? null : SvgNumeric.value(defaultValue, null);
