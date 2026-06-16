@@ -6,6 +6,7 @@ analyzer:
     missing_return: warning
     public_member_api_docs: ignore
     todo: ignore
+    prefer_initializing_formals: ignore
 
 linter:
   rules:

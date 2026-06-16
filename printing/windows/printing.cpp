@@ -16,8 +16,8 @@
 
 #include "printing.h"
 
-#include "print_job.h"
 #include <fpdfview.h>
+#include "print_job.h"
 
 namespace nfet {
 

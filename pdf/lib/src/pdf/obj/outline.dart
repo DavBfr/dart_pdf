@@ -83,7 +83,7 @@ class PdfOutline extends PdfObject<PdfDict> {
   String? get page {
     final int? num;
     if (_page != null) {
-      num = pdfDocument.pdfPageList.pages.indexOf(_page!);
+      num = pdfDocument.pdfPageList.pages.indexOf(_page);
     } else if (dest != null) {
       num = pdfDocument.pdfPageList.pages.indexOf(dest!);
     } else {

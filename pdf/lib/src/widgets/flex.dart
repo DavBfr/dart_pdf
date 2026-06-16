@@ -86,9 +86,9 @@ class Flex extends MultiChildWidget with SpanningWidget {
   double _getIntrinsicSize({
     Axis? sizingDirection,
     double?
-        extent, // the extent in the direction that isn't the sizing direction
+    extent, // the extent in the direction that isn't the sizing direction
     _ChildSizingFunction?
-        childSize, // a method to find the size in the sizing direction
+    childSize, // a method to find the size in the sizing direction
   }) {
     if (direction == sizingDirection) {
       // INTRINSIC MAIN SIZE
@@ -299,8 +299,9 @@ class Flex extends MultiChildWidget with SpanningWidget {
     );
     var allocatedFlexSpace = 0.0;
     if (totalFlex > 0) {
-      final spacePerFlex =
-          canFlex && totalFlex > 0 ? (freeSpace / totalFlex) : double.nan;
+      final spacePerFlex = canFlex && totalFlex > 0
+          ? (freeSpace / totalFlex)
+          : double.nan;
 
       for (final child in children) {
         final flex = child is Flexible ? child.flex : 0;
@@ -308,8 +309,8 @@ class Flex extends MultiChildWidget with SpanningWidget {
         if (flex > 0) {
           final maxChildExtent = canFlex
               ? (child == lastFlexChild
-                  ? (freeSpace - allocatedFlexSpace)
-                  : spacePerFlex * flex)
+                    ? (freeSpace - allocatedFlexSpace)
+                    : spacePerFlex * flex)
               : double.infinity;
           double? minChildExtent;
           switch (fit) {
@@ -417,23 +418,26 @@ class Flex extends MultiChildWidget with SpanningWidget {
         break;
       case MainAxisAlignment.spaceBetween:
         leadingSpace = 0.0;
-        betweenSpace =
-            totalChildren > 1 ? remainingSpace / (totalChildren - 1) : 0.0;
+        betweenSpace = totalChildren > 1
+            ? remainingSpace / (totalChildren - 1)
+            : 0.0;
         break;
       case MainAxisAlignment.spaceAround:
         betweenSpace = totalChildren > 0 ? remainingSpace / totalChildren : 0.0;
         leadingSpace = betweenSpace / 2.0;
         break;
       case MainAxisAlignment.spaceEvenly:
-        betweenSpace =
-            totalChildren > 0 ? remainingSpace / (totalChildren + 1) : 0.0;
+        betweenSpace = totalChildren > 0
+            ? remainingSpace / (totalChildren + 1)
+            : 0.0;
         leadingSpace = betweenSpace;
         break;
     }
 
     // Position elements
-    var childMainPosition =
-        flipMainAxis ? actualSize - leadingSpace : leadingSpace;
+    var childMainPosition = flipMainAxis
+        ? actualSize - leadingSpace
+        : leadingSpace;
 
     for (var child in children.sublist(
       _context.firstChild,
@@ -443,7 +447,8 @@ class Flex extends MultiChildWidget with SpanningWidget {
       switch (crossAxisAlignment) {
         case CrossAxisAlignment.start:
         case CrossAxisAlignment.end:
-          childCrossPosition = _startIsTopLeft(
+          childCrossPosition =
+              _startIsTopLeft(
                     flipAxis(direction),
                     textDirection,
                     verticalDirection,
@@ -570,13 +575,13 @@ class Row extends Flex {
     VerticalDirection verticalDirection = VerticalDirection.down,
     List<Widget> children = const <Widget>[],
   }) : super(
-          children: children,
-          direction: Axis.horizontal,
-          mainAxisAlignment: mainAxisAlignment,
-          mainAxisSize: mainAxisSize,
-          crossAxisAlignment: crossAxisAlignment,
-          verticalDirection: verticalDirection,
-        );
+         children: children,
+         direction: Axis.horizontal,
+         mainAxisAlignment: mainAxisAlignment,
+         mainAxisSize: mainAxisSize,
+         crossAxisAlignment: crossAxisAlignment,
+         verticalDirection: verticalDirection,
+       );
 }
 
 class Column extends Flex {
@@ -587,19 +592,19 @@ class Column extends Flex {
     VerticalDirection verticalDirection = VerticalDirection.down,
     List<Widget> children = const <Widget>[],
   }) : super(
-          children: children,
-          direction: Axis.vertical,
-          mainAxisAlignment: mainAxisAlignment,
-          mainAxisSize: mainAxisSize,
-          crossAxisAlignment: crossAxisAlignment,
-          verticalDirection: verticalDirection,
-        );
+         children: children,
+         direction: Axis.vertical,
+         mainAxisAlignment: mainAxisAlignment,
+         mainAxisSize: mainAxisSize,
+         crossAxisAlignment: crossAxisAlignment,
+         verticalDirection: verticalDirection,
+       );
 }
 
 /// A widget that controls how a child of a [Row], [Column], or [Flex] flexes.
 class Flexible extends SingleChildWidget {
   Flexible({this.flex = 1, this.fit = FlexFit.loose, required Widget child})
-      : super(child: child);
+    : super(child: child);
 
   /// The flex factor to use for this child
   final int flex;
@@ -616,15 +621,15 @@ class Flexible extends SingleChildWidget {
 
 class Expanded extends Flexible {
   Expanded({int flex = 1, FlexFit fit = FlexFit.tight, required Widget child})
-      : super(child: child, flex: flex, fit: fit);
+    : super(child: child, flex: flex, fit: fit);
 }
 
 /// Spacer creates an adjustable, empty spacer that can be used to tune the
 /// spacing between widgets in a [Flex] container, like [Row] or [Column].
 class Spacer extends Flexible {
   Spacer({int flex = 1})
-      : assert(flex > 0),
-        super(flex: flex, fit: FlexFit.tight, child: SizedBox.shrink());
+    : assert(flex > 0),
+      super(flex: flex, fit: FlexFit.tight, child: SizedBox.shrink());
 }
 
 typedef IndexedWidgetBuilder = Widget Function(Context context, int index);
@@ -636,10 +641,10 @@ class ListView extends StatelessWidget {
     this.spacing = 0,
     this.padding,
     List<Widget> this.children = const <Widget>[],
-  })  : itemBuilder = null,
-        separatorBuilder = null,
-        itemCount = children.length,
-        super();
+  }) : itemBuilder = null,
+       separatorBuilder = null,
+       itemCount = children.length,
+       super();
 
   ListView.builder({
     this.direction = Axis.vertical,
@@ -648,9 +653,9 @@ class ListView extends StatelessWidget {
     this.padding,
     required this.itemBuilder,
     required this.itemCount,
-  })  : children = null,
-        separatorBuilder = null,
-        super();
+  }) : children = null,
+       separatorBuilder = null,
+       super();
 
   ListView.separated({
     this.direction = Axis.vertical,
@@ -659,9 +664,9 @@ class ListView extends StatelessWidget {
     required this.itemBuilder,
     required this.separatorBuilder,
     required this.itemCount,
-  })  : children = null,
-        spacing = null,
-        super();
+  }) : children = null,
+       spacing = null,
+       super();
 
   final Axis direction;
   final EdgeInsetsGeometry? padding;
@@ -680,8 +685,8 @@ class ListView extends StatelessWidget {
     return spacing == null
         ? separatorBuilder!(context, index)
         : direction == Axis.vertical
-            ? SizedBox(height: spacing)
-            : SizedBox(width: spacing);
+        ? SizedBox(height: spacing)
+        : SizedBox(width: spacing);
   }
 
   @override

@@ -26,7 +26,7 @@ import 'widget.dart';
 
 class Partition extends Widget with SpanningWidget {
   Partition({required this.child, this.width, int flex = 1})
-      : flex = width == null ? flex : 0;
+    : flex = width == null ? flex : 0;
 
   final double? width;
 
@@ -79,7 +79,7 @@ class Partition extends Widget with SpanningWidget {
 
 class PartitionsContext extends WidgetContext {
   PartitionsContext(int count)
-      : partitionContext = List<WidgetContext?>.filled(count, null);
+    : partitionContext = List<WidgetContext?>.filled(count, null);
 
   final List<WidgetContext?> partitionContext;
 
@@ -103,8 +103,8 @@ class PartitionsContext extends WidgetContext {
 
 class Partitions extends Widget with SpanningWidget {
   Partitions({required this.children, this.mainAxisSize = MainAxisSize.max})
-      : _context = PartitionsContext(children.length),
-        super();
+    : _context = PartitionsContext(children.length),
+      super();
 
   final List<Partition> children;
 

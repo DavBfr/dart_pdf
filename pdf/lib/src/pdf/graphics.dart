@@ -987,7 +987,8 @@ class PdfGraphics {
     final cy = cyd + 0.5 * (y1 + y2);
 
     final theta = _vectorAngle(1, 0, (x1d - cxd) / rx, (y1d - cyd) / ry);
-    var dTheta = _vectorAngle(
+    var dTheta =
+        _vectorAngle(
           (x1d - cxd) / rx,
           (y1d - cyd) / ry,
           (-x1d - cxd) / rx,

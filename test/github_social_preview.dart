@@ -167,19 +167,19 @@ class SyntaxHighlighterStyle {
   final TextStyle constantStyle;
 
   factory SyntaxHighlighterStyle.dark() => SyntaxHighlighterStyle(
-    baseStyle: TextStyle(
-      font: Font.courierBold(),
-      color: PdfColors.white,
-      fontSize: 10 * px,
-    ),
-    numberStyle: TextStyle(color: PdfColors.purple300),
-    commentStyle: TextStyle(color: PdfColors.green600),
-    keywordStyle: TextStyle(color: PdfColors.blue600),
-    stringStyle: TextStyle(color: PdfColors.orange400),
-    punctuationStyle: TextStyle(color: PdfColors.pink),
-    classStyle: TextStyle(color: PdfColors.cyan),
-    constantStyle: TextStyle(color: PdfColors.pink),
-  );
+        baseStyle: TextStyle(
+          font: Font.courierBold(),
+          color: PdfColors.white,
+          fontSize: 10 * px,
+        ),
+        numberStyle: TextStyle(color: PdfColors.purple300),
+        commentStyle: TextStyle(color: PdfColors.green600),
+        keywordStyle: TextStyle(color: PdfColors.blue600),
+        stringStyle: TextStyle(color: PdfColors.orange400),
+        punctuationStyle: TextStyle(color: PdfColors.pink),
+        classStyle: TextStyle(color: PdfColors.cyan),
+        constantStyle: TextStyle(color: PdfColors.pink),
+      );
 }
 
 class DartSyntaxHighlighter {

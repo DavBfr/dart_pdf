@@ -57,17 +57,17 @@ Future<Uint8List> generateResume(PdfPageFormat format, CustomData data) async {
                           'Parnella Charlesbois',
                           textScaleFactor: 2,
                           style: pw.Theme.of(context).defaultTextStyle.copyWith(
-                            fontWeight: pw.FontWeight.bold,
-                          ),
+                                fontWeight: pw.FontWeight.bold,
+                              ),
                         ),
                         pw.Padding(padding: const pw.EdgeInsets.only(top: 10)),
                         pw.Text(
                           'Electrotyper',
                           textScaleFactor: 1.2,
                           style: pw.Theme.of(context).defaultTextStyle.copyWith(
-                            fontWeight: pw.FontWeight.bold,
-                            color: green,
-                          ),
+                                fontWeight: pw.FontWeight.bold,
+                                color: green,
+                              ),
                         ),
                         pw.Padding(padding: const pw.EdgeInsets.only(top: 20)),
                         pw.Row(

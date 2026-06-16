@@ -50,34 +50,33 @@ class SvgUse extends SvgOperation {
       'width',
       _brush,
       defaultValue: 0,
-    )!
-        .sizeValue;
+    )!.sizeValue;
     final height = SvgParser.getNumeric(
       element,
       'height',
       _brush,
       defaultValue: 0,
-    )!
-        .sizeValue;
+    )!.sizeValue;
     final x = SvgParser.getNumeric(
       element,
       'x',
       _brush,
       defaultValue: 0,
-    )!
-        .sizeValue;
+    )!.sizeValue;
     final y = SvgParser.getNumeric(
       element,
       'y',
       _brush,
       defaultValue: 0,
-    )!
-        .sizeValue;
+    )!.sizeValue;
 
     SvgOperation? href;
-    final hrefAttr = element.getAttribute('href') ??
-        element.getAttribute('href',
-            namespaceUri: 'http://www.w3.org/1999/xlink');
+    final hrefAttr =
+        element.getAttribute('href') ??
+        element.getAttribute(
+          'href',
+          namespaceUri: 'http://www.w3.org/1999/xlink',
+        );
 
     if (hrefAttr != null) {
       final hrefElement = painter.parser.findById(hrefAttr.substring(1));

@@ -27,7 +27,7 @@ import 'stream.dart';
 import 'string.dart';
 
 class PdfArray<T extends PdfDataType> extends PdfDataType {
-  PdfArray([Iterable<T>? values]) : values = [if (values != null) ...values];
+  PdfArray([Iterable<T>? values]) : values = [...?values];
 
   static PdfArray<PdfIndirect> fromObjects(Iterable<PdfObjectBase> objects) {
     return PdfArray(objects.map<PdfIndirect>((e) => e.ref()).toList());

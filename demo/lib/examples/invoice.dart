@@ -196,9 +196,8 @@ class Invoice {
                     alignment: pw.Alignment.topRight,
                     padding: const pw.EdgeInsets.only(bottom: 8, left: 30),
                     height: 72,
-                    child: _logo != null
-                        ? pw.SvgImage(svg: _logo!)
-                        : pw.PdfLogo(),
+                    child:
+                        _logo != null ? pw.SvgImage(svg: _logo!) : pw.PdfLogo(),
                   ),
                   // pw.Container(
                   //   color: baseColor,

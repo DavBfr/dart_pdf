@@ -26,7 +26,7 @@ import 'object_base.dart';
 import 'stream.dart';
 
 class PdfDict<T extends PdfDataType> extends PdfDataType {
-  PdfDict([Map<String, T>? values]) : values = {if (values != null) ...values};
+  PdfDict([Map<String, T>? values]) : values = {...?values};
 
   PdfDict.values([Map<String, T>? values]) : values = values ?? {};
 

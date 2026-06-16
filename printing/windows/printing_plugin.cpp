@@ -89,8 +89,8 @@ class PrintingPlugin : public flutter::Plugin {
       auto vJob = arguments->find(flutter::EncodableValue("job"));
       auto jobNum = vJob != arguments->end() ? std::get<int>(vJob->second) : -1;
       auto job = new PrintJob{&printing, jobNum};
-      auto res =
-          job->printPdf(name, printer, width, height, usePrinterSettings, windowsModernDialog);
+      auto res = job->printPdf(name, printer, width, height, usePrinterSettings,
+                               windowsModernDialog);
       if (!res) {
         delete job;
       }

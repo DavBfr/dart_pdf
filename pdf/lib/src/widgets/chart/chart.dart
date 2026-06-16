@@ -85,22 +85,22 @@ class Chart extends Widget implements Inherited {
   Widget _build(Context context) {
     return Column(
       children: <Widget>[
-        if (title != null) title!,
+        ?title,
         Expanded(
           child: Row(
             children: <Widget>[
-              if (left != null) left!,
+              ?left,
               Expanded(
                 child: Stack(
                   overflow: Overflow.visible,
-                  children: <Widget>[grid, if (overlay != null) overlay!],
+                  children: <Widget>[grid, ?overlay],
                 ),
               ),
-              if (right != null) right!,
+              ?right,
             ],
           ),
         ),
-        if (bottom != null) bottom!,
+        ?bottom,
       ],
     );
   }

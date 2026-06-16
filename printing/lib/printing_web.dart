@@ -77,10 +77,10 @@ class PrintingPlugin extends PrintingPlatform {
       } else {
         final pdfJsVersion =
             web.window.hasProperty(_dartPdfJsVersion.toJS).toDart
-                ? web.window
-                    .getProperty<js.JSString?>(_dartPdfJsVersion.toJS)!
-                    .toDart
-                : _pdfJsVersion;
+            ? web.window
+                  .getProperty<js.JSString?>(_dartPdfJsVersion.toJS)!
+                  .toDart
+            : _pdfJsVersion;
         _pdfJsUrlBase = '$_pdfJsCdnPath@$pdfJsVersion/build/';
       }
 
@@ -373,7 +373,7 @@ class PrintingPlugin extends PrintingPlatform {
 
 class _WebPdfRaster extends PdfRaster {
   _WebPdfRaster(int width, int height, this.png)
-      : super(width, height, Uint8List(0));
+    : super(width, height, Uint8List(0));
 
   final Uint8List png;
 

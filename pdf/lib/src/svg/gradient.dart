@@ -32,9 +32,9 @@ abstract class SvgGradient extends SvgColor {
     this.colors,
     this.stops,
     this.opacityList,
-  )   : assert(colors.length == stops.length),
-        assert(stops.length == opacityList.length),
-        super();
+  ) : assert(colors.length == stops.length),
+      assert(stops.length == opacityList.length),
+      super();
 
   final GradientUnits? gradientUnits;
 
@@ -117,8 +117,8 @@ class SvgLinearGradient extends SvgGradient {
     final opacityList = <double>[];
 
     for (final child in element.children.whereType<XmlElement>().where(
-          (e) => e.name.local == 'stop',
-        )) {
+      (e) => e.name.local == 'stop',
+    )) {
       SvgParser.convertStyle(child);
       final color = SvgColor.fromXml(
         child.getAttribute('stop-color') ?? 'black',
@@ -134,8 +134,7 @@ class SvgLinearGradient extends SvgGradient {
         'offset',
         null,
         defaultValue: 0,
-      )!
-          .sizeValue;
+      )!.sizeValue;
       colors.add(color.color);
       stops.add(stop);
       opacityList.add(opacity);
@@ -164,9 +163,12 @@ class SvgLinearGradient extends SvgGradient {
     );
 
     SvgLinearGradient href;
-    final hrefAttr = element.getAttribute('href') ??
-        element.getAttribute('href',
-            namespaceUri: 'http://www.w3.org/1999/xlink');
+    final hrefAttr =
+        element.getAttribute('href') ??
+        element.getAttribute(
+          'href',
+          namespaceUri: 'http://www.w3.org/1999/xlink',
+        );
 
     if (hrefAttr != null) {
       final hrefElement = painter.parser.findById(hrefAttr.substring(1));
@@ -262,51 +264,45 @@ class SvgRadialGradient extends SvgGradient {
       'r',
       null,
       defaultValue: .5,
-    )!
-        .sizeValue;
+    )!.sizeValue;
     final cx = SvgParser.getNumeric(
       element,
       'cx',
       null,
       defaultValue: .5,
-    )!
-        .sizeValue;
+    )!.sizeValue;
     final cy = SvgParser.getNumeric(
       element,
       'cy',
       null,
       defaultValue: .5,
-    )!
-        .sizeValue;
+    )!.sizeValue;
     final fr = SvgParser.getNumeric(
       element,
       'fr',
       null,
       defaultValue: 0,
-    )!
-        .sizeValue;
+    )!.sizeValue;
     final fx = SvgParser.getNumeric(
       element,
       'fx',
       null,
       defaultValue: cx,
-    )!
-        .sizeValue;
+    )!.sizeValue;
     final fy = SvgParser.getNumeric(
       element,
       'fy',
       null,
       defaultValue: cy,
-    )!
-        .sizeValue;
+    )!.sizeValue;
 
     final colors = <PdfColor?>[];
     final stops = <double>[];
     final opacityList = <double>[];
 
     for (final child in element.children.whereType<XmlElement>().where(
-          (e) => e.name.local == 'stop',
-        )) {
+      (e) => e.name.local == 'stop',
+    )) {
       SvgParser.convertStyle(child);
       final color = SvgColor.fromXml(
         child.getAttribute('stop-color') ?? 'black',
@@ -322,8 +318,7 @@ class SvgRadialGradient extends SvgGradient {
         'offset',
         null,
         defaultValue: 0,
-      )!
-          .sizeValue;
+      )!.sizeValue;
       colors.add(color.color);
       stops.add(stop);
       opacityList.add(opacity!);
@@ -354,9 +349,12 @@ class SvgRadialGradient extends SvgGradient {
     );
 
     SvgRadialGradient href;
-    final hrefAttr = element.getAttribute('href') ??
-        element.getAttribute('href',
-            namespaceUri: 'http://www.w3.org/1999/xlink');
+    final hrefAttr =
+        element.getAttribute('href') ??
+        element.getAttribute(
+          'href',
+          namespaceUri: 'http://www.w3.org/1999/xlink',
+        );
 
     if (hrefAttr != null) {
       final hrefElement = painter.parser.findById(hrefAttr.substring(1));

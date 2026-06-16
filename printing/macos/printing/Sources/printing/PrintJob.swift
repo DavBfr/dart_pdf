@@ -49,8 +49,8 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     private func layoutParamsChanged(_ new: (width: CGFloat, height: CGFloat, marginLeft: CGFloat, marginTop: CGFloat, marginRight: CGFloat, marginBottom: CGFloat)) -> Bool {
         guard let last = lastLayoutParams else { return true }
         return last.width != new.width || last.height != new.height ||
-               last.marginLeft != new.marginLeft || last.marginTop != new.marginTop ||
-               last.marginRight != new.marginRight || last.marginBottom != new.marginBottom
+            last.marginLeft != new.marginLeft || last.marginTop != new.marginTop ||
+            last.marginRight != new.marginRight || last.marginBottom != new.marginBottom
     }
 
     // Return the number of pages available for printing
@@ -69,10 +69,10 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
                 marginRight: printOperation!.printInfo.rightMargin,
                 marginBottom: printOperation!.printInfo.bottomMargin
             )
-            
+
             if layoutParamsChanged(currentParams) {
                 lastLayoutParams = currentParams
-                
+
                 printing.onLayout(
                     printJob: self,
                     width: currentParams.width,

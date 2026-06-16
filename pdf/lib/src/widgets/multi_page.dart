@@ -185,17 +185,17 @@ class MultiPage extends Page {
     PageOrientation? orientation,
     EdgeInsetsGeometry? margin,
     TextDirection? textDirection,
-  })  : _buildList = build,
-        assert(maxPages > 0),
-        super(
-          pageTheme: pageTheme,
-          pageFormat: pageFormat,
-          build: (_) => SizedBox(),
-          margin: margin,
-          theme: theme,
-          orientation: orientation,
-          textDirection: textDirection,
-        );
+  }) : _buildList = build,
+       assert(maxPages > 0),
+       super(
+         pageTheme: pageTheme,
+         pageFormat: pageFormat,
+         build: (_) => SizedBox(),
+         margin: margin,
+         theme: theme,
+         orientation: orientation,
+         textDirection: textDirection,
+       );
 
   final BuildListCallback _buildList;
 
@@ -254,8 +254,9 @@ class MultiPage extends Page {
     final _margin = resolvedMargin!;
     final _mustRotate = mustRotate;
     final pageHeight = _mustRotate ? pageFormat.width : pageFormat.height;
-    final pageHeightMargin =
-        _mustRotate ? _margin.horizontal : _margin.vertical;
+    final pageHeightMargin = _mustRotate
+        ? _margin.horizontal
+        : _margin.vertical;
     final constraints = BoxConstraints(
       maxWidth: _mustRotate
           ? (pageFormat.height - _margin.vertical)
@@ -276,12 +277,12 @@ class MultiPage extends Page {
     double? offsetStart;
     var _index = 0;
     var sameCount = 0;
-    final baseContext =
-        Context(document: document.document).inheritFromAll(<Inherited>[
-      calculatedTheme,
-      if (pageTheme.textDirection != null)
-        InheritedDirectionality(pageTheme.textDirection),
-    ]);
+    final baseContext = Context(document: document.document)
+        .inheritFromAll(<Inherited>[
+          calculatedTheme,
+          if (pageTheme.textDirection != null)
+            InheritedDirectionality(pageTheme.textDirection),
+        ]);
     final children = _buildList(baseContext);
     WidgetContext? widgetContext;
 
@@ -323,10 +324,12 @@ class MultiPage extends Page {
           return true;
         }());
 
-        offsetStart = pageHeight -
+        offsetStart =
+            pageHeight -
             (_mustRotate ? pageHeightMargin - _margin.bottom : _margin.top);
-        offsetEnd =
-            _mustRotate ? pageHeightMargin - _margin.left : _margin.bottom;
+        offsetEnd = _mustRotate
+            ? pageHeightMargin - _margin.left
+            : _margin.bottom;
 
         _pages.add(
           _MultiPageInstance(
@@ -423,8 +426,9 @@ class MultiPage extends Page {
         _MultiPageWidget(
           child: child,
           constraints: constraints,
-          widgetContext:
-              child is SpanningWidget && canSpan ? child.cloneContext() : null,
+          widgetContext: child is SpanningWidget && canSpan
+              ? child.cloneContext()
+              : null,
         ),
       );
 
@@ -440,16 +444,19 @@ class MultiPage extends Page {
     final _mustRotate = mustRotate;
     final pageHeight = _mustRotate ? pageFormat.width : pageFormat.height;
     final pageWidth = _mustRotate ? pageFormat.height : pageFormat.width;
-    final pageHeightMargin =
-        _mustRotate ? _margin.horizontal : _margin.vertical;
+    final pageHeightMargin = _mustRotate
+        ? _margin.horizontal
+        : _margin.vertical;
     final pageWidthMargin = _mustRotate ? _margin.vertical : _margin.horizontal;
     final availableWidth = pageWidth - pageWidthMargin;
     final isRTL = pageTheme.textDirection == TextDirection.rtl;
     for (final page in _pages) {
-      var offsetStart = pageHeight -
+      var offsetStart =
+          pageHeight -
           (_mustRotate ? pageHeightMargin - _margin.bottom : _margin.top);
-      var offsetEnd =
-          _mustRotate ? pageHeightMargin - _margin.left : _margin.bottom;
+      var offsetEnd = _mustRotate
+          ? pageHeightMargin - _margin.left
+          : _margin.bottom;
 
       if (pageTheme.buildBackground != null) {
         final child = pageTheme.buildBackground!(page.context);
@@ -556,16 +563,18 @@ class MultiPage extends Page {
             break;
           case MainAxisAlignment.spaceBetween:
             leadingSpace = 0.0;
-            betweenSpace =
-                totalChildren > 1 ? freeSpace / (totalChildren - 1) : 0.0;
+            betweenSpace = totalChildren > 1
+                ? freeSpace / (totalChildren - 1)
+                : 0.0;
             break;
           case MainAxisAlignment.spaceAround:
             betweenSpace = totalChildren > 0 ? freeSpace / totalChildren : 0.0;
             leadingSpace = betweenSpace / 2.0;
             break;
           case MainAxisAlignment.spaceEvenly:
-            betweenSpace =
-                totalChildren > 0 ? freeSpace / (totalChildren + 1) : 0.0;
+            betweenSpace = totalChildren > 0
+                ? freeSpace / (totalChildren + 1)
+                : 0.0;
             leadingSpace = betweenSpace;
             break;
         }

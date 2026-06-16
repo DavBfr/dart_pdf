@@ -112,7 +112,8 @@ class GridView extends MultiChildWidget with SpanningWidget {
       _mainAxisCount =
           ((children.length - _context.firstChild) / crossAxisCount).ceil();
 
-      _context.childCrossAxis = crossAxisExtent / crossAxisCount -
+      _context.childCrossAxis =
+          crossAxisExtent / crossAxisCount -
           (crossAxisSpacing * (crossAxisCount - 1) / crossAxisCount);
 
       _context.childMainAxis = math.min(
@@ -127,9 +128,10 @@ class GridView extends MultiChildWidget with SpanningWidget {
         );
       }
     } else {
-      _mainAxisCount = ((mainAxisExtent + mainAxisSpacing) /
-              (mainAxisSpacing + _context.childMainAxis!))
-          .floor();
+      _mainAxisCount =
+          ((mainAxisExtent + mainAxisSpacing) /
+                  (mainAxisSpacing + _context.childMainAxis!))
+              .floor();
 
       if (_mainAxisCount! < 0) {
         // Not enough space to put one line, try to ask for more space.
@@ -139,10 +141,10 @@ class GridView extends MultiChildWidget with SpanningWidget {
 
     final totalMain =
         (_context.childMainAxis! + mainAxisSpacing) * _mainAxisCount! -
-            mainAxisSpacing;
+        mainAxisSpacing;
     final totalCross =
         (_context.childCrossAxis! + crossAxisSpacing) * crossAxisCount -
-            crossAxisSpacing;
+        crossAxisSpacing;
 
     final startX = resolvedPadding.left;
     const startY = 0.0;
@@ -189,7 +191,7 @@ class GridView extends MultiChildWidget with SpanningWidget {
               isRtl
                   ? (_context.childCrossAxis! + child.box!.width - crossAxis)
                   : (_context.childCrossAxis! - child.box!.width) / 2.0 +
-                      crossAxis,
+                        crossAxis,
               totalMain +
                   resolvedPadding.bottom -
                   (_context.childMainAxis! - child.box!.height) / 2.0 -
@@ -206,7 +208,7 @@ class GridView extends MultiChildWidget with SpanningWidget {
               isRtl
                   ? totalMain - (child.box!.width + mainAxis)
                   : (_context.childMainAxis! - child.box!.width) / 2.0 +
-                      mainAxis,
+                        mainAxis,
               totalCross +
                   resolvedPadding.bottom -
                   (_context.childCrossAxis! - child.box!.height) / 2.0 -

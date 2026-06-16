@@ -25,7 +25,7 @@ import 'object_stream.dart';
 
 abstract class PdfBaseFunction extends PdfObject<PdfDict> {
   PdfBaseFunction(PdfDocument pdfDocument)
-      : super(pdfDocument, params: PdfDict());
+    : super(pdfDocument, params: PdfDict());
 
   factory PdfBaseFunction.colorsAndStops(
     PdfDocument pdfDocument,

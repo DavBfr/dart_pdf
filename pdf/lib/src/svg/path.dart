@@ -63,16 +63,30 @@ class SvgPath extends SvgOperation {
   ) {
     final _brush = SvgBrush.fromXml(element, brush, painter);
 
-    final x =
-        SvgParser.getNumeric(element, 'x', _brush, defaultValue: 0)!.sizeValue;
-    final y =
-        SvgParser.getNumeric(element, 'y', _brush, defaultValue: 0)!.sizeValue;
-    final width =
-        SvgParser.getNumeric(element, 'width', _brush, defaultValue: 0)!
-            .sizeValue;
-    final height =
-        SvgParser.getNumeric(element, 'height', _brush, defaultValue: 0)!
-            .sizeValue;
+    final x = SvgParser.getNumeric(
+      element,
+      'x',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final y = SvgParser.getNumeric(
+      element,
+      'y',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final width = SvgParser.getNumeric(
+      element,
+      'width',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final height = SvgParser.getNumeric(
+      element,
+      'height',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
 
     var rx = SvgParser.getNumeric(element, 'rx', _brush)?.sizeValue;
     var ry = SvgParser.getNumeric(element, 'ry', _brush)?.sizeValue;
@@ -81,8 +95,9 @@ class SvgPath extends SvgOperation {
     rx ??= ry;
     final topRight = rx != 0 || ry != 0 ? 'a $rx $ry 0 0 1 $rx $ry' : '';
     final bottomRight = rx != 0 || ry != 0 ? 'a $rx $ry 0 0 1 ${-rx} $ry' : '';
-    final bottomLeft =
-        rx != 0 || ry != 0 ? 'a $rx $ry 0 0 1 ${-rx} ${-ry}' : '';
+    final bottomLeft = rx != 0 || ry != 0
+        ? 'a $rx $ry 0 0 1 ${-rx} ${-ry}'
+        : '';
     final topLeft = rx != 0 || ry != 0 ? 'a $rx $ry 0 0 1 $rx ${-ry}' : '';
     final d =
         'M${x + rx} ${y}h${width - rx * 2}${topRight}v${height - ry * 2}${bottomRight}h${-(width - rx * 2)}${bottomLeft}v${-(height - ry * 2)}${topLeft}z';
@@ -103,12 +118,24 @@ class SvgPath extends SvgOperation {
   ) {
     final _brush = SvgBrush.fromXml(element, brush, painter);
 
-    final cx =
-        SvgParser.getNumeric(element, 'cx', _brush, defaultValue: 0)!.sizeValue;
-    final cy =
-        SvgParser.getNumeric(element, 'cy', _brush, defaultValue: 0)!.sizeValue;
-    final r =
-        SvgParser.getNumeric(element, 'r', _brush, defaultValue: 0)!.sizeValue;
+    final cx = SvgParser.getNumeric(
+      element,
+      'cx',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final cy = SvgParser.getNumeric(
+      element,
+      'cy',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final r = SvgParser.getNumeric(
+      element,
+      'r',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
     final d =
         'M${cx - r},${cy}A$r,$r 0,0,0 ${cx + r},${cy}A$r,$r 0,0,0 ${cx - r},${cy}z';
 
@@ -128,14 +155,30 @@ class SvgPath extends SvgOperation {
   ) {
     final _brush = SvgBrush.fromXml(element, brush, painter);
 
-    final cx =
-        SvgParser.getNumeric(element, 'cx', _brush, defaultValue: 0)!.sizeValue;
-    final cy =
-        SvgParser.getNumeric(element, 'cy', _brush, defaultValue: 0)!.sizeValue;
-    final rx =
-        SvgParser.getNumeric(element, 'rx', _brush, defaultValue: 0)!.sizeValue;
-    final ry =
-        SvgParser.getNumeric(element, 'ry', _brush, defaultValue: 0)!.sizeValue;
+    final cx = SvgParser.getNumeric(
+      element,
+      'cx',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final cy = SvgParser.getNumeric(
+      element,
+      'cy',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final rx = SvgParser.getNumeric(
+      element,
+      'rx',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final ry = SvgParser.getNumeric(
+      element,
+      'ry',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
     final d =
         'M${cx - rx},${cy}A$rx,$ry 0,0,0 ${cx + rx},${cy}A$rx,$ry 0,0,0 ${cx - rx},${cy}z';
 
@@ -192,14 +235,30 @@ class SvgPath extends SvgOperation {
   ) {
     final _brush = SvgBrush.fromXml(element, brush, painter);
 
-    final x1 =
-        SvgParser.getNumeric(element, 'x1', _brush, defaultValue: 0)!.sizeValue;
-    final y1 =
-        SvgParser.getNumeric(element, 'y1', _brush, defaultValue: 0)!.sizeValue;
-    final x2 =
-        SvgParser.getNumeric(element, 'x2', _brush, defaultValue: 0)!.sizeValue;
-    final y2 =
-        SvgParser.getNumeric(element, 'y2', _brush, defaultValue: 0)!.sizeValue;
+    final x1 = SvgParser.getNumeric(
+      element,
+      'x1',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final y1 = SvgParser.getNumeric(
+      element,
+      'y1',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final x2 = SvgParser.getNumeric(
+      element,
+      'x2',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final y2 = SvgParser.getNumeric(
+      element,
+      'y2',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
     final d = 'M$x1 $y1 $x2 $y2';
 
     return SvgPath(

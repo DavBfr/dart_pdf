@@ -86,7 +86,7 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             let marginBottom = CGFloat((args["marginBottom"] as! NSNumber).floatValue)
             let printJob = PrintJob(printing: self, index: args["job"] as! Int)
             let dynamic = args["dynamic"] as! Bool
-            
+
             PrintingPlugin.jobsLock.lock()
             PrintingPlugin.sharedJobs[args["job"] as! UInt32] = printJob
             PrintingPlugin.jobsLock.unlock()
@@ -202,7 +202,7 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             "job": printJob.index,
         ]
         channel.invokeMethod("onCompleted", arguments: data)
-        
+
         PrintingPlugin.jobsLock.lock()
         PrintingPlugin.sharedJobs.removeValue(forKey: UInt32(printJob.index))
         PrintingPlugin.jobsLock.unlock()

@@ -70,8 +70,8 @@ class SvgParser {
   XmlElement? findById(String id) {
     try {
       return root.descendants.whereType<XmlElement>().firstWhere(
-            (e) => e.getAttribute('id') == id,
-          );
+        (e) => e.getAttribute('id') == id,
+      );
     } on StateError {
       return null;
     }

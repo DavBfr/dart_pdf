@@ -57,7 +57,7 @@ std::string toUtf8(TCHAR* tstr) {
 
 std::wstring fromUtf8(std::string str) {
   auto len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(),
-                                  static_cast<int>(str.length()), nullptr, 0);
+                                 static_cast<int>(str.length()), nullptr, 0);
   if (len <= 0) {
     return L"";
   }
@@ -79,7 +79,6 @@ bool PrintJob::printPdf(const std::string& name,
                         double height,
                         bool usePrinterSettings,
                         bool windowsModernDialog) {
-
   documentName = name;
 
   std::size_t dmSize = sizeof(DEVMODE);
@@ -87,7 +86,7 @@ bool PrintJob::printPdf(const std::string& name,
 
   if (!printer.empty()) {
     dmExtra = DeviceCapabilities(fromUtf8(printer).c_str(), NULL, DC_EXTRA,
-                                  NULL, NULL);
+                                 NULL, NULL);
   }
 
   auto dm = static_cast<DEVMODE*>(GlobalAlloc(0, dmSize + dmExtra));
@@ -119,16 +118,17 @@ bool PrintJob::printPdf(const std::string& name,
       pdx.lStructSize = sizeof(PRINTDLGEX);
       pdx.hwndOwner = GetActiveWindow();
       pdx.hDevMode = dm;
-      dm = nullptr; // dialog takes ownership; may replace with new alloc
+      dm = nullptr;  // dialog takes ownership; may replace with new alloc
       pdx.hDevNames = nullptr;
       pdx.hDC = nullptr;
 
       // Flags: Use PD_RETURNDC to get the context we need for PDFium
-      pdx.Flags = PD_RETURNDC | PD_USEDEVMODECOPIESANDCOLLATE | PD_NOPAGENUMS | PD_NOSELECTION;
+      pdx.Flags = PD_RETURNDC | PD_USEDEVMODECOPIESANDCOLLATE | PD_NOPAGENUMS |
+                  PD_NOSELECTION;
 
       pdx.nStartPage = START_PAGE_GENERAL;
       pdx.nMaxPageRanges = 1;
-      PRINTPAGERANGE ranges[1] = {{1, 1}}; // Required structure for PDX
+      PRINTPAGERANGE ranges[1] = {{1, 1}};  // Required structure for PDX
       pdx.lpPageRanges = ranges;
 
       HRESULT hr = PrintDlgEx(&pdx);
@@ -138,12 +138,16 @@ bool PrintJob::printPdf(const std::string& name,
         this->hDC = pdx.hDC;
         this->hDevMode = pdx.hDevMode;
         this->hDevNames = pdx.hDevNames;
-        //success = true;
+        // success = true;
       } else {
-        // User cancelled or error occurred — notify Dart so its future completes.
-        if (pdx.hDC) DeleteDC(pdx.hDC);
-        if (pdx.hDevMode) GlobalFree(pdx.hDevMode);
-        if (pdx.hDevNames) GlobalFree(pdx.hDevNames);
+        // User cancelled or error occurred — notify Dart so its future
+        // completes.
+        if (pdx.hDC)
+          DeleteDC(pdx.hDC);
+        if (pdx.hDevMode)
+          GlobalFree(pdx.hDevMode);
+        if (pdx.hDevNames)
+          GlobalFree(pdx.hDevNames);
         printing->onCompleted(this, false, "");
         return false;
       }
@@ -168,9 +172,12 @@ bool PrintJob::printPdf(const std::string& name,
 
       if (r != 1) {
         printing->onCompleted(this, false, "");
-        if (pd.hDC) DeleteDC(pd.hDC);
-        if (pd.hDevNames) GlobalFree(pd.hDevNames);
-        if (pd.hDevMode) GlobalFree(pd.hDevMode);
+        if (pd.hDC)
+          DeleteDC(pd.hDC);
+        if (pd.hDevNames)
+          GlobalFree(pd.hDevNames);
+        if (pd.hDevMode)
+          GlobalFree(pd.hDevMode);
         return true;
       }
 
@@ -204,7 +211,7 @@ bool PrintJob::printPdf(const std::string& name,
   auto marginBottom = pageHeight - printableHeight - marginTop;
 
   printing->onLayout(this, pageWidth, pageHeight, marginLeft, marginTop,
-                      marginRight, marginBottom);
+                     marginRight, marginBottom);
   return true;
 }
 
@@ -231,7 +238,7 @@ std::vector<Printer> PrintJob::listPrinters() {
   }
 
   auto result = EnumPrinters(flags, nullptr, 2, (LPBYTE)buffer, needed, &needed,
-                               &returned);
+                             &returned);
 
   if (result == 0) {
     free(buffer);
@@ -345,8 +352,8 @@ bool PrintJob::sharePdf(std::vector<uint8_t> data, const std::string& name) {
 void PrintJob::pickPrinter(void* result) {}
 
 void PrintJob::rasterPdf(std::vector<uint8_t> data,
-                          std::vector<int> pages,
-                          double scale) {
+                         std::vector<int> pages,
+                         double scale) {
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
     printing->onPageRasterEnd(this, "Cannot raster a malformed PDF file");
@@ -399,7 +406,7 @@ void PrintJob::rasterPdf(std::vector<uint8_t> data,
     }
 
     printing->onPageRasterized(std::vector<uint8_t>{p, p + l}, bWidth, bHeight,
-                                this);
+                               this);
 
     FPDFBitmap_Destroy(bitmap);
     FPDF_ClosePage(page);
@@ -413,7 +420,7 @@ void PrintJob::rasterPdf(std::vector<uint8_t> data,
 std::map<std::string, bool> PrintJob::printingInfo() {
   return std::map<std::string, bool>{
       {"directPrint", true},     {"dynamicLayout", true}, {"canPrint", true},
-      {"canListPrinters", true}, {"canShare", true},       {"canRaster", true},
+      {"canListPrinters", true}, {"canShare", true},      {"canRaster", true},
   };
 }
 
