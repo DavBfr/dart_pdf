@@ -4,6 +4,7 @@
 
 - Fix lint issues
 - Update xml dependency
+- Add PdfException over the pdf classes
 
 ## 3.12.0
 
