@@ -19,7 +19,6 @@ import 'dart:typed_data';
 import 'package:image/image.dart' as im;
 
 import '../../pdf.dart';
-import '../base/exceptions.dart';
 import 'widget.dart';
 
 /// Identifies an image without committing to the precise final asset

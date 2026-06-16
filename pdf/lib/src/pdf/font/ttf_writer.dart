@@ -145,7 +145,7 @@ class TtfWriter {
             "Missing glyph for character '${String.fromCharCode(char)}' "
             '(U+${char.toRadixString(16).toUpperCase().padLeft(4, '0')}) '
             'in font ${ttf.fontName}. Use a font that includes this codepoint, '
-            "or strip/normalize the character before passing it to the PDF.",
+            'or strip/normalize the character before passing it to the PDF.',
           );
         }
         glyphsMap.remove(glyphsIndex);
@@ -235,17 +235,17 @@ class TtfWriter {
     }
 
     tables[TtfParser.head_table]!.buffer.asByteData().setUint32(
-      8,
-      0,
-    ); // checkSumAdjustment
+          8,
+          0,
+        ); // checkSumAdjustment
     tables[TtfParser.maxp_table]!.buffer.asByteData().setUint16(
-      4,
-      glyphsInfo.length,
-    );
+          4,
+          glyphsInfo.length,
+        );
     tables[TtfParser.hhea_table]!.buffer.asByteData().setUint16(
-      34,
-      glyphsInfo.length,
-    ); // numOfLongHorMetrics
+          34,
+          glyphsInfo.length,
+        ); // numOfLongHorMetrics
 
     {
       // post Table
@@ -389,9 +389,9 @@ class TtfWriter {
 
       final crc = 0xB1B0AFBA - _calcTableChecksum(output.buffer.asByteData());
       output.buffer.asByteData().setUint32(
-        headOffset + 8,
-        crc & 0xffffffff,
-      ); // checkSumAdjustment
+            headOffset + 8,
+            crc & 0xffffffff,
+          ); // checkSumAdjustment
 
       return output;
     }

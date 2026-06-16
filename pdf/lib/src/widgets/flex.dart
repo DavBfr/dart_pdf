@@ -20,7 +20,6 @@ import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
 import '../../widgets.dart';
-import '../base/exceptions.dart';
 
 enum FlexFit { tight, loose }
 

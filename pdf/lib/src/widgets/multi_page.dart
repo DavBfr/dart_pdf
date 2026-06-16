@@ -20,7 +20,6 @@ import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
-import '../base/exceptions.dart';
 import 'basic.dart';
 import 'document.dart';
 import 'flex.dart';

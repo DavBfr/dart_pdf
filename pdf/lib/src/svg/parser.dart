@@ -17,7 +17,6 @@
 import 'package:xml/xml.dart';
 
 import '../../pdf.dart';
-import '../base/exceptions.dart';
 import 'brush.dart';
 
 class SvgParser {

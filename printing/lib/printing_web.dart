@@ -91,11 +91,12 @@ class PrintingPlugin extends PrintingPlatform {
       await web.window
           .callMethod<js.JSPromise>(
             'eval'.toJS,
-            '''(async function() {
-              var m = await import("$importUrl");
-              window.pdfjsLib = m;
-              m.GlobalWorkerOptions.workerSrc = "$workerUrl";
-            })()'''
+            '''
+(async function() {
+  var m = await import("$importUrl");
+  window.pdfjsLib = m;
+  m.GlobalWorkerOptions.workerSrc = "$workerUrl";
+})()'''
                 .toJS,
           )
           .toDart;
