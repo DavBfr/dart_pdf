@@ -77,6 +77,7 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             let printJob = PrintJob(printing: self, index: args["job"] as! Int)
             let dynamic = args["dynamic"] as! Bool
             let forceCustomPrintPaper = args["forceCustomPrintPaper"] as! Bool
+            let fitToPage = args["fitToPage"] as? Bool ?? false
 
             let outputType: UIPrintInfo.OutputType
             switch args["outputType"] as! Int {
@@ -107,7 +108,8 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
                               withPrinter: printer,
                               dynamically: dynamic,
                               outputType: outputType,
-                              forceCustomPrintPaper: forceCustomPrintPaper)
+                              forceCustomPrintPaper: forceCustomPrintPaper,
+                              fitToPage: fitToPage)
             result(NSNumber(value: 1))
         } else if call.method == "sharePdf" {
             let object = args["doc"] as! FlutterStandardTypedData

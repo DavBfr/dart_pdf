@@ -40,6 +40,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     private var dynamic = false
     private var currentSize: CGSize?
     private var forceCustomPrintPaper = false
+    private var fitToPage = false
 
     public init(printing: PrintingPlugin, index: Int) {
         self.printing = printing
@@ -49,13 +50,30 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     }
 
     override public func drawPage(at pageIndex: Int, in _: CGRect) {
-        let ctx = UIGraphicsGetCurrentContext()
-        let page = pdfDocument?.page(at: pageIndex + 1)
-        ctx?.scaleBy(x: 1.0, y: -1.0)
-        ctx?.translateBy(x: 0.0, y: -paperRect.size.height)
-        if page != nil {
-            ctx?.drawPDFPage(page!)
+        guard let ctx = UIGraphicsGetCurrentContext(),
+              let page = pdfDocument?.page(at: pageIndex + 1) else { return }
+
+        let pdfRect = page.getBoxRect(.mediaBox)
+
+        ctx.saveGState()
+        ctx.scaleBy(x: 1.0, y: -1.0)
+        ctx.translateBy(x: 0.0, y: -paperRect.size.height)
+
+        if fitToPage {
+            let scaleX = paperRect.width / pdfRect.width
+            let scaleY = paperRect.height / pdfRect.height
+            let scale = min(scaleX, scaleY)
+            let scaledWidth = pdfRect.width * scale
+            let scaledHeight = pdfRect.height * scale
+            let offsetX = (paperRect.width - scaledWidth) / 2
+            let offsetY = (paperRect.height - scaledHeight) / 2
+
+            ctx.translateBy(x: offsetX, y: offsetY)
+            ctx.scaleBy(x: scale, y: scale)
         }
+
+        ctx.drawPDFPage(page)
+        ctx.restoreGState()
     }
 
     func cancelJob(_ error: String?) {
@@ -170,10 +188,11 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         return bestPaper
     }
 
-    func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool, outputType type: UIPrintInfo.OutputType, forceCustomPrintPaper: Bool = false) {
+    func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool, outputType type: UIPrintInfo.OutputType, forceCustomPrintPaper: Bool = false, fitToPage: Bool = false) {
         currentSize = size
         dynamic = dyn
         self.forceCustomPrintPaper = forceCustomPrintPaper
+        self.fitToPage = fitToPage
 
         let printing = UIPrintInteractionController.isPrintingAvailable
         if !printing {
