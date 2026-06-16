@@ -132,7 +132,8 @@ class Calendar extends StatelessWidget {
       children: List<Widget>.generate(42, (int index) {
         final d = start.add(Duration(days: index - startId));
         final currentMonth = index >= startId && index < endId;
-        final currentDay = d.year == localDate.year &&
+        final currentDay =
+            d.year == localDate.year &&
             d.month == localDate.month &&
             d.day == localDate.day;
         return Container(
@@ -191,7 +192,7 @@ Future<Uint8List> generateCalendar(
         buildForeground: bg == null
             ? null
             : (context) =>
-                FullPage(ignoreMargins: true, child: SvgImage(svg: bg!)),
+                  FullPage(ignoreMargins: true, child: SvgImage(svg: bg!)),
       ),
       build: (context) => Padding(
         padding: const EdgeInsets.only(right: 20),
