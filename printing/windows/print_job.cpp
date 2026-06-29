@@ -94,7 +94,7 @@ bool PrintJob::printPdf(const std::string& name,
   if (usePrinterSettings) {
     dm = nullptr;  // to use default driver config
   } else {
-    ZeroMemory(dm, sizeof(DEVMODE));
+    ZeroMemory(dm, dmSize + dmExtra);
     dm->dmSize = (WORD)dmSize;
     dm->dmDriverExtra = (WORD)dmExtra;
     dm->dmFields =
