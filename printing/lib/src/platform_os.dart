@@ -16,6 +16,4 @@
 
 import 'dart:io' show Platform;
 
-final useFFI = Platform.isMacOS || Platform.isIOS;
-
 final isAndroid = Platform.isAndroid;

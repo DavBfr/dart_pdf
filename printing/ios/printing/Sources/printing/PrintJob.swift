@@ -17,10 +17,6 @@
 import Flutter
 import WebKit
 
-func dataProviderReleaseDataCallback(info _: UnsafeMutableRawPointer?, data: UnsafeRawPointer, size _: Int) {
-    data.deallocate()
-}
-
 // A variable that holds the selected printers to prevent recreate it if selected again
 // Each printer will be identified by its URL string
 var selectedPrinters = [String: UIPrinter]()
@@ -68,14 +64,22 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     }
 
     func setDocument(_ data: Data?) {
-        let bytesPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: data?.count ?? 0)
-        data?.copyBytes(to: bytesPointer, count: data?.count ?? 0)
-        let dataProvider = CGDataProvider(dataInfo: nil, data: bytesPointer, size: data?.count ?? 0, releaseData: dataProviderReleaseDataCallback)
-        pdfDocument = CGPDFDocument(dataProvider!)
+        // An empty or malformed document must not crash: CGDataProvider returns
+        // nil for empty data, and CGPDFDocument returns nil for invalid data.
+        if let data, !data.isEmpty, let dataProvider = CGDataProvider(data: data as CFData) {
+            pdfDocument = CGPDFDocument(dataProvider)
+        } else {
+            pdfDocument = nil
+        }
 
         if dynamic {
-            // Unblock the main thread
+            // Unblock the thread waiting in numberOfPages
             semaphore.signal()
+            return
+        }
+
+        if pdfDocument == nil {
+            printing.onCompleted(printJob: self, completed: false, error: "Unable to load the PDF document")
             return
         }
 
