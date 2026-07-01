@@ -30,7 +30,6 @@ import 'package:pdf/pdf.dart';
 
 import 'callback.dart';
 import 'interface.dart';
-import 'method_channel_js.dart' if (dart.library.io) 'method_channel_ffi.dart';
 import 'output_type.dart';
 import 'print_job.dart';
 import 'printer.dart';
@@ -89,15 +88,7 @@ class MethodChannelPrinting extends PrintingPlatform {
             ),
           );
 
-          if (job.useFFI) {
-            return setErrorFfi(job, e.toString());
-          }
-
           rethrow;
-        }
-
-        if (job.useFFI) {
-          return setDocumentFfi(job, bytes);
         }
 
         return Uint8List.fromList(bytes);

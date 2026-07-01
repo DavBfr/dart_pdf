@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-const useFFI = false;
 const isAndroid = false;
