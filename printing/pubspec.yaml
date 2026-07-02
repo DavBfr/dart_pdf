@@ -15,7 +15,7 @@ topics:
   - print
   - printing
   - report
-version: 5.15.0
+version: 5.15.1
 
 environment:
   sdk: ">=3.12.0 <4.0.0"
