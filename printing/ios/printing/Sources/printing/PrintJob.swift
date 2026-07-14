@@ -27,7 +27,28 @@ var pickedPrinter: UIPrinter?
 public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate {
     private var printing: PrintingPlugin
     public var index: Int
-    private var pdfDocument: CGPDFDocument?
+    private let pdfDocumentLock = NSLock()
+    private var _pdfDocument: CGPDFDocument?
+    // UIKit queries numberOfPages from a background page-count thread
+    // (UIPrintPreviewViewController.updatePageCount) while setDocument and
+    // cancelJob replace the document on the main thread. An unsynchronized
+    // swap lets ARC free the old CGPDFDocument mid-read, crashing in
+    // CGPDFDocumentGetNumberOfPages. All access must go through this lock;
+    // the getter retains the document under the lock so callers always hold
+    // a strong reference to a live object.
+    private var pdfDocument: CGPDFDocument? {
+        get {
+            pdfDocumentLock.lock()
+            defer { pdfDocumentLock.unlock() }
+            return _pdfDocument
+        }
+        set {
+            pdfDocumentLock.lock()
+            defer { pdfDocumentLock.unlock() }
+            _pdfDocument = newValue
+        }
+    }
+
     private var urlObservation: NSKeyValueObservation?
     private var jobName: String?
     private var printerName: String?
@@ -40,13 +61,15 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     public init(printing: PrintingPlugin, index: Int) {
         self.printing = printing
         self.index = index
-        pdfDocument = nil
         super.init()
     }
 
     override public func drawPage(at pageIndex: Int, in _: CGRect) {
         let ctx = UIGraphicsGetCurrentContext()
-        let page = pdfDocument?.page(at: pageIndex + 1)
+        // Hold a strong local reference so a concurrent setDocument can't
+        // release the document (and the page it owns) while we draw.
+        let document = pdfDocument
+        let page = document?.page(at: pageIndex + 1)
         ctx?.scaleBy(x: 1.0, y: -1.0)
         ctx?.translateBy(x: 0.0, y: -paperRect.size.height)
         if page != nil {
