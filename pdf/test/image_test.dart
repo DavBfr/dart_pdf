@@ -201,6 +201,25 @@ void main() {
     expect(image.params['/Height'], const PdfNum(200));
   });
 
+  test('degenerate zero target width keeps the original image', () async {
+    final jpg = im.encodeJpg(im.Image(width: 400, height: 200));
+
+    final pdf = PdfDocument();
+    final provider = MemoryImage(jpg);
+
+    // A sub-pixel box computes a target width of 0, which must not be
+    // resampled — and must not poison the cache slot of the original.
+    final tiny = provider.resolve(
+      Context(document: pdf),
+      const PdfPoint(0.3, 0.3),
+      dpi: 72,
+    );
+    expect(tiny.params['/Width'], const PdfNum(400));
+
+    final original = provider.resolve(Context(document: pdf), PdfPoint.zero);
+    expect(original.params['/Width'], const PdfNum(400));
+  });
+
   test('unknown source width requests the original image', () async {
     final pdf = PdfDocument();
     final provider = _UnknownWidthImage();
