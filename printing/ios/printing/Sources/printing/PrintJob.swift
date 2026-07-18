@@ -17,11 +17,11 @@
 import Flutter
 import WebKit
 
-// A variable that holds the selected printers to prevent recreate it if selected again
-// Each printer will be identified by its URL string
+/// A variable that holds the selected printers to prevent recreate it if selected again
+/// Each printer will be identified by its URL string
 var selectedPrinters = [String: UIPrinter]()
 
-// Holds the printer after it was picked
+/// Holds the printer after it was picked
 var pickedPrinter: UIPrinter?
 
 public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate {
@@ -170,9 +170,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             }
         }
 
-        let bestPaper = UIPrintPaper.bestPaper(forPageSize: currentSize!, withPapersFrom: paperList)
-
-        return bestPaper
+        return UIPrintPaper.bestPaper(forPageSize: currentSize!, withPapersFrom: paperList)
     }
 
     func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool, outputType type: UIPrintInfo.OutputType, forceCustomPrintPaper: Bool = false) {
@@ -258,10 +256,10 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         )
     }
 
-    // UIScene-safe key window lookup. `UIApplication.shared.keyWindow` and
-    // `UIApplication.shared.delegate.window` are nil under UISceneDelegate
-    // (deprecated in iOS 26, mandatory when building with the iOS 27 SDK), so
-    // resolve the key window from the connected window scenes instead.
+    /// UIScene-safe key window lookup. `UIApplication.shared.keyWindow` and
+    /// `UIApplication.shared.delegate.window` are nil under UISceneDelegate
+    /// (deprecated in iOS 26, mandatory when building with the iOS 27 SDK), so
+    /// resolve the key window from the connected window scenes instead.
     static func sceneKeyWindow() -> UIWindow? {
         if #available(iOS 13.0, *) {
             let windows = UIApplication.shared.connectedScenes
@@ -455,7 +453,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     }
 
     public static func printingInfo() -> NSDictionary {
-        let data: NSDictionary = [
+        return [
             "directPrint": true,
             "dynamicLayout": true,
             "canPrint": true,
@@ -463,6 +461,5 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             "canRaster": true,
             "canListPrinters": false,
         ]
-        return data
     }
 }

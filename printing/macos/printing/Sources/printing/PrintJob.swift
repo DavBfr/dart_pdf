@@ -49,7 +49,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
             last.marginRight != new.marginRight || last.marginBottom != new.marginBottom
     }
 
-    // Return the number of pages available for printing
+    /// Return the number of pages available for printing
     override public func knowsPageRange(_ range: NSRangePointer) -> Bool {
         let size = printOperation!.showsPrintPanel ? printOperation!.printPanel.printInfo.paperSize : printOperation!.printInfo.paperSize
 
@@ -103,7 +103,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         return true
     }
 
-    // Return the drawing rectangle for a particular page number
+    /// Return the drawing rectangle for a particular page number
     override public func rectForPage(_ page: Int) -> NSRect {
         self.page = pdfDocument?.page(at: page)
         return self.page?.getBoxRect(CGPDFBox.mediaBox) ?? NSZeroRect
@@ -342,7 +342,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         if #available(macOS 11.0, *) {
             html = true
         }
-        let data: NSDictionary = [
+        return [
             "directPrint": true,
             "dynamicLayout": true,
             "canPrint": true,
@@ -351,6 +351,5 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
             "canRaster": true,
             "canListPrinters": true,
         ]
-        return data
     }
 }
