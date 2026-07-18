@@ -16,8 +16,10 @@
 
 import 'dart:typed_data';
 
+import 'package:image/image.dart' as im;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/src/priv.dart';
+import 'package:pdf/widgets.dart' show Context, MemoryImage;
 import 'package:test/test.dart';
 
 const kRedValue = 110;
@@ -88,5 +90,43 @@ void main() {
       expect(buf[pixelIndex * 3 + 1], kGreenValue);
       expect(buf[pixelIndex * 3 + 2], kBlueValue);
     }
+  });
+
+  test('MemoryImage with dpi does not upscale a JPEG image', () async {
+    final jpg = im.encodeJpg(im.Image(width: 100, height: 50));
+
+    final pdf = PdfDocument();
+    final provider = MemoryImage(jpg);
+
+    // 1 x 0.5 inch at 300 dpi requests 300x150, larger than the 100x50
+    // source: the original image must be embedded unchanged.
+    final image = provider.resolve(
+      Context(document: pdf),
+      const PdfPoint(1 * PdfPageFormat.inch, 0.5 * PdfPageFormat.inch),
+      dpi: 300,
+    );
+
+    expect(image.params['/Width'], const PdfNum(100));
+    expect(image.params['/Height'], const PdfNum(50));
+    expect(image.params['/Filter'], const PdfName('/DCTDecode'));
+  });
+
+  test('MemoryImage with dpi keeps JPEG compression when downsampling', () async {
+    final jpg = im.encodeJpg(im.Image(width: 400, height: 200));
+
+    final pdf = PdfDocument();
+    final provider = MemoryImage(jpg);
+
+    // 1 x 0.5 inch at 300 dpi requests 300x150, smaller than the 400x200
+    // source: the image is resampled but must stay DCT (JPEG) encoded.
+    final image = provider.resolve(
+      Context(document: pdf),
+      const PdfPoint(1 * PdfPageFormat.inch, 0.5 * PdfPageFormat.inch),
+      dpi: 300,
+    );
+
+    expect(image.params['/Width'], const PdfNum(300));
+    expect(image.params['/Height'], const PdfNum(150));
+    expect(image.params['/Filter'], const PdfName('/DCTDecode'));
   });
 }

@@ -49,28 +49,32 @@ abstract class ImageProvider {
   PdfImage resolve(Context context, PdfPoint size, {double? dpi}) {
     final effectiveDpi = dpi ?? this.dpi;
 
-    if (effectiveDpi == null || _cache[0] != null) {
-      _cache[0] ??= buildImage(context);
+    if (effectiveDpi != null && _cache[0] == null) {
+      final width = (size.x / PdfPageFormat.inch * effectiveDpi).toInt();
+      final height = (size.y / PdfPageFormat.inch * effectiveDpi).toInt();
 
-      if (_cache[0]!.pdfDocument != context.document) {
-        _cache[0] = buildImage(context);
+      // Never resample above the source resolution: upscaling adds no detail
+      // but discards the original (possibly better compressed) image data.
+      if (this.width == null || width < this.width!) {
+        if (!_cache.containsKey(width)) {
+          _cache[width] ??= buildImage(context, width: width, height: height);
+        }
+
+        if (_cache[width]!.pdfDocument != context.document) {
+          _cache[width] = buildImage(context, width: width, height: height);
+        }
+
+        return _cache[width]!;
       }
-
-      return _cache[0]!;
     }
 
-    final width = (size.x / PdfPageFormat.inch * effectiveDpi).toInt();
-    final height = (size.y / PdfPageFormat.inch * effectiveDpi).toInt();
+    _cache[0] ??= buildImage(context);
 
-    if (!_cache.containsKey(width)) {
-      _cache[width] ??= buildImage(context, width: width, height: height);
+    if (_cache[0]!.pdfDocument != context.document) {
+      _cache[0] = buildImage(context);
     }
 
-    if (_cache[width]!.pdfDocument != context.document) {
-      _cache[width] = buildImage(context, width: width, height: height);
-    }
-
-    return _cache[width]!;
+    return _cache[0]!;
   }
 }
 
@@ -149,6 +153,16 @@ class MemoryImage extends ImageProvider {
     }
 
     final resized = im.copyResize(image, width: width);
+
+    if (im.JpegDecoder().isValidFile(bytes)) {
+      // Keep DCT (JPEG) encoding for resampled JPEG images: embedding the
+      // raw pixels with Flate compression would inflate the file size.
+      return PdfImage.jpeg(
+        context.document,
+        image: im.encodeJpg(resized, quality: 90),
+      );
+    }
+
     return PdfImage.fromImage(context.document, image: resized);
   }
 }
