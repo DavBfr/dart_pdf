@@ -21,6 +21,7 @@ import '../document.dart';
 import '../font/arabic.dart' as arabic;
 import '../font/bidi_utils.dart' as bidi;
 import '../font/font_metrics.dart';
+import '../font/universal_shaper.dart' as shaper;
 import '../font/ttf_parser.dart';
 import '../font/ttf_writer.dart';
 import '../format/array.dart';
@@ -60,6 +61,15 @@ class PdfTtfFont extends PdfFont {
 
   final TtfParser font;
 
+  /// Map of glyph ID → PUA codepoint for GSUB-derived glyphs
+  final _glyphToPua = <int, int>{};
+
+  /// Reverse map: PUA codepoint → glyph ID
+  final _puaToGlyph = <int, int>{};
+
+  /// Next available PUA codepoint (Private Use Area: U+E000–U+F8FF)
+  int _nextPua = 0xE000;
+
   @override
   String get fontName => font.fontName;
 
@@ -90,7 +100,91 @@ class PdfTtfFont extends PdfFont {
       return metric.copyWith(advanceWidth: 0);
     }
 
-    return font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
+    var metrics = font.glyphInfoMap[g] ?? PdfFontMetrics.zero;
+
+    // Apply GPOS advance width adjustment if available
+    final adjustment = _gposAdvanceAdjust[charCode];
+    if (adjustment != null && adjustment != 0) {
+      metrics = metrics.copyWith(
+        advanceWidth: metrics.advanceWidth + adjustment / font.unitsPerEm,
+      );
+    }
+
+    return metrics;
+  }
+
+  /// Get glyph metrics by glyph ID directly (for GSUB-derived glyphs).
+  PdfFontMetrics _glyphMetricsByGlyphId(int glyphId) {
+    return font.glyphInfoMap[glyphId] ?? PdfFontMetrics.zero;
+  }
+
+  /// GPOS advance width adjustments per codepoint (kerning, etc.)
+  final _gposAdvanceAdjust = <int, int>{};
+
+  /// Get or create a PUA codepoint for a glyph ID.
+  int _getPuaForGlyph(int glyphId) {
+    return _glyphToPua.putIfAbsent(glyphId, () {
+      final pua = _nextPua++;
+      _puaToGlyph[pua] = glyphId;
+      // Register in the font's char→glyph map so metrics work
+      font.charToGlyphIndexMap[pua] = glyphId;
+      return pua;
+    });
+  }
+
+  /// Shape complex script text: reorder characters, apply GSUB + GPOS,
+  /// return a string of codepoints (possibly including PUA codes for
+  /// ligatures) that can be passed to putText.
+  ///
+  /// Supports all Indic scripts (Devanagari, Bengali, Tamil, Telugu,
+  /// Kannada, Malayalam, Gujarati, Gurmukhi, Oriya) and other complex
+  /// scripts (Thai, Khmer, Myanmar, Tibetan, Sinhala, Lao).
+  String? shapeComplexText(String text) {
+    if (!useComplexScripts) return null;
+
+    final result = shaper.shapeText(
+      text,
+      font,
+      (cp) => font.charToGlyphIndexMap[cp] ?? 0,
+    );
+    if (result == null) return null;
+
+    // Convert shaped glyph IDs back to codepoints.
+    // For glyphs that came from the original codepoints, use original.
+    // For GSUB-derived glyphs, use PUA codepoints.
+    final resultCodepoints = <int>[];
+    for (var i = 0; i < result.glyphIds.length; i++) {
+      final glyphId = result.glyphIds[i];
+      if (glyphId == 0) continue; // skip null glyphs
+
+      // Check if this glyph ID corresponds to an original codepoint
+      int? originalCp;
+      for (final entry in font.charToGlyphIndexMap.entries) {
+        if (entry.value == glyphId && entry.key < 0xE000) {
+          originalCp = entry.key;
+          break;
+        }
+      }
+
+      int cp;
+      if (originalCp != null) {
+        cp = originalCp;
+      } else {
+        // GSUB-derived glyph — assign PUA codepoint
+        cp = _getPuaForGlyph(glyphId);
+      }
+      resultCodepoints.add(cp);
+
+      // Store GPOS advance adjustment for this codepoint
+      if (result.positions != null && i < result.positions!.length) {
+        final pos = result.positions![i];
+        if (pos.xAdvanceAdjust != 0) {
+          _gposAdvanceAdjust[cp] = pos.xAdvanceAdjust;
+        }
+      }
+    }
+
+    return String.fromCharCodes(resultCodepoints);
   }
 
   void _buildTrueType(PdfDict params) {
