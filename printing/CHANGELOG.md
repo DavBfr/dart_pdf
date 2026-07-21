@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.15.2
+
+- Fix TypeError when reading `dartPdfJsBaseUrl` for a local Pdf.js path on web [khlebobul]
+
 ## 5.15.1
 
 - Fix layoutPdf hanging forever in iOS App Store builds: return the document via the method-channel reply instead of a dlsym FFI callback, whose symbols are stripped from statically linked (Swift Package Manager) apps by distribution builds
