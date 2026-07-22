@@ -301,7 +301,10 @@ class PrintingPlugin extends PrintingPlatform {
   ) async* {
     await _initPlugin();
 
-    final settings = Settings()..data = document.toJS;
+    // pdf.js 4+ transfers TypedArrays to the worker and takes ownership of the
+    // buffer, which neuters the caller's Uint8List. Copy first so the app can
+    // still download/share the same document bytes after preview rasterization.
+    final settings = Settings()..data = Uint8List.fromList(document).toJS;
 
     if (!_hasPdfJsLib) {
       settings
