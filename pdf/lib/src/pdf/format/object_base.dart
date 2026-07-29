@@ -43,6 +43,7 @@ class PdfSettings {
     this.encryptCallback,
     this.verbose = false,
     this.version = PdfVersion.pdf_1_5,
+    this.simpleTrueTypeFonts = false,
   });
 
   /// Callback to compress the streams in the pdf file.
@@ -58,6 +59,16 @@ class PdfSettings {
 
   /// PDF version to generate
   final PdfVersion version;
+
+  /// Embed TrueType fonts as simple `/TrueType` objects (full font, single-byte
+  /// codes for characters 32-255) instead of subsetted CID `/Type0` fonts.
+  ///
+  /// Some print RIPs reject the CID form and fail the job. Only characters
+  /// 32-255 are encodable in this mode, so it is off by default.
+  ///
+  /// This lives on the settings rather than a static because [PdfDocument.save]
+  /// writes the document on a separate isolate, where statics start fresh.
+  final bool simpleTrueTypeFonts;
 
   /// Compress the document
   bool get compress => deflate != null;
