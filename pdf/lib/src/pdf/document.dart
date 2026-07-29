@@ -75,12 +75,14 @@ class PdfDocument {
     bool compress = true,
     bool verbose = false,
     PdfVersion version = PdfVersion.pdf_1_5,
+    bool simpleTrueTypeFonts = false,
   }) : prev = null,
        _objser = 1 {
     settings = PdfSettings(
       deflate: compress ? (deflate ?? defaultDeflate) : null,
       verbose: verbose,
       version: version,
+      simpleTrueTypeFonts: simpleTrueTypeFonts,
       encryptCallback: (input, object) =>
           encryption?.encrypt(input, object) ?? input,
     );

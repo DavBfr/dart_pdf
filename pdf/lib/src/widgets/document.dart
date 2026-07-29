@@ -30,6 +30,7 @@ class Document {
     bool compress = true,
     bool verbose = false,
     PdfVersion version = PdfVersion.pdf_1_5,
+    bool simpleTrueTypeFonts = false,
     this.theme,
     String? title,
     String? author,
@@ -44,6 +45,7 @@ class Document {
          compress: compress,
          verbose: verbose,
          version: version,
+         simpleTrueTypeFonts: simpleTrueTypeFonts,
        ) {
     if (title != null ||
         author != null ||
