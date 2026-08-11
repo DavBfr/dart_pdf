@@ -51,7 +51,7 @@ class PrintingPlugin extends PrintingPlatform {
 
   static const _pdfJsCdnPath = 'https://unpkg.com/pdfjs-dist';
 
-  static const _pdfJsVersion = '5.7.284';
+  static const _pdfJsVersion = '6.2.108';
 
   final _loading = Mutex();
 

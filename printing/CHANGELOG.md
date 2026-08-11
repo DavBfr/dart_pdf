@@ -3,6 +3,7 @@
 ## 5.15.2
 
 - Fix iOS use-after-free crash in `CGPDFDocumentGetNumberOfPages`: UIKit reads the PDF document from a background page-count thread while dynamic layout replaces it on the main thread; document access is now lock-guarded
+- Fix GHSA-hq66-cqwq-w95j: update pdf.js to 6.2.108
 
 ## 5.15.1
 
