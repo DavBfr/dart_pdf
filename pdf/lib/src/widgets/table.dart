@@ -670,7 +670,8 @@ class Table extends Widget with SpanningWidget {
         final cellBox = cell.box!;
         context.canvas
           ..saveContext()
-          ..drawRect(cellBox.left, cellBox.bottom, cellBox.width, cellBox.height)
+          ..drawRect(
+              cellBox.left, cellBox.bottom, cellBox.width, cellBox.height)
           ..clipPath();
         cell.paint(context);
         context.canvas.restoreContext();
@@ -769,8 +770,12 @@ class Table extends Widget with SpanningWidget {
     if (length <= 0) {
       return 0;
     }
+    final endIndex = (startIndex + length).clamp(0, _heights.length);
+    if (startIndex >= endIndex) {
+      return 0;
+    }
     return _heights
-        .sublist(startIndex, startIndex + length)
+        .sublist(startIndex, endIndex)
         .reduce((prev, next) => prev + next);
   }
 }
