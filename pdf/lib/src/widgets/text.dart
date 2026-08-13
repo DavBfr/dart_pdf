@@ -259,6 +259,25 @@ class _TextDecoration {
   }
 }
 
+/// The word-split pattern, hoisted so layout does not rebuild it per line.
+final RegExp _splitWhitespace = RegExp(r'\s');
+
+/// Whether [s] is entirely printable ASCII with no space — text that cannot
+/// contain a word or line break under `\n` and [_splitWhitespace]. Kept
+/// deliberately narrower than "no ASCII whitespace": `\s` also matches
+/// Unicode whitespace such as U+00A0 and U+2000–U+200A, so any code unit
+/// outside printable ASCII disqualifies the string rather than risk
+/// reclassifying an exotic space as a word character.
+bool _isSingleAsciiWord(String s) {
+  for (var i = 0; i < s.length; i++) {
+    final c = s.codeUnitAt(i);
+    if (c <= 0x20 || c >= 0x7f) {
+      return false;
+    }
+  }
+  return true;
+}
+
 class _Word extends _Span {
   _Word(this.text, TextStyle style, this.metrics) : super(style);
 
@@ -990,18 +1009,34 @@ class RichText extends Widget with SpanningWidget {
           final space =
               font.stringMetrics(' ') * (style.fontSize! * textScaleFactor);
 
-          final spanLines =
-              (useArabic && _textDirection == TextDirection.rtl
-                      ? arabic.convert(span.text!)
-                      : useBidi && _textDirection == TextDirection.rtl
-                      ? bidi.logicalToVisual(span.text!)
-                      : span.text)!
-                  .split('\n');
+          final spanText = (useArabic && _textDirection == TextDirection.rtl
+              ? arabic.convert(span.text!)
+              : useBidi && _textDirection == TextDirection.rtl
+              ? bidi.logicalToVisual(span.text!)
+              : span.text)!;
+          // Fast path: a run of printable ASCII with no space is one word on
+          // one line, so both splits — and the regex engine behind the word
+          // split — can be skipped. Serial numbers and ticket numbers, the
+          // strings a document lays out by the hundreds of thousands, all
+          // qualify. Anything outside printable ASCII goes through the full
+          // split: `\s` matches Unicode whitespace (U+00A0, U+2000…) that a
+          // byte scan must not quietly reclassify as a word character. A
+          // custom [lineSplitter] must see every line, so it disables the
+          // fast path too.
+          final singleWord =
+              lineSplitter == null && _isSingleAsciiWord(spanText);
+          final spanLines = singleWord
+              ? <String>[spanText]
+              : spanText.split('\n');
 
           for (var line = 0; line < spanLines.length; line++) {
-            final words =
-                lineSplitter?.call(spanLines[line]) ??
-                spanLines[line].split(RegExp(r'\s'));
+            // Always a fresh list: an overflowing word is split in place
+            // below (words.insert), and aliasing spanLines would turn the
+            // remainder into an extra line.
+            final words = singleWord
+                ? <String>[spanText]
+                : lineSplitter?.call(spanLines[line]) ??
+                      spanLines[line].split(_splitWhitespace);
             for (var index = 0; index < words.length; index++) {
               final word = words[index];
 
