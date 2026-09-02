@@ -2,6 +2,7 @@
 
 ## 5.15.1
 
+- Fix `RangeError` in `PdfPreviewRaster._raster` when the preview is disposed while a page is being rasterized: re-check `mounted` after awaiting `page.toPng()`, since `dispose()` clears `pages` and the resumed continuation would write to a stale index [PiotrWpl]
 - Fix layoutPdf hanging forever in iOS App Store builds: return the document via the method-channel reply instead of a dlsym FFI callback, whose symbols are stripped from statically linked (Swift Package Manager) apps by distribution builds
 - Fix iOS/macOS crash (force-unwrapped CGDataProvider) when layoutPdf receives empty or malformed document data
 - Fix iOS `convertHtml` crash on iOS 26+ (UISceneDelegate lifecycle): resolve the key window from `connectedScenes` instead of the deprecated `delegate.window`/`keyWindow` lookup [Bilonik]
