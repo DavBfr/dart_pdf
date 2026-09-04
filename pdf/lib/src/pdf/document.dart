@@ -286,4 +286,21 @@ class PdfDocument {
       return os.output();
     });
   }
+
+  /// Writes this document to [output] without first materializing the complete
+  /// PDF as a [Uint8List].
+  ///
+  /// Unlike [save], this method does not move the work to another isolate.
+  /// Callers that need isolation should construct and write the document in
+  /// the worker isolate so the document object graph is never copied between
+  /// isolates.
+  Future<void> write(
+    PdfStream output, {
+    bool enableEventLoopBalancing = false,
+  }) async {
+    if (prev != null) {
+      output.putBytes(prev!.bytes);
+    }
+    await _write(output, enableEventLoopBalancing: enableEventLoopBalancing);
+  }
 }

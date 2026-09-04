@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Add output-stream serialization for memory-bounded PDF generation.
+- Add lazy JPEG streams that do not retain encoded image bytes.
+
 ## 3.13.0
 
 - Fix lint issues
