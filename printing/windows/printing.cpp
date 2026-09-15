@@ -29,8 +29,9 @@ namespace nfet {
 static int libraryRefCount = 0;
 static std::mutex libraryMutex;
 
-Printing::Printing(flutter::MethodChannel<flutter::EncodableValue>* channel)
-    : channel{channel} {
+Printing::Printing(flutter::MethodChannel<flutter::EncodableValue>* channel,
+                   flutter::PluginRegistrarWindows* registrar)
+    : channel{channel}, registrar{registrar} {
   const std::lock_guard<std::mutex> lock{libraryMutex};
   if (libraryRefCount++ == 0) {
     FPDF_LIBRARY_CONFIG config;
@@ -47,6 +48,15 @@ Printing::~Printing() {
   if (--libraryRefCount == 0) {
     FPDF_DestroyLibrary();
   }
+}
+
+HWND Printing::getWindow() {
+  auto* view = registrar->GetView();
+  if (!view) {
+    return nullptr;
+  }
+  HWND hwnd = view->GetNativeWindow();
+  return hwnd ? GetAncestor(hwnd, GA_ROOT) : nullptr;
 }
 
 void Printing::onPageRasterized(std::vector<uint8_t> data,
