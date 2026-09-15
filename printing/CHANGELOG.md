@@ -7,6 +7,7 @@
 - Fix iOS `convertHtml` crash on iOS 26+ (UISceneDelegate lifecycle): resolve the key window from `connectedScenes` instead of the deprecated `delegate.window`/`keyWindow` lookup [Bilonik]
 - Fix Windows memory initialization in `print_job.cpp`: use `dmSize + dmDriverExtra` instead of `sizeof(DEVMODE)` for `ZeroMemory` — `DEVMODE` is a variable-length struct [timothee-escandell]
 - Fix Windows and Linux callbacks being routed to the wrong isolate with multiple `FlutterEngine`s (multi-window): the method channel is now owned by the plugin instance instead of a global
+- Fix PDFium being destroyed on Windows while another plugin instance is still using it: the library is now reference counted on Windows and Linux
 
 ## 5.15.0
 
