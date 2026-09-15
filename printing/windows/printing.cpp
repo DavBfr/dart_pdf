@@ -21,9 +21,8 @@
 
 namespace nfet {
 
-extern std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel;
-
-Printing::Printing() {
+Printing::Printing(flutter::MethodChannel<flutter::EncodableValue>* channel)
+    : channel{channel} {
   FPDF_LIBRARY_CONFIG config;
   config.version = 2;
   config.m_pUserFontPaths = nullptr;
