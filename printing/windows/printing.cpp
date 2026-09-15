@@ -17,22 +17,36 @@
 #include "printing.h"
 
 #include <fpdfview.h>
+
+#include <mutex>
+
 #include "print_job.h"
 
 namespace nfet {
 
+// PDFium is a process-wide library: only the first instance initializes it and
+// only the last one destroys it.
+static int libraryRefCount = 0;
+static std::mutex libraryMutex;
+
 Printing::Printing(flutter::MethodChannel<flutter::EncodableValue>* channel)
     : channel{channel} {
-  FPDF_LIBRARY_CONFIG config;
-  config.version = 2;
-  config.m_pUserFontPaths = nullptr;
-  config.m_pIsolate = nullptr;
-  config.m_v8EmbedderSlot = 0;
-  FPDF_InitLibraryWithConfig(&config);
+  const std::lock_guard<std::mutex> lock{libraryMutex};
+  if (libraryRefCount++ == 0) {
+    FPDF_LIBRARY_CONFIG config;
+    config.version = 2;
+    config.m_pUserFontPaths = nullptr;
+    config.m_pIsolate = nullptr;
+    config.m_v8EmbedderSlot = 0;
+    FPDF_InitLibraryWithConfig(&config);
+  }
 }
 
 Printing::~Printing() {
-  FPDF_DestroyLibrary();
+  const std::lock_guard<std::mutex> lock{libraryMutex};
+  if (--libraryRefCount == 0) {
+    FPDF_DestroyLibrary();
+  }
 }
 
 void Printing::onPageRasterized(std::vector<uint8_t> data,
