@@ -111,12 +111,16 @@ bool PrintJob::printPdf(const std::string& name,
     }
   }
 
+  // nullptr when the engine has no view; both dialogs then keep the owner
+  // they had before.
+  auto owner = printing->getWindow();
+
   if (printer.empty()) {
     if (windowsModernDialog) {
       // --- MODERN OPTION (PrintDlgEx) ---
       PRINTDLGEX pdx = {0};
       pdx.lStructSize = sizeof(PRINTDLGEX);
-      pdx.hwndOwner = GetActiveWindow();
+      pdx.hwndOwner = owner ? owner : GetActiveWindow();
       pdx.hDevMode = dm;
       dm = nullptr;  // dialog takes ownership; may replace with new alloc
       pdx.hDevNames = nullptr;
@@ -156,7 +160,7 @@ bool PrintJob::printPdf(const std::string& name,
       PRINTDLG pd;
       ZeroMemory(&pd, sizeof(pd));
       pd.lStructSize = sizeof(pd);
-      pd.hwndOwner = nullptr;
+      pd.hwndOwner = owner;
       pd.hDevMode = dm;
       pd.hDevNames = nullptr;
       pd.hDC = nullptr;

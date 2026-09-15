@@ -41,7 +41,8 @@ class PrintingPlugin : public flutter::Plugin {
             registrar->messenger(), "net.nfet.printing",
             &flutter::StandardMethodCodec::GetInstance());
 
-    auto plugin = std::make_unique<PrintingPlugin>(std::move(channel));
+    auto plugin =
+        std::make_unique<PrintingPlugin>(std::move(channel), registrar);
 
     plugin->channel->SetMethodCallHandler(
         [plugin_pointer = plugin.get()](const auto& call, auto result) {
@@ -51,14 +52,16 @@ class PrintingPlugin : public flutter::Plugin {
     registrar->AddPlugin(std::move(plugin));
   }
 
-  explicit PrintingPlugin(
-      std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel)
-      : channel{std::move(channel)}, printing{this->channel.get()} {}
+  PrintingPlugin(
+      std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel,
+      flutter::PluginRegistrarWindows* registrar)
+      : channel{std::move(channel)},
+        printing{this->channel.get(), registrar} {}
 
   virtual ~PrintingPlugin() {}
 
  private:
-  // Declared before printing so it outlives it and any pending job.
+  // Declared before printing so it outlives it.
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel;
   Printing printing;
 
