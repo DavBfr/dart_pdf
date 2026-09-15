@@ -27,7 +27,8 @@
 
 #include <fpdfview.h>
 
-print_job::print_job(int index) : index(index) {}
+print_job::print_job(FlMethodChannel* channel, int index)
+    : channel(channel), index(index) {}
 
 print_job::~print_job() {}
 

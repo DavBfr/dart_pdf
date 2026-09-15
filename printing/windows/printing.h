@@ -30,8 +30,10 @@ class PrintJob;
 
 class Printing {
  private:
+  flutter::MethodChannel<flutter::EncodableValue>* channel;
+
  public:
-  Printing();
+  explicit Printing(flutter::MethodChannel<flutter::EncodableValue>* channel);
 
   virtual ~Printing();
 
