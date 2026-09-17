@@ -85,6 +85,131 @@ void main() {
     );
   });
 
+  test(
+    'Text Widgets lineSplitter keeps the default wrapping behavior',
+    () async {
+      // 自定义 splitter 复刻默认的按空白切分时，排版结果必须与默认完全一致。
+      final para = LoremText().paragraph(20);
+      const width = 150.0;
+
+      final doc = Document();
+      late RichText def;
+      late RichText custom;
+      doc.addPage(
+        Page(
+          pageFormat: PdfPageFormat(200, 400),
+          build: (Context context) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(
+                width: width,
+                child: def = RichText(
+                  text: TextSpan(
+                    text: para,
+                    style: TextStyle(font: ttf, fontSize: 10),
+                  ),
+                  lineSplitter: null,
+                ),
+              ),
+              SizedBox(
+                width: width,
+                child: custom = RichText(
+                  text: TextSpan(
+                    text: para,
+                    style: TextStyle(font: ttf, fontSize: 10),
+                  ),
+                  lineSplitter: (line) => line.split(RegExp(r'\s')),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      await doc.save();
+
+      expect(def.box, isNotNull);
+      expect(custom.box, isNotNull);
+      expect(
+        custom.box!.height,
+        def.box!.height,
+        reason: '默认空白切分的 splitter 不得改变换行结果',
+      );
+    },
+  );
+
+  /// Text runs `(x, y)` drawn on the first page, extracted from the
+  /// uncompressed content stream. Used to assert the produced line breaks.
+  List<(double, double)> textRuns(List<int> bytes) {
+    final raw = String.fromCharCodes(bytes);
+    return [
+      for (final m in RegExp(r'([\d.]+) ([\d.]+) Td').allMatches(raw))
+        (double.parse(m[1]!), double.parse(m[2]!)),
+    ];
+  }
+
+  /// Runs of the topmost line (largest y), sorted by x.
+  List<(double, double)> firstLine(List<int> bytes) {
+    final runs = textRuns(bytes);
+    final top = runs.map((r) => r.$2).reduce(math.max);
+    return runs.where((r) => (r.$2 - top).abs() < 0.01).toList()
+      ..sort((a, b) => a.$1.compareTo(b.$1));
+  }
+
+  test(
+    'Text Widgets lineSplitter: CJK fills the line after a short prefix',
+    () async {
+      // 混排短前缀 + 无空格 CJK：默认把整段 CJK 当作一个词 —— 它能独占一行，
+      // 于是被整体挪到下一行，首行只剩 `- `（这正是 dart_pdf#1726 报告的
+      // "could break from the first word"）。提供断行器后 CJK 逐字断行 → 首行填满。
+      const cjk = '字体排印学是研究字体与排版的学问涉及字形设计';
+      const margin = 8.0;
+      const pageWidth = 140.0;
+
+      Future<List<int>> render(LineSplitter? splitter) async {
+        final doc = Document(compress: false);
+        doc.addPage(
+          Page(
+            pageFormat: PdfPageFormat(pageWidth, 120, marginAll: margin),
+            build: (Context context) => RichText(
+              text: TextSpan(
+                text: '- $cjk',
+                style: TextStyle(
+                  font: asian,
+                  fontSize: 8,
+                  // 逐字断行时字间不插空格 → 空格宽度清零。
+                  wordSpacing: splitter == null ? 1 : 0,
+                ),
+              ),
+              lineSplitter: splitter,
+            ),
+          ),
+        );
+        return await doc.save();
+      }
+
+      final def = firstLine(await render(null));
+      final custom = firstLine(await render((line) => line.split('')));
+
+      expect(def, hasLength(1), reason: '默认实现把整段 CJK 挪到下一行，首行只剩前缀');
+      expect(def.single.$1, margin, reason: '孤立前缀从左边距开始');
+
+      expect(custom.length, greaterThan(1), reason: '逐字断行后首行应包含前缀与其后的多个字');
+      expect(custom.first.$1, margin, reason: '首行仍从左边距开始');
+      // 首行填满：最后一个字明显越过默认实现的首行（只有前缀那一个字宽）。
+      expect(
+        custom.last.$1,
+        greaterThan(def.last.$1 + 50),
+        reason: '首行应被填满而不是只放前缀',
+      );
+      // 不超过版心。
+      expect(
+        custom.last.$1,
+        lessThanOrEqualTo(pageWidth - margin + 0.01),
+        reason: '行宽不得超过版心',
+      );
+    },
+  );
+
   test('Text Widgets Alignement', () {
     final para = LoremText().paragraph(40);
 
