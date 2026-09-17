@@ -187,6 +187,20 @@ final file = File("example.pdf");
 await file.writeAsBytes(await pdf.save());
 ```
 
+For memory-bounded output, implement a `PdfStream` backed by a seekable file
+or another destination and write the document directly to it:
+
+```text
+final output = MyFilePdfStream('example.pdf');
+try {
+  await pdf.write(output);
+} finally {
+  output.close();
+}
+```
+
+A custom output must implement byte writes, offsets, and random-access patches.
+
 To save the pdf file (Web):
 (saved as a unique name based on milliseconds since epoch)
 

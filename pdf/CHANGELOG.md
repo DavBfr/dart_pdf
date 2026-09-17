@@ -2,6 +2,8 @@
 
 ## 3.13.1
 
+- Add output-stream serialization for memory-bounded PDF generation.
+- Add lazy JPEG streams that do not retain encoded image bytes.
 - Fix setting a dpi on an Image widget massively inflating the PDF size (dart_pdf#1841): never resample above the source resolution, and keep DCT (JPEG) encoding instead of raw Flate pixels when a JPEG image is downsampled. Note that downsampled JPEG images are re-encoded at quality 90 (lossy); omit dpi to embed the original bytes unchanged
 - Check the no-upscale rule against the decoded pixels, so rotated images can no longer be accidentally upscaled, and keep the original image when the source resolution is unknown
 - Keep dpi downsampling working after the same image was resolved at or above its source resolution
