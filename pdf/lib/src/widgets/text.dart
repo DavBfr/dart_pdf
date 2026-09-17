@@ -657,6 +657,36 @@ class RichTextContext extends WidgetContext {
 
 typedef Hyphenation = List<String> Function(String word);
 
+/// Signature of a function that splits a line of text into words that may be
+/// wrapped independently.
+///
+/// By default, lines are split at whitespace, which means that scripts without
+/// word separators (Chinese, Japanese, Korean...) are treated as a single
+/// word and can only be broken by the hard-splitting fallback, without any
+/// line breaking rule (no prohibition of closing punctuation at the beginning
+/// of a line, etc.).
+///
+/// Providing a custom splitter enables script-aware line wrapping, for
+/// instance breaking between CJK characters, or implementing the Unicode Line
+/// Breaking Algorithm (UAX #14):
+///
+/// ```dart
+/// RichText(
+///   text: TextSpan(
+///     text: '你好，世界',
+///     // Each CJK character may wrap independently. Spaces are not inserted
+///     // between the words, so the space width must be cleared.
+///     style: TextStyle(font: myCjkFont, wordSpacing: 0),
+///   ),
+///   lineSplitter: (line) => line.split(''),
+/// );
+/// ```
+///
+/// Whitespace runs must be returned the same way [String.split] does (as empty
+/// strings) when they are expected to keep their width, so that the default
+/// behavior is preserved for mixed content.
+typedef LineSplitter = List<String> Function(String line);
+
 class RichText extends Widget with SpanningWidget {
   RichText({
     required this.text,
@@ -668,6 +698,7 @@ class RichText extends Widget with SpanningWidget {
     this.maxLines,
     this.overflow = TextOverflow.visible,
     this.hyphenation,
+    this.lineSplitter,
   });
 
   static bool debug = false;
@@ -701,6 +732,12 @@ class RichText extends Widget with SpanningWidget {
   List<InlineSpan>? _preprocessed;
 
   final Hyphenation? hyphenation;
+
+  /// A custom function to split lines of text into words that may be wrapped
+  /// independently. When `null` (the default), lines are split at whitespace.
+  ///
+  /// See [LineSplitter] for details and for an example enabling CJK wrapping.
+  final LineSplitter? lineSplitter;
 
   void _appendDecoration(bool append, _TextDecoration td) {
     if (append && _decorations.isNotEmpty) {
@@ -962,7 +999,9 @@ class RichText extends Widget with SpanningWidget {
                   .split('\n');
 
           for (var line = 0; line < spanLines.length; line++) {
-            final words = spanLines[line].split(RegExp(r'\s'));
+            final words =
+                lineSplitter?.call(spanLines[line]) ??
+                spanLines[line].split(RegExp(r'\s'));
             for (var index = 0; index < words.length; index++) {
               final word = words[index];
 
@@ -1388,6 +1427,8 @@ class Text extends RichText {
     double textScaleFactor = 1.0,
     int? maxLines,
     TextOverflow? overflow,
+    Hyphenation? hyphenation,
+    LineSplitter? lineSplitter,
   }) : super(
          text: TextSpan(text: text, style: style),
          textAlign: textAlign,
@@ -1397,5 +1438,7 @@ class Text extends RichText {
          textScaleFactor: textScaleFactor,
          maxLines: maxLines,
          overflow: overflow,
+         hyphenation: hyphenation,
+         lineSplitter: lineSplitter,
        );
 }
