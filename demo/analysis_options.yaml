@@ -8,6 +8,14 @@ analyzer:
     todo: ignore
     constant_identifier_names: ignore
     avoid_print: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   rules:

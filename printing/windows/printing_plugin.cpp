@@ -55,8 +55,7 @@ class PrintingPlugin : public flutter::Plugin {
   PrintingPlugin(
       std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel,
       flutter::PluginRegistrarWindows* registrar)
-      : channel{std::move(channel)},
-        printing{this->channel.get(), registrar} {}
+      : channel{std::move(channel)}, printing{this->channel.get(), registrar} {}
 
   virtual ~PrintingPlugin() {}
 

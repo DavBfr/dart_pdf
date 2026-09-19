@@ -1,12 +1,9 @@
 # Changelog
 
-## 5.15.2
+## 5.15.1
 
 - Fix iOS use-after-free crash in `CGPDFDocumentGetNumberOfPages`: UIKit reads the PDF document from a background page-count thread while dynamic layout replaces it on the main thread; document access is now lock-guarded
 - Fix GHSA-hq66-cqwq-w95j: update pdf.js to 6.2.108
-
-## 5.15.1
-
 - Fix `RangeError` in `PdfPreviewRaster._raster` when the preview is disposed while a page is being rasterized: re-check `mounted` after awaiting `page.toPng()`, since `dispose()` clears `pages` and the resumed continuation would write to a stale index [PiotrWpl]
 - Fix layoutPdf hanging forever in iOS App Store builds: return the document via the method-channel reply instead of a dlsym FFI callback, whose symbols are stripped from statically linked (Swift Package Manager) apps by distribution builds
 - Fix iOS/macOS crash (force-unwrapped CGDataProvider) when layoutPdf receives empty or malformed document data

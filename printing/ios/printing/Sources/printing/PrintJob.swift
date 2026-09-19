@@ -29,13 +29,13 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     public var index: Int
     private let pdfDocumentLock = NSLock()
     private var _pdfDocument: CGPDFDocument?
-    // UIKit queries numberOfPages from a background page-count thread
-    // (UIPrintPreviewViewController.updatePageCount) while setDocument and
-    // cancelJob replace the document on the main thread. An unsynchronized
-    // swap lets ARC free the old CGPDFDocument mid-read, crashing in
-    // CGPDFDocumentGetNumberOfPages. All access must go through this lock;
-    // the getter retains the document under the lock so callers always hold
-    // a strong reference to a live object.
+    /// UIKit queries numberOfPages from a background page-count thread
+    /// (UIPrintPreviewViewController.updatePageCount) while setDocument and
+    /// cancelJob replace the document on the main thread. An unsynchronized
+    /// swap lets ARC free the old CGPDFDocument mid-read, crashing in
+    /// CGPDFDocumentGetNumberOfPages. All access must go through this lock;
+    /// the getter retains the document under the lock so callers always hold
+    /// a strong reference to a live object.
     private var pdfDocument: CGPDFDocument? {
         get {
             pdfDocumentLock.lock()
