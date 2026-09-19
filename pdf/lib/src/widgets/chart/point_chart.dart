@@ -41,6 +41,7 @@ class PointDataSet<T extends PointChartValue> extends Dataset {
     double borderWidth = 1.5,
     this.drawPoints = true,
     this.shape,
+    this.offsets = 0,
     this.buildValue,
     this.valuePosition = ValuePosition.auto,
   }) : super(
