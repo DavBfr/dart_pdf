@@ -6,10 +6,16 @@
 
 ## 5.15.1
 
+- Fix iOS use-after-free crash in `CGPDFDocumentGetNumberOfPages`: UIKit reads the PDF document from a background page-count thread while dynamic layout replaces it on the main thread; document access is now lock-guarded
+- Fix GHSA-hq66-cqwq-w95j: update pdf.js to 6.2.108
+- Fix `RangeError` in `PdfPreviewRaster._raster` when the preview is disposed while a page is being rasterized: re-check `mounted` after awaiting `page.toPng()`, since `dispose()` clears `pages` and the resumed continuation would write to a stale index [PiotrWpl]
 - Fix layoutPdf hanging forever in iOS App Store builds: return the document via the method-channel reply instead of a dlsym FFI callback, whose symbols are stripped from statically linked (Swift Package Manager) apps by distribution builds
 - Fix iOS/macOS crash (force-unwrapped CGDataProvider) when layoutPdf receives empty or malformed document data
 - Fix iOS `convertHtml` crash on iOS 26+ (UISceneDelegate lifecycle): resolve the key window from `connectedScenes` instead of the deprecated `delegate.window`/`keyWindow` lookup [Bilonik]
 - Fix Windows memory initialization in `print_job.cpp`: use `dmSize + dmDriverExtra` instead of `sizeof(DEVMODE)` for `ZeroMemory` — `DEVMODE` is a variable-length struct [timothee-escandell]
+- Fix Windows and Linux callbacks being routed to the wrong isolate with multiple `FlutterEngine`s (multi-window): the method channel is now owned by the plugin instance instead of a global
+- Fix PDFium being destroyed on Windows while another plugin instance is still using it: the library is now reference counted on Windows and Linux
+- Fix the Windows print dialog not being owned by the window that started the job with multiple windows
 
 ## 5.15.0
 

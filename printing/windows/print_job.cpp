@@ -111,12 +111,16 @@ bool PrintJob::printPdf(const std::string& name,
     }
   }
 
+  // nullptr when the engine has no view; both dialogs then keep the owner
+  // they had before.
+  auto owner = printing->getWindow();
+
   if (printer.empty()) {
     if (windowsModernDialog) {
       // --- MODERN OPTION (PrintDlgEx) ---
       PRINTDLGEX pdx = {0};
       pdx.lStructSize = sizeof(PRINTDLGEX);
-      pdx.hwndOwner = GetActiveWindow();
+      pdx.hwndOwner = owner ? owner : GetActiveWindow();
       pdx.hDevMode = dm;
       dm = nullptr;  // dialog takes ownership; may replace with new alloc
       pdx.hDevNames = nullptr;
@@ -156,7 +160,7 @@ bool PrintJob::printPdf(const std::string& name,
       PRINTDLG pd;
       ZeroMemory(&pd, sizeof(pd));
       pd.lStructSize = sizeof(pd);
-      pd.hwndOwner = nullptr;
+      pd.hwndOwner = owner;
       pd.hDevMode = dm;
       pd.hDevNames = nullptr;
       pd.hDC = nullptr;
@@ -277,6 +281,15 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
 
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
+    // Returning here without calling onCompleted() leaves the Dart-side Future
+    // pending forever. Abort the document StartDoc already opened so no
+    // half-open job is left in the queue, release the handles like the success
+    // path below does, and report the failure.
+    AbortDoc(hDC);
+    DeleteDC(hDC);
+    GlobalFree(hDevNames);
+    GlobalFree(hDevMode);
+    printing->onCompleted(this, false, "Cannot print a malformed PDF file");
     return;
   }
 

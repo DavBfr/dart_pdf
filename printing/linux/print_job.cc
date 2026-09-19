@@ -23,11 +23,37 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <cstring>
+#include <mutex>
 #include <string>
 
 #include <fpdfview.h>
 
-print_job::print_job(int index) : index(index) {}
+// PDFium is a process-wide library: only the first job initializes it and
+// only the last one destroys it.
+static int library_ref_count = 0;
+static std::mutex library_mutex;
+
+static void acquire_pdfium() {
+  const std::lock_guard<std::mutex> lock{library_mutex};
+  if (library_ref_count++ == 0) {
+    FPDF_LIBRARY_CONFIG config;
+    config.version = 2;
+    config.m_pUserFontPaths = nullptr;
+    config.m_pIsolate = nullptr;
+    config.m_v8EmbedderSlot = 0;
+    FPDF_InitLibraryWithConfig(&config);
+  }
+}
+
+static void release_pdfium() {
+  const std::lock_guard<std::mutex> lock{library_mutex};
+  if (--library_ref_count == 0) {
+    FPDF_DestroyLibrary();
+  }
+}
+
+print_job::print_job(FlMethodChannel* channel, int index)
+    : channel(channel), index(index) {}
 
 print_job::~print_job() {}
 
@@ -249,16 +275,11 @@ void print_job::raster_pdf(const uint8_t data[],
                            const int32_t pages[],
                            size_t pages_count,
                            double scale) {
-  FPDF_LIBRARY_CONFIG config;
-  config.version = 2;
-  config.m_pUserFontPaths = nullptr;
-  config.m_pIsolate = nullptr;
-  config.m_v8EmbedderSlot = 0;
-  FPDF_InitLibraryWithConfig(&config);
+  acquire_pdfium();
 
   auto doc = FPDF_LoadMemDocument64(data, size, nullptr);
   if (!doc) {
-    FPDF_DestroyLibrary();
+    release_pdfium();
     on_page_raster_end(this, "Cannot raster a malformed PDF file");
     return;
   }
@@ -317,7 +338,7 @@ void print_job::raster_pdf(const uint8_t data[],
 
   FPDF_CloseDocument(doc);
 
-  FPDF_DestroyLibrary();
+  release_pdfium();
 
   on_page_raster_end(this, nullptr);
 }

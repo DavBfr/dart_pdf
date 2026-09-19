@@ -51,7 +51,7 @@ class PrintingPlugin extends PrintingPlatform {
 
   static const _pdfJsCdnPath = 'https://unpkg.com/pdfjs-dist';
 
-  static const _pdfJsVersion = '5.7.284';
+  static const _pdfJsVersion = '6.2.108';
 
   final _loading = Mutex();
 
@@ -73,7 +73,9 @@ class PrintingPlugin extends PrintingPlatform {
       // Check if the source of PDF.js library is overridden via
       // [dartPdfJsBaseUrl] JavaScript variable.
       if (web.window.hasProperty(_dartPdfJsBaseUrl.toJS).toDart) {
-        _pdfJsUrlBase = web.window.getProperty(_dartPdfJsBaseUrl.toJS);
+        _pdfJsUrlBase = web.window
+            .getProperty<js.JSString?>(_dartPdfJsBaseUrl.toJS)!
+            .toDart;
       } else {
         final pdfJsVersion =
             web.window.hasProperty(_dartPdfJsVersion.toJS).toDart
@@ -301,11 +303,10 @@ class PrintingPlugin extends PrintingPlatform {
   ) async* {
     await _initPlugin();
 
-    // PDF.js transfers the ArrayBuffer to its worker (detaching it).
-    // Copy on the JS side so postMessage always gets a transferable buffer.
-    final jsData = Uint8List.fromList(document).toJS.callMethod<js.JSUint8Array>('slice'.toJS);
-    final settings = Settings()..data = jsData;
-
+    // pdf.js 4+ transfers TypedArrays to the worker and takes ownership of the
+    // buffer, which neuters the caller's Uint8List. Copy first so the app can
+    // still download/share the same document bytes after preview rasterization.
+    final settings = Settings()..data = Uint8List.fromList(document).toJS;
 
     if (!_hasPdfJsLib) {
       settings

@@ -47,8 +47,22 @@ class PdfTtfFont extends PdfFont {
     widthsObject = PdfObject<PdfArray>(pdfDocument, params: PdfArray());
   }
 
+  /// Whether this font should take the CID `/Type0` path.
+  ///
+  /// Reads [PdfSettings.simpleTrueTypeFonts] rather than a static, because
+  /// [PdfDocument.save] writes on a separate isolate where statics start fresh
+  /// — a static would be seen by putText() but not by prepare().
+  bool get _useType0 => font.unicode && !settings.simpleTrueTypeFonts;
+
+  /// Whether this font is written as a CID `/Type0` font.
+  ///
+  /// Consumers must key off this rather than `font.unicode`, which only reports
+  /// the sfnt version tag and stays true even when the simple `/TrueType` path
+  /// is taken. [PdfFontDescriptor] needs it to pick symbolic vs nonsymbolic.
+  bool get isCidFont => _useType0;
+
   @override
-  String get subtype => font.unicode ? '/Type0' : super.subtype;
+  String get subtype => _useType0 ? '/Type0' : super.subtype;
 
   late PdfUnicodeCmap unicodeCMap;
 
@@ -159,7 +173,7 @@ class PdfTtfFont extends PdfFont {
   void prepare() {
     super.prepare();
 
-    if (font.unicode) {
+    if (_useType0) {
       _buildType0(params);
     } else {
       _buildTrueType(params);
@@ -168,8 +182,10 @@ class PdfTtfFont extends PdfFont {
 
   @override
   void putText(PdfStream stream, String text) {
-    if (!font.unicode) {
-      super.putText(stream, text);
+    if (!_useType0) {
+      // Without the return the simple encoding is emitted and then the hex CID
+      // string is appended on top of it, corrupting the text.
+      return super.putText(stream, text);
     }
 
     final runes = text.runes;

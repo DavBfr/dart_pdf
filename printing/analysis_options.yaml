@@ -7,6 +7,13 @@ analyzer:
     public_member_api_docs: ignore
     todo: ignore
     prefer_initializing_formals: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   rules:

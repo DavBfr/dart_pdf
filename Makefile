@@ -44,7 +44,7 @@ pdf/material.ttf:
 	curl -L "https://github.com/google/material-design-icons/raw/master/font/MaterialIcons-Regular.ttf" > $@
 
 pdf/emoji.ttf:
-	curl -L https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf > $@
+	curl -fL https://github.com/googlefonts/noto-emoji/raw/f3ae03f5e9/fonts/NotoColorEmoji.ttf > $@
 
 demo/assets/logo.svg:
 	curl -L "http://pigment.github.io/fake-logos/logos/vector/color/auto-speed.svg" > $@
@@ -57,8 +57,8 @@ pdf/hacen-tunisia.ttf:
 
 format: format-dart format-clang format-swift
 
-format-dart: $(DART_SRC)
-	$(DART_BIN) format $^
+format-dart: pdf/pubspec.lock printing/pubspec.lock demo/pubspec.lock test/pubspec.lock $(DART_SRC)
+	$(DART_BIN) format $(DART_SRC)
 
 format-clang: $(CLNG_SRC)
 	clang-format -style=Chromium -i $^
