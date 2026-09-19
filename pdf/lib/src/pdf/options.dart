@@ -6,3 +6,12 @@ const bool useArabic = bool.fromEnvironment(
   'use_arabic',
   defaultValue: !useBidi,
 );
+
+/// Whether to use complex script shaping with OpenType GSUB.
+/// Supports Indic scripts (Devanagari, Bengali, Tamil, Telugu, Kannada,
+/// Malayalam, Gujarati, Gurmukhi, Oriya) and other complex scripts
+/// (Thai, Khmer, Myanmar, Tibetan, Sinhala, Lao).
+const bool useComplexScripts = bool.fromEnvironment(
+  'use_complex_scripts',
+  defaultValue: true,
+);
