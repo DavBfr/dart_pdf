@@ -25,6 +25,8 @@ import 'package:meta/meta.dart';
 import '../options.dart';
 import 'bidi_utils.dart' as bidi;
 import 'font_metrics.dart';
+import 'gpos_parser.dart';
+import 'gsub_parser.dart';
 
 enum TtfParserName {
   copyright,
@@ -179,6 +181,8 @@ class TtfParser {
   static const String cbdt_table = 'CBDT';
   static const String post_table = 'post';
   static const String os_2_table = 'OS/2';
+  static const String gsub_table = 'GSUB';
+  static const String gpos_table = 'GPOS';
 
   final ByteData bytes;
   final tableOffsets = <String, int>{};
@@ -189,6 +193,38 @@ class TtfParser {
   final glyphSizes = <int>[];
   final glyphInfoMap = <int, PdfFontMetrics>{};
   final bitmapOffsets = <int, TtfBitmapInfo>{};
+
+  GsubData? _gsubData;
+  bool _gsubParsed = false;
+
+  /// Lazily parsed GSUB data for the given script tags.
+  GsubData? getGsubData(List<String> scriptTags) {
+    if (_gsubParsed) return _gsubData;
+    _gsubParsed = true;
+
+    final gsubOffset = tableOffsets[gsub_table];
+    if (gsubOffset == null) return null;
+
+    final parser = GsubParser(bytes);
+    _gsubData = parser.parse(gsubOffset, scriptTags);
+    return _gsubData;
+  }
+
+  GposData? _gposData;
+  bool _gposParsed = false;
+
+  /// Lazily parsed GPOS data for the given script tags.
+  GposData? getGposData(List<String> scriptTags) {
+    if (_gposParsed) return _gposData;
+    _gposParsed = true;
+
+    final gposOffset = tableOffsets[gpos_table];
+    if (gposOffset == null) return null;
+
+    final parser = GposParser(bytes);
+    _gposData = parser.parse(gposOffset, scriptTags);
+    return _gposData;
+  }
 
   int get unitsPerEm => bytes.getUint16(tableOffsets[head_table]! + 18);
 
