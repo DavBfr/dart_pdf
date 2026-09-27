@@ -2,6 +2,12 @@
 
 ## 3.13.2
 
+- Support `currentColor` in SVG fills and strokes, resolved against the inherited `color` property; elements using it were previously not painted at all
+- Fix an SVG paint server reference that cannot be resolved crashing the whole document, and honour the fallback colour after `url(...)`
+- Fix a gradient declared on an ancestor group being lost by its children, which left the shape unpainted
+- Fix an unparsable `stop-color` crashing gradient construction
+- Fix the SVG `transparent` keyword painting opaque white, and honour the alpha of `rgba()`, `hsla()` and 8-digit hex colours; fill and stroke alpha no longer bleed into each other
+
 - Fix `Partitions` reporting itself finished as soon as its shortest column ran out, so `MultiPage` advanced past it and dropped whatever the longer columns still had queued
 - Fix a null-check crash when a partition wraps a widget that only becomes spannable once it has been built, such as `DefaultTextStyle`
 

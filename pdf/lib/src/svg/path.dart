@@ -274,25 +274,31 @@ class SvgPath extends SvgOperation {
 
   @override
   void paintShape(PdfGraphics canvas) {
-    if (brush.fill!.isNotEmpty) {
+    // The colour may carry its own alpha - rgba(), #rrggbbaa, `transparent` -
+    // which the fill and stroke opacities multiply.
+    final fillAlpha = brush.fillOpacity! * (brush.fill!.opacity ?? 1.0);
+    final strokeAlpha = brush.strokeOpacity! * (brush.stroke!.opacity ?? 1.0);
+
+    if (brush.fill!.isNotEmpty && fillAlpha > 0) {
       brush.fill!.setFillColor(this, canvas);
-      if (brush.fillOpacity! < 1) {
+      if (fillAlpha < 1) {
         canvas
           ..saveContext()
-          ..setGraphicState(PdfGraphicState(opacity: brush.fillOpacity));
+          // fillOpacity, not opacity: the latter sets the stroke alpha too.
+          ..setGraphicState(PdfGraphicState(fillOpacity: fillAlpha));
       }
       canvas
         ..drawShape(d)
         ..fillPath(evenOdd: brush.fillEvenOdd!);
-      if (brush.fillOpacity! < 1) {
+      if (fillAlpha < 1) {
         canvas.restoreContext();
       }
     }
 
-    if (brush.stroke!.isNotEmpty) {
+    if (brush.stroke!.isNotEmpty && strokeAlpha > 0) {
       brush.stroke!.setStrokeColor(this, canvas);
-      if (brush.strokeOpacity! < 1) {
-        canvas.setGraphicState(PdfGraphicState(opacity: brush.strokeOpacity));
+      if (strokeAlpha < 1) {
+        canvas.setGraphicState(PdfGraphicState(strokeOpacity: strokeAlpha));
       }
       canvas
         ..drawShape(d)
