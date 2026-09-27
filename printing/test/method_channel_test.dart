@@ -16,6 +16,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pdf/pdf.dart';
@@ -230,6 +231,67 @@ void main() {
       });
       expect(layoutCalls, 0);
     });
+
+    // These two pin the contract the native backends have to honour: a job
+    // that ends for any reason sends exactly one onCompleted. They pass
+    // against the Dart code at HEAD; the Linux plugin is what did not send it.
+    test('a cancellation reports false rather than an error', () async {
+      final result = layout((PdfPageFormat format) async => Uint8List(0));
+      await pumpEventQueue();
+
+      // What cancel_job(nullptr) puts on the channel.
+      await fromPlatform('onCompleted', <String, dynamic>{
+        'job': jobOf('printPdf'),
+        'completed': false,
+        'error': null,
+      });
+
+      expect(await result, isFalse);
+    });
+
+    test(
+      'a failing onLayout completes with the error the platform sends',
+      () async {
+        final reported = <Object>[];
+        final previousOnError = FlutterError.onError;
+        FlutterError.onError = (FlutterErrorDetails details) =>
+            reported.add(details.exception);
+        addTearDown(() => FlutterError.onError = previousOnError);
+
+        final result = layout(
+          (PdfPageFormat format) async => throw Exception('no document'),
+        );
+        final expectation = expectLater(result, throwsA('no document'));
+        await pumpEventQueue();
+
+        final job = jobOf('printPdf');
+        // The onLayout reply is an error, so nothing is written and the native
+        // side has to end the job itself. Without that onCompleted the future
+        // never settles - which is what the empty Linux cancel_job caused.
+        final reply = await fromPlatform('onLayout', <String, dynamic>{
+          'job': job,
+          'width': 595.0,
+          'height': 842.0,
+          'marginLeft': 0.0,
+          'marginTop': 0.0,
+          'marginRight': 0.0,
+          'marginBottom': 0.0,
+        });
+        expect(
+          () => _codec.decodeEnvelope(reply!),
+          throwsA(isA<PlatformException>()),
+          reason: 'the platform sees a failed onLayout',
+        );
+        expect(reported, hasLength(1), reason: 'the build failure is reported');
+
+        await fromPlatform('onCompleted', <String, dynamic>{
+          'job': job,
+          'completed': false,
+          'error': 'no document',
+        });
+        await expectation;
+      },
+    );
 
     test(
       'unregisters the job when the platform reports it completed',
@@ -487,17 +549,26 @@ void main() {
     test('a missing reply is a failure, not a success', () async {
       // The platform answers nothing at all - an unimplemented backend, or one
       // that returned before deciding. That is not a share.
-      expect(await impl.sharePdf(Uint8List(0), 'x.pdf', bounds, null, null, null), isFalse);
+      expect(
+        await impl.sharePdf(Uint8List(0), 'x.pdf', bounds, null, null, null),
+        isFalse,
+      );
     });
 
     test('a zero reply is a failure', () async {
       replies['sharePdf'] = 0;
-      expect(await impl.sharePdf(Uint8List(0), 'x.pdf', bounds, null, null, null), isFalse);
+      expect(
+        await impl.sharePdf(Uint8List(0), 'x.pdf', bounds, null, null, null),
+        isFalse,
+      );
     });
 
     test('a non-zero reply is a success', () async {
       replies['sharePdf'] = 1;
-      expect(await impl.sharePdf(Uint8List(0), 'x.pdf', bounds, null, null, null), isTrue);
+      expect(
+        await impl.sharePdf(Uint8List(0), 'x.pdf', bounds, null, null, null),
+        isTrue,
+      );
     });
 
     test('the name that crosses the channel carries no directory', () async {

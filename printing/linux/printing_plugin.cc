@@ -71,6 +71,8 @@ static void printing_plugin_handle_method_call(PrintingPlugin* self,
         fl_value_get_float(fl_value_lookup_string(args, "marginBottom"));
 
     auto job = new print_job(self->channel, jobNum);
+    // print_pdf returns false when it has already reported its result, and
+    // the job is still owned here; true means the job owns itself from now on.
     auto res = job->print_pdf(name, printer, pageWidth, pageHeight, marginLeft,
                               marginTop, marginRight, marginBottom);
     if (!res) {
@@ -186,7 +188,11 @@ static void on_layout_response_cb(GObject* object,
   g_autoptr(FlMethodResponse) response =
       fl_method_channel_invoke_method_finish(channel, result, &error);
   if (!response) {
-    job->cancel_job(error->message);
+    // cancel_job destroys the job, so this must not fall through into the
+    // branches below.
+    job->cancel_job(error != nullptr ? error->message
+                                     : "The onLayout call failed");
+    return;
   }
 
   if (FL_IS_METHOD_SUCCESS_RESPONSE(response)) {
@@ -201,6 +207,10 @@ static void on_layout_response_cb(GObject* object,
     auto message = fl_method_error_response_get_message(error_response);
     //  fl_method_error_response_get_details(error_response);
     job->cancel_job(message);
+  } else {
+    // Not implemented, or a response type this plugin does not know: the job
+    // still has to end, or the Dart future never completes.
+    job->cancel_job("The onLayout call was not handled");
   }
 }
 

@@ -15,6 +15,12 @@
 - Fix the shared document being left behind in the temp directory on iOS and macOS. The copy is now deleted once the share sheet is done with it
 - Fix the Android share granting write access to the shared file, and stale entries accumulating in the share directory
 - Fix the Linux share ignoring every write error, and leaving a forked copy of the application running when `xdg-open` is missing
+- Fix `Printing.layoutPdf` and `Printing.directPrintPdf` never completing on Linux when the document could not be built: `cancel_job` was an empty function, so the future stayed pending, the print dialog stayed alive and everything the job owned leaked. Every Linux job now reports exactly one result, whatever ends it
+- Fix Linux leaking one file descriptor and one document-sized memfd per print, which made a long-running app fail with 'Too many open files' after about a thousand prints
+- Fix a failed spool write still sending a truncated document to the Linux printer, and reporting a second result for the same job
+- Fix Linux never freeing a print job: one leaked per print and per dialog cancel. A cancelled dialog is also destroyed rather than hidden
+- Fix the Linux print dialog's printer and page setup being released although they were never acquired, which corrupted their reference counts and crashed the app on a later dialog print
+- A Linux print to a queue that accepts no PDF, or with no printer selected, reports that instead of continuing with a null printer
 
 ## 5.15.2
 
