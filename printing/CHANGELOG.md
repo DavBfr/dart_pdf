@@ -6,11 +6,15 @@
 - `PdfPreview` now gives a roll format a real height from the page it rasterized while keeping the requested width exactly, so roll printing works from the preview on every backend
 - A page size or margin reported back by a platform that is not finite is repaired instead of reaching the document
 - Fix the Android media-size match rejecting every candidate for a large page, because the tolerance arithmetic overflowed, and never matching a custom finite format
-
 - Fix the `PdfPreview` share button calling `onPrinted` instead of `onShared`, which left `onShared` as dead code. Apps that relied on `onPrinted` firing for a share must move that handler to `onShared`
 - Fix a null-check crash when the preview rebuilds while a share is in flight: the share action read its iPad popover anchor after awaiting the document, by which time its element had been replaced. The anchor is now read before the await, from the context passed to the action
 - `PdfShareAction` now reports a failure through `onShareError` and as a `FlutterError` instead of letting it escape as an unhandled asynchronous error, matching the print action. `PdfPreview` gained an `onShareError` parameter to receive it
 - `PdfPreviewActionBounds.childKey` and its `bounds` getter are deprecated in favour of `boundsOf(context)`; `bounds` now answers `Rect.zero` rather than throwing when the key is detached
+- `Printing.sharePdf` now treats `filename` as a file name rather than a path: any directory part is dropped, and a name that identifies no file falls back to `document.pdf`. Every backend pasted the string onto a temp directory, so a name containing a separator silently shared nothing on most platforms and aborted the Linux plugin
+- `Printing.sharePdf` now answers `false` when the platform reports no share instead of reading a missing reply as success, and the Android, iOS, macOS, Linux and Windows backends report whether the file was written and the share sheet actually presented
+- Fix the shared document being left behind in the temp directory on iOS and macOS. The copy is now deleted once the share sheet is done with it
+- Fix the Android share granting write access to the shared file, and stale entries accumulating in the share directory
+- Fix the Linux share ignoring every write error, and leaving a forked copy of the application running when `xdg-open` is missing
 
 ## 5.15.2
 

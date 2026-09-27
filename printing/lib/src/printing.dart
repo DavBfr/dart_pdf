@@ -194,6 +194,7 @@ mixin Printing {
   ///
   /// [subject] and [body] will only work for Android and iOS platforms.
   /// [emails] will only work for Android Platform.
+  /// [filename] is a file name, not a path: any directory part is dropped.
   static Future<bool> sharePdf({
     required Uint8List bytes,
     String filename = 'document.pdf',
@@ -206,12 +207,32 @@ mixin Printing {
 
     return PrintingPlatform.instance.sharePdf(
       bytes,
-      filename,
+      safeFilename(filename),
       bounds,
       subject,
       body,
       emails,
     );
+  }
+
+  /// Reduce [filename] to a name that is safe to use inside a temp directory
+  ///
+  /// Every backend joined the caller's string onto a directory, so a name
+  /// carrying a separator pointed somewhere that does not exist - silently
+  /// nothing on most platforms, a crash on Linux - and one carrying '..'
+  /// escaped the directory altogether.
+  @visibleForTesting
+  static String safeFilename(
+    String filename, {
+    String fallback = 'document.pdf',
+  }) {
+    final name = filename.split(RegExp(r'[/\\]')).last.trim();
+
+    if (name.isEmpty || name == '.' || name == '..') {
+      return fallback;
+    }
+
+    return name;
   }
 
   /// Convert an html document to a pdf data

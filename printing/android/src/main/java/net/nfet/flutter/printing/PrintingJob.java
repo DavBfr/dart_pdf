@@ -16,6 +16,7 @@
 
 package net.nfet.flutter.printing;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -334,9 +335,24 @@ public class PrintingJob extends PrintDocumentAdapter {
         printing.onCompleted(PrintingJob.this, false, message);
     }
 
-    static void sharePdf(final Context context, final byte[] data, final String name,
+    /**
+     * Write the document to the share cache and offer it to the chooser.
+     *
+     * <p>Returns false instead of reporting success blindly: the caller's
+     * Future used to complete with true even when nothing was presented.
+     */
+    static boolean sharePdf(final Context context, final byte[] data, final String name,
             final String subject, final String body, final ArrayList<String> emails) {
-        assert name != null;
+        if (data == null) {
+            return false;
+        }
+
+        // Defensive basename: the Dart side already does this, but a stale
+        // Dart layer must not be able to write outside the share directory.
+        final String safeName = new File(name != null ? name : "document.pdf").getName();
+        if (safeName.isEmpty()) {
+            return false;
+        }
 
         try {
             final File shareDirectory = new File(context.getCacheDir(), "share");
@@ -344,9 +360,21 @@ public class PrintingJob extends PrintDocumentAdapter {
                 if (!shareDirectory.mkdirs()) {
                     throw new IOException("Unable to create cache directory");
                 }
+            } else {
+                // The URI grant has to outlive this call, so the previous
+                // document can only be removed on the next one. deleteOnExit()
+                // does not help: Android kills the process without running it.
+                final File[] stale = shareDirectory.listFiles();
+                if (stale != null) {
+                    for (final File file : stale) {
+                        if (!file.getName().equals(safeName) && !file.delete()) {
+                            Log.w("PDF", "Unable to delete a stale shared file");
+                        }
+                    }
+                }
             }
 
-            File shareFile = new File(shareDirectory, name);
+            File shareFile = new File(shareDirectory, safeName);
 
             FileOutputStream stream = new FileOutputStream(shareFile);
             stream.write(data);
@@ -371,14 +399,17 @@ public class PrintingJob extends PrintDocumentAdapter {
 
             for (ResolveInfo resolveInfo : resInfoList) {
                 String packageName = resolveInfo.activityInfo.packageName;
-                context.grantUriPermission(packageName, apkURI,
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                // Read is all a share needs; write let every matching app
+                // modify the document.
+                context.grantUriPermission(
+                        packageName, apkURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
             context.startActivity(chooserIntent);
             shareFile.deleteOnExit();
-        } catch (IOException e) {
-            e.printStackTrace();
+            return true;
+        } catch (IOException | IllegalArgumentException | ActivityNotFoundException e) {
+            Log.e("PDF", "Unable to share the document", e);
+            return false;
         }
     }
 

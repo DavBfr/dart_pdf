@@ -294,7 +294,10 @@ class MethodChannelPrinting extends PrintingPlatform {
       'w': bounds.width,
       'h': bounds.height,
     };
-    return await _channel.invokeMethod<int>('sharePdf', params) != 0;
+    // A missing reply used to count as success, as did every backend that
+    // answered 1 before knowing whether anything had been presented.
+    final result = await _channel.invokeMethod<int>('sharePdf', params);
+    return result != null && result != 0;
   }
 
   @override

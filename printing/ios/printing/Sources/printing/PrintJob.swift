@@ -325,25 +325,53 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         return UIApplication.shared.delegate?.window ?? nil
     }
 
-    static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String, subject: String?, body: String?) {
+    /// Offer the document through the share sheet.
+    ///
+    /// Returns false when nothing was presented, instead of letting the caller
+    /// believe every share succeeded.
+    static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String, subject: String?, body: String?) -> Bool {
+        // Defensive basename: a name carrying a separator pointed outside the
+        // temp directory, and one carrying '..' escaped it.
+        var safeName = (name as NSString).lastPathComponent
+        if safeName.isEmpty || safeName == "." || safeName == ".." {
+            safeName = "document.pdf"
+        }
+
         let tmpDirURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-        let fileURL = tmpDirURL.appendingPathComponent(name)
+        let fileURL = tmpDirURL.appendingPathComponent(safeName)
 
         do {
             try data.write(to: fileURL, options: .atomic)
         } catch {
             print("sharePdf error: \(error.localizedDescription)")
-            return
+            return false
         }
 
-        let activityViewController = UIActivityViewController(activityItems: [fileURL, body as Any], applicationActivities: nil)
+        guard let controller = PrintJob.sceneKeyWindow()?.rootViewController else {
+            // No window to present from: presenting would be a silent no-op.
+            try? FileManager.default.removeItem(at: fileURL)
+            return false
+        }
+
+        // A nil body used to be handed over as NSNull.
+        var items: [Any] = [fileURL]
+        if let body = body {
+            items.append(body)
+        }
+
+        let activityViewController = UIActivityViewController(activityItems: items, applicationActivities: nil)
         activityViewController.setValue(subject, forKey: "subject")
+        activityViewController.completionWithItemsHandler = { _, _, _, _ in
+            // The share sheet has finished with the file; nothing used to
+            // remove it.
+            try? FileManager.default.removeItem(at: fileURL)
+        }
         if UIDevice.current.userInterfaceIdiom == .pad {
-            let controller: UIViewController? = PrintJob.sceneKeyWindow()?.rootViewController
-            activityViewController.popoverPresentationController?.sourceView = controller?.view
+            activityViewController.popoverPresentationController?.sourceView = controller.view
             activityViewController.popoverPresentationController?.sourceRect = rect
         }
-        PrintJob.sceneKeyWindow()?.rootViewController?.present(activityViewController, animated: true)
+        controller.present(activityViewController, animated: true)
+        return true
     }
 
     func convertHtml(_ data: String, withPageSize rect: CGRect, andMargin margin: CGRect, andBaseUrl baseUrl: URL?) {

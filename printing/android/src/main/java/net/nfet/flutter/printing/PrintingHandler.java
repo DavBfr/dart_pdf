@@ -54,8 +54,9 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     final String subject = call.argument("subject");
                     final String body = call.argument("body");
                     final ArrayList<String> emails = call.argument("emails");
-                    PrintingJob.sharePdf(context, document, name, subject, body, emails);
-                    result.success(1);
+                    final boolean shared = PrintingJob.sharePdf(
+                            context, document, name, subject, body, emails);
+                    result.success(shared ? 1 : 0);
                     break;
                 }
                 case "convertHtml": {

@@ -17,6 +17,7 @@
 #include "print_job.h"
 
 #include <linux/memfd.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
@@ -250,11 +251,30 @@ void print_job::cancel_job(const gchar* error) {}
 bool print_job::share_pdf(const uint8_t data[],
                           size_t size,
                           const gchar* name) {
-  auto filename = "/tmp/" + std::string(name);
+  // Defensive basename: a name carrying a separator used to point at a
+  // directory that does not exist, and fopen then returned NULL, which the
+  // unchecked fwrite below turned into a crash of the whole application.
+  std::string base = name == nullptr ? "" : std::string(name);
+  const auto slash = base.find_last_of("/\\");
+  if (slash != std::string::npos) {
+    base = base.substr(slash + 1);
+  }
+  if (base.empty() || base == "." || base == "..") {
+    base = "document.pdf";
+  }
+
+  const auto filename = "/tmp/" + base;
 
   auto fd = fopen(filename.c_str(), "wb");
-  fwrite(data, size, 1, fd);
-  fclose(fd);
+  if (!fd) {
+    return false;
+  }
+  const auto written = size == 0 ? 0 : fwrite(data, size, 1, fd);
+  const auto closed = fclose(fd);
+  if ((size != 0 && written != 1) || closed != 0) {
+    remove(filename.c_str());
+    return false;
+  }
 
   auto pid = fork();
 
@@ -262,12 +282,15 @@ bool print_job::share_pdf(const uint8_t data[],
     return false;
   } else if (pid == 0) {  // child process
     execlp("xdg-open", "xdg-open", filename.c_str(), nullptr);
+    // Only reached when exec failed. Without this the child returns into the
+    // Flutter engine and a second copy of the whole application keeps running.
+    _exit(EXIT_FAILURE);
   }
 
   int status = 0;
   waitpid(pid, &status, 0);
 
-  return status == 0;
+  return WIFEXITED(status) && WEXITSTATUS(status) == 0;
 }
 
 void print_job::raster_pdf(const uint8_t data[],

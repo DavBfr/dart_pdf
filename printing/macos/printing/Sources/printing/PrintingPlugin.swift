@@ -90,7 +90,7 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
                 return
             }
 
-            PrintJob.sharePdf(
+            let shared = PrintJob.sharePdf(
                 data: object.data,
                 withSourceRect: CGRect(
                     x: CGFloat((args["x"] as? NSNumber)?.floatValue ?? 0.0),
@@ -100,7 +100,7 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
                 ),
                 andName: args["name"] as! String, andWindow: view
             )
-            result(NSNumber(value: 1))
+            result(NSNumber(value: shared ? 1 : 0))
         } else if call.method == "convertHtml" {
             let width = CGFloat((args["width"] as? NSNumber)?.floatValue ?? 0.0)
             let height = CGFloat((args["height"] as? NSNumber)?.floatValue ?? 0.0)

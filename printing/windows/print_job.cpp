@@ -394,14 +394,31 @@ bool PrintJob::sharePdf(std::vector<uint8_t> data, const std::string& name) {
     return false;
   }
 
-  auto filename = fromUtf8(toUtf8(lpTempPathBuffer) + "\\" + name);
+  // Defensive basename: the name comes from Dart and used to be pasted into
+  // the path as-is, so one carrying a separator wrote outside the temp
+  // directory.
+  auto basename = name.substr(name.find_last_of("/\\") + 1);
+  if (basename.empty() || basename == "." || basename == "..") {
+    basename = "document.pdf";
+  }
+
+  auto directory = toUtf8(lpTempPathBuffer);
+  if (!directory.empty() && directory.back() != '\\') {
+    directory += "\\";
+  }
+  auto filename = fromUtf8(directory + basename);
 
   auto output_file =
       std::basic_ofstream<uint8_t>{filename, std::ios::out | std::ios::binary};
   output_file.write(data.data(), data.size());
   output_file.close();
+  if (!output_file) {
+    // A full disk or an unwritable temp directory used to be reported as a
+    // successful share.
+    return false;
+  }
 
-  SHELLEXECUTEINFO ShExecInfo;
+  SHELLEXECUTEINFO ShExecInfo = {};
   ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
   ShExecInfo.fMask = 0;
   ShExecInfo.hwnd = nullptr;

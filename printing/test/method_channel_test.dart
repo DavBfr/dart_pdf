@@ -31,6 +31,7 @@ void main() {
   late MethodChannelPrinting impl;
   late List<MethodCall> calls;
   late Set<String> failing;
+  late Map<String, Object?> replies;
 
   // A platform -> Dart call, returning the reply envelope so a test can check
   // that the handler answered instead of throwing.
@@ -66,13 +67,14 @@ void main() {
     impl = MethodChannelPrinting();
     calls = <MethodCall>[];
     failing = <String>{};
+    replies = <String, Object?>{};
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_channel, (MethodCall call) async {
           calls.add(call);
           if (failing.contains(call.method)) {
             throw PlatformException(code: 'error', message: 'boom');
           }
-          return null;
+          return replies[call.method];
         });
   });
 
@@ -476,6 +478,71 @@ void main() {
 
       expect(await result, <int>[1, 2]);
       expect(MethodChannelPrinting.pendingJobs, pending);
+    });
+  });
+
+  group('sharePdf', () {
+    const bounds = Rect.fromLTRB(0, 0, 1, 1);
+
+    test('a missing reply is a failure, not a success', () async {
+      // The platform answers nothing at all - an unimplemented backend, or one
+      // that returned before deciding. That is not a share.
+      expect(await impl.sharePdf(Uint8List(0), 'x.pdf', bounds, null, null, null), isFalse);
+    });
+
+    test('a zero reply is a failure', () async {
+      replies['sharePdf'] = 0;
+      expect(await impl.sharePdf(Uint8List(0), 'x.pdf', bounds, null, null, null), isFalse);
+    });
+
+    test('a non-zero reply is a success', () async {
+      replies['sharePdf'] = 1;
+      expect(await impl.sharePdf(Uint8List(0), 'x.pdf', bounds, null, null, null), isTrue);
+    });
+
+    test('the name that crosses the channel carries no directory', () async {
+      replies['sharePdf'] = 1;
+
+      await Printing.sharePdf(
+        bytes: Uint8List(0),
+        filename: '../../../etc/passwd.pdf',
+        bounds: Rect.fromLTRB(0, 0, 1, 1),
+      );
+
+      // Every backend joins this onto a temp directory, so a separator used to
+      // point outside it.
+      expect(calls.last.arguments['name'], 'passwd.pdf');
+    });
+
+    group('safeFilename', () {
+      test('keeps an ordinary name', () {
+        expect(Printing.safeFilename('report.pdf'), 'report.pdf');
+      });
+
+      test('drops a posix directory', () {
+        expect(Printing.safeFilename('a/b/report.pdf'), 'report.pdf');
+      });
+
+      test('drops a windows directory', () {
+        expect(Printing.safeFilename(r'a\b\report.pdf'), 'report.pdf');
+      });
+
+      test('refuses to escape the directory', () {
+        expect(Printing.safeFilename('../../etc/passwd'), 'passwd');
+        expect(Printing.safeFilename('..'), 'document.pdf');
+        expect(Printing.safeFilename('../'), 'document.pdf');
+      });
+
+      test('falls back for a name that names no file', () {
+        expect(Printing.safeFilename(''), 'document.pdf');
+        expect(Printing.safeFilename('.'), 'document.pdf');
+        expect(Printing.safeFilename('   '), 'document.pdf');
+        expect(Printing.safeFilename('a/'), 'document.pdf');
+      });
+
+      test('honours the caller fallback', () {
+        expect(Printing.safeFilename('', fallback: 'other.pdf'), 'other.pdf');
+      });
     });
   });
 }

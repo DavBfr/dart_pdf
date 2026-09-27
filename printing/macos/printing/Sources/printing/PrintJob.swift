@@ -229,28 +229,73 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         }
     }
 
-    public static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String, andWindow view: NSView) {
-        let tempFile = NSTemporaryDirectory() + name
+    /// Keeps the sharing-picker delegates alive until the picker is done with
+    /// them: NSSharingServicePicker holds its delegate weakly.
+    private static var sharingPickerDelegates: [SharingPickerCleanup] = []
+
+    /// Offer the document through the sharing picker.
+    ///
+    /// Returns false when the file could not be written, instead of letting
+    /// the caller believe every share succeeded.
+    public static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String, andWindow view: NSView) -> Bool {
+        // Defensive basename: NSTemporaryDirectory() + name used to accept a
+        // path, which pointed outside the temp directory.
+        var safeName = (name as NSString).lastPathComponent
+        if safeName.isEmpty || safeName == "." || safeName == ".." {
+            safeName = "document.pdf"
+        }
+
+        let tempFile = NSTemporaryDirectory() + safeName
         let file = NSURL(fileURLWithPath: tempFile)
 
+        guard let fileURL = file.absoluteURL else {
+            return false
+        }
+
         do {
-            try data.write(to: file.absoluteURL!)
+            try data.write(to: fileURL)
         } catch {
             print("Unable to save the pdf file to \(tempFile)")
-            return
+            return false
         }
 
         let sharingServicePicker = NSSharingServicePicker(items: [file])
+        let delegate = SharingPickerCleanup(path: tempFile)
+        sharingServicePicker.delegate = delegate
+        // Kept alive until the picker is done with it.
+        PrintJob.sharingPickerDelegates.append(delegate)
         sharingServicePicker.show(relativeTo: rect, of: view, preferredEdge: NSRectEdge.maxY)
+        return true
+    }
 
-//        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
-//            let fileManager = FileManager.default
-//            do {
-//                try fileManager.removeItem(atPath: tempFile)
-//            } catch let error as NSError {
-//                print("Unable to delete \(tempFile): \(error)")
-//            }
-//        }
+    /// Removes the shared temp file once the service has finished with it.
+    ///
+    /// The cleanup used to be commented out, so every share left a copy of the
+    /// document in the temp directory.
+    private class SharingPickerCleanup: NSObject, NSSharingServicePickerDelegate {
+        init(path: String) {
+            self.path = path
+        }
+
+        let path: String
+
+        func sharingServicePicker(_: NSSharingServicePicker, didChoose service: NSSharingService?) {
+            if service == nil {
+                // Dismissed without choosing: nothing will read the file.
+                remove()
+                return
+            }
+            // A service may still be reading the file, so give it a moment
+            // before taking the copy away.
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(5)) { [weak self] in
+                self?.remove()
+            }
+        }
+
+        private func remove() {
+            try? FileManager.default.removeItem(atPath: path)
+            PrintJob.sharingPickerDelegates.removeAll { $0 === self }
+        }
     }
 
     @available(macOS 11.0, *)
