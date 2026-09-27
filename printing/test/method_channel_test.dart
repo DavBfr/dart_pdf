@@ -301,6 +301,32 @@ void main() {
       expect(zoneErrors, isEmpty);
     });
 
+    test(
+      'a second result arriving before the first is handled is ignored',
+      () async {
+        final pending = MethodChannelPrinting.pendingJobs;
+        final result = impl.convertHtml('<p>x</p>', null, PdfPageFormat.a4);
+        final expectation = expectLater(result, throwsA('first'));
+        await pumpEventQueue();
+
+        final job = jobOf('convertHtml');
+        // Android's PdfConvert could report an error and then a success for one
+        // job, both before the awaiting code resumed.
+        await fromPlatform('onHtmlError', <String, dynamic>{
+          'job': job,
+          'error': 'first',
+        });
+        final reply = await fromPlatform('onHtmlRendered', <String, dynamic>{
+          'job': job,
+          'doc': Uint8List.fromList(<int>[9]),
+        });
+        expect(() => _codec.decodeEnvelope(reply!), returnsNormally);
+
+        await expectation;
+        expect(MethodChannelPrinting.pendingJobs, pending);
+      },
+    );
+
     test('unregisters the job on success', () async {
       final pending = MethodChannelPrinting.pendingJobs;
       final result = impl.convertHtml('<p>x</p>', null, PdfPageFormat.a4);

@@ -101,7 +101,9 @@ class MethodChannelPrinting extends PrintingPlatform {
         final bool? completed = call.arguments['completed'];
         final String? error = call.arguments['error'];
         final job = _printJobs.getJob(call.arguments['job']);
-        if (job != null) {
+        // A native backend may report a result twice; the second one must be
+        // ignored rather than raise 'Bad state: Future already completed'.
+        if (job != null && !job.onCompleted!.isCompleted) {
           if (completed == false && error != null) {
             job.onCompleted!.completeError(error);
           } else {
@@ -111,13 +113,13 @@ class MethodChannelPrinting extends PrintingPlatform {
         break;
       case 'onHtmlRendered':
         final job = _printJobs.getJob(call.arguments['job']);
-        if (job != null) {
+        if (job != null && !job.onHtmlRendered!.isCompleted) {
           job.onHtmlRendered!.complete(call.arguments['doc']);
         }
         break;
       case 'onHtmlError':
         final job = _printJobs.getJob(call.arguments['job']);
-        if (job != null) {
+        if (job != null && !job.onHtmlRendered!.isCompleted) {
           job.onHtmlRendered!.completeError(call.arguments['error']);
         }
         break;

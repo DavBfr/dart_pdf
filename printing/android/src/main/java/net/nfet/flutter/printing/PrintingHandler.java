@@ -76,15 +76,12 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     assert marginBottom != null;
 
                     PrintAttributes.Margins margins = new PrintAttributes.Margins(
-                            Double.valueOf(marginLeft * 1000.0).intValue(),
-                            Double.valueOf(marginTop * 1000.0 / 72.0).intValue(),
-                            Double.valueOf(marginRight * 1000.0 / 72.0).intValue(),
-                            Double.valueOf(marginBottom * 1000.0 / 72.0).intValue());
+                            pointsToMils(marginLeft), pointsToMils(marginTop),
+                            pointsToMils(marginRight), pointsToMils(marginBottom));
 
                     PrintAttributes.MediaSize size =
                             new PrintAttributes.MediaSize("flutter_printing", "Provided size",
-                                    Double.valueOf(width * 1000.0 / 72.0).intValue(),
-                                    Double.valueOf(height * 1000.0 / 72.0).intValue());
+                                    pointsToMils(width), pointsToMils(height));
 
                     printJob.convertHtml((String) call.argument("html"), size, margins,
                             (String) call.argument("baseUrl"));
@@ -204,5 +201,14 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
         }
 
         channel.invokeMethod("onPageRasterEnd", args);
+    }
+
+    /// The channel carries lengths in PDF points; Android wants mils.
+    ///
+    /// The left margin used to be multiplied by 1000 without dividing by 72,
+    /// making it 72 times too wide, which pushed the content off the page and
+    /// produced a zero-page conversion.
+    private static int pointsToMils(double points) {
+        return Double.valueOf(points * 1000.0 / 72.0).intValue();
     }
 }

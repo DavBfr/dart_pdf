@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import 'dart:async';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:printing/src/mutex.dart';
 

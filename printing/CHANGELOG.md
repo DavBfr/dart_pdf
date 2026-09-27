@@ -2,6 +2,12 @@
 
 ## 5.15.2
 
+- Fix Android `convertHtml` never completing when the print adapter reported a layout or write failure, or a cancellation: those callbacks were not overridden, so the caller's future hung for the lifetime of the process. Every path now delivers exactly one result
+- Fix Android `convertHtml` reporting both an error and a success for a document that produced no pages
+- Fix Android `convertHtml` leaking its `WebView` and print adapter: they are now owned for the length of the call and torn down once, on the main thread, after the result has been dispatched
+- Fix the Android `convertHtml` left margin being 72 times too wide, which pushed the content off the page and produced an empty conversion
+- A duplicate or out-of-order platform callback for a job is now ignored instead of raising `Bad state: Future already completed`
+
 - Fix `Printing.raster()` never terminating its stream when the platform call itself fails: the error is now delivered on the stream and the stream closes, instead of leaving `PdfPreview` on a permanent spinner and reporting the error as an unhandled asynchronous error
 - Fix `layoutPdf`, `convertHtml` and `raster` leaking their `PrintJob` entry when the platform call throws, which also turned a duplicate platform callback into a confusing `Bad state: Future already completed`
 - A raster subscription cancelled early now unregisters its job

@@ -29,11 +29,19 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @RequiresApi(api = Build.VERSION_CODES.KITKAT)
 public class PdfConvert {
     public static void print(final Context context, final PrintDocumentAdapter adapter,
             final PrintAttributes attributes, final Result result) {
+        // Every callback below may fire, or not fire, independently: the print
+        // adapter reports failure and cancellation through separate methods,
+        // and the zero-page path used to report both an error and a success.
+        // The wrapper makes the contract 'exactly one result, then onFinish'.
+        final SingleResult once = new SingleResult(adapter, result);
+
+        adapter.onStart();
         adapter.onLayout(null, attributes, null, new PrintDocumentAdapter.LayoutResultCallback() {
             @Override
             public void onLayoutFinished(PrintDocumentInfo info, boolean changed) {
@@ -42,7 +50,7 @@ public class PdfConvert {
                 try {
                     outputFile = File.createTempFile("printing", "pdf", outputDir);
                 } catch (IOException e) {
-                    result.onError(e.getMessage());
+                    once.onError(e.getMessage());
                     return;
                 }
 
@@ -58,26 +66,101 @@ public class PdfConvert {
                                     super.onWriteFinished(pages);
 
                                     if (pages.length == 0) {
-                                        if (!finalOutputFile.delete()) {
-                                            Log.e("PDF", "Unable to delete temporary file");
-                                        }
-                                        result.onError("No page created");
+                                        deleteQuietly(finalOutputFile);
+                                        once.onError("No page created");
+                                        return;
                                     }
 
-                                    result.onSuccess(finalOutputFile);
-                                    if (!finalOutputFile.delete()) {
-                                        Log.e("PDF", "Unable to delete temporary file");
-                                    }
+                                    once.onSuccess(finalOutputFile);
+                                    deleteQuietly(finalOutputFile);
+                                }
+
+                                @Override
+                                public void onWriteFailed(CharSequence error) {
+                                    super.onWriteFailed(error);
+                                    deleteQuietly(finalOutputFile);
+                                    once.onError(error != null ? error.toString() : "Write failed");
+                                }
+
+                                @Override
+                                public void onWriteCancelled() {
+                                    super.onWriteCancelled();
+                                    deleteQuietly(finalOutputFile);
+                                    once.onError("Write cancelled");
                                 }
                             });
                 } catch (FileNotFoundException e) {
-                    if (!outputFile.delete()) {
-                        Log.e("PDF", "Unable to delete temporary file");
-                    }
-                    result.onError(e.getMessage());
+                    deleteQuietly(outputFile);
+                    once.onError(e.getMessage());
                 }
             }
+
+            @Override
+            public void onLayoutFailed(CharSequence error) {
+                super.onLayoutFailed(error);
+                once.onError(error != null ? error.toString() : "Layout failed");
+            }
+
+            @Override
+            public void onLayoutCancelled() {
+                super.onLayoutCancelled();
+                once.onError("Layout cancelled");
+            }
         }, null);
+    }
+
+    private static void deleteQuietly(File file) {
+        if (file.exists() && !file.delete()) {
+            Log.e("PDF", "Unable to delete temporary file");
+        }
+    }
+
+    /// Delivers at most one result and finishes the adapter exactly once.
+    private static final class SingleResult implements Result {
+        private final PrintDocumentAdapter adapter;
+        private final Result delegate;
+        private final AtomicBoolean done = new AtomicBoolean(false);
+
+        SingleResult(PrintDocumentAdapter adapter, Result delegate) {
+            this.adapter = adapter;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void onSuccess(File file) {
+            if (!done.compareAndSet(false, true)) {
+                Log.w("PDF", "Ignoring a duplicate conversion result");
+                return;
+            }
+            try {
+                delegate.onSuccess(file);
+            } finally {
+                finish();
+            }
+        }
+
+        @Override
+        public void onError(String message) {
+            if (!done.compareAndSet(false, true)) {
+                Log.w("PDF", "Ignoring a duplicate conversion result: " + message);
+                return;
+            }
+            try {
+                delegate.onError(message);
+            } finally {
+                finish();
+            }
+        }
+
+        private void finish() {
+            // The adapter contract requires this so it can release whatever
+            // onLayout and onWrite allocated.
+            try {
+                adapter.onFinish();
+            } catch (Exception e) {
+                Log.e("PDF", "Unable to finish the print document adapter", e);
+            }
+        }
     }
 
     public static byte[] readFile(File file) throws IOException {
