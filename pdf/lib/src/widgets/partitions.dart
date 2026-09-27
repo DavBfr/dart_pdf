@@ -86,7 +86,14 @@ class PartitionsContext extends WidgetContext {
   @override
   void apply(PartitionsContext other) {
     for (var index = 0; index < partitionContext.length; index++) {
-      partitionContext[index]?.apply(other.partitionContext[index]!);
+      final otherContext = other.partitionContext[index];
+      if (otherContext == null) {
+        // That child was not spannable when this snapshot was taken - a
+        // StatelessWidget only knows what it wraps once it has been built -
+        // so there is no state to restore for it.
+        continue;
+      }
+      partitionContext[index]?.apply(otherContext);
     }
   }
 
@@ -134,8 +141,11 @@ class Partitions extends Widget with SpanningWidget {
   bool get canSpan => children.any((Partition part) => part.canSpan);
 
   @override
+  // True when ANY partition still has content: reporting 'finished' as soon
+  // as the shortest column runs out made MultiPage advance past this widget
+  // and drop whatever the longer columns still had queued.
   bool get hasMoreWidgets =>
-      !children.any((Partition part) => !part.hasMoreWidgets);
+      children.any((Partition part) => part.hasMoreWidgets);
 
   @override
   void layout(
@@ -247,8 +257,9 @@ class Partitions extends Widget with SpanningWidget {
     _context.apply(context);
     var index = 0;
     for (final child in children) {
-      if (child.canSpan) {
-        child.restoreContext(_context.partitionContext[index]!);
+      final childContext = _context.partitionContext[index];
+      if (child.canSpan && childContext != null) {
+        child.restoreContext(childContext);
       }
       index++;
     }

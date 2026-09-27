@@ -2,6 +2,9 @@
 
 ## 3.13.2
 
+- Fix `Partitions` reporting itself finished as soon as its shortest column ran out, so `MultiPage` advanced past it and dropped whatever the longer columns still had queued
+- Fix a null-check crash when a partition wraps a widget that only becomes spannable once it has been built, such as `DefaultTextStyle`
+
 - Fix font subsetting handing an unrelated glyph to, or failing outright on, the second of two characters that share one source glyph. Canonical duplicates (U+0394 and U+2206, U+00AF and U+02C9), any two codepoints the font does not map, and the Arabic presentation forms all collide this way, which made `save()` throw `Missing glyph for character ...` or silently draw the wrong glyph
 - Fix subsetting shifting every later character onto the wrong glyph when one glyph index was outside the font's outline table, which emitted an empty subset for a bitmap-only font
 - Fix a null-check crash when drawing a space with a font that does not map U+0020
