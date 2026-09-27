@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
@@ -57,5 +59,74 @@ void main() {
 
     final file1 = File('widgets-monopage-1.pdf');
     await file1.writeAsBytes(await pdf.save());
+  });
+
+  test('a Column still spans across pages', () async {
+    final rows = List<Widget>.generate(
+      120,
+      (int i) => Text('Row$i', style: const TextStyle(fontSize: 12)),
+    );
+    final document = Document(compress: false);
+    document.addPage(
+      MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        build: (Context context) => <Widget>[Column(children: rows)],
+      ),
+    );
+
+    final text = latin1.decode(await document.save(), allowInvalid: true);
+    expect(document.document.pdfPageList.pages.length, 3);
+    for (var i = 0; i < 120; i++) {
+      expect(
+        '(Row$i)'.allMatches(text).length,
+        1,
+        reason: 'row $i must be drawn exactly once',
+      );
+    }
+  });
+
+  test('a Column nested in a Column terminates', () async {
+    final rows = List<Widget>.generate(
+      120,
+      (int i) => Text('Nested$i', style: const TextStyle(fontSize: 12)),
+    );
+    final document = Document(compress: false);
+    document.addPage(
+      MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        build: (Context context) => <Widget>[
+          Column(children: <Widget>[Column(children: rows)]),
+        ],
+      ),
+    );
+
+    final text = latin1.decode(await document.save(), allowInvalid: true);
+    for (var i = 0; i < 120; i++) {
+      expect(text, contains('(Nested$i)'), reason: 'row $i must be drawn');
+    }
+  });
+
+  test('MultiPage spans a Wrap that reuses a child instance', () async {
+    final spacer = SizedBox(width: 20);
+    final children = <Widget>[];
+    for (var i = 0; i < 12; i++) {
+      children.add(Container(width: 60, height: 20, child: Text('I$i')));
+      if (i != 11) {
+        children.add(spacer);
+      }
+    }
+
+    final document = Document(compress: false);
+    document.addPage(
+      MultiPage(
+        pageFormat: const PdfPageFormat(240, 70, marginAll: 10),
+        build: (Context context) => <Widget>[Wrap(children: children)],
+      ),
+    );
+
+    final text = latin1.decode(await document.save(), allowInvalid: true);
+    for (var i = 0; i < 12; i++) {
+      expect(text, contains('(I$i)'), reason: 'item $i must be painted');
+    }
   });
 }

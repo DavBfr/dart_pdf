@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.13.2
+
+- Fix a `Column` silently dropping every child from the first one that overflows, which rendered a bounded `Column` as blank space when its first child did not fit. Children are now all laid out and painted, and an overflowing `Flex` clips to its own box; the truncation is kept only when a spanning parent will continue the widget on the next page
+- Fix `Wrap` keying its run lookup by widget identity, so reusing one child instance (a shared spacer, `List.filled`) dropped every child after the first reuse and could stop `MultiPage` from ever advancing
+
 ## 3.13.1
 
 - Add output-stream serialization for memory-bounded PDF generation.
