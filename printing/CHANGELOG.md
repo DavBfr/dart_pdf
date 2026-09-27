@@ -5,6 +5,9 @@
 - Fix `Printing.raster()` never terminating its stream when the platform call itself fails: the error is now delivered on the stream and the stream closes, instead of leaving `PdfPreview` on a permanent spinner and reporting the error as an unhandled asynchronous error
 - Fix `layoutPdf`, `convertHtml` and `raster` leaking their `PrintJob` entry when the platform call throws, which also turned a duplicate platform callback into a confusing `Bad state: Future already completed`
 - A raster subscription cancelled early now unregisters its job
+- Fix web printing deadlocking for the rest of the session when pdf.js fails to load: the plugin's mutex is now released on every path, the failure is reported to the callers queued behind it instead of having each of them retry, and the module import is bounded by a timeout
+- `PdfPreview` now shows its error widget when the platform capabilities cannot be read, instead of an endless loading indicator
+- Fix `Mutex` waking every queued waiter at once, which let two callers run inside the same critical section and cleared the lock out from under one of them
 
 ## 5.15.1
 

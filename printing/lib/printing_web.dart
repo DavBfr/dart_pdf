@@ -66,9 +66,49 @@ class PrintingPlugin extends PrintingPlatform {
   /// The base URL for loading pdf.js library
   late String _pdfJsUrlBase;
 
-  Future<void> _initPlugin() async {
-    await _loading.acquire();
+  /// Set once pdf.js is available, so the queued callers woken by one load do
+  /// not each import it again.
+  bool _pdfJsLoaded = false;
 
+  /// The last load failure, reported to further callers for
+  /// [_pdfJsRetryCooldown] instead of having all of them retry at once.
+  Object? _pdfJsError;
+
+  DateTime? _pdfJsErrorAt;
+
+  static const _pdfJsRetryCooldown = Duration(seconds: 10);
+
+  static const _pdfJsLoadTimeout = Duration(seconds: 30);
+
+  Future<void> _initPlugin() => _loading.protect(_loadPdfJs);
+
+  Future<void> _loadPdfJs() async {
+    final failedAt = _pdfJsErrorAt;
+    if (_pdfJsError != null &&
+        failedAt != null &&
+        DateTime.now().difference(failedAt) < _pdfJsRetryCooldown) {
+      // Report the same failure rather than letting every queued caller
+      // re-issue an import that just failed.
+      throw _pdfJsError!;
+    }
+
+    if (_pdfJsLoaded) {
+      return;
+    }
+
+    try {
+      await _importPdfJs();
+      _pdfJsLoaded = true;
+      _pdfJsError = null;
+      _pdfJsErrorAt = null;
+    } catch (e) {
+      _pdfJsError = e;
+      _pdfJsErrorAt = DateTime.now();
+      rethrow;
+    }
+  }
+
+  Future<void> _importPdfJs() async {
     if (!_hasPdfJsLib) {
       // Check if the source of PDF.js library is overridden via
       // [dartPdfJsBaseUrl] JavaScript variable.
@@ -101,10 +141,11 @@ class PrintingPlugin extends PrintingPlatform {
 })()'''
                 .toJS,
           )
-          .toDart;
+          .toDart
+          // A proxy that black-holes the request would otherwise leave every
+          // caller waiting forever.
+          .timeout(_pdfJsLoadTimeout);
     }
-
-    _loading.release();
   }
 
   @override
