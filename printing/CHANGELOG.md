@@ -27,6 +27,8 @@
 - Fix Windows leaking the default-printer name buffer on every `listPrinters` failure
 - Fix the classic Windows print dialog leaking one native job object per cancel
 - `Printing.listPrinters` answers an empty list rather than throwing a null-check error when a platform reports no printer list at all
+- Fix an app that depends on printing and another pdfium plugin failing to configure with 'Build step for pdfium failed: 1', or silently building against the other plugin's pdfium. The Windows and Linux CMake cache entries are now `PRINTING_PDFIUM_VERSION` and `PRINTING_PDFIUM_ARCH`, and the download, source and build trees live under printing's own binary directory instead of `${CMAKE_BINARY_DIR}/pdfium-*`. An app that overrides the version or architecture must use the new names
+- Fix the Windows and Linux CMake configure failing with 'string sub-command REPLACE requires at least four arguments' when the app scaffold does not define `FLUTTER_TARGET_PLATFORM`; the architecture now falls back to x64
 
 ## 5.15.2
 

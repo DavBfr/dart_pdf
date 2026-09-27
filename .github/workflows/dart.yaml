@@ -38,6 +38,8 @@ jobs:
         run: bash <(curl -s https://codecov.io/bash)
       - name: Prepare build
         run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
+      - name: Check the pdfium CMake cache namespacing
+        run: cmake -S printing/test/cmake -B build/printing-cmake-test
       - name: Build example for Linux
         run: cd printing/example; flutter build -v linux
       - name: Build example for Android
@@ -94,6 +96,8 @@ jobs:
         run: flutter config --enable-windows-desktop
       - name: Prepare build
         run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
+      - name: Check the pdfium CMake cache namespacing
+        run: cmake -S printing/test/cmake -B build/printing-cmake-test
       - name: Build example for Windows
         run: cd printing/example; flutter build -v windows
 

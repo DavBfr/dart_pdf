@@ -71,9 +71,13 @@ for documentation.
    on your main `CMakeLists.txt` with:
 
    ```python
-   set(PDFIUM_VERSION "4929" CACHE STRING "" FORCE)
-   set(PDFIUM_ARCH "x64" CACHE STRING "" FORCE)
+   set(PRINTING_PDFIUM_VERSION "4929" CACHE STRING "" FORCE)
+   set(PRINTING_PDFIUM_ARCH "x64" CACHE STRING "" FORCE)
    ```
+
+   These were called `PDFIUM_VERSION` and `PDFIUM_ARCH` before printing 5.16.0.
+   The unprefixed names are shared with every other plugin in the app, so an
+   app that also depends on another pdfium plugin could not configure both.
 
   See the releases here: <https://github.com/bblanchon/pdfium-binaries/releases>
 
