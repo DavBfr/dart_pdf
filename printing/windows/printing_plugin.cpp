@@ -116,7 +116,13 @@ class PrintingPlugin : public flutter::Plugin {
       result->Success(flutter::EncodableValue(res ? 1 : 0));
     } else if (method_call.method_name().compare("listPrinters") == 0) {
       auto job = std::make_unique<PrintJob>(&printing, -1);
-      auto printers = job->listPrinters();
+      auto error = std::string{};
+      auto printers = job->listPrinters(&error);
+      if (!error.empty()) {
+        // A stopped spooler used to look like a machine with no printers.
+        result->Error("listPrinters", error);
+        return;
+      }
       auto pl = flutter::EncodableList{};
       for (auto printer : printers) {
         auto mp = flutter::EncodableMap{};

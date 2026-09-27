@@ -616,4 +616,37 @@ void main() {
       });
     });
   });
+
+  group('listPrinters', () {
+    test('a platform failure reaches the caller', () async {
+      // Windows answered an empty list when the spooler was stopped, so an app
+      // could not tell 'no printers' from 'the print system is down'.
+      failing.add('listPrinters');
+
+      await expectLater(impl.listPrinters(), throwsA(isA<PlatformException>()));
+    });
+
+    test('a null reply is an empty list, not a null-check error', () async {
+      expect(await impl.listPrinters(), isEmpty);
+    });
+
+    test('a printer without a location or a comment is accepted', () async {
+      replies['listPrinters'] = <Object?>[
+        <String, Object?>{
+          'url': 'ipp://p',
+          'name': 'p',
+          'model': null,
+          'default': false,
+          'available': true,
+        },
+      ];
+
+      final printers = await impl.listPrinters();
+
+      expect(printers, hasLength(1));
+      expect(printers.first.name, 'p');
+      expect(printers.first.location, isNull);
+      expect(printers.first.comment, isNull);
+    });
+  });
 }

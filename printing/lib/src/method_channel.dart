@@ -249,7 +249,9 @@ class MethodChannelPrinting extends PrintingPlatform {
 
     final printers = <Printer>[];
 
-    for (final printer in list!) {
+    // A backend that answers null means no printers; it used to raise an
+    // opaque null-check error instead.
+    for (final printer in list ?? const <dynamic>[]) {
       printers.add(Printer.fromMap(printer));
     }
 

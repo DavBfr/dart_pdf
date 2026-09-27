@@ -21,6 +21,12 @@
 - Fix Linux never freeing a print job: one leaked per print and per dialog cancel. A cancelled dialog is also destroyed rather than hidden
 - Fix the Linux print dialog's printer and page setup being released although they were never acquired, which corrupted their reference counts and crashed the app on a later dialog print
 - A Linux print to a queue that accepts no PDF, or with no printer selected, reports that instead of continuing with a null printer
+- Fix Windows reporting a successful print for a job that was never spooled. `StartDoc`, `StartPage`, `EndPage` and `EndDoc` are all checked, so `Printing.layoutPdf` now returns false, or throws with the system's message, where it used to return true: cancelling the Print to PDF save dialog, a printer out of paper, access denied and a stopped spooler were all silent successes. A cancellation completes with false rather than throwing
+- A failed Windows job aborts the document it opened instead of leaving a half-open job in the queue, and releases its device context and DEVMODE blocks on every path
+- Fix `Printing.listPrinters` answering an empty list on Windows when the print system had failed, so an app could not tell that from a machine with no printers. It now reports the failure, and a printer added while the list was being read no longer loses the whole list
+- Fix Windows leaking the default-printer name buffer on every `listPrinters` failure
+- Fix the classic Windows print dialog leaking one native job object per cancel
+- `Printing.listPrinters` answers an empty list rather than throwing a null-check error when a platform reports no printer list at all
 
 ## 5.15.2
 

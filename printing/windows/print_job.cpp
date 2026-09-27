@@ -72,6 +72,44 @@ std::wstring fromUtf8(std::string str) {
   return wstr;
 }
 
+/// Describe the last Win32 error, prefixed with what was being attempted.
+///
+/// Returns an empty string for a cancellation, so the Dart side completes with
+/// false instead of throwing: the user cancelling a Save-As dialog is not an
+/// error.
+std::string lastErrorMessage(const std::string& what) {
+  const auto code = GetLastError();
+
+  if (code == ERROR_CANCELLED || code == ERROR_PRINT_CANCELLED) {
+    return std::string{};
+  }
+
+  LPWSTR text = nullptr;
+  const auto length = FormatMessageW(
+      FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+          FORMAT_MESSAGE_IGNORE_INSERTS,
+      nullptr, code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+      reinterpret_cast<LPWSTR>(&text), 0, nullptr);
+
+  auto message = what;
+  if (length > 0 && text != nullptr) {
+    auto detail = std::wstring{text, length};
+    while (!detail.empty() &&
+           (detail.back() == L'\r' || detail.back() == L'\n')) {
+      detail.pop_back();
+    }
+    message += ": " + toUtf8(detail);
+  } else {
+    message += " (error " + std::to_string(code) + ")";
+  }
+
+  if (text != nullptr) {
+    LocalFree(text);
+  }
+
+  return message;
+}
+
 PrintJob::PrintJob(Printing* printing, int index)
     : printing{printing}, index{index} {}
 
@@ -193,6 +231,7 @@ bool PrintJob::printPdf(const std::string& name,
       pd.lStructSize = sizeof(pd);
       pd.hwndOwner = owner;
       pd.hDevMode = dm;
+      dm = nullptr;  // dialog takes ownership; may replace with new alloc
       pd.hDevNames = nullptr;
       pd.hDC = nullptr;
       pd.Flags = PD_USEDEVMODECOPIES | PD_RETURNDC | PD_PRINTSETUP |
@@ -206,14 +245,18 @@ bool PrintJob::printPdf(const std::string& name,
       auto r = PrintDlg(&pd);
 
       if (r != 1) {
-        printing->onCompleted(this, false, "");
+        // User cancelled or error occurred - release what the dialog handed
+        // back, notify Dart so its future completes, then return false so the
+        // caller reclaims this job. Returning true leaked one job per cancel,
+        // because nothing was ever handed a pointer to it.
         if (pd.hDC)
           DeleteDC(pd.hDC);
         if (pd.hDevNames)
           GlobalFree(pd.hDevNames);
         if (pd.hDevMode)
           GlobalFree(pd.hDevMode);
-        return true;
+        printing->onCompleted(this, false, "");
+        return false;
       }
 
       hDC = pd.hDC;
@@ -255,49 +298,66 @@ bool PrintJob::printPdf(const std::string& name,
   return true;
 }
 
-std::vector<Printer> PrintJob::listPrinters() {
-  LPTSTR defaultPrinter;
+std::vector<Printer> PrintJob::listPrinters(std::string* error) {
+  // Both buffers are vectors, so no exit path can leak them - the malloc'd
+  // default-printer name used to leak on every early return - and neither
+  // allocation needs a null check.
   DWORD size = 0;
   GetDefaultPrinter(nullptr, &size);
 
-  defaultPrinter = static_cast<LPTSTR>(malloc(size * sizeof(TCHAR)));
-  if (!GetDefaultPrinter(defaultPrinter, &size)) {
+  auto defaultPrinter = std::vector<TCHAR>(size > 0 ? size : 1);
+  if (size == 0 || !GetDefaultPrinter(defaultPrinter.data(), &size)) {
     size = 0;
   }
 
   auto printers = std::vector<Printer>{};
-  DWORD needed = 0;
-  DWORD returned = 0;
   const auto flags = PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS;
 
-  EnumPrinters(flags, nullptr, 2, nullptr, 0, &needed, &returned);
+  DWORD needed = 0;
+  DWORD returned = 0;
+  auto buffer = std::vector<BYTE>{};
 
-  auto buffer = (PRINTER_INFO_2*)malloc(needed);
-  if (!buffer) {
-    return printers;
+  // Probe then fill is a race: a printer added in between makes the fill fail
+  // with ERROR_INSUFFICIENT_BUFFER, which used to be reported as a machine
+  // with no printers at all.
+  for (auto attempt = 0; attempt < 3; attempt++) {
+    needed = 0;
+    returned = 0;
+    EnumPrinters(flags, nullptr, 2, nullptr, 0, &needed, &returned);
+
+    if (needed == 0) {
+      // No printers, which is not a failure.
+      return printers;
+    }
+
+    buffer.assign(needed, 0);
+    if (EnumPrinters(flags, nullptr, 2, buffer.data(), needed, &needed,
+                     &returned) != 0) {
+      const auto info = reinterpret_cast<PRINTER_INFO_2*>(buffer.data());
+
+      for (DWORD i = 0; i < returned; i++) {
+        printers.push_back(
+            Printer{toUtf8(info[i].pPrinterName), toUtf8(info[i].pPrinterName),
+                    toUtf8(info[i].pDriverName), toUtf8(info[i].pLocation),
+                    toUtf8(info[i].pComment),
+                    size > 0 && _tcsncmp(info[i].pPrinterName,
+                                         defaultPrinter.data(), size) == 0,
+                    (info[i].Status &
+                     (PRINTER_STATUS_NOT_AVAILABLE | PRINTER_STATUS_ERROR |
+                      PRINTER_STATUS_OFFLINE | PRINTER_STATUS_PAUSED)) == 0});
+      }
+
+      return printers;
+    }
+
+    if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+      break;
+    }
   }
 
-  auto result = EnumPrinters(flags, nullptr, 2, (LPBYTE)buffer, needed, &needed,
-                             &returned);
-
-  if (result == 0) {
-    free(buffer);
-    return printers;
+  if (error != nullptr) {
+    *error = lastErrorMessage("Unable to list the printers");
   }
-
-  for (DWORD i = 0; i < returned; i++) {
-    printers.push_back(Printer{
-        toUtf8(buffer[i].pPrinterName), toUtf8(buffer[i].pPrinterName),
-        toUtf8(buffer[i].pDriverName), toUtf8(buffer[i].pLocation),
-        toUtf8(buffer[i].pComment),
-        size > 0 && _tcsncmp(buffer[i].pPrinterName, defaultPrinter, size) == 0,
-        (buffer[i].Status &
-         (PRINTER_STATUS_NOT_AVAILABLE | PRINTER_STATUS_ERROR |
-          PRINTER_STATUS_OFFLINE | PRINTER_STATUS_PAUSED)) == 0});
-  }
-
-  free(buffer);
-  free(defaultPrinter);
   return printers;
 }
 
@@ -313,17 +373,22 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
   auto docName = fromUtf8(documentName);
   docInfo.lpszDocName = docName.c_str();
 
-  auto r = StartDoc(hDC, &docInfo);
+  // StartDoc's result used to be overwritten and never read, so a job that was
+  // never spooled - Save-As cancelled, out of paper, access denied, spooler
+  // stopped - still reported success.
+  if (StartDoc(hDC, &docInfo) <= 0) {
+    // A cancellation gives an empty message, which Dart completes as false
+    // rather than throwing.
+    failJob(lastErrorMessage("Unable to start the print job"));
+    return;
+  }
+  documentOpen = true;
 
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
     // Returning here without calling onCompleted() leaves the Dart-side Future
-    // pending forever. Abort the document StartDoc already opened so no
-    // half-open job is left in the queue, release the handles like the success
-    // path below does, and report the failure.
-    AbortDoc(hDC);
-    releaseHandles();
-    printing->onCompleted(this, false, "Cannot print a malformed PDF file");
+    // pending forever.
+    failJob("Cannot print a malformed PDF file");
     return;
   }
 
@@ -332,11 +397,24 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
   auto marginTop = GetDeviceCaps(hDC, PHYSICALOFFSETY);
 
   for (auto pageNum = 0; pageNum < pages; pageNum++) {
-    StartPage(hDC);
+    if (StartPage(hDC) <= 0) {
+      const auto message = lastErrorMessage("Unable to start a printed page");
+      FPDF_CloseDocument(doc);
+      failJob(message);
+      return;
+    }
 
     auto page = FPDF_LoadPage(doc, pageNum);
     if (!page) {
-      EndPage(hDC);
+      // A page pdfium cannot load is left blank rather than failing the whole
+      // document, but the page itself still has to close cleanly.
+      if (EndPage(hDC) <= 0) {
+        const auto message =
+            lastErrorMessage("Unable to finish a printed page");
+        FPDF_CloseDocument(doc);
+        failJob(message);
+        return;
+      }
       continue;
     }
 
@@ -349,12 +427,29 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
     FPDF_RenderPage(hDC, page, -marginLeft, -marginTop, bWidth, bHeight, 0,
                     FPDF_ANNOT | FPDF_PRINTING);
     FPDF_ClosePage(page);
-    r = EndPage(hDC);
+
+    if (EndPage(hDC) <= 0) {
+      const auto message = lastErrorMessage("Unable to finish a printed page");
+      FPDF_CloseDocument(doc);
+      failJob(message);
+      return;
+    }
   }
+
+  // EndDoc before closing the document, so GetLastError still describes the
+  // GDI call rather than whatever pdfium did last.
+  const auto ended = EndDoc(hDC) > 0;
+  const auto endError =
+      ended ? std::string{}
+            : lastErrorMessage("Unable to finish the print job");
 
   FPDF_CloseDocument(doc);
 
-  EndDoc(hDC);
+  if (!ended) {
+    failJob(endError);
+    return;
+  }
+  documentOpen = false;
 
   releaseHandles();
 
@@ -382,6 +477,19 @@ void PrintJob::releaseHandles() {
 /// dropped the job: the Dart side awaits onCompleted unconditionally, so its
 /// future never settled and the printer HDC and DEVMODEs leaked.
 void PrintJob::cancelJob(const std::string& error) {
+  releaseHandles();
+  printing->onCompleted(this, false, error);
+}
+
+/// End a job that failed while it was being spooled.
+///
+/// AbortDoc runs only when StartDoc actually opened a document, so no call is
+/// made on a device context with nothing to abort.
+void PrintJob::failJob(const std::string& error) {
+  if (documentOpen) {
+    AbortDoc(hDC);
+    documentOpen = false;
+  }
   releaseHandles();
   printing->onCompleted(this, false, error);
 }
