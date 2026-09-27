@@ -2,6 +2,10 @@
 
 ## 3.13.2
 
+- Fix font subsetting handing an unrelated glyph to, or failing outright on, the second of two characters that share one source glyph. Canonical duplicates (U+0394 and U+2206, U+00AF and U+02C9), any two codepoints the font does not map, and the Arabic presentation forms all collide this way, which made `save()` throw `Missing glyph for character ...` or silently draw the wrong glyph
+- Fix subsetting shifting every later character onto the wrong glyph when one glyph index was outside the font's outline table, which emitted an empty subset for a bitmap-only font
+- Fix a null-check crash when drawing a space with a font that does not map U+0020
+
 - Fix `PdfColorCmyk.fromRgb` comparing only red against green when looking for the brightest channel, which produced an oversized black and negative components for any colour whose blue exceeds its red, and dividing zero by zero for black, which wrote the literal `NaN` into the document in release builds
 - Fix `PdfColorHsl.fromRgb` reporting a saturation of 1.0 for black instead of 0.0
 - Fix word splitting cutting between a UTF-16 surrogate pair, which left an unpaired surrogate that no font can map: saving a document with a long run of non-BMP characters (astral CJK, emoji) failed with `Missing glyph for character U+D83C`
