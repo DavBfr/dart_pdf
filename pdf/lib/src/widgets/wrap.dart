@@ -58,6 +58,10 @@ class WrapContext extends WidgetContext {
   }
 
   @override
+  bool isSameAs(WrapContext other) =>
+      firstChild == other.firstChild && lastChild == other.lastChild;
+
+  @override
   String toString() => '$runtimeType first:$firstChild last:$lastChild';
 }
 

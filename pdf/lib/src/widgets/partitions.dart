@@ -91,6 +91,24 @@ class PartitionsContext extends WidgetContext {
   }
 
   @override
+  bool isSameAs(PartitionsContext other) {
+    for (var index = 0; index < partitionContext.length; index++) {
+      final mine = partitionContext[index];
+      final theirs = other.partitionContext[index];
+      if (mine == null || theirs == null) {
+        if (mine != theirs) {
+          return false;
+        }
+        continue;
+      }
+      if (!mine.isSameAs(theirs)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @override
   WidgetContext clone() {
     final context = PartitionsContext(partitionContext.length);
     for (var index = 0; index < partitionContext.length; index++) {

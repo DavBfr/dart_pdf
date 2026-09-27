@@ -2,6 +2,11 @@
 
 ## 3.13.2
 
+- Fix `MultiPage` allocating pages for ever when a spanning widget placed nothing: it now detects that the widget consumed nothing, retries once on a fresh page and otherwise raises a `PdfException` naming the widget and the space available
+- The `maxPages` guard is now checked in release builds too, and bounds consecutive pages produced *without progress* rather than the length of the document, so a document longer than `maxPages` pages no longer fails. A widget that never reports being finished is stopped by a hard ceiling of 10000 pages
+- Fix `MultiPage` rejecting a child sized to exactly `availableHeight` (21 of 120 page-format and margin combinations), and measuring 'would it fit on a new page?' against the whole page body instead of the space left by the header and footer, which could loop for ever
+- `MultiPage` no longer appends a spanned fragment that placed no content, which painted the widget's decoration over an empty strip
+- `Flex`, `Table`, `GridView` and `RichText` now report whether they have more widgets from their saved cursor, so a finished widget no longer forces a trailing page
 - Fix a `Column` silently dropping every child from the first one that overflows, which rendered a bounded `Column` as blank space when its first child did not fit. Children are now all laid out and painted, and an overflowing `Flex` clips to its own box; the truncation is kept only when a spanning parent will continue the widget on the next page
 - Fix a `GridView` whose cell is taller than the available space placing no row at all, so `MultiPage` never advanced: it allocated pages until the document was abandoned in release builds. Such a row is now emitted and overflows, with a diagnostic in debug builds, and an exhausted `GridView` reports that it has no more widgets instead of adding a trailing blank page
 - Fix `Wrap` keying its run lookup by widget identity, so reusing one child instance (a shared spacer, `List.filled`) dropped every child after the first reuse and could stop `MultiPage` from ever advancing

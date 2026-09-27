@@ -148,6 +148,10 @@ class TableContext extends WidgetContext {
   }
 
   @override
+  bool isSameAs(TableContext other) =>
+      firstLine == other.firstLine && lastLine == other.lastLine;
+
+  @override
   String toString() => '$runtimeType firstLine: $firstLine lastLine: $lastLine';
 }
 
@@ -325,7 +329,7 @@ class Table extends Widget with SpanningWidget {
   bool get canSpan => true;
 
   @override
-  bool get hasMoreWidgets => true;
+  bool get hasMoreWidgets => _context.lastLine < children.length;
 
   /// The rows of the table.
   final List<TableRow> children;

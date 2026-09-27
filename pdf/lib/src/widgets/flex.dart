@@ -58,6 +58,10 @@ class FlexContext extends WidgetContext {
   }
 
   @override
+  bool isSameAs(FlexContext other) =>
+      firstChild == other.firstChild && lastChild == other.lastChild;
+
+  @override
   String toString() => '$runtimeType first:$firstChild last:$lastChild';
 }
 
@@ -584,7 +588,8 @@ class Flex extends MultiChildWidget with SpanningWidget {
   bool get canSpan => direction == Axis.vertical;
 
   @override
-  bool get hasMoreWidgets => true;
+  bool get hasMoreWidgets =>
+      direction == Axis.vertical && _context.lastChild < children.length;
 
   @override
   void restoreContext(FlexContext context) {

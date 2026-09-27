@@ -651,6 +651,13 @@ class RichTextContext extends WidgetContext {
   }
 
   @override
+  bool isSameAs(RichTextContext other) =>
+      spanStart == other.spanStart &&
+      spanEnd == other.spanEnd &&
+      startOffset == other.startOffset &&
+      endOffset == other.endOffset;
+
+  @override
   String toString() =>
       '$runtimeType Offset: $startOffset -> $endOffset  Span: $spanStart -> $spanEnd';
 }
@@ -1402,7 +1409,7 @@ class RichText extends Widget with SpanningWidget {
   bool get canSpan => overflow == TextOverflow.span;
 
   @override
-  bool get hasMoreWidgets => canSpan;
+  bool get hasMoreWidgets => canSpan && _context.spanEnd < _spans.length;
 
   @override
   void restoreContext(RichTextContext context) {

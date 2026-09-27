@@ -31,6 +31,18 @@ import 'text_style.dart';
 import 'theme.dart';
 import 'widget.dart';
 
+/// Tolerance used when deciding whether a widget fits the space left on a
+/// page. A child sized to exactly the available height loses its last bits to
+/// rounding, and 1e-6pt is nine orders of magnitude above that noise while
+/// staying far below anything a device can render.
+const _fitEpsilon = 1e-6;
+
+/// Hard ceiling on the pages one [MultiPage] may produce.
+///
+/// [MultiPage.maxPages] bounds a stall, so a widget that reports progress on
+/// every page would otherwise never be stopped. Far above any real document.
+const _maxTotalPages = 10000;
+
 abstract class WidgetContext {
   /// Called after layout to save the state
   WidgetContext clone();
@@ -38,6 +50,15 @@ abstract class WidgetContext {
   /// Called before relayout to restore the saved state and
   /// restart the layout in the same conditions
   void apply(covariant WidgetContext other);
+
+  /// Whether this context stands at the same position as [other]
+  ///
+  /// [MultiPage] uses it to notice a spanning widget that consumed nothing,
+  /// which would otherwise make it produce pages for ever. The default
+  /// compares [toString], which every context in this package overrides to
+  /// include its cursor; override it for a cheaper or more precise answer.
+  bool isSameAs(covariant WidgetContext other) =>
+      toString() == other.toString();
 }
 
 mixin SpanningWidget on Widget {
@@ -213,8 +234,12 @@ class MultiPage extends Page {
 
   final List<_MultiPageInstance> _pages = <_MultiPageInstance>[];
 
-  /// The maximum number of pages allowed before raising an error.
-  /// This is not checked with a Release build.
+  /// The maximum number of consecutive pages this widget may produce without
+  /// placing any content, before raising a [PdfTooBigPageException].
+  ///
+  /// This bounds a stall, not the length of the document: a widget that keeps
+  /// making progress can span any number of pages. It is checked in every
+  /// build mode, release included.
   final int maxPages;
 
   void _paintChild(
@@ -277,6 +302,12 @@ class MultiPage extends Page {
     double? offsetStart;
     var _index = 0;
     var sameCount = 0;
+    // The body height of a freshly created page, header and footer included,
+    // which is what 'would this fit on a new page?' has to mean.
+    double? emptyPageFreeSpace;
+    // Whether anything has been placed on the current page, so a child that
+    // does not fit an already empty page cannot ask for yet another one.
+    var pageHasContent = false;
     final baseContext = Context(document: document.document)
         .inheritFromAll(<Inherited>[
           calculatedTheme,
@@ -289,16 +320,16 @@ class MultiPage extends Page {
     while (_index < children.length) {
       final child = children[_index];
 
-      assert(() {
-        // Detect too big widgets
-        if (sameCount++ > maxPages) {
-          throw PdfTooBigPageException(
-            'This widget created more than $maxPages pages. This may be an issue in the widget or '
-            'the document. See https://pub.dev/documentation/pdf/latest/widgets/MultiPage-class.html',
-          );
-        }
-        return true;
-      }());
+      // Detect a widget that keeps asking for pages without placing anything.
+      // Checked in release builds too: a stall here is an unbounded loop that
+      // allocates a page per turn.
+      if (sameCount++ > maxPages) {
+        throw PdfTooBigPageException(
+          'MultiPage produced $maxPages consecutive pages without placing '
+          '${child.runtimeType}. That widget cannot be paginated here. '
+          'See https://pub.dev/documentation/pdf/latest/widgets/MultiPage-class.html',
+        );
+      }
 
       // Calculate available space of the current page
       final freeSpace = (offsetStart == null)
@@ -355,6 +386,17 @@ class MultiPage extends Page {
           assert(footerWidget.box != null);
           offsetEnd += footerWidget.box!.height;
         }
+
+        emptyPageFreeSpace = offsetStart - offsetEnd;
+        pageHasContent = false;
+
+        if (_pages.length > _maxTotalPages) {
+          throw PdfTooBigPageException(
+            'MultiPage produced more than $_maxTotalPages pages while laying '
+            'out ${child.runtimeType}. That widget never reports being '
+            'finished. See https://pub.dev/documentation/pdf/latest/widgets/MultiPage-class.html',
+          );
+        }
       }
 
       // If we are processing a multi-page widget, we restore its context
@@ -373,10 +415,15 @@ class MultiPage extends Page {
       final canSpan = child is SpanningWidget && child.canSpan;
 
       // What to do if the widget is too big for the page?
-      if (offsetStart! - child.box!.height < offsetEnd) {
-        // If it is not a multi-page widget and its height
-        // is smaller than a full new page, we schedule a new page creation
-        if (child.box!.height <= pageHeight - pageHeightMargin && !canSpan) {
+      // The tolerance keeps a child sized to exactly the available height from
+      // being rejected by the last bit of floating-point noise.
+      if (offsetStart! - child.box!.height < offsetEnd - _fitEpsilon) {
+        // If it is not a multi-page widget and it would fit on a page of its
+        // own, we schedule a new page creation. A child that does not fit an
+        // already empty page must not ask for another one: that never ends.
+        if (!canSpan &&
+            child.box!.height <= emptyPageFreeSpace! + _fitEpsilon &&
+            pageHasContent) {
           context = null;
           continue;
         }
@@ -384,8 +431,13 @@ class MultiPage extends Page {
         // Else we crash if the widget is too big and cannot be separated
         if (!canSpan) {
           throw PdfException(
-            'Widget won\'t fit into the page as its height (${child.box!.height}) '
-            'exceed a page height (${pageHeight - pageHeightMargin}). '
+            'Widget ${child.runtimeType} won\'t fit into the page: it is '
+            '${child.box!.height.toStringAsFixed(3)}pt tall but only '
+            '${emptyPageFreeSpace!.toStringAsFixed(3)}pt are available on an '
+            'empty page (page body '
+            '${(pageHeight - pageHeightMargin).toStringAsFixed(3)}pt, '
+            'header and footer '
+            '${(pageHeight - pageHeightMargin - emptyPageFreeSpace).toStringAsFixed(3)}pt). '
             'You probably need a SpanningWidget or use a single page layout',
           );
         }
@@ -403,17 +455,40 @@ class MultiPage extends Page {
         span.layout(context, localConstraints, parentUsesSize: false);
         assert(span.box != null);
         widgetContext = span.saveContext();
-        _pages.last.widgets.add(
-          _MultiPageWidget(
-            child: span,
-            constraints: localConstraints,
-            widgetContext: widgetContext.clone(),
-          ),
-        );
+
+        // Did this layout consume anything? Without this check a widget that
+        // places nothing keeps its cursor, and the loop below schedules
+        // another page for it for ever.
+        final progressed =
+            savedContext == null || !widgetContext.isSameAs(savedContext);
+
+        if (progressed) {
+          _pages.last.widgets.add(
+            _MultiPageWidget(
+              child: span,
+              constraints: localConstraints,
+              widgetContext: widgetContext.clone(),
+            ),
+          );
+          sameCount = 0;
+        } else if (pageHasContent) {
+          // Nothing fitted in what was left of this page, but a whole page
+          // may work: retry there once. Appending the empty fragment would
+          // paint this widget's decoration over an empty strip.
+          context = null;
+          continue;
+        } else {
+          throw PdfException(
+            'Widget ${span.runtimeType} won\'t fit into the page: a child of '
+            'it is taller than the '
+            '${localConstraints.maxHeight.toStringAsFixed(3)}pt available on '
+            'an empty page body. Split that child, shrink it, or use a single '
+            'page layout',
+          );
+        }
 
         // Has it finished spanning?
         if (!span.hasMoreWidgets) {
-          sameCount = 0;
           _index++;
         }
 
@@ -433,6 +508,9 @@ class MultiPage extends Page {
       );
 
       offsetStart -= child.box!.height;
+      if (child.box!.height > 0) {
+        pageHasContent = true;
+      }
       sameCount = 0;
       _index++;
     }

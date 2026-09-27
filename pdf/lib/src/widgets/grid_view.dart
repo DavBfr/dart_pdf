@@ -47,6 +47,10 @@ class GridViewContext extends WidgetContext {
   }
 
   @override
+  bool isSameAs(GridViewContext other) =>
+      firstChild == other.firstChild && lastChild == other.lastChild;
+
+  @override
   String toString() =>
       '$runtimeType first:$firstChild last:$lastChild size:${childCrossAxis}x$childMainAxis';
 }
