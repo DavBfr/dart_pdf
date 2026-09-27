@@ -3,6 +3,7 @@
 ## 3.13.2
 
 - Fix a `Column` silently dropping every child from the first one that overflows, which rendered a bounded `Column` as blank space when its first child did not fit. Children are now all laid out and painted, and an overflowing `Flex` clips to its own box; the truncation is kept only when a spanning parent will continue the widget on the next page
+- Fix a `GridView` whose cell is taller than the available space placing no row at all, so `MultiPage` never advanced: it allocated pages until the document was abandoned in release builds. Such a row is now emitted and overflows, with a diagnostic in debug builds, and an exhausted `GridView` reports that it has no more widgets instead of adding a trailing blank page
 - Fix `Wrap` keying its run lookup by widget identity, so reusing one child instance (a shared spacer, `List.filled`) dropped every child after the first reuse and could stop `MultiPage` from ever advancing
 
 ## 3.13.1

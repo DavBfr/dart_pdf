@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
@@ -70,6 +72,91 @@ void main() {
         ),
       ),
     );
+  });
+
+  test('a GridView cell taller than the page terminates', () async {
+    // childAspectRatio 4 with two columns makes each cell ~964pt tall, more
+    // than the 728pt A4 body: the row count used to floor to zero, so nothing
+    // was placed and MultiPage asked for another page for ever.
+    final document = Document(compress: false);
+    document.addPage(
+      MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        build: (Context context) => <Widget>[
+          GridView(
+            crossAxisCount: 2,
+            childAspectRatio: 4,
+            children: List<Widget>.generate(8, (int i) => Text('C$i')),
+          ),
+        ],
+      ),
+    );
+
+    final text = latin1.decode(await document.save(), allowInvalid: true);
+    expect(document.document.pdfPageList.pages.length, lessThanOrEqualTo(8));
+    for (var i = 0; i < 8; i++) {
+      expect(
+        '(C$i)'.allMatches(text).length,
+        1,
+        reason: 'cell $i must be drawn exactly once',
+      );
+    }
+  });
+
+  test('a spanning GridView adds no trailing blank page', () async {
+    final document = Document(compress: false);
+    document.addPage(
+      MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        build: (Context context) => <Widget>[
+          GridView(
+            crossAxisCount: 2,
+            childAspectRatio: 1,
+            children: List<Widget>.generate(20, (int i) => Text('G$i')),
+          ),
+        ],
+      ),
+    );
+
+    final text = latin1.decode(await document.save(), allowInvalid: true);
+    expect(document.document.pdfPageList.pages.length, 4);
+    for (var i = 0; i < 20; i++) {
+      expect('(G$i)'.allMatches(text).length, 1, reason: 'cell $i once');
+    }
+  });
+
+  test('an exhausted GridView reports no more widgets', () async {
+    final grid = GridView(
+      crossAxisCount: 2,
+      childAspectRatio: 1,
+      children: List<Widget>.generate(4, (int i) => Text('E$i')),
+    );
+    final document = Document(compress: false);
+    document.addPage(
+      MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        build: (Context context) => <Widget>[grid],
+      ),
+    );
+    await document.save();
+
+    expect(grid.hasMoreWidgets, isFalse);
+  });
+
+  test('an empty GridView lays out to nothing', () async {
+    final document = Document(compress: false);
+    document.addPage(
+      Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (Context context) => GridView(
+          crossAxisCount: 2,
+          childAspectRatio: 1,
+          children: const <Widget>[],
+        ),
+      ),
+    );
+
+    await expectLater(document.save(), completes);
   });
 
   tearDownAll(() async {
