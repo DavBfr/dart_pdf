@@ -39,6 +39,15 @@ import 'raster.dart';
 
 const MethodChannel _channel = MethodChannel('net.nfet.printing');
 
+/// A length the method channel can carry.
+///
+/// Roll and undefined page formats use `double.infinity` for an axis, which no
+/// platform can represent: Android turned it into its unknown-size sentinel,
+/// iOS produced NaN margins and Windows cast it into a negative 16-bit paper
+/// length. Zero means 'this axis is unspecified, use the printer's paper for
+/// it' in the channel protocol.
+double _finite(double value) => value.isFinite ? value : 0.0;
+
 /// An implementation of [PrintingPlatform] that uses method channels.
 class MethodChannelPrinting extends PrintingPlatform {
   /// Create a [PrintingPlatform] object for method channels.
@@ -60,13 +69,27 @@ class MethodChannelPrinting extends PrintingPlatform {
         if (job == null) {
           return;
         }
+        // A backend that mishandled an unspecified axis can report a size or
+        // a margin that is not finite; without this the document would be
+        // laid out, and written, with a NaN MediaBox.
+        double axis(String key, double fallback) {
+          final double value = call.arguments[key];
+          return value.isFinite && value > 0 ? value : fallback;
+        }
+
+        double margin(String key) {
+          final double value = call.arguments[key];
+          return value.isFinite ? value : 0.0;
+        }
+
+        final requested = job.format;
         final format = PdfPageFormat(
-          call.arguments['width'],
-          call.arguments['height'],
-          marginLeft: call.arguments['marginLeft'],
-          marginTop: call.arguments['marginTop'],
-          marginRight: call.arguments['marginRight'],
-          marginBottom: call.arguments['marginBottom'],
+          axis('width', requested?.width ?? PdfPageFormat.a4.width),
+          axis('height', requested?.height ?? PdfPageFormat.a4.height),
+          marginLeft: margin('marginLeft'),
+          marginTop: margin('marginTop'),
+          marginRight: margin('marginRight'),
+          marginBottom: margin('marginBottom'),
         );
 
         Uint8List bytes;
@@ -188,18 +211,19 @@ class MethodChannelPrinting extends PrintingPlatform {
     final job = _printJobs.add(
       onCompleted: Completer<bool>(),
       onLayout: onLayout,
+      format: format,
     );
 
     final params = <String, dynamic>{
       if (printer != null) 'printer': printer.url,
       'name': name,
       'job': job.index,
-      'width': format.width,
-      'height': format.height,
-      'marginLeft': format.marginLeft,
-      'marginTop': format.marginTop,
-      'marginRight': format.marginRight,
-      'marginBottom': format.marginBottom,
+      'width': _finite(format.width),
+      'height': _finite(format.height),
+      'marginLeft': _finite(format.marginLeft),
+      'marginTop': _finite(format.marginTop),
+      'marginRight': _finite(format.marginRight),
+      'marginBottom': _finite(format.marginBottom),
       'dynamic': dynamicLayout,
       'usePrinterSettings': usePrinterSettings,
       'outputType': outputType.index,
@@ -284,12 +308,12 @@ class MethodChannelPrinting extends PrintingPlatform {
     final params = <String, dynamic>{
       'html': html,
       'baseUrl': baseUrl,
-      'width': format.width,
-      'height': format.height,
-      'marginLeft': format.marginLeft,
-      'marginTop': format.marginTop,
-      'marginRight': format.marginRight,
-      'marginBottom': format.marginBottom,
+      'width': _finite(format.width),
+      'height': _finite(format.height),
+      'marginLeft': _finite(format.marginLeft),
+      'marginTop': _finite(format.marginTop),
+      'marginRight': _finite(format.marginRight),
+      'marginBottom': _finite(format.marginBottom),
       'job': job.index,
     };
 

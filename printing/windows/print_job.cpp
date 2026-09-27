@@ -116,7 +116,9 @@ bool PrintJob::printPdf(const std::string& name,
     dm->dmDriverExtra = (WORD)dmExtra;
 
     // dmPaperSize, dmPaperWidth and dmPaperLength always describe the portrait
-    // sheet; dmOrientation rotates it.
+    // sheet; dmOrientation rotates it. A zero axis means 'unspecified' in the
+    // channel protocol, and selectPaper() drops it, so the driver keeps its
+    // own paper for that axis instead of being handed a wrapped short.
     const auto portraitWidth = width > height ? height : width;
     const auto portraitHeight = width > height ? width : height;
     const auto paper = selectPaper(portraitWidth, portraitHeight);

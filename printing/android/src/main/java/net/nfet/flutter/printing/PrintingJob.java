@@ -188,23 +188,39 @@ public class PrintingJob extends PrintDocumentAdapter {
 
         PrintAttributes.Builder attrBuilder = new PrintAttributes.Builder();
 
-        int widthMils = Double.valueOf(width * 1000.0 / 72.0).intValue();
-        int heightMils = Double.valueOf(height * 1000.0 / 72.0).intValue();
+        // A zero axis means 'unspecified' in the channel protocol: a roll
+        // format has no length. Double.intValue() of an out-of-range value is
+        // Integer.MAX_VALUE, which then wrapped the comparisons below to
+        // negative and left the framework's 1x2-mil unknown-size sentinel.
+        final long widthMils = pointsToMils(width);
+        final long heightMils = pointsToMils(height);
 
         PrintAttributes.MediaSize mediaSize = null;
-        boolean isPortrait = heightMils >= widthMils;
+        boolean isPortrait = heightMils == 0 || heightMils >= widthMils;
 
-        // get the media size from predefined media sizes
-        for (PrintAttributes.MediaSize size : getAllPredefinedSizes()) {
-            // https://github.com/DavBfr/dart_pdf/issues/635
-            int err = 20;
-            PrintAttributes.MediaSize m = isPortrait ? size.asPortrait() : size.asLandscape();
-            if ((widthMils + err) >= m.getWidthMils() && (widthMils - err) <= m.getWidthMils()
-                    && (heightMils + err) >= m.getHeightMils()
-                    && (heightMils - err) <= m.getHeightMils()) {
-                mediaSize = m;
-                break;
+        if (widthMils > 0 && heightMils > 0) {
+            // get the media size from predefined media sizes
+            for (PrintAttributes.MediaSize size : getAllPredefinedSizes()) {
+                // https://github.com/DavBfr/dart_pdf/issues/635
+                final long err = 20;
+                PrintAttributes.MediaSize m = isPortrait ? size.asPortrait() : size.asLandscape();
+                // Compared in long so the tolerance cannot overflow.
+                if ((widthMils + err) >= m.getWidthMils() && (widthMils - err) <= m.getWidthMils()
+                        && (heightMils + err) >= m.getHeightMils()
+                        && (heightMils - err) <= m.getHeightMils()) {
+                    mediaSize = m;
+                    break;
+                }
             }
+        }
+
+        if (mediaSize == null && widthMils > 0) {
+            // One axis known: describe a custom sheet rather than falling back
+            // to the unknown-size sentinel, which makes the print UI resolve
+            // the media from the printer and lay the document out for Letter.
+            final long length = heightMils > 0 ? heightMils : widthMils * 2;
+            mediaSize = new PrintAttributes.MediaSize(
+                    "flutter_printing", "Provided size", (int) widthMils, (int) length);
         }
 
         if (mediaSize == null) {
@@ -529,5 +545,21 @@ public class PrintingJob extends PrintDocumentAdapter {
         });
 
         thread.start();
+    }
+
+    /// Convert PDF points to mils, clamped to what an int media size can hold.
+    ///
+    /// Returns 0 for a value that is not finite - a roll format carries
+    /// infinity - or that does not fit, so the caller can treat that axis as
+    /// unspecified instead of using a wrapped number.
+    private static long pointsToMils(double points) {
+        if (Double.isNaN(points) || Double.isInfinite(points) || points <= 0) {
+            return 0;
+        }
+        final double mils = points * 1000.0 / 72.0;
+        if (mils < 1 || mils > Integer.MAX_VALUE) {
+            return 0;
+        }
+        return (long) mils;
     }
 }

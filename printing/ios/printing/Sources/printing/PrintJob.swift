@@ -196,7 +196,13 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         return UIPrintPaper.bestPaper(forPageSize: currentSize!, withPapersFrom: paperList)
     }
 
-    func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool, outputType type: UIPrintInfo.OutputType, forceCustomPrintPaper: Bool = false) {
+    func printPdf(name: String, withPageSize rawSize: CGSize, andMargin rawMargin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool, outputType type: UIPrintInfo.OutputType, forceCustomPrintPaper: Bool = false) {
+        // A roll format leaves an axis unspecified, which arrives as 0 (or,
+        // from an older Dart side, as infinity). Either way an infinite size
+        // makes the margin arithmetic below produce NaN, which ends up in the
+        // document as a NaN MediaBox.
+        let size = PrintJob.usableSize(rawSize)
+        let margin = PrintJob.usableMargin(rawMargin, in: size)
         currentSize = size
         dynamic = dyn
         self.forceCustomPrintPaper = forceCustomPrintPaper
@@ -272,11 +278,36 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             printJob: self,
             width: size.width,
             height: size.height,
-            marginLeft: margin.minX,
-            marginTop: margin.minY,
-            marginRight: size.width - margin.maxX,
-            marginBottom: size.height - margin.maxY
+            marginLeft: PrintJob.finite(margin.minX),
+            marginTop: PrintJob.finite(margin.minY),
+            marginRight: PrintJob.finite(size.width - margin.maxX),
+            marginBottom: PrintJob.finite(size.height - margin.maxY)
         )
+    }
+
+    /// 0 for a value that is not finite, so NaN never reaches Dart.
+    static func finite(_ value: CGFloat) -> CGFloat {
+        return value.isFinite ? value : 0
+    }
+
+    /// Replace an unspecified axis with the default paper's, so the job has a
+    /// real sheet to lay out on.
+    static func usableSize(_ size: CGSize) -> CGSize {
+        // A4 in points, the same default the Dart side falls back to. The
+        // print sheet lets the user pick another paper from here.
+        let fallback = CGSize(width: 595.28, height: 841.89)
+        let width = size.width.isFinite && size.width > 0 ? size.width : fallback.width
+        let height = size.height.isFinite && size.height > 0 ? size.height : fallback.height
+        return CGSize(width: width, height: height)
+    }
+
+    /// Clamp a margin rect to the sheet, dropping any non-finite edge.
+    static func usableMargin(_ margin: CGRect, in size: CGSize) -> CGRect {
+        let x = finite(margin.minX)
+        let y = finite(margin.minY)
+        let width = margin.width.isFinite ? margin.width : size.width - x
+        let height = margin.height.isFinite ? margin.height : size.height - y
+        return CGRect(x: x, y: y, width: max(0, width), height: max(0, height))
     }
 
     /// UIScene-safe key window lookup. `UIApplication.shared.keyWindow` and

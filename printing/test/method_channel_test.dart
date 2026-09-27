@@ -255,6 +255,142 @@ void main() {
     );
   });
 
+  group('page format', () {
+    test('an unspecified axis crosses the channel as zero', () async {
+      unawaited(
+        impl
+            .layoutPdf(
+              null,
+              (PdfPageFormat format) async => Uint8List(0),
+              'document',
+              PdfPageFormat.roll80,
+              true,
+              false,
+              OutputType.generic,
+              false,
+              false,
+            )
+            .catchError((Object _) => false),
+      );
+      await pumpEventQueue();
+
+      final call = calls.lastWhere((MethodCall c) => c.method == 'printPdf');
+      expect(call.arguments['width'], closeTo(80 * PdfPageFormat.mm, 1e-6));
+      expect(
+        call.arguments['height'],
+        0.0,
+        reason: 'infinity cannot cross the channel',
+      );
+      for (final key in <String>[
+        'marginLeft',
+        'marginTop',
+        'marginRight',
+        'marginBottom',
+      ]) {
+        expect((call.arguments[key] as double).isFinite, isTrue);
+      }
+
+      await fromPlatform('onCompleted', <String, dynamic>{
+        'job': jobOf('printPdf'),
+        'completed': false,
+      });
+    });
+
+    test('a non-finite size reported back is repaired', () async {
+      PdfPageFormat? received;
+      unawaited(
+        impl
+            .layoutPdf(
+              null,
+              (PdfPageFormat format) async {
+                received = format;
+                return Uint8List(0);
+              },
+              'document',
+              PdfPageFormat.roll80,
+              true,
+              false,
+              OutputType.generic,
+              false,
+              false,
+            )
+            .catchError((Object _) => false),
+      );
+      await pumpEventQueue();
+
+      // What a backend that mishandled the unspecified axis sends: iOS used to
+      // produce NaN margins this way, and the document got a NaN MediaBox.
+      await fromPlatform('onLayout', <String, dynamic>{
+        'job': jobOf('printPdf'),
+        'width': 226.77,
+        'height': double.infinity,
+        'marginLeft': 14.17,
+        'marginTop': 14.17,
+        'marginRight': double.nan,
+        'marginBottom': double.nan,
+      });
+
+      expect(received, isNotNull);
+      expect(received!.width, closeTo(226.77, 1e-6));
+      // An infinite height is meaningful for a roll - the page auto-sizes to
+      // its content - but a NaN margin used to poison that computation and put
+      // a NaN MediaBox in the document.
+      expect(received!.height.isNaN, isFalse);
+      expect(received!.marginRight, 0);
+      expect(received!.marginBottom, 0);
+
+      await fromPlatform('onCompleted', <String, dynamic>{
+        'job': jobOf('printPdf'),
+        'completed': false,
+      });
+    });
+
+    test(
+      'a bogus size reported back falls back to the requested one',
+      () async {
+        PdfPageFormat? received;
+        unawaited(
+          impl
+              .layoutPdf(
+                null,
+                (PdfPageFormat format) async {
+                  received = format;
+                  return Uint8List(0);
+                },
+                'document',
+                PdfPageFormat.a4,
+                true,
+                false,
+                OutputType.generic,
+                false,
+                false,
+              )
+              .catchError((Object _) => false),
+        );
+        await pumpEventQueue();
+
+        await fromPlatform('onLayout', <String, dynamic>{
+          'job': jobOf('printPdf'),
+          'width': double.nan,
+          'height': double.nan,
+          'marginLeft': 0.0,
+          'marginTop': 0.0,
+          'marginRight': 0.0,
+          'marginBottom': 0.0,
+        });
+
+        expect(received, isNotNull);
+        expect(received!.width, PdfPageFormat.a4.width);
+        expect(received!.height, PdfPageFormat.a4.height);
+
+        await fromPlatform('onCompleted', <String, dynamic>{
+          'job': jobOf('printPdf'),
+          'completed': false,
+        });
+      },
+    );
+  });
+
   group('convertHtml', () {
     test('unregisters the job when the platform reports onHtmlError', () async {
       final pending = MethodChannelPrinting.pendingJobs;

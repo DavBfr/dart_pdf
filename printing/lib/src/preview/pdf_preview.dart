@@ -266,12 +266,29 @@ class PdfPreviewState extends State<PdfPreview> {
     final pages = previewWidget.currentState?.pages ?? const [];
     final dpi = previewWidget.currentState?.dpi ?? PdfPageFormat.inch;
 
-    if (!widget.canChangePageFormat && pages.isNotEmpty) {
-      format = PdfPageFormat(
-        pages.first.width * PdfPageFormat.inch / dpi,
-        pages.first.height * PdfPageFormat.inch / dpi,
-        marginAll: 5 * PdfPageFormat.mm,
-      );
+    if (pages.isNotEmpty) {
+      final rasterWidth = pages.first.width * PdfPageFormat.inch / dpi;
+      final rasterHeight = pages.first.height * PdfPageFormat.inch / dpi;
+
+      if (!widget.canChangePageFormat) {
+        format = PdfPageFormat(
+          rasterWidth,
+          rasterHeight,
+          marginAll: 5 * PdfPageFormat.mm,
+        );
+      } else if (!format.width.isFinite || !format.height.isFinite) {
+        // A roll format leaves one axis unspecified, and no platform can
+        // represent that. Keep the axis the user asked for - an 80mm roll
+        // stays 80mm - and take the other from the page just rasterized.
+        format = PdfPageFormat(
+          format.width.isFinite ? format.width : rasterWidth,
+          format.height.isFinite ? format.height : rasterHeight,
+          marginLeft: format.marginLeft.isFinite ? format.marginLeft : 0,
+          marginTop: format.marginTop.isFinite ? format.marginTop : 0,
+          marginRight: format.marginRight.isFinite ? format.marginRight : 0,
+          marginBottom: format.marginBottom.isFinite ? format.marginBottom : 0,
+        );
+      }
     }
 
     return format;

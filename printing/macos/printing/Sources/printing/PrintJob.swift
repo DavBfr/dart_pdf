@@ -166,7 +166,10 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         return printers
     }
 
-    public func printPdf(name: String, withPageSize size: CGSize, andMargin _: CGRect, withPrinter printer: String?, dynamically dyn: Bool, andWindow window: NSWindow) {
+    public func printPdf(name: String, withPageSize rawSize: CGSize, andMargin _: CGRect, withPrinter printer: String?, dynamically dyn: Bool, andWindow window: NSWindow) {
+        // A roll format leaves an axis unspecified, which arrives as 0 (or, on
+        // an older Dart side, as infinity). NSPrintInfo cannot use either.
+        let size = PrintJob.usableSize(rawSize)
         dynamic = dyn
         _window = window
         lastLayoutParams = nil
@@ -351,5 +354,13 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
             "canRaster": true,
             "canListPrinters": true,
         ]
+    }
+
+    /// Replace an unspecified or non-finite axis with A4's, in points.
+    static func usableSize(_ size: CGSize) -> CGSize {
+        let fallback = CGSize(width: 595.28, height: 841.89)
+        let width = size.width.isFinite && size.width > 0 ? size.width : fallback.width
+        let height = size.height.isFinite && size.height > 0 ? size.height : fallback.height
+        return CGSize(width: width, height: height)
     }
 }

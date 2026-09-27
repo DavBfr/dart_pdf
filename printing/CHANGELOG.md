@@ -2,6 +2,11 @@
 
 ## 5.16.0
 
+- Fix roll and undefined page formats sending `double.infinity` over the method channel, which no platform can represent: Android substituted its unknown-size sentinel and laid the document out for Letter, iOS produced NaN margins that ended up as a `NaN` MediaBox, and Windows cast the length into a negative 16-bit field. An unspecified axis is now sent as `0`, meaning 'use the printer's paper for this axis', and each backend treats it that way
+- `PdfPreview` now gives a roll format a real height from the page it rasterized while keeping the requested width exactly, so roll printing works from the preview on every backend
+- A page size or margin reported back by a platform that is not finite is repaired instead of reaching the document
+- Fix the Android media-size match rejecting every candidate for a large page, because the tolerance arithmetic overflowed, and never matching a custom finite format
+
 - Fix the `PdfPreview` share button calling `onPrinted` instead of `onShared`, which left `onShared` as dead code. Apps that relied on `onPrinted` firing for a share must move that handler to `onShared`
 - Fix a null-check crash when the preview rebuilds while a share is in flight: the share action read its iPad popover anchor after awaiting the document, by which time its element had been replaced. The anchor is now read before the await, from the context passed to the action
 - `PdfShareAction` now reports a failure through `onShareError` and as a `FlutterError` instead of letting it escape as an unhandled asynchronous error, matching the print action. `PdfPreview` gained an `onShareError` parameter to receive it
