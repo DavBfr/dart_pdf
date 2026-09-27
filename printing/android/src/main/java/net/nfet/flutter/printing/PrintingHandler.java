@@ -1,7 +1,9 @@
 package net.nfet.flutter.printing;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 import android.print.PrintAttributes;
 
 import androidx.annotation.NonNull;
@@ -24,6 +26,19 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+        try {
+            handleMethodCall(call, result);
+        } catch (final RuntimeException e) {
+            // A framework exception used to escape this method, which Flutter
+            // reports to Dart as an anonymous PlatformException carrying a raw
+            // platform message and no indication of which call failed.
+            Log.e("PDF", "Unable to handle " + call.method, e);
+            result.error("printing", e.getMessage(), call.method);
+        }
+    }
+
+    private void handleMethodCall(
+            @NonNull MethodCall call, @NonNull MethodChannel.Result result) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
             switch (call.method) {
                 case "printPdf": {
@@ -36,6 +51,19 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     assert name != null;
                     assert width != null;
                     assert height != null;
+
+                    if (!(context instanceof Activity)) {
+                        // PrintManager.print refuses a non-Activity context.
+                        // Report it as a job failure, so the Dart future
+                        // completes with a message that says what is wrong
+                        // instead of an anonymous PlatformException carrying a
+                        // raw framework message.
+                        printJob.cancelJob("Printing needs an Activity, and this Flutter engine"
+                                + " has none attached");
+                        result.success(0);
+                        break;
+                    }
+
                     printJob.printPdf(name, width, height);
 
                     result.success(1);
@@ -90,7 +118,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     break;
                 }
                 case "printingInfo": {
-                    result.success(PrintingJob.printingInfo());
+                    result.success(PrintingJob.printingInfo(context));
                     break;
                 }
                 case "rasterPdf": {

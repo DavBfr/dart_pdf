@@ -42,6 +42,8 @@ jobs:
         run: cmake -S printing/test/cmake -B build/printing-cmake-test
       - name: Build example for Linux
         run: cd printing/example; flutter build -v linux
+      - name: Run the Android plugin unit tests
+        run: cd printing/example/android; ./gradlew :printing:testDebugUnitTest
       - name: Build example for Android
         run: cd printing/example; flutter build -v apk
       - name: Build demo for Web

@@ -16,7 +16,7 @@
 
 package net.nfet.flutter.printing;
 
-import android.content.ActivityNotFoundException;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -63,7 +63,6 @@ import java.util.List;
  */
 @RequiresApi(api = Build.VERSION_CODES.KITKAT)
 public class PrintingJob extends PrintDocumentAdapter {
-    private static PrintManager printManager;
     private final Context context;
     private final PrintingHandler printing;
     private PrintJob printJob;
@@ -80,11 +79,14 @@ public class PrintingJob extends PrintDocumentAdapter {
         this.context = context;
         this.printing = printing;
         this.index = index;
-        printManager = (PrintManager) context.getSystemService(Context.PRINT_SERVICE);
     }
 
-    static HashMap<String, Object> printingInfo() {
-        final boolean canPrint = android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+    static HashMap<String, Object> printingInfo(Context context) {
+        // PrintManager.print refuses anything but an Activity, so an engine
+        // with none attached - a background or cached engine - cannot print.
+        // This used to report canPrint true there and then fail the call.
+        final boolean canPrint = android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
+                && context instanceof Activity;
         final boolean canRaster = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
 
         HashMap<String, Object> result = new HashMap<>();
@@ -231,6 +233,17 @@ public class PrintingJob extends PrintDocumentAdapter {
 
         attrBuilder.setMediaSize(mediaSize);
         PrintAttributes attrib = attrBuilder.build();
+
+        // Resolved here, the only place that needs it, and never stored: a
+        // static PrintManager kept its Context - the host Activity, with its
+        // Window and FlutterView - alive for the whole process.
+        final PrintManager printManager =
+                (PrintManager) context.getSystemService(Context.PRINT_SERVICE);
+        if (printManager == null) {
+            cancelJob("The print service is not available on this device");
+            return;
+        }
+
         printJob = printManager.print(name, this, attrib);
     }
 
@@ -394,6 +407,12 @@ public class PrintingJob extends PrintDocumentAdapter {
             shareIntent.putExtra(
                     Intent.EXTRA_EMAIL, emails != null ? emails.toArray(new String[0]) : null);
             Intent chooserIntent = Intent.createChooser(shareIntent, null);
+            if (!(context instanceof Activity)) {
+                // startActivity on a non-Activity context needs its own task,
+                // and threw an AndroidRuntimeException without it, so sharing
+                // from a background or cached engine opened nothing.
+                chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
             List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(
                     chooserIntent, PackageManager.MATCH_DEFAULT_ONLY);
 
@@ -407,7 +426,13 @@ public class PrintingJob extends PrintDocumentAdapter {
             context.startActivity(chooserIntent);
             shareFile.deleteOnExit();
             return true;
-        } catch (IOException | IllegalArgumentException | ActivityNotFoundException e) {
+        } catch (IOException e) {
+            Log.e("PDF", "Unable to share the document", e);
+            return false;
+        } catch (RuntimeException e) {
+            // IllegalArgumentException from the FileProvider,
+            // ActivityNotFoundException and AndroidRuntimeException from the
+            // chooser: none of them should cross the channel raw.
             Log.e("PDF", "Unable to share the document", e);
             return false;
         }

@@ -29,6 +29,11 @@
 - `Printing.listPrinters` answers an empty list rather than throwing a null-check error when a platform reports no printer list at all
 - Fix an app that depends on printing and another pdfium plugin failing to configure with 'Build step for pdfium failed: 1', or silently building against the other plugin's pdfium. The Windows and Linux CMake cache entries are now `PRINTING_PDFIUM_VERSION` and `PRINTING_PDFIUM_ARCH`, and the download, source and build trees live under printing's own binary directory instead of `${CMAKE_BINARY_DIR}/pdfium-*`. An app that overrides the version or architecture must use the new names
 - Fix the Windows and Linux CMake configure failing with 'string sub-command REPLACE requires at least four arguments' when the app scaffold does not define `FLUTTER_TARGET_PLATFORM`; the architecture now falls back to x64
+- Fix `Printing.sharePdf` opening nothing on Android in a background or cached `FlutterEngine` with no Activity. The chooser now carries `FLAG_ACTIVITY_NEW_TASK` when the plugin is bound to the application context, and is unchanged when an Activity is attached
+- `Printing.info().canPrint` is now false on Android while no Activity is attached, because `PrintManager` refuses any other context. `Printing.layoutPdf` there completes with a message naming the Activity requirement instead of an anonymous `PlatformException` carrying a raw framework message
+- Fix the Android plugin dropping its method-call handler when the Activity is destroyed, which turned every later call in a surviving engine into a `MissingPluginException`. It now falls back to the application context
+- No Android framework exception escapes the plugin's method-call handler any more; each one is reported as a `printing` PlatformException naming the call that failed
+- Fix Android retaining the last Activity, its Window and its FlutterView for the lifetime of the process after a single print, raster, HTML conversion or share: `PrintingJob` kept the `PrintManager` in a static field, and `PrintManager` holds its Context. The print service is now resolved where it is used and never stored
 
 ## 5.15.2
 
