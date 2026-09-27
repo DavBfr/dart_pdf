@@ -84,4 +84,11 @@ class PrintJobs {
   void remove(int index) {
     _printJobs.remove(index);
   }
+
+  /// Number of jobs still waiting for a platform callback.
+  ///
+  /// Every call registers one job and must unregister it again, whether it
+  /// succeeds or fails, so this returns to its previous value after each
+  /// completed call.
+  int get pending => _printJobs.length;
 }

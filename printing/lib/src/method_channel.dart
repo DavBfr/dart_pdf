@@ -23,7 +23,8 @@ import 'package:flutter/foundation.dart'
         FlutterError,
         FlutterErrorDetails,
         InformationCollector,
-        StringProperty;
+        StringProperty,
+        visibleForTesting;
 import 'package:flutter/rendering.dart' show Rect;
 import 'package:flutter/services.dart' show MethodCall, MethodChannel;
 import 'package:pdf/pdf.dart';
@@ -46,6 +47,10 @@ class MethodChannelPrinting extends PrintingPlatform {
   }
 
   static final _printJobs = PrintJobs();
+
+  /// Number of print jobs still waiting for a platform callback.
+  @visibleForTesting
+  static int get pendingJobs => _printJobs.pending;
 
   /// Callbacks from platform plugin
   static Future<dynamic> _handleMethod(MethodCall call) async {
@@ -118,7 +123,7 @@ class MethodChannelPrinting extends PrintingPlatform {
         break;
       case 'onPageRasterized':
         final job = _printJobs.getJob(call.arguments['job']);
-        if (job != null) {
+        if (job != null && !job.onPageRasterized!.isClosed) {
           final raster = PdfRaster(
             call.arguments['width'],
             call.arguments['height'],
@@ -130,12 +135,17 @@ class MethodChannelPrinting extends PrintingPlatform {
       case 'onPageRasterEnd':
         final job = _printJobs.getJob(call.arguments['job']);
         if (job != null) {
-          final dynamic error = call.arguments['error'];
-          if (error != null) {
-            job.onPageRasterized!.addError(error);
-          }
-          await job.onPageRasterized!.close();
+          // Unregister first: close() is not awaited, so the job must not
+          // outlive this callback even if nobody ever listened.
           _printJobs.remove(job.index);
+          final controller = job.onPageRasterized!;
+          if (!controller.isClosed) {
+            final dynamic error = call.arguments['error'];
+            if (error != null) {
+              controller.addError(error);
+            }
+            unawaited(controller.close());
+          }
         }
         break;
     }
@@ -195,8 +205,8 @@ class MethodChannelPrinting extends PrintingPlatform {
       if (windowsModernDialog) 'windowsModernDialog': windowsModernDialog,
     };
 
-    await _channel.invokeMethod<int>('printPdf', params);
     try {
+      await _channel.invokeMethod<int>('printPdf', params);
       return await job.onCompleted!.future;
     } finally {
       _printJobs.remove(job.index);
@@ -281,15 +291,22 @@ class MethodChannelPrinting extends PrintingPlatform {
       'job': job.index,
     };
 
-    await _channel.invokeMethod<void>('convertHtml', params);
-    final result = await job.onHtmlRendered!.future;
-    _printJobs.remove(job.index);
-    return result;
+    try {
+      await _channel.invokeMethod<void>('convertHtml', params);
+      return await job.onHtmlRendered!.future;
+    } finally {
+      _printJobs.remove(job.index);
+    }
   }
 
   @override
   Stream<PdfRaster> raster(Uint8List document, List<int>? pages, double dpi) {
-    final job = _printJobs.add(onPageRasterized: StreamController<PdfRaster>());
+    final controller = StreamController<PdfRaster>();
+    final job = _printJobs.add(onPageRasterized: controller);
+
+    // A consumer that stops listening early unregisters the job, so later
+    // platform callbacks for it are dropped instead of leaking the entry.
+    controller.onCancel = () => _printJobs.remove(job.index);
 
     final params = <String, dynamic>{
       'doc': Uint8List.fromList(document),
@@ -298,7 +315,32 @@ class MethodChannelPrinting extends PrintingPlatform {
       'job': job.index,
     };
 
-    _channel.invokeMethod<void>('rasterPdf', params);
-    return job.onPageRasterized!.stream;
+    unawaited(_startRaster(job, params));
+    return controller.stream;
+  }
+
+  /// Ask the platform to rasterize the document.
+  ///
+  /// A successful call does not terminate the stream: the pages arrive later
+  /// through `onPageRasterized` and the stream is closed by
+  /// `onPageRasterEnd`. Only a failure of the platform call itself is
+  /// reported here, so a consumer can never wait forever on a rasterizer
+  /// that never started.
+  static Future<void> _startRaster(
+    PrintJob job,
+    Map<String, dynamic> params,
+  ) async {
+    try {
+      await _channel.invokeMethod<void>('rasterPdf', params);
+    } catch (e, s) {
+      final controller = job.onPageRasterized!;
+      if (!controller.isClosed) {
+        controller.addError(e, s);
+        // Never awaited: close() on a controller nobody listens to yet does
+        // not complete until it is subscribed.
+        unawaited(controller.close());
+      }
+      _printJobs.remove(job.index);
+    }
   }
 }

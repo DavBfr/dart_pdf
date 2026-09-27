@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.15.2
+
+- Fix `Printing.raster()` never terminating its stream when the platform call itself fails: the error is now delivered on the stream and the stream closes, instead of leaving `PdfPreview` on a permanent spinner and reporting the error as an unhandled asynchronous error
+- Fix `layoutPdf`, `convertHtml` and `raster` leaking their `PrintJob` entry when the platform call throws, which also turned a duplicate platform callback into a confusing `Bad state: Future already completed`
+- A raster subscription cancelled early now unregisters its job
+
 ## 5.15.1
 
 - Fix iOS use-after-free crash in `CGPDFDocumentGetNumberOfPages`: UIKit reads the PDF document from a background page-count thread while dynamic layout replaces it on the main thread; document access is now lock-guarded
