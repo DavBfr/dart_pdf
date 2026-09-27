@@ -322,75 +322,27 @@ class PdfColorCmyk extends PdfColor {
 
   /// Create a CMYK color from red ,green and blue components
   const PdfColorCmyk.fromRgb(double r, double g, double b, [double a = 1.0])
-    : black =
-          1.0 -
-          (r > g
-              ? r
-              : g > b
-              ? r > g
-                    ? r
-                    : g
-              : b),
-      cyan =
-          (1.0 -
-              r -
-              (1.0 -
-                  (r > g
-                      ? r
-                      : g > b
-                      ? r > g
-                            ? r
-                            : g
-                      : b))) /
-          (1.0 -
-              (1.0 -
-                  (r > g
-                      ? r
-                      : g > b
-                      ? r > g
-                            ? r
-                            : g
-                      : b))),
-      magenta =
-          (1.0 -
-              g -
-              (1.0 -
-                  (r > g
-                      ? r
-                      : g > b
-                      ? r > g
-                            ? r
-                            : g
-                      : b))) /
-          (1.0 -
-              (1.0 -
-                  (r > g
-                      ? r
-                      : g > b
-                      ? r > g
-                            ? r
-                            : g
-                      : b))),
-      yellow =
-          (1.0 -
-              b -
-              (1.0 -
-                  (r > g
-                      ? r
-                      : g > b
-                      ? r > g
-                            ? r
-                            : g
-                      : b))) /
-          (1.0 -
-              (1.0 -
-                  (r > g
-                      ? r
-                      : g > b
-                      ? r > g
-                            ? r
-                            : g
-                      : b))),
+    // The maximum of the three channels, spelled out because math.max is not
+    // a const expression and this constructor must stay const. Comparing r
+    // against g only, as this used to, returns r for any colour with r > g
+    // and b > r, which made black too large and the other components
+    // negative.
+    : black = 1.0 - (r > g ? (r > b ? r : b) : (g > b ? g : b)),
+      // An achromatic colour has no chroma: without this guard black divides
+      // 0 by 0 and every component becomes NaN, which reaches the PDF as the
+      // literal 'NaN' once asserts are stripped.
+      cyan = (r > g ? (r > b ? r : b) : (g > b ? g : b)) == 0.0
+          ? 0.0
+          : ((r > g ? (r > b ? r : b) : (g > b ? g : b)) - r) /
+                (r > g ? (r > b ? r : b) : (g > b ? g : b)),
+      magenta = (r > g ? (r > b ? r : b) : (g > b ? g : b)) == 0.0
+          ? 0.0
+          : ((r > g ? (r > b ? r : b) : (g > b ? g : b)) - g) /
+                (r > g ? (r > b ? r : b) : (g > b ? g : b)),
+      yellow = (r > g ? (r > b ? r : b) : (g > b ? g : b)) == 0.0
+          ? 0.0
+          : ((r > g ? (r > b ? r : b) : (g > b ? g : b)) - b) /
+                (r > g ? (r > b ? r : b) : (g > b ? g : b)),
       super(r, g, b, a);
 
   /// Cyan component
@@ -684,8 +636,11 @@ class PdfColorHsl extends PdfColor {
 
     final hue = _getHue(red, green, blue, max, delta);
     final lightness = (max + min) / 2.0;
-    // Saturation can exceed 1.0 with rounding errors, so clamp it.
-    final saturation = lightness == 1.0
+    // An achromatic colour (max == min) has no saturation, and the divisor
+    // 1 - |2L - 1| is zero at both ends of the lightness range, so guard on
+    // delta: black used to divide 0 by 0 and report a saturation of 1.
+    // Saturation can also exceed 1.0 with rounding errors, so clamp it.
+    final saturation = delta == 0.0
         ? 0.0
         : (delta / (1.0 - (2.0 * lightness - 1.0).abs())).clamp(0.0, 1.0);
     return PdfColorHsl._(hue, saturation, lightness, alpha, red, green, blue);

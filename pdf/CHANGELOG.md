@@ -2,6 +2,11 @@
 
 ## 3.13.2
 
+- Fix `PdfColorCmyk.fromRgb` comparing only red against green when looking for the brightest channel, which produced an oversized black and negative components for any colour whose blue exceeds its red, and dividing zero by zero for black, which wrote the literal `NaN` into the document in release builds
+- Fix `PdfColorHsl.fromRgb` reporting a saturation of 1.0 for black instead of 0.0
+- Fix word splitting cutting between a UTF-16 surrogate pair, which left an unpaired surrogate that no font can map: saving a document with a long run of non-BMP characters (astral CJK, emoji) failed with `Missing glyph for character U+D83C`
+- Fix a word that fits the line being hard-split when only the leading whitespace pushed it over the edge
+
 - Fix `MultiPage` allocating pages for ever when a spanning widget placed nothing: it now detects that the widget consumed nothing, retries once on a fresh page and otherwise raises a `PdfException` naming the widget and the space available
 - The `maxPages` guard is now checked in release builds too, and bounds consecutive pages produced *without progress* rather than the length of the document, so a document longer than `maxPages` pages no longer fails. A widget that never reports being finished is stopped by a hard ceiling of 10000 pages
 - Fix `MultiPage` rejecting a child sized to exactly `availableHeight` (21 of 120 page-format and margin combinations), and measuring 'would it fit on a new page?' against the whole page body instead of the space left by the header and footer, which could loop for ever
