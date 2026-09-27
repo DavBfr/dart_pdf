@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.16.0
+
+- Fix the `PdfPreview` share button calling `onPrinted` instead of `onShared`, which left `onShared` as dead code. Apps that relied on `onPrinted` firing for a share must move that handler to `onShared`
+- Fix a null-check crash when the preview rebuilds while a share is in flight: the share action read its iPad popover anchor after awaiting the document, by which time its element had been replaced. The anchor is now read before the await, from the context passed to the action
+- `PdfShareAction` now reports a failure through `onShareError` and as a `FlutterError` instead of letting it escape as an unhandled asynchronous error, matching the print action. `PdfPreview` gained an `onShareError` parameter to receive it
+- `PdfPreviewActionBounds.childKey` and its `bounds` getter are deprecated in favour of `boundsOf(context)`; `bounds` now answers `Rect.zero` rather than throwing when the key is detached
+
 ## 5.15.2
 
 - Fix Windows print jobs hanging forever: opening a named printer, a failing Dart layout callback, an unimplemented reply and a reply carrying no document all deleted the job without reporting anything, so `layoutPdf` and `directPrintPdf` waited for a result that could never arrive. Each now reports the failure and releases the printer device context and settings blocks

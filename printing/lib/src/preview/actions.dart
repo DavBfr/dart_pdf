@@ -32,12 +32,23 @@ typedef OnPdfPreviewActionPressed =
     );
 
 mixin PdfPreviewActionBounds {
+  @Deprecated(
+    'Bounds are read from the BuildContext passed to the action instead. '
+    'A per-widget GlobalKey is detached by any rebuild.',
+  )
   final childKey = GlobalKey();
 
-  /// Calculate the widget bounds for iPad popup position
-  Rect get bounds {
-    final referenceBox =
-        childKey.currentContext!.findRenderObject()! as RenderBox;
+  /// Widget bounds used to anchor the iPad share popover
+  ///
+  /// [context] must be the one handed to the action callback, and must be read
+  /// in the same synchronous turn as the tap: an element unmounted by a
+  /// rebuild has no render object.
+  Rect boundsOf(BuildContext context) {
+    final referenceBox = context.findRenderObject();
+    if (referenceBox is! RenderBox || !referenceBox.attached) {
+      // The platform treats an empty rect as 'no anchor'.
+      return Rect.zero;
+    }
     final topLeft = referenceBox.localToGlobal(
       referenceBox.paintBounds.topLeft,
     );
@@ -45,6 +56,16 @@ mixin PdfPreviewActionBounds {
       referenceBox.paintBounds.bottomRight,
     );
     return Rect.fromPoints(topLeft, bottomRight);
+  }
+
+  /// Calculate the widget bounds for iPad popup position
+  @Deprecated('Use boundsOf(context) instead.')
+  Rect get bounds {
+    final context = childKey.currentContext;
+    if (context == null) {
+      return Rect.zero;
+    }
+    return boundsOf(context);
   }
 }
 
@@ -194,7 +215,7 @@ class PdfShareAction extends StatelessWidget with PdfPreviewActionBounds {
 
   @override
   Widget build(BuildContext context) {
-    return PdfPreviewAction(key: childKey, icon: icon, onPressed: _share);
+    return PdfPreviewAction(icon: icon, onPressed: _share);
   }
 
   Future<void> _share(
@@ -202,19 +223,50 @@ class PdfShareAction extends StatelessWidget with PdfPreviewActionBounds {
     LayoutCallback build,
     PdfPageFormat pageFormat,
   ) async {
-    final bytes = await build(pageFormat);
+    // Read the anchor synchronously: a rebuild during the awaits below - the
+    // orientation toggle, the format dropdown, info() completing - unmounts
+    // this element, and there is then no render object to measure.
+    final anchor = boundsOf(context);
 
-    final result = await Printing.sharePdf(
-      bytes: bytes,
-      bounds: bounds,
-      filename: filename,
-      body: body,
-      subject: subject,
-      emails: emails,
-    );
+    try {
+      final bytes = await build(pageFormat);
 
-    if (result) {
-      onShared?.call();
+      final result = await Printing.sharePdf(
+        bytes: bytes,
+        bounds: anchor,
+        filename: filename,
+        body: body,
+        subject: subject,
+        emails: emails,
+      );
+
+      if (result) {
+        onShared?.call();
+      }
+    } catch (exception, stack) {
+      // Nothing awaits this future, so an escaping error would only show up as
+      // an unhandled asynchronous error. Report it like the print action does.
+      InformationCollector? collector;
+
+      assert(() {
+        collector = () sync* {
+          yield StringProperty('PageFormat', pageFormat.toString());
+          yield StringProperty('Filename', filename);
+        };
+        return true;
+      }());
+
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'printing',
+          context: ErrorDescription('while sharing a PDF'),
+          informationCollector: collector,
+        ),
+      );
+
+      onShareError?.call(exception);
     }
   }
 }

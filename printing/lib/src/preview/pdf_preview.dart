@@ -50,6 +50,7 @@ class PdfPreview extends StatefulWidget {
     this.onPrinted,
     this.onPrintError,
     this.onShared,
+    this.onShareError,
     this.scrollViewDecoration,
     this.pdfPreviewPageDecoration,
     this.pdfFileName,
@@ -109,6 +110,7 @@ class PdfPreview extends StatefulWidget {
     this.onPrinted,
     this.onPrintError,
     this.onShared,
+    this.onShareError,
     this.scrollViewDecoration,
     this.pdfPreviewPageDecoration,
     this.pdfFileName,
@@ -179,6 +181,9 @@ class PdfPreview extends StatefulWidget {
 
   /// Called if the user shares the pdf document
   final void Function(BuildContext context)? onShared;
+
+  /// Called if an error occurred while sharing the Pdf
+  final void Function(BuildContext context, dynamic error)? onShareError;
 
   /// Decoration of scrollView
   final Decoration? scrollViewDecoration;
@@ -377,9 +382,13 @@ class PdfPreviewState extends State<PdfPreview> {
       actions.add(
         PdfShareAction(
           filename: widget.pdfFileName,
-          onShared: widget.onPrinted == null
+          // onShared, not onPrinted: sharing used to report itself as a print.
+          onShared: widget.onShared == null
               ? null
-              : () => widget.onPrinted!(context),
+              : () => widget.onShared!(context),
+          onShareError: widget.onShareError == null
+              ? null
+              : (dynamic error) => widget.onShareError!(context, error),
           subject: widget.shareActionExtraSubject,
           emails: widget.shareActionExtraEmails,
           body: widget.shareActionExtraBody,
