@@ -82,6 +82,10 @@ class PrintJob {
 
   void cancelJob(const std::string& error);
 
+  // Release the printer device context and the DEVMODE/DEVNAMES blocks.
+  // Idempotent, so a job may be cancelled after a partial setup.
+  void releaseHandles();
+
   bool sharePdf(std::vector<uint8_t> data, const std::string& name);
 
   void pickPrinter(void* result);

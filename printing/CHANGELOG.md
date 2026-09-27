@@ -2,6 +2,12 @@
 
 ## 5.15.2
 
+- Fix Windows print jobs hanging forever: opening a named printer, a failing Dart layout callback, an unimplemented reply and a reply carrying no document all deleted the job without reporting anything, so `layoutPdf` and `directPrintPdf` waited for a result that could never arrive. Each now reports the failure and releases the printer device context and settings blocks
+- Fix a Windows crash (`std::bad_variant_access`) when the layout reply carries no document, which aborted the whole application
+- Fix an unchecked printer capability query on Windows producing a settings block that claimed 65535 bytes of driver data it never allocated
+- Fix the Windows settings block being leaked on every print when `usePrinterSettings` is set
+- Fix the requested page format never reaching the Windows driver: the form number was always sent as 0, which drivers replace with their own default paper. Standard formats are now sent as their form number, custom sizes as explicit dimensions, and a roll format asks only for the orientation instead of casting infinity into a 16-bit field
+
 - Fix Android `convertHtml` never completing when the print adapter reported a layout or write failure, or a cancellation: those callbacks were not overridden, so the caller's future hung for the lifetime of the process. Every path now delivers exactly one result
 - Fix Android `convertHtml` reporting both an error and a success for a document that produced no pages
 - Fix Android `convertHtml` leaking its `WebView` and print adapter: they are now owned for the length of the call and torn down once, on the main thread, after the result has been dispatched
