@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -314,6 +315,75 @@ void main() {
         ],
       ),
     );
+  });
+
+  test('Wrap keeps every child when one child instance is reused', () async {
+    // A single shared spacer instance: the run lookup used to be keyed by
+    // object identity, so it kept only the last occurrence and dropped every
+    // child after the first reuse.
+    final spacer = SizedBox(width: 20);
+    final children = <Widget>[];
+    for (var i = 0; i < 6; i++) {
+      children.add(Container(width: 60, height: 20, child: Text('W$i')));
+      if (i != 5) {
+        children.add(spacer);
+      }
+    }
+
+    final document = Document(compress: false);
+    document.addPage(
+      Page(
+        pageFormat: const PdfPageFormat(240, 300, marginAll: 10),
+        build: (Context context) => Wrap(children: children),
+      ),
+    );
+
+    final text = latin1.decode(await document.save(), allowInvalid: true);
+    for (var i = 0; i < 6; i++) {
+      expect(text, contains('(W$i)'), reason: 'item $i must be painted');
+    }
+  });
+
+  test('Wrap layout is independent of child instance reuse', () async {
+    List<Widget> build(bool reuse) {
+      final spacer = SizedBox(width: 20);
+      final children = <Widget>[];
+      for (var i = 0; i < 6; i++) {
+        children.add(Container(width: 60, height: 20, child: Text('W$i')));
+        if (i != 5) {
+          children.add(reuse ? spacer : SizedBox(width: 20));
+        }
+      }
+      return children;
+    }
+
+    final shared = build(true);
+    final distinct = build(false);
+
+    for (final children in <List<Widget>>[shared, distinct]) {
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(240, 300, marginAll: 10),
+          build: (Context context) => Wrap(children: children),
+        ),
+      );
+      await document.save();
+    }
+
+    List<double> at(List<Widget> children, int item) {
+      final box = children[item * 2].box!;
+      return <double>[box.x, box.y, box.width, box.height];
+    }
+
+    for (var i = 0; i < 6; i++) {
+      // Items sit at even indexes; the spacers are the reused instances.
+      expect(
+        at(shared, i),
+        at(distinct, i),
+        reason: 'item $i must be placed the same way',
+      );
+    }
   });
 
   tearDownAll(() async {

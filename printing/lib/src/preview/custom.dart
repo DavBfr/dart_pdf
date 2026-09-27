@@ -22,7 +22,6 @@ import 'package:pdf/pdf.dart';
 
 import '../callback.dart';
 import '../printing.dart';
-import '../printing_info.dart';
 import 'page.dart';
 import 'raster.dart';
 
@@ -170,19 +169,44 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
   void didChangeDependencies() {
     if (!infoLoaded) {
       infoLoaded = true;
-      Printing.info().then((PrintingInfo printingInfo) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          info = printingInfo;
-          raster();
-        });
-      });
+      unawaited(_loadPrintingInfo());
     }
 
     raster();
     super.didChangeDependencies();
+  }
+
+  /// Read the platform capabilities before the first raster pass.
+  ///
+  /// A failure here must be shown: on the web a pdf.js that cannot be loaded
+  /// makes this throw, and without an error the preview would sit on its
+  /// loading indicator forever.
+  Future<void> _loadPrintingInfo() async {
+    try {
+      final printingInfo = await Printing.info();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        info = printingInfo;
+        raster();
+      });
+    } catch (exception, stack) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'printing',
+          context: ErrorDescription('while reading the printing capabilities'),
+        ),
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        error = exception;
+      });
+    }
   }
 
   /// Ensures that page with [index] is become visible.

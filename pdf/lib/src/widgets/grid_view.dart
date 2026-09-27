@@ -47,6 +47,10 @@ class GridViewContext extends WidgetContext {
   }
 
   @override
+  bool isSameAs(GridViewContext other) =>
+      firstChild == other.firstChild && lastChild == other.lastChild;
+
+  @override
   String toString() =>
       '$runtimeType first:$firstChild last:$lastChild size:${childCrossAxis}x$childMainAxis';
 }
@@ -133,7 +137,24 @@ class GridView extends MultiChildWidget with SpanningWidget {
                   (mainAxisSpacing + _context.childMainAxis!))
               .floor();
 
-      if (_mainAxisCount! < 0) {
+      if (_context.firstChild < children.length) {
+        // A cell taller than the space available still has to be emitted:
+        // with zero rows nothing is placed, the cursor never advances and a
+        // spanning parent keeps asking for another page for ever.
+        if (_mainAxisCount! < 1) {
+          assert(() {
+            print(
+              'A GridView cell is taller than the available space '
+              '(${_context.childMainAxis!.toStringAsFixed(1)} > '
+              '${mainAxisExtent.toStringAsFixed(1)}). '
+              'The row will overflow; lower childAspectRatio or raise '
+              'crossAxisCount.',
+            );
+            return true;
+          }());
+          _mainAxisCount = 1;
+        }
+      } else if (_mainAxisCount! < 0) {
         // Not enough space to put one line, try to ask for more space.
         _mainAxisCount = 0;
       }
@@ -375,7 +396,7 @@ class GridView extends MultiChildWidget with SpanningWidget {
   bool get canSpan => true;
 
   @override
-  bool get hasMoreWidgets => true;
+  bool get hasMoreWidgets => _context.lastChild < children.length;
 
   @override
   void restoreContext(GridViewContext context) {

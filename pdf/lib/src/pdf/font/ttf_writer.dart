@@ -84,83 +84,61 @@ class TtfWriter {
     final tables = <String, Uint8List>{};
     final tablesLength = <String, int>{};
 
-    // Create the glyphs table
-    final glyphsMap = <int, TtfGlyphInfo>{};
-    final charMap = <int, int>{};
-    final overflow = <int>{};
+    // Create the glyphs table.
+    //
+    // The caller writes /CIDToGIDMap /Identity and uses the position in
+    // `chars` as the CID, so subset glyph i must be the glyph for chars[i],
+    // with no gaps. Several characters legitimately share one source glyph -
+    // canonical duplicates such as U+0394 and U+2206, every codepoint the font
+    // does not map (all funnelled onto glyph 0), and the Arabic presentation
+    // forms this package points at their base letter - so the mapping from
+    // characters to source glyphs is many-to-one and each CID needs its own
+    // copy of the outline.
+    final glyphsInfo = <TtfGlyphInfo>[];
+    final sourceGlyphs = <int, TtfGlyphInfo>{};
+    // Component glyphs of compound glyphs, which live after the CID region.
     final compounds = <int, int>{};
 
-    for (final char in chars) {
-      if (char == 32) {
-        final glyph = TtfGlyphInfo(
-          ttf.charToGlyphIndexMap[char]!,
-          Uint8List(0),
-          const <int>[],
-        );
-        glyphsMap[glyph.index] = glyph;
-        charMap[char] = glyph.index;
-        continue;
+    TtfGlyphInfo readSource(int glyphIndex) {
+      final cached = sourceGlyphs[glyphIndex];
+      if (cached != null) {
+        return cached;
       }
+      final glyph = ttf.readGlyph(glyphIndex).copy();
+      sourceGlyphs[glyphIndex] = glyph;
+      for (final component in glyph.compounds) {
+        compounds[component] = -1;
+        readSource(component);
+      }
+      return glyph;
+    }
 
+    for (final char in chars) {
       final glyphIndex = ttf.charToGlyphIndexMap[char] ?? 0;
-      if (glyphIndex >= ttf.glyphOffsets.length) {
+
+      if (char == 32 || glyphIndex >= ttf.glyphOffsets.length) {
         assert(() {
-          print('Glyph $glyphIndex not in the font ${ttf.fontName}');
+          if (char != 32) {
+            print('Glyph $glyphIndex not in the font ${ttf.fontName}');
+          }
           return true;
         }());
+        // Still occupy this CID slot: skipping it would shift every later
+        // character onto the wrong glyph.
+        glyphsInfo.add(TtfGlyphInfo(glyphIndex, Uint8List(0), const <int>[]));
         continue;
       }
 
-      void addGlyph(glyphIndex) {
-        final glyph = ttf.readGlyph(glyphIndex).copy();
-        for (final g in glyph.compounds) {
-          compounds[g] = -1;
-          overflow.add(g);
-          addGlyph(g);
-        }
-        glyphsMap[glyph.index] = glyph;
-      }
-
-      charMap[char] = glyphIndex;
-      addGlyph(glyphIndex);
+      // One copy per CID: _updateCompoundGlyph rewrites the component indices
+      // in place, so two slots must not share a buffer.
+      glyphsInfo.add(readSource(glyphIndex).copy());
     }
 
-    final glyphsInfo = <TtfGlyphInfo>[];
-
-    for (final char in chars) {
-      final glyphsIndex = charMap[char];
-      if (glyphsIndex != null) {
-        final glyph = glyphsMap[glyphsIndex];
-        if (glyph != null) {
-          glyphsInfo.add(glyph);
-        } else if (glyphsMap.isNotEmpty) {
-          glyphsInfo.add(glyphsMap.values.first);
-        } else {
-          // The font has no glyph reachable for [char] AND every other glyph in the
-          // subset has already been consumed, so `glyphsMap.values.first` would throw
-          // `Bad state: No element`. Surface a clearer diagnostic that names the
-          // offending codepoint — this is typically a font/charset mismatch
-          // (e.g. Arabic Presentation Forms in a font with no Presentation glyphs).
-          throw Exception(
-            "Missing glyph for character '${String.fromCharCode(char)}' "
-            '(U+${char.toRadixString(16).toUpperCase().padLeft(4, '0')}) '
-            'in font ${ttf.fontName}. Use a font that includes this codepoint, '
-            'or strip/normalize the character before passing it to the PDF.',
-          );
-        }
-        glyphsMap.remove(glyphsIndex);
-      }
-    }
-
-    glyphsInfo.addAll(glyphsMap.values);
-
-    // Add compound glyphs
-    for (final compound in compounds.keys) {
-      final index = glyphsInfo.firstWhere(
-        (TtfGlyphInfo glyph) => glyph.index == compound,
-      );
-      compounds[compound] = glyphsInfo.indexOf(index);
-      assert((compounds[compound] ?? 0) >= 0, 'Unable to find the glyph');
+    // Append the component glyphs after the CID region and record where they
+    // landed, so the compound outlines can point at them.
+    for (final component in compounds.keys.toList()) {
+      compounds[component] = glyphsInfo.length;
+      glyphsInfo.add(readSource(component).copy());
     }
 
     // update compound indices

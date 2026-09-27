@@ -46,6 +46,7 @@ class SvgBrush {
     required this.fontWeight,
     required this.textAnchor,
     required this.blendMode,
+    this.currentColor,
     this.mask,
   });
 
@@ -61,6 +62,21 @@ class SvgBrush {
     final strokeLineCap = element.getAttribute('stroke-linecap');
     final strokeLineJoin = element.getAttribute('stroke-linejoin');
     final blendMode = element.getAttribute('mix-blend-mode');
+
+    // `color` establishes what `currentColor` means for this element and its
+    // descendants, and must be resolved before fill and stroke are parsed.
+    final colorAttribute = element.getAttribute('color');
+    final currentColor =
+        colorAttribute == null ||
+            colorAttribute == 'inherit' ||
+            colorAttribute.toLowerCase() == 'currentcolor'
+        ? parent.currentColor
+        : (SvgColor.fromXml(
+                colorAttribute,
+                painter,
+                currentColor: parent.currentColor,
+              ).color ??
+              parent.currentColor);
 
     final result = parent.merge(
       SvgBrush(
@@ -87,9 +103,17 @@ class SvgBrush {
           'stroke-miterlimit',
           defaultValue: null,
         ),
-        fill: SvgColor.fromXml(element.getAttribute('fill'), painter),
+        fill: SvgColor.fromXml(
+          element.getAttribute('fill'),
+          painter,
+          currentColor: currentColor,
+        ),
         fillEvenOdd: fillRule == null ? null : fillRule == 'evenodd',
-        stroke: SvgColor.fromXml(element.getAttribute('stroke'), painter),
+        stroke: SvgColor.fromXml(
+          element.getAttribute('stroke'),
+          painter,
+          currentColor: currentColor,
+        ),
         strokeWidth: SvgParser.getNumeric(element, 'stroke-width', parent),
         strokeDashArray: strokeDashArray == null
             ? null
@@ -109,6 +133,8 @@ class SvgBrush {
         fontStyle: element.getAttribute('font-style'),
         fontWeight: element.getAttribute('font-weight'),
         textAnchor: _textAnchors[element.getAttribute('text-anchor')],
+        // Descendants resolve `currentColor` against this element's value.
+        currentColor: currentColor,
       ),
     );
 
@@ -139,6 +165,7 @@ class SvgBrush {
     fontWeight: 'normal',
     fontStyle: 'normal',
     textAnchor: SvgTextAnchor.start,
+    currentColor: PdfColors.black,
     mask: null,
   );
 
@@ -197,6 +224,10 @@ class SvgBrush {
   final String? fontWeight;
   final SvgTextAnchor? textAnchor;
   final PdfBlendMode? blendMode;
+
+  /// Value of the CSS `color` property, which `currentColor` resolves to.
+  final PdfColor? currentColor;
+
   final SvgMaskPath? mask;
 
   SvgBrush merge(SvgBrush? other) {
@@ -206,13 +237,13 @@ class SvgBrush {
 
     var _fill = other.fill ?? fill;
 
-    if (_fill?.inherit ?? false) {
+    if ((_fill?.inherit ?? false) && fill != null && other.fill != null) {
       _fill = fill!.merge(other.fill!);
     }
 
     var _stroke = other.stroke ?? stroke;
 
-    if (_stroke?.inherit ?? false) {
+    if ((_stroke?.inherit ?? false) && stroke != null && other.stroke != null) {
       _stroke = stroke!.merge(other.stroke!);
     }
 
@@ -235,6 +266,7 @@ class SvgBrush {
       strokeLineCap: other.strokeLineCap ?? strokeLineCap,
       strokeLineJoin: other.strokeLineJoin ?? strokeLineJoin,
       strokeMiterLimit: other.strokeMiterLimit ?? strokeMiterLimit,
+      currentColor: other.currentColor ?? currentColor,
       mask: other.mask,
     );
   }
@@ -258,6 +290,7 @@ class SvgBrush {
     String? fontWeight,
     SvgTextAnchor? textAnchor,
     PdfBlendMode? blendMode,
+    PdfColor? currentColor,
     SvgMaskPath? mask,
   }) {
     return SvgBrush(
@@ -279,6 +312,7 @@ class SvgBrush {
       fontWeight: fontWeight ?? this.fontWeight,
       textAnchor: textAnchor ?? this.textAnchor,
       blendMode: blendMode ?? this.blendMode,
+      currentColor: currentColor ?? this.currentColor,
       mask: mask ?? this.mask,
     );
   }

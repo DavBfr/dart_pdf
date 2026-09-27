@@ -69,6 +69,10 @@ public class PrintingJob extends PrintDocumentAdapter {
     private byte[] documentData;
     private String jobName;
     private LayoutResultCallback callback;
+    // The html conversion owns these for the length of one convertHtml call.
+    private WebView htmlWebView;
+    private PrintDocumentAdapter htmlAdapter;
+    private boolean htmlDone;
     int index;
 
     PrintingJob(Context context, PrintingHandler printing, int index) {
@@ -367,7 +371,12 @@ public class PrintingJob extends PrintDocumentAdapter {
         Configuration configuration = context.getResources().getConfiguration();
         configuration.fontScale = (float) 1;
         Context webContext = context.createConfigurationContext(configuration);
+        // Held in a field rather than a local: nothing else keeps the WebView
+        // or its adapter alive for the length of the conversion, and nothing
+        // used to destroy them afterwards.
+        htmlDone = false;
         final WebView webView = new WebView(webContext);
+        htmlWebView = webView;
 
         webView.loadDataWithBaseURL(baseUrl, data, "text/HTML", "UTF-8", null);
 
@@ -387,6 +396,7 @@ public class PrintingJob extends PrintDocumentAdapter {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         final PrintDocumentAdapter adapter =
                                 webView.createPrintDocumentAdapter("printing");
+                        htmlAdapter = adapter;
 
                         PdfConvert.print(context, adapter, attributes, new PdfConvert.Result() {
                             @Override
@@ -395,17 +405,44 @@ public class PrintingJob extends PrintDocumentAdapter {
                                     byte[] fileContent = PdfConvert.readFile(file);
                                     printing.onHtmlRendered(PrintingJob.this, fileContent);
                                 } catch (IOException e) {
-                                    onError(e.getMessage());
+                                    printing.onHtmlError(PrintingJob.this, e.getMessage());
                                 }
+                                finishHtmlJob();
                             }
 
                             @Override
                             public void onError(String message) {
                                 printing.onHtmlError(PrintingJob.this, message);
+                                finishHtmlJob();
                             }
                         });
                     }
                 }
+            }
+        });
+    }
+
+    /// Release the WebView used by convertHtml, exactly once.
+    ///
+    /// Posted to the main looper on purpose: the result callbacks run inside a
+    /// Chromium callback stack, and destroying the WebView re-entrantly from
+    /// there crashes the renderer. WebView also demands the UI thread.
+    private void finishHtmlJob() {
+        if (htmlDone) {
+            return;
+        }
+        htmlDone = true;
+
+        new Handler(Looper.getMainLooper()).post(() -> {
+            // PdfConvert already called onFinish() on the adapter.
+            htmlAdapter = null;
+
+            final WebView webView = htmlWebView;
+            htmlWebView = null;
+            if (webView != null) {
+                webView.stopLoading();
+                webView.setWebViewClient(new WebViewClient());
+                webView.destroy();
             }
         });
     }

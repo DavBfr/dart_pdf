@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -318,17 +320,35 @@ class PdfPreviewState extends State<PdfPreview> {
   void didChangeDependencies() {
     if (!infoLoaded) {
       infoLoaded = true;
-      Printing.info().then((PrintingInfo printingInfo) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          info = printingInfo;
-        });
-      });
+      unawaited(_loadPrintingInfo());
     }
 
     super.didChangeDependencies();
+  }
+
+  /// Read the platform capabilities used to decide which actions to offer.
+  ///
+  /// A failure leaves the actions as they are; the inner [PdfPreviewCustom]
+  /// reports it, so this only keeps it from becoming an unhandled error.
+  Future<void> _loadPrintingInfo() async {
+    try {
+      final printingInfo = await Printing.info();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        info = printingInfo;
+      });
+    } catch (exception, stack) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'printing',
+          context: ErrorDescription('while reading the printing capabilities'),
+        ),
+      );
+    }
   }
 
   @override

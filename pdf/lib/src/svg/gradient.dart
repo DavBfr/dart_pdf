@@ -47,7 +47,8 @@ abstract class SvgGradient extends SvgColor {
   final List<double> opacityList;
 
   @override
-  bool get isEmpty => colors.isEmpty;
+  bool get isEmpty =>
+      colors.isEmpty || colors.every((PdfColor? c) => c == null);
 
   PdfPattern buildGradient(
     SvgOperation op,
@@ -135,9 +136,13 @@ class SvgLinearGradient extends SvgGradient {
         null,
         defaultValue: 0,
       )!.sizeValue;
-      colors.add(color.color);
+      // A stop-color that cannot be parsed used to enter the list as null and
+      // crash the PDF function builder; black is the initial value of the CSS
+      // `color` property and what a missing stop-color already defaults to.
+      colors.add(color.color ?? PdfColors.black);
       stops.add(stop);
-      opacityList.add(opacity);
+      // Fold any alpha carried by the stop colour into its opacity.
+      opacityList.add(opacity * (color.opacity ?? 1.0));
     }
 
     GradientUnits? gradientUnits;
@@ -319,9 +324,10 @@ class SvgRadialGradient extends SvgGradient {
         null,
         defaultValue: 0,
       )!.sizeValue;
-      colors.add(color.color);
+      // Same defensive resolution as the linear gradient above.
+      colors.add(color.color ?? PdfColors.black);
       stops.add(stop);
-      opacityList.add(opacity!);
+      opacityList.add(opacity! * (color.opacity ?? 1.0));
     }
 
     GradientUnits? gradientUnits;

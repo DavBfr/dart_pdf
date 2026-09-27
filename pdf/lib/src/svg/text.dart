@@ -139,28 +139,32 @@ class SvgText extends SvgOperation {
           ..translateByDouble(x!, -y!, 0, 1),
       );
 
-    if (brush.fill!.isNotEmpty) {
+    // The colour may carry its own alpha, which the opacities multiply.
+    final fillAlpha = brush.fillOpacity! * (brush.fill!.opacity ?? 1.0);
+    final strokeAlpha = brush.strokeOpacity! * (brush.stroke!.opacity ?? 1.0);
+
+    if (brush.fill!.isNotEmpty && fillAlpha > 0) {
       brush.fill!.setFillColor(this, canvas);
-      if (brush.fillOpacity! < 1) {
+      if (fillAlpha < 1) {
         canvas
           ..saveContext()
-          ..setGraphicState(PdfGraphicState(opacity: brush.fillOpacity));
+          ..setGraphicState(PdfGraphicState(fillOpacity: fillAlpha));
       }
       canvas.drawString(font, brush.fontSize!.sizeValue, text, 0, 0);
-      if (brush.fillOpacity! < 1) {
+      if (fillAlpha < 1) {
         canvas.restoreContext();
       }
     }
 
-    if (brush.stroke!.isNotEmpty) {
+    if (brush.stroke!.isNotEmpty && strokeAlpha > 0) {
       if (brush.strokeWidth != null) {
         canvas.setLineWidth(brush.strokeWidth!.sizeValue);
       }
       if (brush.strokeDashArray != null) {
         canvas.setLineDashPattern(brush.strokeDashArray!);
       }
-      if (brush.strokeOpacity! < 1) {
-        canvas.setGraphicState(PdfGraphicState(opacity: brush.strokeOpacity));
+      if (strokeAlpha < 1) {
+        canvas.setGraphicState(PdfGraphicState(strokeOpacity: strokeAlpha));
       }
       brush.stroke!.setStrokeColor(this, canvas);
       canvas.drawString(

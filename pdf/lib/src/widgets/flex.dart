@@ -58,6 +58,10 @@ class FlexContext extends WidgetContext {
   }
 
   @override
+  bool isSameAs(FlexContext other) =>
+      firstChild == other.firstChild && lastChild == other.lastChild;
+
+  @override
   String toString() => '$runtimeType first:$firstChild last:$lastChild';
 }
 
@@ -82,6 +86,16 @@ class Flex extends MultiChildWidget with SpanningWidget {
   final VerticalDirection verticalDirection;
 
   final FlexContext _context = FlexContext();
+
+  /// Whether a spanning parent drives this widget across several pages.
+  ///
+  /// Only [saveContext] and [restoreContext] set it, and only a spanning
+  /// parent calls those, so a [Flex] laid out anywhere else keeps all of its
+  /// children instead of truncating at the first one that overflows.
+  bool _spanning = false;
+
+  /// Set when the children did not fit the main axis, so [paint] clips.
+  bool _overflow = false;
 
   double _getIntrinsicSize({
     Axis? sizingDirection,
@@ -281,8 +295,14 @@ class Flex extends MultiChildWidget with SpanningWidget {
         assert(child.box != null);
         allocatedSize += _getMainSize(child);
         crossSize = math.max(crossSize, _getCrossSize(child));
-        if (direction == Axis.vertical &&
-            allocatedSize > constraints.maxHeight) {
+        // Stop before a child that does not fit only when a spanning parent
+        // will continue this widget on the next page, and never before the
+        // first one: an empty range paints nothing and lets the parent loop
+        // for ever without making progress.
+        if (_spanning &&
+            direction == Axis.vertical &&
+            allocatedSize > constraints.maxHeight &&
+            index > _context.firstChild) {
           break;
         }
       }
@@ -290,6 +310,11 @@ class Flex extends MultiChildWidget with SpanningWidget {
       index++;
     }
     _context.lastChild = index;
+    assert(
+      _context.lastChild > _context.firstChild ||
+          _context.firstChild >= children.length,
+      'Flex made no progress: a layout must consume at least one child',
+    );
     final totalChildren = _context.lastChild - _context.firstChild;
 
     // Distribute free space to flexible children, and determine baseline.
@@ -376,6 +401,7 @@ class Flex extends MultiChildWidget with SpanningWidget {
     final idealSize = canFlex && mainAxisSize == MainAxisSize.max
         ? maxMainSize
         : allocatedSize;
+    _overflow = allocatedSize > maxMainSize;
     double? actualSize;
     double actualSizeDelta;
     late PdfPoint size;
@@ -541,6 +567,14 @@ class Flex extends MultiChildWidget with SpanningWidget {
       ..saveContext()
       ..setTransform(mat);
 
+    if (_overflow) {
+      // The children are wider or taller than this box, so keep them from
+      // painting over whatever sits next to it, as Flutter's RenderFlex does.
+      context.canvas
+        ..drawBox(PdfRect(0, 0, box!.width, box!.height))
+        ..clipPath();
+    }
+
     for (final child in children.sublist(
       _context.firstChild,
       _context.lastChild,
@@ -554,15 +588,18 @@ class Flex extends MultiChildWidget with SpanningWidget {
   bool get canSpan => direction == Axis.vertical;
 
   @override
-  bool get hasMoreWidgets => true;
+  bool get hasMoreWidgets =>
+      direction == Axis.vertical && _context.lastChild < children.length;
 
   @override
   void restoreContext(FlexContext context) {
+    _spanning = true;
     _context.firstChild = context.lastChild;
   }
 
   @override
   WidgetContext saveContext() {
+    _spanning = true;
     return _context;
   }
 }

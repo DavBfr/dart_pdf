@@ -15,6 +15,8 @@
  */
 
 #include "print_job.h"
+
+#include "paper_size.h"
 #include "printing.h"
 
 #include <fpdfview.h>
@@ -81,34 +83,61 @@ bool PrintJob::printPdf(const std::string& name,
                         bool windowsModernDialog) {
   documentName = name;
 
-  std::size_t dmSize = sizeof(DEVMODE);
-  std::size_t dmExtra = 0;
+  // Only allocate when the DEVMODE will be used: the usePrinterSettings path
+  // used to allocate one and then drop the pointer, leaking it on every job.
+  DEVMODE* dm = nullptr;
 
-  if (!printer.empty()) {
-    dmExtra = DeviceCapabilities(fromUtf8(printer).c_str(), NULL, DC_EXTRA,
-                                 NULL, NULL);
-  }
+  if (!usePrinterSettings) {
+    const std::size_t dmSize = sizeof(DEVMODE);
+    std::size_t dmExtra = 0;
 
-  auto dm = static_cast<DEVMODE*>(GlobalAlloc(0, dmSize + dmExtra));
+    if (!printer.empty()) {
+      // DeviceCapabilities answers -1 for an unknown or unavailable printer;
+      // assigning that to an unsigned type wrapped it to SIZE_MAX, so the
+      // allocation failed and dmDriverExtra claimed 65535 bytes of a struct
+      // that was never allocated.
+      const int extra = DeviceCapabilities(fromUtf8(printer).c_str(), nullptr,
+                                           DC_EXTRA, nullptr, nullptr);
+      if (extra < 0) {
+        cancelJob("Unknown or unavailable printer: " + printer);
+        return false;
+      }
+      dmExtra = static_cast<std::size_t>(extra);
+    }
 
-  if (usePrinterSettings) {
-    dm = nullptr;  // to use default driver config
-  } else {
+    dm = static_cast<DEVMODE*>(GlobalAlloc(GMEM_FIXED, dmSize + dmExtra));
+    if (!dm) {
+      cancelJob("Out of memory allocating the printer settings");
+      return false;
+    }
+
     ZeroMemory(dm, dmSize + dmExtra);
     dm->dmSize = (WORD)dmSize;
     dm->dmDriverExtra = (WORD)dmExtra;
-    dm->dmFields =
-        DM_ORIENTATION | DM_PAPERSIZE | DM_PAPERLENGTH | DM_PAPERWIDTH;
-    dm->dmPaperSize = 0;
-    if (width > height) {
-      dm->dmOrientation = DMORIENT_LANDSCAPE;
-      dm->dmPaperWidth = static_cast<short>(round(height * 254 / pdfDpi));
-      dm->dmPaperLength = static_cast<short>(round(width * 254 / pdfDpi));
-    } else {
-      dm->dmOrientation = DMORIENT_PORTRAIT;
-      dm->dmPaperWidth = static_cast<short>(round(width * 254 / pdfDpi));
-      dm->dmPaperLength = static_cast<short>(round(height * 254 / pdfDpi));
+
+    // dmPaperSize, dmPaperWidth and dmPaperLength always describe the portrait
+    // sheet; dmOrientation rotates it.
+    const auto portraitWidth = width > height ? height : width;
+    const auto portraitHeight = width > height ? width : height;
+    const auto paper = selectPaper(portraitWidth, portraitHeight);
+
+    dm->dmOrientation = width > height ? DMORIENT_LANDSCAPE : DMORIENT_PORTRAIT;
+    dm->dmFields = DM_ORIENTATION;
+
+    if (paper.isStandardForm()) {
+      // A dmPaperSize of 0, as this used to send, is not a valid form number,
+      // so drivers fell back to their own default paper. Do not also send the
+      // dimensions: they would override the form.
+      dm->dmFields |= DM_PAPERSIZE;
+      dm->dmPaperSize = paper.paperSize;
+    } else if (paper.hasDimensions()) {
+      dm->dmFields |= DM_PAPERSIZE | DM_PAPERLENGTH | DM_PAPERWIDTH;
+      dm->dmPaperSize = DMPAPER_USER;
+      dm->dmPaperWidth = paper.widthTenthsMm;
+      dm->dmPaperLength = paper.lengthTenthsMm;
     }
+    // Otherwise the size cannot be expressed - a roll format carries infinity
+    // - so ask only for the orientation and let the driver choose the media.
   }
 
   // nullptr when the engine has no view; both dialogs then keep the owner
@@ -190,12 +219,17 @@ bool PrintJob::printPdf(const std::string& name,
       hDevNames = pd.hDevNames;
     }
   } else {
-    hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), nullptr, dm);
-    if (!hDC) {
-      return false;
-    }
+    // Take ownership before the call can fail, so cancelJob() below releases
+    // the DEVMODE instead of leaking it.
     hDevMode = dm;
     hDevNames = nullptr;
+    hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), nullptr, dm);
+    if (!hDC) {
+      // The caller deletes this job, so nothing could report the failure
+      // later: the Dart future would wait for ever.
+      cancelJob("Cannot open the printer '" + printer + "'");
+      return false;
+    }
   }
 
   auto dpiX = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSX)) / pdfDpi;
@@ -286,9 +320,7 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
     // half-open job is left in the queue, release the handles like the success
     // path below does, and report the failure.
     AbortDoc(hDC);
-    DeleteDC(hDC);
-    GlobalFree(hDevNames);
-    GlobalFree(hDevMode);
+    releaseHandles();
     printing->onCompleted(this, false, "Cannot print a malformed PDF file");
     return;
   }
@@ -322,14 +354,35 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
 
   EndDoc(hDC);
 
-  DeleteDC(hDC);
-  GlobalFree(hDevNames);
-  GlobalFree(hDevMode);
+  releaseHandles();
 
   printing->onCompleted(this, true, "");
 }
 
-void PrintJob::cancelJob(const std::string& error) {}
+void PrintJob::releaseHandles() {
+  if (hDC) {
+    DeleteDC(hDC);
+    hDC = nullptr;
+  }
+  if (hDevNames) {
+    GlobalFree(hDevNames);
+    hDevNames = nullptr;
+  }
+  if (hDevMode) {
+    GlobalFree(hDevMode);
+    hDevMode = nullptr;
+  }
+}
+
+/// End a job that never reached writeJob.
+///
+/// This was an empty body, so every failure path that could not print simply
+/// dropped the job: the Dart side awaits onCompleted unconditionally, so its
+/// future never settled and the printer HDC and DEVMODEs leaked.
+void PrintJob::cancelJob(const std::string& error) {
+  releaseHandles();
+  printing->onCompleted(this, false, error);
+}
 
 bool PrintJob::sharePdf(std::vector<uint8_t> data, const std::string& name) {
   TCHAR lpTempPathBuffer[MAX_PATH];

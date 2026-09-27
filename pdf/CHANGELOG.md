@@ -1,5 +1,34 @@
 # Changelog
 
+## 3.13.2
+
+- Support `currentColor` in SVG fills and strokes, resolved against the inherited `color` property; elements using it were previously not painted at all
+- Fix an SVG paint server reference that cannot be resolved crashing the whole document, and honour the fallback colour after `url(...)`
+- Fix a gradient declared on an ancestor group being lost by its children, which left the shape unpainted
+- Fix an unparsable `stop-color` crashing gradient construction
+- Fix the SVG `transparent` keyword painting opaque white, and honour the alpha of `rgba()`, `hsla()` and 8-digit hex colours; fill and stroke alpha no longer bleed into each other
+
+- Fix `Partitions` reporting itself finished as soon as its shortest column ran out, so `MultiPage` advanced past it and dropped whatever the longer columns still had queued
+- Fix a null-check crash when a partition wraps a widget that only becomes spannable once it has been built, such as `DefaultTextStyle`
+
+- Fix font subsetting handing an unrelated glyph to, or failing outright on, the second of two characters that share one source glyph. Canonical duplicates (U+0394 and U+2206, U+00AF and U+02C9), any two codepoints the font does not map, and the Arabic presentation forms all collide this way, which made `save()` throw `Missing glyph for character ...` or silently draw the wrong glyph
+- Fix subsetting shifting every later character onto the wrong glyph when one glyph index was outside the font's outline table, which emitted an empty subset for a bitmap-only font
+- Fix a null-check crash when drawing a space with a font that does not map U+0020
+
+- Fix `PdfColorCmyk.fromRgb` comparing only red against green when looking for the brightest channel, which produced an oversized black and negative components for any colour whose blue exceeds its red, and dividing zero by zero for black, which wrote the literal `NaN` into the document in release builds
+- Fix `PdfColorHsl.fromRgb` reporting a saturation of 1.0 for black instead of 0.0
+- Fix word splitting cutting between a UTF-16 surrogate pair, which left an unpaired surrogate that no font can map: saving a document with a long run of non-BMP characters (astral CJK, emoji) failed with `Missing glyph for character U+D83C`
+- Fix a word that fits the line being hard-split when only the leading whitespace pushed it over the edge
+
+- Fix `MultiPage` allocating pages for ever when a spanning widget placed nothing: it now detects that the widget consumed nothing, retries once on a fresh page and otherwise raises a `PdfException` naming the widget and the space available
+- The `maxPages` guard is now checked in release builds too, and bounds consecutive pages produced *without progress* rather than the length of the document, so a document longer than `maxPages` pages no longer fails. A widget that never reports being finished is stopped by a hard ceiling of 10000 pages
+- Fix `MultiPage` rejecting a child sized to exactly `availableHeight` (21 of 120 page-format and margin combinations), and measuring 'would it fit on a new page?' against the whole page body instead of the space left by the header and footer, which could loop for ever
+- `MultiPage` no longer appends a spanned fragment that placed no content, which painted the widget's decoration over an empty strip
+- `Flex`, `Table`, `GridView` and `RichText` now report whether they have more widgets from their saved cursor, so a finished widget no longer forces a trailing page
+- Fix a `Column` silently dropping every child from the first one that overflows, which rendered a bounded `Column` as blank space when its first child did not fit. Children are now all laid out and painted, and an overflowing `Flex` clips to its own box; the truncation is kept only when a spanning parent will continue the widget on the next page
+- Fix a `GridView` whose cell is taller than the available space placing no row at all, so `MultiPage` never advanced: it allocated pages until the document was abandoned in release builds. Such a row is now emitted and overflows, with a diagnostic in debug builds, and an exhausted `GridView` reports that it has no more widgets instead of adding a trailing blank page
+- Fix `Wrap` keying its run lookup by widget identity, so reusing one child instance (a shared spacer, `List.filled`) dropped every child after the first reuse and could stop `MultiPage` from ever advancing
+
 ## 3.13.1
 
 - Add output-stream serialization for memory-bounded PDF generation.

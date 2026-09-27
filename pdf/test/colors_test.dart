@@ -809,4 +809,60 @@ void main() {
     final file = File('colors.pdf');
     await file.writeAsBytes(await pdf.save());
   });
+
+  test('PdfColorCmyk.fromRgb picks the real maximum channel', () {
+    // r > g with b > r used to return r as the maximum, so black came out too
+    // large and the other components went negative.
+    const blue = PdfColorCmyk.fromRgb(0.2, 0.1, 0.9);
+    expect(blue.black, closeTo(0.1, 1e-9));
+    expect(blue.cyan, closeTo((0.9 - 0.2) / 0.9, 1e-9));
+    expect(blue.magenta, closeTo((0.9 - 0.1) / 0.9, 1e-9));
+    expect(blue.yellow, closeTo(0.0, 1e-9));
+
+    for (final color in <PdfColor>[
+      const PdfColor(0.2, 0.1, 0.9),
+      const PdfColor(0.9, 0.5, 0.1),
+      const PdfColor(0.1, 0.9, 0.5),
+      PdfColors.blue,
+      PdfColors.purple,
+      PdfColors.teal,
+    ]) {
+      final cmyk = color.toCmyk();
+      for (final value in <double>[
+        cmyk.cyan,
+        cmyk.magenta,
+        cmyk.yellow,
+        cmyk.black,
+      ]) {
+        expect(value.isNaN, isFalse);
+        expect(value, inInclusiveRange(0.0, 1.0));
+      }
+    }
+  });
+
+  test('a black PdfColor converts to CMYK without dividing by zero', () {
+    final cmyk = PdfColors.black.toCmyk();
+    expect(cmyk.cyan, 0.0);
+    expect(cmyk.magenta, 0.0);
+    expect(cmyk.yellow, 0.0);
+    expect(cmyk.black, 1.0);
+
+    const direct = PdfColorCmyk.fromRgb(0, 0, 0);
+    expect(direct.cyan.isNaN, isFalse);
+    expect(direct.black, 1.0);
+  });
+
+  test('a black PdfColor converts to HSL with no saturation', () {
+    final hsl = PdfColors.black.toHsl();
+    expect(hsl.saturation, 0.0);
+    expect(hsl.lightness, 0.0);
+    expect(hsl.toHex(), '#000000ff');
+
+    final white = PdfColors.white.toHsl();
+    expect(white.saturation, 0.0);
+    expect(white.lightness, 1.0);
+
+    final grey = const PdfColor(0.5, 0.5, 0.5).toHsl();
+    expect(grey.saturation, 0.0);
+  });
 }
