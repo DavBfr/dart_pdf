@@ -1103,6 +1103,13 @@ class RichText extends Widget with SpanningWidget {
                     index--;
                     continue;
                   }
+
+                  if (spanCount == 0 && offsetX > 0) {
+                    // The word fits a line of its own and only the leading
+                    // whitespace pushed it over the edge. Drop that
+                    // whitespace rather than splitting a word that fits.
+                    offsetX = 0.0;
+                  }
                 }
               }
 
@@ -1379,30 +1386,55 @@ class RichText extends Widget with SpanningWidget {
     }
   }
 
+  /// Widest prefix of [word] that fits [maxWidth], as a UTF-16 offset
+  ///
+  /// The offset is always on a rune boundary: cutting between a surrogate pair
+  /// leaves an unpaired surrogate in both halves, which no font can map, so
+  /// the document would either draw an arbitrary glyph or fail to save. At
+  /// least one rune is always consumed, so a caller that re-queues the rest
+  /// makes progress.
   int _splitWord(String word, PdfFont font, TextStyle style, double maxWidth) {
-    var low = 0;
-    var high = word.length;
-    var pos = (low + high) ~/ 2;
+    double widthOf(int end) =>
+        (font.stringMetrics(
+                  word.substring(0, end),
+                  letterSpacing:
+                      style.letterSpacing! /
+                      (style.fontSize! * textScaleFactor),
+                ) *
+                (style.fontSize! * textScaleFactor))
+            .width;
 
-    while (low + 1 < high) {
-      final metrics =
-          font.stringMetrics(
-            word.substring(0, pos),
-            letterSpacing:
-                style.letterSpacing! / (style.fontSize! * textScaleFactor),
-          ) *
-          (style.fontSize! * textScaleFactor);
-
-      if (metrics.width > maxWidth) {
-        high = pos;
-      } else {
-        low = pos;
-      }
-
-      pos = (low + high) ~/ 2;
+    // Offsets just past each rune, so bounds.last == word.length.
+    final bounds = <int>[];
+    for (var i = 0; i < word.length;) {
+      final unit = word.codeUnitAt(i);
+      final isHighSurrogate = unit >= 0xd800 && unit <= 0xdbff;
+      i += isHighSurrogate && i + 1 < word.length ? 2 : 1;
+      bounds.add(i);
     }
 
-    return math.max(1, pos);
+    if (bounds.isEmpty) {
+      return word.length;
+    }
+
+    // The whole word was never measured, so a word that fits was still split.
+    if (widthOf(word.length) <= maxWidth) {
+      return word.length;
+    }
+
+    var low = 0;
+    var high = bounds.length;
+
+    while (low + 1 < high) {
+      final mid = (low + high) ~/ 2;
+      if (widthOf(bounds[mid - 1]) > maxWidth) {
+        high = mid;
+      } else {
+        low = mid;
+      }
+    }
+
+    return bounds[math.max(0, low - 1)];
   }
 
   @override
