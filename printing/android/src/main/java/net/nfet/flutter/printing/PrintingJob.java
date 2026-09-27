@@ -46,6 +46,7 @@ import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.annotation.VisibleForTesting;
 import androidx.core.content.FileProvider;
 
 import java.io.File;
@@ -68,7 +69,14 @@ public class PrintingJob extends PrintDocumentAdapter {
     private PrintJob printJob;
     private byte[] documentData;
     private String jobName;
-    private LayoutResultCallback callback;
+    // Package-private, so the unit tests can put a job in the state the print
+    // framework would have put it in.
+    @VisibleForTesting LayoutResultCallback callback;
+    // Set from the CancellationSignal listener, so onLayoutCancelled is only
+    // ever used for a cancellation the framework actually asked for.
+    @VisibleForTesting boolean layoutCancelled;
+    // Whether the terminal result has already gone to Dart.
+    private boolean completed;
     // The html conversion owns these for the length of one convertHtml call.
     private WebView htmlWebView;
     private PrintDocumentAdapter htmlAdapter;
@@ -101,34 +109,86 @@ public class PrintingJob extends PrintDocumentAdapter {
     @Override
     public void onWrite(PageRange[] pageRanges, ParcelFileDescriptor parcelFileDescriptor,
             CancellationSignal cancellationSignal, WriteResultCallback writeResultCallback) {
-        OutputStream output = null;
+        // android.print requires exactly one of onWriteFinished,
+        // onWriteFailed or onWriteCancelled per onWrite, and has no timeout.
+        // A swallowed IOException left none of them, so the preview span on
+        // 'Preparing preview' and layoutPdf never returned.
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+            writeResultCallback.onWriteCancelled();
+            return;
+        }
+
+        if (documentData == null) {
+            writeResultCallback.onWriteFailed("No document to write");
+            return;
+        }
+
+        // The framework owns the descriptor, so this stream must not be an
+        // AutoCloseOutputStream.
+        final OutputStream output;
         try {
             output = new FileOutputStream(parcelFileDescriptor.getFileDescriptor());
+        } catch (RuntimeException e) {
+            reportWriteFailure(writeResultCallback, e);
+            return;
+        }
+
+        writeDocument(output, writeResultCallback);
+    }
+
+    /**
+     * Copy the document into an already-open stream and report exactly one
+     * result.
+     *
+     * <p>Separate from onWrite so it can be exercised without a
+     * ParcelFileDescriptor.
+     */
+    void writeDocument(OutputStream output, WriteResultCallback writeResultCallback) {
+        try {
             output.write(documentData, 0, documentData.length);
+            output.flush();
+            output.close();
             writeResultCallback.onWriteFinished(new PageRange[] {PageRange.ALL_PAGES});
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
+        } catch (IOException | RuntimeException e) {
+            reportWriteFailure(writeResultCallback, e);
             try {
-                if (output != null) {
-                    output.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                output.close();
+            } catch (IOException | RuntimeException ignored) {
+                // Already failing; the framework still owns the descriptor.
             }
         }
+    }
+
+    private void reportWriteFailure(WriteResultCallback writeResultCallback, Throwable e) {
+        Log.e("PDF", "Unable to write the document to the print spooler", e);
+        final String message = e.getMessage();
+        // onWriteFailed needs a message; null used to be the only outcome here
+        // because nothing was reported at all.
+        writeResultCallback.onWriteFailed(
+                message != null ? message : "Unable to write the document");
     }
 
     @Override
     public void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
             CancellationSignal cancellationSignal, LayoutResultCallback callback, Bundle extras) {
         // Respond to cancellation request
-        if (cancellationSignal.isCanceled()) {
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
             callback.onLayoutCancelled();
             return;
         }
 
         this.callback = callback;
+        layoutCancelled = false;
+
+        // Without this listener nothing ever set the flag, so every failure
+        // was reported as a cancellation.
+        if (cancellationSignal != null) {
+            cancellationSignal.setOnCancelListener(
+                    () -> new Handler(Looper.getMainLooper()).post(() -> {
+                        layoutCancelled = true;
+                        cancelJob(null);
+                    }));
+        }
 
         PrintAttributes.MediaSize size = newAttributes.getMediaSize();
         PrintAttributes.Margins margins = newAttributes.getMinMargins();
@@ -141,25 +201,51 @@ public class PrintingJob extends PrintDocumentAdapter {
                 margins.getBottomMils() * 72.0 / 1000.0);
     }
 
+    /**
+     * Report this job's single terminal result to Dart.
+     *
+     * <p>The onFinish poll below and a layout failure could both report, which
+     * the Dart side had to guard against; there is now one owner.
+     */
+    private void reportCompleted(final boolean success, final String message) {
+        if (completed) {
+            return;
+        }
+        completed = true;
+        printing.onCompleted(PrintingJob.this, success, message);
+    }
+
     @Override
     public void onFinish() {
+        if (completed) {
+            // Already reported - a layout failure, or a cancellation - so
+            // there is nothing left to wait for.
+            printJob = null;
+            return;
+        }
+
         Thread thread = new Thread(() -> {
             try {
                 final boolean[] wait = {true};
                 int count = 5 * 60 * 10; // That's 10 minutes.
                 while (wait[0]) {
                     new Handler(Looper.getMainLooper()).post(() -> {
+                        if (completed) {
+                            wait[0] = false;
+                            return;
+                        }
+
                         int state = printJob == null ? PrintJobInfo.STATE_FAILED
                                                      : printJob.getInfo().getState();
 
                         if (state == PrintJobInfo.STATE_COMPLETED) {
-                            printing.onCompleted(PrintingJob.this, true, null);
+                            reportCompleted(true, null);
                             wait[0] = false;
                         } else if (state == PrintJobInfo.STATE_CANCELED) {
-                            printing.onCompleted(PrintingJob.this, false, null);
+                            reportCompleted(false, null);
                             wait[0] = false;
                         } else if (state == PrintJobInfo.STATE_FAILED) {
-                            printing.onCompleted(PrintingJob.this, false, "Unable to print");
+                            reportCompleted(false, "Unable to print");
                             wait[0] = false;
                         }
                     });
@@ -175,8 +261,8 @@ public class PrintingJob extends PrintDocumentAdapter {
             } catch (final Exception e) {
                 new Handler(Looper.getMainLooper())
                         .post(()
-                                        -> printing.onCompleted(PrintingJob.this,
-                                                printJob != null && printJob.isCompleted(),
+                                        -> reportCompleted(printJob != null
+                                                        && printJob.isCompleted(),
                                                 e.getMessage()));
             }
 
@@ -342,10 +428,42 @@ public class PrintingJob extends PrintDocumentAdapter {
         return sizes;
     }
 
+    /**
+     * End the job because the print framework cancelled it.
+     *
+     * <p>onLayoutCancelled is reserved for a CancellationSignal cancellation;
+     * using it for a failure left the dialog on 'Preparing preview' with no
+     * message, because the message was dropped and printJob.cancel() cannot
+     * close a job that is still STATE_CREATED.
+     */
     void cancelJob(String message) {
-        if (callback != null) callback.onLayoutCancelled();
+        final LayoutResultCallback pending = callback;
+        callback = null;
+        if (pending != null) {
+            pending.onLayoutCancelled();
+        }
         if (printJob != null) printJob.cancel();
-        printing.onCompleted(PrintingJob.this, false, message);
+        reportCompleted(false, message);
+    }
+
+    /** End the job because the document could not be produced. */
+    void failJob(String message) {
+        if (layoutCancelled) {
+            // The framework asked for a cancellation first; that is the
+            // terminal callback it expects.
+            cancelJob(message);
+            return;
+        }
+
+        final String reported = message != null ? message : "Unable to produce the document";
+
+        final LayoutResultCallback pending = callback;
+        callback = null;
+        if (pending != null) {
+            pending.onLayoutFailed(reported);
+        }
+        if (printJob != null) printJob.cancel();
+        reportCompleted(false, message);
     }
 
     /**
@@ -522,12 +640,21 @@ public class PrintingJob extends PrintDocumentAdapter {
     void setDocument(byte[] data) {
         documentData = data;
 
+        final LayoutResultCallback pending = callback;
+        if (pending == null) {
+            // The layout already ended - cancelled, or failed - so a second
+            // terminal callback would be a framework violation, and reading
+            // the null callback was a NullPointerException.
+            return;
+        }
+        callback = null;
+
         PrintDocumentInfo info = new PrintDocumentInfo.Builder(jobName)
                                          .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
                                          .build();
 
         // Content layout reflow is complete
-        callback.onLayoutFinished(info, true);
+        pending.onLayoutFinished(info, true);
     }
 
     void rasterPdf(final byte[] data, final ArrayList<Integer> pages, final Double scale) {

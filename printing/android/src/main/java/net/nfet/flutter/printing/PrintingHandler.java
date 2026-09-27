@@ -160,18 +160,20 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                 if (result instanceof byte[]) {
                     printJob.setDocument((byte[]) result);
                 } else {
-                    printJob.cancelJob("Unknown data received");
+                    // A failure, not a cancellation: reported as one, the
+                    // print dialog sat on 'Preparing preview' for ever.
+                    printJob.failJob("Unknown data received");
                 }
             }
 
             @Override
             public void error(@NonNull String errorCode, String errorMessage, Object errorDetails) {
-                printJob.cancelJob(errorMessage);
+                printJob.failJob(errorMessage);
             }
 
             @Override
             public void notImplemented() {
-                printJob.cancelJob("notImplemented");
+                printJob.failJob("notImplemented");
             }
         });
     }

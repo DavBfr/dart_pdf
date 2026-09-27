@@ -279,8 +279,17 @@ void main() {
         });
         expect(
           () => _codec.decodeEnvelope(reply!),
-          throwsA(isA<PlatformException>()),
-          reason: 'the platform sees a failed onLayout',
+          throwsA(
+            isA<PlatformException>().having(
+              (PlatformException e) => e.message,
+              'message',
+              isNotEmpty,
+            ),
+          ),
+          // Android puts this text in the print dialog through
+          // onLayoutFailed, so an empty message would leave the user with a
+          // blank error.
+          reason: 'the platform sees a failed onLayout, with a message',
         );
         expect(reported, hasLength(1), reason: 'the build failure is reported');
 

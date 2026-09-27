@@ -34,6 +34,9 @@
 - Fix the Android plugin dropping its method-call handler when the Activity is destroyed, which turned every later call in a surviving engine into a `MissingPluginException`. It now falls back to the application context
 - No Android framework exception escapes the plugin's method-call handler any more; each one is reported as a `printing` PlatformException naming the call that failed
 - Fix Android retaining the last Activity, its Window and its FlutterView for the lifetime of the process after a single print, raster, HTML conversion or share: `PrintingJob` kept the `PrintManager` in a static field, and `PrintManager` holds its Context. The print service is now resolved where it is used and never stored
+- Fix the Android system print dialog sitting on 'Preparing preview' with no message when the `onLayout` callback throws. A failure is now reported to the print framework as a failure, carrying the message from Dart, instead of as a cancellation, which dropped it
+- Fix the Android print preview hanging when the document could not be written into the print spooler - a full disk, or a descriptor closed because the dialog was dismissed. The write now reports a result on every path, so `Printing.layoutPdf` completes instead of waiting for ever
+- Each Android print job now delivers exactly one result to Dart and exactly one terminal callback to the print framework, whatever ends it
 
 ## 5.15.2
 
