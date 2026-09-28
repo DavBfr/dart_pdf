@@ -28,6 +28,8 @@ class PdfRaster extends PdfRasterBase {
     : super(width, height, true, pixels);
 
   /// Decode RGBA raw image to dart:ui Image
+  ///
+  /// The caller owns the returned image and must dispose it.
   Future<ui.Image> toImage() {
     final comp = Completer<ui.Image>();
     ui.decodeImageFromPixels(
@@ -44,8 +46,20 @@ class PdfRaster extends PdfRasterBase {
   @override
   Future<Uint8List> toPng() async {
     final image = await toImage();
-    final data = await image.toByteData(format: ui.ImageByteFormat.png);
-    return data!.buffer.asUint8List();
+
+    try {
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (data == null) {
+        throw Exception('Unable to encode a ${width}x$height page as PNG');
+      }
+
+      return data.buffer.asUint8List();
+    } finally {
+      // This image is an intermediate, unlike the one toImage() hands to its
+      // caller. It used to be abandoned, so every page of every preview
+      // re-raster left its full-resolution decode in engine memory.
+      image.dispose();
+    }
   }
 }
 

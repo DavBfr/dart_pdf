@@ -27,6 +27,48 @@ import 'package:printing/src/method_channel.dart';
 void main() {
   setUp(TestWidgetsFlutterBinding.ensureInitialized);
 
+  test('toPng disposes the image it decoded', () async {
+    // toImage() hands its image to the caller, but toPng()'s is an
+    // intermediate: it used to be abandoned, so every page of every preview
+    // re-raster left a full-resolution decode in engine memory.
+    var created = 0;
+    var disposed = 0;
+    final previousCreate = ui.Image.onCreate;
+    final previousDispose = ui.Image.onDispose;
+    ui.Image.onCreate = (ui.Image image) => created++;
+    ui.Image.onDispose = (ui.Image image) => disposed++;
+    addTearDown(() {
+      ui.Image.onCreate = previousCreate;
+      ui.Image.onDispose = previousDispose;
+    });
+
+    final raster = PdfRaster(
+      4,
+      4,
+      Uint8List.fromList(List<int>.filled(4 * 4 * 4, 0xff)),
+    );
+
+    for (var i = 0; i < 5; i++) {
+      await raster.toPng();
+    }
+
+    expect(created, 5);
+    expect(disposed, created, reason: 'nothing is left in engine memory');
+  });
+
+  test('toImage hands its image to the caller', () async {
+    final raster = PdfRaster(
+      4,
+      4,
+      Uint8List.fromList(List<int>.filled(4 * 4 * 4, 0xff)),
+    );
+
+    final image = await raster.toImage();
+
+    expect(image.debugDisposed, isFalse, reason: 'the caller owns this one');
+    image.dispose();
+  });
+
   test('an opaque page survives toPng', () async {
     // What the native backends now hand over. They used to return alpha 0 for
     // most of a blank page, so re-encoding it gave a black page.

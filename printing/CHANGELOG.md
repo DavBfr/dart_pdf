@@ -12,6 +12,9 @@
 - Fix the Android raster leaking a full-size temp file in the app cache, two file descriptors and a native `PdfRenderer` on every failure - a password-protected, truncated or malformed document, or an out-of-range page index - which also tripped StrictMode. Every handle is now released on every path, and the temp file is deleted last rather than on the line after the constructor that threw
 - An out-of-range page index on Android now ends the raster stream with a message naming the index and the page count, instead of an uncaught `IllegalArgumentException`
 - A failed Android raster always reports a non-null message. It could report null, which the Dart side reads as a clean end of stream, and it could report twice
+- Fix `PdfRaster.toPng` abandoning the `ui.Image` it decodes, so every page of every preview re-raster left a full-resolution decode in engine memory. `PdfRaster.toImage` still hands its image to the caller, which its documentation now says
+- `PdfRaster.toPng` reports a failure to encode instead of a null-check error
+
 
 
 
