@@ -132,6 +132,8 @@ jobs:
           architecture: x64
       - name: Enable macOS for flutter
         run: flutter config --enable-macos-desktop
+      - name: Type-check the Apple plugin sources
+        run: sh printing/test/apple/typecheck.sh
       - name: Check the Apple page renderer
         run: |
           diff printing/macos/printing/Sources/printing/PdfPageRenderer.swift printing/ios/printing/Sources/printing/PdfPageRenderer.swift

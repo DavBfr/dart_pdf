@@ -43,6 +43,10 @@
 - Fix a rotated page losing a pixel from one axis when rastered on iOS and macOS; raster sizes are rounded rather than truncated
 - A page larger than the paper is now scaled to fit rather than clipped
 - The iOS and macOS podspec deployment targets are raised to 13.0 and 10.15, which is what the Swift package manifests already declared
+- Fix `Printing.directPrintPdf` with `dynamicLayout: false` never asking for the document on iOS and handing AirPrint an empty job, so nothing printed. The job now starts only once the document has arrived
+- Fix the iOS print sheet opening portrait for a landscape format, and always using the generic output type, when `dynamicLayout` is false. The orientation and `outputType` a caller asks for are now used on both paths. **Static-layout sheets now open landscape for a landscape format**
+- An iOS print job that cannot be started - the sheet refuses to present, or the printer refuses the job - now reports that, instead of leaving the future pending
+- Each iOS print job reports exactly one result to Dart
 
 ## 5.15.2
 

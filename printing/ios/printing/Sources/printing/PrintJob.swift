@@ -53,7 +53,15 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     private var urlObservation: NSKeyValueObservation?
     private var jobName: String?
     private var printerName: String?
-    private var orientation: UIPrintInfo.Orientation?
+    /// Built once in printPdf and re-assigned onto the shared controller
+    /// immediately before every present() or print(to:).
+    ///
+    /// setDocument used to build a second one, which hard-coded .general and
+    /// lost the requested orientation, so a landscape document printed to a
+    /// portrait sheet on the static-layout path.
+    private(set) var printInfo: UIPrintInfo?
+    /// Whether the single result has already gone to Dart.
+    private var completed = false
     private let semaphore = DispatchSemaphore(value: 0)
     private var dynamic = false
     private var currentSize: CGSize?
@@ -86,7 +94,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         if dynamic {
             semaphore.signal()
         } else {
-            printing.onCompleted(printJob: self, completed: false, error: error as NSString?)
+            reportCompleted(false, error)
         }
     }
 
@@ -106,50 +114,12 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         }
 
         if pdfDocument == nil {
-            printing.onCompleted(printJob: self, completed: false, error: "Unable to load the PDF document")
+            reportCompleted(false, "Unable to load the PDF document")
             return
         }
 
         DispatchQueue.main.async { [self] in
-            let controller = UIPrintInteractionController.shared
-            controller.delegate = self
-
-            let printInfo = UIPrintInfo.printInfo()
-            let strippedJobName = jobName!.hasSuffix(".pdf") ? String(jobName!.dropLast(4)) : jobName!
-            printInfo.jobName = strippedJobName
-            printInfo.outputType = .general
-            if orientation != nil {
-                printInfo.orientation = orientation!
-                orientation = nil
-            }
-            controller.printInfo = printInfo
-            controller.printPageRenderer = self
-
-            if self.printerName != nil {
-                let printerURL = URL(string: self.printerName!)
-
-                if printerURL == nil {
-                    self.printing.onCompleted(printJob: self, completed: false, error: "Unable to find printer URL")
-                    return
-                }
-
-                let printerURLString = printerURL!.absoluteString
-
-                if !selectedPrinters.keys.contains(printerURLString) {
-                    selectedPrinters[printerURLString] = UIPrinter(url: printerURL!)
-                }
-
-                selectedPrinters[printerURLString]!.contactPrinter { available in
-                    if !available {
-                        self.printing.onCompleted(printJob: self, completed: false, error: "Printer not available")
-                        return
-                    }
-
-                    controller.print(to: selectedPrinters[printerURLString]!, completionHandler: self.completionHandler)
-                }
-            } else {
-                controller.present(animated: true, completionHandler: self.completionHandler)
-            }
+            startJob()
         }
     }
 
@@ -177,7 +147,19 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             print("Unable to print: \(error?.localizedDescription ?? "unknown error")")
         }
 
-        printing.onCompleted(printJob: self, completed: completed, error: error?.localizedDescription as NSString?)
+        reportCompleted(completed, error?.localizedDescription)
+    }
+
+    /// Report this job's single result to Dart.
+    ///
+    /// A job can fail on its way to UIKit and then have UIKit report as well,
+    /// which the Dart side had to guard against.
+    private func reportCompleted(_ success: Bool, _ error: String?) {
+        if completed {
+            return
+        }
+        completed = true
+        printing.onCompleted(printJob: self, completed: success, error: error as NSString?)
     }
 
     public func printInteractionController(_: UIPrintInteractionController, choosePaper paperList: [UIPrintPaper]) -> UIPrintPaper {
@@ -213,71 +195,27 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
 
         let printing = UIPrintInteractionController.isPrintingAvailable
         if !printing {
-            self.printing.onCompleted(printJob: self, completed: false, error: "Printing not available")
+            reportCompleted(false, "Printing not available")
             return
-        }
-
-        if size.width > size.height {
-            orientation = UIPrintInfo.Orientation.landscape
         }
 
         // Strip .pdf extension as UIPrintInteractionController appends it automatically
         jobName = name.hasSuffix(".pdf") ? String(name.dropLast(4)) : name
         printerName = printerID
 
-        let controller = UIPrintInteractionController.shared
-        controller.delegate = self
-
-        let printInfo = UIPrintInfo.printInfo()
-        printInfo.jobName = jobName!
-        printInfo.outputType = type
-        if orientation != nil {
-            printInfo.orientation = orientation!
-            orientation = nil
-        }
-        controller.printInfo = printInfo
-        controller.showsPaperSelectionForLoadedPapers = true
-
-        controller.printPageRenderer = self
-
-        if printerID != nil {
-            let printerURL = URL(string: printerID!)
-
-            if printerURL == nil {
-                self.printing.onCompleted(printJob: self, completed: false, error: "Unable to find printer URL")
-                return
-            }
-
-            let printerURLString = printerURL!.absoluteString
-
-            if !selectedPrinters.keys.contains(printerURLString) {
-                selectedPrinters[printerURLString] = UIPrinter(url: printerURL!)
-            }
-
-            // Sometimes using UIPrinter(url:) gives a non-contactable printer.
-            // https://stackoverflow.com/questions/34602302/creating-a-working-uiprinter-object-from-url-for-dialogue-free-printing
-            // This lets use a printer saved during picking and fall back using a printer created with UIPrinter(url:)
-            if pickedPrinter != nil, selectedPrinters[printerURLString]!.url == pickedPrinter?.url {
-                controller.print(to: pickedPrinter!, completionHandler: completionHandler)
-                return
-            }
-
-            selectedPrinters[printerURLString]!.contactPrinter { available in
-                if !available {
-                    self.printing.onCompleted(printJob: self, completed: false, error: "Printer not available")
-                    return
-                }
-
-                controller.print(to: selectedPrinters[printerURLString]!, completionHandler: self.completionHandler)
-            }
-            return
-        }
+        printInfo = PrintJob.makePrintInfo(jobName: jobName!, size: size, outputType: type)
 
         if dynamic {
-            controller.present(animated: true, completionHandler: completionHandler)
+            // UIKit drives the layout: numberOfPages asks Dart for the
+            // document while the job runs.
+            startJob()
             return
         }
 
+        // Static layout: ask for the document first and start the job in
+        // setDocument. The printer branch used to start the job here, before
+        // anything had asked Dart for a document, so AirPrint got an empty
+        // job and nothing printed.
         self.printing.onLayout(
             printJob: self,
             width: size.width,
@@ -287,6 +225,74 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             marginRight: PrintJob.finite(size.width - margin.maxX),
             marginBottom: PrintJob.finite(size.height - margin.maxY)
         )
+    }
+
+    /// One print info per job, carrying exactly what Dart asked for.
+    static func makePrintInfo(jobName: String, size: CGSize, outputType: UIPrintInfo.OutputType) -> UIPrintInfo {
+        let printInfo = UIPrintInfo.printInfo()
+        printInfo.jobName = jobName
+        printInfo.outputType = outputType
+        printInfo.orientation = size.width > size.height ? .landscape : .portrait
+        return printInfo
+    }
+
+    /// Hand this renderer to UIKit, to a named printer or through the sheet.
+    ///
+    /// UIPrintInteractionController.shared is process-wide, so the print info
+    /// and the renderer are re-assigned here, immediately before the job
+    /// starts.
+    private func startJob() {
+        let controller = UIPrintInteractionController.shared
+        controller.delegate = self
+        if let printInfo {
+            controller.printInfo = printInfo
+        }
+        controller.showsPaperSelectionForLoadedPapers = true
+        controller.printPageRenderer = self
+
+        guard let printerName else {
+            if !controller.present(animated: true, completionHandler: completionHandler) {
+                // Used to be silent, so the Dart future never completed.
+                reportCompleted(false, "Unable to present the print sheet")
+            }
+            return
+        }
+
+        guard let printerURL = URL(string: printerName) else {
+            reportCompleted(false, "Unable to find printer URL")
+            return
+        }
+
+        let printerURLString = printerURL.absoluteString
+
+        if !selectedPrinters.keys.contains(printerURLString) {
+            selectedPrinters[printerURLString] = UIPrinter(url: printerURL)
+        }
+
+        // Sometimes using UIPrinter(url:) gives a non-contactable printer.
+        // https://stackoverflow.com/questions/34602302/creating-a-working-uiprinter-object-from-url-for-dialogue-free-printing
+        // This lets use a printer saved during picking and fall back using a printer created with UIPrinter(url:)
+        if let pickedPrinter, selectedPrinters[printerURLString]!.url == pickedPrinter.url {
+            if !controller.print(to: pickedPrinter, completionHandler: completionHandler) {
+                reportCompleted(false, "Unable to start the print job")
+            }
+            return
+        }
+
+        selectedPrinters[printerURLString]!.contactPrinter { [weak self] available in
+            guard let self else {
+                return
+            }
+
+            if !available {
+                self.reportCompleted(false, "Printer not available")
+                return
+            }
+
+            if !controller.print(to: selectedPrinters[printerURLString]!, completionHandler: self.completionHandler) {
+                self.reportCompleted(false, "Unable to start the print job")
+            }
+        }
     }
 
     /// 0 for a value that is not finite, so NaN never reaches Dart.

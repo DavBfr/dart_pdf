@@ -5,10 +5,26 @@
 build targets and the file has to stay inside the plugin's single module: a
 separate SwiftPM target could not be imported from a CocoaPods build.
 
-The plugin's own package cannot be unit tested on its own, because it depends on
-the Flutter framework that the Flutter tool supplies at build time. The renderer,
-however, depends on nothing but PDFKit, so it can be compiled and exercised
-directly:
+## Type-checking
+
+The plugin's own package cannot be built on its own, because it depends on the
+Flutter framework that the Flutter tool supplies at build time. `typecheck.sh`
+stands `flutter_stub/` in for that framework - it declares only the handful of
+symbols these sources use - and type-checks both platform trees against the real
+iOS and macOS SDKs:
+
+```sh
+sh printing/test/apple/typecheck.sh
+```
+
+That catches wrong UIKit, AppKit and PDFKit signatures, which `swiftc -parse`
+does not. It is not a substitute for building the example app, and it says
+nothing about the Flutter side of the plugin.
+
+## The page renderer
+
+`PdfPageRenderer` depends on nothing but PDFKit, so it can be compiled and
+exercised directly:
 
 ```sh
 python3 printing/test/apple/make_fixtures.py /tmp/printing-fixtures

@@ -658,4 +658,100 @@ void main() {
       expect(printers.first.comment, isNull);
     });
   });
+
+  group('printPdf arguments', () {
+    // What reaches the native side decides what the print sheet does: iOS
+    // builds its UIPrintInfo from the output type and the page size, and only
+    // asks Dart for a document up front when 'dynamic' is false.
+    Future<void> layout({
+      Printer? printer,
+      PdfPageFormat format = PdfPageFormat.a4,
+      bool dynamicLayout = true,
+      OutputType outputType = OutputType.generic,
+    }) async {
+      final result = impl.layoutPdf(
+        printer,
+        (PdfPageFormat format) async => Uint8List(0),
+        'document.pdf',
+        format,
+        dynamicLayout,
+        false,
+        outputType,
+        false,
+        false,
+      );
+      await pumpEventQueue();
+      await fromPlatform('onCompleted', <String, dynamic>{
+        'job': jobOf('printPdf'),
+        'completed': true,
+      });
+      await result;
+    }
+
+    test('the output type crosses the channel as its index', () async {
+      await layout(outputType: OutputType.grayscale);
+
+      expect(calls.last.arguments['outputType'], OutputType.grayscale.index);
+      expect(
+        OutputType.grayscale.index,
+        2,
+        reason: 'the native side reads an index',
+      );
+    });
+
+    test('a static layout is requested as dynamic: false', () async {
+      await layout(dynamicLayout: false);
+
+      expect(calls.last.arguments['dynamic'], isFalse);
+    });
+
+    test('a landscape format keeps its own axes', () async {
+      await layout(format: PdfPageFormat.a4.landscape);
+
+      expect(
+        calls.last.arguments['width'],
+        greaterThan(calls.last.arguments['height']),
+      );
+    });
+
+    test('directPrintPdf names its printer', () async {
+      const printer = Printer(url: 'ipp://printer', name: 'printer');
+      await layout(printer: printer, dynamicLayout: false);
+
+      final args = calls.last.arguments;
+      expect(args['printer'], 'ipp://printer');
+      expect(args['name'], 'document.pdf');
+      expect(args['dynamic'], isFalse);
+      expect(args['width'], PdfPageFormat.a4.width);
+      expect(args['marginLeft'], PdfPageFormat.a4.marginLeft);
+    });
+
+    test('a failed job start makes the future throw', () async {
+      // What the iOS side now reports when print(to:) or present() refuses.
+      final result = impl.layoutPdf(
+        const Printer(url: 'ipp://printer', name: 'printer'),
+        (PdfPageFormat format) async => Uint8List(0),
+        'document',
+        PdfPageFormat.a4,
+        false,
+        false,
+        OutputType.generic,
+        false,
+        false,
+      );
+      final expectation = expectLater(
+        result,
+        throwsA('Unable to start the print job'),
+      );
+      await pumpEventQueue();
+
+      await fromPlatform('onCompleted', <String, dynamic>{
+        'job': jobOf('printPdf'),
+        'completed': false,
+        'error': 'Unable to start the print job',
+      });
+
+      await expectation;
+    });
+  });
 }
