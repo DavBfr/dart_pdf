@@ -16,6 +16,8 @@
 - Fix the emitted sfnt binary-search fields, which were 256/2/96 where the spec requires 128/3/32, and the table directory, whose records were in layout order rather than the required ascending tag order
 - **Fix a font passed as a sliced `ByteData` being misparsed.** Every accessor was view-relative but the reach-throughs to the backing buffer were absolute, so `Font.ttf` over a view threw `FormatException: Missing extension byte` decoding the table tags, or silently parsed a shifted window. All of them are view-aware now, and `TtfParser.fontData` is a new getter returning exactly the view
 - **Fix a partial font view embedding the whole backing buffer** while `/Length1` described only the view - 1,093,112 bytes of stream for a `/Length1` of 93,112. A view now embeds byte-for-byte what the whole buffer would
+- **Fix copy, in-viewer search and text extraction returning the wrong characters for emoji and CJK ext-B.** The `ToUnicode` CMap wrote each destination as the code point padded to four hex digits, so anything above U+FFFF came out as five - U+1F100 as `<1F100>`, which a reader decodes as U+1F10 followed by a NUL. Destinations are UTF-16BE code units now, so U+1F100 is `<D83CDD00>`. The glyphs always rendered, so nothing looked wrong
+- The `ToUnicode` CMap is emitted in sections of at most 100 entries, which is the limit the format sets; it used to be one section for the whole font
 
 ## 3.13.2
 
