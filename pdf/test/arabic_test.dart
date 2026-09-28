@@ -138,6 +138,33 @@ void main() {
       expect(bidi.isRtlText(''), isFalse);
     });
 
+    test('hasBidi skips text the algorithm has nothing to do with', () {
+      expect(bidi.hasBidi('Hello world'), isFalse);
+      expect(bidi.hasBidi('35 + 7 = 42'), isFalse);
+      expect(bidi.hasBidi('caf\u00E9 na\u00EFve'), isFalse);
+      expect(bidi.hasBidi(''), isFalse);
+
+      expect(bidi.hasBidi('Total: مرحبا'), isTrue);
+      expect(bidi.hasBidi('\u05D0'), isTrue, reason: 'Hebrew');
+      expect(bidi.hasBidi('\u200F10'), isTrue, reason: 'an explicit RLM');
+      expect(bidi.hasBidi('\u200E10'), isTrue, reason: 'an explicit LRM');
+      expect(bidi.hasBidi('a\u202Bb'), isTrue, reason: 'an embedding');
+      expect(bidi.hasBidi('a\u2067b'), isTrue, reason: 'an isolate');
+    });
+
+    test('shapeLogical never throws', () {
+      // The same package:bidi normalizer bug B-024 guards logicalToVisual
+      // against. Here the text comes back as it went in, so its runs can still
+      // be placed and mirrored, only unjoined.
+      for (var carrier = 0x0622; carrier <= 0x0626; carrier++) {
+        for (final haraka in <int>[0x064C, 0x064E, 0x0650, 0x0670]) {
+          final text = String.fromCharCodes(<int>[carrier, haraka]);
+          expect(() => bidi.shapeLogical(text), returnsNormally);
+          expect(bidi.shapeLogical(text), text);
+        }
+      }
+    });
+
     test('reversed walks whole code points', () {
       expect(bidi.reversed('abc'), 'cba');
       expect(bidi.reversed('a\u{1F600}b'), 'b\u{1F600}a');

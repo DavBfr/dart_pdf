@@ -992,11 +992,6 @@ class RichText extends Widget with SpanningWidget {
     final _textDirection = textDirection ?? Directionality.of(context);
     _textAlign = textAlign ?? theme.textAlign ?? TextAlign.start;
 
-    // Whether the bidi algorithm shapes and reorders this paragraph. The rtl
-    // gate is B-023's to remove; it is load-bearing until the paragraph-level
-    // word reversal is gone, which is what this change does.
-    final _bidi = useBidi && _textDirection == TextDirection.rtl;
-
     final _overflow = this.overflow ?? theme.overflow;
 
     final constraintWidth = constraints.hasBoundedWidth
@@ -1018,6 +1013,25 @@ class RichText extends Widget with SpanningWidget {
     var overflow = false;
 
     _preprocessed ??= _preProcessSpans(context);
+
+    // Whether the bidi algorithm shapes and reorders this paragraph.
+    //
+    // It used to run only when the resolved direction was rtl, and
+    // Directionality defaults to ltr, so an Arabic or Hebrew fragment inside an
+    // English paragraph - a name, an address line, a currency symbol - got no
+    // reordering and no shaping and came out backwards and unjoined. UAX #9 uses
+    // the base direction to pick the embedding level, not to decide whether to
+    // run at all. Text with nothing bidirectional in it is skipped, so a
+    // left-to-right document is untouched.
+    final _bidi =
+        useBidi &&
+        (_textDirection == TextDirection.rtl ||
+            _preprocessed!.any(
+              (InlineSpan span) =>
+                  span is TextSpan &&
+                  span.text != null &&
+                  bidi.hasBidi(span.text!),
+            ));
 
     void _buildLines() {
       for (final span in _preprocessed!) {
@@ -1145,7 +1159,12 @@ class RichText extends Widget with SpanningWidget {
                 if (spanCount > 0 && metrics.width <= constraintWidth) {
                   overflow = true;
                   if (_bidi) {
-                    _reorderVisual(spanStart, spanCount, offsetX, true);
+                    _reorderVisual(
+                      spanStart,
+                      spanCount,
+                      offsetX,
+                      _textDirection == TextDirection.rtl,
+                    );
                   }
                   lines.add(
                     _Line(
@@ -1273,7 +1292,12 @@ class RichText extends Widget with SpanningWidget {
 
             if (line < spanLines.length - 1) {
               if (_bidi) {
-                _reorderVisual(spanStart, spanCount, offsetX, true);
+                _reorderVisual(
+                  spanStart,
+                  spanCount,
+                  offsetX,
+                  _textDirection == TextDirection.rtl,
+                );
               }
               lines.add(
                 _Line(
@@ -1328,7 +1352,12 @@ class RichText extends Widget with SpanningWidget {
           if (offsetX + ws.width > constraintWidth && spanCount > 0) {
             overflow = true;
             if (_bidi) {
-              _reorderVisual(spanStart, spanCount, offsetX, true);
+              _reorderVisual(
+                spanStart,
+                spanCount,
+                offsetX,
+                _textDirection == TextDirection.rtl,
+              );
             }
             lines.add(
               _Line(
@@ -1388,7 +1417,12 @@ class RichText extends Widget with SpanningWidget {
 
     if (spanCount > 0) {
       if (_bidi) {
-        _reorderVisual(spanStart, spanCount, offsetX, true);
+        _reorderVisual(
+          spanStart,
+          spanCount,
+          offsetX,
+          _textDirection == TextDirection.rtl,
+        );
       }
       lines.add(
         _Line(

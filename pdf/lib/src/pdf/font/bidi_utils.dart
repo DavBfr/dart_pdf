@@ -129,8 +129,8 @@ String _logicalToVisual(String input) {
 /// the whole paragraph instead and then reverses its word order; the two
 /// reversals cancel only while every word of a run stays on one line.
 ///
-/// Never throws: on failure the text is shaped by [arabic.convert], as in
-/// [logicalToVisual].
+/// Never throws: on failure the text comes back as it went in, so it is placed
+/// and mirrored but unjoined.
 String shapeLogical(String input) {
   try {
     final buffer = StringBuffer();
@@ -170,7 +170,11 @@ String shapeLogical(String input) {
       return true;
     }());
 
-    return arabic.convert(input);
+    // The text itself, in logical order: [reorderLine] can still place its runs
+    // and the letters still read in the right direction, only unjoined. What
+    // arabic.convert returns is already reversed, which this pipeline would
+    // reverse a second time.
+    return input;
   }
 }
 
@@ -178,25 +182,55 @@ String shapeLogical(String input) {
 String reversed(String text) =>
     String.fromCharCodes(text.runes.toList().reversed);
 
-/// Whether [text] holds a strong right-to-left character.
+/// Whether [rune] is a strong right-to-left character.
 ///
 /// Arabic-Indic digits are deliberately not strong: a number reads left to right
 /// wherever it sits, so a run of them must not be mirrored.
+bool _isStrongRtl(int rune) {
+  if (rune < 0x0590) {
+    return false;
+  }
+  if ((rune >= 0x0660 && rune <= 0x0669) ||
+      (rune >= 0x06F0 && rune <= 0x06F9)) {
+    return false;
+  }
+
+  return (rune >= 0x0590 && rune <= 0x05FF) || // Hebrew
+      (rune >= 0x0600 && rune <= 0x08FF) || // Arabic, Syriac, Thaana, NKo
+      (rune >= 0xFB1D && rune <= 0xFDFF) || // Hebrew, Arabic forms A
+      (rune >= 0xFE70 && rune <= 0xFEFF) || // Arabic forms B
+      (rune >= 0x10800 && rune <= 0x10FFF) ||
+      (rune >= 0x1E800 && rune <= 0x1EFFF);
+}
+
+/// Whether [text] holds a strong right-to-left character.
 bool isRtlText(String text) {
+  for (final rune in text.runes) {
+    if (_isStrongRtl(rune)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/// Whether the bidirectional algorithm has anything to do with [text].
+///
+/// Text with no strong right-to-left character and no bidi control is already in
+/// visual order, so the whole pass can be skipped - which is what keeps a
+/// left-to-right document byte for byte what it was.
+bool hasBidi(String text) {
   for (final rune in text.runes) {
     if (rune < 0x0590) {
       continue;
     }
-    if ((rune >= 0x0660 && rune <= 0x0669) ||
-        (rune >= 0x06F0 && rune <= 0x06F9)) {
-      continue;
-    }
-    if ((rune >= 0x0590 && rune <= 0x05FF) || // Hebrew
-        (rune >= 0x0600 && rune <= 0x08FF) || // Arabic, Syriac, Thaana, NKo
-        (rune >= 0xFB1D && rune <= 0xFDFF) || // Hebrew, Arabic forms A
-        (rune >= 0xFE70 && rune <= 0xFEFF) || // Arabic forms B
-        (rune >= 0x10800 && rune <= 0x10FFF) ||
-        (rune >= 0x1E800 && rune <= 0x1EFFF)) {
+    if (_isStrongRtl(rune) ||
+        rune == 0x061C || // ARABIC LETTER MARK
+        rune == 0x200E || // LEFT-TO-RIGHT MARK
+        rune == 0x200F || // RIGHT-TO-LEFT MARK
+        (rune >= 0x202A && rune <= 0x202E) || // embeddings and overrides
+        (rune >= 0x2066 && rune <= 0x2069)) {
+      // isolates
       return true;
     }
   }

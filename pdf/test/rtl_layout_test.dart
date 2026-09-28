@@ -137,6 +137,54 @@ void main() {
     pdf = Document();
   });
 
+  group('an arabic run inside an english paragraph', () {
+    /// The drawn runs of an LTR page, left to right, as code-unit lists.
+    Future<List<List<int>>> ltrRuns(String text) async {
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(400, 120, marginAll: 0),
+          build: (Context context) => Text(
+            text,
+            style: TextStyle(font: loadFont('hacen-tunisia.ttf'), fontSize: 20),
+          ),
+        ),
+      );
+
+      final lines = laidOutLines(await document.save());
+      expect(lines, hasLength(1));
+      return lines.single.map((String word) => word.codeUnits).toList();
+    }
+
+    test('is shaped and put in visual order', () async {
+      // The bidi pass ran only when the resolved direction was rtl, and
+      // Directionality defaults to ltr, so an Arabic fragment in an English
+      // sentence got no reordering, no shaping and no control removal.
+      expect(await ltrRuns('x \u0627 \u0628 y'), <List<int>>[
+        <int>[0x78], // x
+        <int>[0xFE8F], // the second Arabic word comes first on the page
+        <int>[0xFE8D],
+        <int>[0x79], // y
+      ]);
+    });
+
+    test('keeps its place between the words around it', () async {
+      expect(await ltrRuns('Total: \u0645 today'), <List<int>>[
+        'Total:'.codeUnits,
+        <int>[0xFEE1], // shaped, where the raw U+0645 used to be drawn
+        'today'.codeUnits,
+      ]);
+    });
+
+    test('a paragraph with nothing bidirectional is left alone', () async {
+      expect(await ltrRuns('Hello world foo'), <List<int>>[
+        'Hello'.codeUnits,
+        'world'.codeUnits,
+        'foo'.codeUnits,
+      ]);
+    });
+  });
+
   group('a wrapped right-to-left paragraph', () {
     // hacen-tunisia has the isolated Arabic forms but no medial or final ones,
     // so these use one-letter words: they shape to an isolated form the font
