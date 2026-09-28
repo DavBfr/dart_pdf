@@ -47,6 +47,10 @@
 - Fix the iOS print sheet opening portrait for a landscape format, and always using the generic output type, when `dynamicLayout` is false. The orientation and `outputType` a caller asks for are now used on both paths. **Static-layout sheets now open landscape for a landscape format**
 - An iOS print job that cannot be started - the sheet refuses to present, or the printer refuses the job - now reports that, instead of leaving the future pending
 - Each iOS print job reports exactly one result to Dart
+- Fix `Printing.convertHtml` on macOS returning a single page about 108pt wide and as tall as the whole document, ignoring the requested page format and losing the margins. It renders through a print operation at the requested paper size now, so a document taller than one page is paginated. **The shape of the macOS output changes, and `@media print` rules now apply**
+- Fix `Printing.convertHtml` on macOS snapshotting the page one second after starting the load, whatever state it was in: HTML pulling a slow resource converted truncated and was reported as a success, a failed navigation was also reported as a success, and every conversion took at least a second. The conversion now waits for the load to finish, reports a failed navigation as an error, and falls back to rendering whatever exists only after 30 seconds
+- No temporary file is left behind by a macOS HTML conversion, and exactly one result is reported per call
+- `Printing.listPrinters` on macOS now reports `isDefault`, `isAvailable` and `location`. Every entry used to say `isDefault: false` and `isAvailable: true`, so a picker could not preselect the default and a paused queue looked printable. `comment` stays null, which `Printer.comment` now documents
 
 ## 5.15.2
 

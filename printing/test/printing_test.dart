@@ -81,6 +81,46 @@ void main() {
     final imageProvider = Image.memory(bytes).image;
     expect(await flutterImageProvider(imageProvider), isNotNull);
   });
+
+  group('Printer', () {
+    test('a platform map with every key round-trips', () {
+      // The keys the GTK and Win32 backends have always sent, and that macOS
+      // now sends too.
+      const map = <String, Object?>{
+        'url': 'ipp://p',
+        'name': 'p',
+        'model': 'a model',
+        'location': 'a room',
+        'comment': 'a comment',
+        'default': true,
+        'available': false,
+      };
+
+      final printer = Printer.fromMap(map);
+
+      expect(printer.url, 'ipp://p');
+      expect(printer.name, 'p');
+      expect(printer.model, 'a model');
+      expect(printer.location, 'a room');
+      expect(printer.comment, 'a comment');
+      expect(printer.isDefault, isTrue);
+      expect(printer.isAvailable, isFalse);
+      expect(printer.toMap(), map);
+    });
+
+    test('a map without the optional keys keeps the documented defaults', () {
+      final printer = Printer.fromMap(<String, Object?>{
+        'url': 'ipp://p',
+        'name': 'p',
+      });
+
+      expect(printer.model, isNull);
+      expect(printer.location, isNull);
+      expect(printer.comment, isNull);
+      expect(printer.isDefault, isFalse);
+      expect(printer.isAvailable, isTrue);
+    });
+  });
 }
 
 class MockPrinting extends Mock

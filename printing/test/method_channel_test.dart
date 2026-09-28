@@ -465,6 +465,30 @@ void main() {
   });
 
   group('convertHtml', () {
+    test('the page format crosses the channel as size and margins', () async {
+      // macOS builds its NSPrintInfo from these, so a missing margin is a
+      // page that ignores the requested format.
+      const format = PdfPageFormat(595, 842, marginAll: 20);
+      final result = impl.convertHtml('<p>x</p>', null, format);
+      final expectation = expectLater(result, throwsA('done'));
+      await pumpEventQueue();
+
+      final args = calls.last.arguments;
+      expect(args['width'], 595.0);
+      expect(args['height'], 842.0);
+      expect(args['marginLeft'], 20.0);
+      expect(args['marginTop'], 20.0);
+      expect(args['marginRight'], 20.0);
+      expect(args['marginBottom'], 20.0);
+      expect(args['html'], '<p>x</p>');
+
+      await fromPlatform('onHtmlError', <String, dynamic>{
+        'job': jobOf('convertHtml'),
+        'error': 'done',
+      });
+      await expectation;
+    });
+
     test('unregisters the job when the platform reports onHtmlError', () async {
       final pending = MethodChannelPrinting.pendingJobs;
       final result = impl.convertHtml('<p>x</p>', null, PdfPageFormat.a4);

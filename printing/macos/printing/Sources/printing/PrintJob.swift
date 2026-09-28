@@ -28,6 +28,15 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     // to outlive every page it hands out, because PDFPage does not retain it.
     private var pdfDocument: PDFDocument?
     private var page: PDFPage?
+    // The HTML conversion owns these for the length of one convertHtml call.
+    private var htmlWebView: WKWebView?
+    private var htmlDelegate: NSObject?
+    private var htmlBackstop: DispatchWorkItem?
+    private var htmlPrintInfo: NSPrintInfo?
+    private var htmlTempFile: String?
+    private var htmlWindow: NSWindow?
+    private var htmlStarted = false
+    private var htmlFinished = false
     private var isWaitingForDocument = false
     private var documentReceived = false
     private var dynamic = false
@@ -161,20 +170,88 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     public func listPrinters() -> [NSDictionary] {
         var printers: Array = [NSDictionary]()
 
+        // NSPrinter answers the name and the model, but not whether a queue is
+        // the default or whether it will print, so the contract's 'default',
+        // 'available' and 'location' keys were simply absent and Dart turned
+        // them into false, true and null. PrintCore has them.
+        let details = PrintJob.printerDetails()
+
         for name in NSPrinter.printerNames {
             let printer = NSPrinter(name: name)
             if printer == nil {
                 continue
             }
-            let pr: NSDictionary = [
+
+            let pr: NSMutableDictionary = [
                 "url": name,
                 "name": name,
                 "model": printer!.type,
             ]
+
+            if let detail = details[name] {
+                pr["default"] = detail.isDefault
+                pr["available"] = detail.isAvailable
+                if let location = detail.location {
+                    pr["location"] = location
+                }
+            }
+
             printers.append(pr)
         }
 
         return printers
+    }
+
+    private struct PrinterDetail {
+        let isDefault: Bool
+        let isAvailable: Bool
+        let location: String?
+    }
+
+    /// What PrintCore knows about each queue, by name.
+    ///
+    /// Returns an empty map when the print server cannot be reached, so
+    /// listPrinters degrades to the three keys it used to answer rather than
+    /// failing.
+    private static func printerDetails() -> [String: PrinterDetail] {
+        var list: Unmanaged<CFArray>?
+        guard PMServerCreatePrinterList(nil, &list) == noErr, let list else {
+            return [:]
+        }
+
+        // takeRetainedValue owns the array, so it is released when this
+        // function returns, on every path.
+        let cfPrinters = list.takeRetainedValue()
+        var details: [String: PrinterDetail] = [:]
+
+        for index in 0 ..< CFArrayGetCount(cfPrinters) {
+            // PMPrinter is an OpaquePointer, not a class, so the array cannot
+            // be bridged to a Swift array: doing that crashes.
+            guard let raw = CFArrayGetValueAtIndex(cfPrinters, index) else {
+                continue
+            }
+            let printer = PMPrinter(raw)
+
+            guard let name = PMPrinterGetName(printer) as String? else {
+                continue
+            }
+
+            var state = PMPrinterState(kPMPrinterIdle)
+            let hasState = PMPrinterGetState(printer, &state) == noErr
+            let location = PMPrinterGetLocation(printer) as String?
+
+            details[name] = PrinterDetail(
+                isDefault: PMPrinterIsDefault(printer),
+                // A stopped queue holds everything sent to it, so it is not
+                // available; an unreadable state is assumed printable, as
+                // before.
+                isAvailable: !hasState || state != PMPrinterState(kPMPrinterStopped),
+                // An empty location is no location, and must not become "".
+                location: location?.isEmpty == false ? location : nil
+            )
+        }
+
+        return details
     }
 
     public func printPdf(name: String, withPageSize rawSize: CGSize, andMargin _: CGRect, withPrinter printer: String?, dynamically dyn: Bool, andWindow window: NSWindow) {
@@ -309,37 +386,177 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         }
     }
 
-    @available(macOS 11.0, *)
-    public func convertHtml(_ data: String, withPageSize size: CGRect, andMargin margin: CGRect, andBaseUrl baseUrl: URL?) {
-        let tempFile = NSTemporaryDirectory() + NSUUID().uuidString
-        let directoryURL = URL(fileURLWithPath: tempFile)
+    /// How long to wait for a page that never finishes loading.
+    ///
+    /// This replaces a fixed one-second wait, which snapshotted whatever
+    /// WebKit happened to have laid out and reported it as a success.
+    private static let htmlLoadBackstop = 30.0
 
-        let printOpts: [NSPrintInfo.AttributeKey: Any] = [NSPrintInfo.AttributeKey.jobDisposition: NSPrintInfo.JobDisposition.save, NSPrintInfo.AttributeKey.jobSavingURL: directoryURL]
+    @available(macOS 11.0, *)
+    public func convertHtml(_ data: String, withPageSize size: CGRect, andMargin margin: CGRect, andBaseUrl baseUrl: URL?, andWindow window: NSWindow?) {
+        let tempFile = NSTemporaryDirectory() + NSUUID().uuidString + ".pdf"
+
+        let printOpts: [NSPrintInfo.AttributeKey: Any] = [
+            NSPrintInfo.AttributeKey.jobDisposition: NSPrintInfo.JobDisposition.save,
+            NSPrintInfo.AttributeKey.jobSavingURL: URL(fileURLWithPath: tempFile),
+        ]
         let printInfo = NSPrintInfo(dictionary: printOpts)
         printInfo.horizontalPagination = NSPrintInfo.PaginationMode.automatic
         printInfo.verticalPagination = NSPrintInfo.PaginationMode.automatic
-        printInfo.paperSize.width = size.width
-        printInfo.paperSize.height = size.height
+        // paperSize is a value, so the two assignments this replaces wrote to a
+        // temporary. It made no difference, because the print operation the
+        // rest of this setup describes was never created: the conversion
+        // snapshotted a zero-sized web view instead, which WebKit laid out at
+        // its intrinsic minimum width and captured as one very long page.
+        printInfo.paperSize = NSSize(width: size.width, height: size.height)
         printInfo.topMargin = margin.minY
         printInfo.leftMargin = margin.minX
         printInfo.rightMargin = size.width - margin.maxX
         printInfo.bottomMargin = size.height - margin.maxY
+        printInfo.isHorizontallyCentered = false
+        printInfo.isVerticallyCentered = false
 
-        let webView = WKWebView(frame: CGRect.zero)
+        htmlPrintInfo = printInfo
+        htmlTempFile = tempFile
+        htmlWindow = window
+        htmlStarted = false
+        htmlFinished = false
+
+        // Sized to the printable area, so WebKit breaks lines where the paper
+        // does.
+        let contentWidth = max(size.width - printInfo.leftMargin - printInfo.rightMargin, 1)
+        let contentHeight = max(size.height - printInfo.topMargin - printInfo.bottomMargin, 1)
+        let webView = WKWebView(frame: NSRect(x: 0, y: 0, width: contentWidth, height: contentHeight))
+        let delegate = HtmlNavigationDelegate(job: self)
+        webView.navigationDelegate = delegate
+        htmlWebView = webView
+        htmlDelegate = delegate
+
+        // Rendering is driven by the navigation delegate; this only stops a
+        // page that never loads from hanging the Dart future for ever.
+        let backstop = DispatchWorkItem { [weak self] in
+            self?.renderHtml()
+        }
+        htmlBackstop = backstop
+        DispatchQueue.main.asyncAfter(deadline: .now() + PrintJob.htmlLoadBackstop, execute: backstop)
+
         webView.loadHTMLString(data, baseURL: baseUrl)
-        let when = DispatchTime.now() + 1
+    }
 
-        DispatchQueue.main.asyncAfter(deadline: when) {
-            webView.createPDF { result in
+    /// Drives the HTML conversion from the navigation rather than from a timer.
+    private class HtmlNavigationDelegate: NSObject, WKNavigationDelegate {
+        init(job: PrintJob) {
+            self.job = job
+        }
+
+        private weak var job: PrintJob?
+
+        func webView(_: WKWebView, didFinish _: WKNavigation!) {
+            if #available(macOS 11.0, *) {
+                job?.renderHtml()
+            }
+        }
+
+        func webView(_: WKWebView, didFail _: WKNavigation!, withError error: Error) {
+            job?.failHtml("Unable to load the HTML document: \(error.localizedDescription)")
+        }
+
+        func webView(_: WKWebView, didFailProvisionalNavigation _: WKNavigation!, withError error: Error) {
+            job?.failHtml("Unable to load the HTML document: \(error.localizedDescription)")
+        }
+    }
+
+    /// Print the loaded page to a PDF at the requested paper size.
+    @available(macOS 11.0, *)
+    fileprivate func renderHtml() {
+        if htmlStarted || htmlFinished {
+            return
+        }
+        htmlStarted = true
+        htmlBackstop?.cancel()
+
+        guard let webView = htmlWebView, let printInfo = htmlPrintInfo else {
+            failHtml("The HTML conversion has no document to render")
+            return
+        }
+
+        guard let window = htmlWindow else {
+            // With no window there is nothing to run a print operation in, so
+            // fall back to the page capture. It ignores the paper size, but it
+            // is better than an error.
+            webView.createPDF { [weak self] result in
                 switch result {
                 case let .success(data):
-                    self.printing.onHtmlRendered(printJob: self, pdfData: data)
-                    let fileManager = FileManager.default
-                    try? fileManager.removeItem(atPath: tempFile)
+                    self?.finishHtml(data)
                 case let .failure(error):
-                    self.printing.onHtmlError(printJob: self, error: "Unable to create PDF: \(error.localizedDescription)")
+                    self?.failHtml("Unable to create PDF: \(error.localizedDescription)")
                 }
             }
+            return
+        }
+
+        webView.frame = NSRect(origin: .zero, size: printInfo.paperSize)
+
+        let operation = webView.printOperation(with: printInfo)
+        operation.showsPrintPanel = false
+        operation.showsProgressPanel = false
+        operation.view?.frame = NSRect(origin: .zero, size: printInfo.paperSize)
+        operation.runModal(
+            for: window,
+            delegate: self,
+            didRun: #selector(htmlOperationDidRun(printOperation:success:contextInfo:)),
+            contextInfo: nil
+        )
+    }
+
+    @objc func htmlOperationDidRun(printOperation _: NSPrintOperation, success: Bool, contextInfo _: UnsafeRawPointer?) {
+        guard success else {
+            failHtml("Unable to render the HTML document")
+            return
+        }
+
+        guard let tempFile = htmlTempFile,
+              let data = FileManager.default.contents(atPath: tempFile),
+              !data.isEmpty
+        else {
+            failHtml("The rendered HTML document could not be read")
+            return
+        }
+
+        finishHtml(data)
+    }
+
+    private func finishHtml(_ data: Data) {
+        if htmlFinished {
+            return
+        }
+        htmlFinished = true
+        releaseHtml()
+        printing.onHtmlRendered(printJob: self, pdfData: data)
+    }
+
+    fileprivate func failHtml(_ error: String) {
+        if htmlFinished {
+            return
+        }
+        htmlFinished = true
+        releaseHtml()
+        printing.onHtmlError(printJob: self, error: error)
+    }
+
+    /// Release everything one conversion owns, including its temp file.
+    private func releaseHtml() {
+        htmlBackstop?.cancel()
+        htmlBackstop = nil
+        htmlWebView?.navigationDelegate = nil
+        htmlWebView = nil
+        htmlDelegate = nil
+        htmlPrintInfo = nil
+        htmlWindow = nil
+
+        if let tempFile = htmlTempFile {
+            try? FileManager.default.removeItem(atPath: tempFile)
+            htmlTempFile = nil
         }
     }
 
