@@ -49,6 +49,7 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.content.FileProvider;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -58,6 +59,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * PrintJob
@@ -665,75 +667,146 @@ public class PrintingJob extends PrintDocumentAdapter {
             return;
         }
 
+        // One terminal callback per call, whichever path gets there first: the
+        // uncaught-exception handler below used to be able to report a second
+        // one, and to report a null message, which the Dart side reads as a
+        // clean end of stream.
+        final AtomicBoolean ended = new AtomicBoolean(false);
+
         Thread thread = new Thread(() -> {
             String error = null;
+            File file = null;
+            FileOutputStream oStream = null;
+            FileInputStream iStream = null;
+            ParcelFileDescriptor parcelFD = null;
+            PdfRenderer renderer = null;
+
             try {
-                File tempDir = context.getCacheDir();
-                File file = File.createTempFile("printing", null, tempDir);
-                FileOutputStream oStream = new FileOutputStream(file);
+                file = File.createTempFile("printing", null, context.getCacheDir());
+                oStream = new FileOutputStream(file);
                 oStream.write(data);
                 oStream.close();
+                oStream = null;
 
-                FileInputStream iStream = new FileInputStream(file);
-                ParcelFileDescriptor parcelFD = ParcelFileDescriptor.dup(iStream.getFD());
-                PdfRenderer renderer = new PdfRenderer(parcelFD);
+                iStream = new FileInputStream(file);
+                parcelFD = ParcelFileDescriptor.dup(iStream.getFD());
+                renderer = new PdfRenderer(parcelFD);
+                // PdfRenderer owns the descriptor now, and closes it itself.
+                // Closing it here as well would close the dup twice.
+                parcelFD = null;
 
-                if (!file.delete()) {
-                    Log.e("PDF", "Unable to delete temporary file");
-                }
+                final int documentPages = renderer.getPageCount();
+                final int pageCount = pages != null ? pages.size() : documentPages;
 
-                final int pageCount = pages != null ? pages.size() : renderer.getPageCount();
                 for (int i = 0; i < pageCount; i++) {
-                    PdfRenderer.Page page = renderer.openPage(pages == null ? i : pages.get(i));
+                    final int pageIndex = pages == null ? i : pages.get(i);
+                    if (pageIndex < 0 || pageIndex >= documentPages) {
+                        // Used to reach openPage and throw
+                        // IllegalArgumentException, which nothing caught.
+                        throw new IOException("Page " + (pageIndex + 1)
+                                + " is out of range: the document has " + documentPages
+                                + " page(s)");
+                    }
 
-                    final int width = Double.valueOf(page.getWidth() * scale).intValue();
-                    final int height = Double.valueOf(page.getHeight() * scale).intValue();
-                    int stride = width * 4;
+                    PdfRenderer.Page page = renderer.openPage(pageIndex);
+                    try {
+                        // At least one pixel: Bitmap.createBitmap rejects a
+                        // zero-sized request.
+                        final int width =
+                                Math.max(Double.valueOf(page.getWidth() * scale).intValue(), 1);
+                        final int height =
+                                Math.max(Double.valueOf(page.getHeight() * scale).intValue(), 1);
+                        final int stride = width * 4;
 
-                    Matrix transform = new Matrix();
-                    transform.setScale(scale.floatValue(), scale.floatValue());
+                        Matrix transform = new Matrix();
+                        transform.setScale(scale.floatValue(), scale.floatValue());
 
-                    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                    // A PDF page has no background of its own, and a fresh
-                    // bitmap is zero-filled, so a rastered page used to come
-                    // back transparent - and saving it as PNG, or re-encoding
-                    // it as JPEG, gave a black page.
-                    bitmap.eraseColor(background);
+                        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                        // A PDF page has no background of its own, and a fresh
+                        // bitmap is zero-filled, so a rastered page used to come
+                        // back transparent - and saving it as PNG, or re-encoding
+                        // it as JPEG, gave a black page.
+                        bitmap.eraseColor(background);
 
-                    page.render(bitmap, null, transform, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+                        page.render(
+                                bitmap, null, transform, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
 
-                    page.close();
+                        final ByteBuffer buf = ByteBuffer.allocate(stride * height);
+                        bitmap.copyPixelsToBuffer(buf);
+                        bitmap.recycle();
 
-                    final ByteBuffer buf = ByteBuffer.allocate(stride * height);
-                    bitmap.copyPixelsToBuffer(buf);
-                    bitmap.recycle();
-
-                    new Handler(Looper.getMainLooper())
-                            .post(()
-                                            -> printing.onPageRasterized(
-                                                    PrintingJob.this, buf.array(), width, height));
+                        new Handler(Looper.getMainLooper())
+                                .post(()
+                                                -> printing.onPageRasterized(PrintingJob.this,
+                                                        buf.array(), width, height));
+                    } finally {
+                        // In a finally, so renderer.close() below cannot throw
+                        // 'Cannot close a renderer with open pages'.
+                        page.close();
+                    }
                 }
+            } catch (Throwable e) {
+                // Widened from IOException: a password-protected or truncated
+                // document throws SecurityException or IllegalArgumentException
+                // from the PdfRenderer constructor, and neither was caught - so
+                // the temp file, both streams and the dup'ed descriptor all
+                // leaked, and the message that reached Dart was null.
+                Log.e("PDF", "Unable to raster the document", e);
+                error = e.getMessage() != null ? e.getMessage() : e.toString();
+            } finally {
+                closeQuietly(renderer);
+                closeQuietly(parcelFD);
+                closeQuietly(iStream);
+                closeQuietly(oStream);
 
-                renderer.close();
-                iStream.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                error = e.getMessage();
+                // Deleted last, and on every path. It used to be deleted after
+                // the PdfRenderer constructor, so it survived for ever exactly
+                // when that constructor threw.
+                if (file != null && file.exists() && !file.delete()) {
+                    Log.w("PDF", "Unable to delete a temporary file");
+                }
             }
 
-            final String finalError = error;
-            new Handler(Looper.getMainLooper())
-                    .post(() -> printing.onPageRasterEnd(PrintingJob.this, finalError));
+            reportRasterEnd(ended, error);
         });
 
         thread.setUncaughtExceptionHandler((t, e) -> {
-            final String finalError = e.getMessage();
-            new Handler(Looper.getMainLooper())
-                    .post(() -> printing.onPageRasterEnd(PrintingJob.this, finalError));
+            Log.e("PDF", "Unable to raster the document", e);
+            reportRasterEnd(ended, e.getMessage() != null ? e.getMessage() : e.toString());
         });
 
         thread.start();
+    }
+
+    /// Report the single end of a raster, on the main thread.
+    private void reportRasterEnd(final AtomicBoolean ended, final String error) {
+        if (!ended.compareAndSet(false, true)) {
+            return;
+        }
+
+        new Handler(Looper.getMainLooper())
+                .post(() -> printing.onPageRasterEnd(PrintingJob.this, error));
+    }
+
+    /// Close a handle, or do nothing when there is none.
+    ///
+    /// Each close is guarded on its own, so one failure cannot skip the rest.
+    /// Package-private so the unit tests can exercise it.
+    @VisibleForTesting
+    static void closeQuietly(final Object handle) {
+        if (handle == null) {
+            return;
+        }
+
+        try {
+            if (handle instanceof PdfRenderer) {
+                ((PdfRenderer) handle).close();
+            } else if (handle instanceof Closeable) {
+                ((Closeable) handle).close();
+            }
+        } catch (Throwable e) {
+            Log.w("PDF", "Unable to close a raster handle", e);
+        }
     }
 
     /// Convert PDF points to mils, clamped to what an int media size can hold.

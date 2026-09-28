@@ -9,6 +9,10 @@
 - Every pdfium handle on the Windows and Linux raster paths is released by a scope guard, so the new failure exits cannot skip a close
 - Fix the web raster hanging for ever when a page's blob could not be read or the read was aborted: the `FileReader` listener completed its completer only on the success path, and its failure went to the zone rather than to the awaiting code, so `Printing.raster` stopped emitting and never closed and `PdfPreview` sat on a spinner with no error. The read now reports a failure on the stream
 - Fix the web raster silently dropping a page when the canvas could not be encoded; it reports which page instead
+- Fix the Android raster leaking a full-size temp file in the app cache, two file descriptors and a native `PdfRenderer` on every failure - a password-protected, truncated or malformed document, or an out-of-range page index - which also tripped StrictMode. Every handle is now released on every path, and the temp file is deleted last rather than on the line after the constructor that threw
+- An out-of-range page index on Android now ends the raster stream with a message naming the index and the page count, instead of an uncaught `IllegalArgumentException`
+- A failed Android raster always reports a non-null message. It could report null, which the Dart side reads as a clean end of stream, and it could report twice
+
 
 
 
