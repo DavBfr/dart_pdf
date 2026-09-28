@@ -16,6 +16,7 @@
 
 import FlutterMacOS
 import Foundation
+import PDFKit
 import WebKit
 
 public class PrintJob: NSView, NSSharingServicePickerDelegate {
@@ -23,8 +24,10 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     public var index: Int
 
     private var printOperation: NSPrintOperation?
-    private var pdfDocument: CGPDFDocument?
-    private var page: CGPDFPage?
+    // PDFKit rather than CGPDFDocument: see PdfPageRenderer. The document has
+    // to outlive every page it hands out, because PDFPage does not retain it.
+    private var pdfDocument: PDFDocument?
+    private var page: PDFPage?
     private var isWaitingForDocument = false
     private var documentReceived = false
     private var dynamic = false
@@ -91,12 +94,13 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
             }
         }
 
-        if pdfDocument != nil {
-            range.pointee.length = pdfDocument!.numberOfPages
-            let page = pdfDocument!.page(at: 1)
-            let size = page?.getBoxRect(CGPDFBox.mediaBox) ?? NSZeroRect
-            setFrameSize(size.size)
-            setBoundsSize(size.size)
+        if let document = pdfDocument {
+            range.pointee.length = document.pageCount
+            // The crop box is what is meant to be seen, and its origin is not
+            // necessarily zero.
+            let size = document.page(at: 0).map { PdfPageRenderer.size(of: $0) } ?? .zero
+            setFrameSize(size)
+            setBoundsSize(size)
         } else {
             range.pointee.length = 0
         }
@@ -105,8 +109,12 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
 
     /// Return the drawing rectangle for a particular page number
     override public func rectForPage(_ page: Int) -> NSRect {
-        self.page = pdfDocument?.page(at: page)
-        return self.page?.getBoxRect(CGPDFBox.mediaBox) ?? NSZeroRect
+        // NSPrintOperation numbers pages from 1, PDFKit from 0.
+        self.page = pdfDocument?.page(at: page - 1)
+        guard let current = self.page else {
+            return NSZeroRect
+        }
+        return NSRect(origin: .zero, size: PdfPageRenderer.size(of: current))
     }
 
     @objc func printOperationDidRun(printOperation _: NSPrintOperation, success: Bool, contextInfo _: UnsafeRawPointer?) {
@@ -114,10 +122,10 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     }
 
     func setDocument(_ data: Data?) {
-        // An empty or malformed document must not crash: CGDataProvider returns
-        // nil for empty data, and CGPDFDocument returns nil for invalid data.
-        if let data, !data.isEmpty, let dataProvider = CGDataProvider(data: data as CFData) {
-            pdfDocument = CGPDFDocument(dataProvider)
+        // An empty or malformed document must not crash: PDFDocument returns
+        // nil for both.
+        if let data, !data.isEmpty {
+            pdfDocument = PDFDocument(data: data)
         } else {
             pdfDocument = nil
         }
@@ -139,12 +147,15 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     }
 
     override public func draw(_: NSRect) {
-        if pdfDocument != nil {
-            let ctx = NSGraphicsContext.current?.cgContext
-            if page != nil {
-                ctx?.drawPDFPage(page!)
-            }
+        guard let ctx = NSGraphicsContext.current?.cgContext,
+              // Held so the document cannot be released while the page draws.
+              pdfDocument != nil,
+              let page = page
+        else {
+            return
         }
+
+        PdfPageRenderer.draw(page: page, in: ctx, to: bounds)
     }
 
     public func listPrinters() -> [NSDictionary] {
@@ -333,49 +344,22 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     }
 
     public func rasterPdf(data: Data, pages: [Int]?, scale: CGFloat) {
-        guard
-            let provider = CGDataProvider(data: data as CFData),
-            let document = CGPDFDocument(provider)
-        else {
+        guard let document = PDFDocument(data: data), document.pageCount > 0 else {
             printing.onPageRasterEnd(printJob: self, error: "Cannot raster a malformed PDF file")
             return
         }
 
         DispatchQueue.global().async {
-            let pageCount = document.numberOfPages
-
-            for pageNum in pages ?? Array(0 ... pageCount - 1) {
-                guard let page = document.page(at: pageNum + 1) else { continue }
-                let angle = CGFloat(page.rotationAngle) * CGFloat.pi / -180
-                let rect = page.getBoxRect(.mediaBox)
-                let width = Int(abs((cos(angle) * rect.width + sin(angle) * rect.height) * scale))
-                let height = Int(abs((cos(angle) * rect.height + sin(angle) * rect.width) * scale))
-                let stride = width * 4
-                var data = Data(repeating: 0, count: stride * height)
-
-                data.withUnsafeMutableBytes { (outputBytes: UnsafeMutableRawBufferPointer) in
-                    let rgb = CGColorSpaceCreateDeviceRGB()
-                    let context = CGContext(
-                        data: outputBytes.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                        width: width,
-                        height: height,
-                        bitsPerComponent: 8,
-                        bytesPerRow: stride,
-                        space: rgb,
-                        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-                    )
-
-                    if context != nil {
-                        context!.translateBy(x: CGFloat(width) / 2, y: CGFloat(height) / 2)
-                        context!.scaleBy(x: scale, y: scale)
-                        context!.rotate(by: angle)
-                        context!.translateBy(x: -rect.width / 2, y: -rect.height / 2)
-                        context!.drawPDFPage(page)
-                    }
+            // document is captured, so it outlives every page below.
+            for pageNum in pages ?? Array(0 ... document.pageCount - 1) {
+                guard let page = document.page(at: pageNum),
+                      let raster = PdfPageRenderer.raster(page: page, scale: scale)
+                else {
+                    continue
                 }
 
                 DispatchQueue.main.sync {
-                    self.printing.onPageRasterized(printJob: self, imageData: data, width: width, height: height)
+                    self.printing.onPageRasterized(printJob: self, imageData: raster.data, width: raster.width, height: raster.height)
                 }
             }
 

@@ -132,6 +132,12 @@ jobs:
           architecture: x64
       - name: Enable macOS for flutter
         run: flutter config --enable-macos-desktop
+      - name: Check the Apple page renderer
+        run: |
+          diff printing/macos/printing/Sources/printing/PdfPageRenderer.swift printing/ios/printing/Sources/printing/PdfPageRenderer.swift
+          python3 printing/test/apple/make_fixtures.py build/printing-fixtures
+          swiftc -O -o build/renderer-checks printing/macos/printing/Sources/printing/PdfPageRenderer.swift printing/test/apple/main.swift
+          build/renderer-checks build/printing-fixtures
       - name: Prepare build
         run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
       - name: Build example for macOS

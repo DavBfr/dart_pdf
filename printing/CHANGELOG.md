@@ -37,6 +37,12 @@
 - Fix the Android system print dialog sitting on 'Preparing preview' with no message when the `onLayout` callback throws. A failure is now reported to the print framework as a failure, carrying the message from Dart, instead of as a cancellation, which dropped it
 - Fix the Android print preview hanging when the document could not be written into the print spooler - a full disk, or a descriptor closed because the dialog was dismissed. The write now reports a result on every path, so `Printing.layoutPdf` completes instead of waiting for ever
 - Each Android print job now delivers exactly one result to Dart and exactly one terminal callback to the print framework, whatever ends it
+- Annotations - highlights, comments, ink, stamps and form widget appearances - are now drawn on iOS and macOS, in `Printing.raster`, `PdfPreview` and printed output. They were silently missing, because the Apple backends ran only the page content stream; Windows and Linux already drew them. Annotations carrying the Hidden flag stay hidden
+- Fix a PDF whose MediaBox or CropBox origin is not (0, 0) rastering and printing displaced and clipped on iOS and macOS
+- Fix iOS and macOS disagreeing about the pixel size of the same document: macOS sized the raster from the media box and iOS from the crop box. Both now use the crop box, matching Windows and Linux. **macOS raster sizes change for any document with a crop box smaller than its media box**
+- Fix a rotated page losing a pixel from one axis when rastered on iOS and macOS; raster sizes are rounded rather than truncated
+- A page larger than the paper is now scaled to fit rather than clipped
+- The iOS and macOS podspec deployment targets are raised to 13.0 and 10.15, which is what the Swift package manifests already declared
 
 ## 5.15.2
 
