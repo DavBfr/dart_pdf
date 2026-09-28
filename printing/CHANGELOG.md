@@ -25,6 +25,9 @@
 - Fix `PdfPreview.onPageFormatChanged` never firing again after the first parent rebuild, so a persisted paper-size choice silently stopped being saved. The replaced `PdfPreviewData` is now also disposed rather than leaked, and the selected format survives the swap
 - Fix `PdfPreview` leaking one `ScrollController` per mount, with its listener list. The scroll-position restore scheduled from `build` is guarded, so disposing the controller cannot turn that leak into a 'used after being disposed' crash
 - `PdfPreviewCustomState.previewUpdate` is deprecated: it was always null and nothing wrote to it
+- **A failed font download now reaches the caller.** `PdfGoogleFonts.*` and `DownloadableFont.getFont` used to return Helvetica on any failure, with their only report inside an assert that release and profile builds strip - so a release build silently shipped a document in which every rune outside 0x00-0xFF was a crossed box. To keep the old behaviour, set `DownloadableFont.defaultFallback = Font.helvetica()` once, or pass `fallback:` to `getFont`; the substitution is then reported through `FlutterError.reportError` in every build mode
+- A downloaded body that is not a font - a captive portal's sign-in page, a truncated response - is now a font error naming the font and the URL, and is dropped from the cache, instead of a `RangeError` from inside the TTF reader much later
+- `DownloadableFont` is exported, so an app can use it for its own font URLs and set the fallback
 
 
 
