@@ -1055,6 +1055,13 @@ class RichText extends Widget with SpanningWidget {
     var top = 0.0;
     var bottom = 0.0;
 
+    // The largest TextStyle.height among the spans of the line being built, as a
+    // multiple of the natural line height, and zero until the line has one. The
+    // field was declared, defaulted and carried by copyWith, apply and merge, and
+    // read by nothing: a paragraph measured the same at height null, 0.5, 1, 2, 4
+    // and 10, so Flutter code ported with height: 1.5 came out single-spaced.
+    var lineHeight = 0.0;
+
     final lines = <_Line>[];
     var spanCount = 0;
     var spanStart = 0;
@@ -1246,9 +1253,10 @@ class RichText extends Widget with SpanningWidget {
                   spanCount = 0;
 
                   offsetX = 0.0;
-                  offsetY += bottom - top;
+                  offsetY += (bottom - top) * lineHeight;
                   top = 0;
                   bottom = 0;
+                  lineHeight = 0.0;
 
                   if (_maxLines != null && lines.length >= _maxLines) {
                     return;
@@ -1324,6 +1332,7 @@ class RichText extends Widget with SpanningWidget {
               final mb = tightBounds ? metrics.bottom : metrics.ascent;
               top = math.min(top, mt + baseline);
               bottom = math.max(bottom, mb + baseline);
+              lineHeight = math.max(lineHeight, style.height ?? 1.0);
 
               // A right-to-left run reads backwards on the page, and every
               // consumer of the span - the drawn string and its own metrics -
@@ -1379,13 +1388,17 @@ class RichText extends Widget with SpanningWidget {
 
               offsetX = 0.0;
               if (spanCount > 0) {
-                offsetY += bottom - top;
+                offsetY += (bottom - top) * lineHeight;
               } else {
                 offsetY +=
-                    font.emptyLineHeight * style.fontSize! * textScaleFactor;
+                    font.emptyLineHeight *
+                    style.fontSize! *
+                    textScaleFactor *
+                    (style.height ?? 1.0);
               }
               top = 0;
               bottom = 0;
+              lineHeight = 0.0;
               spanCount = 0;
 
               if (_maxLines != null && lines.length >= _maxLines) {
@@ -1444,9 +1457,10 @@ class RichText extends Widget with SpanningWidget {
             spanCount = 0;
 
             offsetX = 0.0;
-            offsetY += bottom - top;
+            offsetY += (bottom - top) * lineHeight;
             top = 0;
             bottom = 0;
+            lineHeight = 0.0;
 
             // Below the reset and `>=`, like the two text branches. It used to
             // test `>` above them, so one line too many was built - and on the
@@ -1467,6 +1481,7 @@ class RichText extends Widget with SpanningWidget {
           final baseline = span.baseline * textScaleFactor;
           top = math.min(top, baseline);
           bottom = math.max(bottom, ws.height + baseline);
+          lineHeight = math.max(lineHeight, style.height ?? 1.0);
 
           ws.offset = PdfPoint(offsetX, -offsetY + baseline);
           _spans.add(ws);
@@ -1509,7 +1524,7 @@ class RichText extends Widget with SpanningWidget {
           false,
         ),
       );
-      offsetY += bottom - top;
+      offsetY += (bottom - top) * lineHeight;
     } else if (lines.isEmpty && blankHeight > 0) {
       // Nothing was laid out, but there was a paragraph: it reserves one line,
       // and whatever whitespace it held has already moved the pen.

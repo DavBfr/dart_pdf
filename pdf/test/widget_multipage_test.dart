@@ -156,4 +156,29 @@ void main() {
 
     await expectLater(pdf.save(), completes);
   });
+  test('TextStyle.height pushes a paragraph onto more pages', () async {
+    Future<int> pages(double height) async {
+      final pdf = Document();
+      pdf.addPage(
+        MultiPage(
+          pageFormat: const PdfPageFormat(200, 60, marginAll: 4),
+          build: (Context context) => <Widget>[
+            Text(
+              'The quick brown fox jumps over the lazy dog and keeps running '
+              'for a while yet, and then a while longer still',
+              overflow: TextOverflow.span,
+              style: TextStyle(fontSize: 10, height: height),
+            ),
+          ],
+        ),
+      );
+      await pdf.save();
+      return pdf.document.pdfPageList.pages.length;
+    }
+
+    // The paragraph fits one 60pt page at its natural line height and needs two
+    // at twice that.
+    expect(await pages(1), 1);
+    expect(await pages(2), 2);
+  });
 }

@@ -519,6 +519,145 @@ void main() {
     );
   });
 
+  group('TextStyle.height', () {
+    const paragraph =
+        'The quick brown fox jumps over the lazy dog and keeps running for a '
+        'while';
+
+    /// The box height of [paragraph] in a 200pt column.
+    Future<double> heightOf({
+      double? height,
+      double lineSpacing = 0,
+      TextStyle? style,
+    }) async {
+      late RichText laid;
+      final document = Document();
+      document.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(400, 900, marginAll: 0),
+          build: (Context context) => SizedBox(
+            width: 200,
+            child: laid = RichText(
+              text: TextSpan(
+                text: paragraph,
+                style:
+                    style ??
+                    TextStyle(
+                      font: ttf,
+                      fontSize: 10,
+                      height: height,
+                      lineSpacing: lineSpacing,
+                    ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await document.save();
+      return laid.box!.height;
+    }
+
+    test('scales the line height by exactly that much', () async {
+      // The field was declared, defaulted and carried by copyWith, apply and
+      // merge, and read by no layout code at all: the same paragraph measured
+      // the same at height null, 0.5, 1, 2, 4 and 10.
+      final base = await heightOf(height: 1);
+
+      for (final factor in <double>[0.5, 1, 1.5, 2, 3, 10]) {
+        expect(
+          await heightOf(height: factor),
+          closeTo(base * factor, 1e-9),
+          reason: 'height $factor',
+        );
+      }
+    });
+
+    test('unset, 1 and the theme default all mean the same', () async {
+      final base = await heightOf(height: 1);
+
+      expect(await heightOf(), closeTo(base, 1e-9), reason: 'null');
+      expect(
+        await heightOf(style: TextStyle(font: ttf, fontSize: 10)),
+        closeTo(base, 1e-9),
+      );
+    });
+
+    test('is a multiple, where lineSpacing is absolute points', () async {
+      // Two lines in this column, so one gap between them.
+      final natural = await heightOf(height: 1) / 2;
+
+      expect(
+        await heightOf(height: 2, lineSpacing: 3),
+        closeTo(2 * natural * 2 + 3, 1e-9),
+      );
+    });
+
+    test('a line takes the largest of its spans', () async {
+      late RichText laid;
+      final document = Document();
+      document.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(400, 300, marginAll: 0),
+          build: (Context context) => laid = RichText(
+            text: TextSpan(
+              style: TextStyle(font: ttf, fontSize: 10),
+              children: <TextSpan>[
+                const TextSpan(text: 'one '),
+                TextSpan(
+                  text: 'two',
+                  style: TextStyle(font: ttf, fontSize: 10, height: 2),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await document.save();
+
+      final single = await heightOf(height: 1) / 2;
+      expect(laid.box!.height, closeTo(2 * single, 1e-9));
+    });
+
+    test('an empty line scales too', () async {
+      late RichText laid;
+      Future<double> blankLines(double height) async {
+        final document = Document();
+        document.addPage(
+          Page(
+            pageFormat: const PdfPageFormat(400, 300, marginAll: 0),
+            build: (Context context) => laid = RichText(
+              text: TextSpan(
+                text: 'a\n\nb',
+                style: TextStyle(font: ttf, fontSize: 10, height: height),
+              ),
+            ),
+          ),
+        );
+        await document.save();
+        return laid.box!.height;
+      }
+
+      expect(await blankLines(2), closeTo(2 * await blankLines(1), 1e-9));
+    });
+
+    test('apply can scale it', () {
+      // The assert here read `heightFactor == 1.0 && heightDelta == 0.0`, which
+      // refused to scale a height that was set, unlike the three fields beside
+      // it. An inheriting style, because apply() does not carry lineSpacing and
+      // so cannot be called on a style that has inherit false at all - a defect
+      // of its own, not this one.
+      expect(const TextStyle(height: 1).apply(heightFactor: 2).height, 2.0);
+      expect(const TextStyle(height: 2).apply(heightDelta: 1).height, 3.0);
+      // And, like the three fields beside it, scaling a height that is not set
+      // is a mistake worth an assert.
+      expect(
+        () => const TextStyle().apply(heightFactor: 2),
+        throwsA(isA<AssertionError>()),
+      );
+      expect(const TextStyle().apply().height, isNull);
+    });
+  });
+
   group('a paragraph of nothing but whitespace', () {
     /// The box [child] lays out to.
     Future<PdfRect> boxOf(RichText Function() child) async {
