@@ -15,6 +15,7 @@
  */
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:js_interop' as js;
 import 'dart:js_interop_unsafe' as js;
 import 'dart:typed_data';
@@ -31,12 +32,14 @@ import 'src/interface.dart';
 import 'src/mutex.dart';
 import 'src/output_type.dart';
 import 'src/pdfjs.dart';
+import 'src/pdfjs_urls.dart';
 import 'src/printer.dart';
 import 'src/printing_info.dart';
 import 'src/raster.dart';
 
 const _dartPdfJsVersion = 'dartPdfJsVersion';
 const _dartPdfJsBaseUrl = 'dartPdfJsBaseUrl';
+const _dartPdfJsCMapUrl = 'dartPdfJsCMapUrl';
 
 /// Print plugin targeting Flutter on the Web
 class PrintingPlugin extends PrintingPlatform {
@@ -49,10 +52,6 @@ class PrintingPlugin extends PrintingPlatform {
 
   static const String _frameId = '__net_nfet_printing__';
 
-  static const _pdfJsCdnPath = 'https://unpkg.com/pdfjs-dist';
-
-  static const _pdfJsVersion = '6.2.108';
-
   final _loading = Mutex();
 
   bool get _hasPdfJsLib => web.window
@@ -63,8 +62,14 @@ class PrintingPlugin extends PrintingPlatform {
       )
       .toDart;
 
-  /// The base URL for loading pdf.js library
-  late String _pdfJsUrlBase;
+  /// The URLs this plugin resolved for pdf.js.
+  ///
+  /// Null when the host page supplied the library itself and configured no
+  /// cmaps URL: the plugin then has no idea where that copy keeps its cmaps.
+  /// This used to be a `late String` assigned only on the loading path, so
+  /// reading it in [raster] would have thrown a LateInitializationError - which
+  /// the dead guard there hid.
+  PdfJsUrls? _pdfJsUrls;
 
   /// Set once pdf.js is available, so the queued callers woken by one load do
   /// not each import it again.
@@ -108,44 +113,56 @@ class PrintingPlugin extends PrintingPlatform {
     }
   }
 
-  Future<void> _importPdfJs() async {
-    if (!_hasPdfJsLib) {
-      // Check if the source of PDF.js library is overridden via
-      // [dartPdfJsBaseUrl] JavaScript variable.
-      if (web.window.hasProperty(_dartPdfJsBaseUrl.toJS).toDart) {
-        _pdfJsUrlBase = web.window
-            .getProperty<js.JSString?>(_dartPdfJsBaseUrl.toJS)!
-            .toDart;
-      } else {
-        final pdfJsVersion =
-            web.window.hasProperty(_dartPdfJsVersion.toJS).toDart
-            ? web.window
-                  .getProperty<js.JSString?>(_dartPdfJsVersion.toJS)!
-                  .toDart
-            : _pdfJsVersion;
-        _pdfJsUrlBase = '$_pdfJsCdnPath@$pdfJsVersion/build/';
-      }
-
-      // pdf.js 4+ ships ES modules only (.mjs), so load it with a dynamic
-      // import() instead of a classic <script> tag.
-      final importUrl = '${_pdfJsUrlBase}pdf.min.mjs';
-      final workerUrl = '${_pdfJsUrlBase}pdf.worker.min.mjs';
-      await web.window
-          .callMethod<js.JSPromise>(
-            'eval'.toJS,
-            '''
-(async function() {
-  var m = await import("$importUrl");
-  window.pdfjsLib = m;
-  m.GlobalWorkerOptions.workerSrc = "$workerUrl";
-})()'''
-                .toJS,
-          )
-          .toDart
-          // A proxy that black-holes the request would otherwise leave every
-          // caller waiting forever.
-          .timeout(_pdfJsLoadTimeout);
+  /// A string set on `window` by the app, or null when unset or empty.
+  String? _configured(String name) {
+    if (!web.window.hasProperty(name.toJS).toDart) {
+      return null;
     }
+
+    final value = web.window.getProperty<js.JSString?>(name.toJS)?.toDart;
+    return value == null || value.isEmpty ? null : value;
+  }
+
+  Future<void> _importPdfJs() async {
+    final hostProvided = _hasPdfJsLib;
+    final configuredCMapUrl = _configured(_dartPdfJsCMapUrl);
+
+    // A library this plugin did not load says nothing about where its cmaps
+    // are, so only an explicit override applies in that case.
+    if (!hostProvided || configuredCMapUrl != null) {
+      _pdfJsUrls = PdfJsUrls.resolve(
+        documentBaseUri: web.window.document.baseURI,
+        configuredBase: _configured(_dartPdfJsBaseUrl),
+        configuredCMapUrl: configuredCMapUrl,
+        version: _configured(_dartPdfJsVersion) ?? PdfJsUrls.defaultVersion,
+      );
+    }
+
+    if (hostProvided) {
+      return;
+    }
+
+    final urls = _pdfJsUrls!;
+
+    // pdf.js 4+ ships ES modules only (.mjs), so load it with a dynamic
+    // import() instead of a classic <script> tag. The URLs are JSON-encoded:
+    // they come from the page, and a quote in one of them used to be a syntax
+    // error in this script.
+    await web.window
+        .callMethod<js.JSPromise>(
+          'eval'.toJS,
+          '''
+(async function() {
+  var m = await import(${jsonEncode(urls.module)});
+  window.pdfjsLib = m;
+  m.GlobalWorkerOptions.workerSrc = ${jsonEncode(urls.worker)};
+})()'''
+              .toJS,
+        )
+        .toDart
+        // A proxy that black-holes the request would otherwise leave every
+        // caller waiting forever.
+        .timeout(_pdfJsLoadTimeout);
   }
 
   @override
@@ -349,9 +366,13 @@ class PrintingPlugin extends PrintingPlatform {
     // still download/share the same document bytes after preview rasterization.
     final settings = Settings()..data = Uint8List.fromList(document).toJS;
 
-    if (!_hasPdfJsLib) {
+    // This used to test !_hasPdfJsLib, which _initPlugin() above has just made
+    // true, so the CMap configuration was never applied and text using a
+    // predefined CMap silently disappeared.
+    final cMapUrl = _pdfJsUrls?.cMap;
+    if (cMapUrl != null) {
       settings
-        ..cMapUrl = '$_pdfJsUrlBase/cmaps/'
+        ..cMapUrl = cMapUrl
         ..cMapPacked = true;
     }
 

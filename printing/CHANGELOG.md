@@ -1,5 +1,13 @@
 # Changelog
 
+## 5.17.0
+
+- Fix self-hosting pdf.js on web never loading, with 'Failed to resolve module specifier'. A dynamic `import()` reads its argument as a module specifier, so the relative `dartPdfJsBaseUrl` the README documented was a bare specifier the browser rejected. The configured base is now resolved against the page - honouring `<base href>` - and given a trailing slash
+- Fix text disappearing on web from PDFs whose CID fonts use a predefined CMap (`UniJIS-UCS2-H`, `GBK-EUC-H`). The CMap configuration was behind a condition that was never true, and the URL it would have built was a 404: `pdfjs-dist` keeps `cmaps/` beside `build/`, not inside it
+- A self-hoster whose `cmaps/` directory is not next to the library can point at it with a new `dartPdfJsCMapUrl` window variable
+- Configuration values from the page are escaped before being interpolated into the loader script, so a quote in one of them is no longer a syntax error
+- The README's pdf.js instructions named version 3.2.146 and the `*.js` loader files, neither of which works with the ES-module pdf.js this package requests
+
 ## 5.16.0
 
 - Fix roll and undefined page formats sending `double.infinity` over the method channel, which no platform can represent: Android substituted its unknown-size sentinel and laid the document out for Letter, iOS produced NaN margins that ended up as a `NaN` MediaBox, and Windows cast the length into a negative 16-bit field. An unspecified axis is now sent as `0`, meaning 'use the printer's paper for this axis', and each backend treats it that way
