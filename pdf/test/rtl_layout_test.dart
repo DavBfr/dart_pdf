@@ -19,6 +19,7 @@ import 'dart:math' as math;
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/src/pdf/font/bidi_utils.dart' as bidi;
+import 'package:pdf/src/pdf/options.dart';
 import 'package:pdf/src/widgets/text_segmentation.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
@@ -131,6 +132,12 @@ Future<List<List<String>>> rtlLines(String text, double width) async {
   return laidOutLines(await document.save());
 }
 
+/// These read the output of the bidi pipeline, which a build with
+/// -Duse_arabic=true replaces with arabic.convert.
+const legacyArabic = useArabic
+    ? 'the legacy arabic.convert path is in use'
+    : null;
+
 void main() {
   setUpAll(() {
     Document.debug = true;
@@ -203,7 +210,7 @@ void main() {
         <String>['the', 'historical', 'old', '\uFE8D'],
         <String>['\uFE8F', 'town'],
       ]);
-    });
+    }, skip: legacyArabic);
 
     test('is unchanged where it does not wrap', () async {
       final lines = await rtlLines(
@@ -214,7 +221,7 @@ void main() {
       expect(lines, <List<String>>[
         <String>['\uFE8F', 'the', 'historical', 'old', 'town', '\uFE8D'],
       ]);
-    });
+    }, skip: legacyArabic);
 
     test('carries a link across the whole run it covers', () async {
       // _getBox took the decoration's first and last span as its left and right
@@ -291,7 +298,7 @@ void main() {
         <String>['\uFE99', '\uFE95', '\uFE8F', '\uFE8D'],
         <String>['\uFEA9', '\uFEA5', '\uFEA1', '\uFE9D'],
       ]);
-    });
+    }, skip: legacyArabic);
   });
 
   test('an explicit bidi mark still reorders the paragraph', () async {
@@ -328,7 +335,7 @@ void main() {
     expect(pages, hasLength(3));
     expect(pages[0], pages[1], reason: 'stripped after the bidi pass');
     expect(pages[0], isNot(pages[2]), reason: 'not before it');
-  });
+  }, skip: legacyArabic);
 
   test('RTL Text', () {
     pdf.addPage(

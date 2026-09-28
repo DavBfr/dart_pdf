@@ -33,6 +33,8 @@
 - **Fix a link annotation or a background over a right-to-left run being narrower than the run.** The box took the decoration's first and last span as its left and right edge, and for a right-to-left run the first span is the rightmost, so most of the words were not clickable. It is the extent over the whole range now
 - Right-to-left lines shift by up to a couple of points: each word used to be mirrored by its ink box, which does not tile, and is now placed by its advance
 - **Fix an Arabic or Hebrew fragment inside an English paragraph rendering backwards and unjoined** - a name, an address line, a currency symbol. The bidi pass ran only when the resolved direction was `rtl`, and `Directionality` defaults to `ltr`; UAX #9 uses the base direction to pick the embedding level, not to decide whether to run at all. `Text('Total: مرحبا today')` with no `textDirection` now shapes the Arabic and puts it in visual order between the two English words. A paragraph with no strong right-to-left character and no bidi control is skipped, so a left-to-right document is untouched
+- Builds with `--dart-define=use_arabic=true`, or `use_bidi=false`: **a blank line inside one `Text` no longer disappears** - the line break was appended in the same statement that skipped the empty line, so each blank line swallowed its own separator - and **a line with no Arabic in it is no longer indented by one space**. Documents on that path reflow: paragraph breaks come back and such lines shift left by a space
+- On the same path, an Arabic-range character with no shaped form of its own - a Kurdish letter, an Arabic-Indic digit - keeps its place in the word instead of moving to the other end: `arabic.convert('مائة١٢')` now starts with the digits
 
 ## 3.13.2
 

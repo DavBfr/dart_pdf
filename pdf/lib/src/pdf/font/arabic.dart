@@ -325,7 +325,12 @@ Iterable<String> _parse(String text) sync* {
 
   final notArabicWords = <List<int>>[];
 
-  var first = true;
+  // Whether anything has been emitted yet. A separator goes between two emitted
+  // tokens and never before the first: the trailing flush used to test a flag
+  // that was set by every word, emitted or held back, so a line with no Arabic
+  // in it came out indented by one space.
+  var yielded = false;
+
   for (final word in words) {
     final newWord = <int>[];
     var isNewWordArabic = false;
@@ -356,7 +361,11 @@ Iterable<String> _parse(String text) sync* {
         if (position != -1) {
           newWord.insert(0, _arabicSubstitionA[currentLetter][position]);
         } else {
-          newWord.add(currentLetter);
+          // The buffer is built in reverse, so an Arabic-range character with no
+          // substitution of its own - a Kurdish letter, an Arabic-Indic digit -
+          // has to go in at the front like every other one. Appending it put it
+          // at the wrong end of the word.
+          newWord.insert(0, currentLetter);
         }
       } else {
         prevLetter = 0;
@@ -368,10 +377,9 @@ Iterable<String> _parse(String text) sync* {
       }
     }
 
-    if (!first && isNewWordArabic) {
+    if (yielded && isNewWordArabic) {
       yield ' ';
     }
-    first = false;
 
     if (isNewWordArabic) {
       isNewWordArabic = false;
@@ -380,16 +388,18 @@ Iterable<String> _parse(String text) sync* {
       }
       notArabicWords.clear();
       yield String.fromCharCodes(_resolveLigatures(newWord));
+      yielded = true;
     } else {
       notArabicWords.insert(0, newWord);
     }
   }
   // if notArabicWords.length != 0, that means all sentence doesn't contain Arabic.
   for (var i = 0; i < notArabicWords.length; i++) {
-    if (!first) {
+    if (yielded) {
       yield ' ';
     }
     yield String.fromCharCodes(notArabicWords[i]);
+    yielded = true;
   }
 }
 
@@ -397,11 +407,19 @@ Iterable<String> _parse(String text) sync* {
 String convert(String input) {
   final lines = input.split('\n');
   final parsed = <String>[];
+
   for (var i = 0; i < lines.length; i++) {
-    if (lines[i].isEmpty) {
-      continue;
+    if (lines[i].isNotEmpty) {
+      parsed.addAll(_parse(lines[i]));
     }
-    parsed.addAll([..._parse(lines[i]), if (i != lines.length - 1) '\n']);
+
+    // Outside the empty-line skip: the separator used to be appended in the same
+    // statement, so a blank line swallowed its own line break and a paragraph
+    // break inside one Text disappeared.
+    if (i != lines.length - 1) {
+      parsed.add('\n');
+    }
   }
+
   return parsed.join();
 }

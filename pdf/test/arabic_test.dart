@@ -17,6 +17,7 @@
 import 'dart:io';
 
 import 'package:pdf/pdf.dart';
+import 'package:pdf/src/pdf/font/arabic.dart' as arabic;
 import 'package:pdf/src/pdf/font/bidi_utils.dart' as bidi;
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
@@ -168,6 +169,75 @@ void main() {
     test('reversed walks whole code points', () {
       expect(bidi.reversed('abc'), 'cba');
       expect(bidi.reversed('a\u{1F600}b'), 'b\u{1F600}a');
+    });
+  });
+
+  group('the legacy arabic.convert path', () {
+    // Only reached in builds with --dart-define=use_arabic=true, or
+    // use_bidi=false, but the function is callable either way.
+    test('preserves line structure', () {
+      // The line separator was appended in the same statement that the
+      // empty-line skip jumped over, so a blank line swallowed its own break and
+      // a paragraph break inside one Text disappeared.
+      expect(arabic.convert('a\n\nb'), 'a\n\nb');
+      expect(arabic.convert('\na'), '\na');
+      expect(arabic.convert('a\n'), 'a\n');
+      expect(arabic.convert('\n\n'), '\n\n');
+
+      for (final text in <String>[
+        'a',
+        'a\nb',
+        'a\n\nb',
+        '\na\n',
+        'مرحبا\n\nأهلا',
+        'Title\n\nمرحبا',
+      ]) {
+        expect(
+          arabic.convert(text).split('\n'),
+          hasLength(text.split('\n').length),
+          reason: 'line count of "${text.replaceAll('\n', r'\n')}"',
+        );
+      }
+    });
+
+    test('does not indent a line that has no Arabic in it', () {
+      // The trailing flush tested a flag that every word set, emitted or held
+      // back, so it emitted a separator before the very first token.
+      expect(arabic.convert('a'), 'a');
+      expect(arabic.convert('Title'), 'Title');
+      expect(arabic.convert('hello world'), 'world hello');
+      expect(arabic.convert('Title\n\nمرحبا'), startsWith('Title'));
+
+      // A separator still goes between two emitted tokens, exactly once.
+      expect(arabic.convert('مرحبا world'), endsWith(' world'));
+      expect(arabic.convert('world مرحبا'), startsWith('world '));
+      expect(
+        arabic.convert('مرحبا أهلا').split(' '),
+        hasLength(2),
+        reason: 'one separator between two Arabic words',
+      );
+    });
+
+    test('keeps an unmapped Arabic-range character in its place', () {
+      // The word is built in reverse, and an Arabic-range character with no
+      // substitution of its own was appended instead of inserted, so it landed
+      // at the wrong end.
+      expect(arabic.convert('مائة١٢').codeUnits.take(2), <int>[0x0662, 0x0661]);
+
+      // The Arabic letters themselves are unchanged.
+      expect(arabic.convert('مائة١٢').codeUnits.skip(2), <int>[
+        0xFE94,
+        0xFE8B,
+        0xFE8E,
+        0xFEE3,
+      ]);
+      expect(arabic.convert('مرحبا').codeUnits, <int>[
+        0xFE8E,
+        0xFE92,
+        0xFEA3,
+        0xFEAE,
+        0xFEE3,
+      ]);
     });
   });
 
