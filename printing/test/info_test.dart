@@ -76,4 +76,29 @@ void main() {
     expect(info.canShare, isTrue, reason: 'sharing works without an Activity');
     expect(info.canRaster, isTrue);
   });
+
+  test('reportsPrintOutcome is true for a method-channel platform', () {
+    // The native backends all report the real outcome through onCompleted, and
+    // none of them sends this key, so an absent value has to mean true.
+    final info = PrintingInfo.fromMap(<dynamic, dynamic>{'canPrint': true});
+
+    expect(info.reportsPrintOutcome, isTrue);
+    expect(info.toString(), contains('reportsPrintOutcome: true'));
+  });
+
+  test('reportsPrintOutcome can be reported false', () {
+    // What the web plugin answers: a true result there only means the print
+    // dialog was invoked.
+    final info = PrintingInfo.fromMap(<dynamic, dynamic>{
+      'canPrint': true,
+      'reportsPrintOutcome': false,
+    });
+
+    expect(info.reportsPrintOutcome, isFalse);
+    expect(info.toString(), contains('reportsPrintOutcome: false'));
+  });
+
+  test('an unavailable platform reports no outcome either', () {
+    expect(PrintingInfo.unavailable.reportsPrintOutcome, isFalse);
+  });
 }

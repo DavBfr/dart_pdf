@@ -49,6 +49,13 @@ mixin Printing {
   /// Use value `true` to use [format] as custom paper size, when the printer
   /// driver will not allows the user to use papers which are actually supported by the printer.
   /// (Supported platforms: iOS)
+  ///
+  /// On the web a true result means the browser's print dialog was invoked, not
+  /// that the document reached a printer: no browser reports whether the user
+  /// then printed or cancelled, and [PrintingInfo.reportsPrintOutcome] is false
+  /// there. A browser that cannot print a document from a hidden frame - Android
+  /// Chrome, and any web view - is given it as a download instead, and that
+  /// returns false.
   static Future<bool> layoutPdf({
     required LayoutCallback onLayout,
     String name = 'Document',
@@ -157,6 +164,13 @@ mixin Printing {
   /// Use value `true` to use [format] as custom paper size, when the printer
   /// driver will not allows the user to use papers which are actually supported by the printer.
   /// (Supported platforms: iOS)
+  ///
+  /// On the web a true result means the browser's print dialog was invoked, not
+  /// that the document reached a printer: no browser reports whether the user
+  /// then printed or cancelled, and [PrintingInfo.reportsPrintOutcome] is false
+  /// there. A browser that cannot print a document from a hidden frame - Android
+  /// Chrome, and any web view - is given it as a download instead, and that
+  /// returns false.
   static FutureOr<bool> directPrintPdf({
     required Printer printer,
     required LayoutCallback onLayout,

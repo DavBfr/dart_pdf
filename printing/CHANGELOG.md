@@ -7,6 +7,13 @@
 - A self-hoster whose `cmaps/` directory is not next to the library can point at it with a new `dartPdfJsCMapUrl` window variable
 - Configuration values from the page are escaped before being interpolated into the loader script, so a quote in one of them is no longer a syntax error
 - The README's pdf.js instructions named version 3.2.146 and the `*.js` loader files, neither of which works with the ES-module pdf.js this package requests
+- **`Printing.layoutPdf` on web no longer returns true unconditionally.** It returns false when nothing reached a print dialog: the browser refused to print the frame, the document never loaded, or the browser was handed a download instead. Apps that marked invoices printed, popped a route or showed success off that value were doing so after a cancel, after a failure and after a popup-blocked download
+- Fix mobile browsers never attempting to print on web. The strategy is chosen from the browser engine rather than the `Mobile` user-agent token, so an iPhone and an iPad - which sends a desktop user agent - now behave the same instead of one printing and the other silently doing nothing
+- The web download fallback now sets the anchor's `download` attribute with the job name instead of `target=_blank`, which iOS Safari blocks when it is clicked after an await. **On Android and in web views, printing on web now downloads the document rather than opening a tab**
+- `PrintingInfo` gained `reportsPrintOutcome`, false on web, for an app that treats a print as a committed action
+- Fix the web print path leaving the print iframe, its helper script and a full copy of the document in the page whenever the browser's `print()` returned promptly, and never revoking any blob object URL it created. Every print, share and download used to retain the whole document for the lifetime of the tab
+- The web print future no longer resolves while the print dialog is still open, and completes false instead of hanging when the browser will not render the document at all
+
 
 ## 5.16.0
 

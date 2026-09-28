@@ -151,6 +151,13 @@ await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) async => doc.save());
 ```
 
+`layoutPdf` returns true when the document was printed and false when it was
+cancelled, except on the web: no browser reports whether the user printed or
+cancelled, so there a true result only means the browser's print dialog was
+invoked. `Printing.info().reportsPrintOutcome` is false on the web to say so. A
+browser that cannot print from a hidden frame - Android Chrome, and any web
+view - is handed the document as a download instead, and that returns false.
+
 Or share the document to other applications:
 
 ```dart

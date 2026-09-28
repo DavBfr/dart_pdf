@@ -36,6 +36,7 @@ import 'src/pdfjs_urls.dart';
 import 'src/printer.dart';
 import 'src/printing_info.dart';
 import 'src/raster.dart';
+import 'src/web_print_policy.dart';
 
 const _dartPdfJsVersion = 'dartPdfJsVersion';
 const _dartPdfJsBaseUrl = 'dartPdfJsBaseUrl';
@@ -51,6 +52,33 @@ class PrintingPlugin extends PrintingPlatform {
   static const String _scriptId = '__net_nfet_printing_s__';
 
   static const String _frameId = '__net_nfet_printing__';
+
+  /// How long to wait for the iframe to load the document.
+  ///
+  /// A blob the browser will not render fires no load event, and the future
+  /// used to stay pending for ever.
+  static const _frameLoadTimeout = Duration(seconds: 20);
+
+  /// How long to wait for `afterprint` when `print()` returned immediately.
+  ///
+  /// Only a safety net: every browser that matters fires `afterprint`, whether
+  /// the user printed or cancelled.
+  static const _printDialogTimeout = Duration(minutes: 2);
+
+  /// How long a download's object URL has to stay alive.
+  ///
+  /// Firefox and Safari abort a download whose blob URL is revoked while the
+  /// fetch is still in flight.
+  static const _downloadUrlLifetime = Duration(seconds: 10);
+
+  /// The same, for a document opened in a new tab rather than downloaded.
+  static const _openUrlLifetime = Duration(minutes: 1);
+
+  /// The object URL of the document currently in the print iframe.
+  ///
+  /// Revoked before a new one replaces it, so a load event that never arrives
+  /// leaks one document rather than one per call.
+  String? _lastPrintUrl;
 
   final _loading = Mutex();
 
@@ -172,6 +200,8 @@ class PrintingPlugin extends PrintingPlatform {
       canPrint: true,
       canShare: true,
       canRaster: _hasPdfJsLib,
+      // The browser tells nobody whether the user printed or cancelled.
+      reportsPrintOutcome: false,
     );
   }
 
@@ -218,89 +248,174 @@ class PrintingPlugin extends PrintingPlatform {
       return false;
     }
 
-    // UserAgent can contain both Chrome and Safari for Chrome browser.
-    // UserAgent contains only Safari for Safari browser.
-    final userAgent = web.window.navigator.userAgent;
-    final isChrome = userAgent.contains('Chrome');
-    final isSafari = userAgent.contains('Safari') && !isChrome;
-    final isFirefox = userAgent.contains('Firefox');
-    final isMobile = userAgent.contains('Mobile');
+    final strategy = webPrintStrategy(
+      userAgent: web.window.navigator.userAgent,
+      maxTouchPoints: web.window.navigator.maxTouchPoints,
+    );
 
-    // Chrome, Safari, and Firefox on a desktop computer
-    if ((isChrome || isSafari || isFirefox) && !isMobile) {
-      final completer = Completer<bool>();
-      final pdfFile = web.Blob(
-        [result.toJS].toJS,
-        web.BlobPropertyBag(type: 'application/pdf'),
-      );
-      final pdfUrl = web.URL.createObjectURL(pdfFile);
-      final doc = web.window.document;
-
-      final script =
-          doc.getElementById(_scriptId) ?? doc.createElement('script');
-      script.setAttribute('id', _scriptId);
-      script.setAttribute('type', 'text/javascript');
-      script.innerHTML =
-          '''function ${_frameId}_print(){var f=document.getElementById('$_frameId');f.focus();f.contentWindow.print();}'''
-              .toJS;
-      doc.body!.append(script);
-
-      final frame = doc.getElementById(_frameId) ?? doc.createElement('iframe');
-      if (isFirefox) {
-        // Set the iframe to be is visible on the page (guaranteed by fixed position) but hidden using opacity 0, because
-        // this works in Firefox. The height needs to be sufficient for some part of the document other than the PDF
-        // viewer's toolbar to be visible in the page
-        frame.setAttribute(
-          'style',
-          'width: 1px; height: 100px; position: fixed; left: 0; top: 0; opacity: 0; border-width: 0; margin: 0; padding: 0',
-        );
-      } else {
-        // Hide the iframe in other browsers
-        frame.setAttribute(
-          'style',
-          'visibility: hidden; height: 0; width: 0; position: absolute;',
-          // 'height: 400px; width: 600px; position: absolute; z-index: 1000',
-        );
-      }
-
-      frame.setAttribute('id', _frameId);
-      frame.setAttribute('src', pdfUrl);
-      final stopWatch = Stopwatch();
-
-      web.EventListener? load;
-      load = (web.Event event) {
-        frame.removeEventListener('load', load);
-        Timer(Duration(milliseconds: isSafari ? 500 : 0), () {
-          try {
-            stopWatch.start();
-            web.window.callMethod('${_frameId}_print'.toJS);
-            stopWatch.stop();
-            completer.complete(true);
-          } catch (e) {
-            assert(() {
-              // ignore: avoid_print
-              print('Error: $e');
-              return true;
-            }());
-            completer.complete(_getPdf(result));
-          }
-        });
-      }.toJS;
-
-      frame.addEventListener('load', load);
-
-      doc.body!.append(frame);
-
-      final res = await completer.future;
-      // If print() is synchronous
-      if (stopWatch.elapsedMilliseconds > 1000) {
-        frame.remove();
-        script.remove();
-      }
-      return res;
+    if (strategy == WebPrintStrategy.download) {
+      // Nothing reaches a print dialog here, so this must not report a print.
+      // It used to hand back a hard-coded true, and to click a target=_blank
+      // link after an await - outside the user-gesture window, which iOS Safari
+      // blocks - so on mobile nothing happened at all and onPrinted fired.
+      await _getPdf(result, filename: webPdfFilename(name));
+      return false;
     }
 
-    return _getPdf(result);
+    return _printInFrame(result, name: name);
+  }
+
+  /// Load the document into a hidden iframe and print it.
+  ///
+  /// Resolves true when the browser's print dialog was invoked, and false when
+  /// it was not: no browser reports whether the user then printed or cancelled.
+  Future<bool> _printInFrame(Uint8List bytes, {required String name}) async {
+    final userAgent = web.window.navigator.userAgent;
+    final isFirefox = userAgent.contains('Firefox');
+    final isSafari =
+        userAgent.contains('Safari') && !userAgent.contains('Chrome');
+
+    final completer = Completer<bool>();
+    final pdfFile = web.Blob(
+      [bytes.toJS].toJS,
+      web.BlobPropertyBag(type: 'application/pdf'),
+    );
+    final pdfUrl = web.URL.createObjectURL(pdfFile);
+    // One document at a time, so a load event that never arrives cannot leak a
+    // copy per call.
+    _revokeLastPrintUrl();
+    _lastPrintUrl = pdfUrl;
+
+    final doc = web.window.document;
+
+    final script = doc.getElementById(_scriptId) ?? doc.createElement('script');
+    script.setAttribute('id', _scriptId);
+    script.setAttribute('type', 'text/javascript');
+    script.innerHTML =
+        '''function ${_frameId}_print(){var f=document.getElementById('$_frameId');f.focus();f.contentWindow.print();}'''
+            .toJS;
+    doc.body!.append(script);
+
+    final frame = doc.getElementById(_frameId) ?? doc.createElement('iframe');
+    if (isFirefox) {
+      // Set the iframe to be is visible on the page (guaranteed by fixed position) but hidden using opacity 0, because
+      // this works in Firefox. The height needs to be sufficient for some part of the document other than the PDF
+      // viewer's toolbar to be visible in the page
+      frame.setAttribute(
+        'style',
+        'width: 1px; height: 100px; position: fixed; left: 0; top: 0; opacity: 0; border-width: 0; margin: 0; padding: 0',
+      );
+    } else {
+      // Hide the iframe in other browsers
+      frame.setAttribute(
+        'style',
+        'visibility: hidden; height: 0; width: 0; position: absolute;',
+      );
+    }
+
+    frame.setAttribute('id', _frameId);
+    frame.setAttribute('src', pdfUrl);
+
+    web.EventListener? load;
+    web.EventListener? afterPrint;
+    Timer? loadTimeout;
+    Timer? dialogTimeout;
+
+    void teardown() {
+      loadTimeout?.cancel();
+      dialogTimeout?.cancel();
+      if (load != null) {
+        frame.removeEventListener('load', load);
+      }
+      if (afterPrint != null) {
+        web.window.removeEventListener('afterprint', afterPrint);
+      }
+      frame.remove();
+      script.remove();
+      // The teardown used to be guarded by 'the print call blocked for more
+      // than a second', so a browser whose print() returns at once left the
+      // iframe, the script and the document's bytes in the page.
+      _revokeLastPrintUrl();
+    }
+
+    void finish(bool printed) {
+      if (completer.isCompleted) {
+        return;
+      }
+      teardown();
+      completer.complete(printed);
+    }
+
+    load = (web.Event event) {
+      loadTimeout?.cancel();
+      if (load != null) {
+        frame.removeEventListener('load', load);
+      }
+
+      Timer(Duration(milliseconds: isSafari ? 500 : 0), () {
+        if (completer.isCompleted) {
+          return;
+        }
+
+        // Registered here, not at the start: a print somewhere else in the app
+        // while this document was still loading would otherwise complete this
+        // future.
+        afterPrint = (web.Event event) {
+          finish(true);
+        }.toJS;
+        web.window.addEventListener('afterprint', afterPrint);
+
+        final stopWatch = Stopwatch()..start();
+        try {
+          web.window.callMethod('${_frameId}_print'.toJS);
+        } catch (e) {
+          assert(() {
+            // ignore: avoid_print
+            print('Error: $e');
+            return true;
+          }());
+
+          // The dialog was never invoked, so this is not a print. Hand the
+          // document over as a download and say so: this used to report the
+          // fallback's hard-coded true.
+          teardown();
+          _getPdf(bytes, filename: webPdfFilename(name)).ignore();
+          if (!completer.isCompleted) {
+            completer.complete(false);
+          }
+          return;
+        }
+        stopWatch.stop();
+
+        if (stopWatch.elapsedMilliseconds > 1000) {
+          // print() blocked until the dialog closed, so it is safe to take the
+          // iframe away now.
+          finish(true);
+          return;
+        }
+
+        // print() returned at once, so the dialog is probably still open:
+        // removing the iframe now could cancel it. Wait for afterprint.
+        dialogTimeout = Timer(_printDialogTimeout, () => finish(true));
+      });
+    }.toJS;
+
+    frame.addEventListener('load', load);
+
+    // A blob the browser will not render fires no load event at all.
+    loadTimeout = Timer(_frameLoadTimeout, () => finish(false));
+
+    doc.body!.append(frame);
+
+    return completer.future;
+  }
+
+  void _revokeLastPrintUrl() {
+    final url = _lastPrintUrl;
+    if (url != null) {
+      web.URL.revokeObjectURL(url);
+      _lastPrintUrl = null;
+    }
   }
 
   @override
@@ -331,6 +446,16 @@ class PrintingPlugin extends PrintingPlatform {
     doc.body?.append(link);
     link.click();
     link.remove();
+
+    // An object URL holds its whole blob until it is revoked or the document
+    // unloads, so every share used to retain a copy of the document for the
+    // lifetime of the tab. Revoked late, because revoking while the browser is
+    // still fetching aborts the download.
+    Timer(
+      filename != null ? _downloadUrlLifetime : _openUrlLifetime,
+      () => web.URL.revokeObjectURL(pdfUrl),
+    );
+
     return true;
   }
 
