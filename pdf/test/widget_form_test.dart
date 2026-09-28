@@ -143,6 +143,44 @@ void main() {
     );
   });
 
+  test('form widgets keep their appearance out of the page content', () async {
+    // Why the Windows and Linux backends need a pdfium form-fill environment:
+    // these widgets emit /Subtype /Widget annotations carrying an /AP stream,
+    // and paint nothing into the page's own content stream. FPDF_RenderPage and
+    // FPDF_RenderPageBitmap draw every annotation except widget and popup ones,
+    // so without FPDF_FFLDraw or a prior FPDFPage_Flatten they are simply
+    // missing from the output.
+    // Uncompressed, so the object dictionaries are readable here.
+    final document = Document(compress: false);
+    document.addPage(
+      Page(
+        build: (Context context) => Column(
+          children: <Widget>[
+            Checkbox(name: 'checked', value: true),
+            TextField(name: 'given', value: 'hello'),
+            FlatButton(name: 'submit', child: Text('Submit')),
+          ],
+        ),
+      ),
+    );
+
+    final bytes = await document.save();
+    final source = String.fromCharCodes(bytes);
+
+    expect(
+      RegExp('/Subtype/Widget').allMatches(source).length,
+      3,
+      reason: 'one annotation per field',
+    );
+    expect(
+      RegExp('/AP<<').allMatches(source).length,
+      3,
+      reason: 'each carries its appearance in a stream of its own',
+    );
+    // The text field's value lives only in that appearance stream.
+    expect(source, contains('/V(hello)'));
+  });
+
   tearDownAll(() async {
     final file = File('widgets-form.pdf');
     await file.writeAsBytes(await pdf.save());

@@ -14,6 +14,8 @@
 - A failed Android raster always reports a non-null message. It could report null, which the Dart side reads as a clean end of stream, and it could report twice
 - Fix `PdfRaster.toPng` abandoning the `ui.Image` it decodes, so every page of every preview re-raster left a full-resolution decode in engine memory. `PdfRaster.toImage` still hands its image to the caller, which its documentation now says
 - `PdfRaster.toPng` reports a failure to encode instead of a null-check error
+- Fix AcroForm widget annotations - checkboxes, text fields, buttons, signatures - being absent from the Windows and Linux preview raster and from Windows printed output, while the same document shows them in any viewer. The raster paths now draw them through a pdfium form-fill environment, and the Windows print path flattens them into the page, which keeps the output vector
+
 
 
 
