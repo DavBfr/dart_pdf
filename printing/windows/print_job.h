@@ -101,7 +101,8 @@ class PrintJob {
 
   void rasterPdf(std::vector<uint8_t> data,
                  std::vector<int> pages,
-                 double scale);
+                 double scale,
+                 uint32_t background);
 
   std::map<std::string, bool> printingInfo();
 };

@@ -61,6 +61,34 @@ enum PdfPageRenderer {
         )
     }
 
+    /// Paint the page backdrop.
+    ///
+    /// A PDF page has no background of its own: the imaging model leaves it to
+    /// whatever displays the document. Nothing painted one here, so a rastered
+    /// page came back transparent - 96% of a blank A4 at alpha 0 - and saving it
+    /// as PNG or re-encoding it as JPEG gave a black page.
+    ///
+    /// `argb` is 0xAARRGGBB; a zero alpha paints nothing, which is what printing
+    /// 5.17 and earlier produced.
+    static func fill(_ argb: UInt32, in context: CGContext, to rect: CGRect) {
+        let alpha = CGFloat((argb >> 24) & 0xFF) / 255
+        guard alpha > 0 else {
+            return
+        }
+
+        context.saveGState()
+        // Unpremultiplied components: CoreGraphics premultiplies into the
+        // bitmap, which is what ui.decodeImageFromPixels expects to receive.
+        context.setFillColor(
+            red: CGFloat((argb >> 16) & 0xFF) / 255,
+            green: CGFloat((argb >> 8) & 0xFF) / 255,
+            blue: CGFloat(argb & 0xFF) / 255,
+            alpha: alpha
+        )
+        context.fill(rect)
+        context.restoreGState()
+    }
+
     /// Draw `page` into `context`, fitted inside `rect` and centred.
     ///
     /// `context` must use PDF conventions, with y increasing upwards.
@@ -94,8 +122,14 @@ enum PdfPageRenderer {
 
     /// Raster `page` at `scale` into premultiplied RGBA bytes.
     ///
+    /// `background` is the 0xAARRGGBB page backdrop, opaque white by default.
+    ///
     /// Returns nil when the bitmap context cannot be created.
-    static func raster(page: PDFPage, scale: CGFloat) -> (data: Data, width: Int, height: Int)? {
+    static func raster(
+        page: PDFPage,
+        scale: CGFloat,
+        background: UInt32 = 0xFFFF_FFFF
+    ) -> (data: Data, width: Int, height: Int)? {
         let (width, height) = rasterSize(of: page, scale: scale)
         let stride = width * 4
         var data = Data(repeating: 0, count: stride * height)
@@ -115,11 +149,9 @@ enum PdfPageRenderer {
                 return false
             }
 
-            draw(
-                page: page,
-                in: context,
-                to: CGRect(x: 0, y: 0, width: CGFloat(width), height: CGFloat(height))
-            )
+            let bounds = CGRect(x: 0, y: 0, width: CGFloat(width), height: CGFloat(height))
+            fill(background, in: context, to: bounds)
+            draw(page: page, in: context, to: bounds)
             return true
         }
 

@@ -657,7 +657,8 @@ public class PrintingJob extends PrintDocumentAdapter {
         pending.onLayoutFinished(info, true);
     }
 
-    void rasterPdf(final byte[] data, final ArrayList<Integer> pages, final Double scale) {
+    void rasterPdf(final byte[] data, final ArrayList<Integer> pages, final Double scale,
+            final int background) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
             printing.onPageRasterEnd(
                     this, "PDF Raster available since Android 5.0 Lollipop (API 21)");
@@ -693,6 +694,11 @@ public class PrintingJob extends PrintDocumentAdapter {
                     transform.setScale(scale.floatValue(), scale.floatValue());
 
                     Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                    // A PDF page has no background of its own, and a fresh
+                    // bitmap is zero-filled, so a rastered page used to come
+                    // back transparent - and saving it as PNG, or re-encoding
+                    // it as JPEG, gave a black page.
+                    bitmap.eraseColor(background);
 
                     page.render(bitmap, null, transform, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
 

@@ -400,7 +400,8 @@ void print_job::raster_pdf(const uint8_t data[],
                            size_t size,
                            const int32_t pages[],
                            size_t pages_count,
-                           double scale) {
+                           double scale,
+                           uint32_t background) {
   acquire_pdfium();
 
   auto doc = FPDF_LoadMemDocument64(data, size, nullptr);
@@ -436,7 +437,11 @@ void print_job::raster_pdf(const uint8_t data[],
     auto bHeight = static_cast<int>(height * scale);
 
     auto bitmap = FPDFBitmap_Create(bWidth, bHeight, 1);
-    FPDFBitmap_FillRect(bitmap, 0, 0, bWidth, bHeight, 0x00ffffff);
+    // A PDF page has no background of its own. This used to be hard-coded to
+    // 0x00ffffff, which writes white but leaves alpha at 0, so a rastered page
+    // came back transparent and saving it as PNG gave a black page.
+    FPDFBitmap_FillRect(bitmap, 0, 0, bWidth, bHeight,
+                        static_cast<unsigned long>(background));
 
     FPDF_RenderPageBitmap(bitmap, page, 0, 0, bWidth, bHeight, 0,
                           FPDF_ANNOT | FPDF_LCD_TEXT | FPDF_NO_NATIVETEXT);
@@ -445,13 +450,27 @@ void print_job::raster_pdf(const uint8_t data[],
     auto stride = FPDFBitmap_GetStride(bitmap);
     size_t l = static_cast<size_t>(bHeight * stride);
 
-    // BGRA to RGBA conversion
+    // BGRA to RGBA, and straight to premultiplied alpha: pdfium writes straight
+    // alpha, while ui.decodeImageFromPixels reads rgba8888 as premultiplied. It
+    // made no difference while every pixel was fully transparent, and none at
+    // all for the opaque default, but a partially transparent page was wrong.
     for (auto y = 0; y < bHeight; y++) {
       auto offset = y * stride;
       for (auto x = 0; x < bWidth; x++) {
-        auto t = p[offset];
-        p[offset] = p[offset + 2];
-        p[offset + 2] = t;
+        const auto b = p[offset];
+        const auto g = p[offset + 1];
+        const auto r = p[offset + 2];
+        const auto a = p[offset + 3];
+
+        if (a == 255) {
+          p[offset] = r;
+          p[offset + 2] = b;
+        } else {
+          p[offset] = static_cast<uint8_t>((r * a + 127) / 255);
+          p[offset + 1] = static_cast<uint8_t>((g * a + 127) / 255);
+          p[offset + 2] = static_cast<uint8_t>((b * a + 127) / 255);
+        }
+
         offset += 4;
       }
     }

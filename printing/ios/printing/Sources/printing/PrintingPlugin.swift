@@ -137,10 +137,13 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             let doc = args["doc"] as! FlutterStandardTypedData
             let pages = args["pages"] as? [Int]
             let scale = CGFloat((args["scale"] as! NSNumber).floatValue)
+            // Opaque white when an older Dart side does not send one.
+            let background = (args["background"] as? NSNumber)?.uint32Value ?? 0xFFFF_FFFF
             let printJob = PrintJob(printing: self, index: args["job"] as! Int)
             printJob.rasterPdf(data: doc.data,
                                pages: pages,
-                               scale: scale)
+                               scale: scale,
+                               background: background)
             result(NSNumber(value: 1))
         } else {
             result(FlutterMethodNotImplemented)

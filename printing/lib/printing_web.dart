@@ -410,6 +410,13 @@ class PrintingPlugin extends PrintingPlatform {
     return completer.future;
   }
 
+  /// An ARGB int as the `rgba()` string pdf.js wants for its page backdrop.
+  static String _cssColor(int argb) {
+    final alpha = ((argb >> 24) & 0xff) / 255;
+    return 'rgba(${(argb >> 16) & 0xff},${(argb >> 8) & 0xff},'
+        '${argb & 0xff},$alpha)';
+  }
+
   void _revokeLastPrintUrl() {
     final url = _lastPrintUrl;
     if (url != null) {
@@ -482,8 +489,9 @@ class PrintingPlugin extends PrintingPlatform {
   Stream<PdfRaster> raster(
     Uint8List document,
     List<int>? pages,
-    double dpi,
-  ) async* {
+    double dpi, {
+    int background = 0xffffffff,
+  }) async* {
     await _initPlugin();
 
     // pdf.js 4+ transfers TypedArrays to the worker and takes ownership of the
@@ -525,7 +533,11 @@ class PrintingPlugin extends PrintingPlatform {
 
           final renderContext = Settings()
             ..canvasContext = context
-            ..viewport = viewport;
+            ..viewport = viewport
+            // pdf.js filled its canvas opaque white whatever the caller asked
+            // for, which is why web was the one backend that did not come back
+            // transparent. Now it is the caller's choice on every backend.
+            ..background = _cssColor(background);
 
           await page.render(renderContext).promise.toDart;
 

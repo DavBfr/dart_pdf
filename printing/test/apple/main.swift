@@ -59,8 +59,9 @@ struct Raster {
     }
 }
 
-func raster(_ name: String, scale: CGFloat = 1) -> Raster {
-    guard let r = PdfPageRenderer.raster(page: page(name), scale: scale) else {
+func raster(_ name: String, scale: CGFloat = 1, background: UInt32 = 0xFFFF_FFFF) -> Raster {
+    guard let r = PdfPageRenderer.raster(page: page(name), scale: scale, background: background)
+    else {
         fatalError("raster failed for \(name)")
     }
     return Raster(data: r.data, width: r.width, height: r.height)
@@ -136,6 +137,42 @@ let scaled = raster("crop_bl", scale: 2)
 check("scale 2 doubles the raster", scaled.width == 200 && scaled.height == 200,
       "got \(scaled.width)x\(scaled.height)")
 check("scale 2 keeps the corners", scaled.name(4, 4) == "blue", "got \(scaled.name(4, 4))")
+
+// --- page backdrop ------------------------------------------------------------
+
+// A PDF page has no background of its own. Nothing painted one, so a rastered
+// page came back transparent and saving it as PNG gave a black page.
+let opaque = raster("blank")
+check("a blank page is opaque white by default", opaque.name(5, 5) == "white",
+      "got \(opaque.name(5, 5))")
+check("every pixel of it is opaque", {
+    for y in 0 ..< opaque.height {
+        for x in 0 ..< opaque.width {
+            if opaque.pixel(x, y).3 != 255 { return false }
+        }
+    }
+    return true
+}())
+
+// The 5.17 and earlier output: nothing behind the page at all.
+let clear = raster("blank", background: 0x0000_0000)
+check("a zero background paints nothing", clear.name(5, 5) == "clear",
+      "got \(clear.name(5, 5))")
+
+// An explicit colour, to prove the channels are not swapped.
+let blue = raster("blank", background: 0xFF00_00FF)
+check("an explicit background keeps its channels", blue.name(5, 5) == "blue",
+      "got \(blue.name(5, 5))")
+let half = raster("blank", background: 0x8000_0000)
+let (hr, hg, hb, ha) = half.pixel(5, 5)
+check("a translucent background is premultiplied",
+      ha == 128 && hr == 0 && hg == 0 && hb == 0,
+      "got rgba(\(hr),\(hg),\(hb),\(ha))")
+
+// The backdrop goes behind the content, not over it.
+let overCrop = raster("crop_bl")
+check("the backdrop does not cover the page", overCrop.name(2, 2) == "blue",
+      "got \(overCrop.name(2, 2))")
 
 print(failures == 0 ? "\nPdfPageRenderer: all checks passed"
                     : "\n\(failures) check(s) failed")

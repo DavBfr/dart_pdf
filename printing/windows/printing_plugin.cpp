@@ -163,8 +163,15 @@ class PrintingPlugin : public flutter::Plugin {
           vScale != arguments->end() ? std::get<double>(vScale->second) : 1;
       auto vJob = arguments->find(flutter::EncodableValue("job"));
       auto jobNum = vJob != arguments->end() ? std::get<int>(vJob->second) : -1;
+      // Opaque white when an older Dart side does not send one.
+      auto vBackground = arguments->find(flutter::EncodableValue("background"));
+      auto background =
+          vBackground != arguments->end() &&
+                  std::holds_alternative<int>(vBackground->second)
+              ? static_cast<uint32_t>(std::get<int>(vBackground->second))
+              : 0xffffffffu;
       auto job = std::make_unique<PrintJob>(&printing, jobNum);
-      job->rasterPdf(doc, pages, scale);
+      job->rasterPdf(doc, pages, scale, background);
       result->Success(nullptr);
     } else if (method_call.method_name().compare("printingInfo") == 0) {
       auto job = std::make_unique<PrintJob>(&printing, -1);

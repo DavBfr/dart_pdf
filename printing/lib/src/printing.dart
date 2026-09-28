@@ -277,13 +277,26 @@ mixin Printing {
   ///
   /// This is not supported on all platforms. Check the result of [info] to
   /// find at runtime if this feature is available or not.
+  ///
+  /// [background] is the ARGB colour painted behind each page, opaque white by
+  /// default. A PDF page has no background of its own - the imaging model leaves
+  /// it to whatever displays the document - and the native backends used to
+  /// leave it transparent, so saving a rastered page as PNG or re-encoding it as
+  /// JPEG produced a black page. Pass `0x00000000` for the transparent pages of
+  /// printing 5.17 and earlier.
   static Stream<PdfRaster> raster(
     Uint8List document, {
     List<int>? pages,
     double dpi = PdfPageFormat.inch,
+    int background = 0xffffffff,
   }) {
     assert(dpi > 0);
 
-    return PrintingPlatform.instance.raster(document, pages, dpi);
+    return PrintingPlatform.instance.raster(
+      document,
+      pages,
+      dpi,
+      background: background,
+    );
   }
 }

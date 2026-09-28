@@ -64,7 +64,9 @@ w("rot90.pdf", page_pdf(b"0 0 200 100", corners(0, 0, 200, 100), rotate=90))
 # 4. A crop box flush with the media top-right corner: the case that worked.
 w("crop_tr.pdf", page_pdf(b"0 0 200 200", corners(100, 100, 100, 100),
                           cropbox=b"100 100 200 200"))
-# 5. An annotation whose appearance stream paints the top-right quadrant red.
+# 5. A page that paints nothing at all, so only the backdrop shows.
+w("blank.pdf", page_pdf(b"0 0 20 20", b""))
+# 6. An annotation whose appearance stream paints the top-right quadrant red.
 # /Resources is optional per the spec, but PDFKit renders the stream with a
 # default (black) colour without it, so a faithful fixture carries one.
 appearance = stream(b"1 0 0 rg 0 0 50 50 re f",
@@ -74,7 +76,7 @@ annot = (b"<< /Type /Annot /Subtype /Square /Rect [50 50 100 100] /F 4 "
          b"/AP << /N 6 0 R >> >>")
 w("annot.pdf", page_pdf(b"0 0 100 100", b"1 1 1 rg 0 0 100 100 re f",
                         annots=b"5 0 R", annot_objs=(annot, appearance)))
-# 6. The same annotation, hidden.
+# 7. The same annotation, hidden.
 annot_hidden = (b"<< /Type /Annot /Subtype /Square /Rect [50 50 100 100] /F 2 "
                 b"/AP << /N 6 0 R >> >>")
 w("hidden.pdf", page_pdf(b"0 0 100 100", b"1 1 1 rg 0 0 100 100 re f",

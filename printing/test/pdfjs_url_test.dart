@@ -29,7 +29,7 @@ void main() {
       expect(
         urls.module,
         'https://unpkg.com/pdfjs-dist@${PdfJsUrls.defaultVersion}'
-            '/build/pdf.min.mjs',
+        '/build/pdf.min.mjs',
       );
     });
 
@@ -37,7 +37,7 @@ void main() {
       expect(
         urls.worker,
         'https://unpkg.com/pdfjs-dist@${PdfJsUrls.defaultVersion}'
-            '/build/pdf.worker.min.mjs',
+        '/build/pdf.worker.min.mjs',
       );
     });
 
@@ -70,7 +70,8 @@ void main() {
     // these has to come out as a URL.
     const cases = <String, String>{
       // The shape the README documented, which never worked.
-      'assets/js/pdf/6.2.108/': 'https://example.com/app/assets/js/pdf/6.2.108/',
+      'assets/js/pdf/6.2.108/':
+          'https://example.com/app/assets/js/pdf/6.2.108/',
       './assets/js/pdf/': 'https://example.com/app/assets/js/pdf/',
       '../shared/pdfjs/': 'https://example.com/shared/pdfjs/',
       '/assets/js/pdf/': 'https://example.com/assets/js/pdf/',

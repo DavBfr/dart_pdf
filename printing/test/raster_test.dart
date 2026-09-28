@@ -19,10 +19,34 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as im;
 import 'package:printing/printing.dart';
 
 void main() {
   setUp(TestWidgetsFlutterBinding.ensureInitialized);
+
+  test('an opaque page survives toPng', () async {
+    // What the native backends now hand over. They used to return alpha 0 for
+    // most of a blank page, so re-encoding it gave a black page.
+    final raster = PdfRaster(
+      4,
+      4,
+      Uint8List.fromList(List<int>.filled(4 * 4 * 4, 0xff)),
+    );
+
+    final decoded = im.decodePng(await raster.toPng());
+
+    expect(decoded, isNotNull);
+    expect(decoded!.width, 4);
+    expect(decoded.height, 4);
+    for (final pixel in decoded) {
+      expect(
+        <num>[pixel.r, pixel.g, pixel.b, pixel.a],
+        <num>[255, 255, 255, 255],
+        reason: 'every pixel must stay opaque white',
+      );
+    }
+  });
 
   test('PdfRaster', () async {
     final raster = PdfRaster(

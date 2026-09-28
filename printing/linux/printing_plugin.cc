@@ -104,9 +104,16 @@ static void printing_plugin_handle_method_call(PrintingPlugin* self,
       }
     }
     auto scale = fl_value_get_float(fl_value_lookup_string(args, "scale"));
+    // Opaque white when an older Dart side does not send one.
+    auto v_background = fl_value_lookup_string(args, "background");
+    auto background =
+        v_background != nullptr &&
+                fl_value_get_type(v_background) == FL_VALUE_TYPE_INT
+            ? static_cast<uint32_t>(fl_value_get_int(v_background))
+            : 0xffffffffu;
     auto jobNum = fl_value_get_int(fl_value_lookup_string(args, "job"));
     auto job = std::make_unique<print_job>(self->channel, jobNum);
-    job->raster_pdf(doc, size, pages, pages_count, scale);
+    job->raster_pdf(doc, size, pages, pages_count, scale, background);
     free(pages);
 
     g_autoptr(FlValue) result = fl_value_new_bool(true);

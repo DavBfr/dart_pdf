@@ -487,7 +487,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         controller.present(animated: true, completionHandler: pickPrinterCompletionHandler)
     }
 
-    public func rasterPdf(data: Data, pages: [Int]?, scale: CGFloat) {
+    public func rasterPdf(data: Data, pages: [Int]?, scale: CGFloat, background: UInt32 = 0xFFFF_FFFF) {
         guard let document = PDFDocument(data: data), document.pageCount > 0 else {
             printing.onPageRasterEnd(printJob: self, error: "Cannot raster a malformed PDF file")
             return
@@ -497,7 +497,11 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             // document is captured, so it outlives every page below.
             for pageNum in pages ?? Array(0 ... document.pageCount - 1) {
                 guard let page = document.page(at: pageNum),
-                      let raster = PdfPageRenderer.raster(page: page, scale: scale)
+                      let raster = PdfPageRenderer.raster(
+                          page: page,
+                          scale: scale,
+                          background: background
+                      )
                 else {
                     continue
                 }

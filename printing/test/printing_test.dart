@@ -159,8 +159,9 @@ class MockPrinting extends Mock
   Stream<PdfRaster> raster(
     Uint8List document,
     List<int>? pages,
-    double dpi,
-  ) async* {}
+    double dpi, {
+    int background = 0xffffffff,
+  }) async* {}
 }
 
 class MockContext extends Mock implements BuildContext {}

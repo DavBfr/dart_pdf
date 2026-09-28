@@ -331,7 +331,12 @@ class MethodChannelPrinting extends PrintingPlatform {
   }
 
   @override
-  Stream<PdfRaster> raster(Uint8List document, List<int>? pages, double dpi) {
+  Stream<PdfRaster> raster(
+    Uint8List document,
+    List<int>? pages,
+    double dpi, {
+    int background = 0xffffffff,
+  }) {
     final controller = StreamController<PdfRaster>();
     final job = _printJobs.add(onPageRasterized: controller);
 
@@ -344,6 +349,7 @@ class MethodChannelPrinting extends PrintingPlatform {
       'pages': pages,
       'scale': dpi / PdfPageFormat.inch,
       'job': job.index,
+      'background': background,
     };
 
     unawaited(_startRaster(job, params));

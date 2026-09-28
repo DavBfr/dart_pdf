@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.18.0
+
+- **`Printing.raster` now paints an opaque white page backdrop.** A PDF page has no background of its own - the imaging model leaves it to whatever displays the document - and no native backend painted one, so 96% of a blank A4 came back at alpha 0 and saving a rastered page as PNG, or re-encoding it as JPEG, gave a black page. Pass `background: 0x00000000` to `Printing.raster` for the transparent pages of 5.17 and earlier
+- Fix Windows and Linux handing back straight alpha where Flutter reads premultiplied, so a partially transparent page rastered too bright. It made no difference while every pixel was transparent, and none for the new opaque default
+- `PrintingPlatform.raster` gained a `background` parameter, which a custom platform implementation has to accept
+
 ## 5.17.0
 
 - Fix self-hosting pdf.js on web never loading, with 'Failed to resolve module specifier'. A dynamic `import()` reads its argument as a module specifier, so the relative `dartPdfJsBaseUrl` the README documented was a bare specifier the browser rejected. The configured base is now resolved against the page - honouring `<base href>` - and given a trailing slash

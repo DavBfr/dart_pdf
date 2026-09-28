@@ -125,9 +125,12 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     final byte[] document = call.argument("doc");
                     final ArrayList<Integer> pages = call.argument("pages");
                     Double scale = call.argument("scale");
+                    // Opaque white when an older Dart side does not send one.
+                    final Integer background = call.argument("background");
                     final PrintingJob printJob =
                             new PrintingJob(context, this, (int) call.argument("job"));
-                    printJob.rasterPdf(document, pages, scale);
+                    printJob.rasterPdf(document, pages, scale,
+                            background != null ? background : 0xffffffff);
                     result.success(1);
                     break;
                 }

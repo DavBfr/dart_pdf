@@ -95,7 +95,8 @@ class print_job {
                   size_t size,
                   const int32_t pages[],
                   size_t pages_count,
-                  double scale);
+                  double scale,
+                  uint32_t background);
 
   static FlValue* printing_info();
 };
