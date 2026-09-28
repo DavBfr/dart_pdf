@@ -18,7 +18,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop' as js;
 import 'dart:js_interop_unsafe' as js;
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -36,6 +35,7 @@ import 'src/pdfjs_urls.dart';
 import 'src/printer.dart';
 import 'src/printing_info.dart';
 import 'src/raster.dart';
+import 'src/web_blob.dart';
 import 'src/web_print_policy.dart';
 
 const _dartPdfJsVersion = 'dartPdfJsVersion';
@@ -542,7 +542,6 @@ class PrintingPlugin extends PrintingPlatform {
           await page.render(renderContext).promise.toDart;
 
           // Convert the image to PNG
-          final completer = Completer<void>();
           final blobCompleter = Completer<web.Blob?>();
           canvas.toBlob(
             // ignore: unnecessary_lambdas
@@ -550,21 +549,21 @@ class PrintingPlugin extends PrintingPlatform {
               blobCompleter.complete(blob);
             }.toJS,
           );
+
           final blob = await blobCompleter.future;
           if (blob == null) {
-            continue;
+            // This used to `continue`, so the page was silently missing from
+            // the stream with nothing to say why.
+            throw Exception('Unable to encode page ${pageIndex + 1}');
           }
-          final data = BytesBuilder();
-          final r = web.FileReader();
-          r.readAsArrayBuffer(blob);
 
-          r.onLoadEnd.listen((web.ProgressEvent e) {
-            data.add((r.result! as js.JSArrayBuffer).toDart.asInt8List());
-            completer.complete();
-          });
-          await completer.future;
-
-          yield _WebPdfRaster(canvas.width, canvas.height, data.toBytes());
+          // Each iteration now either yields a page or throws; nothing here
+          // awaits something that has no completion path.
+          yield _WebPdfRaster(
+            canvas.width,
+            canvas.height,
+            await blobToBytes(blob),
+          );
         } finally {
           page.cleanup();
         }

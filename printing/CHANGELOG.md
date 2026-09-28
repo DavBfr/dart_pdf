@@ -7,6 +7,9 @@
 - `PrintingPlatform.raster` gained a `background` parameter, which a custom platform implementation has to accept
 - **Fix `Printing.raster` hard-crashing the whole process on Windows and Linux** for a page too large to rasterize - an A0 at 600 dpi, an A4 at 3400 dpi. pdfium answers a null bitmap once the buffer reaches 4 GiB, and the pixel loop wrote straight through it; the buffer length and the row offsets were also computed in `int`, which wraps above 2 GiB. The stream now ends with an error naming the problem and the app stays alive
 - Every pdfium handle on the Windows and Linux raster paths is released by a scope guard, so the new failure exits cannot skip a close
+- Fix the web raster hanging for ever when a page's blob could not be read or the read was aborted: the `FileReader` listener completed its completer only on the success path, and its failure went to the zone rather than to the awaiting code, so `Printing.raster` stopped emitting and never closed and `PdfPreview` sat on a spinner with no error. The read now reports a failure on the stream
+- Fix the web raster silently dropping a page when the canvas could not be encoded; it reports which page instead
+
 
 
 ## 5.17.0

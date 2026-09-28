@@ -178,6 +178,32 @@ void main() {
       expect(closed, isTrue);
     });
 
+    test('an error mid-document reaches an await for loop', () async {
+      // What a page whose blob cannot be read now does on web, and what a page
+      // too large to rasterize does on desktop. It used to hang instead.
+      final received = <int>[];
+      Object? error;
+
+      final consumed = Future<void>(() async {
+        try {
+          await for (final page in Printing.raster(Uint8List(0))) {
+            received.add(page.pixels.first);
+          }
+        } catch (e) {
+          error = e;
+        }
+      });
+      await pumpEventQueue();
+
+      await sendPage(1);
+      await pumpEventQueue();
+      await endRaster(error: 'Unable to encode page 2');
+      await consumed;
+
+      expect(received, <int>[1], reason: 'the pages before the failure arrive');
+      expect(error, 'Unable to encode page 2');
+    });
+
     test('a raster after a failed one gets its own job', () async {
       Printing.raster(Uint8List(0)).listen(null, onError: (Object _) {});
       await pumpEventQueue();
