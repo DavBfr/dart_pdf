@@ -519,6 +519,97 @@ void main() {
     );
   });
 
+  group('maxLines with a line broken by a WidgetSpan', () {
+    /// The distinct text baselines [child] paints, and its own box.
+    Future<List<Object>> layOut(Widget Function() child) async {
+      late RichText laid;
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(100, 300, marginAll: 0),
+          build: (Context context) {
+            final widget = child();
+            laid = widget as RichText;
+            return widget;
+          },
+        ),
+      );
+
+      final pdf = String.fromCharCodes(await document.save());
+      final baselines = RegExp(
+        r'[-\d.]+ ([-\d.]+) Td \[\(',
+      ).allMatches(pdf).map((RegExpMatch m) => m.group(1)!).toSet();
+
+      return <Object>[baselines.length, laid.box!.height];
+    }
+
+    test('lays out exactly maxLines lines', () async {
+      // The WidgetSpan branch tested `lines.length > _maxLines`, above the line
+      // reset, where both text branches test `>=` below it. So one line too many
+      // was built, and on the way out offsetY had not advanced for it: the box
+      // came out a line short of what was painted and the surplus line landed on
+      // top of whatever followed.
+      for (final maxLines in <int>[1, 2, 3]) {
+        final withWidgets = await layOut(
+          () => RichText(
+            maxLines: maxLines,
+            text: TextSpan(
+              style: const TextStyle(fontSize: 10),
+              children: <InlineSpan>[
+                for (var i = 0; i < 6; i++) ...<InlineSpan>[
+                  TextSpan(text: 'W$i'),
+                  WidgetSpan(
+                    child: SizedBox(
+                      width: 60,
+                      height: 8,
+                      child: Container(color: PdfColors.grey),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+
+        expect(
+          withWidgets.first,
+          maxLines,
+          reason: 'maxLines $maxLines: one baseline per line',
+        );
+
+        // And the box covers exactly those lines, as a text-only paragraph of
+        // the same height does.
+        final textOnly = await layOut(
+          () => RichText(
+            maxLines: maxLines,
+            text: const TextSpan(
+              style: TextStyle(fontSize: 10),
+              text: 'aaaaaa bbbbbb cccccc dddddd eeeeee ffffff',
+            ),
+          ),
+        );
+
+        expect(withWidgets.last, textOnly.last, reason: 'maxLines $maxLines');
+      }
+    });
+
+    test('holds when the break falls on an emoji', () async {
+      for (final maxLines in <int>[1, 2]) {
+        final laid = await layOut(
+          () => RichText(
+            maxLines: maxLines,
+            text: TextSpan(
+              style: TextStyle(fontSize: 10, fontFallback: <Font>[emoji]),
+              text: 'aaa 🐈 bbb 🐈 ccc 🐈 ddd 🐈 eee',
+            ),
+          ),
+        );
+
+        expect(laid.first, maxLines, reason: 'maxLines $maxLines');
+      }
+    });
+  });
+
   group('letterSpacing at a span boundary', () {
     /// The x of each `Td` that precedes a literal text run.
     Future<List<double>> positions(

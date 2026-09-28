@@ -1419,14 +1419,19 @@ class RichText extends Widget with SpanningWidget {
             spanStart += spanCount;
             spanCount = 0;
 
-            if (_maxLines != null && lines.length > _maxLines) {
-              return;
-            }
-
             offsetX = 0.0;
             offsetY += bottom - top;
             top = 0;
             bottom = 0;
+
+            // Below the reset and `>=`, like the two text branches. It used to
+            // test `>` above them, so one line too many was built - and on the
+            // way out offsetY had not advanced for it and spanCount was 0, so the
+            // box was a line short of what was painted and the surplus line was
+            // drawn over whatever came next.
+            if (_maxLines != null && lines.length >= _maxLines) {
+              return;
+            }
 
             if (offsetY > constraintHeight) {
               return;
