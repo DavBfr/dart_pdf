@@ -403,6 +403,39 @@ Iterable<String> _parse(String text) sync* {
   }
 }
 
+/// One Arabic Presentation Form: which letter it is a form of, and the OpenType
+/// feature that produces it.
+class ShapedForm {
+  const ShapedForm(this.letter, this.feature);
+
+  /// The nominal letter.
+  final int letter;
+
+  /// The GSUB feature tag: `fina`, `init` or `medi`.
+  final String feature;
+
+  @override
+  String toString() =>
+      'ShapedForm(U+${letter.toRadixString(16).toUpperCase()}, $feature)';
+}
+
+/// The OpenType feature behind each slot of an [_arabicSubstitionA] entry.
+const List<String> _formFeatures = <String>['isol', 'fina', 'init', 'medi'];
+
+/// What each Arabic Presentation Form is a form of.
+///
+/// The isolated slot is left out: it holds the nominal letter itself, which the
+/// cmap already carries.
+final Map<int, ShapedForm> shapedForms = <int, ShapedForm>{
+  for (final entry in _arabicSubstitionA.entries)
+    for (var at = 1; at < (entry.value as List<int>).length; at++)
+      if ((entry.value as List<int>)[at] != entry.key)
+        (entry.value as List<int>)[at]: ShapedForm(
+          entry.key,
+          _formFeatures[at],
+        ),
+};
+
 /// Apply Arabic shape substitutions
 String convert(String input) {
   final lines = input.split('\n');

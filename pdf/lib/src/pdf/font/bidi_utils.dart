@@ -238,6 +238,24 @@ bool hasBidi(String text) {
   return false;
 }
 
+/// The inert character that stands for [run] in a line skeleton.
+///
+/// Hebrew alef for anything with a strong right-to-left character in it - it is
+/// strong R and, unlike the Arabic letters, is never shaped, ligated or
+/// decomposed. Otherwise the run's own first character when that is ASCII, which
+/// carries its real class: a letter is L, a digit EN, punctuation ON. Otherwise
+/// a latin letter, since everything left is left-to-right.
+int _skeletonOf(String run) {
+  for (final rune in run.runes) {
+    if (_isStrongRtl(rune)) {
+      return 0x05D0;
+    }
+  }
+
+  final first = run.isEmpty ? 0 : run.codeUnitAt(0);
+  return first >= 0x20 && first <= 0x7E ? first : 0x61;
+}
+
 /// Apply UAX #9 rule L2 to one line: the logical indices of [runs] in visual
 /// left-to-right order.
 ///
@@ -248,6 +266,10 @@ bool hasBidi(String text) {
 /// embedding control. The control is removed again on the way out, which shifts
 /// every index by the one character it occupied.
 ///
+/// The algorithm is run over a skeleton of one character per run rather than over
+/// the line itself: the real text shapes, ligates and decomposes, so its indices
+/// do not line up with the runs, while the skeleton's do, one for one.
+///
 /// Returns the identity order if the algorithm cannot account for every run.
 List<int> reorderLine(List<String> runs, {required bool rtl}) {
   final order = List<int>.generate(runs.length, (int i) => i);
@@ -255,57 +277,49 @@ List<int> reorderLine(List<String> runs, {required bool rtl}) {
     return order;
   }
 
-  // The line as one string, with each run's place in it.
-  final line = StringBuffer(rtl ? '\u202B' : '\u202A');
-  final starts = List<int>.filled(runs.length, 0);
-  var at = 1;
-
+  final skeleton = StringBuffer(rtl ? '\u202B' : '\u202A');
   for (var run = 0; run < runs.length; run++) {
     if (run > 0) {
-      line.write(' ');
-      at++;
+      skeleton.write(' ');
     }
-    starts[run] = at;
-    at += runs[run].length;
-    line.write(runs[run]);
+    skeleton.writeCharCode(_skeletonOf(runs[run]));
   }
 
   List<int> indices;
   try {
     indices = bidi.BidiString.fromLogical(
-      line.toString(),
+      skeleton.toString(),
     ).paragraphs.first.indices;
   } catch (e) {
     assert(() {
       // ignore: avoid_print
-      print('Unable to reorder "$line": $e');
+      print('Unable to reorder a line of ${runs.length} runs: $e');
       return true;
     }());
 
     return order;
   }
 
-  // The leftmost place each run reaches. Runs cannot interleave under L2, so
-  // that is enough to order them.
-  final leftmost = List<int>.filled(runs.length, -1);
+  // Position 0 is the embedding control, which has been taken back out; run r
+  // sits at 1 + 2 * r, with the separators on the odd offsets.
+  final rank = List<int>.filled(runs.length, -1);
 
   for (var visual = 0; visual < indices.length; visual++) {
-    final logical = indices[visual];
+    final logical = indices[visual] - 1;
+    if (logical < 0 || logical.isOdd) {
+      continue;
+    }
 
-    for (var run = 0; run < runs.length; run++) {
-      if (logical >= starts[run] && logical < starts[run] + runs[run].length) {
-        if (leftmost[run] < 0) {
-          leftmost[run] = visual;
-        }
-        break;
-      }
+    final run = logical ~/ 2;
+    if (run < runs.length && rank[run] < 0) {
+      rank[run] = visual;
     }
   }
 
-  if (leftmost.contains(-1)) {
+  if (rank.contains(-1)) {
     assert(() {
       // ignore: avoid_print
-      print('Unable to place every run of "$line"');
+      print('Unable to place every run of a line of ${runs.length}');
       return true;
     }());
 
@@ -313,9 +327,8 @@ List<int> reorderLine(List<String> runs, {required bool rtl}) {
   }
 
   order.sort(
-    (int a, int b) => leftmost[a] != leftmost[b]
-        ? leftmost[a].compareTo(leftmost[b])
-        : a.compareTo(b),
+    (int a, int b) =>
+        rank[a] != rank[b] ? rank[a].compareTo(rank[b]) : a.compareTo(b),
   );
 
   return order;

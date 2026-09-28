@@ -287,4 +287,90 @@ void main() {
       }
     });
   });
+
+  group('the GSUB joining features', () {
+    TtfParser parse(String name) =>
+        TtfParser(File(name).readAsBytesSync().buffer.asByteData());
+
+    test('are read from a font that has them', () {
+      final font = parse('hacen-tunisia.ttf');
+
+      expect(font.arabicJoining.keys.toList()..sort(), <String>[
+        'fina',
+        'init',
+        'isol',
+        'medi',
+      ]);
+      for (final feature in <String>['fina', 'init', 'medi']) {
+        expect(font.arabicJoining[feature], isNotEmpty, reason: feature);
+        for (final entry in font.arabicJoining[feature]!.entries) {
+          expect(entry.value, isNot(0), reason: '$feature: no .notdef');
+          expect(
+            entry.value,
+            isNot(entry.key),
+            reason: '$feature: a real move',
+          );
+          expect(entry.value, lessThan(font.numGlyphs));
+        }
+      }
+    });
+
+    test('are empty, and harmless, for a font without them', () {
+      for (final name in <String>[
+        'open-sans.ttf',
+        'roboto.ttf',
+        'noto-sans.ttf',
+        'genyomintw.ttf',
+        'material.ttf',
+        'emoji.ttf',
+      ]) {
+        late TtfParser font;
+        expect(() => font = parse(name), returnsNormally, reason: name);
+        expect(font.arabicJoining, isEmpty, reason: name);
+      }
+    });
+
+    test('make the joined forms reachable by their code point', () {
+      // A glyph is only addressable through the cmap, and the shaper
+      // substitutes code points, so a font that joins through GSUB could not be
+      // asked for its final, initial and medial glyphs at all: they came out as
+      // .notdef with no width. hacen-tunisia carries the base letters and the
+      // isolated forms only.
+      final font = parse('hacen-tunisia.ttf');
+
+      // U+0628 BEH: nominal, final, initial, medial.
+      final nominal = font.charToGlyphIndexMap[0x0628];
+      expect(nominal, isNotNull);
+      expect(font.charToGlyphIndexMap[0xFE8F], nominal, reason: 'isolated');
+
+      final joined = <int>[
+        for (final form in <int>[0xFE90, 0xFE91, 0xFE92])
+          font.charToGlyphIndexMap[form]!,
+      ];
+      expect(joined.toSet(), hasLength(3), reason: 'three distinct glyphs');
+      expect(joined, isNot(contains(nominal)));
+
+      for (final glyph in joined) {
+        expect(
+          font.glyphInfoMap[glyph]!.advanceWidth,
+          greaterThan(0),
+          reason: 'glyph $glyph has a width',
+        );
+      }
+    });
+
+    test('a font that already maps a form keeps its own glyph', () {
+      // Only what the cmap does not carry is filled in, so nothing that renders
+      // today renders differently.
+      final font = parse('hacen-tunisia.ttf');
+      final isolated = font.charToGlyphIndexMap[0xFE8D];
+
+      expect(isolated, font.charToGlyphIndexMap[0x0627]);
+      expect(
+        font.arabicJoining['isol']![isolated!],
+        isNotNull,
+        reason: 'the isol feature does have something to say about it',
+      );
+    });
+  });
 }

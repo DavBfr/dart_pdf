@@ -192,6 +192,42 @@ void main() {
     });
   });
 
+  group('a joined arabic word', () {
+    test('has a real width and is drawn right to left', () async {
+      // hacen-tunisia joins through GSUB and its cmap carries only the base
+      // letters and the isolated forms, so every medial and final glyph came out
+      // as .notdef with no width: two words overlapped at the same x.
+      final shaped = bidi.shapeLogical('مرحبا بالعالم').split(' ');
+      final lines = await rtlLines('مرحبا بالعالم', 400);
+
+      expect(lines, <List<String>>[
+        <String>[bidi.reversed(shaped[1]), bidi.reversed(shaped[0])],
+      ]);
+    });
+
+    test('measures more than nothing', () async {
+      final widget = Text(
+        'مرحبا',
+        style: TextStyle(font: loadFont('hacen-tunisia.ttf'), fontSize: 20),
+      );
+
+      final document = Document();
+      document.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(400, 120, marginAll: 0),
+          textDirection: TextDirection.rtl,
+          build: (Context context) => widget,
+        ),
+      );
+      await document.save();
+
+      // The five glyphs of a shaped 'مرحبا' at 20pt. It used to measure 0.0,
+      // because four of the five were not in the cmap at all.
+      expect(widget.box!.width, greaterThan(30));
+      expect(widget.box!.width, lessThan(120));
+    });
+  }, skip: legacyArabic);
+
   group('a wrapped right-to-left paragraph', () {
     // hacen-tunisia has the isolated Arabic forms but no medial or final ones,
     // so these use one-letter words: they shape to an isolated form the font

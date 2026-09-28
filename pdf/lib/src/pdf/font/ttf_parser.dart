@@ -23,6 +23,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
 import '../options.dart';
+import 'arabic.dart' as arabic;
 import 'bidi_utils.dart' as bidi;
 import 'font_metrics.dart';
 
@@ -156,6 +157,8 @@ class TtfParser {
     );
 
     _parseCMap();
+    _parseGsub();
+    _aliasShapedForms();
     if (tableOffsets.containsKey(loca_table) &&
         tableOffsets.containsKey(glyf_table)) {
       _parseIndexes();
@@ -183,6 +186,14 @@ class TtfParser {
   static const String fpgm_table = 'fpgm';
   static const String prep_table = 'prep';
   static const String gasp_table = 'gasp';
+  static const String gsub_table = 'GSUB';
+
+  /// The Arabic joining features the GSUB table defines, keyed by feature tag,
+  /// each mapping a glyph id to the glyph that replaces it.
+  ///
+  /// Empty for a font with no GSUB table and for one whose GSUB has no `arab`
+  /// script.
+  final arabicJoining = <String, Map<int, int>>{};
 
   final ByteData bytes;
   final tableOffsets = <String, int>{};
@@ -276,6 +287,185 @@ class TtfParser {
   /// every consumer of this map reads it as Unicode. With hacen-tunisia.ttf the
   /// Mac subtable's byte 0xAA landed on U+00AA, so `Text('ª')` drew the trademark
   /// glyph and a document containing both threw 'Missing glyph for character'.
+  /// The four-byte tag at [at].
+  String _tag(int at) => String.fromCharCodes(_slice(at, 4));
+
+  /// Read the `arab` script's joining features out of the GSUB table.
+  ///
+  /// Only the single substitution, lookup type 1, which is what the four joining
+  /// features use: a ligature substitution replaces a run of glyphs, which the
+  /// code-point shaper this feeds cannot express. A malformed table leaves
+  /// [arabicJoining] empty rather than throwing.
+  void _parseGsub() {
+    final base = tableOffsets[gsub_table];
+    if (base == null || base + 10 > bytes.lengthInBytes) {
+      return;
+    }
+
+    try {
+      final scriptList = base + bytes.getUint16(base + 4);
+      final featureList = base + bytes.getUint16(base + 6);
+      final lookupList = base + bytes.getUint16(base + 8);
+
+      // The default language system of the `arab` script: its features are the
+      // ones that apply when no language is selected.
+      var langSys = -1;
+      final scriptCount = bytes.getUint16(scriptList);
+      for (var i = 0; i < scriptCount; i++) {
+        final record = scriptList + 2 + i * 6;
+        if (_tag(record) != 'arab') {
+          continue;
+        }
+        final script = scriptList + bytes.getUint16(record + 4);
+        final offset = bytes.getUint16(script);
+        if (offset != 0) {
+          langSys = script + offset;
+        }
+        break;
+      }
+
+      if (langSys < 0) {
+        return;
+      }
+
+      final featureCount = bytes.getUint16(featureList);
+      final used = bytes.getUint16(langSys + 4);
+
+      for (var i = 0; i < used; i++) {
+        final index = bytes.getUint16(langSys + 6 + i * 2);
+        if (index >= featureCount) {
+          continue;
+        }
+
+        final record = featureList + 2 + index * 6;
+        final tag = _tag(record);
+        if (!_joiningFeatures.contains(tag)) {
+          continue;
+        }
+
+        final feature = featureList + bytes.getUint16(record + 4);
+        final substitutions = arabicJoining.putIfAbsent(
+          tag,
+          () => <int, int>{},
+        );
+        final lookupCount = bytes.getUint16(feature + 2);
+        for (var k = 0; k < lookupCount; k++) {
+          _parseGsubSingle(
+            lookupList,
+            bytes.getUint16(feature + 4 + k * 2),
+            substitutions,
+          );
+        }
+
+        if (substitutions.isEmpty) {
+          arabicJoining.remove(tag);
+        }
+      }
+    } catch (e) {
+      assert(() {
+        // ignore: avoid_print
+        print('Unable to read the GSUB table of $fontName: $e');
+        return true;
+      }());
+
+      arabicJoining.clear();
+    }
+  }
+
+  static const _joiningFeatures = <String>{'isol', 'fina', 'init', 'medi'};
+
+  void _parseGsubSingle(int lookupList, int index, Map<int, int> into) {
+    if (index >= bytes.getUint16(lookupList)) {
+      return;
+    }
+
+    final lookup = lookupList + bytes.getUint16(lookupList + 2 + index * 2);
+    if (bytes.getUint16(lookup) != 1) {
+      return;
+    }
+
+    final subTableCount = bytes.getUint16(lookup + 4);
+    for (var i = 0; i < subTableCount; i++) {
+      final table = lookup + bytes.getUint16(lookup + 6 + i * 2);
+      final glyphs = _parseCoverage(table + bytes.getUint16(table + 2));
+
+      switch (bytes.getUint16(table)) {
+        case 1:
+          final delta = bytes.getInt16(table + 4);
+          for (final glyph in glyphs) {
+            into[glyph] = (glyph + delta) & 0xFFFF;
+          }
+          break;
+        case 2:
+          final count = bytes.getUint16(table + 4);
+          for (var k = 0; k < glyphs.length && k < count; k++) {
+            into[glyphs[k]] = bytes.getUint16(table + 6 + k * 2);
+          }
+          break;
+      }
+    }
+  }
+
+  /// The glyph ids a coverage table lists, in coverage-index order.
+  List<int> _parseCoverage(int at) {
+    final count = bytes.getUint16(at + 2);
+
+    switch (bytes.getUint16(at)) {
+      case 1:
+        return <int>[
+          for (var i = 0; i < count; i++) bytes.getUint16(at + 4 + i * 2),
+        ];
+      case 2:
+        final glyphs = <int>[];
+        for (var i = 0; i < count; i++) {
+          final range = at + 4 + i * 6;
+          final end = bytes.getUint16(range + 2);
+          for (var glyph = bytes.getUint16(range); glyph <= end; glyph++) {
+            glyphs.add(glyph);
+          }
+        }
+        return glyphs;
+    }
+
+    return const <int>[];
+  }
+
+  /// Make the font's own final, initial and medial glyphs reachable by the
+  /// Arabic Presentation Form code point that stands for them.
+  ///
+  /// A glyph is only addressable through the cmap, and the shaper substitutes
+  /// code points, so a font that joins through GSUB - which is what every modern
+  /// Arabic font does - could not be asked for its joined forms at all: they
+  /// came out as .notdef with no width. hacen-tunisia, the font this package's
+  /// own Arabic fixture uses, carries exactly the base letters and their
+  /// isolated forms.
+  ///
+  /// Only forms the cmap does not already carry are filled in, so nothing that
+  /// renders today renders differently.
+  void _aliasShapedForms() {
+    if (arabicJoining.isEmpty) {
+      return;
+    }
+
+    for (final form in arabic.shapedForms.entries) {
+      if (charToGlyphIndexMap.containsKey(form.key)) {
+        continue;
+      }
+
+      final nominal = charToGlyphIndexMap[form.value.letter];
+      if (nominal == null) {
+        continue;
+      }
+
+      final glyph = arabicJoining[form.value.feature]?[nominal];
+      if (glyph == null || glyph == 0) {
+        continue;
+      }
+
+      charToGlyphIndexMap[form.key] = glyph;
+    }
+  }
+
   void _parseCMap() {
     final basePosition = tableOffsets[cmap_table]!;
     final numSubTables = bytes.getUint16(basePosition + 2);
