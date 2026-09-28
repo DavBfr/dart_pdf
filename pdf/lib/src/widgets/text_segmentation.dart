@@ -81,3 +81,55 @@ String stripDefaultIgnorable(String text, {Set<int> keep = const <int>{}}) {
   out.write(text.substring(start));
   return out.toString();
 }
+
+/// Every whitespace character the text layout handles, breakable or not.
+///
+/// Dart's `\s` without U+FEFF, which [stripDefaultIgnorable] has already
+/// removed by the time any of this runs.
+final RegExp whitespace = RegExp(r'[ \t\n\v\f\r\u0085   -     　]');
+
+/// Whitespace at which a line may be broken.
+///
+/// [whitespace] minus U+00A0, U+2007 and U+202F. Those three are non-breaking
+/// by definition - UAX #14 gives them the GL class - and are the documented way
+/// to hold two words together, yet Dart's `\s` matches all of them, so the
+/// default splitter broke lines at exactly the characters an author reaches for
+/// to stop it. U+FEFF, the fourth, is dropped as a default ignorable.
+final RegExp breakableWhitespace = RegExp(r'[ \t\n\v\f\r\u0085  -  -    　]');
+
+/// A run of text and the whitespace that follows it.
+class TextChunk {
+  const TextChunk(this.text, this.separator);
+
+  /// What is drawn.
+  final String text;
+
+  /// The whitespace between this run and the next, empty at the end of a line.
+  ///
+  /// It is never drawn: it only advances the pen, by its own width in the font
+  /// being used rather than by a U+0020's.
+  final String separator;
+
+  @override
+  String toString() => 'TextChunk("$text" + ${separator.length} separator)';
+}
+
+/// Split [line] at every breakable whitespace character, keeping each separator
+/// with the run it follows.
+///
+/// The runs are exactly what `String.split` returns - one character delimits, so
+/// a run of whitespace, or whitespace at either end, yields empty runs - except
+/// that the separator is carried rather than discarded, so it can be measured
+/// instead of being charged as a U+0020 whatever it was.
+List<TextChunk> tokenize(String line) {
+  final chunks = <TextChunk>[];
+  var start = 0;
+
+  for (final match in breakableWhitespace.allMatches(line)) {
+    chunks.add(TextChunk(line.substring(start, match.start), match.group(0)!));
+    start = match.end;
+  }
+  chunks.add(TextChunk(line.substring(start), ''));
+
+  return chunks;
+}

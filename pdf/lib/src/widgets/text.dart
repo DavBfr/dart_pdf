@@ -1004,8 +1004,34 @@ class RichText extends Widget with SpanningWidget {
 
           final font = style!.font!.getFont(context);
 
-          final space =
-              font.stringMetrics(' ') * (style.fontSize! * textScaleFactor);
+          /// What one separator advances the pen by, measured in this font
+          /// instead of assumed to be a U+0020: an em space, an ideographic
+          /// space and a tab are nothing like a space wide.
+          double gapOf(String separator) => separator.isEmpty
+              ? 0
+              : (font.stringMetrics(separator) *
+                            (style.fontSize! * textScaleFactor))
+                        .advanceWidth *
+                    style.wordSpacing!;
+
+          /// [text] with every whitespace character this font cannot draw
+          /// replaced by a plain space.
+          ///
+          /// Whitespace carries its own width now, so a character the font does
+          /// not map would advance by nothing: no font has a glyph for U+0009,
+          /// and hacen-tunisia has none for U+00A0. A U+0020 is what the layout
+          /// charged for all of them before.
+          String drawable(String text) {
+            if (!whitespace.hasMatch(text)) {
+              return text;
+            }
+
+            return text.replaceAllMapped(whitespace, (Match match) {
+              final found = match.group(0)!;
+              final rune = found.codeUnitAt(0);
+              return rune < 0x20 || !font.isRuneSupported(rune) ? ' ' : found;
+            });
+          }
 
           // The strip runs after the shaping and the bidi reordering, which both
           // need the joiners and the bidi marks, and before the line split, so
@@ -1021,17 +1047,26 @@ class RichText extends Widget with SpanningWidget {
                 : span.text)!,
           ).split(RegExp(r'\r\n|\r|\n'));
 
+          // The gap charged after the last run. The line-closing sites take it
+          // back out, so a line's width ends at its last glyph.
+          var lastGap = 0.0;
+
           for (var line = 0; line < spanLines.length; line++) {
-            final words =
-                lineSplitter?.call(spanLines[line]) ??
-                spanLines[line].split(RegExp(r'\s'));
-            for (var index = 0; index < words.length; index++) {
-              final word = words[index];
+            final chunks = lineSplitter == null
+                ? tokenize(spanLines[line])
+                : <TextChunk>[
+                    // A caller-supplied splitter says nothing about what it
+                    // took out, so every run keeps the U+0020 it always got.
+                    for (final word in lineSplitter!(spanLines[line]))
+                      TextChunk(word, ' '),
+                  ];
+            for (var index = 0; index < chunks.length; index++) {
+              final chunk = chunks[index];
+              final word = drawable(chunk.text);
 
               if (word.isEmpty) {
-                offsetX +=
-                    space.advanceWidth * style.wordSpacing! +
-                    style.letterSpacing!;
+                lastGap = gapOf(drawable(chunk.separator));
+                offsetX += lastGap + style.letterSpacing!;
                 continue;
               }
 
@@ -1066,8 +1101,11 @@ class RichText extends Widget with SpanningWidget {
                       fits += syllable;
                     }
                     if (fits.isNotEmpty) {
-                      words[index] = '$fits-';
-                      words.insert(index + 1, word.substring(fits.length));
+                      chunks[index] = TextChunk('$fits-', '');
+                      chunks.insert(
+                        index + 1,
+                        TextChunk(word.substring(fits.length), chunk.separator),
+                      );
                       index--;
                       continue;
                     }
@@ -1082,9 +1120,7 @@ class RichText extends Widget with SpanningWidget {
                       spanStart,
                       spanCount,
                       bottom,
-                      offsetX -
-                          space.advanceWidth * style.wordSpacing! -
-                          style.letterSpacing!,
+                      offsetX - lastGap - style.letterSpacing!,
                       _textDirection,
                       true,
                     ),
@@ -1112,8 +1148,11 @@ class RichText extends Widget with SpanningWidget {
                   final pos = _splitWord(word, font, style, constraintWidth);
 
                   if (pos < word.length) {
-                    words[index] = word.substring(0, pos);
-                    words.insert(index + 1, word.substring(pos));
+                    chunks[index] = TextChunk(word.substring(0, pos), '');
+                    chunks.insert(
+                      index + 1,
+                      TextChunk(word.substring(pos), chunk.separator),
+                    );
 
                     // Try again
                     index--;
@@ -1150,10 +1189,8 @@ class RichText extends Widget with SpanningWidget {
                 ),
               );
 
-              offsetX +=
-                  metrics.advanceWidth +
-                  space.advanceWidth * style.wordSpacing! +
-                  style.letterSpacing!;
+              lastGap = gapOf(drawable(chunk.separator));
+              offsetX += metrics.advanceWidth + lastGap + style.letterSpacing!;
             }
 
             if (line < spanLines.length - 1) {
@@ -1163,9 +1200,7 @@ class RichText extends Widget with SpanningWidget {
                   spanStart,
                   spanCount,
                   bottom,
-                  offsetX -
-                      space.advanceWidth * style.wordSpacing! -
-                      style.letterSpacing!,
+                  offsetX - lastGap - style.letterSpacing!,
                   _textDirection,
                   false,
                 ),
@@ -1196,8 +1231,9 @@ class RichText extends Widget with SpanningWidget {
             }
           }
 
-          offsetX -=
-              space.advanceWidth * style.wordSpacing! - style.letterSpacing!;
+          // The operator precedence here is B-169's defect, not this one's:
+          // it reads -(gap) + letterSpacing where both terms were added.
+          offsetX -= lastGap - style.letterSpacing!;
         } else if (span is WidgetSpan) {
           span.child.layout(
             context,
