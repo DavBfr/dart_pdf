@@ -17,6 +17,10 @@
 - Fix `PdfPreview` re-running the app's whole document build and a full raster pass on any inherited-widget change - opening the keyboard, toggling dark mode, changing the text scale - even though only the size and the device pixel ratio can move the resolution it renders at
 - `PdfPreview` now re-rasters when the window is resized, which it did not do at all
 - `PdfPreviewRaster` gained a protected `computeDpi()` and a `needsRasterForDpi` getter, for a subclass that overrides the scheduling
+- Fix `PdfPreview` throwing `RangeError` out of `build` - a red error widget the user cannot recover from - when a page was zoomed and a re-raster then produced fewer pages. The zoomed page is clamped to the last page there is, or leaves the zoom when the document is empty, and `onZoomChanged` fires exactly once per real change
+- Fix `PdfPreview` re-inflating every page on every rebuild with `enableScrollToPage: true`, which made streaming a document cost O(N^2), and made a key from `getPageKey` dead one frame later. Page keys are now stable for the life of the page
+- Fix `scrollToPage` and `getPageKey` throwing `RangeError (length): Valid value range is empty: 0` when called before the first page was rasterized, or past the end after the document shrank. `scrollToPage` now completes without scrolling, and both assert in debug with the index and the page count
+- `PdfPreviewCustomState` gained a `pageCount` getter, and `PdfPreviewRaster` a protected `onPagesChanged()` hook called before each page-list change is published
 
 
 

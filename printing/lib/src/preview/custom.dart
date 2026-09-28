@@ -154,6 +154,10 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
 
   @override
   void didUpdateWidget(covariant PdfPreviewCustom oldWidget) {
+    if (oldWidget.enableScrollToPage != widget.enableScrollToPage) {
+      _syncPageGlobalKeys();
+    }
+
     if (oldWidget.build != widget.build ||
         widget.shouldRepaint ||
         widget.pageFormat != oldWidget.pageFormat) {
@@ -216,6 +220,71 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     }
   }
 
+  @override
+  void onPagesChanged() {
+    _syncPageGlobalKeys();
+    _clampPreview();
+    super.onPagesChanged();
+  }
+
+  /// Keep exactly one key per page, the same object for that page's lifetime.
+  ///
+  /// These used to be reallocated inside build. Fresh keys make
+  /// `Widget.canUpdate` false for every page child, so each rebuild
+  /// deactivated and re-inflated every page - and with a setState per
+  /// rasterized page, streaming a document cost O(N^2) - while a key handed out
+  /// by [getPageKey] was dead one frame later.
+  void _syncPageGlobalKeys() {
+    if (!widget.enableScrollToPage) {
+      if (_pageGlobalKeys.isNotEmpty) {
+        _pageGlobalKeys = <GlobalKey>[];
+      }
+      return;
+    }
+
+    if (_pageGlobalKeys.length > pages.length) {
+      // Shrunk: the keys for the pages that remain are untouched.
+      _pageGlobalKeys = _pageGlobalKeys.sublist(0, pages.length);
+      return;
+    }
+
+    while (_pageGlobalKeys.length < pages.length) {
+      _pageGlobalKeys.add(GlobalKey());
+    }
+  }
+
+  /// Reconcile the zoomed page with a page list that may have shrunk.
+  ///
+  /// `preview` used to index `pages` unguarded, and only didUpdateWidget reset
+  /// it - while rasters also start from didChangeDependencies, reassemble and
+  /// the debug switch. So zooming a page and then resizing threw a RangeError
+  /// out of build: a red error widget, and a preview the user could not
+  /// recover.
+  void _clampPreview() {
+    final zoomed = preview;
+    if (zoomed == null || zoomed < pages.length) {
+      return;
+    }
+
+    if (pages.isEmpty) {
+      preview = null;
+      updatePosition = null;
+      // The zoom state really changed, so the callback is owed exactly one
+      // call.
+      _zoomChanged();
+      return;
+    }
+
+    // Stay zoomed, on the last page there is.
+    preview = pages.length - 1;
+  }
+
+  /// The number of rasterized pages.
+  ///
+  /// [scrollToPage] and [getPageKey] are meaningful only for an index below
+  /// this, which is zero until the first raster has delivered a page.
+  int get pageCount => pages.length;
+
   /// Ensures that page with [index] is become visible.
   Future<void> scrollToPage(
     int index, {
@@ -225,10 +294,32 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
         ScrollPositionAlignmentPolicy.explicit,
   }) {
     assert(index >= 0, 'Index of page cannot be negative');
+    assert(
+      widget.enableScrollToPage,
+      'scrollToPage needs PdfPreview(enableScrollToPage: true)',
+    );
+    assert(
+      index < _pageGlobalKeys.length,
+      'Page $index is out of range: the preview has ${_pageGlobalKeys.length} '
+      'page(s). scrollToPage is meaningful only once a page has been '
+      'rasterized.',
+    );
+
+    if (index >= _pageGlobalKeys.length) {
+      // Nothing to scroll to: no page has been rasterized yet, or the document
+      // shrank. This used to throw a RangeError out of a public method.
+      return Future<void>.value();
+    }
+
     final pageContext = _pageGlobalKeys[index].currentContext;
-    assert(pageContext != null, 'Context of GlobalKey cannot be null');
+    if (pageContext == null) {
+      // The page exists but is not on screen: the preview is zoomed, or the
+      // list has not laid that page out.
+      return Future<void>.value();
+    }
+
     return Scrollable.ensureVisible(
-      pageContext!,
+      pageContext,
       duration: duration,
       curve: curve,
       alignmentPolicy: alignmentPolicy,
@@ -236,7 +327,20 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
   }
 
   /// Returns the global key for page with [index].
-  Key getPageKey(int index) => _pageGlobalKeys[index];
+  ///
+  /// The same object for as long as that page exists, so it can be held across
+  /// frames. Meaningful only for an index below [pageCount], and only with
+  /// `enableScrollToPage: true`.
+  Key getPageKey(int index) {
+    assert(index >= 0, 'Index of page cannot be negative');
+    assert(
+      index < _pageGlobalKeys.length,
+      'Page $index is out of range: the preview has ${_pageGlobalKeys.length} '
+      'page(s).',
+    );
+
+    return _pageGlobalKeys[index];
+  }
 
   Widget _showError(Object error) {
     if (widget.onError != null) {
@@ -259,10 +363,6 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     if (pages.isEmpty) {
       return widget.loadingWidget ??
           const Center(child: CircularProgressIndicator());
-    }
-
-    if (widget.enableScrollToPage) {
-      _pageGlobalKeys = List.generate(pages.length, (_) => GlobalKey());
     }
 
     if (widget.pagesBuilder != null) {
@@ -312,7 +412,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
           );
   }
 
-  Widget _zoomPreview() {
+  Widget _zoomPreview(int index) {
     final zoomPreview = GestureDetector(
       onDoubleTap: () {
         setState(() {
@@ -335,7 +435,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
             : null,
         child: Center(
           child: PdfPreviewPage(
-            pageData: pages[preview!],
+            pageData: pages[index],
             pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
             pageMargin: widget.previewPageMargin,
           ),
@@ -359,8 +459,11 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
   Widget build(BuildContext context) {
     Widget page;
 
-    if (preview != null) {
-      page = _zoomPreview();
+    // Guarded, and build never writes to `preview`: onPagesChanged reconciles
+    // it, and this is what keeps a stale index from reaching `pages`.
+    final zoomed = preview;
+    if (zoomed != null && zoomed < pages.length) {
+      page = _zoomPreview(zoomed);
     } else {
       page = Container(
         constraints: widget.maxPageWidth != null

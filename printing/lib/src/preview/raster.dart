@@ -78,6 +78,15 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
     super.dispose();
   }
 
+  /// Called when the page list changed, before the change is published.
+  ///
+  /// Anything derived from [pages] - a key per page, an index into it - has to
+  /// be reconciled here, because a raster can shrink the list under state that
+  /// was valid for the old one. Runs inside the mounted guard, so a subclass
+  /// may touch its own state.
+  @protected
+  void onPagesChanged() {}
+
   /// The resolution to rasterize at, from the current widget and media query.
   ///
   /// Only the size and the device pixel ratio feed this, so a MediaQuery change
@@ -251,6 +260,7 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         }
 
         if (mounted) {
+          onPagesChanged();
           setState(() {});
         }
 
@@ -264,6 +274,7 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         pages.removeRange(pageNum, pages.length);
       }
       if (mounted) {
+        onPagesChanged();
         setState(() {});
       }
     } catch (exception, stack) {
