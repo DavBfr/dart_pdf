@@ -28,6 +28,9 @@
 - **A failed font download now reaches the caller.** `PdfGoogleFonts.*` and `DownloadableFont.getFont` used to return Helvetica on any failure, with their only report inside an assert that release and profile builds strip - so a release build silently shipped a document in which every rune outside 0x00-0xFF was a crossed box. To keep the old behaviour, set `DownloadableFont.defaultFallback = Font.helvetica()` once, or pass `fallback:` to `getFont`; the substitution is then reported through `FlutterError.reportError` in every build mode
 - A downloaded body that is not a font - a captive portal's sign-in page, a truncated response - is now a font error naming the font and the URL, and is dropped from the cache, instead of a `RangeError` from inside the TTF reader much later
 - `DownloadableFont` is exported, so an app can use it for its own font URLs and set the fallback
+- Fix `flutterImageProvider` never completing when the pixel read-back fails, which on the web is what a `NetworkImage` served without CORS headers does: the preview span for ever, `layoutPdf` and `sharePdf` never fired, and no error reached the app. It now rejects with the read-back's own exception, and with a descriptive one naming the image size when the read-back yields no bytes
+- A `flutterImageProvider` load failure now rejects with the exception and its stack rather than the string 'image failed to load', and its listener is removed on every path
+
 
 
 

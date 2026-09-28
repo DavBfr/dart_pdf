@@ -36,22 +36,44 @@ Future<ImageProvider> flutterImageProvider(
   late rdr.ImageStreamListener listener;
   listener = rdr.ImageStreamListener(
     (rdr.ImageInfo image, bool sync) async {
-      final bytes = await image.image.toByteData();
+      // ImageStreamCompleter.setImage discards the future this async callback
+      // returns, so anything thrown in here became an unhandled zone error and
+      // the completer was simply never settled: on web, a CORS-tainted canvas
+      // made the returned future hang for ever, with no error reaching the app.
+      try {
+        final bytes = await image.image.toByteData();
 
-      final result = RawImage(
-        bytes: bytes!.buffer.asUint8List(),
-        width: image.image.width,
-        height: image.image.height,
-      );
+        if (bytes == null) {
+          throw Exception(
+            'Unable to read the pixels of a '
+            '${image.image.width}x${image.image.height} image',
+          );
+        }
 
-      if (!completer.isCompleted) {
-        completer.complete(result);
+        if (!completer.isCompleted) {
+          completer.complete(
+            RawImage(
+              bytes: bytes.buffer.asUint8List(),
+              width: image.image.width,
+              height: image.image.height,
+            ),
+          );
+        }
+      } catch (e, s) {
+        if (!completer.isCompleted) {
+          completer.completeError(e, s);
+        }
+        onError?.call(e, s);
+      } finally {
+        stream.removeListener(listener);
       }
-      stream.removeListener(listener);
     },
     onError: (dynamic exception, StackTrace? stackTrace) {
+      stream.removeListener(listener);
       if (!completer.isCompleted) {
-        completer.completeError('image failed to load');
+        // The exception itself, rather than the string 'image failed to load'
+        // that used to replace it.
+        completer.completeError(exception as Object, stackTrace);
       }
       if (onError != null) {
         onError(exception, stackTrace);
