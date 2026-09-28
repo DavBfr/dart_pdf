@@ -106,13 +106,18 @@ class _TextDecoration {
       return _box;
     }
 
-    final x1 = spans[startSpan].offset.x + spans[startSpan].left;
-    final x2 =
-        spans[endSpan].offset.x + spans[endSpan].left + spans[endSpan].width;
+    // The extremes over the whole range, not the first and last span: a line is
+    // reordered into visual order after it is built, so the first span of a
+    // decoration is not necessarily its leftmost.
+    var x1 = spans[startSpan].offset.x + spans[startSpan].left;
+    var x2 = x1 + spans[startSpan].width;
     var y1 = spans[startSpan].offset.y + spans[startSpan].top;
     var y2 = y1 + spans[startSpan].height;
 
     for (var n = startSpan + 1; n <= endSpan; n++) {
+      final nx1 = spans[n].offset.x + spans[n].left;
+      x1 = math.min(x1, nx1);
+      x2 = math.max(x2, nx1 + spans[n].width);
       final ny1 = spans[n].offset.y + spans[n].top;
       final ny2 = ny1 + spans[n].height;
       y1 = math.min(y1, ny1);
@@ -575,48 +580,65 @@ class _Line {
     final spans = parent._spans.sublist(firstSpan, lastSpan);
     final isRTL = textDirection == TextDirection.rtl;
 
+    // The bidi algorithm has already put this line in visual order, so all that
+    // is left is a uniform shift. Only the legacy arabic.convert path, which
+    // shapes without reordering, still needs the line mirrored here.
+    final mirror = !useBidi && isRTL;
+
     var delta = 0.0;
     switch (textAlign) {
       case TextAlign.left:
-        delta = isRTL ? wordsWidth : 0;
+        delta = mirror ? wordsWidth : 0;
         break;
       case TextAlign.right:
-        delta = isRTL ? totalWidth : totalWidth - wordsWidth;
+        delta = mirror ? totalWidth : totalWidth - wordsWidth;
         break;
       case TextAlign.start:
-        delta = isRTL ? totalWidth : 0;
+        delta = mirror ? totalWidth : (isRTL ? totalWidth - wordsWidth : 0);
         break;
       case TextAlign.end:
-        delta = isRTL ? wordsWidth : totalWidth - wordsWidth;
+        delta = mirror ? wordsWidth : (isRTL ? 0 : totalWidth - wordsWidth);
         break;
       case TextAlign.center:
         delta = (totalWidth - wordsWidth) / 2.0;
-        if (isRTL) {
+        if (mirror) {
           delta += wordsWidth;
         }
         break;
       case TextAlign.justify:
-        delta = isRTL ? totalWidth : 0;
+        delta = mirror ? totalWidth : (isRTL ? totalWidth - wordsWidth : 0);
         if (!justify) {
           break;
         }
 
         final gap = (totalWidth - wordsWidth) / (spans.length - 1);
         var x = 0.0;
-        for (final span in spans) {
-          span.offset = PdfPoint(
-            isRTL
-                ? delta - x - (span.offset.x + span.width)
-                : span.offset.x + x,
-            span.offset.y - baseline,
-          );
+
+        if (mirror) {
+          for (final span in spans) {
+            span.offset = PdfPoint(
+              delta - x - (span.offset.x + span.width),
+              span.offset.y - baseline,
+            );
+            x += gap;
+          }
+
+          return;
+        }
+
+        // Widen the gaps the line already has, which means walking it as it is
+        // drawn rather than as it was built.
+        for (final span
+            in spans.toList()
+              ..sort((_Span a, _Span b) => a.offset.x.compareTo(b.offset.x))) {
+          span.offset = PdfPoint(span.offset.x + x, span.offset.y - baseline);
           x += gap;
         }
 
         return;
     }
 
-    if (isRTL) {
+    if (mirror) {
       for (final span in spans) {
         span.offset = PdfPoint(
           delta - (span.offset.x + span.width),
@@ -970,6 +992,11 @@ class RichText extends Widget with SpanningWidget {
     final _textDirection = textDirection ?? Directionality.of(context);
     _textAlign = textAlign ?? theme.textAlign ?? TextAlign.start;
 
+    // Whether the bidi algorithm shapes and reorders this paragraph. The rtl
+    // gate is B-023's to remove; it is load-bearing until the paragraph-level
+    // word reversal is gone, which is what this change does.
+    final _bidi = useBidi && _textDirection == TextDirection.rtl;
+
     final _overflow = this.overflow ?? theme.overflow;
 
     final constraintWidth = constraints.hasBoundedWidth
@@ -1042,8 +1069,13 @@ class RichText extends Widget with SpanningWidget {
           final spanLines = stripDefaultIgnorable(
             (useArabic && _textDirection == TextDirection.rtl
                 ? arabic.convert(span.text!)
-                : useBidi && _textDirection == TextDirection.rtl
-                ? bidi.logicalToVisual(span.text!)
+                : _bidi
+                // Shaped, but still in logical order: line breaking, metrics
+                // and hyphenation all need that, and rule L2 belongs to a
+                // finished line. Reordering the paragraph first and reversing
+                // its word order cancelled out only while every word of a run
+                // stayed on one line.
+                ? bidi.shapeLogical(span.text!)
                 : span.text)!,
             // The soft hyphen, the zero-width space and the word joiner are
             // break opportunities: tokenize reads them and drops them.
@@ -1075,14 +1107,7 @@ class RichText extends Widget with SpanningWidget {
                 continue;
               }
 
-              final metrics =
-                  font.stringMetrics(
-                    word,
-                    letterSpacing:
-                        style.letterSpacing! /
-                        (style.fontSize! * textScaleFactor),
-                  ) *
-                  (style.fontSize! * textScaleFactor);
+              final metrics = _metricsOf(word, font, style);
 
               if (_softWrap &&
                   offsetX + metrics.width > constraintWidth + 0.00001) {
@@ -1119,6 +1144,9 @@ class RichText extends Widget with SpanningWidget {
 
                 if (spanCount > 0 && metrics.width <= constraintWidth) {
                   overflow = true;
+                  if (_bidi) {
+                    _reorderVisual(spanStart, spanCount, offsetX, true);
+                  }
                   lines.add(
                     _Line(
                       this,
@@ -1214,7 +1242,17 @@ class RichText extends Widget with SpanningWidget {
               top = math.min(top, mt + baseline);
               bottom = math.max(bottom, mb + baseline);
 
-              final wd = _Word(word, style, metrics);
+              // A right-to-left run reads backwards on the page, and every
+              // consumer of the span - the drawn string and its own metrics -
+              // has to agree on that.
+              final visual = _bidi && bidi.isRtlText(word)
+                  ? bidi.reversed(word)
+                  : word;
+              final wd = _Word(
+                visual,
+                style,
+                visual == word ? metrics : _metricsOf(visual, font, style),
+              );
               wd.offset = PdfPoint(offsetX, -offsetY + baseline);
               _spans.add(wd);
               spanCount++;
@@ -1234,6 +1272,9 @@ class RichText extends Widget with SpanningWidget {
             }
 
             if (line < spanLines.length - 1) {
+              if (_bidi) {
+                _reorderVisual(spanStart, spanCount, offsetX, true);
+              }
               lines.add(
                 _Line(
                   this,
@@ -1286,6 +1327,9 @@ class RichText extends Widget with SpanningWidget {
 
           if (offsetX + ws.width > constraintWidth && spanCount > 0) {
             overflow = true;
+            if (_bidi) {
+              _reorderVisual(spanStart, spanCount, offsetX, true);
+            }
             lines.add(
               _Line(
                 this,
@@ -1343,6 +1387,9 @@ class RichText extends Widget with SpanningWidget {
     _buildLines();
 
     if (spanCount > 0) {
+      if (_bidi) {
+        _reorderVisual(spanStart, spanCount, offsetX, true);
+      }
       lines.add(
         _Line(
           this,
@@ -1478,15 +1525,74 @@ class RichText extends Widget with SpanningWidget {
     }
   }
 
+  /// The metrics [text] lays out to in this style.
+  PdfFontMetrics _metricsOf(String text, PdfFont font, TextStyle style) =>
+      font.stringMetrics(
+        text,
+        letterSpacing:
+            style.letterSpacing! / (style.fontSize! * textScaleFactor),
+      ) *
+      (style.fontSize! * textScaleFactor);
+
   /// The width [text] lays out to in this style.
   double _textWidth(String text, PdfFont font, TextStyle style) =>
-      (font.stringMetrics(
-                text,
-                letterSpacing:
-                    style.letterSpacing! / (style.fontSize! * textScaleFactor),
-              ) *
-              (style.fontSize! * textScaleFactor))
-          .width;
+      _metricsOf(text, font, style).width;
+
+  /// Put one finished line into visual order.
+  ///
+  /// UAX #9 rule L2 applies to a line once its breaks are known, so it cannot be
+  /// done to the paragraph up front: every line would get a slice of a reordered
+  /// paragraph, and reordering a slice is not the same thing. That is why an
+  /// embedded Latin run straddling a wrap point landed on the wrong lines.
+  ///
+  /// The spans keep their logical order in [_spans] - the page-break
+  /// bookkeeping, the decorations and the span ranges all index them that way -
+  /// and only their x offsets move. [lineEnd] is where the pen stopped, so each
+  /// span's slot is the distance to the next one and the slots add up to what
+  /// the line already measured.
+  void _reorderVisual(int first, int count, double lineEnd, bool rtl) {
+    if (count < 2) {
+      return;
+    }
+
+    final spans = _spans.sublist(first, first + count);
+    final order = bidi.reorderLine(<String>[
+      for (final span in spans)
+        // A widget has no text of its own. U+FFFC is what the algorithm expects
+        // in its place: an object that takes the direction around it.
+        if (span is _Word) span.text else '\uFFFC',
+    ], rtl: rtl);
+
+    // What each span advanced the pen by, and the gap that followed it. The
+    // gap belongs between the two words it separates, wherever they end up, so
+    // it cannot travel with one of them.
+    final advance = <double>[
+      for (final span in spans)
+        if (span is _Word)
+          span.metrics.advanceWidth
+        else
+          span.left + span.width,
+    ];
+    final gaps = <double>[
+      for (var i = 0; i < count; i++)
+        ((i + 1 < count ? spans[i + 1].offset.x : lineEnd) -
+                spans[i].offset.x) -
+            advance[i],
+    ];
+
+    var x = spans.first.offset.x;
+    for (var at = 0; at < order.length; at++) {
+      final index = order[at];
+      spans[index].offset = PdfPoint(x, spans[index].offset.y);
+      x += advance[index];
+
+      if (at + 1 < order.length) {
+        // The gap recorded after whichever of the two neighbours comes first
+        // logically, which is the one that separated them.
+        x += gaps[math.min(index, order[at + 1])];
+      }
+    }
+  }
 
   /// The last break opportunity of [word] whose head still fits [maxWidth], or
   /// null if not even the first one does.

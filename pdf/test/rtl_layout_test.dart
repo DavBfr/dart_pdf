@@ -15,12 +15,15 @@
  */
 
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/src/pdf/font/bidi_utils.dart' as bidi;
 import 'package:pdf/src/widgets/text_segmentation.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
+
+import 'utils.dart';
 
 late Document pdf;
 
@@ -57,10 +60,190 @@ List<String> drawnPages(List<int> bytes) {
   return pages;
 }
 
+String _fromUtf16Be(String hex) => String.fromCharCodes(<int>[
+  for (var i = 0; i + 4 <= hex.length; i += 4)
+    int.parse(hex.substring(i, i + 4), radix: 16),
+]);
+
+/// The words of each laid-out line, left to right, decoded through the font's
+/// own ToUnicode CMap.
+///
+/// One entry per baseline, top line first.
+List<List<String>> laidOutLines(List<int> bytes) {
+  final pdf = String.fromCharCodes(bytes);
+
+  final toUnicode = <int, String>{};
+  for (final entry in RegExp(
+    r'<([0-9A-F]{4})> <([0-9A-F]+)>',
+  ).allMatches(pdf)) {
+    toUnicode[int.parse(entry.group(1)!, radix: 16)] = _fromUtf16Be(
+      entry.group(2)!,
+    );
+  }
+
+  final lines = <double, List<List<double>>>{};
+  final words = <String>[];
+
+  for (final run in RegExp(
+    r'([-\d.]+) ([-\d.]+) Td \[<([0-9A-Fa-f]+)>\]TJ',
+  ).allMatches(pdf)) {
+    final cids = run.group(3)!.toUpperCase();
+    final text = StringBuffer();
+    for (var i = 0; i + 4 <= cids.length; i += 4) {
+      text.write(toUnicode[int.parse(cids.substring(i, i + 4), radix: 16)]);
+    }
+
+    lines.putIfAbsent(double.parse(run.group(2)!), () => <List<double>>[]).add(
+      <double>[double.parse(run.group(1)!), words.length.toDouble()],
+    );
+    words.add(text.toString());
+  }
+
+  final baselines = lines.keys.toList()
+    ..sort((double a, double b) => b.compareTo(a));
+
+  return <List<String>>[
+    for (final baseline in baselines)
+      <String>[
+        for (final run
+            in lines[baseline]!..sort(
+              (List<double> a, List<double> b) => a.first.compareTo(b.first),
+            ))
+          words[run.last.toInt()],
+      ],
+  ];
+}
+
+/// Lay [text] out on an RTL page of [width] and read the lines back.
+Future<List<List<String>>> rtlLines(String text, double width) async {
+  final document = Document(compress: false);
+  document.addPage(
+    Page(
+      pageFormat: PdfPageFormat(width, 300, marginAll: 0),
+      textDirection: TextDirection.rtl,
+      build: (Context context) => Text(
+        text,
+        style: TextStyle(font: loadFont('hacen-tunisia.ttf'), fontSize: 20),
+      ),
+    ),
+  );
+
+  return laidOutLines(await document.save());
+}
+
 void main() {
   setUpAll(() {
     Document.debug = true;
     pdf = Document();
+  });
+
+  group('a wrapped right-to-left paragraph', () {
+    // hacen-tunisia has the isolated Arabic forms but no medial or final ones,
+    // so these use one-letter words: they shape to an isolated form the font
+    // actually carries and therefore have a real width.
+    test('keeps an embedded Latin run in reading order', () async {
+      // Rule L2 reorders a line once its breaks are known. It used to be applied
+      // to the whole paragraph, whose word order was then reversed, and the line
+      // breaker saw that: line 1 came out as 'historical old town ا' and 'the'
+      // was left behind on line 2.
+      final lines = await rtlLines(
+        '\u0627 the historical old town \u0628',
+        150,
+      );
+
+      expect(lines, <List<String>>[
+        <String>['the', 'historical', 'old', '\uFE8D'],
+        <String>['\uFE8F', 'town'],
+      ]);
+    });
+
+    test('is unchanged where it does not wrap', () async {
+      final lines = await rtlLines(
+        '\u0627 the historical old town \u0628',
+        400,
+      );
+
+      expect(lines, <List<String>>[
+        <String>['\uFE8F', 'the', 'historical', 'old', 'town', '\uFE8D'],
+      ]);
+    });
+
+    test('carries a link across the whole run it covers', () async {
+      // _getBox took the decoration's first and last span as its left and right
+      // edge. The spans are in logical order, so for a right-to-left run the
+      // first one is the rightmost and the rect came out narrower than the text
+      // it belongs to - a link that is not clickable over most of its words.
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(400, 120, marginAll: 0),
+          textDirection: TextDirection.rtl,
+          build: (Context context) => RichText(
+            text: TextSpan(
+              style: TextStyle(
+                font: loadFont('hacen-tunisia.ttf'),
+                fontSize: 20,
+              ),
+              children: <TextSpan>[
+                const TextSpan(text: 'x '),
+                TextSpan(
+                  text: '\u0627 \u0628',
+                  annotation: AnnotationLink('https://example.com'),
+                ),
+                const TextSpan(text: ' y'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final bytes = await document.save();
+      final pdf = String.fromCharCodes(bytes);
+
+      final rect = RegExp(r'/Rect\s*\[([-\d. ]+)\]')
+          .firstMatch(pdf)!
+          .group(1)!
+          .trim()
+          .split(RegExp(r'\s+'))
+          .map(double.parse)
+          .toList();
+      expect(rect, hasLength(4));
+
+      // Where the two linked words were actually drawn.
+      final xs = <double>[];
+      for (final run in RegExp(
+        r'([-\d.]+) [-\d.]+ Td \[<([0-9A-Fa-f]+)>\]TJ',
+      ).allMatches(pdf)) {
+        if (<String>['0002', '0003'].contains(run.group(2)!.toLowerCase())) {
+          xs.add(double.parse(run.group(1)!));
+        }
+      }
+      expect(xs, hasLength(2), reason: 'both linked words are drawn');
+
+      expect(
+        rect[0],
+        lessThanOrEqualTo(xs.reduce(math.min) + 1),
+        reason: 'the link reaches the leftmost word',
+      );
+      expect(
+        rect[2],
+        greaterThanOrEqualTo(xs.reduce(math.max)),
+        reason: 'and the rightmost',
+      );
+    });
+
+    test('puts pure right-to-left words on the lines they belong to', () async {
+      // Each line holds the logical words it should, in visual order.
+      final lines = await rtlLines(
+        '\u0627 \u0628 \u062A \u062B \u062C \u062D \u062E \u062F',
+        60,
+      );
+
+      expect(lines, <List<String>>[
+        <String>['\uFE99', '\uFE95', '\uFE8F', '\uFE8D'],
+        <String>['\uFEA9', '\uFEA5', '\uFEA1', '\uFE9D'],
+      ]);
+    });
   });
 
   test('an explicit bidi mark still reorders the paragraph', () async {

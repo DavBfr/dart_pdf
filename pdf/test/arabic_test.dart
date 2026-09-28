@@ -46,6 +46,104 @@ void main() {
     style = TextStyle(font: arabicFont, fontSize: 30);
   });
 
+  group('shaping and reordering are separate steps', () {
+    test('shapeLogical shapes without moving anything', () {
+      // The same glyphs logicalToVisual produces, in the order they were
+      // written. Line breaking, metrics and hyphenation all need logical order;
+      // rule L2 belongs to a finished line.
+      expect(
+        bidi.shapeLogical('محمد').codeUnits,
+        bidi.logicalToVisual('محمد').codeUnits.reversed,
+      );
+      expect(bidi.shapeLogical('السلام').codeUnits, <int>[
+        0xFE8D,
+        0xFEDF,
+        0xFEB4,
+        0xFEFC,
+        0xFEE1,
+      ]);
+
+      // Not one character moves in text that has no strong RTL run, where
+      // logicalToVisual reverses the word order outright.
+      expect(bidi.shapeLogical('Hello world foo'), 'Hello world foo');
+      expect(bidi.logicalToVisual('Hello world foo'), 'foo world Hello');
+
+      // An embedded Latin run keeps its place.
+      expect(
+        bidi.shapeLogical('إلى the historical'),
+        endsWith(' the historical'),
+      );
+    });
+
+    test('reorderLine applies L2 against the paragraph, not the line', () {
+      List<String> visual(List<String> runs, {required bool rtl}) =>
+          bidi.reorderLine(runs, rtl: rtl).map((int i) => runs[i]).toList();
+
+      // A Latin run inside an RTL line reads left to right, and the line as a
+      // whole reads right to left.
+      expect(visual(<String>['إلى', 'the', 'historical'], rtl: true), <String>[
+        'the',
+        'historical',
+        'إلى',
+      ]);
+
+      // An all-Latin line is still part of its RTL paragraph: it keeps reading
+      // order, and the alignment puts it on the right.
+      expect(visual(<String>['old', 'town'], rtl: true), <String>[
+        'old',
+        'town',
+      ]);
+
+      // Pure RTL is a straight reversal.
+      expect(visual(<String>['مرحبا', 'بالعالم'], rtl: true), <String>[
+        'بالعالم',
+        'مرحبا',
+      ]);
+
+      // The base direction decides, which is why it has to be the paragraph's.
+      expect(visual(<String>['Total:', 'مرحبا', 'today'], rtl: false), <String>[
+        'Total:',
+        'مرحبا',
+        'today',
+      ]);
+      expect(visual(<String>['Total:', 'مرحبا', 'today'], rtl: true), <String>[
+        'today',
+        'مرحبا',
+        'Total:',
+      ]);
+
+      // A number reads left to right wherever it sits.
+      expect(visual(<String>['مرحبا', '35', 'أهلا'], rtl: true), <String>[
+        'أهلا',
+        '35',
+        'مرحبا',
+      ]);
+
+      expect(bidi.reorderLine(<String>['one'], rtl: true), <int>[0]);
+      expect(bidi.reorderLine(<String>[], rtl: true), isEmpty);
+    });
+
+    test('isRtlText finds strong right-to-left characters only', () {
+      expect(bidi.isRtlText('مرحبا'), isTrue);
+      expect(bidi.isRtlText('\uFE8E'), isTrue, reason: 'a presentation form');
+      expect(bidi.isRtlText('\u05D0'), isTrue, reason: 'Hebrew');
+      expect(bidi.isRtlText('abc'), isFalse);
+      expect(bidi.isRtlText('35'), isFalse);
+      expect(bidi.isRtlText('(5) = 10'), isFalse);
+      expect(
+        bidi.isRtlText('\u0660\u0661'),
+        isFalse,
+        reason: 'Arabic-Indic digits are numbers, not strong RTL',
+      );
+      expect(bidi.isRtlText(''), isFalse);
+    });
+
+    test('reversed walks whole code points', () {
+      expect(bidi.reversed('abc'), 'cba');
+      expect(bidi.reversed('a\u{1F600}b'), 'b\u{1F600}a');
+    });
+  });
+
   test('logicalToVisual never throws', () {
     // package:bidi's normalizer indexes its length table out of step with the
     // decomposition of the hamza carriers, so 40 of these 45 pairs threw
