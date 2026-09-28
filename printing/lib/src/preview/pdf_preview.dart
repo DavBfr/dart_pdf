@@ -305,18 +305,30 @@ class PdfPreviewState extends State<PdfPreview> {
       onComputeActualPageFormat: computeActualPageFormat,
     );
 
-    previewData.addListener(() {
-      if (mounted) {
-        setState(() {});
-      }
-      widget.onPageFormatChanged?.call(previewData.pageFormat);
-    });
+    previewData.addListener(_onPreviewDataChanged);
 
     super.initState();
   }
 
+  /// A named method rather than a closure, so didUpdateWidget can move the
+  /// subscription to a replacement.
+  ///
+  /// It used to be an anonymous closure registered once in initState, and
+  /// didUpdateWidget built a fresh PdfPreviewData without re-registering it, so
+  /// onPageFormatChanged stopped firing after the first parent rebuild - a
+  /// persisted paper-size choice silently stopped being saved - while the
+  /// preview kept re-rendering, because PdfPreviewController subscribes to the
+  /// new object itself.
+  void _onPreviewDataChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+    widget.onPageFormatChanged?.call(previewData.pageFormat);
+  }
+
   @override
   void dispose() {
+    previewData.removeListener(_onPreviewDataChanged);
     previewData.dispose();
     super.dispose();
   }
@@ -326,14 +338,23 @@ class PdfPreviewState extends State<PdfPreview> {
     if (oldWidget.build != widget.build ||
         widget.shouldRepaint ||
         widget.pageFormats != oldWidget.pageFormats) {
+      final replaced = previewData;
+
       previewData = PdfPreviewData(
         buildDocument: widget.build,
         pageFormats: widget.pageFormats.isNotEmpty
             ? widget.pageFormats
             : PdfPreview._defaultPageFormats,
-        initialPageFormat: previewData.pageFormat,
+        // The selection survives the swap.
+        initialPageFormat: replaced.pageFormat,
         onComputeActualPageFormat: computeActualPageFormat,
       );
+      previewData.addListener(_onPreviewDataChanged);
+
+      // Exactly one live PdfPreviewData per state: the replaced one used to be
+      // left subscribed to nothing and never disposed.
+      replaced.removeListener(_onPreviewDataChanged);
+      replaced.dispose();
     }
     super.didUpdateWidget(oldWidget);
   }

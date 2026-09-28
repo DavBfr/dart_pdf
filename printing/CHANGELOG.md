@@ -21,6 +21,11 @@
 - Fix `PdfPreview` re-inflating every page on every rebuild with `enableScrollToPage: true`, which made streaming a document cost O(N^2), and made a key from `getPageKey` dead one frame later. Page keys are now stable for the life of the page
 - Fix `scrollToPage` and `getPageKey` throwing `RangeError (length): Valid value range is empty: 0` when called before the first page was rasterized, or past the end after the document shrank. `scrollToPage` now completes without scrolling, and both assert in debug with the index and the page count
 - `PdfPreviewCustomState` gained a `pageCount` getter, and `PdfPreviewRaster` a protected `onPagesChanged()` hook called before each page-list change is published
+- Fix a change to `PdfPreview`'s `pages`, `dpi` or `maxPageWidth` having no effect until some unrelated event happened to re-raster, at which point the view jumped. Only apps passing `build` as a stable tear-off were affected: a closure literal masked it, because its identity differs on every rebuild. `pages` is compared by content, so a fresh list with the same contents still does not re-raster
+- Fix `PdfPreview.onPageFormatChanged` never firing again after the first parent rebuild, so a persisted paper-size choice silently stopped being saved. The replaced `PdfPreviewData` is now also disposed rather than leaked, and the selected format survives the swap
+- Fix `PdfPreview` leaking one `ScrollController` per mount, with its listener list. The scroll-position restore scheduled from `build` is guarded, so disposing the controller cannot turn that leak into a 'used after being disposed' crash
+- `PdfPreviewCustomState.previewUpdate` is deprecated: it was always null and nothing wrote to it
+
 
 
 

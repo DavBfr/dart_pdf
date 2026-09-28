@@ -130,6 +130,12 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
 
   final transformationController = TransformationController();
 
+  /// Unused, and always null.
+  ///
+  /// The preview's debounce lives on the [PdfPreviewRaster] mixin; this field
+  /// was never written to, and cancelling it in dispose() was a no-op that hid
+  /// the fact that the scroll controller was not being disposed.
+  @Deprecated('This field is unused and will be removed in a future release')
   Timer? previewUpdate;
 
   MouseCursor _mouseCursor = MouseCursor.defer;
@@ -142,7 +148,10 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
   @override
   void dispose() {
     transformationController.dispose();
-    previewUpdate?.cancel();
+    // Created here, so disposed here. A ScrollController is a ChangeNotifier,
+    // and every mount and unmount used to leak one, with its listener list.
+    scrollController.dispose();
+    // Last, so the mixin still cancels its debounce and evicts the page images.
     super.dispose();
   }
 
@@ -158,9 +167,20 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
       _syncPageGlobalKeys();
     }
 
+    // widget.pages, widget.dpi and widget.maxPageWidth all feed the raster, and
+    // none of them used to be compared here: a page-filter, dpi or width change
+    // had no effect until some unrelated event happened to raster. A closure
+    // literal for `build` masked it, because its identity differs on every
+    // rebuild.
+    //
+    // pages is compared by content, not identity, so a fresh list literal with
+    // the same contents does not re-raster on every rebuild.
     if (oldWidget.build != widget.build ||
         widget.shouldRepaint ||
-        widget.pageFormat != oldWidget.pageFormat) {
+        widget.pageFormat != oldWidget.pageFormat ||
+        !listEquals(widget.pages, oldWidget.pages) ||
+        widget.dpi != oldWidget.dpi ||
+        (widget.dpi == null && widget.maxPageWidth != oldWidget.maxPageWidth)) {
       preview = null;
       updatePosition = null;
       raster();
@@ -474,6 +494,13 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
 
       if (updatePosition != null) {
         Timer.run(() {
+          // Scheduled from build and never cancelled, so without these guards
+          // disposing the controller turns a silent leak into a 'used after
+          // being disposed' crash.
+          if (!mounted || !scrollController.hasClients) {
+            updatePosition = null;
+            return;
+          }
           scrollController.jumpTo(updatePosition!);
           updatePosition = null;
         });
