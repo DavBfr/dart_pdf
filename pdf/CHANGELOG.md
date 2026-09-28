@@ -10,6 +10,10 @@
 - A malformed or truncated cmap subtable is skipped rather than throwing a `RangeError` in release or an `AssertionError` in debug
 - **Fix a blank implemented as an empty glyph drawing the next glyph in the font.** `readGlyph` never consulted the glyph's size, and an empty glyph shares its offset with the one after it, so `drawString('A B')` rendered 'A¡B' with open-sans and `Text('a​b')` drew a box over the 'b'. Every empty glyph in every bundled font was affected - 17 in open-sans, 19 in roboto, 20 in noto-sans - and the subsetter embedded those wrong outlines
 - A glyph's bytes are now clamped to what the font's `loca` table says the glyph occupies, so a malformed table cannot hand back its neighbour's outline
+- **Fix subsetting aborting with 'Null check operator used on a null value' for a TrueType font that has no OS/2 table** - AppleGothic, some CJK and icon fonts. The emitted table directory came from a hard-coded ten-entry list while the table copy skipped what the source font did not have. It is now derived from the tables that are actually present, so the header, the records and the payloads agree by construction
+- A font with no `post` table is given a synthesised one, and a font with no `hmtx`, `head`, `maxp` or `hhea` fails with an exception naming the font and the table
+- **Fix every embedded subset dropping the hinting programs its glyph outlines call.** `cvt `, `fpgm`, `prep` and `gasp` are copied now, so a subset is no longer structurally invalid - its glyph programs called missing functions and indexed an absent control-value table, which shifted outlines on FreeType-based print paths and could stop a strict RIP loading them. Subsets grow a few KB
+- Fix the emitted sfnt binary-search fields, which were 256/2/96 where the spec requires 128/3/32, and the table directory, whose records were in layout order rather than the required ascending tag order
 
 ## 3.13.2
 

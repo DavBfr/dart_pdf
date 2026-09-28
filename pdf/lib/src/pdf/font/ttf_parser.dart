@@ -179,6 +179,10 @@ class TtfParser {
   static const String cbdt_table = 'CBDT';
   static const String post_table = 'post';
   static const String os_2_table = 'OS/2';
+  static const String cvt_table = 'cvt ';
+  static const String fpgm_table = 'fpgm';
+  static const String prep_table = 'prep';
+  static const String gasp_table = 'gasp';
 
   final ByteData bytes;
   final tableOffsets = <String, int>{};

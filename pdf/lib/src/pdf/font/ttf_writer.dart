@@ -201,17 +201,53 @@ class TtfWriter {
       TtfParser.maxp_table,
       TtfParser.hhea_table,
       TtfParser.os_2_table,
+      // The glyph outlines are copied with their instructions, so the programs
+      // those instructions call have to come too. Without them every subset was
+      // structurally invalid: glyph programs called missing functions and
+      // indexed an absent control-value table.
+      TtfParser.cvt_table,
+      TtfParser.fpgm_table,
+      TtfParser.prep_table,
+      TtfParser.gasp_table,
     }) {
       final start = ttf.tableOffsets[tn];
       if (start == null) {
         continue;
       }
+
       final len = ttf.tableSize[tn]!;
-      final data = Uint8List.fromList(
-        ttf.bytes.buffer.asUint8List(start, _wordAlign(len)),
-      );
+      // _wordAlign can round past the end of the file, so the copy is clamped
+      // and the padding is zeroed rather than read.
+      final available = ttf.bytes.buffer.lengthInBytes - start;
+      final copy = math.min(_wordAlign(len), math.max(available, 0));
+      final data = Uint8List(_wordAlign(len));
+      if (copy > 0) {
+        data.setRange(0, copy, ttf.bytes.buffer.asUint8List(start, copy));
+      }
+
       tables[tn] = data;
       tablesLength[tn] = len;
+    }
+
+    if (!tables.containsKey(TtfParser.head_table) ||
+        !tables.containsKey(TtfParser.maxp_table) ||
+        !tables.containsKey(TtfParser.hhea_table)) {
+      throw Exception(
+        'Unable to subset the font ${ttf.fontName}: it has no '
+        '${!tables.containsKey(TtfParser.head_table)
+            ? 'head'
+            : !tables.containsKey(TtfParser.maxp_table)
+            ? 'maxp'
+            : 'hhea'} table',
+      );
+    }
+
+    if (ttf.tableOffsets[TtfParser.hmtx_table] == null) {
+      // Read unguarded further down; this used to be a bare null-check error
+      // naming neither the font nor the table.
+      throw Exception(
+        'Unable to subset the font ${ttf.fontName}: it has no hmtx table',
+      );
     }
 
     tables[TtfParser.head_table]!.buffer.asByteData().setUint32(
@@ -229,12 +265,19 @@ class TtfWriter {
 
     {
       // post Table
-      final start = ttf.tableOffsets[TtfParser.post_table]!;
       const len = 32;
-      final data = Uint8List.fromList(
-        ttf.bytes.buffer.asUint8List(start, _wordAlign(len)),
-      );
-      data.buffer.asByteData().setUint32(0, 0x00030000); // Version 3.0 no names
+      final data = Uint8List(_wordAlign(len));
+      final start = ttf.tableOffsets[TtfParser.post_table];
+      if (start != null) {
+        final available = ttf.bytes.buffer.lengthInBytes - start;
+        final copy = math.min(_wordAlign(len), math.max(available, 0));
+        if (copy > 0) {
+          data.setRange(0, copy, ttf.bytes.buffer.asUint8List(start, copy));
+        }
+      }
+      // Version 3.0, no names. Synthesised outright when the source font has no
+      // post table at all, which used to be a null-check error.
+      data.buffer.asByteData().setUint32(0, 0x00030000);
       tables[TtfParser.post_table] = data;
       tablesLength[TtfParser.post_table] = len;
     }
@@ -312,31 +355,35 @@ class TtfWriter {
       final start = ByteData(12 + numTables * 16);
       start.setUint32(0, 0x00010000);
       start.setUint16(4, numTables);
-      var pot = numTables;
-      while (pot & (pot - 1) != 0) {
-        pot++;
+
+      // The spec's own formulas. The loop this replaces found the next power of
+      // two at or above numTables rather than the largest at or below it, took
+      // the natural log instead of log2, and inverted rangeShift, so every
+      // subset carried 256/2/96 where 128/3/32 is required.
+      var entrySelector = 0;
+      while (1 << (entrySelector + 1) <= numTables) {
+        entrySelector++;
       }
-      start.setUint16(6, pot * 16);
-      start.setUint16(8, math.log(pot).toInt());
-      start.setUint16(10, pot * 16 - numTables * 16);
+      final searchRange = numTables == 0 ? 0 : 16 << entrySelector;
+
+      start.setUint16(6, searchRange);
+      start.setUint16(8, numTables == 0 ? 0 : entrySelector);
+      start.setUint16(10, numTables * 16 - searchRange);
 
       // Create the table directory
       var count = 0;
       var offset = 12 + numTables * 16;
       var headOffset = 0;
 
-      final tableKeys = [
-        TtfParser.head_table,
-        TtfParser.hhea_table,
-        TtfParser.maxp_table,
-        TtfParser.os_2_table,
-        TtfParser.hmtx_table,
-        TtfParser.cmap_table,
-        TtfParser.loca_table,
-        TtfParser.glyf_table,
-        TtfParser.name_table,
-        TtfParser.post_table,
-      ];
+      // The tables that are actually here, in ascending tag order as the spec
+      // requires. This used to be a hard-coded ten-entry list in layout order,
+      // which both broke the ordering and dereferenced tables[name]! for an
+      // entry a tolerant source-table copy may never have produced - so a font
+      // without an OS/2 table aborted save() with 'Null check operator used on
+      // a null value', naming neither the font nor the table. numTables comes
+      // from the same map, so the header, the records and the payloads now agree
+      // by construction.
+      final tableKeys = tables.keys.toList()..sort();
 
       for (final name in tableKeys) {
         final data = tables[name]!;
