@@ -13,6 +13,11 @@
 - `PrintingInfo` gained `reportsPrintOutcome`, false on web, for an app that treats a print as a committed action
 - Fix the web print path leaving the print iframe, its helper script and a full copy of the document in the page whenever the browser's `print()` returned promptly, and never revoking any blob object URL it created. Every print, share and download used to retain the whole document for the lifetime of the tab
 - The web print future no longer resolves while the print dialog is still open, and completes false instead of hanging when the browser will not render the document at all
+- Fix `PdfPreview` dropping a page format, orientation or debug-switch change made while pages were still streaming. The action bar showed the new setting while the preview kept the old rendering until some unrelated event happened to re-raster. Requests made during a raster now coalesce into one catch-up pass that renders the newest of them
+- Fix `PdfPreview` re-running the app's whole document build and a full raster pass on any inherited-widget change - opening the keyboard, toggling dark mode, changing the text scale - even though only the size and the device pixel ratio can move the resolution it renders at
+- `PdfPreview` now re-rasters when the window is resized, which it did not do at all
+- `PdfPreviewRaster` gained a protected `computeDpi()` and a `needsRasterForDpi` getter, for a subclass that overrides the scheduling
+
 
 
 ## 5.16.0

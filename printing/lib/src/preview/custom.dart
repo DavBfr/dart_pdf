@@ -172,7 +172,14 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
       unawaited(_loadPrintingInfo());
     }
 
-    raster();
+    // Gated on the dpi: the state depends on MediaQuery only because the dpi is
+    // computed from it, but MediaQueryData equality also covers viewInsets,
+    // padding, platformBrightness, textScaler and the accessibility flags. So
+    // opening the keyboard or toggling dark mode used to re-run the app's whole
+    // document build and a full raster pass for an identical result.
+    if (needsRasterForDpi) {
+      raster();
+    }
     super.didChangeDependencies();
   }
 
