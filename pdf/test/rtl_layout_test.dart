@@ -17,6 +17,8 @@
 import 'dart:io';
 
 import 'package:pdf/pdf.dart';
+import 'package:pdf/src/pdf/font/bidi_utils.dart' as bidi;
+import 'package:pdf/src/widgets/text_segmentation.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
@@ -28,10 +30,73 @@ final _redBox = Container(width: 50, height: 50, color: PdfColors.red);
 
 final _yellowBox = Container(width: 50, height: 50, color: PdfColors.yellow);
 
+/// The text each page of [bytes] draws, as one string per page.
+///
+/// Every `[(...)]TJ` run of a page, concatenated, so one entry covers one
+/// paragraph however many words it was split into. The standard-14 fonts write
+/// their runs as literal strings, so this is readable text.
+List<String> drawnPages(List<int> bytes) {
+  final pdf = String.fromCharCodes(bytes);
+  final pages = <String>[];
+
+  for (final block in RegExp(
+    r'stream\n(.*?)endstream',
+    dotAll: true,
+  ).allMatches(pdf)) {
+    final body = block.group(1)!;
+    if (!body.contains('TJ')) {
+      continue;
+    }
+    pages.add(
+      RegExp(
+        r'\[\(([^)]*)\)\]TJ',
+      ).allMatches(body).map((RegExpMatch m) => m.group(1)!).join(),
+    );
+  }
+
+  return pages;
+}
+
 void main() {
   setUpAll(() {
     Document.debug = true;
     pdf = Document();
+  });
+
+  test('an explicit bidi mark still reorders the paragraph', () async {
+    // A default ignorable is dropped after the bidi reordering, not before, so
+    // an explicit LRM or RLM keeps doing its job. This string reorders one way
+    // if the mark is still there when the bidi pass runs and the other way if
+    // it has already been taken out.
+    const source = '\u200F123 abc';
+
+    final afterBidi = stripDefaultIgnorable(bidi.logicalToVisual(source));
+    final beforeBidi = bidi.logicalToVisual(stripDefaultIgnorable(source));
+    expect(afterBidi, '123 abc');
+    expect(beforeBidi, 'abc 123');
+
+    final document = Document(compress: false);
+
+    // The paragraph under test, then the two candidate orders drawn straight:
+    // an LTR paragraph runs no bidi pass of its own.
+    for (final entry in <String, TextDirection>{
+      source: TextDirection.rtl,
+      afterBidi: TextDirection.ltr,
+      beforeBidi: TextDirection.ltr,
+    }.entries) {
+      document.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(400, 100, marginAll: 0),
+          build: (Context context) =>
+              Text(entry.key, textDirection: entry.value),
+        ),
+      );
+    }
+
+    final pages = drawnPages(await document.save());
+    expect(pages, hasLength(3));
+    expect(pages[0], pages[1], reason: 'stripped after the bidi pass');
+    expect(pages[0], isNot(pages[2]), reason: 'not before it');
   });
 
   test('RTL Text', () {

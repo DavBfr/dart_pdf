@@ -30,6 +30,7 @@ import 'image.dart';
 import 'image_provider.dart';
 import 'multi_page.dart';
 import 'placeholders.dart';
+import 'text_segmentation.dart';
 import 'text_style.dart';
 import 'theme.dart';
 import 'widget.dart';
@@ -836,6 +837,9 @@ class RichText extends Widget with SpanningWidget {
           final rune = text[index];
           const spaces = {
             0x0a,
+            0x0b,
+            0x0c,
+            0x0d,
             0x09,
             0x00A0,
             0x1680,
@@ -852,9 +856,15 @@ class RichText extends Widget with SpanningWidget {
             0x200A,
             0x202F,
             0x205F,
+            0x2028,
+            0x2029,
             0x3000,
           };
-          if (spaces.contains(rune)) {
+          // A default ignorable is never drawn, so it must not reach the
+          // fallback scan either: with no font covering it the scan ended at
+          // _addPlaceholder and painted a crossed box for a soft hyphen, a
+          // variation selector or a bidi mark.
+          if (spaces.contains(rune) || isDefaultIgnorable(rune)) {
             continue;
           }
 
@@ -997,13 +1007,19 @@ class RichText extends Widget with SpanningWidget {
           final space =
               font.stringMetrics(' ') * (style.fontSize! * textScaleFactor);
 
-          final spanLines =
-              (useArabic && _textDirection == TextDirection.rtl
-                      ? arabic.convert(span.text!)
-                      : useBidi && _textDirection == TextDirection.rtl
-                      ? bidi.logicalToVisual(span.text!)
-                      : span.text)!
-                  .split('\n');
+          // The strip runs after the shaping and the bidi reordering, which both
+          // need the joiners and the bidi marks, and before the line split, so
+          // no invisible character is ever measured or drawn. U+000D is a line
+          // terminator: the split used to look for U+000A alone, so a document
+          // written with CRLF or CR line endings ran every line together and
+          // drew a placeholder box at each break.
+          final spanLines = stripDefaultIgnorable(
+            (useArabic && _textDirection == TextDirection.rtl
+                ? arabic.convert(span.text!)
+                : useBidi && _textDirection == TextDirection.rtl
+                ? bidi.logicalToVisual(span.text!)
+                : span.text)!,
+          ).split(RegExp(r'\r\n|\r|\n'));
 
           for (var line = 0; line < spanLines.length; line++) {
             final words =
