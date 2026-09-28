@@ -296,6 +296,36 @@ void main() {
     );
   });
 
+  test('a row of empty cells keeps its height', () async {
+    // A whitespace-only Text laid out 0 x 0, so the row collapsed to a hairline.
+    late Table table;
+    final document = Document();
+    document.addPage(
+      Page(
+        pageFormat: const PdfPageFormat(400, 300, marginAll: 0),
+        theme: ThemeData.withFont(base: loadFont('open-sans.ttf')),
+        build: (Context context) => table = Table(
+          children: <TableRow>[
+            for (final row in <List<String>>[
+              <String>['a', 'b'],
+              <String>['', ''],
+              <String>['c', 'd'],
+            ])
+              TableRow(
+                children: <Widget>[
+                  for (final cell in row)
+                    Text(cell, style: const TextStyle(fontSize: 12)),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+    await document.save();
+
+    expect(table.box!.height, closeTo(3 * 16.341796875, 0.001));
+  });
+
   tearDownAll(() async {
     final file = File('widgets-table.pdf');
     await file.writeAsBytes(await pdf.save());

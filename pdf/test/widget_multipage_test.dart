@@ -129,4 +129,31 @@ void main() {
       expect(text, contains('(I$i)'), reason: 'item $i must be painted');
     }
   });
+  test('a blank Text with less than a line left does not loop', () async {
+    // A blank paragraph lays out one zero-span line now. TextOverflow.span would
+    // hand that line to the next page, where it has no height to give back, so
+    // nothing would ever make progress.
+    final pdf = Document();
+    pdf.addPage(
+      MultiPage(
+        maxPages: 4,
+        pageFormat: const PdfPageFormat(200, 60, marginAll: 4),
+        build: (Context context) => <Widget>[
+          Text(
+            'a\nb\nc',
+            overflow: TextOverflow.span,
+            style: const TextStyle(fontSize: 12),
+          ),
+          Text(
+            '   ',
+            overflow: TextOverflow.span,
+            style: const TextStyle(fontSize: 12),
+          ),
+          Text('tail', style: const TextStyle(fontSize: 12)),
+        ],
+      ),
+    );
+
+    await expectLater(pdf.save(), completes);
+  });
 }

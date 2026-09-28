@@ -995,6 +995,19 @@ class RichText extends Widget with SpanningWidget {
           }());
         }
 
+        if (runes.isEmpty) {
+          // An empty span still carries its style, which is where a blank
+          // paragraph's line height comes from.
+          spans.add(
+            _addText(
+              text: runes,
+              style: style,
+              baseline: span.baseline,
+              annotation: annotation,
+            ),
+          );
+        }
+
         flush(runes.length);
 
         // Every rune was either written into a run or replaced by a widget.
@@ -1047,6 +1060,12 @@ class RichText extends Widget with SpanningWidget {
     var spanStart = 0;
     var overflow = false;
 
+    // The height one empty line of this paragraph's tallest font takes. A
+    // paragraph of nothing but whitespace produces no word, so no line, so
+    // nothing ever advanced offsetY and the box came out 0 x 0: a table row of
+    // empty cells collapsed to a hairline and a Text(' ') spacer added no width.
+    var blankHeight = 0.0;
+
     _preprocessed ??= _preProcessSpans(context);
 
     // Whether the bidi algorithm shapes and reorders this paragraph.
@@ -1079,6 +1098,11 @@ class RichText extends Widget with SpanningWidget {
           }
 
           final font = style!.font!.getFont(context);
+
+          blankHeight = math.max(
+            blankHeight,
+            font.emptyLineHeight * style.fontSize! * textScaleFactor,
+          );
 
           /// What one separator advances the pen by, measured in this font
           /// instead of assumed to be a U+0020: an em space, an ideographic
@@ -1486,6 +1510,11 @@ class RichText extends Widget with SpanningWidget {
         ),
       );
       offsetY += bottom - top;
+    } else if (lines.isEmpty && blankHeight > 0) {
+      // Nothing was laid out, but there was a paragraph: it reserves one line,
+      // and whatever whitespace it held has already moved the pen.
+      lines.add(_Line(this, spanStart, 0, 0, offsetX, _textDirection, false));
+      offsetY += blankHeight;
     }
 
     assert(!overflow || constraintWidth.isFinite);

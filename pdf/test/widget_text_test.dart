@@ -519,6 +519,105 @@ void main() {
     );
   });
 
+  group('a paragraph of nothing but whitespace', () {
+    /// The box [child] lays out to.
+    Future<PdfRect> boxOf(RichText Function() child) async {
+      late RichText laid;
+      final document = Document();
+      document.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(400, 300, marginAll: 0),
+          build: (Context context) {
+            laid = child();
+            return laid;
+          },
+        ),
+      );
+      await document.save();
+      return laid.box!;
+    }
+
+    Future<PdfRect> textBox(String text) =>
+        boxOf(() => Text(text, style: TextStyle(font: ttf, fontSize: 12)));
+
+    test('reserves one line', () async {
+      // A whitespace-only string yields only empty runs, which move the pen but
+      // create no word, so no line was ever appended: offsetY never advanced and
+      // the box came out 0 x 0. A table row of empty cells collapsed to a
+      // hairline and a Text(' ') spacer added no width at all.
+      final line = (await textBox('X')).height;
+      expect(line, closeTo(16.341796875, 1e-9));
+
+      expect((await textBox('')).width, 0.0);
+      expect((await textBox('')).height, closeTo(line, 1e-9));
+
+      expect((await textBox(' ')).width, closeTo(3.1171875, 1e-9));
+      expect((await textBox(' ')).height, closeTo(line, 1e-9));
+
+      expect((await textBox('  ')).width, closeTo(6.234375, 1e-9));
+      expect((await textBox('  ')).height, closeTo(line, 1e-9));
+    });
+
+    test('leaves everything that did lay out alone', () async {
+      expect((await textBox('X')).width, closeTo(6.92578125, 1e-9));
+      expect((await textBox('a b')).width, closeTo(17.14453125, 1e-9));
+
+      final newline = await textBox('\n');
+      expect(newline.width, 0.0);
+      expect(newline.height, closeTo(16.341796875, 1e-9));
+
+      final blankLine = await textBox('a\n\nb');
+      expect(blankLine.width, closeTo(7.353515625, 1e-9));
+      expect(blankLine.height, closeTo(49.025390625, 1e-9));
+
+      // A span with no text at all is still nothing.
+      final empty = await boxOf(
+        () => RichText(
+          text: TextSpan(style: TextStyle(font: ttf, fontSize: 12)),
+        ),
+      );
+      expect(empty.width, 0.0);
+      expect(empty.height, 0.0);
+    });
+
+    test('works as a spacer in a Row', () async {
+      late RichText post;
+      final document = Document();
+      document.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(400, 300, marginAll: 0),
+          build: (Context context) => Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Text('pre', style: TextStyle(font: ttf, fontSize: 12)),
+              Text(' ', style: TextStyle(font: ttf, fontSize: 12)),
+              post = Text('post', style: TextStyle(font: ttf, fontSize: 12)),
+            ],
+          ),
+        ),
+      );
+      await document.save();
+
+      // Where 'pre post' as one paragraph puts 'post'. The spacer used to add
+      // nothing, so the two words ran together.
+      final joined = Document(compress: false);
+      joined.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(400, 300, marginAll: 0),
+          build: (Context context) =>
+              Text('pre post', style: TextStyle(font: ttf, fontSize: 12)),
+        ),
+      );
+      final xs = RegExp(r'([-\d.]+) [-\d.]+ Td \[<')
+          .allMatches(String.fromCharCodes(await joined.save()))
+          .map((RegExpMatch m) => double.parse(m.group(1)!))
+          .toList();
+
+      expect(xs, hasLength(2));
+      expect(post.box!.x, closeTo(xs.last, 0.001));
+    });
+  });
+
   group('maxLines with a line broken by a WidgetSpan', () {
     /// The distinct text baselines [child] paints, and its own box.
     Future<List<Object>> layOut(Widget Function() child) async {
