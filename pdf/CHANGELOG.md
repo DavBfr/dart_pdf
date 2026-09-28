@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.14.0
+
+- **Fix a font whose cmap has a format 0 subtable mapping every character to the wrong glyph.** The glyph array was read two bytes early, so 'ABC abc' rendered as '?@A _`a' and U+0041 came back as glyph 63, with no error and no fallback
+- **Fix a font carrying a Macintosh or symbol cmap subtable drawing the wrong glyphs.** Every recognised subtable was merged into one map, in record order, but a Macintosh subtable is keyed by Mac Roman bytes and a symbol subtable by 0xF000-offset codes while every consumer reads the map as Unicode. Only the best subtable is used now, and its keys are translated to Unicode. With `hacen-tunisia.ttf`, `Text('ª')` drew the trademark glyph and a document holding both threw 'Missing glyph for character'
+- A symbol font's glyphs are reachable by their low byte as well as their 0xF0xx code, so `drawString('A')` finds one
+- **Fix cmap format 4 ignoring a segment's `idDelta` for a glyph-id-array lookup**, which rendered that whole range with its glyphs shifted
+- **Fix glyph 0 being recorded as coverage.** Format 4 defines it as 'not covered', so a character in a hole looked supported, `TextStyle.fontFallback` was skipped, and the reader drew .notdef - an empty box. Such runes now reach the fallback font
+- A malformed or truncated cmap subtable is skipped rather than throwing a `RangeError` in release or an `AssertionError` in debug
+
 ## 3.13.2
 
 - Support `currentColor` in SVG fills and strokes, resolved against the inherited `color` property; elements using it were previously not painted at all
