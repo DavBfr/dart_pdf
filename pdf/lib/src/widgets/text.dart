@@ -1151,8 +1151,13 @@ class RichText extends Widget with SpanningWidget {
               final word = drawable(chunk.text);
 
               if (word.isEmpty) {
+                // No glyphs, so no letter spacing to make up for: the spacing
+                // added after a run compensates for the trailing one
+                // PdfFontMetrics.append leaves out of the advance, and an empty
+                // run has no trailing glyph. Charging it moved every word after
+                // a run of whitespace, so splitting text into spans shifted it.
                 lastGap = gapOf(drawable(chunk.separator));
-                offsetX += lastGap + style.letterSpacing!;
+                offsetX += lastGap;
                 continue;
               }
 
@@ -1371,9 +1376,14 @@ class RichText extends Widget with SpanningWidget {
             }
           }
 
-          // The operator precedence here is B-169's defect, not this one's:
-          // it reads -(gap) + letterSpacing where both terms were added.
-          offsetX -= lastGap - style.letterSpacing!;
+          // Take back the gap charged after the last run, but not its letter
+          // spacing: PdfFontMetrics.append leaves the trailing one out of the
+          // advance while the emitted Tc still applies it, so the next span
+          // starts where continuous text would put it. This read
+          // `-= lastGap - letterSpacing`, which parses as -(gap) + spacing
+          // rather than -(gap + spacing), so every span boundary gained two
+          // letter spacings of gap.
+          offsetX -= lastGap;
         } else if (span is WidgetSpan) {
           span.child.layout(
             context,

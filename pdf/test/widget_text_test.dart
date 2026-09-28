@@ -519,6 +519,102 @@ void main() {
     );
   });
 
+  group('letterSpacing at a span boundary', () {
+    /// The x of each `Td` that precedes a literal text run.
+    Future<List<double>> positions(
+      List<String> parts, {
+      double letterSpacing = 0,
+      TextAlign? textAlign,
+      double width = 600,
+    }) async {
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: PdfPageFormat(width, 120, marginAll: 0),
+          build: (Context context) => SizedBox(
+            width: width,
+            child: RichText(
+              textAlign: textAlign,
+              text: TextSpan(
+                style: TextStyle(fontSize: 20, letterSpacing: letterSpacing),
+                children: <TextSpan>[
+                  for (final part in parts) TextSpan(text: part),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final pdf = String.fromCharCodes(await document.save());
+      return RegExp(r'([-\d.]+) [-\d.]+ Td \[\(')
+          .allMatches(pdf)
+          .map((RegExpMatch m) => double.parse(m.group(1)!))
+          .toList();
+    }
+
+    test('adds no gap of its own', () async {
+      // The end-of-span statement read `-= gap - letterSpacing`, which parses as
+      // -(gap) + spacing rather than -(gap + spacing), so the pen sat two letter
+      // spacings too far right after every span.
+      expect(
+        await positions(<String>['AAA', 'BBB', 'CCC'], letterSpacing: 5),
+        <double>[0, 55.02, 110.04],
+      );
+    });
+
+    test('is unchanged at zero, which is the default', () async {
+      expect(await positions(<String>['AAA', 'BBB', 'CCC']), <double>[
+        0,
+        40.02,
+        80.04,
+      ]);
+    });
+
+    test('splitting text into spans does not move it', () async {
+      for (final spacing in <double>[0, 2, 5]) {
+        final whole = await positions(<String>[
+          'AAA BBB CCC',
+        ], letterSpacing: spacing);
+        final split = await positions(<String>[
+          'AAA ',
+          'BBB ',
+          'CCC',
+        ], letterSpacing: spacing);
+
+        expect(split, whole, reason: 'letterSpacing $spacing');
+      }
+    });
+
+    test('a centred line of several spans sits where one span does', () async {
+      // Centring divides what the line measured, so a span boundary that moved
+      // the pen moved the whole line off centre.
+      for (final align in <TextAlign>[
+        TextAlign.center,
+        TextAlign.right,
+        TextAlign.left,
+      ]) {
+        final whole = await positions(
+          <String>['AAA BBB CCC'],
+          letterSpacing: 5,
+          textAlign: align,
+          width: 300,
+        );
+        final split = await positions(
+          <String>['AAA ', 'BBB ', 'CCC'],
+          letterSpacing: 5,
+          textAlign: align,
+          width: 300,
+        );
+
+        expect(split, whole, reason: '$align');
+        if (align == TextAlign.center) {
+          expect(whole.first, greaterThan(0), reason: 'it did move');
+        }
+      }
+    });
+  });
+
   group('a run served by a fallback font', () {
     late Font arabicFont;
 

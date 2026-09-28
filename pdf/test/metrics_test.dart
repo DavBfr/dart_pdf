@@ -182,4 +182,32 @@ void main() {
     final file = File('metrics.pdf');
     await file.writeAsBytes(await pdf.save());
   });
+
+  test('letterSpacing is charged between glyphs, not after the last', () {
+    // The advance leaves the trailing spacing out, which is why the text layout
+    // adds one back after each run: the Tc the stream carries applies it on the
+    // page, and the two together are what puts the next run in the right place.
+    final font = PdfFont.helvetica(PdfDocument());
+
+    for (final word in <String>['A', 'AA', 'AAA', 'Hello']) {
+      final glyphs = word.codeUnits
+          .map((int c) => font.glyphMetrics(c).advanceWidth)
+          .reduce((double a, double b) => a + b);
+
+      expect(
+        font.stringMetrics(word).advanceWidth,
+        closeTo(glyphs, 1e-9),
+        reason: '$word at no letter spacing',
+      );
+
+      for (final spacing in <double>[0.25, 1, 2.5]) {
+        expect(
+          font.stringMetrics(word, letterSpacing: spacing).advanceWidth +
+              spacing,
+          closeTo(glyphs + word.length * spacing, 1e-9),
+          reason: '$word at $spacing',
+        );
+      }
+    }
+  });
 }
