@@ -28,6 +28,7 @@
 - **Fix a hyphenated word being cut anywhere but at a hyphen.** `'Hello-World-this-should-break'` fell to a width search with no notion of where a break belongs, so it was cut mid-syllable. A line may now end after a hyphen - not before a digit, so `'3-4'` stays whole, and not at a leading sign - and only falls back to the width search when the word offers nothing
 - **Fix a soft hyphen being drawn as a real hyphen and never breaking a line.** U+00AD is invisible until it is used: `'Bundes<SHY>verfassungs<SHY>gericht'` draws as `Bundesverfassungsgericht` and measures the same, and when it has to wrap it breaks at a soft hyphen and puts a visible hyphen at the end of that line
 - **Fix U+200B giving no break opportunity at all**, which is the only way to wrap CJK text without a `lineSplitter`. It breaks now and is never drawn. U+2060 takes the following opportunity away, and U+2011 never breaks
+- **Fix `save()` aborting with `RangeError (length): Not in inclusive range 0..7: 8` on Arabic** where one of the hamza carriers آأؤإئ is followed by a haraka - 40 of the 45 pairs. The bug is in package:bidi's normalizer, which this package called unguarded on the path every RTL span takes, with no runtime way to opt out. The reordering now falls back to shaping the text without it, which renders differently but stays Arabic
 
 ## 3.13.2
 

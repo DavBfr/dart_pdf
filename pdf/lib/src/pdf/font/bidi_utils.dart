@@ -1,5 +1,7 @@
 import 'package:bidi/bidi.dart' as bidi;
 
+import 'arabic.dart' as arabic;
+
 /*
  * Copyright (C) 2017, David PHAM-VAN <dev.nfet.net@gmail.com>
  *
@@ -80,7 +82,29 @@ const Map<int, int> basicToIsolatedMappings = {
 };
 
 /// Applies THE BIDIRECTIONAL ALGORITHM using (https://pub.dev/packages/bidi)
+///
+/// Never throws. package:bidi's normalizer indexes its length table out of step
+/// with the decomposition of U+0622-U+0626, so a hamza carrier followed by a
+/// haraka - 40 of the 45 pairs - threw `RangeError (length): Not in inclusive
+/// range 0..1: 2` out of `Document.save()`, with no runtime way to opt out of
+/// the call. On failure the text is shaped without the reordering, which is a
+/// different rendering but still Arabic; returning the logical string would draw
+/// it reversed and unjoined.
 String logicalToVisual(String input) {
+  try {
+    return _logicalToVisual(input);
+  } catch (e) {
+    assert(() {
+      // ignore: avoid_print
+      print('Unable to apply the bidi algorithm to "$input": $e');
+      return true;
+    }());
+
+    return arabic.convert(input);
+  }
+}
+
+String _logicalToVisual(String input) {
   final buffer = StringBuffer();
   final paragraphs = bidi.BidiString.fromLogical(input).paragraphs;
   for (final paragraph in paragraphs) {

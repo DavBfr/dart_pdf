@@ -16,6 +16,7 @@
 
 import 'dart:io';
 
+import 'package:pdf/pdf.dart';
 import 'package:pdf/src/pdf/font/bidi_utils.dart' as bidi;
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
@@ -43,6 +44,74 @@ void main() {
 
     arabicFont = loadFont('hacen-tunisia.ttf');
     style = TextStyle(font: arabicFont, fontSize: 30);
+  });
+
+  test('logicalToVisual never throws', () {
+    // package:bidi's normalizer indexes its length table out of step with the
+    // decomposition of the hamza carriers, so 40 of these 45 pairs threw
+    // 'RangeError (length): Not in inclusive range 0..1: 2' out of save(), with
+    // no runtime way to turn the call off.
+    var shaped = 0;
+
+    for (var carrier = 0x0622; carrier <= 0x0626; carrier++) {
+      for (final haraka in <int>[
+        0x064B,
+        0x064C,
+        0x064D,
+        0x064E,
+        0x064F,
+        0x0650,
+        0x0651,
+        0x0652,
+        0x0670,
+      ]) {
+        final text = String.fromCharCodes(<int>[carrier, haraka]);
+        final label =
+            'U+${carrier.toRadixString(16)} + U+${haraka.toRadixString(16)}';
+
+        late String visual;
+        expect(
+          () => visual = bidi.logicalToVisual(text),
+          returnsNormally,
+          reason: label,
+        );
+        expect(visual, isNotEmpty, reason: label);
+        if (visual != text) {
+          shaped++;
+        }
+      }
+    }
+
+    expect(shaped, 45, reason: 'every pair comes back shaped, not raw');
+  });
+
+  test('a paragraph of the failing pairs still saves', () async {
+    final document = Document();
+    document.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(200, 100),
+        build: (Context context) => Text('\u0623\u064Fغلق في', style: style),
+      ),
+    );
+
+    expect(await document.save(), isNotEmpty);
+  });
+
+  test('where package:bidi succeeds the output is unchanged', () {
+    expect(bidi.logicalToVisual('محمد').codeUnits, <int>[
+      0xFEAA,
+      0xFEE4,
+      0xFEA4,
+      0xFEE3,
+    ]);
+    expect(bidi.logicalToVisual('السلام').codeUnits, <int>[
+      0xFEE1,
+      0xFEFC,
+      0xFEB4,
+      0xFEDF,
+      0xFE8D,
+    ]);
   });
 
   test('Arabic Diacritics', () {
