@@ -23,6 +23,49 @@ import 'package:test/test.dart';
 
 import 'utils.dart';
 
+/// The CID payload of each `[<...>]TJ` run, in paint order.
+List<String> cidRuns(String pdf) => RegExp(
+  r'\[<([0-9A-Fa-f]+)>\]TJ',
+).allMatches(pdf).map((RegExpMatch m) => m.group(1)!.toUpperCase()).toList();
+
+/// How many runs each baseline carries, top line first.
+List<int> runsPerLine(String pdf) {
+  final lines = <double, int>{};
+
+  for (final run in RegExp(
+    r'[-\d.]+ ([-\d.]+) Td \[<[0-9A-Fa-f]+>\]TJ',
+  ).allMatches(pdf)) {
+    final y = double.parse(run.group(1)!);
+    lines[y] = (lines[y] ?? 0) + 1;
+  }
+
+  final baselines = lines.keys.toList()
+    ..sort((double a, double b) => b.compareTo(a));
+  return <int>[for (final y in baselines) lines[y]!];
+}
+
+/// One right-to-left page of [text], uncompressed.
+Future<String> fallbackPage(
+  String text, {
+  required Font font,
+  List<Font> fontFallback = const <Font>[],
+  double width = 400,
+}) async {
+  final document = Document(compress: false);
+  document.addPage(
+    Page(
+      pageFormat: PdfPageFormat(width, 200, marginAll: 0),
+      textDirection: TextDirection.rtl,
+      build: (Context context) => Text(
+        text,
+        style: TextStyle(font: font, fontFallback: fontFallback, fontSize: 20),
+      ),
+    ),
+  );
+
+  return String.fromCharCodes(await document.save());
+}
+
 late Document pdf;
 late Font ttf;
 late Font ttfBold;
@@ -474,6 +517,164 @@ void main() {
         ),
       ),
     );
+  });
+
+  group('a run served by a fallback font', () {
+    late Font arabicFont;
+
+    setUpAll(() {
+      arabicFont = loadFont('hacen-tunisia.ttf');
+    });
+
+    test('is one span, and joins', () async {
+      // A span was emitted for each unsupported rune on its own, and shaping
+      // works on a span, so a one-character span could only ever produce the
+      // isolated form: 'محمد' came out as four unjoined letters in four runs.
+      for (final word in <String>['محمد', 'مرحبا']) {
+        final viaFallback = cidRuns(
+          await fallbackPage(word, font: ttf, fontFallback: <Font>[arabicFont]),
+        );
+        final asBase = cidRuns(await fallbackPage(word, font: arabicFont));
+
+        expect(viaFallback, hasLength(1), reason: word);
+        expect(
+          viaFallback.single.length ~/ 4,
+          word.length,
+          reason: '$word: one glyph per letter',
+        );
+        expect(
+          viaFallback,
+          asBase,
+          reason: '$word: the same run the base font would draw',
+        );
+      }
+    });
+
+    test('is joined the way the shaper says', () async {
+      // U+FEAA U+FEE4 U+FEA4 U+FEE3: dal final, meem medial, hah initial, meem
+      // isolated, which is 'محمد' shaped and in visual order.
+      final pdf = await fallbackPage(
+        'محمد',
+        font: ttf,
+        fontFallback: <Font>[arabicFont],
+      );
+
+      final toUnicode = <int, int>{};
+      for (final entry in RegExp(
+        r'<([0-9A-F]{4})> <([0-9A-F]{4})>',
+      ).allMatches(pdf)) {
+        toUnicode[int.parse(entry.group(1)!, radix: 16)] = int.parse(
+          entry.group(2)!,
+          radix: 16,
+        );
+      }
+
+      final cids = cidRuns(pdf).single;
+      expect(
+        <int>[
+          for (var i = 0; i + 4 <= cids.length; i += 4)
+            toUnicode[int.parse(cids.substring(i, i + 4), radix: 16)]!,
+        ],
+        <int>[0xFEAA, 0xFEE4, 0xFEA4, 0xFEE3],
+      );
+    });
+
+    test('a mixed sentence is one run per script', () async {
+      final runs = cidRuns(
+        await fallbackPage(
+          'Hello مرحبا world',
+          font: ttf,
+          fontFallback: <Font>[arabicFont],
+        ),
+      );
+
+      expect(runs, hasLength(3), reason: 'Hello, the Arabic word, world');
+      expect(runs[1].length ~/ 4, 5, reason: 'the Arabic word is whole');
+    });
+
+    test('wraps on word boundaries, not inside words', () async {
+      // Each letter used to be its own word, so a line could break anywhere
+      // inside the Arabic and justify stretched the gaps between its letters.
+      final pdf = await fallbackPage(
+        'Hello مرحبا world',
+        font: ttf,
+        fontFallback: <Font>[arabicFont],
+        width: 140,
+      );
+
+      final runs = cidRuns(pdf);
+      expect(runs, hasLength(3), reason: 'still three words');
+      expect(runsPerLine(pdf).reduce((int a, int b) => a + b), 3);
+      expect(runs.map((String run) => run.length ~/ 4), <int>[
+        5,
+        5,
+        5,
+      ], reason: 'Hello, the five Arabic letters, world - none of them split');
+    });
+
+    test('an emoji ends the run either side of it', () async {
+      final emojiFont = loadFont('emoji.ttf');
+      final runs = cidRuns(
+        await fallbackPage(
+          'م\u{1F600}م',
+          font: ttf,
+          fontFallback: <Font>[arabicFont, emojiFont],
+        ),
+      );
+
+      expect(runs, hasLength(2));
+      expect(runs.every((String run) => run.length == 4), isTrue);
+    });
+
+    test('a rune no font covers ends it too', () async {
+      // U+0E01 is Thai: neither open-sans nor hacen-tunisia has it.
+      final runs = cidRuns(
+        await fallbackPage(
+          'م\u0E01م',
+          font: ttf,
+          fontFallback: <Font>[arabicFont],
+        ),
+      );
+
+      expect(runs, hasLength(2));
+    });
+
+    test('every rune ends up in exactly one span', () async {
+      // The coverage assert inside _preProcessSpans is what this exercises: the
+      // runs have to tile the source text with nothing dropped or repeated.
+      final random = math.Random(20260929);
+      const pool = <int>[
+        0x61,
+        0x62,
+        0x20,
+        0x645,
+        0x631,
+        0x62D,
+        0x0E01,
+        0x1F600,
+        0x0A,
+        0xFE0F,
+        0x00AD,
+        0x30,
+      ];
+
+      for (var round = 0; round < 40; round++) {
+        final runes = <int>[
+          for (var i = 0; i < 1 + random.nextInt(12); i++)
+            pool[random.nextInt(pool.length)],
+        ];
+
+        await expectLater(
+          fallbackPage(
+            String.fromCharCodes(runes),
+            font: ttf,
+            fontFallback: <Font>[arabicFont, emoji],
+          ),
+          completes,
+          reason: runes.map((int r) => r.toRadixString(16)).join(','),
+        );
+      }
+    });
   });
 
   tearDownAll(() async {

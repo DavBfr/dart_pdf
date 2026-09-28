@@ -25,6 +25,7 @@ import '../pdf/options.dart';
 import 'annotations.dart';
 import 'basic.dart';
 import 'document.dart';
+import 'font.dart';
 import 'geometry.dart';
 import 'image.dart';
 import 'image_provider.dart';
@@ -853,10 +854,46 @@ class RichText extends Widget with SpanningWidget {
 
         final font = style!.font!.getFont(context);
 
-        var text = span.text!.runes.toList();
+        final runes = span.text!.runes.toList();
 
-        for (var index = 0; index < text.length; index++) {
-          final rune = text[index];
+        // One span per maximal run of runes served by the same font. A span was
+        // emitted for each unsupported rune on its own, so a fallback-served
+        // Arabic word arrived as a string of one-character spans - and shaping
+        // works on a span, so every letter could only come out in its isolated
+        // form, each became its own word for wrapping, and justify stretched the
+        // gaps between letters.
+        Font? served;
+        var start = 0;
+
+        void flush(int end) {
+          if (end <= start) {
+            return;
+          }
+
+          spans.add(
+            _addText(
+              text: runes,
+              start: start,
+              end: end,
+              style: served == null
+                  ? style
+                  : style.copyWith(
+                      font: served,
+                      fontNormal: served,
+                      fontBold: served,
+                      fontBoldItalic: served,
+                      fontItalic: served,
+                    ),
+              baseline: span.baseline,
+              annotation: annotation,
+            ),
+          );
+
+          start = end;
+        }
+
+        for (var index = 0; index < runes.length; index++) {
+          final rune = runes[index];
           const spaces = {
             0x0a,
             0x0b,
@@ -882,90 +919,88 @@ class RichText extends Widget with SpanningWidget {
             0x2029,
             0x3000,
           };
-          // A default ignorable is never drawn, so it must not reach the
-          // fallback scan either: with no font covering it the scan ended at
-          // _addPlaceholder and painted a crossed box for a soft hyphen, a
-          // variation selector or a bidi mark.
+          // Whitespace stays with whatever run is open, so a space cannot chop a
+          // sentence in two. A default ignorable is never drawn, so it must not
+          // reach the fallback scan either: with no font covering it the scan
+          // ended at _addPlaceholder and painted a crossed box for a soft hyphen,
+          // a variation selector or a bidi mark.
           if (spaces.contains(rune) || isDefaultIgnorable(rune)) {
             continue;
           }
 
-          if (!font.isRuneSupported(rune)) {
-            if (index > 0) {
-              spans.add(
-                _addText(
-                  text: text,
-                  end: index,
-                  style: style,
-                  baseline: span.baseline,
-                  annotation: annotation,
-                ),
-              );
+          if (font.isRuneSupported(rune)) {
+            if (served != null) {
+              flush(index);
+              served = null;
             }
-            var found = false;
-            for (final fb in style.fontFallback) {
-              final font = fb.getFont(context);
-              if (font.isRuneSupported(rune)) {
-                if (font is PdfTtfFont) {
-                  final bitmap = font.font.getBitmap(rune);
-                  if (bitmap != null) {
-                    spans.add(
-                      _addEmoji(
-                        bitmap: bitmap,
-                        style: style,
-                        baseline: span.baseline,
-                        annotation: annotation,
-                      ),
-                    );
-                    found = true;
-                    break;
-                  }
-                }
-                spans.add(
-                  _addText(
-                    text: [rune],
-                    style: style.copyWith(
-                      font: fb,
-                      fontNormal: fb,
-                      fontBold: fb,
-                      fontBoldItalic: fb,
-                      fontItalic: fb,
-                    ),
-                    baseline: span.baseline,
-                    annotation: annotation,
-                  ),
-                );
-                found = true;
-                break;
-              }
-            }
-            if (!found) {
-              spans.add(
-                _addPlaceholder(
-                  style: style,
-                  baseline: span.baseline,
-                  annotation: annotation,
-                ),
-              );
-              assert(() {
-                print(
-                  'Unable to find a font to draw "${String.fromCharCode(rune)}" (U+${rune.toRadixString(16)}) try to provide a TextStyle.fontFallback',
-                );
-                return true;
-              }());
-            }
-            text = text.sublist(index + 1);
-            index = -1;
+            continue;
           }
+
+          // The span's own font cannot draw it. Take the first fallback that can.
+          Font? fallback;
+          TtfBitmapInfo? bitmap;
+          for (final candidate in style.fontFallback) {
+            final resolved = candidate.getFont(context);
+            if (!resolved.isRuneSupported(rune)) {
+              continue;
+            }
+            fallback = candidate;
+            if (resolved is PdfTtfFont) {
+              bitmap = resolved.font.getBitmap(rune);
+            }
+            break;
+          }
+
+          if (bitmap != null) {
+            // An emoji is its own object: it ends the run before it and starts a
+            // new one after it.
+            flush(index);
+            spans.add(
+              _addEmoji(
+                bitmap: bitmap,
+                style: style,
+                baseline: span.baseline,
+                annotation: annotation,
+              ),
+            );
+            start = index + 1;
+            served = null;
+            continue;
+          }
+
+          if (fallback != null) {
+            if (served != fallback) {
+              flush(index);
+              served = fallback;
+            }
+            continue;
+          }
+
+          flush(index);
+          spans.add(
+            _addPlaceholder(
+              style: style,
+              baseline: span.baseline,
+              annotation: annotation,
+            ),
+          );
+          start = index + 1;
+          served = null;
+
+          assert(() {
+            print(
+              'Unable to find a font to draw "${String.fromCharCode(rune)}" (U+${rune.toRadixString(16)}) try to provide a TextStyle.fontFallback',
+            );
+            return true;
+          }());
         }
 
-        spans.add(
-          _addText(
-            text: text,
-            style: style,
-            baseline: span.baseline,
-            annotation: annotation,
-          ),
+        flush(runes.length);
+
+        // Every rune was either written into a run or replaced by a widget.
+        assert(
+          start == runes.length,
+          'the emitted spans have to cover the whole source text',
         );
 
         return true;
