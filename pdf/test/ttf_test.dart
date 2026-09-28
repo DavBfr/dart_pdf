@@ -15,6 +15,7 @@
  */
 
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/src/pdf/font/ttf_writer.dart';
@@ -117,5 +118,83 @@ void main() {
     final data = ttfWriter.withChars('hçHée 你好 檯號 ☃'.runes.toList());
     final output = File('${font.fontName}.ttf');
     output.writeAsBytesSync(data);
+  });
+
+  group('readGlyph', () {
+    const fonts = <String>[
+      'open-sans',
+      'roboto',
+      'noto-sans',
+      'hacen-tunisia',
+      'genyomintw',
+    ];
+
+    test('returns nothing for a glyph loca says is empty', () {
+      // An empty glyph has loca[i] == loca[i + 1], so the start offset points at
+      // the next glyph's record and the readers used to return its outline. Every
+      // blank in every one of these fonts came back drawn.
+      for (final name in fonts) {
+        final font = TtfParser(
+          File('$name.ttf').readAsBytesSync().buffer.asByteData(),
+        );
+
+        for (var g = 0; g < font.glyphOffsets.length; g++) {
+          if (font.glyphSizes[g] > 0) {
+            continue;
+          }
+
+          final glyph = font.readGlyph(g);
+          expect(glyph.data, isEmpty, reason: '$name glyph $g');
+          expect(glyph.compounds, isEmpty, reason: '$name glyph $g');
+        }
+      }
+    });
+
+    test('never returns more than loca says the glyph occupies', () {
+      for (final name in fonts) {
+        final font = TtfParser(
+          File('$name.ttf').readAsBytesSync().buffer.asByteData(),
+        );
+
+        for (var g = 0; g < font.glyphOffsets.length; g++) {
+          expect(
+            font.readGlyph(g).data.length,
+            lessThanOrEqualTo(math.max(font.glyphSizes[g], 0)),
+            reason: '$name glyph $g',
+          );
+        }
+      }
+    });
+
+    test('an empty glyph is not its neighbour', () {
+      final font = TtfParser(
+        File('open-sans.ttf').readAsBytesSync().buffer.asByteData(),
+      );
+
+      // Glyph 97 is U+00A0, the no-break space; 98 is U+00A1. readGlyph(97) used
+      // to return 98's outline, byte for byte.
+      expect(font.glyphSizes[97], 0);
+      expect(font.readGlyph(97).data, isEmpty);
+      expect(font.readGlyph(98).data, hasLength(font.glyphSizes[98]));
+      expect(font.readGlyph(97).data, isNot(font.readGlyph(98).data));
+    });
+
+    test('a subset keeps the empty glyphs empty', () {
+      final data = File('open-sans.ttf').readAsBytesSync();
+      final font = TtfParser(data.buffer.asByteData());
+
+      // 0x00A0 is a no-break space and 0x200B a zero-width space: both empty.
+      final subset = TtfWriter(
+        font,
+      ).withChars(<int>[0x41, 0x00A0, 0x200B, 0x42]);
+      final reparsed = TtfParser(subset.buffer.asByteData());
+
+      expect(reparsed.glyphSizes.where((int s) => s == 0), hasLength(2));
+      for (var g = 0; g < reparsed.glyphOffsets.length; g++) {
+        if (reparsed.glyphSizes[g] == 0) {
+          expect(reparsed.readGlyph(g).data, isEmpty);
+        }
+      }
+    });
   });
 }

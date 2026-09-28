@@ -116,11 +116,13 @@ class TtfWriter {
     for (final char in chars) {
       final glyphIndex = ttf.charToGlyphIndexMap[char] ?? 0;
 
-      if (char == 32 || glyphIndex >= ttf.glyphOffsets.length) {
+      // A glyph the font does not have. The space used to be special-cased here
+      // too, because readGlyph returned the next glyph's outline for it; now an
+      // empty glyph reads as empty, so a font whose space really does carry an
+      // outline keeps it.
+      if (glyphIndex >= ttf.glyphOffsets.length) {
         assert(() {
-          if (char != 32) {
-            print('Glyph $glyphIndex not in the font ${ttf.fontName}');
-          }
+          print('Glyph $glyphIndex not in the font ${ttf.fontName}');
           return true;
         }());
         // Still occupy this CID slot: skipping it would shift every later

@@ -619,6 +619,15 @@ class TtfParser {
   }
 
   /// http://stevehanov.ca/blog/?id=143
+  /// A glyph's bytes, never more than `loca` says the glyph occupies.
+  ///
+  /// A malformed `loca`, or a reader that walks past the record, could otherwise
+  /// hand back the following glyph's outline.
+  Uint8List _glyphBytes(int glyph, int start, int end) {
+    final length = math.min(end - start, glyphSizes[glyph]);
+    return Uint8List.view(bytes.buffer, start, length < 0 ? 0 : length);
+  }
+
   TtfGlyphInfo readGlyph(int index) {
     assert(index < glyphOffsets.length);
 
@@ -626,6 +635,15 @@ class TtfParser {
 
     if (start >= tableSize[glyf_table]! + tableOffsets[glyf_table]! ||
         start == 0) {
+      return TtfGlyphInfo(index, Uint8List(0), const <int>[]);
+    }
+
+    if (glyphSizes[index] <= 0) {
+      // An empty glyph - a no-break space, a tab, U+2000 to U+200B, U+FEFF -
+      // has loca[i] == loca[i + 1], so `start` points at the *next* glyph's
+      // record and the readers below happily returned its outline. drawString
+      // of 'A B' rendered 'A¡B'. _parseGlyphs already tests glyphSizes, so the
+      // metrics said blank while the outline said letter.
       return TtfGlyphInfo(index, Uint8List(0), const <int>[]);
     }
 
@@ -664,7 +682,7 @@ class TtfParser {
     if (numberOfContours == 0) {
       return TtfGlyphInfo(
         glyph,
-        Uint8List.view(bytes.buffer, start, offset - start),
+        _glyphBytes(glyph, start, offset),
         const <int>[],
       );
     }
@@ -701,7 +719,7 @@ class TtfParser {
 
     return TtfGlyphInfo(
       glyph,
-      Uint8List.view(bytes.buffer, start, offset - start),
+      _glyphBytes(glyph, start, offset),
       const <int>[],
     );
   }
@@ -741,11 +759,7 @@ class TtfParser {
       offset += bytes.getUint16(offset) + 2;
     }
 
-    return TtfGlyphInfo(
-      glyph,
-      Uint8List.view(bytes.buffer, start, offset - start),
-      components,
-    );
+    return TtfGlyphInfo(glyph, _glyphBytes(glyph, start, offset), components);
   }
 
   String _decodeUtf16(Uint8List bytes) {

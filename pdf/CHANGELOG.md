@@ -8,6 +8,8 @@
 - **Fix cmap format 4 ignoring a segment's `idDelta` for a glyph-id-array lookup**, which rendered that whole range with its glyphs shifted
 - **Fix glyph 0 being recorded as coverage.** Format 4 defines it as 'not covered', so a character in a hole looked supported, `TextStyle.fontFallback` was skipped, and the reader drew .notdef - an empty box. Such runes now reach the fallback font
 - A malformed or truncated cmap subtable is skipped rather than throwing a `RangeError` in release or an `AssertionError` in debug
+- **Fix a blank implemented as an empty glyph drawing the next glyph in the font.** `readGlyph` never consulted the glyph's size, and an empty glyph shares its offset with the one after it, so `drawString('A B')` rendered 'A¡B' with open-sans and `Text('a​b')` drew a box over the 'b'. Every empty glyph in every bundled font was affected - 17 in open-sans, 19 in roboto, 20 in noto-sans - and the subsetter embedded those wrong outlines
+- A glyph's bytes are now clamped to what the font's `loca` table says the glyph occupies, so a malformed table cannot hand back its neighbour's outline
 
 ## 3.13.2
 
