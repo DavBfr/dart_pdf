@@ -238,6 +238,131 @@ void main() {
     });
   });
 
+  group('break opportunities inside a word', () {
+    test('are found where the text says, and nowhere else', () {
+      List<String> at(String run) => tokenize(run).single.breaks
+          .map((TextBreak b) => '${b.offset}${b.hyphen ? 'h' : ''}')
+          .toList();
+
+      // A hyphen breaks after itself.
+      expect(tokenize('Hello-World').single.text, 'Hello-World');
+      expect(at('Hello-World'), <String>['6']);
+      expect(at('a-b-c'), <String>['2', '4']);
+
+      // Not run-initial, so a sign stays with its number, and not before a
+      // digit, so a range stays whole.
+      expect(at('-5'), isEmpty);
+      expect(at('3-4'), isEmpty);
+      expect(at('3-4-x'), <String>['4']);
+
+      // Nothing to break away from a trailing hyphen.
+      expect(at('Hello-'), isEmpty);
+
+      // A soft hyphen is dropped and remembered; a zero-width space is dropped.
+      expect(tokenize('Bundes\u00ADgericht').single.text, 'Bundesgericht');
+      expect(at('Bundes\u00ADgericht'), <String>['6h']);
+      expect(tokenize('Hello\u200BWorld').single.text, 'HelloWorld');
+      expect(at('Hello\u200BWorld'), <String>['5']);
+      expect(at('\u00ADabc'), isEmpty, reason: 'run-initial');
+
+      // A word joiner takes the next opportunity away, and is dropped itself.
+      expect(tokenize('a-\u2060b').single.text, 'a-b');
+      expect(at('a-\u2060b'), isEmpty);
+      expect(at('a\u00AD\u2060b'), isEmpty);
+      expect(at('a\u200B\u2060b'), isEmpty);
+
+      // U+2010 breaks, U+2011 never does.
+      expect(at('a\u2010b'), <String>['2']);
+      expect(at('a\u2011b'), isEmpty);
+
+      // Nothing to find in ordinary text.
+      expect(at('Hello'), isEmpty);
+    });
+
+    test('a hyphenated word breaks only after a hyphen', () async {
+      // 'Hello-' is 54.6pt at 20pt and 'Hello-World-' 117.1pt, so these widths
+      // take one or two segments. The token used to fall straight to a width
+      // search, which cut it wherever it happened to land.
+      for (final width in <double>[90, 100, 110, 130, 150]) {
+        final laid = await layOut(
+          'Hello-World-this-should-break-at-dashes',
+          openSans,
+          width: width,
+        );
+
+        expect(laid.lines.length, greaterThan(1), reason: 'width $width');
+        for (final line in laid.lines) {
+          expect(line, isNot(startsWith('-')), reason: 'width $width');
+        }
+        for (final line in laid.lines.take(laid.lines.length - 1)) {
+          expect(
+            line,
+            endsWith('-'),
+            reason: 'width $width: a line may only end at a hyphen',
+          );
+        }
+      }
+    });
+
+    test('a hyphen before a digit is not one', () async {
+      // 'aaaa-' is 50.9pt, 'aaaa-1111' 96.7pt and 'aaaa-1111a' 107.8pt. With the
+      // opportunity suppressed the width search fills the line instead.
+      final digits = await layOut('aaaa-1111aaaa', openSans, width: 100);
+      expect(digits.lines.first, 'aaaa-1111');
+
+      final letters = await layOut('aaaa-bbbbaaaa', openSans, width: 100);
+      expect(letters.lines.first, 'aaaa-');
+    });
+
+    test('a word with no opportunity is still hard-split', () async {
+      final laid = await layOut('AAAAAAAAAAAA', openSans, width: 90);
+
+      expect(laid.lines.length, greaterThan(1));
+      expect(laid.lines.join(), 'AAAAAAAAAAAA');
+      for (final line in laid.lines) {
+        expect(line, isNot(contains('-')));
+      }
+    });
+
+    test('a zero-width space breaks and draws nothing', () async {
+      // At 80pt a width search would cut after 'HelloWo', so landing on 'Hello'
+      // is the opportunity being used rather than a coincidence.
+      final narrow = await layOut('Hello\u200BWorld', openSans, width: 80);
+      expect(narrow.lines, <String>['Hello', 'World']);
+
+      final wide = await layOut('Hello\u200BWorld', openSans, width: 200);
+      expect(wide.lines, <String>['HelloWorld']);
+    });
+
+    test('a soft hyphen is drawn only where the break is taken', () async {
+      // 'Bundes-' is 77.0pt and 'verfassungs-' 117.9pt.
+      final wrapped = await layOut(
+        'Bundes\u00ADverfassungs\u00ADgericht',
+        openSans,
+        width: 130,
+      );
+      expect(wrapped.lines, <String>['Bundes-', 'verfassungs-', 'gericht']);
+
+      // Where it fits, it costs nothing and shows nothing.
+      final whole = await layOut(
+        'Bundes\u00ADverfassungs\u00ADgericht',
+        openSans,
+        width: 400,
+        softWrap: false,
+      );
+      final plain = await layOut(
+        'Bundesverfassungsgericht',
+        openSans,
+        width: 400,
+        softWrap: false,
+      );
+
+      expect(whole.lines, <String>['Bundesverfassungsgericht']);
+      expect(whole.box.width, closeTo(plain.box.width, 0.0001));
+      expect(whole.lines.single, isNot(contains('-')));
+    });
+  });
+
   test('a caller-supplied lineSplitter still decides everything', () async {
     // The default no longer breaks at a non-breaking space, but a splitter that
     // wants to still can, and its runs are charged one space each as before.
@@ -248,5 +373,15 @@ void main() {
     );
 
     expect(laid.lines, <String>['AAAA', 'BBBB']);
+
+    // And it drops a soft hyphen without turning it into a break of its own.
+    final shy = await layOut(
+      'Bundes\u00ADverfassungs\u00ADgericht',
+      openSans,
+      width: 400,
+      softWrap: false,
+      lineSplitter: (String line) => line.split(RegExp(r'\s')),
+    );
+    expect(shy.lines, <String>['Bundesverfassungsgericht']);
   });
 }

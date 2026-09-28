@@ -1045,6 +1045,9 @@ class RichText extends Widget with SpanningWidget {
                 : useBidi && _textDirection == TextDirection.rtl
                 ? bidi.logicalToVisual(span.text!)
                 : span.text)!,
+            // The soft hyphen, the zero-width space and the word joiner are
+            // break opportunities: tokenize reads them and drops them.
+            keep: breakControls,
           ).split(RegExp(r'\r\n|\r|\n'));
 
           // The gap charged after the last run. The line-closing sites take it
@@ -1056,9 +1059,11 @@ class RichText extends Widget with SpanningWidget {
                 ? tokenize(spanLines[line])
                 : <TextChunk>[
                     // A caller-supplied splitter says nothing about what it
-                    // took out, so every run keeps the U+0020 it always got.
+                    // took out, so every run keeps the U+0020 it always got. It
+                    // is also the authority on where lines break, so the break
+                    // controls are dropped here without becoming opportunities.
                     for (final word in lineSplitter!(spanLines[line]))
-                      TextChunk(word, ' '),
+                      TextChunk(stripDefaultIgnorable(word), ' '),
                   ];
             for (var index = 0; index < chunks.length; index++) {
               final chunk = chunks[index];
@@ -1144,7 +1149,42 @@ class RichText extends Widget with SpanningWidget {
 
                   offsetY += style.lineSpacing! * textScaleFactor;
                 } else {
-                  // One word Overflow, try to split it.
+                  // One word Overflow. Break it where it is meant to break
+                  // before falling back to a width search that knows nothing
+                  // about the text.
+                  final at = _lastBreakThatFits(
+                    chunk.breaks,
+                    word,
+                    font,
+                    style,
+                    constraintWidth,
+                  );
+
+                  if (at != null) {
+                    chunks[index] = TextChunk(
+                      word.substring(0, at.offset) + (at.hyphen ? '-' : ''),
+                      '',
+                    );
+                    chunks.insert(
+                      index + 1,
+                      TextChunk(
+                        word.substring(at.offset),
+                        chunk.separator,
+                        <TextBreak>[
+                          for (final rest in chunk.breaks)
+                            if (rest.offset > at.offset)
+                              TextBreak(
+                                rest.offset - at.offset,
+                                hyphen: rest.hyphen,
+                              ),
+                        ],
+                      ),
+                    );
+
+                    index--;
+                    continue;
+                  }
+
                   final pos = _splitWord(word, font, style, constraintWidth);
 
                   if (pos < word.length) {
@@ -1438,6 +1478,41 @@ class RichText extends Widget with SpanningWidget {
     }
   }
 
+  /// The width [text] lays out to in this style.
+  double _textWidth(String text, PdfFont font, TextStyle style) =>
+      (font.stringMetrics(
+                text,
+                letterSpacing:
+                    style.letterSpacing! / (style.fontSize! * textScaleFactor),
+              ) *
+              (style.fontSize! * textScaleFactor))
+          .width;
+
+  /// The last break opportunity of [word] whose head still fits [maxWidth], or
+  /// null if not even the first one does.
+  ///
+  /// [breaks] is ascending and each head is a prefix of the next, so the search
+  /// stops at the first one that overflows.
+  TextBreak? _lastBreakThatFits(
+    List<TextBreak> breaks,
+    String word,
+    PdfFont font,
+    TextStyle style,
+    double maxWidth,
+  ) {
+    TextBreak? fits;
+
+    for (final at in breaks) {
+      final head = word.substring(0, at.offset) + (at.hyphen ? '-' : '');
+      if (_textWidth(head, font, style) > maxWidth + 0.00001) {
+        break;
+      }
+      fits = at;
+    }
+
+    return fits;
+  }
+
   /// Widest prefix of [word] that fits [maxWidth], as a UTF-16 offset
   ///
   /// The offset is always on a rune boundary: cutting between a surrogate pair
@@ -1446,15 +1521,7 @@ class RichText extends Widget with SpanningWidget {
   /// least one rune is always consumed, so a caller that re-queues the rest
   /// makes progress.
   int _splitWord(String word, PdfFont font, TextStyle style, double maxWidth) {
-    double widthOf(int end) =>
-        (font.stringMetrics(
-                  word.substring(0, end),
-                  letterSpacing:
-                      style.letterSpacing! /
-                      (style.fontSize! * textScaleFactor),
-                ) *
-                (style.fontSize! * textScaleFactor))
-            .width;
+    double widthOf(int end) => _textWidth(word.substring(0, end), font, style);
 
     // Offsets just past each rune, so bounds.last == word.length.
     final bounds = <int>[];

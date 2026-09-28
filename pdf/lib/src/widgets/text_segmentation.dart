@@ -97,11 +97,38 @@ final RegExp whitespace = RegExp(r'[ \t\n\v\f\r\u0085   -     　
 /// to stop it. U+FEFF, the fourth, is dropped as a default ignorable.
 final RegExp breakableWhitespace = RegExp(r'[ \t\n\v\f\r\u0085  -  -    　]');
 
+/// The default ignorables the tokenizer consumes itself.
+///
+/// A soft hyphen and a zero-width space are break opportunities, and a word
+/// joiner takes one away, so they have to survive [stripDefaultIgnorable] and
+/// reach [tokenize], which drops them once it has read them.
+const Set<int> breakControls = <int>{0x00AD, 0x200B, 0x2060};
+
+/// Somewhere inside a run where a line may be broken.
+class TextBreak {
+  const TextBreak(this.offset, {this.hyphen = false});
+
+  /// Where the tail begins, as a UTF-16 offset into the run's text.
+  final int offset;
+
+  /// Whether taking this break has to put a hyphen at the end of the head.
+  ///
+  /// True for a soft hyphen, which is drawn only where it is used.
+  final bool hyphen;
+
+  @override
+  String toString() => 'TextBreak($offset${hyphen ? ' + hyphen' : ''})';
+}
+
 /// A run of text and the whitespace that follows it.
 class TextChunk {
-  const TextChunk(this.text, this.separator);
+  const TextChunk(
+    this.text,
+    this.separator, [
+    this.breaks = const <TextBreak>[],
+  ]);
 
-  /// What is drawn.
+  /// What is drawn, if the whole run fits on the line.
   final String text;
 
   /// The whitespace between this run and the next, empty at the end of a line.
@@ -110,8 +137,72 @@ class TextChunk {
   /// being used rather than by a U+0020's.
   final String separator;
 
+  /// Where the run itself may be broken, in ascending order.
+  final List<TextBreak> breaks;
+
   @override
-  String toString() => 'TextChunk("$text" + ${separator.length} separator)';
+  String toString() =>
+      'TextChunk("$text" + ${separator.length} separator, $breaks)';
+}
+
+/// The characters that can start or stop a break inside a run.
+final RegExp _mayBreak = RegExp(r'[\u002D\u00AD\u200B\u2010\u2060]');
+
+/// Find the break opportunities inside one whitespace-delimited run, and drop
+/// the invisible characters that mark them.
+///
+/// An overflowing run used to fall straight to a width search with no notion of
+/// where a break belongs, so a hyphenated word was cut wherever the search
+/// landed, a soft hyphen was drawn as a real hyphen and never broke, and a
+/// zero-width space did nothing at all.
+TextChunk _withBreaks(String run, String separator) {
+  if (!_mayBreak.hasMatch(run)) {
+    return TextChunk(run, separator);
+  }
+
+  final text = StringBuffer();
+  final breaks = <TextBreak>[];
+
+  for (var i = 0; i < run.length; i++) {
+    final unit = run.codeUnitAt(i);
+
+    // A word joiner right after a candidate forbids the break there. It is a
+    // default ignorable, so it is dropped either way.
+    final joined = i + 1 < run.length && run.codeUnitAt(i + 1) == 0x2060;
+
+    switch (unit) {
+      case 0x00AD: // SOFT HYPHEN: drawn only where the break is taken
+        if (text.isNotEmpty && !joined) {
+          breaks.add(TextBreak(text.length, hyphen: true));
+        }
+        continue;
+      case 0x200B: // ZERO WIDTH SPACE: never drawn
+        if (text.isNotEmpty && !joined) {
+          breaks.add(TextBreak(text.length));
+        }
+        continue;
+      case 0x2060: // WORD JOINER: never drawn
+        continue;
+      case 0x002D: // HYPHEN-MINUS
+      case 0x2010: // HYPHEN
+        text.writeCharCode(unit);
+        // Not run-initial, so '-5' keeps its sign, and not before a digit, so a
+        // range like '3-4' stays whole. A trailing hyphen has nothing to break
+        // away from it.
+        final next = i + 1 < run.length ? run.codeUnitAt(i + 1) : 0;
+        if (text.length > 1 &&
+            !joined &&
+            i + 1 < run.length &&
+            !(next >= 0x30 && next <= 0x39)) {
+          breaks.add(TextBreak(text.length));
+        }
+        continue;
+    }
+
+    text.writeCharCode(unit);
+  }
+
+  return TextChunk(text.toString(), separator, breaks);
 }
 
 /// Split [line] at every breakable whitespace character, keeping each separator
@@ -126,10 +217,12 @@ List<TextChunk> tokenize(String line) {
   var start = 0;
 
   for (final match in breakableWhitespace.allMatches(line)) {
-    chunks.add(TextChunk(line.substring(start, match.start), match.group(0)!));
+    chunks.add(
+      _withBreaks(line.substring(start, match.start), match.group(0)!),
+    );
     start = match.end;
   }
-  chunks.add(TextChunk(line.substring(start), ''));
+  chunks.add(_withBreaks(line.substring(start), ''));
 
   return chunks;
 }
