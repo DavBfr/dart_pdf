@@ -281,4 +281,43 @@ void main() {
       expect(rasterJobs, hasLength(1));
     });
   });
+
+  testWidgets('a raster error shows the preview error widget', (tester) async {
+    // What a page too large to raster now reports, instead of taking the whole
+    // process down.
+    final reported = <Object>[];
+    final previousOnError = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) =>
+        reported.add(details.exception);
+    addTearDown(() => FlutterError.onError = previousOnError);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(size: Size(800, 600)),
+        child: MaterialApp(
+          home: PdfPreviewCustom(
+            build: build,
+            onError: (BuildContext context, Object error) =>
+                Text('failed: $error', textDirection: TextDirection.ltr),
+          ),
+        ),
+      ),
+    );
+    await startRaster(tester);
+    expect(rasterJobs, hasLength(1));
+
+    await _fromPlatform('onPageRasterEnd', <String, dynamic>{
+      'job': rasterJobs.last,
+      'error': 'Cannot raster a page this large',
+    });
+    await settle(tester);
+
+    expect(
+      find.text('failed: Cannot raster a page this large'),
+      findsOneWidget,
+    );
+    // The preview surfaces the failure as well as showing it, as it does for a
+    // failed document build.
+    expect(reported, hasLength(1));
+  });
 }

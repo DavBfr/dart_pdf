@@ -5,6 +5,9 @@
 - **`Printing.raster` now paints an opaque white page backdrop.** A PDF page has no background of its own - the imaging model leaves it to whatever displays the document - and no native backend painted one, so 96% of a blank A4 came back at alpha 0 and saving a rastered page as PNG, or re-encoding it as JPEG, gave a black page. Pass `background: 0x00000000` to `Printing.raster` for the transparent pages of 5.17 and earlier
 - Fix Windows and Linux handing back straight alpha where Flutter reads premultiplied, so a partially transparent page rastered too bright. It made no difference while every pixel was transparent, and none for the new opaque default
 - `PrintingPlatform.raster` gained a `background` parameter, which a custom platform implementation has to accept
+- **Fix `Printing.raster` hard-crashing the whole process on Windows and Linux** for a page too large to rasterize - an A0 at 600 dpi, an A4 at 3400 dpi. pdfium answers a null bitmap once the buffer reaches 4 GiB, and the pixel loop wrote straight through it; the buffer length and the row offsets were also computed in `int`, which wraps above 2 GiB. The stream now ends with an error naming the problem and the app stays alive
+- Every pdfium handle on the Windows and Linux raster paths is released by a scope guard, so the new failure exits cannot skip a close
+
 
 ## 5.17.0
 

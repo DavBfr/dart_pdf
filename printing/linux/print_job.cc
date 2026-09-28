@@ -16,6 +16,8 @@
 
 #include "print_job.h"
 
+#include "pdfium_raster.h"
+
 #include <errno.h>
 #include <linux/memfd.h>
 #include <stdio.h>
@@ -396,22 +398,59 @@ bool print_job::share_pdf(const uint8_t data[],
   return WIFEXITED(status) && WEXITSTATUS(status) == 0;
 }
 
+/// Holds the process-wide pdfium reference for a scope.
+class pdfium_scope {
+ public:
+  pdfium_scope() { acquire_pdfium(); }
+  ~pdfium_scope() { release_pdfium(); }
+
+  pdfium_scope(const pdfium_scope&) = delete;
+  pdfium_scope& operator=(const pdfium_scope&) = delete;
+};
+
+/// Closes a pdfium handle however the scope is left.
+///
+/// The raster loop gained exit paths that must not skip FPDF_ClosePage,
+/// FPDFBitmap_Destroy or the library reference.
+template <typename Handle, void (*Close)(Handle)>
+class pdfium_handle {
+ public:
+  explicit pdfium_handle(Handle handle) : handle_(handle) {}
+  ~pdfium_handle() {
+    if (handle_ != nullptr) {
+      Close(handle_);
+    }
+  }
+
+  pdfium_handle(const pdfium_handle&) = delete;
+  pdfium_handle& operator=(const pdfium_handle&) = delete;
+
+  Handle get() const { return handle_; }
+  explicit operator bool() const { return handle_ != nullptr; }
+
+ private:
+  Handle handle_;
+};
+
+using document_handle = pdfium_handle<FPDF_DOCUMENT, &FPDF_CloseDocument>;
+using page_handle = pdfium_handle<FPDF_PAGE, &FPDF_ClosePage>;
+using bitmap_handle = pdfium_handle<FPDF_BITMAP, &FPDFBitmap_Destroy>;
+
 void print_job::raster_pdf(const uint8_t data[],
                            size_t size,
                            const int32_t pages[],
                            size_t pages_count,
                            double scale,
                            uint32_t background) {
-  acquire_pdfium();
+  const pdfium_scope pdfium;
 
-  auto doc = FPDF_LoadMemDocument64(data, size, nullptr);
+  document_handle doc{FPDF_LoadMemDocument64(data, size, nullptr)};
   if (!doc) {
-    release_pdfium();
     on_page_raster_end(this, "Cannot raster a malformed PDF file");
     return;
   }
 
-  auto pageCount = FPDF_GetPageCount(doc);
+  auto pageCount = FPDF_GetPageCount(doc.get());
   auto allPages = false;
 
   if (pages_count == 0) {
@@ -419,71 +458,53 @@ void print_job::raster_pdf(const uint8_t data[],
     pages_count = pageCount;
   }
 
-  for (auto pn = 0; pn < pages_count; pn++) {
-    auto n = allPages ? pn : pages[pn];
+  for (size_t pn = 0; pn < pages_count; pn++) {
+    auto n = allPages ? static_cast<int32_t>(pn) : pages[pn];
     if (n >= pageCount) {
       continue;
     }
 
-    auto page = FPDF_LoadPage(doc, n);
+    page_handle page{FPDF_LoadPage(doc.get(), n)};
     if (!page) {
       continue;
     }
 
-    auto width = FPDF_GetPageWidth(page);
-    auto height = FPDF_GetPageHeight(page);
+    const auto raster = nfet::rasterSizeFor(
+        FPDF_GetPageWidth(page.get()), FPDF_GetPageHeight(page.get()), scale);
+    if (!raster.valid) {
+      // pdfium answers a null bitmap for this, which the loop below used to
+      // write through.
+      on_page_raster_end(this, "Cannot raster a page this large");
+      return;
+    }
 
-    auto bWidth = static_cast<int>(width * scale);
-    auto bHeight = static_cast<int>(height * scale);
+    bitmap_handle bitmap{FPDFBitmap_Create(raster.width, raster.height, 1)};
+    if (!bitmap) {
+      on_page_raster_end(this, "Out of memory rastering a page");
+      return;
+    }
 
-    auto bitmap = FPDFBitmap_Create(bWidth, bHeight, 1);
     // A PDF page has no background of its own. This used to be hard-coded to
     // 0x00ffffff, which writes white but leaves alpha at 0, so a rastered page
     // came back transparent and saving it as PNG gave a black page.
-    FPDFBitmap_FillRect(bitmap, 0, 0, bWidth, bHeight,
+    FPDFBitmap_FillRect(bitmap.get(), 0, 0, raster.width, raster.height,
                         static_cast<unsigned long>(background));
 
-    FPDF_RenderPageBitmap(bitmap, page, 0, 0, bWidth, bHeight, 0,
+    FPDF_RenderPageBitmap(bitmap.get(), page.get(), 0, 0, raster.width,
+                          raster.height, 0,
                           FPDF_ANNOT | FPDF_LCD_TEXT | FPDF_NO_NATIVETEXT);
 
-    uint8_t* p = static_cast<uint8_t*>(FPDFBitmap_GetBuffer(bitmap));
-    auto stride = FPDFBitmap_GetStride(bitmap);
-    size_t l = static_cast<size_t>(bHeight * stride);
-
-    // BGRA to RGBA, and straight to premultiplied alpha: pdfium writes straight
-    // alpha, while ui.decodeImageFromPixels reads rgba8888 as premultiplied. It
-    // made no difference while every pixel was fully transparent, and none at
-    // all for the opaque default, but a partially transparent page was wrong.
-    for (auto y = 0; y < bHeight; y++) {
-      auto offset = y * stride;
-      for (auto x = 0; x < bWidth; x++) {
-        const auto b = p[offset];
-        const auto g = p[offset + 1];
-        const auto r = p[offset + 2];
-        const auto a = p[offset + 3];
-
-        if (a == 255) {
-          p[offset] = r;
-          p[offset + 2] = b;
-        } else {
-          p[offset] = static_cast<uint8_t>((r * a + 127) / 255);
-          p[offset + 1] = static_cast<uint8_t>((g * a + 127) / 255);
-          p[offset + 2] = static_cast<uint8_t>((b * a + 127) / 255);
-        }
-
-        offset += 4;
-      }
+    uint8_t* p = static_cast<uint8_t*>(FPDFBitmap_GetBuffer(bitmap.get()));
+    if (p == nullptr) {
+      on_page_raster_end(this, "Unable to read the rastered page");
+      return;
     }
 
-    on_page_rasterized(this, p, l, bWidth, bHeight);
+    nfet::bgraToPremultipliedRgba(p, raster.width, raster.height,
+                                  raster.stride);
 
-    FPDFBitmap_Destroy(bitmap);
-    FPDF_ClosePage(page);
+    on_page_rasterized(this, p, raster.bytes, raster.width, raster.height);
   }
-
-  FPDF_CloseDocument(doc);
-
-  release_pdfium();
 
   on_page_raster_end(this, nullptr);
 }

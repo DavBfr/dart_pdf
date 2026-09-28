@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import 'dart:typed_data';
+import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as im;
 import 'package:printing/printing.dart';
+import 'package:printing/src/method_channel.dart';
 
 void main() {
   setUp(TestWidgetsFlutterBinding.ensureInitialized);
@@ -68,5 +70,131 @@ void main() {
 
     await tester.pumpWidget(Image(image: PdfRasterImage(raster)));
     await tester.pumpAndSettle();
+  });
+
+  group('the raster stream', () {
+    const channel = MethodChannel('net.nfet.printing');
+    const codec = StandardMethodCodec();
+    late List<MethodCall> calls;
+
+    setUp(() {
+      calls = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall call) async {
+            calls.add(call);
+            return null;
+          });
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    });
+
+    Future<ByteData?> fromPlatform(String method, Object arguments) async {
+      ByteData? reply;
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage(
+            channel.name,
+            codec.encodeMethodCall(MethodCall(method, arguments)),
+            (ByteData? data) => reply = data,
+          );
+      return reply;
+    }
+
+    int job() => calls.last.arguments['job'] as int;
+
+    Future<void> sendPage(int index) =>
+        fromPlatform('onPageRasterized', <String, dynamic>{
+          'job': job(),
+          'width': 1,
+          'height': 1,
+          // One pixel, distinct per page, so order is observable.
+          'image': Uint8List.fromList(<int>[index, 0, 0, 0xff]),
+        });
+
+    Future<ByteData?> endRaster({String? error}) => fromPlatform(
+      'onPageRasterEnd',
+      <String, dynamic>{'job': job(), 'error': error},
+    );
+
+    test('pages delivered after the rasterPdf reply still arrive', () async {
+      // The reply used to mean 'the whole document has been rendered', because
+      // the desktop backends ran the loop inline in the method-call handler. It
+      // only means the job has started.
+      final received = <int>[];
+      final done = Completer<void>();
+
+      Printing.raster(Uint8List(0)).listen(
+        (PdfRaster page) => received.add(page.pixels.first),
+        onDone: done.complete,
+      );
+      await pumpEventQueue();
+      expect(calls, hasLength(1), reason: 'the request went out');
+
+      for (var i = 0; i < 3; i++) {
+        await sendPage(i);
+      }
+      await endRaster();
+      await done.future;
+
+      expect(received, <int>[0, 1, 2], reason: 'in order, none dropped');
+    });
+
+    test('a second end message is ignored', () async {
+      var closes = 0;
+      Printing.raster(Uint8List(0)).listen(null, onDone: () => closes++);
+      await pumpEventQueue();
+
+      await sendPage(0);
+      await endRaster();
+      await pumpEventQueue();
+
+      // A backend that reports twice must not raise 'Bad state'.
+      final reply = await endRaster();
+      await pumpEventQueue();
+
+      expect(closes, 1);
+      expect(() => codec.decodeEnvelope(reply!), returnsNormally);
+    });
+
+    test('an error ends the stream with that error', () async {
+      // What a page too large to raster now reports, instead of taking the
+      // whole process down with an access violation.
+      Object? error;
+      var closed = false;
+
+      Printing.raster(Uint8List(0)).listen(
+        null,
+        onError: (Object e) => error = e,
+        onDone: () => closed = true,
+      );
+      await pumpEventQueue();
+
+      await endRaster(error: 'Cannot raster a page this large');
+      await pumpEventQueue();
+
+      expect(error, 'Cannot raster a page this large');
+      expect(closed, isTrue);
+    });
+
+    test('a raster after a failed one gets its own job', () async {
+      Printing.raster(Uint8List(0)).listen(null, onError: (Object _) {});
+      await pumpEventQueue();
+      final first = job();
+      await endRaster(error: 'nope');
+      await pumpEventQueue();
+
+      Printing.raster(Uint8List(0)).listen(null, onError: (Object _) {});
+      await pumpEventQueue();
+      final second = job();
+
+      expect(second, isNot(first));
+      expect(MethodChannelPrinting.pendingJobs, 1);
+
+      await endRaster(error: 'nope');
+      await pumpEventQueue();
+      expect(MethodChannelPrinting.pendingJobs, 0, reason: 'nothing left over');
+    });
   });
 }
