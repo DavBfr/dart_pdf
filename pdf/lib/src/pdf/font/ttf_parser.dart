@@ -123,7 +123,7 @@ class TtfParser {
     final numTables = bytes.getUint16(4);
 
     for (var i = 0; i < numTables; i++) {
-      final name = utf8.decode(bytes.buffer.asUint8List(i * 16 + 12, 4));
+      final name = utf8.decode(_slice(i * 16 + 12, 4));
       final offset = bytes.getUint32(i * 16 + 20);
       final size = bytes.getUint32(i * 16 + 24);
       tableOffsets[name] = offset;
@@ -246,10 +246,7 @@ class TtfParser {
       if (platformID == 1 && nameID == fontNameID.index) {
         try {
           _fontName = utf8.decode(
-            bytes.buffer.asUint8List(
-              basePosition + stringOffset + offset,
-              length,
-            ),
+            _slice(basePosition + stringOffset + offset, length),
           );
         } catch (a) {
           print('Error: $platformID $nameID $a');
@@ -259,10 +256,7 @@ class TtfParser {
       if (platformID == 3 && nameID == fontNameID.index) {
         try {
           return _decodeUtf16(
-            bytes.buffer.asUint8List(
-              basePosition + stringOffset + offset,
-              length,
-            ),
+            _slice(basePosition + stringOffset + offset, length),
           );
         } catch (a) {
           print('Error: $platformID $nameID $a');
@@ -623,13 +617,40 @@ class TtfParser {
   }
 
   /// http://stevehanov.ca/blog/?id=143
+  /// The font's own bytes, exactly the view this parser was given.
+  ///
+  /// Every table offset in this class is relative to the start of that view, and
+  /// nothing reads or embeds a byte outside it.
+  Uint8List get fontData => _slice(0, bytes.lengthInBytes);
+
+  /// A table's bytes, in the view's own coordinates and clamped to it.
+  ///
+  /// For the subsetter, which copies whole tables out of the source font.
+  Uint8List tableBytes(int offset, int length) => _slice(offset, length);
+
+  /// A slice of the view, in the view's own coordinates.
+  ///
+  /// The accessors on [bytes] are view-relative but the reach-throughs to its
+  /// backing buffer were absolute, so a font handed over as a sliced ByteData
+  /// threw a FormatException decoding table tags, or silently parsed a shifted
+  /// window.
+  Uint8List _slice(int offset, int length) {
+    final start = bytes.offsetInBytes + offset;
+    final available = bytes.lengthInBytes - offset;
+    final clamped = length < 0
+        ? 0
+        : (length > available ? (available < 0 ? 0 : available) : length);
+
+    return Uint8List.view(bytes.buffer, start, clamped);
+  }
+
   /// A glyph's bytes, never more than `loca` says the glyph occupies.
   ///
   /// A malformed `loca`, or a reader that walks past the record, could otherwise
   /// hand back the following glyph's outline.
   Uint8List _glyphBytes(int glyph, int start, int end) {
     final length = math.min(end - start, glyphSizes[glyph]);
-    return Uint8List.view(bytes.buffer, start, length < 0 ? 0 : length);
+    return _slice(start, length);
   }
 
   TtfGlyphInfo readGlyph(int index) {
@@ -843,10 +864,7 @@ class TtfParser {
               final dataLen = bytes.getUint32(sbitOffset + 5);
 
               bitmapOffsets[glyph] = TtfBitmapInfo(
-                bytes.buffer.asUint8List(
-                  bytes.offsetInBytes + sbitOffset + 9,
-                  dataLen,
-                ),
+                _slice(sbitOffset + 9, dataLen),
                 height,
                 width,
                 bearingX,

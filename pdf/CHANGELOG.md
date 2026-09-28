@@ -14,6 +14,8 @@
 - A font with no `post` table is given a synthesised one, and a font with no `hmtx`, `head`, `maxp` or `hhea` fails with an exception naming the font and the table
 - **Fix every embedded subset dropping the hinting programs its glyph outlines call.** `cvt `, `fpgm`, `prep` and `gasp` are copied now, so a subset is no longer structurally invalid - its glyph programs called missing functions and indexed an absent control-value table, which shifted outlines on FreeType-based print paths and could stop a strict RIP loading them. Subsets grow a few KB
 - Fix the emitted sfnt binary-search fields, which were 256/2/96 where the spec requires 128/3/32, and the table directory, whose records were in layout order rather than the required ascending tag order
+- **Fix a font passed as a sliced `ByteData` being misparsed.** Every accessor was view-relative but the reach-throughs to the backing buffer were absolute, so `Font.ttf` over a view threw `FormatException: Missing extension byte` decoding the table tags, or silently parsed a shifted window. All of them are view-aware now, and `TtfParser.fontData` is a new getter returning exactly the view
+- **Fix a partial font view embedding the whole backing buffer** while `/Length1` described only the view - 1,093,112 bytes of stream for a `/Length1` of 93,112. A view now embeds byte-for-byte what the whole buffer would
 
 ## 3.13.2
 

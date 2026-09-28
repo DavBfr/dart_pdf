@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'ttf_parser.dart';
@@ -216,14 +215,13 @@ class TtfWriter {
       }
 
       final len = ttf.tableSize[tn]!;
-      // _wordAlign can round past the end of the file, so the copy is clamped
-      // and the padding is zeroed rather than read.
-      final available = ttf.bytes.buffer.lengthInBytes - start;
-      final copy = math.min(_wordAlign(len), math.max(available, 0));
+      // Sliced through the parser, so a font handed over as a view of a larger
+      // buffer copies its own bytes and not whatever precedes them. _wordAlign
+      // can also round past the end of the font, so the copy is clamped and the
+      // padding is zeroed rather than read.
+      final source = ttf.tableBytes(start, _wordAlign(len));
       final data = Uint8List(_wordAlign(len));
-      if (copy > 0) {
-        data.setRange(0, copy, ttf.bytes.buffer.asUint8List(start, copy));
-      }
+      data.setRange(0, source.length, source);
 
       tables[tn] = data;
       tablesLength[tn] = len;
@@ -269,11 +267,8 @@ class TtfWriter {
       final data = Uint8List(_wordAlign(len));
       final start = ttf.tableOffsets[TtfParser.post_table];
       if (start != null) {
-        final available = ttf.bytes.buffer.lengthInBytes - start;
-        final copy = math.min(_wordAlign(len), math.max(available, 0));
-        if (copy > 0) {
-          data.setRange(0, copy, ttf.bytes.buffer.asUint8List(start, copy));
-        }
+        final source = ttf.tableBytes(start, _wordAlign(len));
+        data.setRange(0, source.length, source);
       }
       // Version 3.0, no names. Synthesised outright when the source font has no
       // post table at all, which used to be a null-check error.

@@ -16,6 +16,7 @@
 
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/src/pdf/font/ttf_writer.dart';
@@ -194,6 +195,95 @@ void main() {
         if (reparsed.glyphSizes[g] == 0) {
           expect(reparsed.readGlyph(g).data, isEmpty);
         }
+      }
+    });
+  });
+
+  group('a sliced view', () {
+    /// The same font, as a view starting [pad] bytes into a larger buffer.
+    TtfParser padded(String name, int pad) {
+      final font = File('$name.ttf').readAsBytesSync();
+      final buffer = Uint8List(pad + font.length + 7)
+        // Something other than zeros in front, so a parse that ignores the
+        // offset reads nonsense rather than accidentally working.
+        ..fillRange(0, pad, 0x5A)
+        ..setRange(pad, pad + font.length, font);
+
+      return TtfParser(ByteData.view(buffer.buffer, pad, font.length));
+    }
+
+    test('parses identically to offset zero', () {
+      // Every accessor is view-relative but the reach-throughs to the backing
+      // buffer were absolute, so this threw a FormatException decoding table
+      // tags, or silently parsed a shifted window.
+      final base = TtfParser(
+        File('open-sans.ttf').readAsBytesSync().buffer.asByteData(),
+      );
+
+      for (final pad in <int>[1, 8, 4096]) {
+        final view = padded('open-sans', pad);
+
+        expect(view.fontName, base.fontName, reason: 'pad $pad');
+        expect(view.numGlyphs, base.numGlyphs, reason: 'pad $pad');
+        expect(view.tableOffsets, base.tableOffsets, reason: 'pad $pad');
+        expect(view.tableSize, base.tableSize, reason: 'pad $pad');
+        expect(
+          view.charToGlyphIndexMap,
+          base.charToGlyphIndexMap,
+          reason: 'pad $pad',
+        );
+      }
+    });
+
+    test('reads every glyph identically', () {
+      final base = TtfParser(
+        File('open-sans.ttf').readAsBytesSync().buffer.asByteData(),
+      );
+      final view = padded('open-sans', 8);
+
+      for (var g = 0; g < base.glyphOffsets.length; g++) {
+        expect(
+          view.readGlyph(g).data,
+          base.readGlyph(g).data,
+          reason: 'glyph $g',
+        );
+      }
+    });
+
+    test('subsets identically', () {
+      final base = TtfParser(
+        File('open-sans.ttf').readAsBytesSync().buffer.asByteData(),
+      );
+      final view = padded('open-sans', 4096);
+      const chars = <int>[0x41, 0x42, 0x61, 0x62, 0x20];
+
+      expect(
+        TtfWriter(view).withChars(chars),
+        TtfWriter(base).withChars(chars),
+      );
+    });
+
+    test('fontData is exactly the view', () {
+      final font = File('open-sans.ttf').readAsBytesSync();
+      final view = padded('open-sans', 8);
+
+      expect(view.fontData, hasLength(font.length));
+      expect(view.fontData, font);
+    });
+
+    test('an emoji font reads the same bitmaps', () {
+      final base = TtfParser(
+        File('emoji.ttf').readAsBytesSync().buffer.asByteData(),
+      );
+      final view = padded('emoji', 8);
+
+      expect(view.bitmapOffsets.keys, base.bitmapOffsets.keys);
+      for (final glyph in base.bitmapOffsets.keys) {
+        expect(
+          view.getBitmap(glyph)?.data,
+          base.getBitmap(glyph)?.data,
+          reason: 'glyph $glyph',
+        );
       }
     });
   });

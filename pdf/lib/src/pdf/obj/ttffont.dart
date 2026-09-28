@@ -111,7 +111,10 @@ class PdfTtfFont extends PdfFont {
     int charMin;
     int charMax;
 
-    file.buf.putBytes(font.bytes.buffer.asUint8List());
+    // The font's own bytes, not the whole backing buffer: a partial view used to
+    // embed everything behind it while /Length1 described only the view, so the
+    // two disagreed - 1,093,112 bytes of stream for a /Length1 of 93,112.
+    file.buf.putBytes(font.fontData);
     file.params['/Length1'] = PdfNum(font.bytes.lengthInBytes);
 
     params['/BaseFont'] = PdfName('/$fontName');

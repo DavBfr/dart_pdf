@@ -15,6 +15,7 @@
  */
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -85,5 +86,51 @@ void main() {
 
     final cid = await buildPdf('Hello World', simple: false);
     expect(cid, contains('/Flags 4'));
+  });
+
+  test('a partial view embeds only its own bytes', () async {
+    // The whole backing buffer used to be embedded while /Length1 described only
+    // the view, so the stream and the number that says how long it is disagreed:
+    // 1,093,112 bytes of font data for a /Length1 of 93,112.
+    final font = File('open-sans.ttf').readAsBytesSync();
+
+    Future<String> pdfFor(ByteData data) async {
+      final doc = pw.Document(compress: false, simpleTrueTypeFonts: true);
+      doc.addPage(
+        pw.Page(
+          build: (_) =>
+              pw.Text('Ab', style: pw.TextStyle(font: pw.Font.ttf(data))),
+        ),
+      );
+      return String.fromCharCodes(await doc.save());
+    }
+
+    // Just the embedded font: the rest of the document carries a random /ID.
+    String fontStream(String pdf) {
+      final start = pdf.indexOf('/Length1 ');
+      final end = pdf.indexOf('endstream', start);
+      expect(start, greaterThan(0));
+      expect(end, greaterThan(start));
+      return pdf.substring(start, end);
+    }
+
+    final buffer = Uint8List(64 + font.length)
+      ..fillRange(0, 64, 0x5A)
+      ..setRange(64, 64 + font.length, font);
+
+    final fromView = await pdfFor(
+      ByteData.view(buffer.buffer, 64, font.length),
+    );
+    final fromWhole = await pdfFor(font.buffer.asByteData());
+
+    expect(
+      fontStream(fromView),
+      fontStream(fromWhole),
+      reason: 'a view must embed exactly what the whole buffer embeds',
+    );
+
+    final declared = RegExp(r'/Length1 (\d+)').firstMatch(fromView);
+    expect(declared, isNotNull);
+    expect(int.parse(declared!.group(1)!), font.length);
   });
 }
