@@ -23,6 +23,7 @@ import '../font/bidi_utils.dart' as bidi;
 import '../font/font_metrics.dart';
 import '../font/ttf_parser.dart';
 import '../font/ttf_writer.dart';
+import '../font/win_ansi.dart' as win_ansi;
 import '../format/array.dart';
 import '../format/dict.dart';
 import '../format/name.dart';
@@ -122,8 +123,17 @@ class PdfTtfFont extends PdfFont {
     charMin = 32;
     charMax = 255;
     for (var i = charMin; i <= charMax; i++) {
+      // /Widths is indexed by byte code and the declared encoding is WinAnsi, so
+      // the glyph behind code 0x96 is U+2013, not the C1 control U+0096. Every
+      // code from 0x80 to 0x9F used to be measured as its control character,
+      // which no font has a glyph for, so all 32 widths came out zero.
+      final rune = win_ansi.runeOfCode[i];
       widthsObject.params.add(
-        PdfNum((glyphMetrics(i).advanceWidth * 1000.0).toInt()),
+        PdfNum(
+          rune == win_ansi.undefined
+              ? 0
+              : (glyphMetrics(rune).advanceWidth * 1000.0).toInt(),
+        ),
       );
     }
     params['/FirstChar'] = PdfNum(charMin);
@@ -222,6 +232,15 @@ class PdfTtfFont extends PdfFont {
 
   @override
   bool isRuneSupported(int charCode) {
+    // The simple /TrueType path writes one WinAnsi byte per rune, so a rune the
+    // encoding cannot name is unusable however well the font covers it - putText
+    // threw a FormatException out of save() on it. Reporting it unsupported lets
+    // the caller fall back to another font, or draw a placeholder, as it does
+    // for any other missing character.
+    if (!_useType0 && win_ansi.codeOfRune(charCode) == win_ansi.undefined) {
+      return false;
+    }
+
     return font.charToGlyphIndexMap.containsKey(charCode);
   }
 }
