@@ -79,26 +79,35 @@ class WidgetWrapper extends pw.ImageProvider {
     final wrappedWidget =
         key.currentContext!.findRenderObject() as RenderRepaintBoundary;
     final image = await wrappedWidget.toImage(pixelRatio: pixelRatio);
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
 
-    if (byteData == null) {
+    try {
+      final byteData = await image.toByteData(
+        format: ui.ImageByteFormat.rawRgba,
+      );
+
+      if (byteData == null) {
+        return WidgetWrapper._(
+          Uint8List(0),
+          0,
+          0,
+          PdfImageOrientation.topLeft,
+          dpi,
+        );
+      }
+
+      // A copy of the pixels, so it stays valid once the image is gone.
+      final imageData = byteData.buffer.asUint8List();
       return WidgetWrapper._(
-        Uint8List(0),
-        0,
-        0,
-        PdfImageOrientation.topLeft,
+        imageData,
+        image.width,
+        image.height,
+        orientation ?? PdfImageOrientation.topLeft,
         dpi,
       );
+    } finally {
+      // The full-resolution image was never released.
+      image.dispose();
     }
-
-    final imageData = byteData.buffer.asUint8List();
-    return WidgetWrapper._(
-      imageData,
-      image.width,
-      image.height,
-      orientation ?? PdfImageOrientation.topLeft,
-      dpi,
-    );
   }
 
   /// Wrap a Flutter Widget to an ImageProvider.
@@ -135,7 +144,9 @@ class WidgetWrapper extends pw.ImageProvider {
   }) async {
     assert(pixelRatio > 0);
 
-    if (!constraints.hasBoundedHeight || !constraints.hasBoundedHeight) {
+    // Both axes, not hasBoundedHeight twice: an unbounded width used to reach
+    // the block below and be reported as something else entirely.
+    if (!constraints.hasBoundedWidth || !constraints.hasBoundedHeight) {
       throw Exception(
         'Unable to convert an unbounded widget. Add maxWidth and maxHeight to the constraints.',
       );
@@ -143,32 +154,24 @@ class WidgetWrapper extends pw.ImageProvider {
 
     widget = ConstrainedBox(constraints: constraints, child: widget);
 
-    final prop = DiagnosticPropertiesBuilder();
-    widget.debugFillProperties(prop);
-
-    if (prop.properties.isEmpty) {
-      throw ErrorDescription('Unable to get the widget properties');
-    }
-
-    final computedConstraints = prop.properties
-        .whereType<DiagnosticsProperty<BoxConstraints>>()
-        .first
-        .value;
-
-    if (computedConstraints == null ||
-        !computedConstraints.hasBoundedWidth ||
-        !computedConstraints.hasBoundedWidth) {
-      throw Exception('Unable to convert an unbounded widget.');
-    }
+    // What stood here read the constraints back out of debug diagnostics -
+    // widget.debugFillProperties, then a throw when the property list came back
+    // empty. DiagnosticPropertiesBuilder.add is assert-guarded, so in any
+    // release or profile build that list is always empty and this always threw
+    // ErrorDescription('Unable to get the widget properties') before rendering
+    // anything. The value it recovered was provably the ConstrainedBox argument
+    // applied on the line above, which the check at the top of this method has
+    // already validated.
 
     final repaintBoundary = RenderRepaintBoundary();
+    final positionedBox = RenderPositionedBox(
+      alignment: Alignment.center,
+      child: repaintBoundary,
+    );
     final view = View.of(context);
 
     final renderView = RenderView(
-      child: RenderPositionedBox(
-        alignment: Alignment.center,
-        child: repaintBoundary,
-      ),
+      child: positionedBox,
       configuration: ViewConfiguration.fromView(view),
       view: view,
     );
@@ -176,37 +179,70 @@ class WidgetWrapper extends pw.ImageProvider {
     final pipelineOwner = PipelineOwner()..rootNode = renderView;
     renderView.prepareInitialFrame();
 
-    final buildOwner = BuildOwner(focusManager: FocusManager());
-    final rootElement = RenderObjectToWidgetAdapter<RenderBox>(
+    // FocusManager's constructor registers a WidgetsBinding observer on web and
+    // on every desktop platform, which only its dispose() removes, so every
+    // call used to add one permanently.
+    final focusManager = FocusManager();
+    final buildOwner = BuildOwner(focusManager: focusManager);
+    final adapter = RenderObjectToWidgetAdapter<RenderBox>(
       container: repaintBoundary,
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: IntrinsicHeight(child: IntrinsicWidth(child: widget)),
       ),
-    ).attachToRenderTree(buildOwner);
-
-    buildOwner
-      ..buildScope(rootElement)
-      ..finalizeTree();
-
-    pipelineOwner
-      ..flushLayout()
-      ..flushCompositingBits()
-      ..flushPaint();
-
-    final image = await repaintBoundary.toImage(pixelRatio: pixelRatio);
-    final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-    if (bytes == null) {
-      throw Exception('Unable to read image data');
-    }
-
-    return WidgetWrapper._(
-      bytes.buffer.asUint8List(),
-      image.width,
-      image.height,
-      orientation ?? PdfImageOrientation.topLeft,
-      dpi,
     );
+    final rootElement = adapter.attachToRenderTree(buildOwner);
+
+    ui.Image? image;
+
+    try {
+      buildOwner
+        ..buildScope(rootElement)
+        ..finalizeTree();
+
+      pipelineOwner
+        ..flushLayout()
+        ..flushCompositingBits()
+        ..flushPaint();
+
+      image = await repaintBoundary.toImage(pixelRatio: pixelRatio);
+      final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      if (bytes == null) {
+        throw Exception('Unable to read image data');
+      }
+
+      return WidgetWrapper._(
+        // A copy, so it stays valid once the image is gone.
+        bytes.buffer.asUint8List(),
+        image.width,
+        image.height,
+        orientation ?? PdfImageOrientation.topLeft,
+        dpi,
+      );
+    } finally {
+      // Nothing created here outlives this call, including when the capture
+      // throws - a widget that lays out to zero size makes toImage throw.
+      image?.dispose();
+
+      // Unmount the elements before disposing the render objects they point at:
+      // re-attach the adapter with no child, then let the build owner finish.
+      RenderObjectToWidgetAdapter<RenderBox>(
+        container: repaintBoundary,
+      ).attachToRenderTree(buildOwner, rootElement);
+      buildOwner
+        ..buildScope(rootElement)
+        ..finalizeTree();
+
+      pipelineOwner.rootNode = null;
+      renderView.child = null;
+      positionedBox.child = null;
+
+      repaintBoundary.dispose();
+      positionedBox.dispose();
+      renderView.dispose();
+      pipelineOwner.dispose();
+      focusManager.dispose();
+    }
   }
 
   /// The image data

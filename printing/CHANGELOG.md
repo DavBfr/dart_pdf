@@ -30,6 +30,7 @@
 - `DownloadableFont` is exported, so an app can use it for its own font URLs and set the fallback
 - Fix `flutterImageProvider` never completing when the pixel read-back fails, which on the web is what a `NetworkImage` served without CORS headers does: the preview span for ever, `layoutPdf` and `sharePdf` never fired, and no error reached the app. It now rejects with the read-back's own exception, and with a descriptive one naming the image size when the read-back yields no bytes
 - A `flutterImageProvider` load failure now rejects with the exception and its stack rather than the string 'image failed to load', and its listener is removed on every path
+- Requires pdf_widget_wrapper 1.0.5, in which `WidgetWrapper.fromWidget` works in release and profile builds instead of always throwing, and neither factory leaks its render pipeline or its captured image
 
 
 
