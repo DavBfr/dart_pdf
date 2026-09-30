@@ -619,6 +619,53 @@ void main() {
         expect(slice.angleEnd, slice.angleStart);
       }
     });
+
+    test('slice outlines stay on the circle', () async {
+      // Two equal slices are two 180-degree arcs, and a half circle is where the
+      // radii ratio rounds to an ULP over 1 and goes down bezierArc's scaling
+      // branch. That branch left the centre factor at 1.0 instead of 0, so the
+      // centre landed a whole radius away and the outline wandered off the
+      // circle - a corner of it 35pt inside a 150pt radius. It depends on how the
+      // ratio rounds, so the start angle is varied to catch it.
+      for (final startAngle in <double>[0, 0.3, 1, 2.5]) {
+        final grid = PieGrid(startAngle: startAngle);
+        final document = Document(compress: false);
+        document.addPage(
+          Page(
+            pageFormat: PdfPageFormat.a4,
+            build: (Context context) => SizedBox(
+              width: 300,
+              height: 300,
+              child: Chart(
+                grid: grid,
+                datasets: <PieDataSet>[
+                  PieDataSet(value: 1, color: PdfColors.blue),
+                  PieDataSet(value: 1, color: PdfColors.red),
+                ],
+              ),
+            ),
+          ),
+        );
+        final pdf = String.fromCharCodes(await document.save());
+
+        // Every bezier end point on a wedge is a point of the arc, so it sits at
+        // the radius from the centre the grid was translated to.
+        final ends = RegExp(
+          r'[-\d.]+ [-\d.]+ [-\d.]+ [-\d.]+ ([-\d.]+) ([-\d.]+) c(?![a-z])',
+        ).allMatches(pdf);
+
+        expect(ends.length, greaterThanOrEqualTo(4), reason: '$startAngle');
+        for (final end in ends) {
+          final x = double.parse(end.group(1)!);
+          final y = double.parse(end.group(2)!);
+          expect(
+            math.sqrt(x * x + y * y),
+            closeTo(grid.radius, 1e-4),
+            reason: 'start angle $startAngle, point ($x, $y)',
+          );
+        }
+      }
+    });
   });
 
   tearDownAll(() async {

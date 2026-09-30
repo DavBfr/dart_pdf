@@ -1017,12 +1017,19 @@ class PdfGraphics {
     final x1d = 0.5 * (x1 - x2);
     final y1d = 0.5 * (y1 - y2);
 
+    // One variable holds two different things in turn: first F.6.6's radii ratio,
+    // then F.6.5's centre factor. The out-of-range branch scaled the radii and
+    // then re-assigned the *ratio* without converting it, so it stayed 1.0 where
+    // it has to be 0 - and sqrt(1.0) put the centre a whole radius away from where
+    // it belongs, taking theta, dTheta and every emitted curve with it. Once the
+    // radii have been corrected the ellipse passes through both endpoints exactly,
+    // so the centre factor is zero.
     var r = x1d * x1d / (rx * rx) + y1d * y1d / (ry * ry);
     if (r > 1.0) {
       final rr = math.sqrt(r);
       rx *= rr;
       ry *= rr;
-      r = x1d * x1d / (rx * rx) + y1d * y1d / (ry * ry);
+      r = 0.0;
     } else if (r != 0.0) {
       r = 1.0 / r - 1.0;
     }
