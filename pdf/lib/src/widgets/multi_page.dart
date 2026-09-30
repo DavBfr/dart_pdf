@@ -66,6 +66,18 @@ mixin SpanningWidget on Widget {
 
   bool get hasMoreWidgets;
 
+  /// Whether [hasMoreWidgets] is an exact answer for the layout just performed.
+  ///
+  /// [MultiPage] lays a widget out with an unbounded height first, only to learn
+  /// how tall it would be; a widget that reports completion is laid out against
+  /// the height that is actually left instead, and asked afterwards whether
+  /// anything is still waiting. For a [Table] that turns quadratic output into
+  /// linear: it used to lay out every remaining row on every page.
+  ///
+  /// Opt in only when [hasMoreWidgets] is false exactly when the last layout
+  /// consumed the last of the content.
+  bool get reportsCompletion => false;
+
   /// Get unmodified mutable context object
   @protected
   WidgetContext saveContext();
@@ -409,7 +421,21 @@ class MultiPage extends Page {
         savedContext = child.cloneContext();
       }
 
-      child.layout(context, constraints, parentUsesSize: false);
+      // A child that reports completion is laid out against the height that is
+      // left, rather than probed with an unbounded one first just to learn how
+      // tall it would be. Asked before the layout, so only a widget that is
+      // itself spanning can opt in: a wrapper does not know what it contains
+      // until it has built, which is why canSpan below is still read afterwards.
+      final reportsCompletion =
+          child is SpanningWidget && child.canSpan && child.reportsCompletion;
+
+      child.layout(
+        context,
+        reportsCompletion
+            ? constraints.copyWith(maxHeight: offsetStart! - offsetEnd)
+            : constraints,
+        parentUsesSize: false,
+      );
       assert(child.box != null);
 
       final canSpan = child is SpanningWidget && child.canSpan;
@@ -417,7 +443,8 @@ class MultiPage extends Page {
       // What to do if the widget is too big for the page?
       // The tolerance keeps a child sized to exactly the available height from
       // being rejected by the last bit of floating-point noise.
-      if (offsetStart! - child.box!.height < offsetEnd - _fitEpsilon) {
+      if (offsetStart! - child.box!.height < offsetEnd - _fitEpsilon ||
+          (reportsCompletion && child.hasMoreWidgets)) {
         // If it is not a multi-page widget and it would fit on a page of its
         // own, we schedule a new page creation. A child that does not fit an
         // already empty page must not ask for another one: that never ends.

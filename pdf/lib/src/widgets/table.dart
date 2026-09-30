@@ -353,6 +353,11 @@ class Table extends Widget with SpanningWidget {
   @override
   bool get hasMoreWidgets => _context.lastLine < children.length;
 
+  /// [hasMoreWidgets] is exact after any layout, so MultiPage can skip its
+  /// unbounded probe.
+  @override
+  bool get reportsCompletion => true;
+
   /// The rows of the table.
   final List<TableRow> children;
 
@@ -364,6 +369,17 @@ class Table extends Widget with SpanningWidget {
 
   final List<double> _widths = <double>[];
   final List<double> _heights = <double>[];
+
+  /// The column widths from the last layout, and what they were computed for.
+  ///
+  /// The measure pass depends only on the incoming maxWidth, the theme and the
+  /// text direction, and it used to run again on every page: a MultiPage whose
+  /// body is one Table re-measured every cell for every page, which made output
+  /// quadratic in the row count - 2000 rows took the best part of a minute.
+  List<double>? _cachedWidths;
+  double? _cachedMaxWidth;
+  ThemeData? _cachedTheme;
+  TextDirection? _cachedDirection;
 
   final TableContext _context = TableContext();
 
@@ -387,114 +403,133 @@ class Table extends Widget with SpanningWidget {
     BoxConstraints constraints, {
     bool parentUsesSize = false,
   }) {
-    // Compute required width for all row/columns width flex
-    final flex = <double>[];
-    final mins = <double>[];
-    _widths.clear();
     _heights.clear();
+
+    final theme = Theme.of(context);
+    final direction = Directionality.of(context);
+    final cached = _cachedWidths;
     var index = 0;
 
-    for (final row in children) {
-      for (var index = 0; index < row.children.length; index++) {
-        final child = row.children[index];
-        final columnWidth = columnWidths?[index] ?? defaultColumnWidth;
-        final columnLayout = columnWidth.layout(child, context, constraints);
+    if (cached != null &&
+        _cachedMaxWidth == constraints.maxWidth &&
+        identical(_cachedTheme, theme) &&
+        _cachedDirection == direction) {
+      _widths
+        ..clear()
+        ..addAll(cached);
+    } else {
+      // Compute required width for all row/columns width flex
+      final flex = <double>[];
+      final mins = <double>[];
+      _widths.clear();
 
-        if (index >= flex.length) {
-          flex.add(columnLayout.flex);
-          _widths.add(columnLayout.width);
-          mins.add(columnLayout.minWidth);
-        } else {
-          if (columnLayout.flex > 0) {
-            flex[index] = math.max(flex[index], columnLayout.flex);
+      for (final row in children) {
+        for (var index = 0; index < row.children.length; index++) {
+          final child = row.children[index];
+          final columnWidth = columnWidths?[index] ?? defaultColumnWidth;
+          final columnLayout = columnWidth.layout(child, context, constraints);
+
+          if (index >= flex.length) {
+            flex.add(columnLayout.flex);
+            _widths.add(columnLayout.width);
+            mins.add(columnLayout.minWidth);
+          } else {
+            if (columnLayout.flex > 0) {
+              flex[index] = math.max(flex[index], columnLayout.flex);
+            }
+            _widths[index] = math.max(_widths[index], columnLayout.width);
+            mins[index] = math.max(mins[index], columnLayout.minWidth);
           }
-          _widths[index] = math.max(_widths[index], columnLayout.width);
-          mins[index] = math.max(mins[index], columnLayout.minWidth);
         }
       }
+
+      final maxWidth = _widths.fold(0.0, (sum, element) => sum + element);
+
+      // Compute column widths using flex and estimated width
+      if (_widths.isNotEmpty && constraints.hasBoundedWidth) {
+        final totalFlex = flex.reduce((double? a, double? b) => a! + b!);
+        var flexSpace = 0.0;
+
+        if (maxWidth > 0) {
+          // The narrowest the inflexible columns can be, and the widest they want.
+          var totalMin = 0.0;
+          var totalMax = 0.0;
+          for (var n = 0; n < _widths.length; n++) {
+            if (flex[n] == 0.0) {
+              totalMin += mins[n];
+              totalMax += _widths[n];
+            }
+          }
+
+          // CSS automatic table layout. Every column used to be rescaled by the
+          // same factor with no per-column floor, so an overflowing table squeezed
+          // a short column below the width of one word and the cell hard-split it:
+          // 'ATLANTICA' came out as ATLANTI then CA. Now each column keeps at least
+          // what its longest word needs, and what is left over is shared in
+          // proportion to how much more each column wanted.
+          final available = constraints.maxWidth;
+          final overflowing = totalMax > available && totalMin < totalMax;
+
+          for (var n = 0; n < _widths.length; n++) {
+            if (flex[n] != 0.0) {
+              continue;
+            }
+
+            final double newWidth;
+            if (!overflowing) {
+              newWidth = _widths[n] / maxWidth * available;
+            } else if (totalMin <= available) {
+              newWidth =
+                  mins[n] +
+                  (_widths[n] - mins[n]) *
+                      (available - totalMin) /
+                      (totalMax - totalMin);
+            } else {
+              // Not even the minimums fit: they are scaled down together, which is
+              // the only thing left that keeps the widths summing to the width
+              // there is.
+              newWidth = mins[n] / totalMin * available;
+            }
+
+            if ((tableWidth == TableWidth.max && totalFlex == 0.0) ||
+                newWidth < _widths[n]) {
+              _widths[n] = newWidth;
+            }
+            flexSpace += _widths[n];
+          }
+        } else if (tableWidth == TableWidth.max && totalFlex == 0.0) {
+          // Every column measured zero, so there is nothing to scale in
+          // proportion: the division was 0.0/0.0 and the NaN landed in the widths,
+          // in the table box, in every cell box and in drawRect. There is still an
+          // available width to fill, so it is shared out evenly. TableWidth.min
+          // and the flex path keep width 0, as they did.
+          final even = constraints.maxWidth / _widths.length;
+          for (var n = 0; n < _widths.length; n++) {
+            _widths[n] = even;
+            flexSpace += even;
+          }
+        }
+        final spacePerFlex = totalFlex > 0.0
+            ? ((constraints.maxWidth - flexSpace) / totalFlex)
+            : double.nan;
+
+        for (var n = 0; n < _widths.length; n++) {
+          if (flex[n] > 0.0) {
+            final newWidth = spacePerFlex * flex[n];
+            _widths[n] = newWidth;
+          }
+        }
+      }
+
+      _cachedWidths = List<double>.of(_widths);
+      _cachedMaxWidth = constraints.maxWidth;
+      _cachedTheme = theme;
+      _cachedDirection = direction;
     }
 
     if (_widths.isEmpty) {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
       return;
-    }
-
-    final maxWidth = _widths.fold(0.0, (sum, element) => sum + element);
-
-    // Compute column widths using flex and estimated width
-    if (constraints.hasBoundedWidth) {
-      final totalFlex = flex.reduce((double? a, double? b) => a! + b!);
-      var flexSpace = 0.0;
-
-      if (maxWidth > 0) {
-        // The narrowest the inflexible columns can be, and the widest they want.
-        var totalMin = 0.0;
-        var totalMax = 0.0;
-        for (var n = 0; n < _widths.length; n++) {
-          if (flex[n] == 0.0) {
-            totalMin += mins[n];
-            totalMax += _widths[n];
-          }
-        }
-
-        // CSS automatic table layout. Every column used to be rescaled by the
-        // same factor with no per-column floor, so an overflowing table squeezed
-        // a short column below the width of one word and the cell hard-split it:
-        // 'ATLANTICA' came out as ATLANTI then CA. Now each column keeps at least
-        // what its longest word needs, and what is left over is shared in
-        // proportion to how much more each column wanted.
-        final available = constraints.maxWidth;
-        final overflowing = totalMax > available && totalMin < totalMax;
-
-        for (var n = 0; n < _widths.length; n++) {
-          if (flex[n] != 0.0) {
-            continue;
-          }
-
-          final double newWidth;
-          if (!overflowing) {
-            newWidth = _widths[n] / maxWidth * available;
-          } else if (totalMin <= available) {
-            newWidth =
-                mins[n] +
-                (_widths[n] - mins[n]) *
-                    (available - totalMin) /
-                    (totalMax - totalMin);
-          } else {
-            // Not even the minimums fit: they are scaled down together, which is
-            // the only thing left that keeps the widths summing to the width
-            // there is.
-            newWidth = mins[n] / totalMin * available;
-          }
-
-          if ((tableWidth == TableWidth.max && totalFlex == 0.0) ||
-              newWidth < _widths[n]) {
-            _widths[n] = newWidth;
-          }
-          flexSpace += _widths[n];
-        }
-      } else if (tableWidth == TableWidth.max && totalFlex == 0.0) {
-        // Every column measured zero, so there is nothing to scale in
-        // proportion: the division was 0.0/0.0 and the NaN landed in the widths,
-        // in the table box, in every cell box and in drawRect. There is still an
-        // available width to fill, so it is shared out evenly. TableWidth.min
-        // and the flex path keep width 0, as they did.
-        final even = constraints.maxWidth / _widths.length;
-        for (var n = 0; n < _widths.length; n++) {
-          _widths[n] = even;
-          flexSpace += even;
-        }
-      }
-      final spacePerFlex = totalFlex > 0.0
-          ? ((constraints.maxWidth - flexSpace) / totalFlex)
-          : double.nan;
-
-      for (var n = 0; n < _widths.length; n++) {
-        if (flex[n] > 0.0) {
-          final newWidth = spacePerFlex * flex[n];
-          _widths[n] = newWidth;
-        }
-      }
     }
 
     final totalWidth = _widths.fold(0.0, (sum, element) => sum + element);

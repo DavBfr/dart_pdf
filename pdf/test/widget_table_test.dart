@@ -628,8 +628,138 @@ void main() {
     });
   });
 
+  group('the column measure pass', () {
+    test('runs once, not once per page', () async {
+      // Table cleared its widths and re-measured every cell on every pass, though
+      // the result depends only on maxWidth, the theme and the direction. A
+      // MultiPage whose body is one Table therefore re-measured the whole table
+      // for every page, which made output quadratic in the row count.
+      _CountingCell.unbounded = 0;
+
+      final pdf = Document();
+      pdf.addPage(
+        MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          build: (Context context) => <Widget>[
+            Table(
+              children: <TableRow>[
+                for (var row = 0; row < 200; row++)
+                  TableRow(
+                    children: <Widget>[
+                      for (var column = 0; column < 5; column++)
+                        _CountingCell(),
+                    ],
+                  ),
+              ],
+            ),
+          ],
+        ),
+      );
+      await pdf.save();
+
+      // One maximum and one minimum per cell, and no more however many pages
+      // the table takes.
+      expect(_CountingCell.unbounded, 200 * 5 * 2);
+      expect(pdf.document.pdfPageList.pages.length, greaterThan(1));
+    });
+
+    test('is keyed on the width it was measured for', () async {
+      // The same instance on two pages of different widths must get the widths
+      // each page calls for.
+      final table = Table(
+        children: <TableRow>[
+          TableRow(children: <Widget>[Text('a'), Text('b')]),
+        ],
+      );
+
+      final widths = <double>[];
+      for (final width in <double>[400, 200, 400]) {
+        final document = Document();
+        document.addPage(
+          Page(
+            pageFormat: PdfPageFormat(width, 200, marginAll: 0),
+            build: (Context context) => table,
+          ),
+        );
+        await document.save();
+        widths.add(table.box!.width);
+      }
+
+      expect(widths, <double>[400, 200, 400]);
+    });
+
+    test('a table that ends mid-page leaves room for what follows', () async {
+      final pdf = Document();
+      pdf.addPage(
+        MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          build: (Context context) => <Widget>[
+            Text('before'),
+            Table(
+              children: <TableRow>[
+                for (var row = 0; row < 5; row++)
+                  TableRow(children: <Widget>[Text('row $row')]),
+              ],
+            ),
+            Text('after'),
+          ],
+        ),
+      );
+      await pdf.save();
+
+      expect(pdf.document.pdfPageList.pages.length, 1);
+    });
+
+    test('a repeating header still appears on every page', () async {
+      final pdf = Document(compress: false);
+      pdf.addPage(
+        MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          header: (Context context) => Text('header'),
+          footer: (Context context) => Text('footer'),
+          build: (Context context) => <Widget>[
+            TableHelper.fromTextArray(
+              headers: <String>['a', 'b'],
+              data: <List<String>>[
+                for (var row = 0; row < 120; row++)
+                  <String>['$row', 'value $row'],
+              ],
+            ),
+          ],
+        ),
+      );
+      final bytes = await pdf.save();
+
+      final pages = pdf.document.pdfPageList.pages.length;
+      expect(pages, greaterThan(1));
+
+      // The repeated header row, once per page.
+      expect(
+        RegExp(r'\[\(a\)\]TJ').allMatches(String.fromCharCodes(bytes)),
+        hasLength(pages),
+      );
+    });
+  });
+
   tearDownAll(() async {
     final file = File('widgets-table.pdf');
     await file.writeAsBytes(await pdf.save());
   });
+}
+
+/// A cell that counts how often it is laid out with an unbounded width.
+class _CountingCell extends Widget {
+  static int unbounded = 0;
+
+  @override
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
+    if (!constraints.hasBoundedWidth) {
+      unbounded++;
+    }
+    box = PdfRect.fromPoints(PdfPoint.zero, const PdfPoint(20, 10));
+  }
 }
