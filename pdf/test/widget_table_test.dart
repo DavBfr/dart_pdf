@@ -326,6 +326,94 @@ void main() {
     expect(table.box!.height, closeTo(3 * 16.341796875, 0.001));
   });
 
+  group('a decorated row', () {
+    Future<String> build(List<TableRow> rows) async {
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: PdfPageFormat.a4,
+          build: (Context context) => Table(children: rows),
+        ),
+      );
+      return String.fromCharCodes(await document.save());
+    }
+
+    TableRow cells(List<String> texts, {BoxDecoration? decoration}) => TableRow(
+      decoration: decoration,
+      children: <Widget>[for (final text in texts) Text(text)],
+    );
+
+    /// Every `re` rectangle, as 'x,y wxh'.
+    List<String> rects(String pdf) =>
+        RegExp(r'([-\d.]+) ([-\d.]+) ([-\d.]+) ([-\d.]+) re')
+            .allMatches(pdf)
+            .map(
+              (RegExpMatch m) =>
+                  '${m.group(1)},${m.group(2)} ${m.group(3)}x${m.group(4)}',
+            )
+            .toList();
+
+    const grey = BoxDecoration(color: PdfColors.grey);
+
+    test('with no children paints a zero-height band', () async {
+      // Both decoration phases seeded the band as y = infinity, h = 0 and lowered
+      // y only inside the children loop, so a row with an empty children list
+      // left y infinite: the stream carried '0 Infinity <w> 0 re' and poppler
+      // dropped everything drawn after it.
+      final pdf = await build(<TableRow>[
+        cells(<String>['a', 'b']),
+        TableRow(decoration: grey, children: const <Widget>[]),
+        cells(<String>['c', 'd']),
+      ]);
+
+      expect(pdf, isNot(contains('Infinity')));
+      expect(pdf, isNot(contains('NaN')));
+
+      // The band sits where layout put the row, with the height layout gave it.
+      expect(rects(pdf), contains('0,13.872 481.88976x0'));
+
+      // And the rows after it are still drawn.
+      expect(
+        RegExp(
+          r'\[\((\w+)\)\]TJ',
+        ).allMatches(pdf).map((RegExpMatch m) => m.group(1)).toList(),
+        <String>['a', 'b', 'c', 'd'],
+      );
+    });
+
+    test('with children is unchanged', () async {
+      final pdf = await build(<TableRow>[
+        cells(<String>['a', 'b'], decoration: grey),
+        cells(<String>['c', 'd'], decoration: grey),
+      ]);
+
+      // The two decoration bands, which are the only full-width rectangles in
+      // the table's own coordinates. The debug paint adds its own boxes.
+      expect(
+        rects(
+          pdf,
+        ).where((String r) => r.endsWith(' 481.88976x13.872')).toList(),
+        <String>['0,13.872 481.88976x13.872', '0,0 481.88976x13.872'],
+      );
+    });
+
+    test('an empty row with no decoration is unchanged', () async {
+      final pdf = await build(<TableRow>[
+        cells(<String>['a', 'b']),
+        TableRow(children: const <Widget>[]),
+        cells(<String>['c', 'd']),
+      ]);
+
+      expect(pdf, isNot(contains('Infinity')));
+      expect(
+        RegExp(
+          r'\[\((\w+)\)\]TJ',
+        ).allMatches(pdf).map((RegExpMatch m) => m.group(1)).toList(),
+        <String>['a', 'b', 'c', 'd'],
+      );
+    });
+  });
+
   tearDownAll(() async {
     final file = File('widgets-table.pdf');
     await file.writeAsBytes(await pdf.save());

@@ -545,21 +545,17 @@ class Table extends Widget with SpanningWidget {
       ..setTransform(mat);
 
     var index = 0;
+    var heightIndex = 0;
+    var yTop = box!.height;
     for (final row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
 
       if (row.decoration != null) {
-        var y = double.infinity;
-        var h = 0.0;
-        for (final child in row.children) {
-          y = math.min(y, child.box!.bottom);
-          h = math.max(h, child.box!.height);
-        }
         row.decoration!.paint(
           context,
-          PdfRect(0, y, box!.width, h),
+          _rowBand(row.children, yTop, heightIndex),
           PaintPhase.background,
         );
       }
@@ -580,24 +576,22 @@ class Table extends Widget with SpanningWidget {
       if (index >= _context.lastLine) {
         break;
       }
+      yTop -= _getHeight(heightIndex);
+      heightIndex++;
     }
 
     index = 0;
+    heightIndex = 0;
+    yTop = box!.height;
     for (final row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
 
       if (row.decoration != null) {
-        var y = double.infinity;
-        var h = 0.0;
-        for (final child in row.children) {
-          y = math.min(y, child.box!.bottom);
-          h = math.max(h, child.box!.height);
-        }
         row.decoration!.paint(
           context,
-          PdfRect(0, y, box!.width, h),
+          _rowBand(row.children, yTop, heightIndex),
           PaintPhase.foreground,
         );
       }
@@ -605,6 +599,8 @@ class Table extends Widget with SpanningWidget {
       if (index >= _context.lastLine) {
         break;
       }
+      yTop -= _getHeight(heightIndex);
+      heightIndex++;
     }
 
     context.canvas.restoreContext();
@@ -612,6 +608,29 @@ class Table extends Widget with SpanningWidget {
     if (border != null) {
       border!.paintTable(context, box!, _widths, _heights);
     }
+  }
+
+  /// The band row [heightIndex] fills, in the table's own coordinates.
+  ///
+  /// Both decoration phases used to seed the band as y = infinity, h = 0 and
+  /// lower y only inside the children loop, so a row with an empty children list
+  /// left y infinite: the stream carried `0 Infinity <w> 0 re` and poppler
+  /// dropped everything drawn after it. Layout already treats such a row as a
+  /// legal zero-height band, and [top] is where that band sits.
+  PdfRect _rowBand(List<Widget> cells, double top, int heightIndex) {
+    var y = double.infinity;
+    var h = 0.0;
+
+    for (final cell in cells) {
+      y = math.min(y, cell.box!.bottom);
+      h = math.max(h, cell.box!.height);
+    }
+
+    if (!y.isFinite || !h.isFinite) {
+      return PdfRect(0, top - _getHeight(heightIndex), box!.width, 0);
+    }
+
+    return PdfRect(0, y, box!.width, h);
   }
 
   double _getHeight(int heightIndex) {
