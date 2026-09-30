@@ -32,23 +32,48 @@ class PieGrid extends ChartGrid {
 
     final _gridBox = PdfRect(0, 0, size.x, size.y);
 
+    final slices = <PieDataSet>[];
     var _total = 0.0;
 
     for (final dataset in datasets) {
       assert(dataset is PieDataSet, 'Use only PieDataset with a PieGrid');
       if (dataset is PieDataSet) {
-        _total += dataset.value;
+        slices.add(dataset);
+        // A negative or non-finite value is not a share of anything.
+        if (dataset.value.isFinite && dataset.value > 0) {
+          _total += dataset.value;
+        }
       }
     }
 
-    final unit = pi / _total * 2;
-    var angle = startAngle;
-
-    for (final dataset in datasets) {
-      if (dataset is PieDataSet) {
-        dataset.angleStart = angle;
-        angle += dataset.value * unit;
-        dataset.angleEnd = angle;
+    if (_total <= 0 || !_total.isFinite) {
+      // No data. `pi / _total * 2` was Infinity, so `value * unit` was 0 *
+      // Infinity = NaN, every slice got NaN bearings, and the arc's guards are
+      // all false for NaN: the sweep count reached .ceil() and threw
+      // 'Unsupported operation: Infinity or NaN toInt' out of save(), losing the
+      // whole document. The slices are empty, but spread around the circle so
+      // their legends do not stack on the start angle.
+      final step = slices.isEmpty ? 0.0 : pi * 2 / slices.length;
+      for (var i = 0; i < slices.length; i++) {
+        final at = startAngle + i * step;
+        slices[i]
+          ..angleStart = at
+          ..angleEnd = at;
+      }
+    } else {
+      // Each boundary comes from the running sum rather than from an accumulated
+      // step, so the last one is exactly startAngle + 2*pi. Accumulating left a
+      // single slice's sweep one ULP short of a full turn for about one value in
+      // twenty - 87.5, 75, 150, 350 among them - and the exact full-circle test
+      // then took the wedge branch, whose two endpoints coincide, so the chart
+      // came out blank with no error at all.
+      var accumulated = 0.0;
+      for (final dataset in slices) {
+        dataset.angleStart = startAngle + accumulated / _total * pi * 2;
+        if (dataset.value.isFinite && dataset.value > 0) {
+          accumulated += dataset.value;
+        }
+        dataset.angleEnd = startAngle + accumulated / _total * pi * 2;
       }
     }
 
@@ -184,7 +209,18 @@ class PieDataSet extends Dataset {
   PdfPoint? _legendPivot;
   PdfPoint? _legendStart;
 
-  bool get _isFullCircle => angleEnd - angleStart >= pi * 2;
+  /// Whether this slice covers the whole circle.
+  ///
+  /// [angleStart] and [angleEnd] are public and mutable, so a caller can leave a
+  /// sweep a hair under a full turn; an exact test sent it to the wedge branch,
+  /// which draws nothing when its two endpoints coincide.
+  bool get _isFullCircle => angleEnd - angleStart >= pi * 2 - 1e-9;
+
+  /// Whether this slice has no sweep, so there is nothing to draw for it.
+  bool get _isEmpty {
+    final sweep = angleEnd - angleStart;
+    return !sweep.isFinite || sweep.abs() < 1e-9;
+  }
 
   @override
   void layout(
@@ -404,7 +440,7 @@ class PieDataSet extends Dataset {
   void paintBackground(Context context) {
     super.paint(context);
 
-    if (drawSurface) {
+    if (drawSurface && !_isEmpty) {
       _paintShape(context);
       if (surfaceOpacity != 1) {
         context.canvas
@@ -426,7 +462,7 @@ class PieDataSet extends Dataset {
   void paint(Context context) {
     super.paint(context);
 
-    if (drawBorder) {
+    if (drawBorder && !_isEmpty) {
       _paintShape(context);
       context.canvas
         ..setLineWidth(borderWidth)

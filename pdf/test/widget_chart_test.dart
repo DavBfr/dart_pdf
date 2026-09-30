@@ -15,6 +15,7 @@
  */
 
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
@@ -476,6 +477,147 @@ void main() {
       expect(y.axisPosition.isFinite, isTrue);
       expect(pdf, isNot(contains('NaN')));
       expect(pdf, isNot(contains('Infinity')));
+    });
+  });
+
+  group('a pie chart', () {
+    /// Lay the datasets out in a 300x300 box and return the raw PDF.
+    Future<String> build(
+      List<PieDataSet> datasets, {
+      double startAngle = 0,
+    }) async {
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: PdfPageFormat.a4,
+          build: (Context context) => SizedBox(
+            width: 300,
+            height: 300,
+            child: Chart(
+              grid: PieGrid(startAngle: startAngle),
+              datasets: datasets,
+            ),
+          ),
+        ),
+      );
+      return String.fromCharCodes(await document.save());
+    }
+
+    /// How many bezier segments the stream draws.
+    int beziers(String pdf) => RegExp(r'[\d.] c ').allMatches(pdf).length;
+
+    test('of one slice closes the circle whatever the value', () async {
+      // The bearings were accumulated as angle += value * (pi / total * 2), and
+      // the two roundings left a single slice one ULP short of a full turn for
+      // about one value in twenty. The full-circle test was exact, so those went
+      // to the wedge branch, whose two endpoints coincide - the arc returns early
+      // and the chart came out blank, with no error and no log.
+      for (final value in <double>[
+        1,
+        7,
+        10,
+        33,
+        37.5,
+        75,
+        87.5,
+        100,
+        150,
+        350,
+        1 / 3,
+      ]) {
+        final slice = PieDataSet(value: value, color: PdfColors.blue);
+        final pdf = await build(<PieDataSet>[slice]);
+
+        expect(
+          slice.angleEnd - slice.angleStart,
+          closeTo(math.pi * 2, 1e-12),
+          reason: 'value $value',
+        );
+        expect(
+          beziers(pdf),
+          greaterThanOrEqualTo(4),
+          reason: 'value $value draws a full ellipse',
+        );
+      }
+    });
+
+    test('of one donut slice, and of a slice plus an empty one', () async {
+      final donut = await build(<PieDataSet>[
+        PieDataSet(value: 87.5, color: PdfColors.blue, innerRadius: 40),
+      ]);
+      expect(beziers(donut), greaterThanOrEqualTo(8));
+
+      final full = PieDataSet(value: 100, color: PdfColors.blue);
+      final empty = PieDataSet(value: 0, color: PdfColors.red);
+      final pdf = await build(<PieDataSet>[full, empty]);
+
+      expect(full.angleEnd - full.angleStart, closeTo(math.pi * 2, 1e-12));
+      expect(empty.angleEnd - empty.angleStart, 0);
+      expect(beziers(pdf), greaterThanOrEqualTo(4));
+    });
+
+    test('of three slices closes the circle from its start angle', () async {
+      final slices = <PieDataSet>[
+        for (var i = 0; i < 3; i++)
+          PieDataSet(value: 1 / 3, color: PdfColors.blue),
+      ];
+      await build(slices, startAngle: 1);
+
+      expect(slices.last.angleEnd, closeTo(1 + math.pi * 2, 1e-12));
+      expect(slices.first.angleStart, 1);
+      for (var i = 1; i < slices.length; i++) {
+        expect(
+          slices[i].angleStart,
+          greaterThanOrEqualTo(slices[i - 1].angleStart),
+          reason: 'the boundaries stay in order',
+        );
+      }
+    });
+
+    test('with nothing to show saves instead of throwing', () async {
+      // `pi / total * 2` was Infinity for a zero total, so `value * unit` was
+      // 0 * Infinity = NaN, every bearing was NaN, and the arc's guards are all
+      // false for NaN: the sweep count reached .ceil() and threw 'Unsupported
+      // operation: Infinity or NaN toInt' out of save(), losing the document.
+      for (final entry in <String, List<double>>{
+        'all zero': <double>[0, 0],
+        'one zero': <double>[0],
+        'cancelling out': <double>[-2, 2],
+        'not a number': <double>[double.nan, 1],
+        'infinite': <double>[double.infinity, 1],
+      }.entries) {
+        for (final innerRadius in <double>[0, 30]) {
+          final pdf = await build(<PieDataSet>[
+            for (final value in entry.value)
+              PieDataSet(
+                value: value,
+                color: PdfColors.blue,
+                innerRadius: innerRadius,
+              ),
+          ]);
+
+          final label = '${entry.key}, innerRadius $innerRadius';
+          expect(pdf, isNot(contains('NaN')), reason: label);
+          expect(pdf, isNot(contains('Infinity')), reason: label);
+        }
+      }
+    });
+
+    test('draws no slice at all when there is no data', () async {
+      final slices = <PieDataSet>[
+        PieDataSet(value: 0, color: PdfColors.blue),
+        PieDataSet(value: 0, color: PdfColors.red),
+      ];
+      final pdf = await build(slices);
+
+      expect(beziers(pdf), 0, reason: 'no wedge and no border');
+
+      // The legends are still spread around the circle rather than stacked.
+      expect(slices.first.angleStart, isNot(slices.last.angleStart));
+      for (final slice in slices) {
+        expect(slice.angleStart.isFinite, isTrue);
+        expect(slice.angleEnd, slice.angleStart);
+      }
     });
   });
 
