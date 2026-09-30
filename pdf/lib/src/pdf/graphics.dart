@@ -700,13 +700,26 @@ class PdfGraphics {
   }
 
   /// Sets the color for drawing
+  /// Sets both the fill and the stroke color for drawing
+  ///
+  /// A null colour leaves both alone and writes nothing.
   void setColor(PdfColor? color) {
     setFillColor(color);
     setStrokeColor(color);
   }
 
   /// Sets the fill color for drawing
+  ///
+  /// A null colour leaves the current fill colour alone and writes nothing. The
+  /// signature has always accepted one, and the verbose diagnostics already used
+  /// `color?.toHex()`, but null fell into the RGB branch - 'null is PdfColorCmyk'
+  /// is false - and was dereferenced there, throwing 'Null check operator used on
+  /// a null value' while the document was being built.
   void setFillColor(PdfColor? color) {
+    if (color == null) {
+      return;
+    }
+
     var o = 0;
     assert(() {
       if (_page.settings.verbose) {
@@ -726,7 +739,7 @@ class PdfGraphics {
       _buf.putString(' k ');
     } else {
       PdfNumList(<double>[
-        color!.red,
+        color.red,
         color.green,
         color.blue,
       ]).output(_page, _buf);
@@ -736,7 +749,7 @@ class PdfGraphics {
     assert(() {
       if (_page.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
-        _buf.putComment('setFillColor(${color?.toHex()})');
+        _buf.putComment('setFillColor(${color.toHex()})');
       }
       return true;
     }());
@@ -744,6 +757,10 @@ class PdfGraphics {
 
   /// Sets the stroke color for drawing
   void setStrokeColor(PdfColor? color) {
+    if (color == null) {
+      return;
+    }
+
     var o = 0;
     assert(() {
       if (_page.settings.verbose) {
@@ -763,7 +780,7 @@ class PdfGraphics {
       _buf.putString(' K ');
     } else {
       PdfNumList(<double>[
-        color!.red,
+        color.red,
         color.green,
         color.blue,
       ]).output(_page, _buf);
@@ -773,7 +790,7 @@ class PdfGraphics {
     assert(() {
       if (_page.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
-        _buf.putComment('setStrokeColor(${color?.toHex()})');
+        _buf.putComment('setStrokeColor(${color.toHex()})');
       }
       return true;
     }());
