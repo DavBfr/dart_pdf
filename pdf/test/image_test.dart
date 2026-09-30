@@ -20,6 +20,18 @@ import 'package:image/image.dart' as im;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/src/priv.dart';
 import 'package:pdf/widgets.dart'
+    as pw
+    show
+        BoxConstraints,
+        BoxFit,
+        ConstrainedBox,
+        Container,
+        Document,
+        Image,
+        Page,
+        RawImage,
+        Widget;
+import 'package:pdf/widgets.dart'
     show Context, ImageImage, ImageProvider, MemoryImage;
 import 'package:test/test.dart';
 
@@ -233,6 +245,104 @@ void main() {
     );
 
     expect(provider.lastRequestedWidth, isNull);
+  });
+
+  group('an Image widget', () {
+    /// A solid [width] x [height] bitmap.
+    ImageProvider bitmap(int width, int height) => pw.RawImage(
+      bytes: Uint32List(width * height).buffer.asUint8List(),
+      width: width,
+      height: height,
+    );
+
+    /// Lay [child] out on a page and hand back the widget.
+    Future<T> layOut<T extends pw.Widget>(T Function() child) async {
+      late T widget;
+      final document = pw.Document();
+      document.addPage(
+        pw.Page(
+          pageFormat: const PdfPageFormat(400, 300, marginAll: 0),
+          build: (Context context) => widget = child(),
+        ),
+      );
+      await document.save();
+      return widget;
+    }
+
+    test('an explicit width is clamped by a tight parent', () async {
+      // An explicit size was used verbatim, so the box could come out bigger than
+      // the slot: inside a 100x100 container this measured 200x100.
+      final image = await layOut(() => pw.Image(bitmap(100, 50), width: 400));
+      expect(image.box!.width, 400, reason: 'unconstrained, it is 400 wide');
+
+      late pw.Image inside;
+      await layOut(
+        () => pw.Container(
+          width: 100,
+          height: 100,
+          child: inside = pw.Image(bitmap(100, 50), width: 400),
+        ),
+      );
+
+      expect(inside.box!.width, 100);
+      expect(inside.box!.height, 50, reason: 'the aspect ratio is kept');
+    });
+
+    test('never exceeds its constraints, for any fit', () async {
+      for (final fit in pw.BoxFit.values) {
+        for (final entry in <String, pw.BoxConstraints>{
+          'tight': const pw.BoxConstraints.tightFor(width: 80, height: 40),
+          'loose': const pw.BoxConstraints(maxWidth: 80, maxHeight: 40),
+          'unbounded': const pw.BoxConstraints(),
+        }.entries) {
+          late pw.Image image;
+          await layOut(
+            () => pw.ConstrainedBox(
+              constraints: entry.value,
+              child: image = pw.Image(
+                bitmap(100, 50),
+                fit: fit,
+                width: 400,
+                height: 400,
+              ),
+            ),
+          );
+
+          final label = '$fit under ${entry.key} constraints';
+          expect(
+            image.box!.width,
+            lessThanOrEqualTo(entry.value.maxWidth),
+            reason: label,
+          );
+          expect(
+            image.box!.height,
+            lessThanOrEqualTo(entry.value.maxHeight),
+            reason: label,
+          );
+        }
+      }
+    });
+
+    test('a zero-sized slot draws nothing rather than NaN', () async {
+      // applyBoxFit returns a zero-sized source for a degenerate destination and
+      // the scale divided by it: save() threw '!value.isNaN' out of PdfNum with
+      // asserts on and wrote the token in release.
+      final document = pw.Document(compress: false);
+      document.addPage(
+        pw.Page(
+          pageFormat: const PdfPageFormat(400, 300, marginAll: 0),
+          build: (Context context) => pw.Container(
+            width: 0,
+            height: 100,
+            child: pw.Image(bitmap(10, 10)),
+          ),
+        ),
+      );
+
+      final pdf = String.fromCharCodes(await document.save());
+      expect(pdf, isNot(contains('NaN')));
+      expect(pdf, isNot(contains('Infinity')));
+    });
   });
 }
 

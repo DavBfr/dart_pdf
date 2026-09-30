@@ -15,6 +15,7 @@
  */
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
@@ -104,6 +105,35 @@ void main() {
         ],
       ),
     );
+  });
+
+  test('an Expanded Image with an explicit width fits its slot', () async {
+    // Image.layout used an explicit width verbatim, so the child came out wider
+    // than the flex slot: 'childSize <= maxChildExtent' at flex.dart:392 in
+    // debug, a silent overlap in release.
+    final document = Document();
+    document.addPage(
+      Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (Context context) => Row(
+          children: <Widget>[
+            Expanded(
+              child: Image(
+                RawImage(
+                  bytes: Uint32List(100 * 50).buffer.asUint8List(),
+                  width: 100,
+                  height: 50,
+                ),
+                width: 400,
+              ),
+            ),
+            Expanded(child: Text('x')),
+          ],
+        ),
+      ),
+    );
+
+    await expectLater(document.save(), completes);
   });
 
   tearDownAll(() async {

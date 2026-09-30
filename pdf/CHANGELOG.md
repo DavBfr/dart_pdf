@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.15.0
+
+- **Fix an `Image` with an explicit `width` or `height` overflowing its slot.** The size was used verbatim instead of being passed through the incoming constraints, so `Expanded(child: Image(img, width: 400))` tripped `childSize <= maxChildExtent` in debug and silently overlapped its neighbours in release, and inside a 100x100 container an image declared 400 wide measured 200x100. An explicit size is a preferred size the parent may override now; the fit's aspect ratio is kept, and the box never exceeds `maxWidth` or `maxHeight`
+- **Fix a zero-sized image slot writing `NaN` operands.** The draw divided by a source rectangle that `applyBoxFit` returns zero-sized for a degenerate destination; `Container(width: 0, child: Image(...))` threw `'!value.isNaN'` out of `save()` with asserts on and wrote the token in release. There is nothing to draw, so nothing is drawn
+
 ## 3.14.0
 
 - **Fix a font whose cmap has a format 0 subtable mapping every character to the wrong glyph.** The glyph array was read two bytes early, so 'ABC abc' rendered as '?@A _`a' and U+0041 came back as glyph 63, with no error and no fallback
