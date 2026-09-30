@@ -320,11 +320,42 @@ class PdfGraphics {
     double? w,
     double? h,
   }) {
+    final bbox = xobj.params['/BBox'] as PdfArray;
+
+    // /BBox is [llx lly urx ury] - ISO 32000-1 8.10.2 - not an origin and a size.
+    // The third and fourth entries were read as the width and the height, so a
+    // form whose box does not start at the origin was scaled by target/urx and
+    // drawn offset by that origin. A reversed box is normalised, as the spec
+    // allows.
+    final x1 = (bbox.values[0] as PdfNum).value.toDouble();
+    final y1 = (bbox.values[1] as PdfNum).value.toDouble();
+    final x2 = (bbox.values[2] as PdfNum).value.toDouble();
+    final y2 = (bbox.values[3] as PdfNum).value.toDouble();
+
+    final llx = math.min(x1, x2);
+    final lly = math.min(y1, y2);
+    final origW = (x2 - x1).abs();
+    final origH = (y2 - y1).abs();
+
+    // A box with no area has nothing to draw, and the division would put an
+    // Infinity operand in the stream.
+    if (origW <= 0 || origH <= 0) {
+      assert(() {
+        if (_page.settings.verbose) {
+          // ignore: avoid_print
+          print(
+            'drawXObject: ${xobj.ref()} has an empty /BBox '
+            '[$x1 $y1 $x2 $y2]; nothing to draw',
+          );
+        }
+        return true;
+      }());
+
+      return;
+    }
+
     _page.addXObject(xobj);
     final name = xobj.name;
-    final bbox = xobj.params['/BBox'] as PdfArray;
-    final origW = (bbox.values[2] as PdfNum).value.toDouble();
-    final origH = (bbox.values[3] as PdfNum).value.toDouble();
     final targetW = w ?? origW;
     final targetH = h ?? origH;
 
@@ -341,7 +372,15 @@ class PdfGraphics {
     }());
 
     _buf.putString('q ');
-    PdfNumList(<double>[scaleX, 0, 0, scaleY, x, y]).output(_page, _buf);
+    // The box's lower-left corner lands at (x, y), whatever the box's own origin.
+    PdfNumList(<double>[
+      scaleX,
+      0,
+      0,
+      scaleY,
+      x - scaleX * llx,
+      y - scaleY * lly,
+    ]).output(_page, _buf);
     _buf.putString(' cm ');
     _buf.putString('$name Do ');
     _buf.putString('Q ');

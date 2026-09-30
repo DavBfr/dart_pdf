@@ -185,4 +185,30 @@ void main() {
     final file = File('widgets-form.pdf');
     await file.writeAsBytes(await pdf.save());
   });
+  test('every appearance /BBox has its corners the right way round', () async {
+    final pdf = Document(compress: false);
+    pdf.addPage(
+      Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (Context context) => Column(
+          children: <Widget>[
+            TextField(name: 'text', width: 200, height: 20),
+            Checkbox(name: 'check', value: true),
+            FlatButton(child: Text('press'), name: 'button'),
+          ],
+        ),
+      ),
+    );
+
+    final bytes = String.fromCharCodes(await pdf.save());
+    final boxes = RegExp(r'/BBox\[([^\]]*)\]').allMatches(bytes);
+    expect(boxes, isNotEmpty);
+
+    for (final box in boxes) {
+      final numbers = box.group(1)!.split(' ').map(double.parse).toList();
+      expect(numbers, hasLength(4));
+      expect(numbers[2], greaterThanOrEqualTo(numbers[0]));
+      expect(numbers[3], greaterThanOrEqualTo(numbers[1]));
+    }
+  });
 }

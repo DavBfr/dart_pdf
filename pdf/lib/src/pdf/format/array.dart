@@ -17,6 +17,7 @@
 import 'dart:collection';
 
 import '../color.dart';
+import '../rect.dart';
 import 'base.dart';
 import 'dict.dart';
 import 'indirect.dart';
@@ -36,6 +37,15 @@ class PdfArray<T extends PdfDataType> extends PdfDataType {
   static PdfArray<PdfNum> fromNum(Iterable<num> list) {
     return PdfArray(list.map<PdfNum>((num e) => PdfNum(e)).toList());
   }
+
+  /// A PDF rectangle: [llx lly urx ury], as ISO 32000-1 7.9.5 defines it and as
+  /// every /Rect, /BBox, /MediaBox and /CropBox takes it.
+  ///
+  /// Never a [PdfRect]'s own fields - left, bottom, width, height - which is what
+  /// several writers splatted in: for a non-zero origin the upper-right corner
+  /// came out short by the origin, and the rectangle could even invert.
+  static PdfArray<PdfNum> fromRect(PdfRect rect) =>
+      PdfArray.fromNum(<double>[rect.left, rect.bottom, rect.right, rect.top]);
 
   static PdfArray fromColor(PdfColor color) {
     if (color is PdfColorCmyk) {

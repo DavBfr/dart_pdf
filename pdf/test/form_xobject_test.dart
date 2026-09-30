@@ -20,6 +20,7 @@ import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/src/pdf/obj/formxobject.dart';
 import 'package:pdf/src/pdf/obj/formxobject_extensions.dart';
+import 'package:pdf/src/priv.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:test/test.dart';
 
@@ -201,6 +202,97 @@ void main() {
         reason: 'one form object',
       );
       expect(RegExp(r'/X\d+ Do').allMatches(pdf), hasLength(3));
+    });
+  });
+  group('drawing a form XObject', () {
+    /// Draw a form with [bbox] and return the `cm` operands it emitted.
+    Future<String?> matrix(
+      List<num> bbox, {
+      double? w,
+      double? h,
+      double x = 0,
+      double y = 0,
+    }) async {
+      final document = pw.Document(compress: false).document;
+      final page = PdfPage(document, pageFormat: PdfPageFormat.a4);
+      final form = PdfFormXObject(document)
+        ..params['/BBox'] = PdfArray.fromNum(bbox);
+
+      page.getGraphics().drawXObject(form, x, y, w: w, h: h);
+
+      final pdf = String.fromCharCodes(await document.save());
+      return RegExp(r'q ([-\d. ]+) cm').firstMatch(pdf)?.group(1);
+    }
+
+    test('places the box, whatever its origin', () async {
+      // /BBox is [llx lly urx ury], not an origin and a size. The last two were
+      // read as the width and the height, so the scale came out as target/urx and
+      // the content landed offset by the box's own origin.
+      expect(
+        await matrix(<num>[0, 0, 100, 50], w: 100, h: 50),
+        '1 0 0 1 0 0',
+        reason: 'a zero-origin box does not move',
+      );
+
+      expect(
+        await matrix(<num>[10, 20, 110, 70], w: 100, h: 50),
+        '1 0 0 1 -10 -20',
+      );
+      expect(
+        await matrix(<num>[10, 20, 110, 70]),
+        '1 0 0 1 -10 -20',
+        reason: 'its natural size is 100 x 50, so the scale is 1',
+      );
+      expect(
+        await matrix(<num>[-50, -25, 50, 25], w: 100, h: 50),
+        '1 0 0 1 50 25',
+        reason: 'scale 1, not 2',
+      );
+      expect(
+        await matrix(<num>[-100, -50, 0, 0], w: 100, h: 50),
+        '1 0 0 1 100 50',
+        reason: 'a box that ends at the origin is 100 x 50, not empty',
+      );
+    });
+
+    test('normalises a reversed box', () async {
+      expect(
+        await matrix(<num>[110, 70, 10, 20], w: 100, h: 50),
+        await matrix(<num>[10, 20, 110, 70], w: 100, h: 50),
+      );
+    });
+
+    test('draws nothing for a box with no area', () async {
+      final document = pw.Document(compress: false).document;
+      final page = PdfPage(document, pageFormat: PdfPageFormat.a4);
+      final form = PdfFormXObject(document)
+        ..params['/BBox'] = PdfArray.fromNum(<num>[10, 20, 10, 70]);
+
+      expect(
+        () => page.getGraphics().drawXObject(form, 0, 0, w: 100, h: 50),
+        returnsNormally,
+      );
+
+      final pdf = String.fromCharCodes(await document.save());
+      expect(pdf, isNot(contains('Infinity')));
+      expect(pdf, isNot(contains('NaN')));
+      expect(pdf, isNot(contains(' Do')), reason: 'nothing to draw');
+    });
+
+    test('moves with the point it is drawn at', () async {
+      final origin = await matrix(<num>[10, 20, 110, 70], w: 100, h: 50);
+      final moved = await matrix(
+        <num>[10, 20, 110, 70],
+        w: 100,
+        h: 50,
+        x: 200,
+        y: 300,
+      );
+
+      final from = origin!.split(' ').map(double.parse).toList();
+      final to = moved!.split(' ').map(double.parse).toList();
+      expect(to[4] - from[4], 200);
+      expect(to[5] - from[5], 300);
     });
   });
 }

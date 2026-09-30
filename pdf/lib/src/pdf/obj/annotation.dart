@@ -261,12 +261,7 @@ abstract class PdfAnnotBase {
     }
 
     final bBox = boundingBox ?? PdfRect.fromPoints(PdfPoint.zero, rect.size);
-    s.params['/BBox'] = PdfArray.fromNum([
-      bBox.left,
-      bBox.bottom,
-      bBox.width,
-      bBox.height,
-    ]);
+    s.params['/BBox'] = PdfArray.fromRect(bBox);
     final g = PdfGraphics(s, s.buf);
 
     if (selected && name != null) {
@@ -279,12 +274,7 @@ abstract class PdfAnnotBase {
   @mustCallSuper
   void build(PdfPage page, PdfObject object, PdfDict params) {
     params['/Subtype'] = PdfName(subtype);
-    params['/Rect'] = PdfArray.fromNum([
-      rect.left,
-      rect.bottom,
-      rect.right,
-      rect.top,
-    ]);
+    params['/Rect'] = PdfArray.fromRect(rect);
 
     params['/P'] = page.ref();
 
