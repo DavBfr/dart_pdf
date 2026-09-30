@@ -183,6 +183,26 @@ void main() {
     await file.writeAsBytes(await pdf.save());
   });
 
+  test('append carries a non-finite letterSpacing through', () {
+    // Which is why the guard belongs in the text layout, where the size that
+    // letterSpacing is divided by is known: this function cannot tell a
+    // deliberate NaN from an accidental one.
+    final font = PdfFont.helvetica(PdfDocument());
+    final glyphs = 'AB'.codeUnits.map(font.glyphMetrics);
+
+    expect(
+      PdfFontMetrics.append(
+        glyphs,
+        letterSpacing: double.nan,
+      ).advanceWidth.isNaN,
+      isTrue,
+    );
+    expect(
+      PdfFontMetrics.append(glyphs, letterSpacing: 0).advanceWidth.isFinite,
+      isTrue,
+    );
+  });
+
   test('letterSpacing is charged between glyphs, not after the last', () {
     // The advance leaves the trailing spacing out, which is why the text layout
     // adds one back after each run: the Tc the stream carries applies it on the

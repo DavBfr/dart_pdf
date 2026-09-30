@@ -519,6 +519,84 @@ void main() {
     );
   });
 
+  group('a zero effective font size', () {
+    /// Lay [child] out and return the raw PDF and the box.
+    Future<List<Object>> build(RichText Function() child) async {
+      late RichText laid;
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: PdfPageFormat.a4,
+          build: (Context context) => laid = child(),
+        ),
+      );
+      final pdf = String.fromCharCodes(await document.save());
+      return <Object>[pdf, laid.box!];
+    }
+
+    test('writes no NaN token', () async {
+      // letterSpacing is divided by the effective font size to convert it to font
+      // units, and the division was unguarded: at size 0 it is 0.0/0.0 = NaN,
+      // PdfFontMetrics.append carried that into the advance and the offset, and
+      // drawString emitted it as a Td coordinate. Asserts on threw from PdfNum;
+      // release wrote the bare token where a number belongs.
+      final cases = <String, RichText Function()>{
+        'an embedded font': () =>
+            Text('two words', style: TextStyle(font: ttf, fontSize: 0)),
+        'a standard-14 font': () =>
+            Text('two words', style: const TextStyle(fontSize: 0)),
+        'textScaleFactor 0': () => RichText(
+          textScaleFactor: 0,
+          text: const TextSpan(
+            text: 'two words',
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
+        'with letterSpacing': () => Text(
+          'two words',
+          style: TextStyle(font: ttf, fontSize: 0, letterSpacing: 2),
+        ),
+      };
+
+      for (final entry in cases.entries) {
+        final result = await build(entry.value);
+        expect(result.first, isNot(contains('NaN')), reason: entry.key);
+        expect(result.first, isNot(contains('Infinity')), reason: entry.key);
+      }
+    });
+
+    test('lays out to a finite box', () async {
+      for (final entry in <String, RichText Function()>{
+        'an embedded font': () =>
+            Text('two words', style: TextStyle(font: ttf, fontSize: 0)),
+        'textScaleFactor 0': () => RichText(
+          textScaleFactor: 0,
+          text: const TextSpan(
+            text: 'two words',
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
+      }.entries) {
+        final box = (await build(entry.value)).last as PdfRect;
+        expect(box.width, 0, reason: entry.key);
+        expect(box.height, 0, reason: entry.key);
+      }
+
+      // letterSpacing is an absolute number of points at every size, so a
+      // zero-size run still carries it; what matters is that it stays finite.
+      final spaced =
+          (await build(
+                () => Text(
+                  'two words',
+                  style: TextStyle(font: ttf, fontSize: 0, letterSpacing: 2),
+                ),
+              )).last
+              as PdfRect;
+      expect(spaced.width.isFinite, isTrue);
+      expect(spaced.height, 0);
+    });
+  });
+
   group('the minimum content width', () {
     /// The narrowest [widget] can be, and the widest it wants to be.
     Future<List<double>> widths(Widget widget) async {

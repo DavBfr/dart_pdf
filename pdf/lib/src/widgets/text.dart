@@ -1205,15 +1205,7 @@ class RichText extends Widget with SpanningWidget {
                   if (syllables.length > 1) {
                     var fits = '';
                     for (var syllable in syllables) {
-                      if (offsetX +
-                              ((font.stringMetrics(
-                                        '$fits$syllable-',
-                                        letterSpacing:
-                                            style.letterSpacing! /
-                                            (style.fontSize! * textScaleFactor),
-                                      ) *
-                                      (style.fontSize! * textScaleFactor))
-                                  .width) >
+                      if (offsetX + _textWidth('$fits$syllable-', font, style) >
                           constraintWidth + 0.00001) {
                         break;
                       }
@@ -1707,13 +1699,22 @@ class RichText extends Widget with SpanningWidget {
     return widest;
   }
 
+  /// [TextStyle.letterSpacing] in font units, which is what stringMetrics takes.
+  ///
+  /// Zero when the effective size is zero or not finite. The division was
+  /// unguarded, so a font size of 0 - or a textScaleFactor of 0 - made it
+  /// 0.0/0.0 = NaN, PdfFontMetrics.append carried that into the advance and the
+  /// offset, and drawString emitted it as a coordinate: an AssertionError out of
+  /// save() where asserts are on, a bare NaN token where a number belongs in
+  /// release.
+  double _letterSpacingOf(TextStyle style) {
+    final size = style.fontSize! * textScaleFactor;
+    return size == 0 || !size.isFinite ? 0 : style.letterSpacing! / size;
+  }
+
   /// The metrics [text] lays out to in this style.
   PdfFontMetrics _metricsOf(String text, PdfFont font, TextStyle style) =>
-      font.stringMetrics(
-        text,
-        letterSpacing:
-            style.letterSpacing! / (style.fontSize! * textScaleFactor),
-      ) *
+      font.stringMetrics(text, letterSpacing: _letterSpacingOf(style)) *
       (style.fontSize! * textScaleFactor);
 
   /// The width [text] lays out to in this style.
