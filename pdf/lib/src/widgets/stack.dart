@@ -186,8 +186,35 @@ class Stack extends MultiChildWidget {
 
     var hasNonPositionedChildren = false;
 
+    // constraints.biggest is infinite on an unbounded axis, and a Stack sits on
+    // one in ordinary trees - inside a Row, or a ListView. The infinite box then
+    // reached drawRect for the overflow clip, and Alignment.inscribe subtracted
+    // two infinities and handed every child a NaN offset. On an unbounded axis
+    // the Stack takes the space it is told it must have, as Flutter does.
+    final biggest = PdfPoint(
+      constraints.hasBoundedWidth ? constraints.maxWidth : constraints.minWidth,
+      constraints.hasBoundedHeight
+          ? constraints.maxHeight
+          : constraints.minHeight,
+    );
+
+    assert(() {
+      if (!constraints.hasBoundedWidth || !constraints.hasBoundedHeight) {
+        final axis = !constraints.hasBoundedWidth
+            ? (!constraints.hasBoundedHeight ? 'width and height' : 'width')
+            : 'height';
+        // ignore: avoid_print
+        print(
+          'Stack has an unbounded $axis, so it can only be as large as its '
+          'minimum constraint. Wrap it in a SizedBox or an Expanded to give it '
+          'a size.',
+        );
+      }
+      return true;
+    }());
+
     if (childCount == 0) {
-      box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
+      box = PdfRect.fromPoints(PdfPoint.zero, biggest);
       return;
     }
 
@@ -201,7 +228,14 @@ class Stack extends MultiChildWidget {
         nonPositionedConstraints = constraints.loosen();
         break;
       case StackFit.expand:
-        nonPositionedConstraints = BoxConstraints.tight(constraints.biggest);
+        // Only the bounded axes are tightened, so a child is never handed a tight
+        // infinite constraint of its own.
+        nonPositionedConstraints = BoxConstraints(
+          minWidth: constraints.hasBoundedWidth ? constraints.maxWidth : 0,
+          maxWidth: constraints.maxWidth,
+          minHeight: constraints.hasBoundedHeight ? constraints.maxHeight : 0,
+          maxHeight: constraints.maxHeight,
+        );
         break;
       case StackFit.passthrough:
         nonPositionedConstraints = constraints;
@@ -225,7 +259,7 @@ class Stack extends MultiChildWidget {
       assert(box!.width == constraints.constrainWidth(width));
       assert(box!.height == constraints.constrainHeight(height));
     } else {
-      box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
+      box = PdfRect.fromPoints(PdfPoint.zero, biggest);
     }
     final resolvedAlignment = alignment.resolve(Directionality.of(context));
     for (final child in children) {
