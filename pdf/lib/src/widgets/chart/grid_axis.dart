@@ -184,35 +184,54 @@ class FixedAxis<T extends num> extends GridAxis {
 
   final List<T> values;
 
+  /// Whether [list] never goes backwards. An empty or one-element list does not.
+  ///
+  /// This read list.first, so the assert in the constructor threw 'Bad state: No
+  /// element' for an empty value list - a data-driven chart whose labels came
+  /// back empty lost the whole document.
   static bool _isSortedAscending(List<num> list) {
-    var prev = list.first;
-    for (final elem in list) {
-      if (prev > elem) {
+    for (var i = 1; i < list.length; i++) {
+      if (list[i - 1] > list[i]) {
         return false;
       }
-      prev = elem;
     }
     return true;
   }
 
-  @override
-  double toChart(num? input) {
+  /// How far along a band of [band] points the value sits.
+  ///
+  /// The division used to be unguarded: an axis of one value, or of values that
+  /// are all equal, has a range of exactly zero, so 0.0/0.0 = NaN reached the
+  /// bars, the ticks and the labels - and PdfNum only asserted, so release wrote
+  /// the token. A lone value sits in the middle of its band, and an empty axis
+  /// has only its origin. The arithmetic for every other axis is untouched, down
+  /// to the order of the operations.
+  double _along(num? input, double band) {
+    if (values.isEmpty) {
+      return 0;
+    }
+
     final offset = transfer(values.first);
     final total = transfer(values.last) - offset;
+    if (total == 0) {
+      return band / 2;
+    }
+
+    return band * (transfer(input!) - offset) / total;
+  }
+
+  @override
+  double toChart(num? input) {
     final start = crossAxisPosition + _marginStart;
     switch (direction) {
       case Axis.horizontal:
         return box!.left +
             start +
-            (box!.width - start - _marginEnd) *
-                (transfer(input!) - offset) /
-                total;
+            _along(input, box!.width - start - _marginEnd);
       case Axis.vertical:
         return box!.bottom +
             start +
-            (box!.height - start - _marginEnd) *
-                (transfer(input!) - offset) /
-                total;
+            _along(input, box!.height - start - _marginEnd);
     }
   }
 
@@ -247,14 +266,22 @@ class FixedAxis<T extends num> extends GridAxis {
 
     var maxWidth = 0.0;
     var maxHeight = 0.0;
-    PdfPoint? first;
-    PdfPoint? last;
+
+    // Zero when there are no values, rather than null: these were force-unwrapped
+    // below, so an empty axis threw a null check out of save() - and the
+    // horizontal axis lays out first, so it was that frame every time.
+    var firstSize = PdfPoint.zero;
+    var lastSize = PdfPoint.zero;
+    var measured = false;
 
     for (final value in values) {
-      last = Widget.measure(_text(value), context: context);
-      maxWidth = math.max(maxWidth, last.x);
-      maxHeight = math.max(maxHeight, last.y);
-      first ??= last;
+      lastSize = Widget.measure(_text(value), context: context);
+      maxWidth = math.max(maxWidth, lastSize.x);
+      maxHeight = math.max(maxHeight, lastSize.y);
+      if (!measured) {
+        firstSize = lastSize;
+        measured = true;
+      }
     }
 
     final ad = _angleDirection();
@@ -263,10 +290,12 @@ class FixedAxis<T extends num> extends GridAxis {
       case Axis.horizontal:
         _textMargin = margin ?? 2;
         _axisTick ??= false;
-        final minStart = ad == 0 ? first!.x / 2 : (ad > 0 ? first!.x : 0.0);
+        final minStart = ad == 0
+            ? firstSize.x / 2
+            : (ad > 0 ? firstSize.x : 0.0);
         _marginEnd = math.max(
           _marginEnd,
-          ad == 0 ? last!.x / 2 : (ad > 0 ? 0.0 : last!.x),
+          ad == 0 ? lastSize.x / 2 : (ad > 0 ? 0.0 : lastSize.x),
         );
         crossAxisPosition = math.max(crossAxisPosition, minStart);
         axisPosition = math.max(axisPosition, maxHeight + _textMargin);
@@ -277,9 +306,11 @@ class FixedAxis<T extends num> extends GridAxis {
         _axisTick ??= true;
         _marginEnd = math.max(
           _marginEnd,
-          ad == 0 ? last!.x / 2 : (ad < 0 ? last!.x : 0.0),
+          ad == 0 ? lastSize.x / 2 : (ad < 0 ? lastSize.x : 0.0),
         );
-        final minStart = ad == 0 ? first!.y / 2 : (ad > 0 ? first!.x : 0.0);
+        final minStart = ad == 0
+            ? firstSize.y / 2
+            : (ad > 0 ? firstSize.x : 0.0);
         crossAxisPosition = math.max(crossAxisPosition, minStart);
         axisPosition = math.max(axisPosition, maxWidth + _textMargin);
         box = PdfRect(0, 0, axisPosition, size.y);
@@ -384,14 +415,14 @@ class FixedAxis<T extends num> extends GridAxis {
 
     switch (direction) {
       case Axis.horizontal:
-        for (final num x in values.sublist(_marginStart > 0 ? 0 : 1)) {
+        for (final num x in values.skip(_marginStart > 0 ? 0 : 1)) {
           final p = toChart(x);
           context.canvas.drawLine(p, grid.gridBox.top, p, grid.gridBox.bottom);
         }
         break;
 
       case Axis.vertical:
-        for (final num y in values.sublist(_marginStart > 0 ? 0 : 1)) {
+        for (final num y in values.skip(_marginStart > 0 ? 0 : 1)) {
           final p = toChart(y);
           context.canvas.drawLine(grid.gridBox.left, p, grid.gridBox.right, p);
         }
