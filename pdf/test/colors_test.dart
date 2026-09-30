@@ -865,4 +865,23 @@ void main() {
     final grey = const PdfColor(0.5, 0.5, 0.5).toHsl();
     expect(grey.saturation, 0.0);
   });
+  test('a CMYK black writes no non-finite operand', () async {
+    // A regression guard rather than a reproduction: this is the shape the
+    // acceptance criteria name, and it is clean on HEAD too.
+    final document = Document(compress: false);
+    document.addPage(
+      Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (Context context) => Container(
+          width: 50,
+          height: 50,
+          color: PdfColorCmyk.fromRgb(0, 0, 0),
+        ),
+      ),
+    );
+
+    final pdf = String.fromCharCodes(await document.save());
+    expect(pdf, isNot(contains('NaN')));
+    expect(pdf, isNot(contains('Infinity')));
+  });
 }
