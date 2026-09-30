@@ -414,6 +414,92 @@ void main() {
     });
   });
 
+  group('a table whose columns all measure zero', () {
+    /// Lay [make] out on an A4 page and hand back the table and the raw PDF.
+    Future<List<Object>> build(Table Function() make) async {
+      late Table table;
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: PdfPageFormat.a4,
+          build: (Context context) => table = make(),
+        ),
+      );
+      final pdf = String.fromCharCodes(await document.save());
+      return <Object>[table, pdf];
+    }
+
+    List<TableRow> emptyCells() => <TableRow>[
+      TableRow(children: <Widget>[SizedBox(), SizedBox()]),
+      TableRow(children: <Widget>[SizedBox(), SizedBox()]),
+    ];
+
+    test('fills the available width instead of dividing by zero', () async {
+      // The widths were scaled as _widths[n] / maxWidth * maxWidth, and with
+      // every column measuring zero that is 0.0/0.0: NaN landed in the widths, in
+      // the table box, in every cell box and in drawRect. Release wrote
+      // 'q 0 0 NaN 0 re W n'.
+      final result = await build(
+        () => Table(border: TableBorder.all(), children: emptyCells()),
+      );
+      final table = result.first as Table;
+
+      expect(result.last, isNot(contains('NaN')));
+      expect(table.box!.width, closeTo(PdfPageFormat.a4.availableWidth, 0.001));
+      expect(table.box!.height.isFinite, isTrue);
+    });
+
+    test('stays zero wide for TableWidth.min', () async {
+      final result = await build(
+        () => Table(
+          tableWidth: TableWidth.min,
+          border: TableBorder.all(),
+          children: emptyCells(),
+        ),
+      );
+
+      expect((result.first as Table).box!.width, 0.0);
+      expect(result.last, isNot(contains('NaN')));
+    });
+
+    test('holds for FixedColumnWidth(0) as well', () async {
+      final result = await build(
+        () => Table(
+          columnWidths: const <int, TableColumnWidth>{
+            0: FixedColumnWidth(0),
+            1: FixedColumnWidth(0),
+          },
+          children: <TableRow>[
+            TableRow(children: <Widget>[Text('a'), Text('b')]),
+          ],
+        ),
+      );
+
+      expect(result.last, isNot(contains('NaN')));
+      expect(
+        (result.first as Table).box!.width,
+        closeTo(PdfPageFormat.a4.availableWidth, 0.001),
+      );
+    });
+
+    test('a table with content is unchanged', () async {
+      final result = await build(
+        () => Table(
+          border: TableBorder.all(),
+          children: <TableRow>[
+            TableRow(children: <Widget>[Text('hello'), Text('world')]),
+          ],
+        ),
+      );
+
+      expect(
+        (result.first as Table).box!.width,
+        closeTo(PdfPageFormat.a4.availableWidth, 0.001),
+      );
+      expect(result.last, isNot(contains('NaN')));
+    });
+  });
+
   tearDownAll(() async {
     final file = File('widgets-table.pdf');
     await file.writeAsBytes(await pdf.save());

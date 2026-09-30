@@ -400,14 +400,28 @@ class Table extends Widget with SpanningWidget {
     if (constraints.hasBoundedWidth) {
       final totalFlex = flex.reduce((double? a, double? b) => a! + b!);
       var flexSpace = 0.0;
-      for (var n = 0; n < _widths.length; n++) {
-        if (flex[n] == 0.0) {
-          final newWidth = _widths[n] / maxWidth * constraints.maxWidth;
-          if ((tableWidth == TableWidth.max && totalFlex == 0.0) ||
-              newWidth < _widths[n]) {
-            _widths[n] = newWidth;
+
+      if (maxWidth > 0) {
+        for (var n = 0; n < _widths.length; n++) {
+          if (flex[n] == 0.0) {
+            final newWidth = _widths[n] / maxWidth * constraints.maxWidth;
+            if ((tableWidth == TableWidth.max && totalFlex == 0.0) ||
+                newWidth < _widths[n]) {
+              _widths[n] = newWidth;
+            }
+            flexSpace += _widths[n];
           }
-          flexSpace += _widths[n];
+        }
+      } else if (tableWidth == TableWidth.max && totalFlex == 0.0) {
+        // Every column measured zero, so there is nothing to scale in
+        // proportion: the division was 0.0/0.0 and the NaN landed in the widths,
+        // in the table box, in every cell box and in drawRect. There is still an
+        // available width to fill, so it is shared out evenly. TableWidth.min
+        // and the flex path keep width 0, as they did.
+        final even = constraints.maxWidth / _widths.length;
+        for (var n = 0; n < _widths.length; n++) {
+          _widths[n] = even;
+          flexSpace += even;
         }
       }
       final spacePerFlex = totalFlex > 0.0
