@@ -242,6 +242,28 @@ class Flex extends MultiChildWidget with SpanningWidget {
         : constraints.maxHeight;
     final canFlex = maxMainSize < double.infinity;
 
+    // A Flex hands a non-flex child an unbounded cross axis by design, so a
+    // stretched Flex nested inside one running the other way was tightening its
+    // children to an infinite size, and the literal token Infinity reached the
+    // content stream. Without the stretch the children keep the loose
+    // constraints they would have had.
+    final maxCrossSize = direction == Axis.horizontal
+        ? constraints.maxHeight
+        : constraints.maxWidth;
+    final canStretch =
+        crossAxisAlignment == CrossAxisAlignment.stretch &&
+        maxCrossSize < double.infinity;
+
+    assert(() {
+      if (crossAxisAlignment == CrossAxisAlignment.stretch && !canStretch) {
+        final dimension = direction == Axis.horizontal ? 'height' : 'width';
+        throw PdfException(
+          'CrossAxisAlignment.stretch needs a bounded cross axis, but the incoming $dimension constraint is unbounded.',
+        );
+      }
+      return true;
+    }());
+
     var crossSize = 0.0;
     var allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
     var index = _context.firstChild;
@@ -264,7 +286,7 @@ class Flex extends MultiChildWidget with SpanningWidget {
         totalFlex += flex;
       } else {
         BoxConstraints? innerConstraints;
-        if (crossAxisAlignment == CrossAxisAlignment.stretch) {
+        if (canStretch) {
           switch (direction) {
             case Axis.horizontal:
               innerConstraints = BoxConstraints(
@@ -349,7 +371,7 @@ class Flex extends MultiChildWidget with SpanningWidget {
           }
 
           BoxConstraints? innerConstraints;
-          if (crossAxisAlignment == CrossAxisAlignment.stretch) {
+          if (canStretch) {
             switch (direction) {
               case Axis.horizontal:
                 innerConstraints = BoxConstraints(
