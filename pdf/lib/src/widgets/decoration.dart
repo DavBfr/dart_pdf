@@ -129,13 +129,22 @@ class LinearGradient extends Gradient {
   @override
   void paint(Context context, PdfRect box) {
     if (colors.isEmpty) {
+      // The caller built the decoration path on the contract that this call
+      // consumes it. Leaving it open runs the next operator - a q, a Q or a cm -
+      // into a path-construction run, and a page with nothing else on it never
+      // gets a /Contents at all, so the whole page comes out blank.
+      context.canvas.endPath();
       return;
     }
 
     if (colors.length == 1) {
+      // One colour is a flat fill, and filling consumes the path. Falling
+      // through to clipPath() would emit 'W n' with no current path, leaving the
+      // shading to paint its whole bounding box: a circle came out square.
       context.canvas
         ..setFillColor(colors.first)
         ..fillPath();
+      return;
     }
 
     assert(stops == null || stops!.length == colors.length);
@@ -198,13 +207,22 @@ class RadialGradient extends Gradient {
   @override
   void paint(Context context, PdfRect box) {
     if (colors.isEmpty) {
+      // The caller built the decoration path on the contract that this call
+      // consumes it. Leaving it open runs the next operator - a q, a Q or a cm -
+      // into a path-construction run, and a page with nothing else on it never
+      // gets a /Contents at all, so the whole page comes out blank.
+      context.canvas.endPath();
       return;
     }
 
     if (colors.length == 1) {
+      // One colour is a flat fill, and filling consumes the path. Falling
+      // through to clipPath() would emit 'W n' with no current path, leaving the
+      // shading to paint its whole bounding box: a circle came out square.
       context.canvas
         ..setFillColor(colors.first)
         ..fillPath();
+      return;
     }
 
     assert(stops == null || stops!.length == colors.length);

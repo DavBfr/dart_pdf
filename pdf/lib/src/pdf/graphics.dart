@@ -148,6 +148,32 @@ class PdfGraphics {
     }());
   }
 
+  /// End the current path without painting it.
+  ///
+  /// A path-construction run has to be closed by a painting operator before the
+  /// next one begins, and `n` is the operator that paints nothing. Use it to
+  /// discard a path that has been built and is no longer wanted.
+  void endPath() {
+    var o = 0;
+    assert(() {
+      if (_page.settings.verbose) {
+        o = _buf.offset;
+        _buf.putString(' ' * (_indent));
+      }
+      return true;
+    }());
+
+    _buf.putString('n ');
+
+    assert(() {
+      if (_page.settings.verbose) {
+        _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
+        _buf.putComment('endPath()');
+      }
+      return true;
+    }());
+  }
+
   /// Draw the contour of the previously defined shape
   void strokePath({bool close = false}) {
     var o = 0;
