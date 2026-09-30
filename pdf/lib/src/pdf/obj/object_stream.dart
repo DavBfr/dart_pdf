@@ -33,8 +33,10 @@ class PdfObjectStream extends PdfObject<PdfDict> {
          params: PdfDict.values({if (type != null) '/Type': PdfName(type)}),
        );
 
-  /// This holds the stream's content.
-  final PdfStream buf = PdfStream();
+  /// This holds the stream's content. Starts small — a document can hold
+  /// thousands of tiny recorded streams — and doubles as it fills, so large
+  /// page content streams still grow in amortized constant time.
+  final PdfStream buf = PdfStream(initialCapacity: 4096);
 
   /// defines if the stream needs to be converted to ascii85
   final bool isBinary;
