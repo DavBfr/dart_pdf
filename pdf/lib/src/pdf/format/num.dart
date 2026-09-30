@@ -36,6 +36,9 @@ class PdfNum extends PdfDataType {
   /// value, so output is unchanged; only the repeated conversion is skipped.
   static final Map<double, String> _formatted = <double, String>{};
 
+  /// Lazily-filled decimal strings for small non-negative ints.
+  static final List<String?> _intCache = List<String?>.filled(4096, null);
+
   /// Bounds the cache for pathological documents whose numbers never repeat.
   /// Real ones settle far below this; past the cap formatting just runs each
   /// time, exactly as it did before.
@@ -62,12 +65,25 @@ class PdfNum extends PdfDataType {
 
   @override
   void output(PdfObjectBase o, PdfStream s, [int? indent]) {
+    write(s, value);
+  }
+
+  /// Writes [value] to [s] exactly as [output] would, without needing a
+  /// [PdfNum] instance. Hot emission paths call this directly so a content
+  /// stream full of coordinates does not allocate a wrapper per number.
+  static void write(PdfStream s, num value) {
     assert(!value.isNaN);
     assert(!value.isInfinite);
 
     final v = value;
     if (v is int) {
-      s.putString(v.toString());
+      // Small ints (object serials aside, almost every int a content stream
+      // writes) skip the per-call toString allocation.
+      if (v >= 0 && v < _intCache.length) {
+        s.putString(_intCache[v] ??= v.toString());
+      } else {
+        s.putString(v.toString());
+      }
       return;
     }
 
@@ -121,7 +137,7 @@ class PdfNumList extends PdfDataType {
       if (n > 0) {
         s.putByte(0x20);
       }
-      PdfNum(values[n]).output(o, s, indent);
+      PdfNum.write(s, values[n]);
     }
   }
 
