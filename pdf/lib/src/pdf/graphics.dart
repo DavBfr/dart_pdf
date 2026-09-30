@@ -343,7 +343,7 @@ class PdfGraphics {
     _buf.putString('q ');
     PdfNumList(<double>[scaleX, 0, 0, scaleY, x, y]).output(_page, _buf);
     _buf.putString(' cm ');
-    _buf.putString('/$name Do ');
+    _buf.putString('$name Do ');
     _buf.putString('Q ');
 
     _page.altered = true;
