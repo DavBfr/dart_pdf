@@ -156,10 +156,17 @@ class TableContext extends WidgetContext {
 }
 
 class ColumnLayout {
-  ColumnLayout(this.width, this.flex);
+  ColumnLayout(this.width, this.flex, {double? minWidth})
+    : minWidth = minWidth ?? width;
 
   final double width;
   final double flex;
+
+  /// The narrowest this column can be without its content being cut.
+  ///
+  /// Defaults to [width]: a widget that cannot report a minimum is taken to be
+  /// as unbreakable as it is wide.
+  final double minWidth;
 }
 
 abstract class TableColumnWidth {
@@ -189,15 +196,30 @@ class IntrinsicColumnWidth extends TableColumnWidth {
 
     child.layout(context, const BoxConstraints());
     assert(child.box != null);
-    final calculatedWidth = child.box!.width == double.infinity
-        ? 0.0
-        : child.box!.width;
+    final maxContent = child.box!.width;
+    final calculatedWidth = maxContent == double.infinity ? 0.0 : maxContent;
     final childFlex =
         flex ??
         (child is Expanded
             ? child.flex.toDouble()
-            : (child.box!.width == double.infinity ? 1 : 0));
-    return ColumnLayout(calculatedWidth, childFlex);
+            : (maxContent == double.infinity ? 1 : 0));
+
+    // The narrowest the cell can be without a word being cut in half. Every
+    // wrapper between here and the text still adds its padding, because this is
+    // an ordinary layout pass.
+    child.layout(
+      context.inheritFrom(const MinContentWidth()),
+      const BoxConstraints(),
+    );
+    final minContent = child.box!.width;
+
+    return ColumnLayout(
+      calculatedWidth,
+      childFlex,
+      minWidth: minContent.isFinite
+          ? math.min(minContent, calculatedWidth)
+          : calculatedWidth,
+    );
   }
 }
 
@@ -367,6 +389,7 @@ class Table extends Widget with SpanningWidget {
   }) {
     // Compute required width for all row/columns width flex
     final flex = <double>[];
+    final mins = <double>[];
     _widths.clear();
     _heights.clear();
     var index = 0;
@@ -380,11 +403,13 @@ class Table extends Widget with SpanningWidget {
         if (index >= flex.length) {
           flex.add(columnLayout.flex);
           _widths.add(columnLayout.width);
+          mins.add(columnLayout.minWidth);
         } else {
           if (columnLayout.flex > 0) {
             flex[index] = math.max(flex[index], columnLayout.flex);
           }
           _widths[index] = math.max(_widths[index], columnLayout.width);
+          mins[index] = math.max(mins[index], columnLayout.minWidth);
         }
       }
     }
@@ -402,15 +427,51 @@ class Table extends Widget with SpanningWidget {
       var flexSpace = 0.0;
 
       if (maxWidth > 0) {
+        // The narrowest the inflexible columns can be, and the widest they want.
+        var totalMin = 0.0;
+        var totalMax = 0.0;
         for (var n = 0; n < _widths.length; n++) {
           if (flex[n] == 0.0) {
-            final newWidth = _widths[n] / maxWidth * constraints.maxWidth;
-            if ((tableWidth == TableWidth.max && totalFlex == 0.0) ||
-                newWidth < _widths[n]) {
-              _widths[n] = newWidth;
-            }
-            flexSpace += _widths[n];
+            totalMin += mins[n];
+            totalMax += _widths[n];
           }
+        }
+
+        // CSS automatic table layout. Every column used to be rescaled by the
+        // same factor with no per-column floor, so an overflowing table squeezed
+        // a short column below the width of one word and the cell hard-split it:
+        // 'ATLANTICA' came out as ATLANTI then CA. Now each column keeps at least
+        // what its longest word needs, and what is left over is shared in
+        // proportion to how much more each column wanted.
+        final available = constraints.maxWidth;
+        final overflowing = totalMax > available && totalMin < totalMax;
+
+        for (var n = 0; n < _widths.length; n++) {
+          if (flex[n] != 0.0) {
+            continue;
+          }
+
+          final double newWidth;
+          if (!overflowing) {
+            newWidth = _widths[n] / maxWidth * available;
+          } else if (totalMin <= available) {
+            newWidth =
+                mins[n] +
+                (_widths[n] - mins[n]) *
+                    (available - totalMin) /
+                    (totalMax - totalMin);
+          } else {
+            // Not even the minimums fit: they are scaled down together, which is
+            // the only thing left that keeps the widths summing to the width
+            // there is.
+            newWidth = mins[n] / totalMin * available;
+          }
+
+          if ((tableWidth == TableWidth.max && totalFlex == 0.0) ||
+              newWidth < _widths[n]) {
+            _widths[n] = newWidth;
+          }
+          flexSpace += _widths[n];
         }
       } else if (tableWidth == TableWidth.max && totalFlex == 0.0) {
         // Every column measured zero, so there is nothing to scale in

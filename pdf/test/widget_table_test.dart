@@ -500,6 +500,134 @@ void main() {
     });
   });
 
+  group('the column width solver', () {
+    test('never squeezes a column below its longest word', () async {
+      // The columns were rescaled by one factor with no per-column floor, so an
+      // overflowing table squeezed a short column below the width of one word and
+      // the cell hard-split it: 'ATLANTICA' came out as ATLANTI then CA.
+      late Table table;
+      late double atlantica;
+
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: PdfPageFormat.a4,
+          build: (Context context) {
+            // What one word needs, measured the way the cell measures it.
+            final word = Text('ATLANTICA', style: Theme.of(context).tableCell);
+            word.layout(
+              context.inheritFrom(const MinContentWidth()),
+              const BoxConstraints(),
+            );
+            atlantica = word.box!.width;
+
+            return table = TableHelper.fromTextArray(
+              headers: <String>[
+                'Codigo',
+                'Descricao do Produto ou Servico',
+                'Quantidade',
+                'Situacao',
+              ],
+              data: <List<String>>[
+                <String>[
+                  '1',
+                  'Servico de manutencao preventiva de equipamentos ind',
+                  '10',
+                  'ATLANTICA',
+                ],
+                <String>[
+                  '2',
+                  'Outro servico com uma descricao bastante longa tambem',
+                  '5',
+                  'ATLANTICA',
+                ],
+              ],
+            );
+          },
+        ),
+      );
+      final pdf = String.fromCharCodes(await document.save());
+
+      final cells = table.children[1].children;
+      expect(
+        cells.last.box!.width,
+        greaterThanOrEqualTo(atlantica + 10),
+        reason: 'the word plus the 5pt padding on each side',
+      );
+
+      // And the widths still fill the table exactly.
+      expect(
+        cells.fold<double>(0, (double sum, Widget c) => sum + c.box!.width),
+        closeTo(PdfPageFormat.a4.availableWidth, 0.001),
+      );
+
+      final runs = RegExp(
+        r'\[\(([^)]*)\)\]TJ',
+      ).allMatches(pdf).map((RegExpMatch m) => m.group(1)!).toList();
+      expect(runs, contains('ATLANTICA'));
+      expect(runs, contains('Situacao'));
+      expect(runs, isNot(contains('ATLANTI')));
+    });
+
+    test('leaves a table that fits exactly as it was', () async {
+      for (final width in <TableWidth>[TableWidth.max, TableWidth.min]) {
+        late Table table;
+        final document = Document();
+        document.addPage(
+          Page(
+            pageFormat: PdfPageFormat.a4,
+            build: (Context context) => table = Table(
+              tableWidth: width,
+              children: <TableRow>[
+                TableRow(children: <Widget>[Text('a'), Text('b')]),
+              ],
+            ),
+          ),
+        );
+        await document.save();
+
+        final expected = width == TableWidth.max
+            ? PdfPageFormat.a4.availableWidth / 2
+            : 6.672;
+        for (final cell in table.children.first.children) {
+          expect(cell.box!.width, closeTo(expected, 1e-9), reason: '$width');
+        }
+      }
+    });
+
+    test('completes when not even the minimums fit', () async {
+      late Table table;
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(40, 300, marginAll: 0),
+          build: (Context context) => table = TableHelper.fromTextArray(
+            cellPadding: EdgeInsets.zero,
+            headers: <String>['h1', 'h2', 'h3'],
+            data: <List<String>>[
+              <String>[
+                'Pneumonoultramicroscopic silicovolcanoconiosis',
+                'Antidisestablishmentarianism opposition',
+                'Incomprehensibilities notwithstanding',
+              ],
+            ],
+          ),
+        ),
+      );
+      final pdf = String.fromCharCodes(await document.save());
+
+      final widths = table.children[1].children
+          .map((Widget c) => c.box!.width)
+          .toList();
+      for (final width in widths) {
+        expect(width.isFinite, isTrue);
+        expect(width, greaterThan(0));
+      }
+      expect(widths.reduce((double a, double b) => a + b), closeTo(40, 0.001));
+      expect(pdf, isNot(contains('NaN')));
+    });
+  });
+
   tearDownAll(() async {
     final file = File('widgets-table.pdf');
     await file.writeAsBytes(await pdf.save());
