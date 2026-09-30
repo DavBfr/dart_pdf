@@ -58,15 +58,23 @@ class PdfStream {
   Uint8List output() => _stream.sublist(0, _offset);
 
   void putString(String? s) {
-    assert(() {
-      for (final codeUnit in s!.codeUnits) {
-        if (codeUnit > 0x7f) {
-          return false;
-        }
-      }
-      return true;
-    }());
+    // An indexed scan, not a for-in over `codeUnits`: this assert runs on every
+    // operator and number written to a content stream, and the CodeUnits
+    // iterator (a closure plus a ListIterator per character) showed up as the
+    // hottest single item in a debug-mode render profile. Asserts are compiled
+    // out of release builds, so this only costs debug and JIT runs — which is
+    // where `flutter run` lives.
+    assert(_isAscii(s!));
     putBytes(s!.codeUnits);
+  }
+
+  static bool _isAscii(String s) {
+    for (var i = 0; i < s.length; i++) {
+      if (s.codeUnitAt(i) > 0x7f) {
+        return false;
+      }
+    }
+    return true;
   }
 
   void putComment(String s) {
