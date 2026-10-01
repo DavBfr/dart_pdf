@@ -232,13 +232,13 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
             }
             let printer = PMPrinter(raw)
 
-            guard let name = PMPrinterGetName(printer) as String? else {
+            guard let name = cfString(PMPrinterGetName(printer)) else {
                 continue
             }
 
             var state = PMPrinterState(kPMPrinterIdle)
             let hasState = PMPrinterGetState(printer, &state) == noErr
-            let location = PMPrinterGetLocation(printer) as String?
+            let location = cfString(PMPrinterGetLocation(printer))
 
             details[name] = PrinterDetail(
                 isDefault: PMPrinterIsDefault(printer),
@@ -609,4 +609,20 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         let height = size.height.isFinite && size.height > 0 ? size.height : fallback.height
         return CGSize(width: width, height: height)
     }
+}
+
+// PMPrinterGetName and PMPrinterGetLocation are audited differently from one SDK
+// to the next: on Xcode 27 they return a bridgeable `CFString?`, on Xcode 16 an
+// `Unmanaged<CFString>?`. A single `as String?` therefore builds here and fails
+// on CI with "cannot convert value of type 'Unmanaged<CFString>?' to type
+// 'String?' in coercion". Overloading on the argument type lets one source file
+// compile against both: the overload that does not match the SDK is simply
+// unused. Neither function transfers ownership, so the unmanaged value is read
+// without consuming a retain.
+private func cfString(_ value: CFString?) -> String? {
+    value as String?
+}
+
+private func cfString(_ value: Unmanaged<CFString>?) -> String? {
+    value?.takeUnretainedValue() as String?
 }
