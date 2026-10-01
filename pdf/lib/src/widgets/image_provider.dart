@@ -123,6 +123,8 @@ class MemoryImage extends ImageProvider {
         info.height,
         orientation ?? info.orientation,
         dpi,
+        requested: orientation,
+        exifOriented: info.orientation != PdfImageOrientation.topLeft,
       );
     }
 
@@ -138,6 +140,7 @@ class MemoryImage extends ImageProvider {
       info.height,
       orientation ?? PdfImageOrientation.topLeft,
       dpi,
+      requested: orientation,
     );
   }
 
@@ -146,16 +149,36 @@ class MemoryImage extends ImageProvider {
     int? width,
     int height,
     PdfImageOrientation orientation,
-    double? dpi,
-  ) : super(width, height, orientation, dpi);
+    double? dpi, {
+    PdfImageOrientation? requested,
+    bool exifOriented = false,
+  }) : _requested = requested,
+       _exifOriented = exifOriented,
+       super(width, height, orientation, dpi);
 
   /// The image data
   final Uint8List bytes;
 
+  /// What the caller asked for, as opposed to what the file declares. Null means
+  /// the file decides.
+  final PdfImageOrientation? _requested;
+
+  /// Whether the source carries an EXIF orientation, which im.decodeImage bakes
+  /// into the pixels it returns.
+  final bool _exifOriented;
+
   @override
   PdfImage buildImage(Context context, {int? width, int? height}) {
     if (width == null) {
-      return PdfImage.file(context.document, bytes: bytes);
+      // A null orientation means the file decides, which is what the provider
+      // reported; a non-null one is the caller overriding it. Neither used to be
+      // forwarded at all, so an oriented provider swapped the dimensions it
+      // reported and then built an unrotated image to fill them.
+      return PdfImage.file(
+        context.document,
+        bytes: bytes,
+        orientation: _requested,
+      );
     }
 
     final image = im.decodeImage(bytes);
@@ -168,10 +191,19 @@ class MemoryImage extends ImageProvider {
     // no-upscale rule: for rotated images the metadata bound checked by
     // resolve() cannot know which axis copyResize will scale.
     if (width >= image.width) {
-      return PdfImage.file(context.document, bytes: bytes);
+      return PdfImage.file(
+        context.document,
+        bytes: bytes,
+        orientation: _requested,
+      );
     }
 
     final resized = im.copyResize(image, width: width);
+
+    // im.decodeImage applies a source EXIF orientation to the pixels it returns -
+    // a 16x8 image with orientation 6 comes back 8x16 - so asking the PDF to
+    // rotate them again would turn the image twice.
+    final remaining = _exifOriented ? null : _requested;
 
     if (im.JpegDecoder().isValidFile(bytes)) {
       // Do not carry the source metadata over: EXIF can hold sensitive data
@@ -184,10 +216,15 @@ class MemoryImage extends ImageProvider {
       return PdfImage.jpeg(
         context.document,
         image: im.encodeJpg(resized, quality: 90),
+        orientation: remaining,
       );
     }
 
-    return PdfImage.fromImage(context.document, image: resized);
+    return PdfImage.fromImage(
+      context.document,
+      image: resized,
+      orientation: remaining ?? PdfImageOrientation.topLeft,
+    );
   }
 }
 
@@ -208,11 +245,19 @@ class ImageImage extends ImageProvider {
     // Resampling at or above the pixel width could only upscale: keep the
     // original pixels (see ImageProvider.resolve).
     if (width == null || width >= _image.width) {
-      return PdfImage.fromImage(context.document, image: _image);
+      return PdfImage.fromImage(
+        context.document,
+        image: _image,
+        orientation: orientation,
+      );
     }
 
     final resized = im.copyResize(_image, width: width);
-    return PdfImage.fromImage(context.document, image: resized);
+    return PdfImage.fromImage(
+      context.document,
+      image: resized,
+      orientation: orientation,
+    );
   }
 }
 

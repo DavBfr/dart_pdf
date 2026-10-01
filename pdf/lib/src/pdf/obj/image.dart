@@ -18,6 +18,7 @@ import 'dart:typed_data';
 
 import 'package:image/image.dart' as im;
 
+import '../../../pdf.dart' show PdfException;
 import '../document.dart';
 import '../exif.dart';
 import '../format/array.dart';
@@ -217,23 +218,28 @@ class PdfImage extends PdfXObject {
   }
 
   /// Create an image from an image file
+  /// Load an image from a file's bytes.
+  ///
+  /// A null [orientation] means use the orientation the file itself declares -
+  /// a JPEG's EXIF tag - and fall back to [PdfImageOrientation.topLeft]. The
+  /// orientation used to be dropped entirely for JPEG bytes.
   factory PdfImage.file(
     PdfDocument pdfDocument, {
     required Uint8List bytes,
-    PdfImageOrientation orientation = PdfImageOrientation.topLeft,
+    PdfImageOrientation? orientation,
   }) {
     if (im.JpegDecoder().isValidFile(bytes)) {
-      return PdfImage.jpeg(pdfDocument, image: bytes);
+      return PdfImage.jpeg(pdfDocument, image: bytes, orientation: orientation);
     }
 
     final image = im.decodeImage(bytes);
     if (image == null) {
-      throw 'Unable to decode image';
+      throw PdfException('Unable to decode image');
     }
     return PdfImage.fromImage(
       pdfDocument,
       image: image,
-      orientation: orientation,
+      orientation: orientation ?? PdfImageOrientation.topLeft,
     );
   }
 

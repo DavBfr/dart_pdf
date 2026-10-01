@@ -30,6 +30,7 @@ import 'package:pdf/widgets.dart'
         Image,
         Page,
         RawImage,
+        SizedBox,
         Widget;
 import 'package:pdf/widgets.dart'
     show Context, ImageImage, ImageProvider, MemoryImage;
@@ -344,6 +345,194 @@ void main() {
       expect(pdf, isNot(contains('Infinity')));
     });
   });
+  group('an orientation asked of a provider', () {
+    /// A 50x200 PNG, so a rotated orientation is visible in the dimensions.
+    final png = Uint8List.fromList(
+      im.encodePng(im.Image(width: 50, height: 200)),
+    );
+
+    /// The same shape as a JPEG, with no EXIF orientation of its own.
+    final jpg = Uint8List.fromList(
+      im.encodeJpg(im.Image(width: 50, height: 200), quality: 40),
+    );
+
+    /// Resolve [provider] in a one-page document and hand back the PdfImage.
+    Future<PdfImage> resolve(
+      ImageProvider provider, {
+      double? dpi,
+      double size = 400,
+    }) async {
+      late PdfImage image;
+      final document = pw.Document();
+      document.addPage(
+        pw.Page(
+          pageFormat: const PdfPageFormat(400, 400, marginAll: 0),
+          build: (Context context) {
+            image = provider.resolve(context, PdfPoint(size, size), dpi: dpi);
+            return pw.SizedBox();
+          },
+        ),
+      );
+      await document.save();
+      return image;
+    }
+
+    test('reaches the PdfImage, for every provider and orientation', () async {
+      // ImageProvider stores the orientation and swaps the dimensions it
+      // reports, but no buildImage forwarded it: six call sites built a PdfImage
+      // without it. The image drew unrotated and, because the box had been sized
+      // for the rotated one, shrunk inside it.
+      for (final orientation in PdfImageOrientation.values) {
+        final providers = <String, ImageProvider>{
+          'MemoryImage(png)': MemoryImage(png, orientation: orientation),
+          'MemoryImage(jpg)': MemoryImage(jpg, orientation: orientation),
+          'ImageImage': ImageImage(
+            im.Image(width: 50, height: 200),
+            orientation: orientation,
+          ),
+          'RawImage': pw.RawImage(
+            bytes: createTestImage(50, 200),
+            width: 50,
+            height: 200,
+            orientation: orientation,
+          ),
+        };
+
+        for (final entry in providers.entries) {
+          final image = await resolve(entry.value);
+          final what = '${entry.key}, $orientation';
+
+          expect(image.orientation, orientation, reason: what);
+          expect(image.width, entry.value.width, reason: what);
+          expect(image.height, entry.value.height, reason: what);
+        }
+      }
+    });
+
+    test('survives the resample path', () async {
+      // Forcing a dpi low enough to downsample takes buildImage's other branch.
+      for (final orientation in PdfImageOrientation.values) {
+        final providers = <String, ImageProvider>{
+          'MemoryImage(png)': MemoryImage(png, orientation: orientation),
+          'MemoryImage(jpg)': MemoryImage(jpg, orientation: orientation),
+          'ImageImage': ImageImage(
+            im.Image(width: 50, height: 200),
+            orientation: orientation,
+          ),
+        };
+
+        for (final entry in providers.entries) {
+          final image = await resolve(entry.value, dpi: 4);
+          final what = '${entry.key}, $orientation, resampled';
+
+          expect(image.orientation, orientation, reason: what);
+        }
+      }
+    });
+
+    test('is the file\'s own when none is given', () async {
+      // A null orientation means the file decides, which is how an EXIF
+      // orientation has always reached the provider - it just never reached the
+      // image.
+      final oriented = _jpegWithOrientation(6);
+
+      expect(MemoryImage(oriented).orientation, PdfImageOrientation.rightTop);
+      expect(
+        (await resolve(MemoryImage(oriented))).orientation,
+        PdfImageOrientation.rightTop,
+      );
+    });
+
+    test('is not applied twice when the pixels already carry it', () async {
+      // im.decodeImage bakes a source EXIF orientation into the pixels it
+      // returns, so the resampled image must not be rotated again.
+      final oriented = _jpegWithOrientation(6);
+      final image = await resolve(MemoryImage(oriented), dpi: 4);
+
+      expect(image.orientation, PdfImageOrientation.topLeft);
+    });
+
+    test('reaches PdfImage.file for PNG and for JPEG bytes', () {
+      // PdfImage.file dropped it entirely for JPEG bytes, delegating to
+      // PdfImage.jpeg without the argument.
+      for (final bytes in <Uint8List>[png, jpg]) {
+        final image = PdfImage.file(
+          PdfDocument(),
+          bytes: bytes,
+          orientation: PdfImageOrientation.rightTop,
+        );
+
+        expect(image.orientation, PdfImageOrientation.rightTop);
+      }
+    });
+
+    test('leaves a JPEG\'s EXIF orientation alone when not given', () {
+      final image = PdfImage.file(
+        PdfDocument(),
+        bytes: _jpegWithOrientation(6),
+      );
+
+      expect(image.orientation, PdfImageOrientation.rightTop);
+    });
+
+    test('rotates the image over its whole layout box', () async {
+      // The box is sized for the rotated image, so the matrix has to fill it.
+      final document = pw.Document(compress: false);
+      document.addPage(
+        pw.Page(
+          pageFormat: const PdfPageFormat(400, 400, marginAll: 0),
+          build: (Context context) => pw.Image(
+            MemoryImage(png, orientation: PdfImageOrientation.rightTop),
+          ),
+        ),
+      );
+      final pdf = String.fromCharCodes(await document.save());
+
+      // ignore: avoid_print
+      print(
+        RegExp(
+          r'[-\d.]+ [-\d.]+ [-\d.]+ [-\d.]+ [-\d.]+ [-\d.]+ cm /I\d+ Do',
+        ).allMatches(pdf).map((m) => m.group(0)).toList().toString(),
+      );
+      expect(pdf, contains('0 -100 400 0 0 400 cm'));
+    });
+  });
+}
+
+/// A decodable JPEG carrying [value] as its EXIF Orientation.
+Uint8List _jpegWithOrientation(int value) {
+  final encoded = im.encodeJpg(im.Image(width: 50, height: 200), quality: 40);
+
+  void u16(List<int> to, int v) => to.addAll(<int>[(v >> 8) & 0xff, v & 0xff]);
+  void u32(List<int> to, int v) => to.addAll(<int>[
+    (v >> 24) & 0xff,
+    (v >> 16) & 0xff,
+    (v >> 8) & 0xff,
+    v & 0xff,
+  ]);
+
+  final tiff = <int>[0x4d, 0x4d, 0x00, 0x2a];
+  u32(tiff, 8);
+
+  final ifd = <int>[];
+  u16(ifd, 1);
+  u16(ifd, 0x0112); // Orientation
+  u16(ifd, 3); // SHORT
+  u32(ifd, 1);
+  ifd.addAll(<int>[0x00, value, 0, 0]);
+  u32(ifd, 0);
+
+  final payload = <int>[0x45, 0x78, 0x69, 0x66, 0, 0, ...tiff, ...ifd];
+  final segment = <int>[0xff, 0xe1];
+  u16(segment, payload.length + 2);
+
+  return Uint8List.fromList(<int>[
+    encoded[0],
+    encoded[1],
+    ...segment,
+    ...payload,
+    ...encoded.sublist(2),
+  ]);
 }
 
 class _UnknownWidthImage extends ImageProvider {
