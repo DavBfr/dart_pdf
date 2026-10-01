@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.16.0
+
+- **Fix `AlignmentDirectional`'s top and bottom constants being vertically inverted.** This package puts y up - `Alignment.topLeft` is `(-1, 1)` and `inscribe` treats `y = 1` as the top - but `AlignmentDirectional` was copied from Flutter with its y-down constants, and `resolve` mirrors x only. So `AlignmentDirectional.topStart` placed its child at the *bottom* of the box, `bottomStart` at the top, and a `topCenter` to `bottomCenter` gradient ran backwards. The six vertical constants are now y-up, so each one resolves to the physical constant of the same name - `topStart` to `Alignment.topLeft` under ltr and `Alignment.topRight` under rtl. **A document that uses these constants and compensated for the inversion will move.** `centerStart`, `center` and `centerEnd` have `y == 0` and do not move
+- **Fix `Alignment.toString()` naming the opposite corner**: the label table was the y-down one, so `Alignment.topLeft` printed `Alignment.bottomLeft`. Debug output only
+
 ## 3.15.0
 
 - **Fix a single-colour gradient painting its whole bounding box and an empty one blanking the page.** `BoxDecoration.paint` builds the decoration path and hands it to `Gradient.paint` to consume. With one colour both `LinearGradient` and `RadialGradient` filled the path and then fell through to `saveContext()..clipPath()`, so `W n` was emitted with no current path: a clip built from nothing clips nothing and the shading painted its whole bounding box, drawing a circle-shaped `Container` as a square - confirmed at 72 dpi, where every corner came out the gradient colour. With no colours at all they returned leaving the path open, running the next `q`, `Q` or `cm` into a path-construction run, and because nothing had set the page's altered flag a page with only that on it was written with no `/Contents`, losing everything else drawn on it. One colour now fills and returns without creating a shading object; no colours end the path. Gradients of two or more colours emit byte-identical content streams

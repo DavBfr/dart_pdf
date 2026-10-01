@@ -227,6 +227,42 @@ void main() {
     );
   });
 
+  test(
+    'a directional alignment places a child where the physical one does',
+    () async {
+      // AlignmentDirectional's six vertical constants were Flutter's y-down ones,
+      // so topStart put its child at the bottom of the box.
+      Future<PdfRect> place(AlignmentGeometry alignment) async {
+        late Container child;
+        final document = Document(compress: false);
+        document.addPage(
+          Page(
+            pageFormat: const PdfPageFormat(200, 200, marginAll: 0),
+            build: (Context context) => Container(
+              width: 100,
+              height: 100,
+              alignment: alignment,
+              child: child = Container(width: 10, height: 10),
+            ),
+          ),
+        );
+        await document.save();
+        return child.box!;
+      }
+
+      final physical = await place(Alignment.topLeft);
+      final directional = await place(AlignmentDirectional.topStart);
+
+      expect(physical.y, 90);
+      expect(directional.x, physical.x);
+      expect(directional.y, physical.y);
+
+      final bottom = await place(AlignmentDirectional.bottomEnd);
+      expect(bottom.x, 90);
+      expect(bottom.y, 0);
+    },
+  );
+
   group('a gradient', () {
     /// Lay [child] out alone on a small page and return the raw PDF.
     Future<String> build(Widget child) async {
