@@ -32,11 +32,18 @@ import 'use.dart';
 abstract class SvgOperation {
   SvgOperation(this.brush, this.clip, this.transform, this.painter);
 
+  /// Build the operation [element] describes.
+  ///
+  /// [expanding] is the set of element ids currently being expanded through
+  /// `<use>`. It is a value, not painter state, because children are built
+  /// lazily - inside the parent's paint - so a mutable stack would already have
+  /// been popped by the time a child is parsed.
   static SvgOperation? fromXml(
     XmlElement element,
     SvgPainter painter,
-    SvgBrush brush,
-  ) {
+    SvgBrush brush, {
+    Set<String> expanding = const <String>{},
+  }) {
     if (element.getAttribute('visibility') == 'hidden') {
       return null;
     }
@@ -51,7 +58,7 @@ abstract class SvgOperation {
       case 'ellipse':
         return SvgPath.fromEllipseXml(element, painter, brush);
       case 'g':
-        return SvgGroup.fromXml(element, painter, brush);
+        return SvgGroup.fromXml(element, painter, brush, expanding: expanding);
       case 'image':
         return SvgImg.fromXml(element, painter, brush);
       case 'line':
@@ -65,11 +72,11 @@ abstract class SvgOperation {
       case 'rect':
         return SvgPath.fromRectXml(element, painter, brush);
       case 'symbol':
-        return SvgSymbol.fromXml(element, painter, brush);
+        return SvgSymbol.fromXml(element, painter, brush, expanding: expanding);
       case 'text':
         return SvgText.fromXml(element, painter, brush);
       case 'use':
-        return SvgUse.fromXml(element, painter, brush);
+        return SvgUse.fromXml(element, painter, brush, expanding: expanding);
     }
 
     return null;

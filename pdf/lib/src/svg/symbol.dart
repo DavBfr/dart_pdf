@@ -36,14 +36,23 @@ class SvgSymbol extends SvgGroup {
   factory SvgSymbol.fromXml(
     XmlElement element,
     SvgPainter painter,
-    SvgBrush brush,
-  ) {
+    SvgBrush brush, {
+    Set<String> expanding = const <String>{},
+  }) {
     final _brush = SvgBrush.fromXml(element, brush, painter);
+
+    // A <use> may not reference one of its own ancestors - SVG 1.1 calls that an
+    // error - so this element's id joins the set its children are built with.
+    // Without it, '<g id="a"><rect/><use href="#a"/></g>' drew the rect a second
+    // time before the guard below stopped the third.
+    final id = element.getAttribute('id');
+    final inside = id == null ? expanding : <String>{...expanding, id};
 
     final children = element.children
         .whereType<XmlElement>()
         .map<SvgOperation?>(
-          (child) => SvgOperation.fromXml(child, painter, _brush),
+          (child) =>
+              SvgOperation.fromXml(child, painter, _brush, expanding: inside),
         )
         .whereType<SvgOperation>();
 

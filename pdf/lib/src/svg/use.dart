@@ -41,8 +41,9 @@ class SvgUse extends SvgOperation {
   factory SvgUse.fromXml(
     XmlElement element,
     SvgPainter painter,
-    SvgBrush brush,
-  ) {
+    SvgBrush brush, {
+    Set<String> expanding = const <String>{},
+  }) {
     final _brush = SvgBrush.fromXml(element, brush, painter);
 
     final width = SvgParser.getNumeric(
@@ -78,10 +79,25 @@ class SvgUse extends SvgOperation {
           namespaceUri: 'http://www.w3.org/1999/xlink',
         );
 
-    if (hrefAttr != null) {
-      final hrefElement = painter.parser.findById(hrefAttr.substring(1));
+    // Only a local '#id' reference, with an id in it: substring(1) on an empty
+    // or external href read whatever happened to be there. And a reference to an
+    // id already being expanded is a cycle - '<g id="a"><use href="#a"/></g>'
+    // recursed until the isolate died with a StackOverflowError out of
+    // pdf.save(), which is an Error and so slips through a try/catch around the
+    // build. Such a <use> now simply paints nothing.
+    if (hrefAttr != null &&
+        hrefAttr.startsWith('#') &&
+        hrefAttr.length > 1 &&
+        !expanding.contains(hrefAttr.substring(1))) {
+      final id = hrefAttr.substring(1);
+      final hrefElement = painter.parser.findById(id);
       if (hrefElement != null) {
-        href = SvgOperation.fromXml(hrefElement, painter, _brush);
+        href = SvgOperation.fromXml(
+          hrefElement,
+          painter,
+          _brush,
+          expanding: <String>{...expanding, id},
+        );
       }
     }
 
@@ -125,5 +141,5 @@ class SvgUse extends SvgOperation {
   }
 
   @override
-  PdfRect boundingBox() => href!.boundingBox();
+  PdfRect boundingBox() => href?.boundingBox() ?? PdfRect.zero;
 }
