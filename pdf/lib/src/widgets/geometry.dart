@@ -79,6 +79,17 @@ class BoxConstraints {
 
   bool get hasBoundedWidth => maxWidth < double.infinity;
 
+  /// The same constraints with the width and height exchanged.
+  ///
+  /// A child that is painted a quarter turn round measures in its own frame, so
+  /// this is the box it has to fit into.
+  BoxConstraints get flipped => BoxConstraints(
+    minWidth: minHeight,
+    maxWidth: maxHeight,
+    minHeight: minWidth,
+    maxHeight: maxWidth,
+  );
+
   bool get hasBoundedHeight => maxHeight < double.infinity;
 
   bool get hasInfiniteWidth => minWidth >= double.infinity;

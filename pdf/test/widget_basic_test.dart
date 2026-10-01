@@ -15,6 +15,8 @@
  */
 
 import 'dart:io';
+import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
@@ -227,6 +229,135 @@ void main() {
         ),
       ),
     );
+  });
+
+  group('a rotateBox', () {
+    /// A solid bitmap of the given pixel size.
+    ImageProvider bitmap(int width, int height) => RawImage(
+      bytes: Uint8List(width * height * 4)
+        ..fillRange(0, width * height * 4, 0x80),
+      width: width,
+      height: height,
+    );
+
+    /// Rotate [child] in the space a Column leaves between two 40pt spacers on
+    /// A4, and hand back the Transform's own box.
+    Future<PdfRect> inColumn(double angle, Widget child) async {
+      late Transform transform;
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: PdfPageFormat.a4,
+          build: (Context context) => Column(
+            children: <Widget>[
+              SizedBox(height: 40),
+              Expanded(
+                child: Align(
+                  child: transform = Transform.rotateBox(
+                    angle: angle,
+                    child: child,
+                  ),
+                ),
+              ),
+              SizedBox(height: 40),
+            ],
+          ),
+        ),
+      );
+      await document.save();
+      return transform.box!;
+    }
+
+    test('a quarter turn fills the cross axis', () async {
+      // The child was laid out against the constraints the Transform itself
+      // received, although it is painted a quarter turn round, so it measured in
+      // the wrong frame: a landscape image reached 361.42pt of the 481.89pt it
+      // was given.
+      final box = await inColumn(math.pi / 2, Image(bitmap(400, 300)));
+
+      expect(box.width, closeTo(PdfPageFormat.a4.availableWidth, 0.01));
+      expect(box.width, closeTo(481.8898, 0.01));
+    });
+
+    test('never exceeds the constraints it was given', () async {
+      // The other way round the same mistake overflowed: a portrait image came
+      // out 642.52pt wide in a 481.89pt slot and was painted off the page.
+      final box = await inColumn(math.pi / 2, Image(bitmap(300, 400)));
+
+      expect(box.width, lessThanOrEqualTo(481.8898 + 1e-6));
+      expect(box.height, lessThanOrEqualTo(PdfPageFormat.a4.availableHeight));
+    });
+
+    test('honours the constraints at every angle', () async {
+      for (var i = 0; i <= 24; i++) {
+        final angle = i * math.pi / 12;
+        late Transform transform;
+        final document = Document(compress: false);
+        document.addPage(
+          Page(
+            pageFormat: const PdfPageFormat(400, 500, marginAll: 0),
+            build: (Context context) => ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 200, maxHeight: 300),
+              child: transform = Transform.rotateBox(
+                angle: angle,
+                child: Image(bitmap(300, 400)),
+              ),
+            ),
+          ),
+        );
+        await document.save();
+
+        expect(
+          transform.box!.width,
+          lessThanOrEqualTo(200 + 1e-6),
+          reason: 'angle $angle',
+        );
+        expect(
+          transform.box!.height,
+          lessThanOrEqualTo(300 + 1e-6),
+          reason: 'angle $angle',
+        );
+      }
+    });
+
+    test('leaves an even turn exactly where it was', () async {
+      // An unrotated child already measures in the right frame, so its box must
+      // not move - neither clamped up to the minimum nor down.
+      for (final angle in <double>[0, math.pi]) {
+        final landscape = await inColumn(angle, Image(bitmap(400, 300)));
+        expect(landscape.width, closeTo(481.8898, 0.01), reason: '$angle');
+        expect(landscape.height, closeTo(361.4174, 0.01), reason: '$angle');
+
+        final portrait = await inColumn(angle, Image(bitmap(300, 400)));
+        expect(portrait.width, closeTo(481.8898, 0.01), reason: '$angle');
+        expect(portrait.height, closeTo(642.5197, 0.01), reason: '$angle');
+      }
+    });
+
+    test('still runs unclamped when asked to', () async {
+      late Transform transform;
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(400, 500, marginAll: 0),
+          build: (Context context) => ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 200, maxHeight: 300),
+            child: transform = Transform.rotateBox(
+              angle: math.pi / 2,
+              unconstrained: true,
+              child: SizedBox(
+                width: 600,
+                height: 700,
+                child: Container(color: PdfColors.blue),
+              ),
+            ),
+          ),
+        ),
+      );
+      await document.save();
+
+      expect(transform.box!.width, greaterThan(200));
+    });
   });
 
   tearDownAll(() async {

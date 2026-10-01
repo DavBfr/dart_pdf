@@ -251,57 +251,131 @@ class Transform extends SingleChildWidget {
     }
 
     if (child != null) {
-      child!.layout(
-        context,
-        unconstrained ? const BoxConstraints() : constraints,
-        parentUsesSize: parentUsesSize,
-      );
+      // The child is painted rotated but measures in its own frame, so the box it
+      // has to fit into is the incoming one turned the same way. A quarter turn
+      // exchanges the two axes; everything else is measured and then scaled down
+      // if the rotated bounding box does not fit. Laying the child out against
+      // the constraints the Transform itself received - which is what this did -
+      // means a quarter-turned child neither fills the space it is given nor
+      // stays inside it: a portrait image came out 642pt wide in a 482pt slot
+      // and was painted off the page.
+      final cos = transform.entry(0, 0).abs();
+      final sin = transform.entry(1, 0).abs();
+      const quarter = 1e-9;
+
+      var childConstraints = unconstrained
+          ? const BoxConstraints()
+          : (cos <= quarter && sin > quarter
+                ? constraints.flipped
+                : constraints);
+
+      child!.layout(context, childConstraints, parentUsesSize: parentUsesSize);
       assert(child!.box != null);
 
-      final mat = transform;
-      final values = mat.applyToVector3Array(<double>[
-        child!.box!.left,
-        child!.box!.top,
-        0,
-        child!.box!.right,
-        child!.box!.top,
-        0,
-        child!.box!.right,
-        child!.box!.bottom,
-        0,
-        child!.box!.left,
-        child!.box!.bottom,
-        0,
-      ]);
+      var bounds = _rotatedBounds();
 
-      final dx = -math.min(
-        math.min(math.min(values[0], values[3]), values[6]),
-        values[9],
-      );
-      final dy = -math.min(
-        math.min(math.min(values[1], values[4]), values[7]),
-        values[10],
-      );
+      if (!unconstrained) {
+        final overWidth =
+            constraints.hasBoundedWidth && bounds.x > constraints.maxWidth;
+        final overHeight =
+            constraints.hasBoundedHeight && bounds.y > constraints.maxHeight;
 
-      box = PdfRect.fromLBRT(
-        0,
-        0,
-        math.max(
-              math.max(math.max(values[0], values[3]), values[6]),
-              values[9],
-            ) +
-            dx,
-        math.max(
-              math.max(math.max(values[1], values[4]), values[7]),
-              values[10],
-            ) +
-            dy,
-      );
+        if (overWidth || overHeight) {
+          // An arbitrary angle: shrink the frame the child measured in by however
+          // much its rotated bounding box overflows, and measure once more.
+          final scale = math.min(
+            overWidth ? constraints.maxWidth / bounds.x : 1.0,
+            overHeight ? constraints.maxHeight / bounds.y : 1.0,
+          );
 
-      transform.leftTranslateByDouble(dx, dy, 0, 1);
+          childConstraints = BoxConstraints(
+            maxWidth: childConstraints.hasBoundedWidth
+                ? childConstraints.maxWidth * scale
+                : bounds.x * scale,
+            maxHeight: childConstraints.hasBoundedHeight
+                ? childConstraints.maxHeight * scale
+                : bounds.y * scale,
+          );
+
+          child!.layout(
+            context,
+            childConstraints,
+            parentUsesSize: parentUsesSize,
+          );
+          assert(child!.box != null);
+          bounds = _rotatedBounds();
+        }
+
+        assert(() {
+          if ((constraints.hasBoundedWidth &&
+                  bounds.x > constraints.maxWidth + 1e-6) ||
+              (constraints.hasBoundedHeight &&
+                  bounds.y > constraints.maxHeight + 1e-6)) {
+            print(
+              'A rotated child does not fit the space it was given: '
+              '${bounds.x.toStringAsFixed(1)} x ${bounds.y.toStringAsFixed(1)} '
+              'in ${constraints.maxWidth.toStringAsFixed(1)} x '
+              '${constraints.maxHeight.toStringAsFixed(1)}. '
+              'The box is clamped, so the child will overflow it.',
+            );
+          }
+          return true;
+        }());
+
+        // Never grow to the minimum: an even turn that already fits has to keep
+        // the box it has always had.
+        bounds = PdfPoint(
+          math.min(bounds.x, constraints.constrainWidth(bounds.x)),
+          math.min(bounds.y, constraints.constrainHeight(bounds.y)),
+        );
+      }
+
+      box = PdfRect.fromLBRT(0, 0, bounds.x, bounds.y);
+      transform.leftTranslateByDouble(_dx, _dy, 0, 1);
     } else {
       box = PdfRect.fromPoints(PdfPoint.zero, constraints.smallest);
     }
+  }
+
+  double _dx = 0;
+  double _dy = 0;
+
+  /// The size of the child's box once rotated, and the translation that brings
+  /// its lower left corner back to the origin.
+  PdfPoint _rotatedBounds() {
+    final values = transform.applyToVector3Array(<double>[
+      child!.box!.left,
+      child!.box!.top,
+      0,
+      child!.box!.right,
+      child!.box!.top,
+      0,
+      child!.box!.right,
+      child!.box!.bottom,
+      0,
+      child!.box!.left,
+      child!.box!.bottom,
+      0,
+    ]);
+
+    _dx = -math.min(
+      math.min(math.min(values[0], values[3]), values[6]),
+      values[9],
+    );
+    _dy = -math.min(
+      math.min(math.min(values[1], values[4]), values[7]),
+      values[10],
+    );
+
+    return PdfPoint(
+      math.max(math.max(math.max(values[0], values[3]), values[6]), values[9]) +
+          _dx,
+      math.max(
+            math.max(math.max(values[1], values[4]), values[7]),
+            values[10],
+          ) +
+          _dy,
+    );
   }
 
   @override
