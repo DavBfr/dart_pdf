@@ -324,10 +324,7 @@ void main() {
       final first = await saveRaw(document);
       final second = await saveRaw(document);
 
-      String numsOf(String pdf) =>
-          RegExp(r'/Nums\[(.*)\]', dotAll: true).firstMatch(pdf)!.group(1)!;
-
-      expect(numsOf(second), numsOf(first));
+      expect(_numsArray(second), _numsArray(first));
     });
   });
 }
