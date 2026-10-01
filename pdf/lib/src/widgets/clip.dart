@@ -66,8 +66,11 @@ class ClipRRect extends SingleChildWidget {
         box!.bottom,
         box!.width,
         box!.height,
-        horizontalRadius,
+        // drawRRect takes the vertical radius first: its fifth argument runs on
+        // the y axis and its sixth on the x axis. These two were the wrong way
+        // round, so a ClipRRect with unequal radii clipped them exchanged.
         verticalRadius,
+        horizontalRadius,
       )
       ..strokePath();
   }
@@ -86,8 +89,8 @@ class ClipRRect extends SingleChildWidget {
           box!.bottom,
           box!.width,
           box!.height,
-          horizontalRadius,
           verticalRadius,
+          horizontalRadius,
         )
         ..clipPath()
         ..setTransform(mat);

@@ -16,28 +16,20 @@ cmake_minimum_required(VERSION 3.15)
 set(PROJECT_NAME "printing")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
-set(PDFIUM_VERSION "5200" CACHE STRING "Version of pdfium used")
-string(REPLACE "windows-" "" TARGET_ARCH ${FLUTTER_TARGET_PLATFORM})
-set(PDFIUM_ARCH ${TARGET_ARCH} CACHE STRING "Architecture of pdfium used")
+set(PRINTING_FLUTTER_OS "windows")
+set(PRINTING_PDFIUM_OS "win")
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/pdfium.cmake)
 
-if(${PDFIUM_VERSION} STREQUAL "latest")
-  set(
-    PDFIUM_URL
-    "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-win-${PDFIUM_ARCH}.tgz"
-    )
-else()
-  set(
-    PDFIUM_URL
-    "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/${PDFIUM_VERSION}/pdfium-win-${PDFIUM_ARCH}.tgz"
-    )
-endif()
-
-# Download pdfium
+# Download pdfium. PREFIX keeps the download, source and build trees under this
+# plugin's own binary directory; without it every pdfium plugin in the app
+# shared ${CMAKE_BINARY_DIR}/pdfium-src and clobbered each other.
 include(../windows/DownloadProject.cmake)
 download_project(PROJ
                  pdfium
+                 PREFIX
+                 "${CMAKE_CURRENT_BINARY_DIR}/pdfium"
                  URL
-                 ${PDFIUM_URL})
+                 ${PRINTING_PDFIUM_URL})
 
 # This value is used when generating builds using this plugin, so it must not be
 # changed

@@ -25,16 +25,34 @@
 #include <gtk/gtk.h>
 #include <gtk/gtkunixprint.h>
 
+/// A single print, raster or share request.
+///
+/// Ownership: the plugin creates the job and owns it until print_pdf or
+/// direct_print_pdf returns true. From then on the job owns itself and
+/// destroys itself in finish(), which is why nothing may touch a job after a
+/// call that may finish it.
 class print_job {
  private:
   // Not owned: belongs to the plugin instance this job was created by.
   FlMethodChannel* channel;
   const int index;
   GtkPrintJob* printJob = nullptr;
+  GtkPrintUnixDialog* dialog = nullptr;
+  // The memfd the document is spooled through. Owned by this job, because
+  // gtk_print_job_set_source_fd wraps it in a GIOChannel that does not close
+  // it.
+  int spool_fd = -1;
+  // Whether a terminal result has already been reported.
+  bool is_completed = false;
+  // Whether this job owns itself; see finish().
+  bool owns_self = false;
+
+  /// Destroy the dialog, drop the GtkPrintJob and close the spool fd.
+  ///
+  /// Idempotent, so the destructor can call it too.
+  void release();
 
  public:
-  GtkPrintUnixDialog* dialog = nullptr;
-
   print_job(FlMethodChannel* channel, int index);
 
   ~print_job();
@@ -61,6 +79,14 @@ class print_job {
 
   void write_job(const uint8_t data[], size_t size);
 
+  /// Report this job's single terminal result and release what it owns.
+  ///
+  /// Calls after the first are ignored, so every failure path can report
+  /// without checking. Destroys the job when it owns itself: nothing may
+  /// touch the job afterwards.
+  void finish(bool completed, const gchar* error);
+
+  /// Terminate the job with an error, or with nullptr for a cancellation.
   void cancel_job(const gchar* error);
 
   static bool share_pdf(const uint8_t data[], size_t size, const gchar* name);
@@ -69,7 +95,8 @@ class print_job {
                   size_t size,
                   const int32_t pages[],
                   size_t pages_count,
-                  double scale);
+                  double scale,
+                  uint32_t background);
 
   static FlValue* printing_info();
 };

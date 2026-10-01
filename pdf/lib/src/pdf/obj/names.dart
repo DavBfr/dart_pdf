@@ -41,6 +41,21 @@ class PdfNames extends PdfObject<PdfDict> {
     double? posZ,
   }) {
     assert(page.pdfDocument == pdfDocument);
+    assert(() {
+      final existing = _dests[name];
+      if (existing != null) {
+        final target = (existing as PdfDict)['/D'];
+        final wanted = PdfArray([page.ref()]).values.first;
+        if (target is PdfArray && target.values.first != wanted) {
+          throw AssertionError(
+            'The destination "$name" is already registered for another page. '
+            'Two anchors with the same name collapse onto one, and the last '
+            'one silently wins.',
+          );
+        }
+      }
+      return true;
+    }());
 
     _dests[name] = PdfDict.values({
       '/D': PdfArray([
@@ -52,6 +67,14 @@ class PdfNames extends PdfObject<PdfDict> {
       ]),
     });
   }
+
+  var _uniqueDest = 0;
+
+  /// A destination name no other anchor in this document will take.
+  ///
+  /// Deterministic per document, so saving the same definition twice gives the
+  /// same names. The prefix is reserved for generated anchors.
+  String uniqueDestName() => '__dest${_uniqueDest++}';
 
   @override
   void prepare() {

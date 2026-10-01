@@ -18,6 +18,8 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:pdf/pdf.dart';
+
 import 'callback.dart';
 import 'raster.dart';
 
@@ -30,6 +32,7 @@ class PrintJob {
     this.onHtmlRendered,
     this.onCompleted,
     this.onPageRasterized,
+    this.format,
   });
 
   /// Callback used when calling Printing.layoutPdf()
@@ -43,6 +46,11 @@ class PrintJob {
 
   /// Stream of rasterized pages
   final StreamController<PdfRaster>? onPageRasterized;
+
+  /// The page format this job was requested with
+  ///
+  /// Used to repair a page size the platform reports back as not finite.
+  final PdfPageFormat? format;
 
   /// The Job number
   final int index;
@@ -63,6 +71,7 @@ class PrintJobs {
     Completer<Uint8List>? onHtmlRendered,
     Completer<bool>? onCompleted,
     StreamController<PdfRaster>? onPageRasterized,
+    PdfPageFormat? format,
   }) {
     final job = PrintJob._(
       index: _currentIndex++,
@@ -70,6 +79,7 @@ class PrintJobs {
       onHtmlRendered: onHtmlRendered,
       onCompleted: onCompleted,
       onPageRasterized: onPageRasterized,
+      format: format,
     );
     _printJobs[job.index] = job;
     return job;
@@ -84,4 +94,11 @@ class PrintJobs {
   void remove(int index) {
     _printJobs.remove(index);
   }
+
+  /// Number of jobs still waiting for a platform callback.
+  ///
+  /// Every call registers one job and must unregister it again, whether it
+  /// succeeds or fails, so this returns to its previous value after each
+  /// completed call.
+  int get pending => _printJobs.length;
 }

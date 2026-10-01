@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
+
+import '../../../pdf.dart' show PdfException;
 import 'base.dart';
 import 'object_base.dart';
 import 'stream.dart';
@@ -26,9 +29,19 @@ class PdfName extends PdfDataType {
   @override
   void output(PdfObjectBase o, PdfStream s, [int? indent]) {
     assert(value[0] == '/');
+
+    // UTF-8 bytes, not UTF-16 code units. A code unit above 0xFF was written as
+    // itself, so '#' was followed by four hex digits for a CJK character - which
+    // reads back as a different name - and a non-BMP character emitted both of
+    // its surrogate halves. The old assert also rejected 0xFF, which is a legal
+    // name byte, so a debug build crashed where release emitted the malformed
+    // name.
     final bytes = <int>[];
-    for (final c in value.codeUnits) {
-      assert(c > 0x00 && c < 0xff);
+    for (final c in utf8.encode(value)) {
+      if (c == 0x00) {
+        // ISO 32000-1 7.3.5: a name may not contain a null byte.
+        throw PdfException('A PDF name cannot contain a null byte: $value');
+      }
 
       if (c < 0x21 ||
           c > 0x7E ||

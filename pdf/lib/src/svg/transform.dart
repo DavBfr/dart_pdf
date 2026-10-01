@@ -17,8 +17,6 @@
 import 'package:vector_math/vector_math_64.dart';
 import 'package:xml/xml.dart';
 
-import 'parser.dart';
-
 class SvgTransform {
   const SvgTransform(this.matrix);
 
@@ -35,57 +33,82 @@ class SvgTransform {
 
     for (final m in _transformRegExp.allMatches(transform)) {
       final name = m.group(1);
-      final parameterList = SvgParser.splitDoubles(m.group(2)!).toList();
 
+      // tryParse, not parse: a non-numeric argument used to throw a
+      // FormatException out of pdf.save(). SvgParser.splitDoubles is left alone
+      // because viewBox and path data share it.
+      final parameterList = _tryParseAll(m.group(2)!);
+      if (parameterList == null) {
+        continue;
+      }
+
+      // SVG 1.1 7.6 gives each function an exact argument count. None of them
+      // was checked: matrix() with seven arguments handed List.filled a negative
+      // length and threw a RangeError, matrix() with fewer was zero-padded into a
+      // singular matrix that collapsed everything after it, and the other five
+      // indexed parameterList[0] on a list that could be empty. A function that
+      // does not match its own signature is now skipped, and the valid ones
+      // around it still apply.
       switch (name) {
         case 'matrix':
-          final mm = <double>[
-            ...parameterList,
-            ...List.filled(6 - parameterList.length, 0.0),
-          ];
+          if (parameterList.length != 6) {
+            continue;
+          }
 
           mat.multiply(
             Matrix4(
-              mm[0],
-              mm[1],
+              parameterList[0],
+              parameterList[1],
               0,
               0,
-              mm[2],
-              mm[3],
+              parameterList[2],
+              parameterList[3],
               0,
               0,
               0,
               0,
               1,
               0,
-              mm[4],
-              mm[5],
+              parameterList[4],
+              parameterList[5],
               0,
               1,
             ),
           );
           break;
         case 'translate':
+          if (parameterList.isEmpty || parameterList.length > 2) {
+            continue;
+          }
+
           final dx = parameterList[0];
-          final dy = [...parameterList, .0][1];
+          final dy = parameterList.length > 1 ? parameterList[1] : 0.0;
 
           mat.multiply(Matrix4.identity()..translateByDouble(dx, dy, 0, 1));
           break;
         case 'scale':
+          if (parameterList.isEmpty || parameterList.length > 2) {
+            continue;
+          }
+
           final sw = parameterList[0];
-          final sh = [...parameterList, sw][1];
+          final sh = parameterList.length > 1 ? parameterList[1] : sw;
 
           mat.multiply(Matrix4.identity()..scaleByDouble(sw, sh, 1, 1));
           break;
         case 'rotate':
+          if (parameterList.length != 1 && parameterList.length != 3) {
+            continue;
+          }
+
           final degrees = parameterList[0];
 
           var ox = 0.0;
           var oy = 0.0;
-          if (parameterList.length > 1) {
+          if (parameterList.length == 3) {
             // Rotation about the origin (ox, oy)
             ox = parameterList[1];
-            oy = [...parameterList, .0][2];
+            oy = parameterList[2];
             mat.translateByDouble(ox, oy, 0, 1);
           }
 
@@ -97,17 +120,42 @@ class SvgTransform {
           break;
 
         case 'skewX':
-          // assert(false, 'skewX');
+          if (parameterList.length != 1) {
+            continue;
+          }
+
           mat.multiply(Matrix4.skewX(radians(parameterList[0])));
           break;
         case 'skewY':
-          // assert(false, 'skewY');
+          if (parameterList.length != 1) {
+            continue;
+          }
+
           mat.multiply(Matrix4.skewY(radians(parameterList[0])));
           break;
       }
     }
 
     return SvgTransform(mat);
+  }
+
+  /// Every number in [parameters], or null when one of the tokens is not one.
+  static List<double>? _tryParseAll(String parameters) {
+    final result = <double>[];
+
+    for (final token in parameters.split(RegExp(r'[\s,]+'))) {
+      if (token.isEmpty) {
+        continue;
+      }
+
+      final value = double.tryParse(token);
+      if (value == null) {
+        return null;
+      }
+      result.add(value);
+    }
+
+    return result;
   }
 
   final Matrix4? matrix;

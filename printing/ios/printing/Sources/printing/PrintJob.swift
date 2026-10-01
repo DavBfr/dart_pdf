@@ -15,6 +15,7 @@
  */
 
 import Flutter
+import PDFKit
 import WebKit
 
 /// A variable that holds the selected printers to prevent recreate it if selected again
@@ -28,15 +29,15 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     private var printing: PrintingPlugin
     public var index: Int
     private let pdfDocumentLock = NSLock()
-    private var _pdfDocument: CGPDFDocument?
+    private var _pdfDocument: PDFDocument?
     /// UIKit queries numberOfPages from a background page-count thread
     /// (UIPrintPreviewViewController.updatePageCount) while setDocument and
     /// cancelJob replace the document on the main thread. An unsynchronized
-    /// swap lets ARC free the old CGPDFDocument mid-read, crashing in
-    /// CGPDFDocumentGetNumberOfPages. All access must go through this lock;
+    /// swap lets ARC free the old document mid-read. All access must go
+    /// through this lock;
     /// the getter retains the document under the lock so callers always hold
     /// a strong reference to a live object.
-    private var pdfDocument: CGPDFDocument? {
+    private var pdfDocument: PDFDocument? {
         get {
             pdfDocumentLock.lock()
             defer { pdfDocumentLock.unlock() }
@@ -52,7 +53,15 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     private var urlObservation: NSKeyValueObservation?
     private var jobName: String?
     private var printerName: String?
-    private var orientation: UIPrintInfo.Orientation?
+    /// Built once in printPdf and re-assigned onto the shared controller
+    /// immediately before every present() or print(to:).
+    ///
+    /// setDocument used to build a second one, which hard-coded .general and
+    /// lost the requested orientation, so a landscape document printed to a
+    /// portrait sheet on the static-layout path.
+    private(set) var printInfo: UIPrintInfo?
+    /// Whether the single result has already gone to Dart.
+    private var completed = false
     private let semaphore = DispatchSemaphore(value: 0)
     private var dynamic = false
     private var currentSize: CGSize?
@@ -69,12 +78,15 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         // Hold a strong local reference so a concurrent setDocument can't
         // release the document (and the page it owns) while we draw.
         let document = pdfDocument
-        let page = document?.page(at: pageIndex + 1)
-        ctx?.scaleBy(x: 1.0, y: -1.0)
-        ctx?.translateBy(x: 0.0, y: -paperRect.size.height)
-        if page != nil {
-            ctx?.drawPDFPage(page!)
+        guard let ctx, let page = document?.page(at: pageIndex) else {
+            return
         }
+
+        // UIKit's context has y increasing downwards; PDF drawing expects the
+        // opposite.
+        ctx.scaleBy(x: 1.0, y: -1.0)
+        ctx.translateBy(x: 0.0, y: -paperRect.size.height)
+        PdfPageRenderer.draw(page: page, in: ctx, to: paperRect)
     }
 
     func cancelJob(_ error: String?) {
@@ -82,15 +94,15 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         if dynamic {
             semaphore.signal()
         } else {
-            printing.onCompleted(printJob: self, completed: false, error: error as NSString?)
+            reportCompleted(false, error)
         }
     }
 
     func setDocument(_ data: Data?) {
-        // An empty or malformed document must not crash: CGDataProvider returns
-        // nil for empty data, and CGPDFDocument returns nil for invalid data.
-        if let data, !data.isEmpty, let dataProvider = CGDataProvider(data: data as CFData) {
-            pdfDocument = CGPDFDocument(dataProvider)
+        // An empty or malformed document must not crash: PDFDocument returns
+        // nil for both.
+        if let data, !data.isEmpty {
+            pdfDocument = PDFDocument(data: data)
         } else {
             pdfDocument = nil
         }
@@ -102,50 +114,12 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         }
 
         if pdfDocument == nil {
-            printing.onCompleted(printJob: self, completed: false, error: "Unable to load the PDF document")
+            reportCompleted(false, "Unable to load the PDF document")
             return
         }
 
         DispatchQueue.main.async { [self] in
-            let controller = UIPrintInteractionController.shared
-            controller.delegate = self
-
-            let printInfo = UIPrintInfo.printInfo()
-            let strippedJobName = jobName!.hasSuffix(".pdf") ? String(jobName!.dropLast(4)) : jobName!
-            printInfo.jobName = strippedJobName
-            printInfo.outputType = .general
-            if orientation != nil {
-                printInfo.orientation = orientation!
-                orientation = nil
-            }
-            controller.printInfo = printInfo
-            controller.printPageRenderer = self
-
-            if self.printerName != nil {
-                let printerURL = URL(string: self.printerName!)
-
-                if printerURL == nil {
-                    self.printing.onCompleted(printJob: self, completed: false, error: "Unable to find printer URL")
-                    return
-                }
-
-                let printerURLString = printerURL!.absoluteString
-
-                if !selectedPrinters.keys.contains(printerURLString) {
-                    selectedPrinters[printerURLString] = UIPrinter(url: printerURL!)
-                }
-
-                selectedPrinters[printerURLString]!.contactPrinter { available in
-                    if !available {
-                        self.printing.onCompleted(printJob: self, completed: false, error: "Printer not available")
-                        return
-                    }
-
-                    controller.print(to: selectedPrinters[printerURLString]!, completionHandler: self.completionHandler)
-                }
-            } else {
-                controller.present(animated: true, completionHandler: self.completionHandler)
-            }
+            startJob()
         }
     }
 
@@ -165,7 +139,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             semaphore.wait()
         }
 
-        return pdfDocument?.numberOfPages ?? 0
+        return pdfDocument?.pageCount ?? 0
     }
 
     func completionHandler(printController _: UIPrintInteractionController, completed: Bool, error: Error?) {
@@ -173,7 +147,19 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             print("Unable to print: \(error?.localizedDescription ?? "unknown error")")
         }
 
-        printing.onCompleted(printJob: self, completed: completed, error: error?.localizedDescription as NSString?)
+        reportCompleted(completed, error?.localizedDescription)
+    }
+
+    /// Report this job's single result to Dart.
+    ///
+    /// A job can fail on its way to UIKit and then have UIKit report as well,
+    /// which the Dart side had to guard against.
+    private func reportCompleted(_ success: Bool, _ error: String?) {
+        if completed {
+            return
+        }
+        completed = true
+        printing.onCompleted(printJob: self, completed: success, error: error as NSString?)
     }
 
     public func printInteractionController(_: UIPrintInteractionController, choosePaper paperList: [UIPrintPaper]) -> UIPrintPaper {
@@ -196,87 +182,142 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         return UIPrintPaper.bestPaper(forPageSize: currentSize!, withPapersFrom: paperList)
     }
 
-    func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool, outputType type: UIPrintInfo.OutputType, forceCustomPrintPaper: Bool = false) {
+    func printPdf(name: String, withPageSize rawSize: CGSize, andMargin rawMargin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool, outputType type: UIPrintInfo.OutputType, forceCustomPrintPaper: Bool = false) {
+        // A roll format leaves an axis unspecified, which arrives as 0 (or,
+        // from an older Dart side, as infinity). Either way an infinite size
+        // makes the margin arithmetic below produce NaN, which ends up in the
+        // document as a NaN MediaBox.
+        let size = PrintJob.usableSize(rawSize)
+        let margin = PrintJob.usableMargin(rawMargin, in: size)
         currentSize = size
         dynamic = dyn
         self.forceCustomPrintPaper = forceCustomPrintPaper
 
         let printing = UIPrintInteractionController.isPrintingAvailable
         if !printing {
-            self.printing.onCompleted(printJob: self, completed: false, error: "Printing not available")
+            reportCompleted(false, "Printing not available")
             return
-        }
-
-        if size.width > size.height {
-            orientation = UIPrintInfo.Orientation.landscape
         }
 
         // Strip .pdf extension as UIPrintInteractionController appends it automatically
         jobName = name.hasSuffix(".pdf") ? String(name.dropLast(4)) : name
         printerName = printerID
 
-        let controller = UIPrintInteractionController.shared
-        controller.delegate = self
-
-        let printInfo = UIPrintInfo.printInfo()
-        printInfo.jobName = jobName!
-        printInfo.outputType = type
-        if orientation != nil {
-            printInfo.orientation = orientation!
-            orientation = nil
-        }
-        controller.printInfo = printInfo
-        controller.showsPaperSelectionForLoadedPapers = true
-
-        controller.printPageRenderer = self
-
-        if printerID != nil {
-            let printerURL = URL(string: printerID!)
-
-            if printerURL == nil {
-                self.printing.onCompleted(printJob: self, completed: false, error: "Unable to find printer URL")
-                return
-            }
-
-            let printerURLString = printerURL!.absoluteString
-
-            if !selectedPrinters.keys.contains(printerURLString) {
-                selectedPrinters[printerURLString] = UIPrinter(url: printerURL!)
-            }
-
-            // Sometimes using UIPrinter(url:) gives a non-contactable printer.
-            // https://stackoverflow.com/questions/34602302/creating-a-working-uiprinter-object-from-url-for-dialogue-free-printing
-            // This lets use a printer saved during picking and fall back using a printer created with UIPrinter(url:)
-            if pickedPrinter != nil, selectedPrinters[printerURLString]!.url == pickedPrinter?.url {
-                controller.print(to: pickedPrinter!, completionHandler: completionHandler)
-                return
-            }
-
-            selectedPrinters[printerURLString]!.contactPrinter { available in
-                if !available {
-                    self.printing.onCompleted(printJob: self, completed: false, error: "Printer not available")
-                    return
-                }
-
-                controller.print(to: selectedPrinters[printerURLString]!, completionHandler: self.completionHandler)
-            }
-            return
-        }
+        printInfo = PrintJob.makePrintInfo(jobName: jobName!, size: size, outputType: type)
 
         if dynamic {
-            controller.present(animated: true, completionHandler: completionHandler)
+            // UIKit drives the layout: numberOfPages asks Dart for the
+            // document while the job runs.
+            startJob()
             return
         }
 
+        // Static layout: ask for the document first and start the job in
+        // setDocument. The printer branch used to start the job here, before
+        // anything had asked Dart for a document, so AirPrint got an empty
+        // job and nothing printed.
         self.printing.onLayout(
             printJob: self,
             width: size.width,
             height: size.height,
-            marginLeft: margin.minX,
-            marginTop: margin.minY,
-            marginRight: size.width - margin.maxX,
-            marginBottom: size.height - margin.maxY
+            marginLeft: PrintJob.finite(margin.minX),
+            marginTop: PrintJob.finite(margin.minY),
+            marginRight: PrintJob.finite(size.width - margin.maxX),
+            marginBottom: PrintJob.finite(size.height - margin.maxY)
         )
+    }
+
+    /// One print info per job, carrying exactly what Dart asked for.
+    static func makePrintInfo(jobName: String, size: CGSize, outputType: UIPrintInfo.OutputType) -> UIPrintInfo {
+        let printInfo = UIPrintInfo.printInfo()
+        printInfo.jobName = jobName
+        printInfo.outputType = outputType
+        printInfo.orientation = size.width > size.height ? .landscape : .portrait
+        return printInfo
+    }
+
+    /// Hand this renderer to UIKit, to a named printer or through the sheet.
+    ///
+    /// UIPrintInteractionController.shared is process-wide, so the print info
+    /// and the renderer are re-assigned here, immediately before the job
+    /// starts.
+    private func startJob() {
+        let controller = UIPrintInteractionController.shared
+        controller.delegate = self
+        if let printInfo {
+            controller.printInfo = printInfo
+        }
+        controller.showsPaperSelectionForLoadedPapers = true
+        controller.printPageRenderer = self
+
+        guard let printerName else {
+            if !controller.present(animated: true, completionHandler: completionHandler) {
+                // Used to be silent, so the Dart future never completed.
+                reportCompleted(false, "Unable to present the print sheet")
+            }
+            return
+        }
+
+        guard let printerURL = URL(string: printerName) else {
+            reportCompleted(false, "Unable to find printer URL")
+            return
+        }
+
+        let printerURLString = printerURL.absoluteString
+
+        if !selectedPrinters.keys.contains(printerURLString) {
+            selectedPrinters[printerURLString] = UIPrinter(url: printerURL)
+        }
+
+        // Sometimes using UIPrinter(url:) gives a non-contactable printer.
+        // https://stackoverflow.com/questions/34602302/creating-a-working-uiprinter-object-from-url-for-dialogue-free-printing
+        // This lets use a printer saved during picking and fall back using a printer created with UIPrinter(url:)
+        if let pickedPrinter, selectedPrinters[printerURLString]!.url == pickedPrinter.url {
+            if !controller.print(to: pickedPrinter, completionHandler: completionHandler) {
+                reportCompleted(false, "Unable to start the print job")
+            }
+            return
+        }
+
+        selectedPrinters[printerURLString]!.contactPrinter { [weak self] available in
+            guard let self else {
+                return
+            }
+
+            if !available {
+                self.reportCompleted(false, "Printer not available")
+                return
+            }
+
+            if !controller.print(to: selectedPrinters[printerURLString]!, completionHandler: self.completionHandler) {
+                self.reportCompleted(false, "Unable to start the print job")
+            }
+        }
+    }
+
+    /// 0 for a value that is not finite, so NaN never reaches Dart.
+    static func finite(_ value: CGFloat) -> CGFloat {
+        return value.isFinite ? value : 0
+    }
+
+    /// Replace an unspecified axis with the default paper's, so the job has a
+    /// real sheet to lay out on.
+    static func usableSize(_ size: CGSize) -> CGSize {
+        // A4 in points, the same default the Dart side falls back to. The
+        // print sheet lets the user pick another paper from here.
+        let fallback = CGSize(width: 595.28, height: 841.89)
+        let width = size.width.isFinite && size.width > 0 ? size.width : fallback.width
+        let height = size.height.isFinite && size.height > 0 ? size.height : fallback.height
+        return CGSize(width: width, height: height)
+    }
+
+    /// Clamp a margin rect to the sheet, dropping any non-finite edge.
+    static func usableMargin(_ margin: CGRect, in size: CGSize) -> CGRect {
+        let x = finite(margin.minX)
+        let y = finite(margin.minY)
+        let width = margin.width.isFinite ? margin.width : size.width - x
+        let height = margin.height.isFinite ? margin.height : size.height - y
+        return CGRect(x: x, y: y, width: max(0, width), height: max(0, height))
     }
 
     /// UIScene-safe key window lookup. `UIApplication.shared.keyWindow` and
@@ -294,25 +335,53 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         return UIApplication.shared.delegate?.window ?? nil
     }
 
-    static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String, subject: String?, body: String?) {
+    /// Offer the document through the share sheet.
+    ///
+    /// Returns false when nothing was presented, instead of letting the caller
+    /// believe every share succeeded.
+    static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String, subject: String?, body: String?) -> Bool {
+        // Defensive basename: a name carrying a separator pointed outside the
+        // temp directory, and one carrying '..' escaped it.
+        var safeName = (name as NSString).lastPathComponent
+        if safeName.isEmpty || safeName == "." || safeName == ".." {
+            safeName = "document.pdf"
+        }
+
         let tmpDirURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-        let fileURL = tmpDirURL.appendingPathComponent(name)
+        let fileURL = tmpDirURL.appendingPathComponent(safeName)
 
         do {
             try data.write(to: fileURL, options: .atomic)
         } catch {
             print("sharePdf error: \(error.localizedDescription)")
-            return
+            return false
         }
 
-        let activityViewController = UIActivityViewController(activityItems: [fileURL, body as Any], applicationActivities: nil)
+        guard let controller = PrintJob.sceneKeyWindow()?.rootViewController else {
+            // No window to present from: presenting would be a silent no-op.
+            try? FileManager.default.removeItem(at: fileURL)
+            return false
+        }
+
+        // A nil body used to be handed over as NSNull.
+        var items: [Any] = [fileURL]
+        if let body = body {
+            items.append(body)
+        }
+
+        let activityViewController = UIActivityViewController(activityItems: items, applicationActivities: nil)
         activityViewController.setValue(subject, forKey: "subject")
+        activityViewController.completionWithItemsHandler = { _, _, _, _ in
+            // The share sheet has finished with the file; nothing used to
+            // remove it.
+            try? FileManager.default.removeItem(at: fileURL)
+        }
         if UIDevice.current.userInterfaceIdiom == .pad {
-            let controller: UIViewController? = PrintJob.sceneKeyWindow()?.rootViewController
-            activityViewController.popoverPresentationController?.sourceView = controller?.view
+            activityViewController.popoverPresentationController?.sourceView = controller.view
             activityViewController.popoverPresentationController?.sourceRect = rect
         }
-        PrintJob.sceneKeyWindow()?.rootViewController?.present(activityViewController, animated: true)
+        controller.present(activityViewController, animated: true)
+        return true
     }
 
     func convertHtml(_ data: String, withPageSize rect: CGRect, andMargin margin: CGRect, andBaseUrl baseUrl: URL?) {
@@ -418,54 +487,27 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         controller.present(animated: true, completionHandler: pickPrinterCompletionHandler)
     }
 
-    public func rasterPdf(data: Data, pages: [Int]?, scale: CGFloat) {
-        guard
-            let provider = CGDataProvider(data: data as CFData),
-            let document = CGPDFDocument(provider)
-        else {
+    public func rasterPdf(data: Data, pages: [Int]?, scale: CGFloat, background: UInt32 = 0xFFFF_FFFF) {
+        guard let document = PDFDocument(data: data), document.pageCount > 0 else {
             printing.onPageRasterEnd(printJob: self, error: "Cannot raster a malformed PDF file")
             return
         }
 
         DispatchQueue.global().async {
-            let pageCount = document.numberOfPages
-
-            for pageNum in pages ?? Array(0 ... pageCount - 1) {
-                guard let page = document.page(at: pageNum + 1) else { continue }
-                let angle = CGFloat(page.rotationAngle) * CGFloat.pi / -180
-                let rect = page.getBoxRect(.mediaBox)
-                let rectCrop = page.getBoxRect(.cropBox)
-                let diffHeight = rectCrop.height - rect.height
-                let diffWidth = rectCrop.width - rect.width
-                let width = Int(abs((cos(angle) * rectCrop.width + sin(angle) * rectCrop.height) * scale))
-                let height = Int(abs((cos(angle) * rectCrop.height + sin(angle) * rectCrop.width) * scale))
-                let stride = width * 4
-                var data = Data(repeating: 0, count: stride * height)
-
-                data.withUnsafeMutableBytes { (outputBytes: UnsafeMutableRawBufferPointer) in
-                    let rgb = CGColorSpaceCreateDeviceRGB()
-                    let context = CGContext(
-                        data: outputBytes.baseAddress?.assumingMemoryBound(to: UInt8.self),
-                        width: width,
-                        height: height,
-                        bitsPerComponent: 8,
-                        bytesPerRow: stride,
-                        space: rgb,
-                        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-                    )
-
-                    if context != nil {
-                        context!.translateBy(x: CGFloat(width) / 2, y: CGFloat(height) / 2)
-                        context!.scaleBy(x: scale, y: scale)
-                        context!.rotate(by: angle)
-                        context!.translateBy(x: -rectCrop.width / 2, y: -rectCrop.height / 2)
-                        context!.translateBy(x: diffWidth, y: diffHeight)
-                        context!.drawPDFPage(page)
-                    }
+            // document is captured, so it outlives every page below.
+            for pageNum in pages ?? Array(0 ... document.pageCount - 1) {
+                guard let page = document.page(at: pageNum),
+                      let raster = PdfPageRenderer.raster(
+                          page: page,
+                          scale: scale,
+                          background: background
+                      )
+                else {
+                    continue
                 }
 
                 DispatchQueue.main.sync {
-                    self.printing.onPageRasterized(printJob: self, imageData: data, width: width, height: height)
+                    self.printing.onPageRasterized(printJob: self, imageData: raster.data, width: raster.width, height: raster.height)
                 }
             }
 

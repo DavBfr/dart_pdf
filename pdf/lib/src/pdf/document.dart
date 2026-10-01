@@ -18,6 +18,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:meta/meta.dart';
 
 import 'document_parser.dart';
 import 'format/array.dart';
@@ -30,6 +31,8 @@ import 'graphic_state.dart';
 import 'io/na.dart'
     if (dart.library.io) 'io/vm.dart'
     if (dart.library.js_interop) 'io/js.dart';
+import 'obj/acroform_field.dart';
+import 'obj/annotation.dart';
 import 'obj/catalog.dart';
 import 'obj/encryption.dart';
 import 'obj/font.dart';
@@ -76,6 +79,7 @@ class PdfDocument {
     bool verbose = false,
     PdfVersion version = PdfVersion.pdf_1_5,
     bool simpleTrueTypeFonts = false,
+    bool colorAlpha = true,
   }) : prev = null,
        _objser = 1 {
     settings = PdfSettings(
@@ -83,6 +87,7 @@ class PdfDocument {
       verbose: verbose,
       version: version,
       simpleTrueTypeFonts: simpleTrueTypeFonts,
+      colorAlpha: colorAlpha,
       encryptCallback: (input, object) =>
           encryption?.encrypt(input, object) ?? input,
     );
@@ -223,6 +228,52 @@ class PdfDocument {
   /// This document has at least one graphic state
   bool get hasGraphicStates => _graphicStates != null;
 
+  /// Group the widget annotations that share a field name under one form field.
+  ///
+  /// ISO 32000-1 12.7.3.1 allows a field and its widget to share one dictionary
+  /// only when the field has a single widget, and this package wrote that merged
+  /// form always - so a TextField in a MultiPage header became one root field per
+  /// page, all named the same and each with its own value. A name used once is
+  /// left exactly as it was.
+  @protected
+  void prepareAcroForm() {
+    final byName = <String, List<PdfAnnot>>{};
+
+    for (final page in pdfPageList.pages) {
+      for (final annot in page.annotations) {
+        final widget = annot.annot;
+        if (widget is! PdfAnnotWidget || widget.fieldName == null) {
+          continue;
+        }
+
+        // A signature stays a root field of its own.
+        if (widget is PdfAnnotSign) {
+          continue;
+        }
+
+        (byName[widget.fieldName!] ??= <PdfAnnot>[]).add(annot);
+      }
+    }
+
+    byName.forEach((String name, List<PdfAnnot> annots) {
+      if (annots.length < 2) {
+        return;
+      }
+
+      // Idempotent: a second write finds the parent already in place.
+      final existing = (annots.first.annot as PdfAnnotWidget).fieldParent;
+      final parent = existing ?? PdfAcroFormField(this, fieldName: name);
+
+      parent.kids
+        ..clear()
+        ..addAll(annots);
+
+      for (final annot in annots) {
+        (annot.annot as PdfAnnotWidget).fieldParent = parent;
+      }
+    });
+  }
+
   /// This writes the document to an OutputStream.
   Future<void> _write(
     PdfStream os, {
@@ -231,6 +282,11 @@ class PdfDocument {
     PdfSignature? signature;
 
     final xref = PdfXrefTable(lastObjectId: _objser);
+
+    // Before the loop below, because it allocates objects and that loop iterates
+    // the object list: a new PdfObject registers itself in it, which would be a
+    // ConcurrentModificationError.
+    prepareAcroForm();
 
     for (final ob in objects.where((e) => e.inUse)) {
       ob.prepare();

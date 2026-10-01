@@ -22,7 +22,6 @@ import 'package:pdf/pdf.dart';
 
 import '../callback.dart';
 import '../printing.dart';
-import '../printing_info.dart';
 import 'page.dart';
 import 'raster.dart';
 
@@ -131,6 +130,12 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
 
   final transformationController = TransformationController();
 
+  /// Unused, and always null.
+  ///
+  /// The preview's debounce lives on the [PdfPreviewRaster] mixin; this field
+  /// was never written to, and cancelling it in dispose() was a no-op that hid
+  /// the fact that the scroll controller was not being disposed.
+  @Deprecated('This field is unused and will be removed in a future release')
   Timer? previewUpdate;
 
   MouseCursor _mouseCursor = MouseCursor.defer;
@@ -143,7 +148,10 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
   @override
   void dispose() {
     transformationController.dispose();
-    previewUpdate?.cancel();
+    // Created here, so disposed here. A ScrollController is a ChangeNotifier,
+    // and every mount and unmount used to leak one, with its listener list.
+    scrollController.dispose();
+    // Last, so the mixin still cancels its debounce and evicts the page images.
     super.dispose();
   }
 
@@ -155,9 +163,24 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
 
   @override
   void didUpdateWidget(covariant PdfPreviewCustom oldWidget) {
+    if (oldWidget.enableScrollToPage != widget.enableScrollToPage) {
+      _syncPageGlobalKeys();
+    }
+
+    // widget.pages, widget.dpi and widget.maxPageWidth all feed the raster, and
+    // none of them used to be compared here: a page-filter, dpi or width change
+    // had no effect until some unrelated event happened to raster. A closure
+    // literal for `build` masked it, because its identity differs on every
+    // rebuild.
+    //
+    // pages is compared by content, not identity, so a fresh list literal with
+    // the same contents does not re-raster on every rebuild.
     if (oldWidget.build != widget.build ||
         widget.shouldRepaint ||
-        widget.pageFormat != oldWidget.pageFormat) {
+        widget.pageFormat != oldWidget.pageFormat ||
+        !listEquals(widget.pages, oldWidget.pages) ||
+        widget.dpi != oldWidget.dpi ||
+        (widget.dpi == null && widget.maxPageWidth != oldWidget.maxPageWidth)) {
       preview = null;
       updatePosition = null;
       raster();
@@ -170,20 +193,117 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
   void didChangeDependencies() {
     if (!infoLoaded) {
       infoLoaded = true;
-      Printing.info().then((PrintingInfo printingInfo) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          info = printingInfo;
-          raster();
-        });
-      });
+      unawaited(_loadPrintingInfo());
     }
 
-    raster();
+    // Gated on the dpi: the state depends on MediaQuery only because the dpi is
+    // computed from it, but MediaQueryData equality also covers viewInsets,
+    // padding, platformBrightness, textScaler and the accessibility flags. So
+    // opening the keyboard or toggling dark mode used to re-run the app's whole
+    // document build and a full raster pass for an identical result.
+    if (needsRasterForDpi) {
+      raster();
+    }
     super.didChangeDependencies();
   }
+
+  /// Read the platform capabilities before the first raster pass.
+  ///
+  /// A failure here must be shown: on the web a pdf.js that cannot be loaded
+  /// makes this throw, and without an error the preview would sit on its
+  /// loading indicator forever.
+  Future<void> _loadPrintingInfo() async {
+    try {
+      final printingInfo = await Printing.info();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        info = printingInfo;
+        raster();
+      });
+    } catch (exception, stack) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'printing',
+          context: ErrorDescription('while reading the printing capabilities'),
+        ),
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        error = exception;
+      });
+    }
+  }
+
+  @override
+  void onPagesChanged() {
+    _syncPageGlobalKeys();
+    _clampPreview();
+    super.onPagesChanged();
+  }
+
+  /// Keep exactly one key per page, the same object for that page's lifetime.
+  ///
+  /// These used to be reallocated inside build. Fresh keys make
+  /// `Widget.canUpdate` false for every page child, so each rebuild
+  /// deactivated and re-inflated every page - and with a setState per
+  /// rasterized page, streaming a document cost O(N^2) - while a key handed out
+  /// by [getPageKey] was dead one frame later.
+  void _syncPageGlobalKeys() {
+    if (!widget.enableScrollToPage) {
+      if (_pageGlobalKeys.isNotEmpty) {
+        _pageGlobalKeys = <GlobalKey>[];
+      }
+      return;
+    }
+
+    if (_pageGlobalKeys.length > pages.length) {
+      // Shrunk: the keys for the pages that remain are untouched.
+      _pageGlobalKeys = _pageGlobalKeys.sublist(0, pages.length);
+      return;
+    }
+
+    while (_pageGlobalKeys.length < pages.length) {
+      _pageGlobalKeys.add(GlobalKey());
+    }
+  }
+
+  /// Reconcile the zoomed page with a page list that may have shrunk.
+  ///
+  /// `preview` used to index `pages` unguarded, and only didUpdateWidget reset
+  /// it - while rasters also start from didChangeDependencies, reassemble and
+  /// the debug switch. So zooming a page and then resizing threw a RangeError
+  /// out of build: a red error widget, and a preview the user could not
+  /// recover.
+  void _clampPreview() {
+    final zoomed = preview;
+    if (zoomed == null || zoomed < pages.length) {
+      return;
+    }
+
+    if (pages.isEmpty) {
+      preview = null;
+      updatePosition = null;
+      // The zoom state really changed, so the callback is owed exactly one
+      // call.
+      _zoomChanged();
+      return;
+    }
+
+    // Stay zoomed, on the last page there is.
+    preview = pages.length - 1;
+  }
+
+  /// The number of rasterized pages.
+  ///
+  /// [scrollToPage] and [getPageKey] are meaningful only for an index below
+  /// this, which is zero until the first raster has delivered a page.
+  int get pageCount => pages.length;
 
   /// Ensures that page with [index] is become visible.
   Future<void> scrollToPage(
@@ -194,10 +314,32 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
         ScrollPositionAlignmentPolicy.explicit,
   }) {
     assert(index >= 0, 'Index of page cannot be negative');
+    assert(
+      widget.enableScrollToPage,
+      'scrollToPage needs PdfPreview(enableScrollToPage: true)',
+    );
+    assert(
+      index < _pageGlobalKeys.length,
+      'Page $index is out of range: the preview has ${_pageGlobalKeys.length} '
+      'page(s). scrollToPage is meaningful only once a page has been '
+      'rasterized.',
+    );
+
+    if (index >= _pageGlobalKeys.length) {
+      // Nothing to scroll to: no page has been rasterized yet, or the document
+      // shrank. This used to throw a RangeError out of a public method.
+      return Future<void>.value();
+    }
+
     final pageContext = _pageGlobalKeys[index].currentContext;
-    assert(pageContext != null, 'Context of GlobalKey cannot be null');
+    if (pageContext == null) {
+      // The page exists but is not on screen: the preview is zoomed, or the
+      // list has not laid that page out.
+      return Future<void>.value();
+    }
+
     return Scrollable.ensureVisible(
-      pageContext!,
+      pageContext,
       duration: duration,
       curve: curve,
       alignmentPolicy: alignmentPolicy,
@@ -205,7 +347,20 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
   }
 
   /// Returns the global key for page with [index].
-  Key getPageKey(int index) => _pageGlobalKeys[index];
+  ///
+  /// The same object for as long as that page exists, so it can be held across
+  /// frames. Meaningful only for an index below [pageCount], and only with
+  /// `enableScrollToPage: true`.
+  Key getPageKey(int index) {
+    assert(index >= 0, 'Index of page cannot be negative');
+    assert(
+      index < _pageGlobalKeys.length,
+      'Page $index is out of range: the preview has ${_pageGlobalKeys.length} '
+      'page(s).',
+    );
+
+    return _pageGlobalKeys[index];
+  }
 
   Widget _showError(Object error) {
     if (widget.onError != null) {
@@ -228,10 +383,6 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     if (pages.isEmpty) {
       return widget.loadingWidget ??
           const Center(child: CircularProgressIndicator());
-    }
-
-    if (widget.enableScrollToPage) {
-      _pageGlobalKeys = List.generate(pages.length, (_) => GlobalKey());
     }
 
     if (widget.pagesBuilder != null) {
@@ -281,7 +432,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
           );
   }
 
-  Widget _zoomPreview() {
+  Widget _zoomPreview(int index) {
     final zoomPreview = GestureDetector(
       onDoubleTap: () {
         setState(() {
@@ -304,7 +455,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
             : null,
         child: Center(
           child: PdfPreviewPage(
-            pageData: pages[preview!],
+            pageData: pages[index],
             pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
             pageMargin: widget.previewPageMargin,
           ),
@@ -328,8 +479,11 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
   Widget build(BuildContext context) {
     Widget page;
 
-    if (preview != null) {
-      page = _zoomPreview();
+    // Guarded, and build never writes to `preview`: onPagesChanged reconciles
+    // it, and this is what keeps a stale index from reaching `pages`.
+    final zoomed = preview;
+    if (zoomed != null && zoomed < pages.length) {
+      page = _zoomPreview(zoomed);
     } else {
       page = Container(
         constraints: widget.maxPageWidth != null
@@ -340,6 +494,13 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
 
       if (updatePosition != null) {
         Timer.run(() {
+          // Scheduled from build and never cancelled, so without these guards
+          // disposing the controller turns a silent leak into a 'used after
+          // being disposed' crash.
+          if (!mounted || !scrollController.hasClients) {
+            updatePosition = null;
+            return;
+          }
           scrollController.jumpTo(updatePosition!);
           updatePosition = null;
         });

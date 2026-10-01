@@ -116,7 +116,13 @@ class PrintingPlugin : public flutter::Plugin {
       result->Success(flutter::EncodableValue(res ? 1 : 0));
     } else if (method_call.method_name().compare("listPrinters") == 0) {
       auto job = std::make_unique<PrintJob>(&printing, -1);
-      auto printers = job->listPrinters();
+      auto error = std::string{};
+      auto printers = job->listPrinters(&error);
+      if (!error.empty()) {
+        // A stopped spooler used to look like a machine with no printers.
+        result->Error("listPrinters", error);
+        return;
+      }
       auto pl = flutter::EncodableList{};
       for (auto printer : printers) {
         auto mp = flutter::EncodableMap{};
@@ -157,8 +163,15 @@ class PrintingPlugin : public flutter::Plugin {
           vScale != arguments->end() ? std::get<double>(vScale->second) : 1;
       auto vJob = arguments->find(flutter::EncodableValue("job"));
       auto jobNum = vJob != arguments->end() ? std::get<int>(vJob->second) : -1;
+      // Opaque white when an older Dart side does not send one.
+      auto vBackground = arguments->find(flutter::EncodableValue("background"));
+      auto background =
+          vBackground != arguments->end() &&
+                  std::holds_alternative<int>(vBackground->second)
+              ? static_cast<uint32_t>(std::get<int>(vBackground->second))
+              : 0xffffffffu;
       auto job = std::make_unique<PrintJob>(&printing, jobNum);
-      job->rasterPdf(doc, pages, scale);
+      job->rasterPdf(doc, pages, scale, background);
       result->Success(nullptr);
     } else if (method_call.method_name().compare("printingInfo") == 0) {
       auto job = std::make_unique<PrintJob>(&printing, -1);

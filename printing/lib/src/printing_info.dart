@@ -25,6 +25,7 @@ class PrintingInfo {
     this.canListPrinters = false,
     this.canShare = false,
     this.canRaster = false,
+    this.reportsPrintOutcome = true,
   });
 
   /// Create an information object from a dictionary
@@ -36,10 +37,15 @@ class PrintingInfo {
     canListPrinters: map['canListPrinters'] ?? false,
     canShare: map['canShare'] ?? false,
     canRaster: map['canRaster'] ?? false,
+    // Absent from every native backend's reply, where it is implied: they all
+    // report the real outcome through onCompleted.
+    reportsPrintOutcome: map['reportsPrintOutcome'] ?? true,
   );
 
   /// Default information with no feature available
-  static const PrintingInfo unavailable = PrintingInfo();
+  static const PrintingInfo unavailable = PrintingInfo(
+    reportsPrintOutcome: false,
+  );
 
   /// The platform can print directly to a printer
   final bool directPrint;
@@ -65,6 +71,15 @@ class PrintingInfo {
   /// to a stream of images
   final bool canRaster;
 
+  /// A true result from [Printing.layoutPdf] or [Printing.directPrintPdf] means
+  /// the document reached a printer
+  ///
+  /// False on the web, where it only means the browser's print dialog was
+  /// invoked: no browser reports whether the user then printed or cancelled. An
+  /// app that treats a print as a committed action - marking an invoice
+  /// printed, say - should ask the user to confirm when this is false.
+  final bool reportsPrintOutcome;
+
   @override
   String toString() =>
       '''
@@ -75,5 +90,6 @@ $runtimeType:
   canConvertHtml: $canConvertHtml
   canListPrinters: $canListPrinters
   canShare: $canShare
-  canRaster: $canRaster''';
+  canRaster: $canRaster
+  reportsPrintOutcome: $reportsPrintOutcome''';
 }

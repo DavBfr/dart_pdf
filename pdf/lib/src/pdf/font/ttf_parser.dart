@@ -23,6 +23,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
 import '../options.dart';
+import 'arabic.dart' as arabic;
 import 'bidi_utils.dart' as bidi;
 import 'font_metrics.dart';
 
@@ -123,7 +124,7 @@ class TtfParser {
     final numTables = bytes.getUint16(4);
 
     for (var i = 0; i < numTables; i++) {
-      final name = utf8.decode(bytes.buffer.asUint8List(i * 16 + 12, 4));
+      final name = utf8.decode(_slice(i * 16 + 12, 4));
       final offset = bytes.getUint32(i * 16 + 20);
       final size = bytes.getUint32(i * 16 + 24);
       tableOffsets[name] = offset;
@@ -156,6 +157,8 @@ class TtfParser {
     );
 
     _parseCMap();
+    _parseGsub();
+    _aliasShapedForms();
     if (tableOffsets.containsKey(loca_table) &&
         tableOffsets.containsKey(glyf_table)) {
       _parseIndexes();
@@ -179,6 +182,18 @@ class TtfParser {
   static const String cbdt_table = 'CBDT';
   static const String post_table = 'post';
   static const String os_2_table = 'OS/2';
+  static const String cvt_table = 'cvt ';
+  static const String fpgm_table = 'fpgm';
+  static const String prep_table = 'prep';
+  static const String gasp_table = 'gasp';
+  static const String gsub_table = 'GSUB';
+
+  /// The Arabic joining features the GSUB table defines, keyed by feature tag,
+  /// each mapping a glyph id to the glyph that replaces it.
+  ///
+  /// Empty for a font with no GSUB table and for one whose GSUB has no `arab`
+  /// script.
+  final arabicJoining = <String, Map<int, int>>{};
 
   final ByteData bytes;
   final tableOffsets = <String, int>{};
@@ -242,10 +257,7 @@ class TtfParser {
       if (platformID == 1 && nameID == fontNameID.index) {
         try {
           _fontName = utf8.decode(
-            bytes.buffer.asUint8List(
-              basePosition + stringOffset + offset,
-              length,
-            ),
+            _slice(basePosition + stringOffset + offset, length),
           );
         } catch (a) {
           print('Error: $platformID $nameID $a');
@@ -255,10 +267,7 @@ class TtfParser {
       if (platformID == 3 && nameID == fontNameID.index) {
         try {
           return _decodeUtf16(
-            bytes.buffer.asUint8List(
-              basePosition + stringOffset + offset,
-              length,
-            ),
+            _slice(basePosition + stringOffset + offset, length),
           );
         } catch (a) {
           print('Error: $platformID $nameID $a');
@@ -268,39 +277,352 @@ class TtfParser {
     return _fontName;
   }
 
-  void _parseCMap() {
-    final basePosition = tableOffsets[cmap_table]!;
-    final numSubTables = bytes.getUint16(basePosition + 2);
-    for (var i = 0; i < numSubTables; i++) {
-      final offset = bytes.getUint32(basePosition + i * 8 + 8);
-      final format = bytes.getUint16(basePosition + offset);
+  /// Read the character to glyph mapping from the best cmap subtable.
+  ///
+  /// Every recognised subtable used to be parsed into the one map, in record
+  /// order, so a later record silently overwrote an earlier one - and the winner
+  /// depended on the order the font happened to list them in. That is wrong
+  /// whatever the order, because a Macintosh (1, 0) subtable is keyed by Mac
+  /// Roman bytes and a (3, 0) symbol subtable by 0xF000-offset codes, while
+  /// every consumer of this map reads it as Unicode. With hacen-tunisia.ttf the
+  /// Mac subtable's byte 0xAA landed on U+00AA, so `Text('ª')` drew the trademark
+  /// glyph and a document containing both threw 'Missing glyph for character'.
+  /// The four-byte tag at [at].
+  String _tag(int at) => String.fromCharCodes(_slice(at, 4));
 
-      switch (format) {
-        case 0:
-          _parseCMapFormat0(basePosition + offset + 2);
-          break;
+  /// Read the `arab` script's joining features out of the GSUB table.
+  ///
+  /// Only the single substitution, lookup type 1, which is what the four joining
+  /// features use: a ligature substitution replaces a run of glyphs, which the
+  /// code-point shaper this feeds cannot express. A malformed table leaves
+  /// [arabicJoining] empty rather than throwing.
+  void _parseGsub() {
+    final base = tableOffsets[gsub_table];
+    if (base == null || base + 10 > bytes.lengthInBytes) {
+      return;
+    }
 
-        case 4:
-          _parseCMapFormat4(basePosition + offset + 2);
-          break;
-        case 6:
-          _parseCMapFormat6(basePosition + offset + 2);
-          break;
+    try {
+      final scriptList = base + bytes.getUint16(base + 4);
+      final featureList = base + bytes.getUint16(base + 6);
+      final lookupList = base + bytes.getUint16(base + 8);
 
-        case 12:
-          _parseCMapFormat12(basePosition + offset + 2);
+      // The default language system of the `arab` script: its features are the
+      // ones that apply when no language is selected.
+      var langSys = -1;
+      final scriptCount = bytes.getUint16(scriptList);
+      for (var i = 0; i < scriptCount; i++) {
+        final record = scriptList + 2 + i * 6;
+        if (_tag(record) != 'arab') {
+          continue;
+        }
+        final script = scriptList + bytes.getUint16(record + 4);
+        final offset = bytes.getUint16(script);
+        if (offset != 0) {
+          langSys = script + offset;
+        }
+        break;
+      }
+
+      if (langSys < 0) {
+        return;
+      }
+
+      final featureCount = bytes.getUint16(featureList);
+      final used = bytes.getUint16(langSys + 4);
+
+      for (var i = 0; i < used; i++) {
+        final index = bytes.getUint16(langSys + 6 + i * 2);
+        if (index >= featureCount) {
+          continue;
+        }
+
+        final record = featureList + 2 + index * 6;
+        final tag = _tag(record);
+        if (!_joiningFeatures.contains(tag)) {
+          continue;
+        }
+
+        final feature = featureList + bytes.getUint16(record + 4);
+        final substitutions = arabicJoining.putIfAbsent(
+          tag,
+          () => <int, int>{},
+        );
+        final lookupCount = bytes.getUint16(feature + 2);
+        for (var k = 0; k < lookupCount; k++) {
+          _parseGsubSingle(
+            lookupList,
+            bytes.getUint16(feature + 4 + k * 2),
+            substitutions,
+          );
+        }
+
+        if (substitutions.isEmpty) {
+          arabicJoining.remove(tag);
+        }
+      }
+    } catch (e) {
+      assert(() {
+        // ignore: avoid_print
+        print('Unable to read the GSUB table of $fontName: $e');
+        return true;
+      }());
+
+      arabicJoining.clear();
+    }
+  }
+
+  static const _joiningFeatures = <String>{'isol', 'fina', 'init', 'medi'};
+
+  void _parseGsubSingle(int lookupList, int index, Map<int, int> into) {
+    if (index >= bytes.getUint16(lookupList)) {
+      return;
+    }
+
+    final lookup = lookupList + bytes.getUint16(lookupList + 2 + index * 2);
+    if (bytes.getUint16(lookup) != 1) {
+      return;
+    }
+
+    final subTableCount = bytes.getUint16(lookup + 4);
+    for (var i = 0; i < subTableCount; i++) {
+      final table = lookup + bytes.getUint16(lookup + 6 + i * 2);
+      final glyphs = _parseCoverage(table + bytes.getUint16(table + 2));
+
+      switch (bytes.getUint16(table)) {
+        case 1:
+          final delta = bytes.getInt16(table + 4);
+          for (final glyph in glyphs) {
+            into[glyph] = (glyph + delta) & 0xFFFF;
+          }
+          break;
+        case 2:
+          final count = bytes.getUint16(table + 4);
+          for (var k = 0; k < glyphs.length && k < count; k++) {
+            into[glyphs[k]] = bytes.getUint16(table + 6 + k * 2);
+          }
           break;
       }
     }
   }
 
+  /// The glyph ids a coverage table lists, in coverage-index order.
+  List<int> _parseCoverage(int at) {
+    final count = bytes.getUint16(at + 2);
+
+    switch (bytes.getUint16(at)) {
+      case 1:
+        return <int>[
+          for (var i = 0; i < count; i++) bytes.getUint16(at + 4 + i * 2),
+        ];
+      case 2:
+        final glyphs = <int>[];
+        for (var i = 0; i < count; i++) {
+          final range = at + 4 + i * 6;
+          final end = bytes.getUint16(range + 2);
+          for (var glyph = bytes.getUint16(range); glyph <= end; glyph++) {
+            glyphs.add(glyph);
+          }
+        }
+        return glyphs;
+    }
+
+    return const <int>[];
+  }
+
+  /// Make the font's own final, initial and medial glyphs reachable by the
+  /// Arabic Presentation Form code point that stands for them.
+  ///
+  /// A glyph is only addressable through the cmap, and the shaper substitutes
+  /// code points, so a font that joins through GSUB - which is what every modern
+  /// Arabic font does - could not be asked for its joined forms at all: they
+  /// came out as .notdef with no width. hacen-tunisia, the font this package's
+  /// own Arabic fixture uses, carries exactly the base letters and their
+  /// isolated forms.
+  ///
+  /// Only forms the cmap does not already carry are filled in, so nothing that
+  /// renders today renders differently.
+  void _aliasShapedForms() {
+    if (arabicJoining.isEmpty) {
+      return;
+    }
+
+    for (final form in arabic.shapedForms.entries) {
+      if (charToGlyphIndexMap.containsKey(form.key)) {
+        continue;
+      }
+
+      final nominal = charToGlyphIndexMap[form.value.letter];
+      if (nominal == null) {
+        continue;
+      }
+
+      final glyph = arabicJoining[form.value.feature]?[nominal];
+      if (glyph == null || glyph == 0) {
+        continue;
+      }
+
+      charToGlyphIndexMap[form.key] = glyph;
+    }
+  }
+
+  void _parseCMap() {
+    final basePosition = tableOffsets[cmap_table]!;
+    final numSubTables = bytes.getUint16(basePosition + 2);
+
+    var bestRank = 0;
+    var bestStart = 0;
+    var bestFormat = 0;
+    var bestPlatform = 0;
+    var bestEncoding = 0;
+
+    for (var i = 0; i < numSubTables; i++) {
+      final platformId = bytes.getUint16(basePosition + i * 8 + 4);
+      final encodingId = bytes.getUint16(basePosition + i * 8 + 6);
+      final start = basePosition + bytes.getUint32(basePosition + i * 8 + 8);
+      if (start + 2 > bytes.lengthInBytes) {
+        continue;
+      }
+
+      final format = bytes.getUint16(start);
+      final rank = _cmapRank(platformId, encodingId, format);
+
+      // Strictly greater, so the first of equally good records wins and record
+      // order still decides between them.
+      if (rank > bestRank) {
+        bestRank = rank;
+        bestStart = start;
+        bestFormat = format;
+        bestPlatform = platformId;
+        bestEncoding = encodingId;
+      }
+    }
+
+    if (bestRank == 0) {
+      return;
+    }
+
+    switch (bestFormat) {
+      case 0:
+        _parseCMapFormat0(bestStart + 2);
+        break;
+      case 4:
+        _parseCMapFormat4(bestStart + 2);
+        break;
+      case 6:
+        _parseCMapFormat6(bestStart + 2);
+        break;
+      case 12:
+        _parseCMapFormat12(bestStart + 2);
+        break;
+    }
+
+    _remapCMapKeys(bestPlatform, bestEncoding);
+  }
+
+  /// How much a cmap subtable is preferred. Zero means it cannot be used.
+  ///
+  /// Unicode beats everything, and within Unicode the wider format wins. The two
+  /// legacy encodings below it are ranked only because [_remapCMapKeys] can turn
+  /// their keys into Unicode; anything else is left alone, so its runes report
+  /// unsupported and route to [TextStyle.fontFallback] rather than drawing the
+  /// wrong glyph.
+  static int _cmapRank(int platformId, int encodingId, int format) {
+    if (format != 0 && format != 4 && format != 6 && format != 12) {
+      return 0;
+    }
+
+    final isUnicode =
+        platformId == 0 ||
+        (platformId == 3 && (encodingId == 1 || encodingId == 10));
+
+    if (isUnicode) {
+      // Format 12 reaches beyond the BMP; format 4 is the common Windows one.
+      return format == 12 ? 50 : (format == 4 ? 40 : 30);
+    }
+
+    if (platformId == 3 && encodingId == 0) {
+      // Windows Symbol.
+      return 20;
+    }
+
+    if (platformId == 1 && encodingId == 0) {
+      // Macintosh Roman.
+      return 10;
+    }
+
+    return 0;
+  }
+
+  /// Turn the parsed keys into Unicode scalar values.
+  void _remapCMapKeys(int platformId, int encodingId) {
+    if (platformId == 1 && encodingId == 0) {
+      // The low half of Mac OS Roman is ASCII; the high half is not.
+      final remapped = <int, int>{};
+      charToGlyphIndexMap.forEach((int code, int glyph) {
+        remapped[code < 0x80 ? code : _macRomanToUnicode[code - 0x80]] = glyph;
+      });
+      charToGlyphIndexMap
+        ..clear()
+        ..addAll(remapped);
+      return;
+    }
+
+    if (platformId == 3 && encodingId == 0) {
+      // A symbol font keys its glyphs at 0xF000 + the byte, so register the bare
+      // byte as well and `drawString('A')` finds something. putIfAbsent, so a
+      // real entry is never displaced by an alias.
+      final aliases = <int, int>{};
+      charToGlyphIndexMap.forEach((int code, int glyph) {
+        if (code >= 0xF000 && code <= 0xF0FF) {
+          aliases[code & 0xFF] = glyph;
+        }
+      });
+      aliases.forEach((int code, int glyph) {
+        charToGlyphIndexMap.putIfAbsent(code, () => glyph);
+      });
+    }
+  }
+
+  /// Mac OS Roman 0x80 to 0xFF, as Unicode scalar values.
+  static const _macRomanToUnicode = <int>[
+    0x00C4, 0x00C5, 0x00C7, 0x00C9, 0x00D1, 0x00D6, 0x00DC, 0x00E1, //
+    0x00E0, 0x00E2, 0x00E4, 0x00E3, 0x00E5, 0x00E7, 0x00E9, 0x00E8,
+    0x00EA, 0x00EB, 0x00ED, 0x00EC, 0x00EE, 0x00EF, 0x00F1, 0x00F3,
+    0x00F2, 0x00F4, 0x00F6, 0x00F5, 0x00FA, 0x00F9, 0x00FB, 0x00FC,
+    0x2020, 0x00B0, 0x00A2, 0x00A3, 0x00A7, 0x2022, 0x00B6, 0x00DF,
+    0x00AE, 0x00A9, 0x2122, 0x00B4, 0x00A8, 0x2260, 0x00C6, 0x00D8,
+    0x221E, 0x00B1, 0x2264, 0x2265, 0x00A5, 0x00B5, 0x2202, 0x2211,
+    0x220F, 0x03C0, 0x222B, 0x00AA, 0x00BA, 0x03A9, 0x00E6, 0x00F8,
+    0x00BF, 0x00A1, 0x00AC, 0x221A, 0x0192, 0x2248, 0x2206, 0x00AB,
+    0x00BB, 0x2026, 0x00A0, 0x00C0, 0x00C3, 0x00D5, 0x0152, 0x0153,
+    0x2013, 0x2014, 0x201C, 0x201D, 0x2018, 0x2019, 0x00F7, 0x25CA,
+    0x00FF, 0x0178, 0x2044, 0x20AC, 0x2039, 0x203A, 0xFB01, 0xFB02,
+    0x2021, 0x00B7, 0x201A, 0x201E, 0x2030, 0x00C2, 0x00CA, 0x00C1,
+    0x00CB, 0x00C8, 0x00CD, 0x00CE, 0x00CF, 0x00CC, 0x00D3, 0x00D4,
+    0xF8FF, 0x00D2, 0x00DA, 0x00DB, 0x00D9, 0x0131, 0x02C6, 0x02DC,
+    0x00AF, 0x02D8, 0x02D9, 0x02DA, 0x00B8, 0x02DD, 0x02DB, 0x02C7,
+  ];
+
+  /// `basePosition` is the subtable start plus two, so it points at the length.
   void _parseCMapFormat0(int basePosition) {
-    assert(bytes.getUint16(basePosition) == 262);
+    // A real check rather than an assert, which release builds strip: a
+    // truncated or mis-sized subtable used to throw RangeError from the loop, or
+    // an AssertionError in debug.
+    final length = bytes.getUint16(basePosition);
+    if (length != 262 || basePosition - 2 + 262 > bytes.lengthInBytes) {
+      return;
+    }
+
     for (var i = 0; i < 256; i++) {
-      final charCode = i;
-      final glyphIndex = bytes.getUint8(basePosition + i + 2);
+      // The header is format, length and language, two bytes each, so the array
+      // starts at the subtable plus six - which is basePosition plus four. This
+      // used to read at basePosition + 2 + i, two bytes early, so every
+      // character came back as the glyph of the character two after it: 'ABC'
+      // rendered as '?@A'.
+      final glyphIndex = bytes.getUint8(basePosition + 4 + i);
       if (glyphIndex > 0) {
-        charToGlyphIndexMap[charCode] = glyphIndex;
+        charToGlyphIndexMap[i] = glyphIndex;
       }
     }
   }
@@ -337,8 +659,28 @@ class TtfParser {
         } else {
           final glyphIndexAddress =
               idRangeOffset + 2 * (c - startCode) + idRangeOffsetAddress;
+          if (glyphIndexAddress + 2 > bytes.lengthInBytes) {
+            continue;
+          }
+
           glyphIndex = bytes.getUint16(glyphIndexAddress);
+          if (glyphIndex != 0) {
+            // The segment's delta applies to a glyphIdArray lookup too. It used
+            // to be taken verbatim, so the whole segment rendered with its
+            // glyphs shifted by idDelta.
+            glyphIndex = (glyphIndex + idDelta) % 65536;
+          }
         }
+
+        if (glyphIndex == 0) {
+          // Format 4 defines zero as 'not covered'. Storing it made
+          // isRuneSupported - a containsKey - answer true, so fontFallback was
+          // skipped and the subsetter embedded .notdef: an empty box. The skip
+          // has to come before the alias below, so an uncovered character gets
+          // no alias either.
+          continue;
+        }
+
         charToGlyphIndexMap[c] = glyphIndex;
 
         /// Having both the unicode and the isolated form code
@@ -365,7 +707,13 @@ class TtfParser {
 
   void _parseCMapFormat12(int basePosition) {
     final numGroups = bytes.getUint32(basePosition + 10);
-    assert(bytes.getUint32(basePosition + 2) == 12 * numGroups + 16);
+
+    // A real check rather than an assert: a malformed font used to throw in
+    // debug and read past the table in release.
+    if (bytes.getUint32(basePosition + 2) != 12 * numGroups + 16 ||
+        basePosition + 14 + numGroups * 12 > bytes.lengthInBytes) {
+      return;
+    }
 
     for (var i = 0; i < numGroups; i++) {
       final startCharCode = bytes.getUint32(basePosition + i * 12 + 14);
@@ -373,11 +721,13 @@ class TtfParser {
       final startGlyphID = bytes.getUint32(basePosition + i * 12 + 22);
 
       for (var j = startCharCode; j <= endCharCode; j++) {
-        assert(
-          !charToGlyphIndexMap.containsKey(j) ||
-              charToGlyphIndexMap[j] == startGlyphID + j - startCharCode,
-        );
-        charToGlyphIndexMap[j] = startGlyphID + j - startCharCode;
+        final glyphIndex = startGlyphID + j - startCharCode;
+        if (glyphIndex == 0) {
+          // Zero is .notdef, not coverage, here too.
+          continue;
+        }
+
+        charToGlyphIndexMap[j] = glyphIndex;
       }
     }
   }
@@ -457,6 +807,42 @@ class TtfParser {
   }
 
   /// http://stevehanov.ca/blog/?id=143
+  /// The font's own bytes, exactly the view this parser was given.
+  ///
+  /// Every table offset in this class is relative to the start of that view, and
+  /// nothing reads or embeds a byte outside it.
+  Uint8List get fontData => _slice(0, bytes.lengthInBytes);
+
+  /// A table's bytes, in the view's own coordinates and clamped to it.
+  ///
+  /// For the subsetter, which copies whole tables out of the source font.
+  Uint8List tableBytes(int offset, int length) => _slice(offset, length);
+
+  /// A slice of the view, in the view's own coordinates.
+  ///
+  /// The accessors on [bytes] are view-relative but the reach-throughs to its
+  /// backing buffer were absolute, so a font handed over as a sliced ByteData
+  /// threw a FormatException decoding table tags, or silently parsed a shifted
+  /// window.
+  Uint8List _slice(int offset, int length) {
+    final start = bytes.offsetInBytes + offset;
+    final available = bytes.lengthInBytes - offset;
+    final clamped = length < 0
+        ? 0
+        : (length > available ? (available < 0 ? 0 : available) : length);
+
+    return Uint8List.view(bytes.buffer, start, clamped);
+  }
+
+  /// A glyph's bytes, never more than `loca` says the glyph occupies.
+  ///
+  /// A malformed `loca`, or a reader that walks past the record, could otherwise
+  /// hand back the following glyph's outline.
+  Uint8List _glyphBytes(int glyph, int start, int end) {
+    final length = math.min(end - start, glyphSizes[glyph]);
+    return _slice(start, length);
+  }
+
   TtfGlyphInfo readGlyph(int index) {
     assert(index < glyphOffsets.length);
 
@@ -464,6 +850,15 @@ class TtfParser {
 
     if (start >= tableSize[glyf_table]! + tableOffsets[glyf_table]! ||
         start == 0) {
+      return TtfGlyphInfo(index, Uint8List(0), const <int>[]);
+    }
+
+    if (glyphSizes[index] <= 0) {
+      // An empty glyph - a no-break space, a tab, U+2000 to U+200B, U+FEFF -
+      // has loca[i] == loca[i + 1], so `start` points at the *next* glyph's
+      // record and the readers below happily returned its outline. drawString
+      // of 'A B' rendered 'A¡B'. _parseGlyphs already tests glyphSizes, so the
+      // metrics said blank while the outline said letter.
       return TtfGlyphInfo(index, Uint8List(0), const <int>[]);
     }
 
@@ -502,7 +897,7 @@ class TtfParser {
     if (numberOfContours == 0) {
       return TtfGlyphInfo(
         glyph,
-        Uint8List.view(bytes.buffer, start, offset - start),
+        _glyphBytes(glyph, start, offset),
         const <int>[],
       );
     }
@@ -539,7 +934,7 @@ class TtfParser {
 
     return TtfGlyphInfo(
       glyph,
-      Uint8List.view(bytes.buffer, start, offset - start),
+      _glyphBytes(glyph, start, offset),
       const <int>[],
     );
   }
@@ -579,11 +974,7 @@ class TtfParser {
       offset += bytes.getUint16(offset) + 2;
     }
 
-    return TtfGlyphInfo(
-      glyph,
-      Uint8List.view(bytes.buffer, start, offset - start),
-      components,
-    );
+    return TtfGlyphInfo(glyph, _glyphBytes(glyph, start, offset), components);
   }
 
   String _decodeUtf16(Uint8List bytes) {
@@ -663,10 +1054,7 @@ class TtfParser {
               final dataLen = bytes.getUint32(sbitOffset + 5);
 
               bitmapOffsets[glyph] = TtfBitmapInfo(
-                bytes.buffer.asUint8List(
-                  bytes.offsetInBytes + sbitOffset + 9,
-                  dataLen,
-                ),
+                _slice(sbitOffset + 9, dataLen),
                 height,
                 width,
                 bearingX,

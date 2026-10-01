@@ -148,14 +148,25 @@ class TableContext extends WidgetContext {
   }
 
   @override
+  bool isSameAs(TableContext other) =>
+      firstLine == other.firstLine && lastLine == other.lastLine;
+
+  @override
   String toString() => '$runtimeType firstLine: $firstLine lastLine: $lastLine';
 }
 
 class ColumnLayout {
-  ColumnLayout(this.width, this.flex);
+  ColumnLayout(this.width, this.flex, {double? minWidth})
+    : minWidth = minWidth ?? width;
 
   final double width;
   final double flex;
+
+  /// The narrowest this column can be without its content being cut.
+  ///
+  /// Defaults to [width]: a widget that cannot report a minimum is taken to be
+  /// as unbreakable as it is wide.
+  final double minWidth;
 }
 
 abstract class TableColumnWidth {
@@ -185,15 +196,30 @@ class IntrinsicColumnWidth extends TableColumnWidth {
 
     child.layout(context, const BoxConstraints());
     assert(child.box != null);
-    final calculatedWidth = child.box!.width == double.infinity
-        ? 0.0
-        : child.box!.width;
+    final maxContent = child.box!.width;
+    final calculatedWidth = maxContent == double.infinity ? 0.0 : maxContent;
     final childFlex =
         flex ??
         (child is Expanded
             ? child.flex.toDouble()
-            : (child.box!.width == double.infinity ? 1 : 0));
-    return ColumnLayout(calculatedWidth, childFlex);
+            : (maxContent == double.infinity ? 1 : 0));
+
+    // The narrowest the cell can be without a word being cut in half. Every
+    // wrapper between here and the text still adds its padding, because this is
+    // an ordinary layout pass.
+    child.layout(
+      context.inheritFrom(const MinContentWidth()),
+      const BoxConstraints(),
+    );
+    final minContent = child.box!.width;
+
+    return ColumnLayout(
+      calculatedWidth,
+      childFlex,
+      minWidth: minContent.isFinite
+          ? math.min(minContent, calculatedWidth)
+          : calculatedWidth,
+    );
   }
 }
 
@@ -255,6 +281,7 @@ class Table extends Widget with SpanningWidget {
     this.columnWidths,
     this.defaultColumnWidth = const IntrinsicColumnWidth(),
     this.tableWidth = TableWidth.max,
+    this.textDirection,
   }) : super();
 
   @Deprecated('Use TableHelper.fromTextArray() instead.')
@@ -303,7 +330,7 @@ class Table extends Widget with SpanningWidget {
     oddCellStyle: oddCellStyle,
     cellFormat: cellFormat,
     cellDecoration: cellDecoration,
-    headerCount: headerCount = 1,
+    headerCount: headerCount,
     headers: headers,
     headerPadding: headerPadding,
     headerHeight: headerHeight,
@@ -325,7 +352,12 @@ class Table extends Widget with SpanningWidget {
   bool get canSpan => true;
 
   @override
-  bool get hasMoreWidgets => true;
+  bool get hasMoreWidgets => _context.lastLine < children.length;
+
+  /// [hasMoreWidgets] is exact after any layout, so MultiPage can skip its
+  /// unbounded probe.
+  @override
+  bool get reportsCompletion => true;
 
   /// The rows of the table.
   final List<TableRow> children;
@@ -336,8 +368,30 @@ class Table extends Widget with SpanningWidget {
 
   final TableWidth tableWidth;
 
+  /// The order the columns are laid out in.
+  ///
+  /// Defaults to the [Directionality] of the enclosing context, so a table on an
+  /// rtl page reads right to left. Pass [TextDirection.ltr] to keep a table
+  /// left-to-right inside an rtl subtree - for a matrix of numbers, say, or for a
+  /// caller that already reversed its own rows.
+  final TextDirection? textDirection;
+
+  /// The direction the last layout resolved to, which paint has to agree with.
+  TextDirection _layoutDirection = TextDirection.ltr;
+
   final List<double> _widths = <double>[];
   final List<double> _heights = <double>[];
+
+  /// The column widths from the last layout, and what they were computed for.
+  ///
+  /// The measure pass depends only on the incoming maxWidth, the theme and the
+  /// text direction, and it used to run again on every page: a MultiPage whose
+  /// body is one Table re-measured every cell for every page, which made output
+  /// quadratic in the row count - 2000 rows took the best part of a minute.
+  List<double>? _cachedWidths;
+  double? _cachedMaxWidth;
+  ThemeData? _cachedTheme;
+  TextDirection? _cachedDirection;
 
   final TableContext _context = TableContext();
 
@@ -361,28 +415,129 @@ class Table extends Widget with SpanningWidget {
     BoxConstraints constraints, {
     bool parentUsesSize = false,
   }) {
-    // Compute required width for all row/columns width flex
-    final flex = <double>[];
-    _widths.clear();
     _heights.clear();
+
+    final theme = Theme.of(context);
+    final direction = textDirection ?? Directionality.of(context);
+    _layoutDirection = direction;
+    final cached = _cachedWidths;
     var index = 0;
 
-    for (final row in children) {
-      for (var index = 0; index < row.children.length; index++) {
-        final child = row.children[index];
-        final columnWidth = columnWidths?[index] ?? defaultColumnWidth;
-        final columnLayout = columnWidth.layout(child, context, constraints);
+    if (cached != null &&
+        _cachedMaxWidth == constraints.maxWidth &&
+        identical(_cachedTheme, theme) &&
+        _cachedDirection == direction) {
+      _widths
+        ..clear()
+        ..addAll(cached);
+    } else {
+      // Compute required width for all row/columns width flex
+      final flex = <double>[];
+      final mins = <double>[];
+      _widths.clear();
 
-        if (index >= flex.length) {
-          flex.add(columnLayout.flex);
-          _widths.add(columnLayout.width);
-        } else {
-          if (columnLayout.flex > 0) {
-            flex[index] = math.max(flex[index], columnLayout.flex);
+      for (final row in children) {
+        for (var index = 0; index < row.children.length; index++) {
+          final child = row.children[index];
+          final columnWidth = columnWidths?[index] ?? defaultColumnWidth;
+          final columnLayout = columnWidth.layout(child, context, constraints);
+
+          if (index >= flex.length) {
+            flex.add(columnLayout.flex);
+            _widths.add(columnLayout.width);
+            mins.add(columnLayout.minWidth);
+          } else {
+            if (columnLayout.flex > 0) {
+              flex[index] = math.max(flex[index], columnLayout.flex);
+            }
+            _widths[index] = math.max(_widths[index], columnLayout.width);
+            mins[index] = math.max(mins[index], columnLayout.minWidth);
           }
-          _widths[index] = math.max(_widths[index], columnLayout.width);
         }
       }
+
+      final maxWidth = _widths.fold(0.0, (sum, element) => sum + element);
+
+      // Compute column widths using flex and estimated width
+      if (_widths.isNotEmpty && constraints.hasBoundedWidth) {
+        final totalFlex = flex.reduce((double? a, double? b) => a! + b!);
+        var flexSpace = 0.0;
+
+        if (maxWidth > 0) {
+          // The narrowest the inflexible columns can be, and the widest they want.
+          var totalMin = 0.0;
+          var totalMax = 0.0;
+          for (var n = 0; n < _widths.length; n++) {
+            if (flex[n] == 0.0) {
+              totalMin += mins[n];
+              totalMax += _widths[n];
+            }
+          }
+
+          // CSS automatic table layout. Every column used to be rescaled by the
+          // same factor with no per-column floor, so an overflowing table squeezed
+          // a short column below the width of one word and the cell hard-split it:
+          // 'ATLANTICA' came out as ATLANTI then CA. Now each column keeps at least
+          // what its longest word needs, and what is left over is shared in
+          // proportion to how much more each column wanted.
+          final available = constraints.maxWidth;
+          final overflowing = totalMax > available && totalMin < totalMax;
+
+          for (var n = 0; n < _widths.length; n++) {
+            if (flex[n] != 0.0) {
+              continue;
+            }
+
+            final double newWidth;
+            if (!overflowing) {
+              newWidth = _widths[n] / maxWidth * available;
+            } else if (totalMin <= available) {
+              newWidth =
+                  mins[n] +
+                  (_widths[n] - mins[n]) *
+                      (available - totalMin) /
+                      (totalMax - totalMin);
+            } else {
+              // Not even the minimums fit: they are scaled down together, which is
+              // the only thing left that keeps the widths summing to the width
+              // there is.
+              newWidth = mins[n] / totalMin * available;
+            }
+
+            if ((tableWidth == TableWidth.max && totalFlex == 0.0) ||
+                newWidth < _widths[n]) {
+              _widths[n] = newWidth;
+            }
+            flexSpace += _widths[n];
+          }
+        } else if (tableWidth == TableWidth.max && totalFlex == 0.0) {
+          // Every column measured zero, so there is nothing to scale in
+          // proportion: the division was 0.0/0.0 and the NaN landed in the widths,
+          // in the table box, in every cell box and in drawRect. There is still an
+          // available width to fill, so it is shared out evenly. TableWidth.min
+          // and the flex path keep width 0, as they did.
+          final even = constraints.maxWidth / _widths.length;
+          for (var n = 0; n < _widths.length; n++) {
+            _widths[n] = even;
+            flexSpace += even;
+          }
+        }
+        final spacePerFlex = totalFlex > 0.0
+            ? ((constraints.maxWidth - flexSpace) / totalFlex)
+            : double.nan;
+
+        for (var n = 0; n < _widths.length; n++) {
+          if (flex[n] > 0.0) {
+            final newWidth = spacePerFlex * flex[n];
+            _widths[n] = newWidth;
+          }
+        }
+      }
+
+      _cachedWidths = List<double>.of(_widths);
+      _cachedMaxWidth = constraints.maxWidth;
+      _cachedTheme = theme;
+      _cachedDirection = direction;
     }
 
     if (_widths.isEmpty) {
@@ -390,35 +545,14 @@ class Table extends Widget with SpanningWidget {
       return;
     }
 
-    final maxWidth = _widths.fold(0.0, (sum, element) => sum + element);
-
-    // Compute column widths using flex and estimated width
-    if (constraints.hasBoundedWidth) {
-      final totalFlex = flex.reduce((double? a, double? b) => a! + b!);
-      var flexSpace = 0.0;
-      for (var n = 0; n < _widths.length; n++) {
-        if (flex[n] == 0.0) {
-          final newWidth = _widths[n] / maxWidth * constraints.maxWidth;
-          if ((tableWidth == TableWidth.max && totalFlex == 0.0) ||
-              newWidth < _widths[n]) {
-            _widths[n] = newWidth;
-          }
-          flexSpace += _widths[n];
-        }
-      }
-      final spacePerFlex = totalFlex > 0.0
-          ? ((constraints.maxWidth - flexSpace) / totalFlex)
-          : double.nan;
-
-      for (var n = 0; n < _widths.length; n++) {
-        if (flex[n] > 0.0) {
-          final newWidth = spacePerFlex * flex[n];
-          _widths[n] = newWidth;
-        }
-      }
-    }
-
     final totalWidth = _widths.fold(0.0, (sum, element) => sum + element);
+
+    // _widths stays in logical order, so columnWidths[i] still addresses the i-th
+    // child; only where each cell is put changes. Every other widget in the
+    // package mirrors on an rtl page, and this one laid its columns out from
+    // x = 0 in source order whatever the direction, so an Arabic report read
+    // backwards.
+    final rtl = direction == TextDirection.rtl;
 
     // Compute final widths
     var totalHeight = 0.0;
@@ -437,7 +571,7 @@ class Table extends Widget with SpanningWidget {
         child.layout(context, childConstraints);
         assert(child.box != null);
         child.box = PdfRect(
-          x,
+          rtl ? totalWidth - x - _widths[n] : x,
           totalHeight,
           child.box!.width,
           child.box!.height,
@@ -461,7 +595,7 @@ class Table extends Widget with SpanningWidget {
           child.layout(context, childConstraints);
           assert(child.box != null);
           child.box = PdfRect(
-            x,
+            rtl ? totalWidth - x - _widths[n] : x,
             totalHeight,
             child.box!.width,
             child.box!.height,
@@ -541,21 +675,17 @@ class Table extends Widget with SpanningWidget {
       ..setTransform(mat);
 
     var index = 0;
+    var heightIndex = 0;
+    var yTop = box!.height;
     for (final row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
 
       if (row.decoration != null) {
-        var y = double.infinity;
-        var h = 0.0;
-        for (final child in row.children) {
-          y = math.min(y, child.box!.bottom);
-          h = math.max(h, child.box!.height);
-        }
         row.decoration!.paint(
           context,
-          PdfRect(0, y, box!.width, h),
+          _rowBand(row.children, yTop, heightIndex),
           PaintPhase.background,
         );
       }
@@ -576,24 +706,22 @@ class Table extends Widget with SpanningWidget {
       if (index >= _context.lastLine) {
         break;
       }
+      yTop -= _getHeight(heightIndex);
+      heightIndex++;
     }
 
     index = 0;
+    heightIndex = 0;
+    yTop = box!.height;
     for (final row in children) {
       if (index++ < _context.firstLine && !row.repeat) {
         continue;
       }
 
       if (row.decoration != null) {
-        var y = double.infinity;
-        var h = 0.0;
-        for (final child in row.children) {
-          y = math.min(y, child.box!.bottom);
-          h = math.max(h, child.box!.height);
-        }
         row.decoration!.paint(
           context,
-          PdfRect(0, y, box!.width, h),
+          _rowBand(row.children, yTop, heightIndex),
           PaintPhase.foreground,
         );
       }
@@ -601,13 +729,47 @@ class Table extends Widget with SpanningWidget {
       if (index >= _context.lastLine) {
         break;
       }
+      yTop -= _getHeight(heightIndex);
+      heightIndex++;
     }
 
     context.canvas.restoreContext();
 
     if (border != null) {
-      border!.paintTable(context, box!, _widths, _heights);
+      // The rules are drawn at cumulative widths from box.left, so under rtl they
+      // need the widths in the order the columns are actually in.
+      border!.paintTable(
+        context,
+        box!,
+        _layoutDirection == TextDirection.rtl
+            ? _widths.reversed.toList()
+            : _widths,
+        _heights,
+      );
     }
+  }
+
+  /// The band row [heightIndex] fills, in the table's own coordinates.
+  ///
+  /// Both decoration phases used to seed the band as y = infinity, h = 0 and
+  /// lower y only inside the children loop, so a row with an empty children list
+  /// left y infinite: the stream carried `0 Infinity <w> 0 re` and poppler
+  /// dropped everything drawn after it. Layout already treats such a row as a
+  /// legal zero-height band, and [top] is where that band sits.
+  PdfRect _rowBand(List<Widget> cells, double top, int heightIndex) {
+    var y = double.infinity;
+    var h = 0.0;
+
+    for (final cell in cells) {
+      y = math.min(y, cell.box!.bottom);
+      h = math.max(h, cell.box!.height);
+    }
+
+    if (!y.isFinite || !h.isFinite) {
+      return PdfRect(0, top - _getHeight(heightIndex), box!.width, 0);
+    }
+
+    return PdfRect(0, y, box!.width, h);
   }
 
   double _getHeight(int heightIndex) {

@@ -15,6 +15,7 @@
  */
 
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart' as rdr;
 import 'package:flutter/services.dart';
@@ -36,22 +37,52 @@ Future<ImageProvider> flutterImageProvider(
   late rdr.ImageStreamListener listener;
   listener = rdr.ImageStreamListener(
     (rdr.ImageInfo image, bool sync) async {
-      final bytes = await image.image.toByteData();
+      // ImageStreamCompleter.setImage discards the future this async callback
+      // returns, so anything thrown in here became an unhandled zone error and
+      // the completer was simply never settled: on web, a CORS-tainted canvas
+      // made the returned future hang for ever, with no error reaching the app.
+      try {
+        // Straight alpha, not dart:ui's premultiplied default: the PDF layer
+        // stores these bytes as /DeviceRGB plus a /DeviceGray /SMask, which
+        // ISO 32000-1 11.6.5.2 defines as straight alpha, so a premultiplied
+        // buffer was composited as Cs*a^2 + Cb*(1-a) - a dark fringe on every
+        // anti-aliased edge, and 50% red over white at (191,127,127) instead of
+        // (255,127,127).
+        final bytes = await image.image.toByteData(
+          format: ui.ImageByteFormat.rawStraightRgba,
+        );
 
-      final result = RawImage(
-        bytes: bytes!.buffer.asUint8List(),
-        width: image.image.width,
-        height: image.image.height,
-      );
+        if (bytes == null) {
+          throw Exception(
+            'Unable to read the pixels of a '
+            '${image.image.width}x${image.image.height} image',
+          );
+        }
 
-      if (!completer.isCompleted) {
-        completer.complete(result);
+        if (!completer.isCompleted) {
+          completer.complete(
+            RawImage(
+              bytes: bytes.buffer.asUint8List(),
+              width: image.image.width,
+              height: image.image.height,
+            ),
+          );
+        }
+      } catch (e, s) {
+        if (!completer.isCompleted) {
+          completer.completeError(e, s);
+        }
+        onError?.call(e, s);
+      } finally {
+        stream.removeListener(listener);
       }
-      stream.removeListener(listener);
     },
     onError: (dynamic exception, StackTrace? stackTrace) {
+      stream.removeListener(listener);
       if (!completer.isCompleted) {
-        completer.completeError('image failed to load');
+        // The exception itself, rather than the string 'image failed to load'
+        // that used to replace it.
+        completer.completeError(exception as Object, stackTrace);
       }
       if (onError != null) {
         onError(exception, stackTrace);

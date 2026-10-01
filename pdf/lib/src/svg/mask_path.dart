@@ -58,9 +58,11 @@ class SvgMaskPath {
   final SvgPainter painter;
 
   void apply(PdfGraphics canvas) {
+    // The /BBox has to be in the space the mask's own stream is evaluated in -
+    // SVG user space - not in page points.
     final mask = PdfSoftMask(
       painter.document,
-      boundingBox: painter.boundingBox,
+      boundingBox: painter.userSpaceBoundingBox(canvas),
     );
 
     final maskCanvas = mask.getGraphics();

@@ -155,11 +155,15 @@ class PdfOutline extends PdfObject<PdfDict> {
       }
       params['/Parent'] = parent!.ref();
 
-      // were a descendent, so by default we are closed. Find out how many
-      // entries are below us
-      final c = descendants();
-      if (c > 0) {
-        params['/Count'] = PdfNum(-c);
+      // A descendant, so closed by default. ISO 32000-1 Table 153: the magnitude
+      // of a negative /Count is how many items become visible when this one is
+      // reopened - and reopening an item does not reopen its children, so that is
+      // the immediate children, not the whole subtree. This used to write the
+      // recursive total, so an item with two children and one grandchild said -3
+      // while expanding it revealed two rows. The root branch below already had
+      // the right rule, so the file contradicted itself.
+      if (outlines.isNotEmpty) {
+        params['/Count'] = PdfNum(-outlines.length);
       }
 
       final index = parent!.getIndex(this);

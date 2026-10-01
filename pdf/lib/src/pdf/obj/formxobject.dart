@@ -18,24 +18,24 @@ import 'package:vector_math/vector_math_64.dart';
 
 import '../document.dart';
 import '../format/array.dart';
-import '../format/dict.dart';
 import '../format/num.dart';
-import 'font.dart';
+import 'graphic_stream.dart';
 import 'xobject.dart';
 
 /// Form XObject
-class PdfFormXObject extends PdfXObject {
+///
+/// Mixes in [PdfGraphicStream], so every font, shader, pattern, xobject and
+/// graphic state a [PdfGraphics] registers while painting into it lands in this
+/// form's own /Resources. It used to carry only a font and xobject map of its
+/// own, and its subclasses painted onto a page of a second, discarded document:
+/// the bytes reached the form but the resources did not, so the stream named
+/// objects that were never written and the form rendered blank.
+class PdfFormXObject extends PdfXObject with PdfGraphicStream {
   /// Create a Form XObject
   PdfFormXObject(PdfDocument pdfDocument) : super(pdfDocument, '/Form') {
     params['/FormType'] = const PdfNum(1);
     params['/BBox'] = PdfArray.fromNum(const <int>[0, 0, 1000, 1000]);
   }
-
-  /// The fonts associated with this page
-  final Map<String, PdfFont> fonts = <String, PdfFont>{};
-
-  /// The xobjects or other images in the pdf
-  final Map<String, PdfXObject> xobjects = <String, PdfXObject>{};
 
   /// Transformation matrix
   void setMatrix(Matrix4 t) {
@@ -48,27 +48,5 @@ class PdfFormXObject extends PdfXObject {
       s[12],
       s[13],
     ]);
-  }
-
-  @override
-  void prepare() {
-    super.prepare();
-
-    // This holds any resources for this FormXObject
-    final resources = PdfDict();
-
-    // fonts
-    if (fonts.isNotEmpty) {
-      resources['/Font'] = PdfDict.fromObjectMap(fonts);
-    }
-
-    // Now the XObjects
-    if (xobjects.isNotEmpty) {
-      resources['/XObject'] = PdfDict.fromObjectMap(xobjects);
-    }
-
-    if (resources.isNotEmpty) {
-      params['/Resources'] = resources;
-    }
   }
 }

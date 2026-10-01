@@ -9,8 +9,6 @@ import '../../format/dict_stream.dart';
 import '../../format/indirect.dart';
 import '../../format/name.dart';
 import '../../format/num.dart';
-import '../../format/object_base.dart';
-import '../../format/stream.dart';
 import '../../format/string.dart';
 import '../object.dart';
 import 'pdfa_date_format.dart';
@@ -73,9 +71,25 @@ class _AttachedFileNames extends PdfObject<PdfDict> {
   @override
   void prepare() {
     super.prepare();
-    params['/Names'] = PdfArray(
-      _files.map((spec) => _PdfRaw(spec._file.fileName, spec)).toList(),
-    );
+
+    // A name tree's keys have to be in ascending order - ISO 32000-1 7.9.6 - or
+    // a consumer's binary search can miss an entry. The keys were emitted in
+    // caller order, and written by a private raw type that put '($name) ref'
+    // straight into the stream: no escaping, so an unbalanced ')' or a backslash
+    // corrupted the object; no Latin-1/UTF-16BE choice, so a non-Latin-1 name was
+    // truncated a code unit at a time; and no encrypt callback either.
+    //
+    // Sorted on a copy: _files is shared with the catalog's /AF array, which has
+    // to keep the caller's order.
+    final sorted = _files.toList()
+      ..sort((a, b) => a._file.fileName.compareTo(b._file.fileName));
+
+    params['/Names'] = PdfArray(<PdfDataType>[
+      for (final spec in sorted) ...<PdfDataType>[
+        PdfString.fromString(spec._file.fileName),
+        spec.ref(),
+      ],
+    ]);
   }
 }
 
@@ -90,8 +104,10 @@ class _AttachedFileSpec extends PdfObject<PdfDict> {
     super.prepare();
 
     params['/Type'] = const PdfName('/Filespec');
-    params['/F'] = PdfString(Uint8List.fromList(_file.fileName.codeUnits));
-    params['/UF'] = PdfString(Uint8List.fromList(_file.fileName.codeUnits));
+    // fromString, not the raw code units: a code unit above 0xFF was truncated to
+    // one byte, so a non-Latin-1 file name was mangled.
+    params['/F'] = PdfString.fromString(_file.fileName);
+    params['/UF'] = PdfString.fromString(_file.fileName);
     params['/EF'] = PdfDict({'/F': _file.ref()});
 
     params['/AFRelationship'] = PdfName(relationship);
@@ -122,25 +138,20 @@ class _AttachedFile extends PdfObject<PdfDictStream> {
 
     params['/Subtype'] = PdfName(subType);
 
+    // ISO 32000-1 Table 46: /Size is the uncompressed size in bytes. It was the
+    // UTF-16 code-unit count while the payload is written as UTF-8, so the two
+    // agreed only for ASCII - a Factur-X attachment with accents declared 99 for
+    // a 106-byte stream, and a consumer that trusts /Size truncated the XML.
+    // Encoded once, so the dictionary and the stream cannot drift.
+    final data = Uint8List.fromList(utf8.encode(content));
+
     params['/Params'] = PdfDict({
-      '/Size': PdfNum(content.codeUnits.length),
+      '/Size': PdfNum(data.length),
       '/ModDate': PdfString(
         Uint8List.fromList('D:$modDate+00\'00\''.codeUnits),
       ),
     });
 
-    params.data = Uint8List.fromList(utf8.encode(content));
-  }
-}
-
-class _PdfRaw extends PdfDataType {
-  const _PdfRaw(this.name, this.spec);
-
-  final String name;
-  final _AttachedFileSpec spec;
-
-  @override
-  void output(PdfObjectBase o, PdfStream s, [int? indent]) {
-    s.putString('($name) ${spec.ref()}');
+    params.data = data;
   }
 }

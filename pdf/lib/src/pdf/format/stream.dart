@@ -49,11 +49,27 @@ class PdfStream {
     _stream.setAll(offset, iterable);
   }
 
+  /// Append the bytes [s] has actually been given.
+  ///
+  /// Not its backing array: _ensureCapacity over-allocates in 64KB steps, so
+  /// everything from the cursor to the end of that array is zero padding. A
+  /// three-byte source used to arrive as 65536 bytes, and splicing a saved
+  /// document left NULs after its %%EOF.
   void putStream(PdfStream s) {
-    putBytes(s._stream);
+    putBytes(Uint8List.sublistView(s._stream, 0, s._offset));
   }
 
   int get offset => _offset;
+
+  /// Forget everything written so far.
+  ///
+  /// prepare() runs on every write, and several implementations append to their
+  /// buffer rather than rebuilding it - so writing one document twice embedded
+  /// the font program twice, with a stale /Length1, and gave /ToUnicode two
+  /// begincmap programs.
+  void reset() {
+    _offset = 0;
+  }
 
   Uint8List output() => _stream.sublist(0, _offset);
 

@@ -68,28 +68,36 @@ class SvgPath extends SvgOperation {
       'x',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final y = SvgParser.getNumeric(
       element,
       'y',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
     final width = SvgParser.getNumeric(
       element,
       'width',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final height = SvgParser.getNumeric(
       element,
       'height',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
 
-    var rx = SvgParser.getNumeric(element, 'rx', _brush)?.sizeValue;
-    var ry = SvgParser.getNumeric(element, 'ry', _brush)?.sizeValue;
+    var rx = SvgParser.getNumeric(
+      element,
+      'rx',
+      _brush,
+    )?.sizeIn(painter.viewport, SvgAxis.horizontal);
+    var ry = SvgParser.getNumeric(
+      element,
+      'ry',
+      _brush,
+    )?.sizeIn(painter.viewport, SvgAxis.vertical);
 
     ry ??= rx ?? 0;
     rx ??= ry;
@@ -123,19 +131,19 @@ class SvgPath extends SvgOperation {
       'cx',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final cy = SvgParser.getNumeric(
       element,
       'cy',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
     final r = SvgParser.getNumeric(
       element,
       'r',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.diagonal);
     final d =
         'M${cx - r},${cy}A$r,$r 0,0,0 ${cx + r},${cy}A$r,$r 0,0,0 ${cx - r},${cy}z';
 
@@ -160,25 +168,25 @@ class SvgPath extends SvgOperation {
       'cx',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final cy = SvgParser.getNumeric(
       element,
       'cy',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
     final rx = SvgParser.getNumeric(
       element,
       'rx',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final ry = SvgParser.getNumeric(
       element,
       'ry',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
     final d =
         'M${cx - rx},${cy}A$rx,$ry 0,0,0 ${cx + rx},${cy}A$rx,$ry 0,0,0 ${cx - rx},${cy}z';
 
@@ -240,25 +248,25 @@ class SvgPath extends SvgOperation {
       'x1',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final y1 = SvgParser.getNumeric(
       element,
       'y1',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
     final x2 = SvgParser.getNumeric(
       element,
       'x2',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final y2 = SvgParser.getNumeric(
       element,
       'y2',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
     final d = 'M$x1 $y1 $x2 $y2';
 
     return SvgPath(
@@ -274,25 +282,34 @@ class SvgPath extends SvgOperation {
 
   @override
   void paintShape(PdfGraphics canvas) {
-    if (brush.fill!.isNotEmpty) {
+    // The colour may carry its own alpha - rgba(), #rrggbbaa, `transparent` -
+    // which the fill and stroke opacities multiply.
+    final fillAlpha = brush.fillOpacity! * (brush.fill!.opacity ?? 1.0);
+    final strokeAlpha = brush.strokeOpacity! * (brush.stroke!.opacity ?? 1.0);
+
+    if (brush.fill!.isNotEmpty && fillAlpha > 0) {
       brush.fill!.setFillColor(this, canvas);
-      if (brush.fillOpacity! < 1) {
+      if (fillAlpha < 1) {
         canvas
           ..saveContext()
-          ..setGraphicState(PdfGraphicState(opacity: brush.fillOpacity));
+          // fillOpacity, not opacity: the latter sets the stroke alpha too.
+          ..setGraphicState(PdfGraphicState(fillOpacity: fillAlpha));
       }
       canvas
         ..drawShape(d)
         ..fillPath(evenOdd: brush.fillEvenOdd!);
-      if (brush.fillOpacity! < 1) {
+      if (fillAlpha < 1) {
         canvas.restoreContext();
       }
     }
 
-    if (brush.stroke!.isNotEmpty) {
+    // hasStroke, not stroke.isNotEmpty: a stroke-width of zero or less means
+    // there is no stroke, and the whole block has to be skipped so no colour,
+    // dash, cap, join, 'w' or 'S' operator goes out.
+    if (brush.hasStroke && strokeAlpha > 0) {
       brush.stroke!.setStrokeColor(this, canvas);
-      if (brush.strokeOpacity! < 1) {
-        canvas.setGraphicState(PdfGraphicState(opacity: brush.strokeOpacity));
+      if (strokeAlpha < 1) {
+        canvas.setGraphicState(PdfGraphicState(strokeOpacity: strokeAlpha));
       }
       canvas
         ..drawShape(d)
@@ -303,7 +320,9 @@ class SvgPath extends SvgOperation {
           brush.strokeDashArray!,
           brush.strokeDashOffset!.toInt(),
         )
-        ..setLineWidth(brush.strokeWidth!.sizeValue)
+        ..setLineWidth(
+          brush.strokeWidth!.sizeIn(painter.viewport, SvgAxis.diagonal),
+        )
         ..strokePath();
     }
   }

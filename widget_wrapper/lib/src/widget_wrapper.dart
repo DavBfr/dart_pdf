@@ -21,6 +21,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:image/image.dart' as im;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -28,11 +29,13 @@ import 'package:pdf/widgets.dart' as pw;
 class WidgetWrapper extends pw.ImageProvider {
   WidgetWrapper._(
     this.bytes,
-    int width,
-    int height,
+    int pixelWidth,
+    int pixelHeight,
     PdfImageOrientation orientation,
     double? dpi,
-  ) : super(width, height, orientation, dpi);
+  )   : _pixelWidth = pixelWidth,
+        _pixelHeight = pixelHeight,
+        super(pixelWidth, pixelHeight, orientation, dpi);
 
   /// Wrap a Flutter Widget identified by a GlobalKey to an ImageProvider.
   ///
@@ -79,26 +82,40 @@ class WidgetWrapper extends pw.ImageProvider {
     final wrappedWidget =
         key.currentContext!.findRenderObject() as RenderRepaintBoundary;
     final image = await wrappedWidget.toImage(pixelRatio: pixelRatio);
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
 
-    if (byteData == null) {
+    try {
+      // dart:ui hands back premultiplied RGBA by default, and the PDF layer
+      // stores these bytes as /DeviceRGB plus a /DeviceGray /SMask - which
+      // ISO 32000-1 11.6.5.2 defines as straight alpha. A viewer then composites
+      // Cs*a^2 + Cb*(1-a), so anti-aliased edges came out with a dark fringe and
+      // 50% red rendered as (191,127,127) over white instead of (255,127,127).
+      final byteData = await image.toByteData(
+        format: ui.ImageByteFormat.rawStraightRgba,
+      );
+
+      if (byteData == null) {
+        return WidgetWrapper._(
+          Uint8List(0),
+          0,
+          0,
+          PdfImageOrientation.topLeft,
+          dpi,
+        );
+      }
+
+      // A copy of the pixels, so it stays valid once the image is gone.
+      final imageData = byteData.buffer.asUint8List();
       return WidgetWrapper._(
-        Uint8List(0),
-        0,
-        0,
-        PdfImageOrientation.topLeft,
+        imageData,
+        image.width,
+        image.height,
+        orientation ?? PdfImageOrientation.topLeft,
         dpi,
       );
+    } finally {
+      // The full-resolution image was never released.
+      image.dispose();
     }
-
-    final imageData = byteData.buffer.asUint8List();
-    return WidgetWrapper._(
-      imageData,
-      image.width,
-      image.height,
-      orientation ?? PdfImageOrientation.topLeft,
-      dpi,
-    );
   }
 
   /// Wrap a Flutter Widget to an ImageProvider.
@@ -135,7 +152,9 @@ class WidgetWrapper extends pw.ImageProvider {
   }) async {
     assert(pixelRatio > 0);
 
-    if (!constraints.hasBoundedHeight || !constraints.hasBoundedHeight) {
+    // Both axes, not hasBoundedHeight twice: an unbounded width used to reach
+    // the block below and be reported as something else entirely.
+    if (!constraints.hasBoundedWidth || !constraints.hasBoundedHeight) {
       throw Exception(
         'Unable to convert an unbounded widget. Add maxWidth and maxHeight to the constraints.',
       );
@@ -143,32 +162,24 @@ class WidgetWrapper extends pw.ImageProvider {
 
     widget = ConstrainedBox(constraints: constraints, child: widget);
 
-    final prop = DiagnosticPropertiesBuilder();
-    widget.debugFillProperties(prop);
-
-    if (prop.properties.isEmpty) {
-      throw ErrorDescription('Unable to get the widget properties');
-    }
-
-    final computedConstraints = prop.properties
-        .whereType<DiagnosticsProperty<BoxConstraints>>()
-        .first
-        .value;
-
-    if (computedConstraints == null ||
-        !computedConstraints.hasBoundedWidth ||
-        !computedConstraints.hasBoundedWidth) {
-      throw Exception('Unable to convert an unbounded widget.');
-    }
+    // What stood here read the constraints back out of debug diagnostics -
+    // widget.debugFillProperties, then a throw when the property list came back
+    // empty. DiagnosticPropertiesBuilder.add is assert-guarded, so in any
+    // release or profile build that list is always empty and this always threw
+    // ErrorDescription('Unable to get the widget properties') before rendering
+    // anything. The value it recovered was provably the ConstrainedBox argument
+    // applied on the line above, which the check at the top of this method has
+    // already validated.
 
     final repaintBoundary = RenderRepaintBoundary();
+    final positionedBox = RenderPositionedBox(
+      alignment: Alignment.center,
+      child: repaintBoundary,
+    );
     final view = View.of(context);
 
     final renderView = RenderView(
-      child: RenderPositionedBox(
-        alignment: Alignment.center,
-        child: repaintBoundary,
-      ),
+      child: positionedBox,
       configuration: ViewConfiguration.fromView(view),
       view: view,
     );
@@ -176,49 +187,119 @@ class WidgetWrapper extends pw.ImageProvider {
     final pipelineOwner = PipelineOwner()..rootNode = renderView;
     renderView.prepareInitialFrame();
 
-    final buildOwner = BuildOwner(focusManager: FocusManager());
-    final rootElement = RenderObjectToWidgetAdapter<RenderBox>(
+    // FocusManager's constructor registers a WidgetsBinding observer on web and
+    // on every desktop platform, which only its dispose() removes, so every
+    // call used to add one permanently.
+    final focusManager = FocusManager();
+    final buildOwner = BuildOwner(focusManager: focusManager);
+    final adapter = RenderObjectToWidgetAdapter<RenderBox>(
       container: repaintBoundary,
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: IntrinsicHeight(child: IntrinsicWidth(child: widget)),
       ),
-    ).attachToRenderTree(buildOwner);
-
-    buildOwner
-      ..buildScope(rootElement)
-      ..finalizeTree();
-
-    pipelineOwner
-      ..flushLayout()
-      ..flushCompositingBits()
-      ..flushPaint();
-
-    final image = await repaintBoundary.toImage(pixelRatio: pixelRatio);
-    final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-    if (bytes == null) {
-      throw Exception('Unable to read image data');
-    }
-
-    return WidgetWrapper._(
-      bytes.buffer.asUint8List(),
-      image.width,
-      image.height,
-      orientation ?? PdfImageOrientation.topLeft,
-      dpi,
     );
+    final rootElement = adapter.attachToRenderTree(buildOwner);
+
+    ui.Image? image;
+
+    try {
+      buildOwner
+        ..buildScope(rootElement)
+        ..finalizeTree();
+
+      pipelineOwner
+        ..flushLayout()
+        ..flushCompositingBits()
+        ..flushPaint();
+
+      image = await repaintBoundary.toImage(pixelRatio: pixelRatio);
+      // Straight alpha, not premultiplied: see fromKey above.
+      final bytes = await image.toByteData(
+        format: ui.ImageByteFormat.rawStraightRgba,
+      );
+      if (bytes == null) {
+        throw Exception('Unable to read image data');
+      }
+
+      return WidgetWrapper._(
+        // A copy, so it stays valid once the image is gone.
+        bytes.buffer.asUint8List(),
+        image.width,
+        image.height,
+        orientation ?? PdfImageOrientation.topLeft,
+        dpi,
+      );
+    } finally {
+      // Nothing created here outlives this call, including when the capture
+      // throws - a widget that lays out to zero size makes toImage throw.
+      image?.dispose();
+
+      // Unmount the elements before disposing the render objects they point at:
+      // re-attach the adapter with no child, then let the build owner finish.
+      RenderObjectToWidgetAdapter<RenderBox>(
+        container: repaintBoundary,
+      ).attachToRenderTree(buildOwner, rootElement);
+      buildOwner
+        ..buildScope(rootElement)
+        ..finalizeTree();
+
+      pipelineOwner.rootNode = null;
+      renderView.child = null;
+      positionedBox.child = null;
+
+      repaintBoundary.dispose();
+      positionedBox.dispose();
+      renderView.dispose();
+      pipelineOwner.dispose();
+      focusManager.dispose();
+    }
   }
 
-  /// The image data
+  /// The image data, as straight-alpha RGBA.
   final Uint8List bytes;
+
+  /// The captured buffer's own pixel dimensions.
+  ///
+  /// Not the inherited [width] and [height], which are display values: those
+  /// swap the two axes for a rotated orientation, while PdfImage writes its
+  /// arguments straight into /Width and /Height and drives its pixel loops with
+  /// them. Handing it the display values made a rotated capture decode at the
+  /// wrong row stride and come out sheared.
+  final int _pixelWidth;
+
+  final int _pixelHeight;
 
   @override
   PdfImage buildImage(pw.Context context, {int? width, int? height}) {
-    return PdfImage(
+    // A resample request is a request to resample. This used to hand PdfImage the
+    // full-resolution capture while labelling it with the requested size, so the
+    // RGB and SMask loops read at the wrong stride - a diagonally sheared sliver
+    // of the top of the widget - and off the end of the buffer entirely when the
+    // requested pixel count exceeded the capture's.
+    if (width == null || _pixelWidth == 0 || width >= _pixelWidth) {
+      return PdfImage(
+        context.document,
+        image: bytes,
+        width: _pixelWidth,
+        height: _pixelHeight,
+        orientation: orientation,
+      );
+    }
+
+    final captured = im.Image.fromBytes(
+      width: _pixelWidth,
+      height: _pixelHeight,
+      bytes: bytes.buffer,
+      bytesOffset: bytes.offsetInBytes,
+      numChannels: 4,
+    );
+
+    // The height is derived from the width, so the aspect ratio holds whatever
+    // the caller's box asked for.
+    return PdfImage.fromImage(
       context.document,
-      image: bytes,
-      width: width ?? this.width!,
-      height: height ?? this.height!,
+      image: im.copyResize(captured, width: width),
       orientation: orientation,
     );
   }

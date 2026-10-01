@@ -38,8 +38,12 @@ jobs:
         run: bash <(curl -s https://codecov.io/bash)
       - name: Prepare build
         run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
+      - name: Check the pdfium CMake cache namespacing
+        run: cmake -S printing/test/cmake -B build/printing-cmake-test
       - name: Build example for Linux
         run: cd printing/example; flutter build -v linux
+      - name: Run the Android plugin unit tests
+        run: cd printing/example/android; ./gradlew :printing:testDebugUnitTest
       - name: Build example for Android
         run: cd printing/example; flutter build -v apk
       - name: Build demo for Web
@@ -94,6 +98,8 @@ jobs:
         run: flutter config --enable-windows-desktop
       - name: Prepare build
         run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
+      - name: Check the pdfium CMake cache namespacing
+        run: cmake -S printing/test/cmake -B build/printing-cmake-test
       - name: Build example for Windows
         run: cd printing/example; flutter build -v windows
 
@@ -126,6 +132,14 @@ jobs:
           architecture: x64
       - name: Enable macOS for flutter
         run: flutter config --enable-macos-desktop
+      - name: Type-check the Apple plugin sources
+        run: sh printing/test/apple/typecheck.sh
+      - name: Check the Apple page renderer
+        run: |
+          diff printing/macos/printing/Sources/printing/PdfPageRenderer.swift printing/ios/printing/Sources/printing/PdfPageRenderer.swift
+          python3 printing/test/apple/make_fixtures.py build/printing-fixtures
+          swiftc -O -o build/renderer-checks printing/macos/printing/Sources/printing/PdfPageRenderer.swift printing/test/apple/main.swift
+          build/renderer-checks build/printing-fixtures
       - name: Prepare build
         run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
       - name: Build example for macOS

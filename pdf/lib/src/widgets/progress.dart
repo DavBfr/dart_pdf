@@ -26,6 +26,8 @@ class CircularProgressIndicator extends Widget {
     this.color,
     this.strokeWidth = 4.0,
     this.backgroundColor,
+    this.fallbackWidth,
+    this.fallbackHeight,
   });
 
   /// The value of this progress indicator.
@@ -40,14 +42,54 @@ class CircularProgressIndicator extends Widget {
 
   final double strokeWidth;
 
+  /// The size to take on an axis the parent leaves unbounded.
+  final double? fallbackWidth;
+
+  /// The size to take on an axis the parent leaves unbounded.
+  final double? fallbackHeight;
+
   @override
   void layout(
     Context context,
     BoxConstraints constraints, {
     bool parentUsesSize = false,
   }) {
-    box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
+    // constraints.biggest is infinite on an unbounded axis, which is exactly what
+    // a non-flex child of a Row is given. The infinite radius then reached
+    // .ceil() in the arc and threw 'Unsupported operation: Infinity or NaN
+    // toInt'.
+    box = PdfRect.fromPoints(
+      PdfPoint.zero,
+      PdfPoint(
+        _bounded(
+          constraints.hasBoundedWidth,
+          constraints.maxWidth,
+          fallbackWidth,
+          'width',
+        ),
+        _bounded(
+          constraints.hasBoundedHeight,
+          constraints.maxHeight,
+          fallbackHeight,
+          'height',
+        ),
+      ),
+    );
   }
+
+  double _bounded(
+    bool bounded,
+    double maximum,
+    double? fallback,
+    String axis,
+  ) => bounded
+      ? maximum
+      : (fallback ??
+            (throw PdfException(
+              'CircularProgressIndicator has an unbounded $axis. Give it a '
+              'fallback${axis[0].toUpperCase()}${axis.substring(1)}, or a '
+              'parent that constrains it.',
+            )));
 
   @override
   void paint(Context context) {
@@ -141,6 +183,7 @@ class LinearProgressIndicator extends Widget {
     this.backgroundColor,
     this.valueColor,
     this.minHeight,
+    this.fallbackWidth,
   });
 
   /// The progress indicator's background color.
@@ -156,16 +199,32 @@ class LinearProgressIndicator extends Widget {
   /// The progress indicator's color
   final PdfColor? valueColor;
 
+  /// The width to take when the parent leaves the width unbounded.
+  final double? fallbackWidth;
+
   @override
   void layout(
     Context context,
     BoxConstraints constraints, {
     bool parentUsesSize = false,
   }) {
+    // The width used to be `minWidth: double.infinity` as an 'as wide as
+    // possible' sentinel, and BoxConstraints.enforce keeps that infinity when the
+    // incoming maxWidth is unbounded - which is what a non-flex child of a Row
+    // gets. The stream then carried 'Infinity 4.936 Infinity 4 re'.
+    final width = constraints.hasBoundedWidth
+        ? constraints.maxWidth
+        : (fallbackWidth ??
+              (throw PdfException(
+                'LinearProgressIndicator has an unbounded width. Give it a '
+                'fallbackWidth, or a parent that constrains it.',
+              )));
+
     box = PdfRect.fromPoints(
       PdfPoint.zero,
       BoxConstraints(
-        minWidth: double.infinity,
+        minWidth: width,
+        maxWidth: width,
         minHeight: minHeight ?? 4.0,
       ).enforce(constraints).smallest,
     );

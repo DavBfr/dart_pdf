@@ -153,12 +153,22 @@ class PdfCatalog extends PdfObject<PdfDict> {
       final fields = (acroForm['/Fields'] ??= PdfArray()) as PdfArray;
       final fontRefs = PdfDict();
       for (final w in widgets) {
-        if (w.annot is PdfTextField) {
-          // collect textfield font references
-          final tf = w.annot as PdfTextField;
-          fontRefs.addAll(PdfDict.values({tf.font.name: tf.font.ref()}));
+        // Every widget that writes a /DA, not only a PdfTextField: a
+        // ChoiceField's /DA named a font that appeared in no /DR and in no page
+        // /Resources either - its own registration ran after PdfPage.prepare had
+        // already frozen them - so Acrobat fell back to Helvetica and CJK or
+        // Arabic option text came out as boxes.
+        for (final font in w.annot.defaultAppearanceFonts) {
+          fontRefs.addAll(PdfDict.values({font.name: font.ref()}));
         }
-        final ref = w.ref();
+
+        // The field, not the widget, when several widgets share one: listing
+        // each widget made one root field per widget, all with the same /T and
+        // each with its own /V.
+        final annot = w.annot;
+        final parent = annot is PdfAnnotWidget ? annot.fieldParent : null;
+        final ref = parent?.ref() ?? w.ref();
+
         if (!fields.values.contains(ref)) {
           fields.add(ref);
         }

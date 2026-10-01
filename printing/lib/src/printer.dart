@@ -56,6 +56,8 @@ class Printer {
   final String? location;
 
   /// A user comment about the printer
+  ///
+  /// Null on macOS and on the web: neither backend can report one.
   final String? comment;
 
   /// Is this the default printer on the system

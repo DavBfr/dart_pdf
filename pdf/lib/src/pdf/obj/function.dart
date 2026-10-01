@@ -81,7 +81,14 @@ class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
     this.order = 1,
     this.domain = const <num>[0, 1],
     this.range = const <num>[0, 1],
-  }) : super(pdfDocument);
+  }) : super(pdfDocument) {
+    if (order != 1 && order != 3) {
+      throw PdfException(
+        'A sampled function interpolates linearly (order 1) or cubically '
+        '(order 3), not with order $order',
+      );
+    }
+  }
 
   factory PdfFunction.fromColors(
     PdfDocument pdfDocument,
@@ -95,7 +102,6 @@ class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
     }
     return PdfFunction(
       pdfDocument,
-      order: 3,
       data: data,
       range: const <num>[0, 1, 0, 1, 0, 1],
     );
@@ -105,6 +111,8 @@ class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
 
   final int bitsPerSample;
 
+  /// The order of interpolation between samples: 1 for linear, 3 for cubic
+  /// spline. Cubic interpolation needs at least four samples per dimension.
   final int order;
 
   final List<num> domain;
@@ -113,15 +121,36 @@ class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
 
   @override
   void prepare() {
+    // Rebuilt, not appended to: a second write doubled the sample data behind a
+    // /Size that described one copy.
+    buf.reset();
     buf.putBytes(data!);
     super.prepare();
 
+    // One sample holds one value per output, each bitsPerSample bits wide, so
+    // that is what the byte count has to be divided by to count the samples.
+    // /Size used to be data.length ~/ order, and order meant components per
+    // sample - which made /Order, the interpolation order, unusable: every
+    // gradient carried /Order 3 over the two samples it interpolates, where
+    // cubic needs four.
+    final outputs = range.length ~/ 2;
+    final samples = data!.length * 8 ~/ (outputs * bitsPerSample);
+
+    if (order == 3 && samples < 4) {
+      throw PdfException(
+        'Cubic interpolation needs at least 4 samples, this function has '
+        '$samples',
+      );
+    }
+
     params['/FunctionType'] = const PdfNum(0);
     params['/BitsPerSample'] = PdfNum(bitsPerSample);
-    params['/Order'] = PdfNum(order);
+    if (order != 1) {
+      params['/Order'] = PdfNum(order);
+    }
     params['/Domain'] = PdfArray.fromNum(domain);
     params['/Range'] = PdfArray.fromNum(range);
-    params['/Size'] = PdfArray.fromNum(<int>[data!.length ~/ order]);
+    params['/Size'] = PdfArray.fromNum(<int>[samples]);
   }
 
   @override
@@ -151,7 +180,6 @@ class PdfStitchingFunction extends PdfBaseFunction {
 
     params['/FunctionType'] = const PdfNum(3);
     params['/Functions'] = PdfArray.fromObjects(functions);
-    params['/Order'] = const PdfNum(3);
     params['/Domain'] = PdfArray.fromNum(<num>[domainStart, domainEnd]);
     params['/Bounds'] = PdfArray.fromNum(bounds);
     params['/Encode'] = PdfArray.fromNum(

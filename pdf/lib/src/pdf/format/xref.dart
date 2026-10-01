@@ -374,7 +374,20 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
       params['/Index'] = PdfArray.fromNum(blocks);
     }
 
-    final bytes = ((math.log(offset) / math.ln2).ceil() / 8).ceil();
+    // The exact byte width, not ceil(log2(x)) / 8: ceil(log2) is one bit short
+    // for a power of two, which crosses a byte boundary at 2^8, 2^16 and 2^24.
+    // The xref stream's own offset is the largest in the table, so a document
+    // whose xref began exactly at byte 65536 recorded it as 0 - 65536 & 0xFFFF -
+    // and readers rebuilt the table. Taken over every offset in the table, not
+    // only this one.
+    var widest = offset;
+    for (final x in xrefList) {
+      if (x.offset > widest) {
+        widest = x.offset;
+      }
+    }
+
+    final bytes = math.max(1, (widest.bitLength + 7) ~/ 8);
     final w = [1, bytes, 1];
     params['/W'] = PdfArray.fromNum(w);
     final wl = w.reduce((a, b) => a + b);

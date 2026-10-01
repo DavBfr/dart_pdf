@@ -1,5 +1,139 @@
 # Changelog
 
+## 5.18.1
+
+- **Fix `flutterImageProvider` embedding premultiplied pixels as straight alpha**, so every anti-aliased edge of a captured image got a dark fringe and a translucent overlay came out muddy: 50% red rendered as (191,127,127) over white instead of (255,127,127). `dart:ui` hands back premultiplied RGBA by default, and the PDF layer stores those bytes as `/DeviceRGB` plus a `/DeviceGray` `/SMask`, which ISO 32000-1 11.6.5.2 defines as straight alpha, so viewers composited `Cs*a^2 + Cb*(1-a)`. The capture now asks for `rawStraightRgba`. A fully opaque capture is byte-identical
+
+## 5.18.0
+
+- **`Printing.raster` now paints an opaque white page backdrop.** A PDF page has no background of its own - the imaging model leaves it to whatever displays the document - and no native backend painted one, so 96% of a blank A4 came back at alpha 0 and saving a rastered page as PNG, or re-encoding it as JPEG, gave a black page. Pass `background: 0x00000000` to `Printing.raster` for the transparent pages of 5.17 and earlier
+- Fix Windows and Linux handing back straight alpha where Flutter reads premultiplied, so a partially transparent page rastered too bright. It made no difference while every pixel was transparent, and none for the new opaque default
+- `PrintingPlatform.raster` gained a `background` parameter, which a custom platform implementation has to accept
+- **Fix `Printing.raster` hard-crashing the whole process on Windows and Linux** for a page too large to rasterize - an A0 at 600 dpi, an A4 at 3400 dpi. pdfium answers a null bitmap once the buffer reaches 4 GiB, and the pixel loop wrote straight through it; the buffer length and the row offsets were also computed in `int`, which wraps above 2 GiB. The stream now ends with an error naming the problem and the app stays alive
+- Every pdfium handle on the Windows and Linux raster paths is released by a scope guard, so the new failure exits cannot skip a close
+- Fix the web raster hanging for ever when a page's blob could not be read or the read was aborted: the `FileReader` listener completed its completer only on the success path, and its failure went to the zone rather than to the awaiting code, so `Printing.raster` stopped emitting and never closed and `PdfPreview` sat on a spinner with no error. The read now reports a failure on the stream
+- Fix the web raster silently dropping a page when the canvas could not be encoded; it reports which page instead
+- Fix the Android raster leaking a full-size temp file in the app cache, two file descriptors and a native `PdfRenderer` on every failure - a password-protected, truncated or malformed document, or an out-of-range page index - which also tripped StrictMode. Every handle is now released on every path, and the temp file is deleted last rather than on the line after the constructor that threw
+- An out-of-range page index on Android now ends the raster stream with a message naming the index and the page count, instead of an uncaught `IllegalArgumentException`
+- A failed Android raster always reports a non-null message. It could report null, which the Dart side reads as a clean end of stream, and it could report twice
+- Fix `PdfRaster.toPng` abandoning the `ui.Image` it decodes, so every page of every preview re-raster left a full-resolution decode in engine memory. `PdfRaster.toImage` still hands its image to the caller, which its documentation now says
+- `PdfRaster.toPng` reports a failure to encode instead of a null-check error
+- Fix AcroForm widget annotations - checkboxes, text fields, buttons, signatures - being absent from the Windows and Linux preview raster and from Windows printed output, while the same document shows them in any viewer. The raster paths now draw them through a pdfium form-fill environment, and the Windows print path flattens them into the page, which keeps the output vector
+
+
+
+
+
+
+## 5.17.0
+
+- Fix self-hosting pdf.js on web never loading, with 'Failed to resolve module specifier'. A dynamic `import()` reads its argument as a module specifier, so the relative `dartPdfJsBaseUrl` the README documented was a bare specifier the browser rejected. The configured base is now resolved against the page - honouring `<base href>` - and given a trailing slash
+- Fix text disappearing on web from PDFs whose CID fonts use a predefined CMap (`UniJIS-UCS2-H`, `GBK-EUC-H`). The CMap configuration was behind a condition that was never true, and the URL it would have built was a 404: `pdfjs-dist` keeps `cmaps/` beside `build/`, not inside it
+- A self-hoster whose `cmaps/` directory is not next to the library can point at it with a new `dartPdfJsCMapUrl` window variable
+- Configuration values from the page are escaped before being interpolated into the loader script, so a quote in one of them is no longer a syntax error
+- The README's pdf.js instructions named version 3.2.146 and the `*.js` loader files, neither of which works with the ES-module pdf.js this package requests
+- **`Printing.layoutPdf` on web no longer returns true unconditionally.** It returns false when nothing reached a print dialog: the browser refused to print the frame, the document never loaded, or the browser was handed a download instead. Apps that marked invoices printed, popped a route or showed success off that value were doing so after a cancel, after a failure and after a popup-blocked download
+- Fix mobile browsers never attempting to print on web. The strategy is chosen from the browser engine rather than the `Mobile` user-agent token, so an iPhone and an iPad - which sends a desktop user agent - now behave the same instead of one printing and the other silently doing nothing
+- The web download fallback now sets the anchor's `download` attribute with the job name instead of `target=_blank`, which iOS Safari blocks when it is clicked after an await. **On Android and in web views, printing on web now downloads the document rather than opening a tab**
+- `PrintingInfo` gained `reportsPrintOutcome`, false on web, for an app that treats a print as a committed action
+- Fix the web print path leaving the print iframe, its helper script and a full copy of the document in the page whenever the browser's `print()` returned promptly, and never revoking any blob object URL it created. Every print, share and download used to retain the whole document for the lifetime of the tab
+- The web print future no longer resolves while the print dialog is still open, and completes false instead of hanging when the browser will not render the document at all
+- Fix `PdfPreview` dropping a page format, orientation or debug-switch change made while pages were still streaming. The action bar showed the new setting while the preview kept the old rendering until some unrelated event happened to re-raster. Requests made during a raster now coalesce into one catch-up pass that renders the newest of them
+- Fix `PdfPreview` re-running the app's whole document build and a full raster pass on any inherited-widget change - opening the keyboard, toggling dark mode, changing the text scale - even though only the size and the device pixel ratio can move the resolution it renders at
+- `PdfPreview` now re-rasters when the window is resized, which it did not do at all
+- `PdfPreviewRaster` gained a protected `computeDpi()` and a `needsRasterForDpi` getter, for a subclass that overrides the scheduling
+- Fix `PdfPreview` throwing `RangeError` out of `build` - a red error widget the user cannot recover from - when a page was zoomed and a re-raster then produced fewer pages. The zoomed page is clamped to the last page there is, or leaves the zoom when the document is empty, and `onZoomChanged` fires exactly once per real change
+- Fix `PdfPreview` re-inflating every page on every rebuild with `enableScrollToPage: true`, which made streaming a document cost O(N^2), and made a key from `getPageKey` dead one frame later. Page keys are now stable for the life of the page
+- Fix `scrollToPage` and `getPageKey` throwing `RangeError (length): Valid value range is empty: 0` when called before the first page was rasterized, or past the end after the document shrank. `scrollToPage` now completes without scrolling, and both assert in debug with the index and the page count
+- `PdfPreviewCustomState` gained a `pageCount` getter, and `PdfPreviewRaster` a protected `onPagesChanged()` hook called before each page-list change is published
+- Fix a change to `PdfPreview`'s `pages`, `dpi` or `maxPageWidth` having no effect until some unrelated event happened to re-raster, at which point the view jumped. Only apps passing `build` as a stable tear-off were affected: a closure literal masked it, because its identity differs on every rebuild. `pages` is compared by content, so a fresh list with the same contents still does not re-raster
+- Fix `PdfPreview.onPageFormatChanged` never firing again after the first parent rebuild, so a persisted paper-size choice silently stopped being saved. The replaced `PdfPreviewData` is now also disposed rather than leaked, and the selected format survives the swap
+- Fix `PdfPreview` leaking one `ScrollController` per mount, with its listener list. The scroll-position restore scheduled from `build` is guarded, so disposing the controller cannot turn that leak into a 'used after being disposed' crash
+- `PdfPreviewCustomState.previewUpdate` is deprecated: it was always null and nothing wrote to it
+- **A failed font download now reaches the caller.** `PdfGoogleFonts.*` and `DownloadableFont.getFont` used to return Helvetica on any failure, with their only report inside an assert that release and profile builds strip - so a release build silently shipped a document in which every rune outside 0x00-0xFF was a crossed box. To keep the old behaviour, set `DownloadableFont.defaultFallback = Font.helvetica()` once, or pass `fallback:` to `getFont`; the substitution is then reported through `FlutterError.reportError` in every build mode
+- A downloaded body that is not a font - a captive portal's sign-in page, a truncated response - is now a font error naming the font and the URL, and is dropped from the cache, instead of a `RangeError` from inside the TTF reader much later
+- `DownloadableFont` is exported, so an app can use it for its own font URLs and set the fallback
+- Fix `flutterImageProvider` never completing when the pixel read-back fails, which on the web is what a `NetworkImage` served without CORS headers does: the preview span for ever, `layoutPdf` and `sharePdf` never fired, and no error reached the app. It now rejects with the read-back's own exception, and with a descriptive one naming the image size when the read-back yields no bytes
+- A `flutterImageProvider` load failure now rejects with the exception and its stack rather than the string 'image failed to load', and its listener is removed on every path
+- Requires pdf_widget_wrapper 1.0.5, in which `WidgetWrapper.fromWidget` works in release and profile builds instead of always throwing, and neither factory leaks its render pipeline or its captured image
+
+
+
+
+
+## 5.16.0
+
+- Fix roll and undefined page formats sending `double.infinity` over the method channel, which no platform can represent: Android substituted its unknown-size sentinel and laid the document out for Letter, iOS produced NaN margins that ended up as a `NaN` MediaBox, and Windows cast the length into a negative 16-bit field. An unspecified axis is now sent as `0`, meaning 'use the printer's paper for this axis', and each backend treats it that way
+- `PdfPreview` now gives a roll format a real height from the page it rasterized while keeping the requested width exactly, so roll printing works from the preview on every backend
+- A page size or margin reported back by a platform that is not finite is repaired instead of reaching the document
+- Fix the Android media-size match rejecting every candidate for a large page, because the tolerance arithmetic overflowed, and never matching a custom finite format
+- Fix the `PdfPreview` share button calling `onPrinted` instead of `onShared`, which left `onShared` as dead code. Apps that relied on `onPrinted` firing for a share must move that handler to `onShared`
+- Fix a null-check crash when the preview rebuilds while a share is in flight: the share action read its iPad popover anchor after awaiting the document, by which time its element had been replaced. The anchor is now read before the await, from the context passed to the action
+- `PdfShareAction` now reports a failure through `onShareError` and as a `FlutterError` instead of letting it escape as an unhandled asynchronous error, matching the print action. `PdfPreview` gained an `onShareError` parameter to receive it
+- `PdfPreviewActionBounds.childKey` and its `bounds` getter are deprecated in favour of `boundsOf(context)`; `bounds` now answers `Rect.zero` rather than throwing when the key is detached
+- `Printing.sharePdf` now treats `filename` as a file name rather than a path: any directory part is dropped, and a name that identifies no file falls back to `document.pdf`. Every backend pasted the string onto a temp directory, so a name containing a separator silently shared nothing on most platforms and aborted the Linux plugin
+- `Printing.sharePdf` now answers `false` when the platform reports no share instead of reading a missing reply as success, and the Android, iOS, macOS, Linux and Windows backends report whether the file was written and the share sheet actually presented
+- Fix the shared document being left behind in the temp directory on iOS and macOS. The copy is now deleted once the share sheet is done with it
+- Fix the Android share granting write access to the shared file, and stale entries accumulating in the share directory
+- Fix the Linux share ignoring every write error, and leaving a forked copy of the application running when `xdg-open` is missing
+- Fix `Printing.layoutPdf` and `Printing.directPrintPdf` never completing on Linux when the document could not be built: `cancel_job` was an empty function, so the future stayed pending, the print dialog stayed alive and everything the job owned leaked. Every Linux job now reports exactly one result, whatever ends it
+- Fix Linux leaking one file descriptor and one document-sized memfd per print, which made a long-running app fail with 'Too many open files' after about a thousand prints
+- Fix a failed spool write still sending a truncated document to the Linux printer, and reporting a second result for the same job
+- Fix Linux never freeing a print job: one leaked per print and per dialog cancel. A cancelled dialog is also destroyed rather than hidden
+- Fix the Linux print dialog's printer and page setup being released although they were never acquired, which corrupted their reference counts and crashed the app on a later dialog print
+- A Linux print to a queue that accepts no PDF, or with no printer selected, reports that instead of continuing with a null printer
+- Fix Windows reporting a successful print for a job that was never spooled. `StartDoc`, `StartPage`, `EndPage` and `EndDoc` are all checked, so `Printing.layoutPdf` now returns false, or throws with the system's message, where it used to return true: cancelling the Print to PDF save dialog, a printer out of paper, access denied and a stopped spooler were all silent successes. A cancellation completes with false rather than throwing
+- A failed Windows job aborts the document it opened instead of leaving a half-open job in the queue, and releases its device context and DEVMODE blocks on every path
+- Fix `Printing.listPrinters` answering an empty list on Windows when the print system had failed, so an app could not tell that from a machine with no printers. It now reports the failure, and a printer added while the list was being read no longer loses the whole list
+- Fix Windows leaking the default-printer name buffer on every `listPrinters` failure
+- Fix the classic Windows print dialog leaking one native job object per cancel
+- `Printing.listPrinters` answers an empty list rather than throwing a null-check error when a platform reports no printer list at all
+- Fix an app that depends on printing and another pdfium plugin failing to configure with 'Build step for pdfium failed: 1', or silently building against the other plugin's pdfium. The Windows and Linux CMake cache entries are now `PRINTING_PDFIUM_VERSION` and `PRINTING_PDFIUM_ARCH`, and the download, source and build trees live under printing's own binary directory instead of `${CMAKE_BINARY_DIR}/pdfium-*`. An app that overrides the version or architecture must use the new names
+- Fix the Windows and Linux CMake configure failing with 'string sub-command REPLACE requires at least four arguments' when the app scaffold does not define `FLUTTER_TARGET_PLATFORM`; the architecture now falls back to x64
+- Fix `Printing.sharePdf` opening nothing on Android in a background or cached `FlutterEngine` with no Activity. The chooser now carries `FLAG_ACTIVITY_NEW_TASK` when the plugin is bound to the application context, and is unchanged when an Activity is attached
+- `Printing.info().canPrint` is now false on Android while no Activity is attached, because `PrintManager` refuses any other context. `Printing.layoutPdf` there completes with a message naming the Activity requirement instead of an anonymous `PlatformException` carrying a raw framework message
+- Fix the Android plugin dropping its method-call handler when the Activity is destroyed, which turned every later call in a surviving engine into a `MissingPluginException`. It now falls back to the application context
+- No Android framework exception escapes the plugin's method-call handler any more; each one is reported as a `printing` PlatformException naming the call that failed
+- Fix Android retaining the last Activity, its Window and its FlutterView for the lifetime of the process after a single print, raster, HTML conversion or share: `PrintingJob` kept the `PrintManager` in a static field, and `PrintManager` holds its Context. The print service is now resolved where it is used and never stored
+- Fix the Android system print dialog sitting on 'Preparing preview' with no message when the `onLayout` callback throws. A failure is now reported to the print framework as a failure, carrying the message from Dart, instead of as a cancellation, which dropped it
+- Fix the Android print preview hanging when the document could not be written into the print spooler - a full disk, or a descriptor closed because the dialog was dismissed. The write now reports a result on every path, so `Printing.layoutPdf` completes instead of waiting for ever
+- Each Android print job now delivers exactly one result to Dart and exactly one terminal callback to the print framework, whatever ends it
+- Annotations - highlights, comments, ink, stamps and form widget appearances - are now drawn on iOS and macOS, in `Printing.raster`, `PdfPreview` and printed output. They were silently missing, because the Apple backends ran only the page content stream; Windows and Linux already drew them. Annotations carrying the Hidden flag stay hidden
+- Fix a PDF whose MediaBox or CropBox origin is not (0, 0) rastering and printing displaced and clipped on iOS and macOS
+- Fix iOS and macOS disagreeing about the pixel size of the same document: macOS sized the raster from the media box and iOS from the crop box. Both now use the crop box, matching Windows and Linux. **macOS raster sizes change for any document with a crop box smaller than its media box**
+- Fix a rotated page losing a pixel from one axis when rastered on iOS and macOS; raster sizes are rounded rather than truncated
+- A page larger than the paper is now scaled to fit rather than clipped
+- The iOS and macOS podspec deployment targets are raised to 13.0 and 10.15, which is what the Swift package manifests already declared
+- Fix `Printing.directPrintPdf` with `dynamicLayout: false` never asking for the document on iOS and handing AirPrint an empty job, so nothing printed. The job now starts only once the document has arrived
+- Fix the iOS print sheet opening portrait for a landscape format, and always using the generic output type, when `dynamicLayout` is false. The orientation and `outputType` a caller asks for are now used on both paths. **Static-layout sheets now open landscape for a landscape format**
+- An iOS print job that cannot be started - the sheet refuses to present, or the printer refuses the job - now reports that, instead of leaving the future pending
+- Each iOS print job reports exactly one result to Dart
+- Fix `Printing.convertHtml` on macOS returning a single page about 108pt wide and as tall as the whole document, ignoring the requested page format and losing the margins. It renders through a print operation at the requested paper size now, so a document taller than one page is paginated. **The shape of the macOS output changes, and `@media print` rules now apply**
+- Fix `Printing.convertHtml` on macOS snapshotting the page one second after starting the load, whatever state it was in: HTML pulling a slow resource converted truncated and was reported as a success, a failed navigation was also reported as a success, and every conversion took at least a second. The conversion now waits for the load to finish, reports a failed navigation as an error, and falls back to rendering whatever exists only after 30 seconds
+- No temporary file is left behind by a macOS HTML conversion, and exactly one result is reported per call
+- `Printing.listPrinters` on macOS now reports `isDefault`, `isAvailable` and `location`. Every entry used to say `isDefault: false` and `isAvailable: true`, so a picker could not preselect the default and a paused queue looked printable. `comment` stays null, which `Printer.comment` now documents
+
+## 5.15.2
+
+- Fix Windows print jobs hanging forever: opening a named printer, a failing Dart layout callback, an unimplemented reply and a reply carrying no document all deleted the job without reporting anything, so `layoutPdf` and `directPrintPdf` waited for a result that could never arrive. Each now reports the failure and releases the printer device context and settings blocks
+- Fix a Windows crash (`std::bad_variant_access`) when the layout reply carries no document, which aborted the whole application
+- Fix an unchecked printer capability query on Windows producing a settings block that claimed 65535 bytes of driver data it never allocated
+- Fix the Windows settings block being leaked on every print when `usePrinterSettings` is set
+- Fix the requested page format never reaching the Windows driver: the form number was always sent as 0, which drivers replace with their own default paper. Standard formats are now sent as their form number, custom sizes as explicit dimensions, and a roll format asks only for the orientation instead of casting infinity into a 16-bit field
+
+- Fix Android `convertHtml` never completing when the print adapter reported a layout or write failure, or a cancellation: those callbacks were not overridden, so the caller's future hung for the lifetime of the process. Every path now delivers exactly one result
+- Fix Android `convertHtml` reporting both an error and a success for a document that produced no pages
+- Fix Android `convertHtml` leaking its `WebView` and print adapter: they are now owned for the length of the call and torn down once, on the main thread, after the result has been dispatched
+- Fix the Android `convertHtml` left margin being 72 times too wide, which pushed the content off the page and produced an empty conversion
+- A duplicate or out-of-order platform callback for a job is now ignored instead of raising `Bad state: Future already completed`
+
+- Fix `Printing.raster()` never terminating its stream when the platform call itself fails: the error is now delivered on the stream and the stream closes, instead of leaving `PdfPreview` on a permanent spinner and reporting the error as an unhandled asynchronous error
+- Fix `layoutPdf`, `convertHtml` and `raster` leaking their `PrintJob` entry when the platform call throws, which also turned a duplicate platform callback into a confusing `Bad state: Future already completed`
+- A raster subscription cancelled early now unregisters its job
+- Fix web printing deadlocking for the rest of the session when pdf.js fails to load: the plugin's mutex is now released on every path, the failure is reported to the callers queued behind it instead of having each of them retry, and the module import is bounded by a timeout
+- `PdfPreview` now shows its error widget when the platform capabilities cannot be read, instead of an endless loading indicator
+- Fix `Mutex` waking every queued waiter at once, which let two callers run inside the same critical section and cleared the lock out from under one of them
+
 ## 5.15.1
 
 - Fix iOS use-after-free crash in `CGPDFDocumentGetNumberOfPages`: UIKit reads the PDF document from a background page-count thread while dynamic layout replaces it on the main thread; document access is now lock-guarded

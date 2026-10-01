@@ -40,4 +40,14 @@ android {
     lintOptions {
         disable "InvalidPackage"
     }
+
+    testOptions {
+        // The unit tests below only inspect the classes, never call into the
+        // framework, so the stubbed android.jar is enough.
+        unitTests.returnDefaultValues = true
+    }
+}
+
+dependencies {
+    testImplementation "junit:junit:4.13.2"
 }

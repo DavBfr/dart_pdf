@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import 'dart:convert';
-
 import '../document.dart';
 import '../font/font_metrics.dart';
 import '../font/type1_fonts.dart';
+import '../font/win_ansi.dart' as win_ansi;
 import '../format/dict.dart';
 import '../format/name.dart';
 import '../format/stream.dart';
@@ -256,14 +255,6 @@ abstract class PdfFont extends PdfObject<PdfDict> {
     );
   }
 
-  static const String _cannotDecodeMessage =
-      '''---------------------------------------------
-Cannot decode the string to Latin1.
-This font does not support Unicode characters.
-If you want to use strings other than Latin strings, use a TrueType (TTF) font instead.
-See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
----------------------------------------------''';
-
   /// The df type of the font, usually /Type1
   final String subtype;
 
@@ -296,6 +287,10 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
   }
 
   /// Calculate the [PdfFontMetrics] for this glyph
+  ///
+  /// [charCode] is a Unicode rune, never a byte code: the two differ over
+  /// 0x80-0x9F, where the declared WinAnsi encoding holds 27 typographic glyphs
+  /// and Latin-1 holds the C1 controls.
   PdfFontMetrics glyphMetrics(int charCode);
 
   /// is this Rune supported by this font
@@ -307,18 +302,15 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
       return PdfFontMetrics.zero;
     }
 
-    try {
-      final chars = latin1.encode(s);
-      final metrics = chars.map(glyphMetrics);
-      return PdfFontMetrics.append(metrics, letterSpacing: letterSpacing);
-    } catch (_) {
-      assert(() {
-        print(_cannotDecodeMessage);
-        return true;
-      }());
-
-      rethrow;
-    }
+    // Measure the bytes [putText] will write, mapped back to the runes
+    // [glyphMetrics] takes, so the advance measured here is the advance a
+    // consumer reads out of /Widths for the byte actually emitted. The encode
+    // used to be latin1, which threw on every character the declared WinAnsi
+    // encoding does hold above 0x7F.
+    final metrics = win_ansi
+        .encode(s)
+        .map((int code) => glyphMetrics(win_ansi.runeOfCode[code]));
+    return PdfFontMetrics.append(metrics, letterSpacing: letterSpacing);
   }
 
   /// Calculate the unit size of this string
@@ -330,19 +322,10 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
 
   /// Draw some text
   void putText(PdfStream stream, String text) {
-    try {
-      PdfString(
-        latin1.encode(text),
-        format: PdfStringFormat.literal,
-        encrypted: false,
-      ).output(this, stream);
-    } catch (_) {
-      assert(() {
-        print(_cannotDecodeMessage);
-        return true;
-      }());
-
-      rethrow;
-    }
+    PdfString(
+      win_ansi.encode(text),
+      format: PdfStringFormat.literal,
+      encrypted: false,
+    ).output(this, stream);
   }
 }

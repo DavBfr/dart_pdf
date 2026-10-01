@@ -18,6 +18,7 @@ import 'dart:typed_data';
 
 import 'package:image/image.dart' as im;
 
+import '../../../pdf.dart' show PdfException;
 import '../document.dart';
 import '../exif.dart';
 import '../format/array.dart';
@@ -62,6 +63,18 @@ typedef PdfImageStreamWriter = void Function(PdfStream output);
 /// Image object stored in the Pdf document
 class PdfImage extends PdfXObject {
   /// Creates a new [PdfImage] instance.
+  /// Embed a raw pixel buffer.
+  ///
+  /// [image] is `width * height` pixels of 8-bit RGB, or RGBA when [alpha] is
+  /// set. **The alpha is straight, not premultiplied**: the colour bytes go to a
+  /// `/DeviceRGB` stream and the alpha byte to a `/DeviceGray` `/SMask`, and
+  /// ISO 32000-1 11.6.5.2 defines that pair as straight alpha. A premultiplied
+  /// buffer - which is what `dart:ui` hands back by default - is composited as
+  /// `Cs*a^2 + Cb*(1-a)`, so translucent pixels come out too dark.
+  ///
+  /// [width] and [height] describe [image] itself, not how it is displayed:
+  /// `image.length` must be `width * height * (alpha ? 4 : 3)`. A rotated
+  /// [orientation] changes where the pixels are drawn, never how they are read.
   factory PdfImage(
     PdfDocument pdfDocument, {
     required Uint8List image,
@@ -70,6 +83,14 @@ class PdfImage extends PdfXObject {
     bool alpha = true,
     PdfImageOrientation orientation = PdfImageOrientation.topLeft,
   }) {
+    assert(
+      image.length >= width * height * (alpha ? 4 : 3),
+      'A ${width}x$height ${alpha ? 'RGBA' : 'RGB'} image needs '
+      '${width * height * (alpha ? 4 : 3)} bytes, got ${image.length}. The '
+      'buffer has to be tightly packed 8-bit samples, and width and height have '
+      'to describe it rather than how it is displayed.',
+    );
+
     final im = PdfImage._(pdfDocument, width, height, orientation);
 
     assert(() {
@@ -124,6 +145,7 @@ class PdfImage extends PdfXObject {
     PdfDocument pdfDocument, {
     required Uint8List image,
     PdfImageOrientation? orientation,
+    bool? cmykInverted,
   }) {
     final info = PdfJpegInfo(image);
     final im = PdfImage._(
@@ -145,9 +167,11 @@ class PdfImage extends PdfXObject {
 
     if (info.isCMYK) {
       im.params['/ColorSpace'] = const PdfName('/DeviceCMYK');
-      if (info.isCMYKInverted) {
-        // CMYK JPEGs from Adobe use inverted values (YCCK encoding).
-        // The /Decode array inverts each component back to proper CMYK.
+      if (cmykInverted ?? info.isCMYKInverted) {
+        // A CMYK JPEG written by Adobe stores its samples inverted, whatever its
+        // APP14 transform byte says. The /Decode array inverts each component
+        // back. cmykInverted is the override for the rare four-component file
+        // that carries no Adobe marker but is inverted anyway, or the reverse.
         im.params['/Decode'] = PdfArray.fromNum(<int>[1, 0, 1, 0, 1, 0, 1, 0]);
       }
     } else if (info.isRGB) {
@@ -214,23 +238,28 @@ class PdfImage extends PdfXObject {
   }
 
   /// Create an image from an image file
+  /// Load an image from a file's bytes.
+  ///
+  /// A null [orientation] means use the orientation the file itself declares -
+  /// a JPEG's EXIF tag - and fall back to [PdfImageOrientation.topLeft]. The
+  /// orientation used to be dropped entirely for JPEG bytes.
   factory PdfImage.file(
     PdfDocument pdfDocument, {
     required Uint8List bytes,
-    PdfImageOrientation orientation = PdfImageOrientation.topLeft,
+    PdfImageOrientation? orientation,
   }) {
     if (im.JpegDecoder().isValidFile(bytes)) {
-      return PdfImage.jpeg(pdfDocument, image: bytes);
+      return PdfImage.jpeg(pdfDocument, image: bytes, orientation: orientation);
     }
 
     final image = im.decodeImage(bytes);
     if (image == null) {
-      throw 'Unable to decode image';
+      throw PdfException('Unable to decode image');
     }
     return PdfImage.fromImage(
       pdfDocument,
       image: image,
-      orientation: orientation,
+      orientation: orientation ?? PdfImageOrientation.topLeft,
     );
   }
 
