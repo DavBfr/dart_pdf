@@ -22,6 +22,7 @@ import 'brush.dart';
 import 'clip_path.dart';
 import 'group.dart';
 import 'image.dart';
+import 'nested_svg.dart';
 import 'painter.dart';
 import 'path.dart';
 import 'symbol.dart';
@@ -71,6 +72,17 @@ abstract class SvgOperation {
         return SvgPath.fromPolylineXml(element, painter, brush);
       case 'rect':
         return SvgPath.fromRectXml(element, painter, brush);
+      case 'svg':
+        // A nested <svg> used to fall through to the return null below, and
+        // SvgGroup dropped it through whereType - the subtree simply vanished.
+        // The root <svg> does not come through here: SvgPainter.paint builds it
+        // as a group directly.
+        return SvgNestedSvg.fromXml(
+          element,
+          painter,
+          brush,
+          expanding: expanding,
+        );
       case 'symbol':
         return SvgSymbol.fromXml(element, painter, brush, expanding: expanding);
       case 'text':

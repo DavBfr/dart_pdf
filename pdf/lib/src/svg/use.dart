@@ -23,7 +23,9 @@ import 'clip_path.dart';
 import 'operation.dart';
 import 'painter.dart';
 import 'parser.dart';
+import 'symbol.dart';
 import 'transform.dart';
+import 'viewbox.dart';
 
 class SvgUse extends SvgOperation {
   SvgUse(
@@ -46,18 +48,19 @@ class SvgUse extends SvgOperation {
   }) {
     final _brush = SvgBrush.fromXml(element, brush, painter);
 
+    // Nullable, because a missing width means the whole viewport while an
+    // explicit width="0" means render nothing. Both used to be parsed into dead
+    // fields: paintShape applied a translation and nothing else.
     final width = SvgParser.getNumeric(
       element,
       'width',
       _brush,
-      defaultValue: 0,
-    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
+    )?.sizeIn(painter.viewport, SvgAxis.horizontal);
     final height = SvgParser.getNumeric(
       element,
       'height',
       _brush,
-      defaultValue: 0,
-    )!.sizeIn(painter.viewport, SvgAxis.vertical);
+    )?.sizeIn(painter.viewport, SvgAxis.vertical);
     final x = SvgParser.getNumeric(
       element,
       'x',
@@ -118,26 +121,87 @@ class SvgUse extends SvgOperation {
 
   final double y;
 
-  final double width;
+  /// The width of the viewport this `<use>` establishes, or null for the whole
+  /// of the current one.
+  final double? width;
 
-  final double height;
+  final double? height;
 
   final SvgOperation? href;
 
+  /// The box this `<use>` gives its content, in the current user space.
+  PdfRect get viewport =>
+      PdfRect(x, y, width ?? painter.viewport.x, height ?? painter.viewport.y);
+
+  /// Whether this `<use>` establishes a viewport of its own, which only a
+  /// `<symbol>` target does.
+  SvgSymbol? get _symbol => href is SvgSymbol ? href! as SvgSymbol : null;
+
+  /// Place the content, and hand back the viewport size in force inside it.
+  PdfPoint? _position(PdfGraphics canvas) {
+    final symbol = _symbol;
+    if (symbol == null) {
+      if (x != 0 || y != 0) {
+        canvas.setTransform(Matrix4.translationValues(x, y, 0));
+      }
+      return null;
+    }
+
+    final box = viewport;
+    if (box.width <= 0 || box.height <= 0) {
+      return null; // width="0" renders nothing, per SVG 1.1 5.6.
+    }
+
+    // The symbol's content belongs inside this box - overflow:hidden - and its
+    // viewBox, if it has one, is fitted into it.
+    canvas
+      ..drawRect(box.x, box.y, box.width, box.height)
+      ..clipPath();
+
+    final viewBox = symbol.viewBox;
+    if (viewBox == null) {
+      if (x != 0 || y != 0) {
+        canvas.setTransform(Matrix4.translationValues(x, y, 0));
+      }
+      return PdfPoint(box.width, box.height);
+    }
+
+    canvas.setTransform(
+      svgViewBoxTransform(viewBox, box, symbol.preserveAspectRatio),
+    );
+    return viewBox.size;
+  }
+
   @override
   void paintShape(PdfGraphics canvas) {
-    if (x != 0 || y != 0) {
-      canvas.setTransform(Matrix4.translationValues(x, y, 0));
+    final symbol = _symbol;
+    final inner = _position(canvas);
+    if (symbol != null && inner == null) {
+      return;
     }
-    href?.paint(canvas);
+
+    if (inner == null) {
+      href?.paint(canvas);
+      return;
+    }
+
+    painter.withViewport(inner, () => href!.paint(canvas));
   }
 
   @override
   void drawShape(PdfGraphics canvas) {
-    if (x != 0 || y != 0) {
-      canvas.setTransform(Matrix4.translationValues(x, y, 0));
+    final symbol = _symbol;
+    final inner = _position(canvas);
+    if (symbol != null && inner == null) {
+      return;
     }
-    href?.draw(canvas);
+
+    if (inner == null) {
+      href?.draw(canvas);
+      return;
+    }
+
+    painter.withViewport(inner, () => href!.draw(canvas));
   }
 
   @override

@@ -112,6 +112,21 @@ class SvgParser {
     r'[\w.-]+(px|pt|em|cm|mm|in|%|)',
   );
 
+  /// The `viewBox` attribute of [element], or null when it has none.
+  static PdfRect? getViewBox(XmlElement element) {
+    final attribute = element.getAttribute('viewBox');
+    if (attribute == null) {
+      return null;
+    }
+
+    final values = splitDoubles(attribute).toList(growable: false);
+    if (values.length != 4) {
+      return null;
+    }
+
+    return PdfRect(values[0], values[1], values[2], values[3]);
+  }
+
   XmlElement? findById(String id) {
     try {
       return root.descendants.whereType<XmlElement>().firstWhere(

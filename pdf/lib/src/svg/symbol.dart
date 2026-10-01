@@ -22,11 +22,15 @@ import 'clip_path.dart';
 import 'group.dart';
 import 'operation.dart';
 import 'painter.dart';
+import 'parser.dart';
 import 'transform.dart';
+import 'viewbox.dart';
 
 class SvgSymbol extends SvgGroup {
   SvgSymbol(
     Iterable<SvgOperation> children,
+    this.viewBox,
+    this.preserveAspectRatio,
     SvgBrush brush,
     SvgClipPath clip,
     SvgTransform transform,
@@ -58,12 +62,23 @@ class SvgSymbol extends SvgGroup {
 
     return SvgSymbol(
       children,
+      SvgParser.getViewBox(element),
+      SvgPreserveAspectRatio.fromString(
+        element.getAttribute('preserveAspectRatio'),
+      ),
       _brush,
       SvgClipPath.fromXml(element, painter, _brush),
       SvgTransform.fromXml(element),
       painter,
     );
   }
+
+  /// The coordinate system this symbol's children are drawn in, if it declares
+  /// one. Neither this nor [preserveAspectRatio] used to be read at all, so a
+  /// symbol drew its children at their own scale wherever it was used.
+  final PdfRect? viewBox;
+
+  final SvgPreserveAspectRatio preserveAspectRatio;
 
   @override
   void paintShape(PdfGraphics canvas) {
