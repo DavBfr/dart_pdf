@@ -127,7 +127,7 @@ class SvgBrush {
           element,
           'stroke-dashoffset',
           parent,
-        )?.sizeValue,
+        )?.sizeIn(painter.viewport, SvgAxis.diagonal),
         fontSize: SvgParser.getNumeric(element, 'font-size', parent),
         fontFamily: element.getAttribute('font-family'),
         fontStyle: element.getAttribute('font-style'),

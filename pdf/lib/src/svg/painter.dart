@@ -41,7 +41,28 @@ class SvgPainter {
 
   final SvgCustomFontLookup? customFontLookup;
 
+  /// The viewport a percentage length is a fraction of.
+  ///
+  /// Seeded from the root viewBox and replaced while a nested viewport paints.
+  /// Geometry attributes are parsed lazily, inside the paint of the element that
+  /// contains them, so the value in force while a child is built is the one that
+  /// child belongs to.
+  PdfPoint viewport = PdfPoint.zero;
+
+  /// Run [body] with [viewport] in force, then put back what was there.
+  void withViewport(PdfPoint size, void Function() body) {
+    final previous = viewport;
+    viewport = size;
+    try {
+      body();
+    } finally {
+      viewport = previous;
+    }
+  }
+
   void paint() {
+    viewport = parser.viewBox.size;
+
     final brush = parser.colorFilter == null
         ? SvgBrush.defaultContext
         : SvgBrush.defaultContext.copyWith(

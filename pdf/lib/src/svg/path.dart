@@ -68,28 +68,36 @@ class SvgPath extends SvgOperation {
       'x',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final y = SvgParser.getNumeric(
       element,
       'y',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
     final width = SvgParser.getNumeric(
       element,
       'width',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final height = SvgParser.getNumeric(
       element,
       'height',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
 
-    var rx = SvgParser.getNumeric(element, 'rx', _brush)?.sizeValue;
-    var ry = SvgParser.getNumeric(element, 'ry', _brush)?.sizeValue;
+    var rx = SvgParser.getNumeric(
+      element,
+      'rx',
+      _brush,
+    )?.sizeIn(painter.viewport, SvgAxis.horizontal);
+    var ry = SvgParser.getNumeric(
+      element,
+      'ry',
+      _brush,
+    )?.sizeIn(painter.viewport, SvgAxis.vertical);
 
     ry ??= rx ?? 0;
     rx ??= ry;
@@ -123,19 +131,19 @@ class SvgPath extends SvgOperation {
       'cx',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final cy = SvgParser.getNumeric(
       element,
       'cy',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
     final r = SvgParser.getNumeric(
       element,
       'r',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.diagonal);
     final d =
         'M${cx - r},${cy}A$r,$r 0,0,0 ${cx + r},${cy}A$r,$r 0,0,0 ${cx - r},${cy}z';
 
@@ -160,25 +168,25 @@ class SvgPath extends SvgOperation {
       'cx',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final cy = SvgParser.getNumeric(
       element,
       'cy',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
     final rx = SvgParser.getNumeric(
       element,
       'rx',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final ry = SvgParser.getNumeric(
       element,
       'ry',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
     final d =
         'M${cx - rx},${cy}A$rx,$ry 0,0,0 ${cx + rx},${cy}A$rx,$ry 0,0,0 ${cx - rx},${cy}z';
 
@@ -240,25 +248,25 @@ class SvgPath extends SvgOperation {
       'x1',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final y1 = SvgParser.getNumeric(
       element,
       'y1',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
     final x2 = SvgParser.getNumeric(
       element,
       'x2',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final y2 = SvgParser.getNumeric(
       element,
       'y2',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
     final d = 'M$x1 $y1 $x2 $y2';
 
     return SvgPath(
@@ -309,7 +317,9 @@ class SvgPath extends SvgOperation {
           brush.strokeDashArray!,
           brush.strokeDashOffset!.toInt(),
         )
-        ..setLineWidth(brush.strokeWidth!.sizeValue)
+        ..setLineWidth(
+          brush.strokeWidth!.sizeIn(painter.viewport, SvgAxis.diagonal),
+        )
         ..strokePath();
     }
   }

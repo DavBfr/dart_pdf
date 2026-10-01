@@ -51,25 +51,25 @@ class SvgUse extends SvgOperation {
       'width',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final height = SvgParser.getNumeric(
       element,
       'height',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
     final x = SvgParser.getNumeric(
       element,
       'x',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final y = SvgParser.getNumeric(
       element,
       'y',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
 
     SvgOperation? href;
     final hrefAttr =

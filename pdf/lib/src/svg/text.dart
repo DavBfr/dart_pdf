@@ -56,15 +56,23 @@ class SvgText extends SvgOperation {
       'dx',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final dy = SvgParser.getNumeric(
       element,
       'dy',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
-    final x = SvgParser.getNumeric(element, 'x', _brush)?.sizeValue;
-    final y = SvgParser.getNumeric(element, 'y', _brush)?.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
+    final x = SvgParser.getNumeric(
+      element,
+      'x',
+      _brush,
+    )?.sizeIn(painter.viewport, SvgAxis.horizontal);
+    final y = SvgParser.getNumeric(
+      element,
+      'y',
+      _brush,
+    )?.sizeIn(painter.viewport, SvgAxis.vertical);
 
     final text = element.children
         .where((node) => node is XmlText || node is XmlCDATA)
@@ -158,7 +166,9 @@ class SvgText extends SvgOperation {
 
     if (brush.stroke!.isNotEmpty && strokeAlpha > 0) {
       if (brush.strokeWidth != null) {
-        canvas.setLineWidth(brush.strokeWidth!.sizeValue);
+        canvas.setLineWidth(
+          brush.strokeWidth!.sizeIn(painter.viewport, SvgAxis.diagonal),
+        );
       }
       if (brush.strokeDashArray != null) {
         canvas.setLineDashPattern(brush.strokeDashArray!);
