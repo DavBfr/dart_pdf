@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.15.2
+
+- Fix `OutOfMemoryError` when rastering PDF pages on Android: compress to PNG natively (`Bitmap.compress`) right after rendering instead of shipping the raw `ARGB_8888` buffer across the `MethodChannel` — a single large page could require a multi-ten-megabyte contiguous allocation just to cross the channel, on top of the bitmap and the codec's own copy of it. Same fix applied to iOS (`CGImageDestination`). `PdfRaster`/`method_channel.dart` gain `PngPdfRaster`, mirroring the `_WebPdfRaster` pattern already used on web: `toPng()` returns the bytes as-is, with no decode/re-encode round trip. Fixes #1805
+
 ## 5.15.1
 
 - Fix iOS use-after-free crash in `CGPDFDocumentGetNumberOfPages`: UIKit reads the PDF document from a background page-count thread while dynamic layout replaces it on the main thread; document access is now lock-guarded
