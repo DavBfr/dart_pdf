@@ -266,6 +266,25 @@ class _TextDecoration {
   }
 }
 
+/// Whether [s] is entirely printable ASCII with no space and no hyphen — text
+/// that cannot contain a word break, a line break or a break opportunity.
+///
+/// Kept deliberately narrower than "no ASCII whitespace": `\s` also matches
+/// Unicode whitespace such as U+00A0 and U+2000–U+200A, so any code unit
+/// outside printable ASCII disqualifies the string rather than risk
+/// reclassifying an exotic space as a word character. A U+002D is excluded
+/// because [tokenize] breaks a run there, so 'long-hyphenated-word' has to go
+/// the long way round.
+bool _isSingleAsciiWord(String s) {
+  for (var i = 0; i < s.length; i++) {
+    final c = s.codeUnitAt(i);
+    if (c <= 0x20 || c >= 0x7f || c == 0x2d) {
+      return false;
+    }
+  }
+  return true;
+}
+
 class _Word extends _Span {
   _Word(this.text, TextStyle style, this.metrics) : super(style);
 
@@ -1140,34 +1159,51 @@ class RichText extends Widget with SpanningWidget {
             });
           }
 
+          final spanText = (useArabic && _textDirection == TextDirection.rtl
+              ? arabic.convert(span.text!)
+              : _bidi
+              // Shaped, but still in logical order: line breaking, metrics
+              // and hyphenation all need that, and rule L2 belongs to a
+              // finished line. Reordering the paragraph first and reversing
+              // its word order cancelled out only while every word of a run
+              // stayed on one line.
+              ? bidi.shapeLogical(span.text!)
+              : span.text)!;
+
+          // Fast path: a run of printable ASCII with no space and no hyphen is
+          // one word on one line with no break opportunity in it, so the strip,
+          // the line split and the tokenizer can all be skipped. Serial numbers
+          // and ticket numbers, the strings a document lays out by the hundreds
+          // of thousands, all qualify. Anything else goes the long way round: a
+          // default ignorable, a CR, an exotic space and a hyphen all mean
+          // something to the code below. A custom [lineSplitter] must see every
+          // line, so it disables the fast path too.
+          final singleWord =
+              lineSplitter == null && _isSingleAsciiWord(spanText);
+
           // The strip runs after the shaping and the bidi reordering, which both
           // need the joiners and the bidi marks, and before the line split, so
           // no invisible character is ever measured or drawn. U+000D is a line
           // terminator: the split used to look for U+000A alone, so a document
           // written with CRLF or CR line endings ran every line together and
           // drew a placeholder box at each break.
-          final spanLines = stripDefaultIgnorable(
-            (useArabic && _textDirection == TextDirection.rtl
-                ? arabic.convert(span.text!)
-                : _bidi
-                // Shaped, but still in logical order: line breaking, metrics
-                // and hyphenation all need that, and rule L2 belongs to a
-                // finished line. Reordering the paragraph first and reversing
-                // its word order cancelled out only while every word of a run
-                // stayed on one line.
-                ? bidi.shapeLogical(span.text!)
-                : span.text)!,
-            // The soft hyphen, the zero-width space and the word joiner are
-            // break opportunities: tokenize reads them and drops them.
-            keep: breakControls,
-          ).split(RegExp(r'\r\n|\r|\n'));
+          final spanLines = singleWord
+              ? <String>[spanText]
+              : stripDefaultIgnorable(
+                  spanText,
+                  // The soft hyphen, the zero-width space and the word joiner
+                  // are break opportunities: tokenize reads them and drops them.
+                  keep: breakControls,
+                ).split(RegExp(r'\r\n|\r|\n'));
 
           // The gap charged after the last run. The line-closing sites take it
           // back out, so a line's width ends at its last glyph.
           var lastGap = 0.0;
 
           for (var line = 0; line < spanLines.length; line++) {
-            final chunks = lineSplitter == null
+            final chunks = singleWord
+                ? <TextChunk>[TextChunk(spanText, '')]
+                : lineSplitter == null
                 ? tokenize(spanLines[line])
                 : <TextChunk>[
                     // A caller-supplied splitter says nothing about what it
