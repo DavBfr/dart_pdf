@@ -83,6 +83,14 @@ class PdfImage extends PdfXObject {
     bool alpha = true,
     PdfImageOrientation orientation = PdfImageOrientation.topLeft,
   }) {
+    assert(
+      image.length >= width * height * (alpha ? 4 : 3),
+      'A ${width}x$height ${alpha ? 'RGBA' : 'RGB'} image needs '
+      '${width * height * (alpha ? 4 : 3)} bytes, got ${image.length}. The '
+      'buffer has to be tightly packed 8-bit samples, and width and height have '
+      'to describe it rather than how it is displayed.',
+    );
+
     final im = PdfImage._(pdfDocument, width, height, orientation);
 
     assert(() {
