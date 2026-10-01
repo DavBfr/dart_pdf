@@ -47,12 +47,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.FileProvider;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -451,7 +451,6 @@ public class PrintingJob extends PrintDocumentAdapter {
 
                     final int width = Double.valueOf(page.getWidth() * scale).intValue();
                     final int height = Double.valueOf(page.getHeight() * scale).intValue();
-                    int stride = width * 4;
 
                     Matrix transform = new Matrix();
                     transform.setScale(scale.floatValue(), scale.floatValue());
@@ -462,14 +461,21 @@ public class PrintingJob extends PrintDocumentAdapter {
 
                     page.close();
 
-                    final ByteBuffer buf = ByteBuffer.allocate(stride * height);
-                    bitmap.copyPixelsToBuffer(buf);
+                    // Compress to PNG (lossless) on the native side, right after rendering,
+                    // instead of shipping the raw ARGB_8888 buffer across the MethodChannel.
+                    // The raw buffer was the direct cause of OutOfMemoryError crashes on
+                    // memory-constrained devices: a single large page could require a
+                    // multi-ten-megabyte contiguous allocation just to cross the channel,
+                    // on top of the bitmap and the platform codec's own copy of it.
+                    final ByteArrayOutputStream pngStream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, pngStream);
                     bitmap.recycle();
+                    final byte[] pngBytes = pngStream.toByteArray();
 
                     new Handler(Looper.getMainLooper())
                             .post(()
                                             -> printing.onPageRasterized(
-                                                    PrintingJob.this, buf.array(), width, height));
+                                                    PrintingJob.this, pngBytes, width, height, true));
                 }
 
                 renderer.close();

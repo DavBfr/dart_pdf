@@ -45,4 +45,29 @@ void main() {
     await tester.pumpWidget(Image(image: PdfRasterImage(raster)));
     await tester.pumpAndSettle();
   });
+
+  test('PngPdfRaster', () async {
+    const width = 10;
+    const height = 10;
+    final rawPixels = Uint8List.fromList(
+      List<int>.filled(width * height * 4, 0),
+    );
+    // Reuse PdfRaster.toPng() to obtain real, valid PNG bytes rather than a
+    // hand-crafted fixture.
+    final pngBytes = await PdfRaster(width, height, rawPixels).toPng();
+
+    final raster = PngPdfRaster(width, height, pngBytes);
+
+    expect(raster.width, width);
+    expect(raster.height, height);
+
+    // No decode/re-encode round trip: the platform-provided bytes are
+    // returned as-is.
+    expect(await raster.toPng(), same(pngBytes));
+
+    // Raw pixels and the ui.Image are only decoded on demand, when actually
+    // requested.
+    expect(raster.pixels, hasLength(width * height * 4));
+    expect(await raster.toImage(), isA<ui.Image>());
+  });
 }

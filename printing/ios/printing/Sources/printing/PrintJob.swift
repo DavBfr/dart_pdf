@@ -15,6 +15,8 @@
  */
 
 import Flutter
+import ImageIO
+import MobileCoreServices
 import WebKit
 
 /// A variable that holds the selected printers to prevent recreate it if selected again
@@ -440,9 +442,10 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                 let width = Int(abs((cos(angle) * rectCrop.width + sin(angle) * rectCrop.height) * scale))
                 let height = Int(abs((cos(angle) * rectCrop.height + sin(angle) * rectCrop.width) * scale))
                 let stride = width * 4
-                var data = Data(repeating: 0, count: stride * height)
+                var rawData = Data(repeating: 0, count: stride * height)
+                var cgImage: CGImage?
 
-                data.withUnsafeMutableBytes { (outputBytes: UnsafeMutableRawBufferPointer) in
+                rawData.withUnsafeMutableBytes { (outputBytes: UnsafeMutableRawBufferPointer) in
                     let rgb = CGColorSpaceCreateDeviceRGB()
                     let context = CGContext(
                         data: outputBytes.baseAddress?.assumingMemoryBound(to: UInt8.self),
@@ -461,11 +464,33 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                         context!.translateBy(x: -rectCrop.width / 2, y: -rectCrop.height / 2)
                         context!.translateBy(x: diffWidth, y: diffHeight)
                         context!.drawPDFPage(page)
+                        cgImage = context!.makeImage()
+                    }
+                }
+
+                // Compress to PNG (lossless) right after rendering, instead of shipping
+                // the raw ARGB buffer across the MethodChannel. Mirrors the Android fix:
+                // avoids a multi-ten-megabyte uncompressed allocation per page crossing
+                // the channel. Falls back to the raw buffer if encoding somehow fails.
+                var pngData: Data?
+                if let cgImage = cgImage {
+                    let mutableData = NSMutableData()
+                    if let destination = CGImageDestinationCreateWithData(mutableData, kUTTypePNG, 1, nil) {
+                        CGImageDestinationAddImage(destination, cgImage, nil)
+                        if CGImageDestinationFinalize(destination) {
+                            pngData = mutableData as Data
+                        }
                     }
                 }
 
                 DispatchQueue.main.sync {
-                    self.printing.onPageRasterized(printJob: self, imageData: data, width: width, height: height)
+                    self.printing.onPageRasterized(
+                        printJob: self,
+                        imageData: pngData ?? rawData,
+                        width: width,
+                        height: height,
+                        isPng: pngData != nil
+                    )
                 }
             }
 

@@ -49,6 +49,40 @@ class PdfRaster extends PdfRasterBase {
   }
 }
 
+/// A [PdfRaster] whose bytes are already PNG-encoded by the platform side
+/// (e.g. compressed natively right after rendering, instead of shipping a
+/// raw ARGB_8888 buffer across the platform channel).
+///
+/// [toPng] returns the bytes as-is, with no decode/re-encode round trip.
+/// Raw pixels are only decoded on demand, if [pixels] or [toImage] is
+/// actually used.
+class PngPdfRaster extends PdfRaster {
+  /// Wrap already PNG-encoded bytes coming from the platform side.
+  PngPdfRaster(int width, int height, this.png)
+    : super(width, height, Uint8List(0));
+
+  /// The PNG-encoded image data
+  final Uint8List png;
+
+  Uint8List? _pixels;
+
+  @override
+  Uint8List get pixels {
+    _pixels ??= PdfRasterBase.fromPng(png).pixels;
+    return _pixels!;
+  }
+
+  @override
+  Future<ui.Image> toImage() async {
+    final codec = await ui.instantiateImageCodec(png);
+    final frameInfo = await codec.getNextFrame();
+    return frameInfo.image;
+  }
+
+  @override
+  Future<Uint8List> toPng() async => png;
+}
+
 /// Image provider for a [PdfRaster]
 class PdfRasterImage extends ImageProvider<PdfRaster> {
   /// Create an ImageProvider from a [PdfRaster]
