@@ -734,8 +734,11 @@ class AspectRatio extends SingleChildWidget {
         context,
         BoxConstraints.tightFor(width: box!.width, height: box!.height),
       );
+      // The child is optional - an AspectRatio makes a perfectly good spacer -
+      // and this sanity check sat outside the guard, so a null child threw a
+      // null check out of layout wherever asserts are on.
+      assert(child!.box != null);
     }
-    assert(child!.box != null);
   }
 
   @override

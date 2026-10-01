@@ -231,6 +231,66 @@ void main() {
     );
   });
 
+  group('an AspectRatio', () {
+    test('without a child is a spacer, not a crash', () async {
+      // The sanity assert on the child's box sat outside the null guard, so this
+      // threw 'Null check operator used on a null value' out of layout wherever
+      // asserts are on - which is every test run and every debug build.
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: PdfPageFormat.a4,
+          build: (Context context) => Column(
+            children: <Widget>[
+              AspectRatio(aspectRatio: 16 / 9),
+              Text('after'),
+            ],
+          ),
+        ),
+      );
+
+      expect(await document.save(), isNotEmpty);
+    });
+
+    test('reserves the height its ratio asks for', () async {
+      late PdfPoint size;
+      final document = Document();
+      document.addPage(
+        Page(
+          pageFormat: PdfPageFormat.a4,
+          build: (Context context) {
+            size = Widget.measure(
+              AspectRatio(aspectRatio: 2),
+              context: context,
+              constraints: const BoxConstraints(maxWidth: 200),
+            );
+            return SizedBox();
+          },
+        ),
+      );
+      await document.save();
+
+      expect(size.x, 200);
+      expect(size.y, 100);
+    });
+
+    test('with a child still checks the child was laid out', () async {
+      // The assert is moved, not deleted.
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: PdfPageFormat.a4,
+          build: (Context context) => AspectRatio(
+            aspectRatio: 2,
+            child: Container(color: PdfColors.blue),
+          ),
+        ),
+      );
+
+      expect(await document.save(), isNotEmpty);
+    });
+  });
+
   group('a rotateBox', () {
     /// A solid bitmap of the given pixel size.
     ImageProvider bitmap(int width, int height) => RawImage(
