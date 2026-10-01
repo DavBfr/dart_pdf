@@ -17,7 +17,6 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
 import 'package:path_parsing/path_parsing.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -88,12 +87,38 @@ enum PdfTextRenderingMode {
   clip,
 }
 
-@immutable
+/// Not immutable: the constant alphas in force change as operators are written,
+/// and [copy] is what the q/Q stack saves and restores.
 class _PdfGraphicsContext {
-  const _PdfGraphicsContext({required this.ctm});
+  _PdfGraphicsContext({
+    required this.ctm,
+    this.inheritedFillAlpha = 1.0,
+    this.inheritedStrokeAlpha = 1.0,
+    this.fillAlpha = 1.0,
+    this.strokeAlpha = 1.0,
+  });
+
   final Matrix4 ctm;
 
-  _PdfGraphicsContext copy() => _PdfGraphicsContext(ctm: ctm.clone());
+  /// The ambient opacity an enclosing [PdfGraphics.setGraphicState] established -
+  /// what an Opacity widget asked for - which a colour's own alpha multiplies.
+  double inheritedFillAlpha;
+
+  double inheritedStrokeAlpha;
+
+  /// The constant alpha the PDF graphics state currently holds, so a redundant
+  /// `gs` is never written.
+  double fillAlpha;
+
+  double strokeAlpha;
+
+  _PdfGraphicsContext copy() => _PdfGraphicsContext(
+    ctm: ctm.clone(),
+    inheritedFillAlpha: inheritedFillAlpha,
+    inheritedStrokeAlpha: inheritedStrokeAlpha,
+    fillAlpha: fillAlpha,
+    strokeAlpha: strokeAlpha,
+  );
 }
 
 /// Pdf drawing operations
@@ -779,6 +804,8 @@ class PdfGraphics {
       }
       return true;
     }());
+
+    _setColorAlpha(color.alpha, stroke: false);
   }
 
   /// Sets the stroke color for drawing
@@ -820,6 +847,8 @@ class PdfGraphics {
       }
       return true;
     }());
+
+    _setColorAlpha(color.alpha, stroke: true);
   }
 
   /// Sets the fill pattern for drawing
@@ -872,6 +901,38 @@ class PdfGraphics {
 
   /// Set the graphic state for drawing
   void setGraphicState(PdfGraphicState state) {
+    // An Opacity inside an Opacity has to compose, and the gs operator sets the
+    // constant alpha absolutely rather than multiplying it - so the product is
+    // computed here, against whatever opacity is already in force.
+    final fill = state.fillOpacity == null
+        ? null
+        : _context.inheritedFillAlpha * state.fillOpacity!;
+    final stroke = state.strokeOpacity == null
+        ? null
+        : _context.inheritedStrokeAlpha * state.strokeOpacity!;
+
+    final effective = fill == state.fillOpacity && stroke == state.strokeOpacity
+        ? state
+        : PdfGraphicState(
+            fillOpacity: fill,
+            strokeOpacity: stroke,
+            blendMode: state.blendMode,
+            softMask: state.softMask,
+            transferFunction: state.transferFunction,
+          );
+
+    _emitGraphicState(effective);
+
+    if (fill != null) {
+      _context.inheritedFillAlpha = fill;
+    }
+    if (stroke != null) {
+      _context.inheritedStrokeAlpha = stroke;
+    }
+  }
+
+  /// Write [state] out and remember the constant alphas it puts in force.
+  void _emitGraphicState(PdfGraphicState state) {
     var o = 0;
     assert(() {
       if (_page.settings.verbose) {
@@ -884,6 +945,13 @@ class PdfGraphics {
     final name = _page.stateName(state);
     _buf.putString('$name gs ');
 
+    if (state.fillOpacity != null) {
+      _context.fillAlpha = state.fillOpacity!;
+    }
+    if (state.strokeOpacity != null) {
+      _context.strokeAlpha = state.strokeOpacity!;
+    }
+
     assert(() {
       if (_page.settings.verbose) {
         _buf.putString(' ' * math.max(0, _commentIndent - _buf.offset + o));
@@ -891,6 +959,33 @@ class PdfGraphics {
       }
       return true;
     }());
+  }
+
+  /// Put the constant alpha a colour asks for in force.
+  ///
+  /// PDF carries constant alpha in an `/ExtGState`, never in the colour
+  /// operators, so `rg`, `k`, `RG` and `K` alone threw a colour's alpha away and
+  /// every translucent fill and stroke painted opaque - PdfColor.fromInt(0) came
+  /// out solid black.
+  void _setColorAlpha(double alpha, {required bool stroke}) {
+    if (!_page.settings.colorAlpha) {
+      return;
+    }
+
+    final want =
+        (stroke ? _context.inheritedStrokeAlpha : _context.inheritedFillAlpha) *
+        alpha;
+    final current = stroke ? _context.strokeAlpha : _context.fillAlpha;
+
+    if ((want - current).abs() < 1e-9) {
+      return;
+    }
+
+    _emitGraphicState(
+      stroke
+          ? PdfGraphicState(strokeOpacity: want)
+          : PdfGraphicState(fillOpacity: want),
+    );
   }
 
   /// Set the transformation Matrix

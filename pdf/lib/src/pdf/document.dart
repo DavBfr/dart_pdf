@@ -76,6 +76,7 @@ class PdfDocument {
     bool verbose = false,
     PdfVersion version = PdfVersion.pdf_1_5,
     bool simpleTrueTypeFonts = false,
+    bool colorAlpha = true,
   }) : prev = null,
        _objser = 1 {
     settings = PdfSettings(
@@ -83,6 +84,7 @@ class PdfDocument {
       verbose: verbose,
       version: version,
       simpleTrueTypeFonts: simpleTrueTypeFonts,
+      colorAlpha: colorAlpha,
       encryptCallback: (input, object) =>
           encryption?.encrypt(input, object) ?? input,
     );
