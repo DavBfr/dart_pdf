@@ -184,12 +184,15 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
 
     /// send pdf to raster data result to flutter
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    void onPageRasterized(PrintingJob printJob, byte[] imageData, int width, int height) {
+    void onPageRasterized(PrintingJob printJob, byte[] imageData, int width, int height, boolean isPng) {
         HashMap<String, Object> args = new HashMap<>();
         args.put("image", imageData);
         args.put("width", width);
         args.put("height", height);
         args.put("job", printJob.index);
+        // Tells the Dart side whether `image` is already PNG-encoded bytes
+        // (no decode/re-encode needed) or a raw ARGB_8888 buffer (legacy path).
+        args.put("isPng", isPng);
 
         channel.invokeMethod("onPageRasterized", args);
     }
