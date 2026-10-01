@@ -2,6 +2,7 @@
 
 ## 3.16.0
 
+- **Fix the deprecated `Table.fromTextArray` overwriting the caller's `headerCount` with 1.** The argument was forwarded as `headerCount: headerCount = 1`, which in Dart assigns 1 to the parameter and evaluates to 1, so `TableHelper.fromTextArray` always received 1 however the caller was written. `headerCount: 0` therefore header-styled the first data row, repeated it on every page and shifted the zebra striping by a row; 2 or more silently lost the extra header rows. Calls that omit `headerCount` are unchanged, since the default is still 1
 - **Fix `AlignmentDirectional`'s top and bottom constants being vertically inverted.** This package puts y up - `Alignment.topLeft` is `(-1, 1)` and `inscribe` treats `y = 1` as the top - but `AlignmentDirectional` was copied from Flutter with its y-down constants, and `resolve` mirrors x only. So `AlignmentDirectional.topStart` placed its child at the *bottom* of the box, `bottomStart` at the top, and a `topCenter` to `bottomCenter` gradient ran backwards. The six vertical constants are now y-up, so each one resolves to the physical constant of the same name - `topStart` to `Alignment.topLeft` under ltr and `Alignment.topRight` under rtl. **A document that uses these constants and compensated for the inversion will move.** `centerStart`, `center` and `centerEnd` have `y == 0` and do not move
 - **Fix `Alignment.toString()` naming the opposite corner**: the label table was the y-down one, so `Alignment.topLeft` printed `Alignment.bottomLeft`. Debug output only
 

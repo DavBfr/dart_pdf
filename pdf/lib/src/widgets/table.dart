@@ -329,7 +329,7 @@ class Table extends Widget with SpanningWidget {
     oddCellStyle: oddCellStyle,
     cellFormat: cellFormat,
     cellDecoration: cellDecoration,
-    headerCount: headerCount = 1,
+    headerCount: headerCount,
     headers: headers,
     headerPadding: headerPadding,
     headerHeight: headerHeight,

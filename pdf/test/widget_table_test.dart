@@ -741,6 +741,116 @@ void main() {
     });
   });
 
+  group('the deprecated Table.fromTextArray', () {
+    const data = <List<dynamic>>[
+      <dynamic>['one', 'two'],
+      <dynamic>['three', 'four'],
+      <dynamic>['five', 'six'],
+      <dynamic>['seven', 'eight'],
+    ];
+
+    /// The content stream of a page holding [table].
+    Future<String> render(Table table) async {
+      final document = Document(compress: false);
+      document.addPage(
+        Page(pageFormat: PdfPageFormat.a4, build: (Context context) => table),
+      );
+      final pdf = String.fromCharCodes(await document.save());
+      final i = pdf.indexOf('stream', pdf.indexOf('/Contents'));
+      return pdf.substring(
+        pdf.indexOf('stream', i) + 6,
+        pdf.indexOf('endstream', i),
+      );
+    }
+
+    test('forwards the headerCount it was given', () async {
+      // The forwarded argument was written 'headerCount: headerCount = 1', which
+      // assigns 1 to the parameter and evaluates to 1 - so every caller got 1.
+      // headerCount: 0 header-styled the first data row and repeated it on every
+      // page; 2 or more silently lost the extra header rows.
+      for (final count in <int>[0, 1, 2, 3]) {
+        // ignore: deprecated_member_use_from_same_package
+        final deprecated = Table.fromTextArray(data: data, headerCount: count);
+        final helper = TableHelper.fromTextArray(
+          data: data,
+          headerCount: count,
+        );
+
+        expect(
+          deprecated.children.map((TableRow r) => r.repeat),
+          helper.children.map((TableRow r) => r.repeat),
+          reason: 'headerCount $count',
+        );
+        expect(
+          deprecated.children.where((TableRow r) => r.repeat),
+          hasLength(count),
+          reason: 'headerCount $count',
+        );
+      }
+    });
+
+    test('is a pure forwarder, down to the content stream', () async {
+      for (final count in <int>[0, 1, 2, 3]) {
+        for (final headers in <List<dynamic>?>[
+          null,
+          <dynamic>['a', 'b'],
+        ]) {
+          // ignore: deprecated_member_use_from_same_package
+          final deprecated = await render(
+            Table.fromTextArray(
+              data: data,
+              headerCount: count,
+              headers: headers,
+              rowDecoration: const BoxDecoration(color: PdfColors.white),
+              oddRowDecoration: const BoxDecoration(color: PdfColors.grey300),
+              headerDecoration: const BoxDecoration(color: PdfColors.blue),
+            ),
+          );
+          final helper = await render(
+            TableHelper.fromTextArray(
+              data: data,
+              headerCount: count,
+              headers: headers,
+              rowDecoration: const BoxDecoration(color: PdfColors.white),
+              oddRowDecoration: const BoxDecoration(color: PdfColors.grey300),
+              headerDecoration: const BoxDecoration(color: PdfColors.blue),
+            ),
+          );
+
+          expect(
+            deprecated,
+            helper,
+            reason: 'headerCount $count, headers ${headers != null}',
+          );
+        }
+      }
+    });
+
+    test('with no headerCount still repeats the first row', () async {
+      // ignore: deprecated_member_use_from_same_package
+      final table = Table.fromTextArray(data: data);
+
+      expect(table.children.first.repeat, isTrue);
+      expect(table.children.where((TableRow r) => r.repeat), hasLength(1));
+    });
+
+    test('with headerCount 0 styles the first row as data', () async {
+      // ignore: deprecated_member_use_from_same_package
+      final table = Table.fromTextArray(
+        data: data,
+        headerCount: 0,
+        headerDecoration: const BoxDecoration(color: PdfColors.blue),
+        rowDecoration: const BoxDecoration(color: PdfColors.white),
+        oddRowDecoration: const BoxDecoration(color: PdfColors.grey300),
+      );
+
+      expect(table.children.first.repeat, isFalse);
+      expect(table.children.first.decoration?.color, PdfColors.white);
+      // Row 1 is the first odd row, so the striping starts where it should.
+      expect(table.children[1].decoration?.color, PdfColors.grey300);
+    });
+  });
+
   tearDownAll(() async {
     final file = File('widgets-table.pdf');
     await file.writeAsBytes(await pdf.save());
