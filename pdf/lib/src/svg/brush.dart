@@ -59,8 +59,9 @@ class SvgBrush {
 
     final strokeDashArray = element.getAttribute('stroke-dasharray');
     final fillRule = element.getAttribute('fill-rule');
-    final strokeLineCap = element.getAttribute('stroke-linecap');
-    final strokeLineJoin = element.getAttribute('stroke-linejoin');
+    // Trimmed, because a presentation attribute may carry surrounding space.
+    final strokeLineCap = element.getAttribute('stroke-linecap')?.trim();
+    final strokeLineJoin = element.getAttribute('stroke-linejoin')?.trim();
     final blendMode = element.getAttribute('mix-blend-mode');
 
     // `color` establishes what `currentColor` means for this element and its
@@ -195,9 +196,15 @@ class SvgBrush {
   };
 
   static const _strokeLineJoin = <String, PdfLineJoin>{
-    'miter ': PdfLineJoin.miter,
+    // 'miter ' - with a trailing space - never matched, so a shape restating
+    // the default join under a round or bevel ancestor kept the inherited one:
+    // null from this lookup is indistinguishable from 'not specified'.
+    'miter': PdfLineJoin.miter,
     'bevel': PdfLineJoin.bevel,
     'round': PdfLineJoin.round,
+    // SVG 2 adds two more that fall back to a miter.
+    'miter-clip': PdfLineJoin.miter,
+    'arcs': PdfLineJoin.miter,
   };
 
   static const _textAnchors = <String, SvgTextAnchor>{
@@ -316,6 +323,15 @@ class SvgBrush {
       mask: mask ?? this.mask,
     );
   }
+
+  /// Whether there is a stroke to paint at all.
+  ///
+  /// SVG reads stroke-width:0 as 'do not paint the stroke'; PDF reads '0 w' as
+  /// the thinnest line the device can draw. Entering the stroke block on the
+  /// colour alone therefore put a hairline on every shape that switched its
+  /// stroke off this way, which no browser draws.
+  bool get hasStroke =>
+      stroke != null && stroke!.isNotEmpty && (strokeWidth?.sizeValue ?? 0) > 0;
 
   @override
   String toString() =>

@@ -164,7 +164,8 @@ class SvgText extends SvgOperation {
       }
     }
 
-    if (brush.stroke!.isNotEmpty && strokeAlpha > 0) {
+    // See SvgPath.paintShape: a stroke-width of zero means no stroke at all.
+    if (brush.hasStroke && strokeAlpha > 0) {
       if (brush.strokeWidth != null) {
         canvas.setLineWidth(
           brush.strokeWidth!.sizeIn(painter.viewport, SvgAxis.diagonal),

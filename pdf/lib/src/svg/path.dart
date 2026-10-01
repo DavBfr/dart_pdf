@@ -303,7 +303,10 @@ class SvgPath extends SvgOperation {
       }
     }
 
-    if (brush.stroke!.isNotEmpty && strokeAlpha > 0) {
+    // hasStroke, not stroke.isNotEmpty: a stroke-width of zero or less means
+    // there is no stroke, and the whole block has to be skipped so no colour,
+    // dash, cap, join, 'w' or 'S' operator goes out.
+    if (brush.hasStroke && strokeAlpha > 0) {
       brush.stroke!.setStrokeColor(this, canvas);
       if (strokeAlpha < 1) {
         canvas.setGraphicState(PdfGraphicState(strokeOpacity: strokeAlpha));
