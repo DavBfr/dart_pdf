@@ -65,9 +65,10 @@ abstract class SvgGradient extends SvgColor {
     canvas.setFillPattern(buildGradient(op, canvas, colors));
 
     if (opacityList.any((o) => o < 1)) {
+      // User space, not page points: see SvgPainter.userSpaceBoundingBox.
       final mask = PdfSoftMask(
         op.painter.document,
-        boundingBox: op.painter.boundingBox,
+        boundingBox: op.painter.userSpaceBoundingBox(canvas),
       );
       canvas.setGraphicState(PdfGraphicState(softMask: mask));
       final maskCanvas = mask.getGraphics()!;

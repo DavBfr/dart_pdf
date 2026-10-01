@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import 'dart:math' as math;
+
+import 'package:vector_math/vector_math_64.dart';
+
 import '../../pdf.dart';
 import '../widgets/font.dart';
 import '../widgets/svg.dart';
@@ -49,6 +53,37 @@ class SvgPainter {
   /// contains them, so the value in force while a child is built is the one that
   /// child belongs to.
   PdfPoint viewport = PdfPoint.zero;
+
+  /// [boundingBox], mapped back into the space [canvas] is currently drawing in.
+  ///
+  /// boundingBox is in page points, and a soft mask's Form XObject is evaluated
+  /// under the SVG user-space CTM - so handing it over as the /BBox clipped the
+  /// mask to the first pageWidth x pageHeight *user units*. With a viewBox of
+  /// 1024 on A4 that is a corner of the artwork; everything else fell into the
+  /// /Luminosity black backdrop and came out at alpha 0.
+  PdfRect userSpaceBoundingBox(PdfGraphics canvas) {
+    final inverse = canvas.getTransform();
+    if (inverse.invert() == 0) {
+      return boundingBox; // Singular: nothing better to say.
+    }
+
+    final corners = <Vector3>[
+      inverse.transform3(Vector3(boundingBox.left, boundingBox.bottom, 0)),
+      inverse.transform3(Vector3(boundingBox.right, boundingBox.bottom, 0)),
+      inverse.transform3(Vector3(boundingBox.right, boundingBox.top, 0)),
+      inverse.transform3(Vector3(boundingBox.left, boundingBox.top, 0)),
+    ];
+
+    final xs = corners.map((Vector3 c) => c.x);
+    final ys = corners.map((Vector3 c) => c.y);
+
+    return PdfRect.fromLBRT(
+      xs.reduce(math.min),
+      ys.reduce(math.min),
+      xs.reduce(math.max),
+      ys.reduce(math.max),
+    );
+  }
 
   /// Run [body] with [viewport] in force, then put back what was there.
   void withViewport(PdfPoint size, void Function() body) {

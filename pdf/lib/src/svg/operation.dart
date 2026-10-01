@@ -115,7 +115,7 @@ abstract class SvgOperation {
 
   void paint(PdfGraphics canvas) {
     canvas.saveContext();
-    clip.apply(canvas);
+    clip.apply(canvas, boundingBox());
     if (transform.isNotEmpty) {
       canvas.setTransform(transform.matrix!);
     }
