@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.18.1
+
+- **Fix `flutterImageProvider` embedding premultiplied pixels as straight alpha**, so every anti-aliased edge of a captured image got a dark fringe and a translucent overlay came out muddy: 50% red rendered as (191,127,127) over white instead of (255,127,127). `dart:ui` hands back premultiplied RGBA by default, and the PDF layer stores those bytes as `/DeviceRGB` plus a `/DeviceGray` `/SMask`, which ISO 32000-1 11.6.5.2 defines as straight alpha, so viewers composited `Cs*a^2 + Cb*(1-a)`. The capture now asks for `rawStraightRgba`. A fully opaque capture is byte-identical
+
 ## 5.18.0
 
 - **`Printing.raster` now paints an opaque white page backdrop.** A PDF page has no background of its own - the imaging model leaves it to whatever displays the document - and no native backend painted one, so 96% of a blank A4 came back at alpha 0 and saving a rastered page as PNG, or re-encoding it as JPEG, gave a black page. Pass `background: 0x00000000` to `Printing.raster` for the transparent pages of 5.17 and earlier

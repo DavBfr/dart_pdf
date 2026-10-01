@@ -345,6 +345,56 @@ void main() {
       expect(pdf, isNot(contains('Infinity')));
     });
   });
+  group('a raw pixel buffer', () {
+    test('is read as straight alpha, not premultiplied', () {
+      // The colour bytes go to a /DeviceRGB stream and the alpha byte to a
+      // /DeviceGray /SMask, which ISO 32000-1 11.6.5.2 defines as straight
+      // alpha. The three capture paths in printing and pdf_widget_wrapper used
+      // to hand over dart:ui's premultiplied default, so a viewer composited
+      // Cs*a^2 + Cb*(1-a) and 50% red came out (191,127,127) over white.
+      final document = PdfDocument();
+      final image = PdfImage(
+        document,
+        image: Uint8List.fromList(<int>[255, 0, 0, 128]),
+        width: 1,
+        height: 1,
+      );
+
+      expect(image.buf.output(), <int>[255, 0, 0]);
+
+      // The soft mask is the object the image points at.
+      final mask = RegExp(
+        r'(\d+) 0 R',
+      ).firstMatch(image.params['/SMask'].toString())!.group(1);
+      final smask = document.objects.firstWhere(
+        (PdfObject<PdfDataType> o) => o.objser.toString() == mask,
+      );
+
+      expect((smask as PdfObjectStream).buf.output(), <int>[128]);
+    });
+
+    test('is described by its own dimensions, not its display ones', () {
+      // ImageProvider's width and height swap the two axes for a rotated
+      // orientation; PdfImage's arguments are the buffer's own and drive its
+      // pixel loops. pdf_widget_wrapper used to pass the former as the latter.
+      final image = PdfImage(
+        PdfDocument(),
+        image: Uint8List(8 * 4 * 4),
+        width: 8,
+        height: 4,
+        orientation: PdfImageOrientation.rightTop,
+      );
+
+      expect(image.params['/Width'].toString(), '8');
+      expect(image.params['/Height'].toString(), '4');
+      expect(image.buf.output(), hasLength(8 * 4 * 3));
+
+      // The display values are the swapped ones.
+      expect(image.width, 4);
+      expect(image.height, 8);
+    });
+  });
+
   group('an orientation asked of a provider', () {
     /// A 50x200 PNG, so a rotated orientation is visible in the dimensions.
     final png = Uint8List.fromList(

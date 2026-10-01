@@ -21,6 +21,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:image/image.dart' as im;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -28,11 +29,13 @@ import 'package:pdf/widgets.dart' as pw;
 class WidgetWrapper extends pw.ImageProvider {
   WidgetWrapper._(
     this.bytes,
-    int width,
-    int height,
+    int pixelWidth,
+    int pixelHeight,
     PdfImageOrientation orientation,
     double? dpi,
-  ) : super(width, height, orientation, dpi);
+  )   : _pixelWidth = pixelWidth,
+        _pixelHeight = pixelHeight,
+        super(pixelWidth, pixelHeight, orientation, dpi);
 
   /// Wrap a Flutter Widget identified by a GlobalKey to an ImageProvider.
   ///
@@ -81,8 +84,13 @@ class WidgetWrapper extends pw.ImageProvider {
     final image = await wrappedWidget.toImage(pixelRatio: pixelRatio);
 
     try {
+      // dart:ui hands back premultiplied RGBA by default, and the PDF layer
+      // stores these bytes as /DeviceRGB plus a /DeviceGray /SMask - which
+      // ISO 32000-1 11.6.5.2 defines as straight alpha. A viewer then composites
+      // Cs*a^2 + Cb*(1-a), so anti-aliased edges came out with a dark fringe and
+      // 50% red rendered as (191,127,127) over white instead of (255,127,127).
       final byteData = await image.toByteData(
-        format: ui.ImageByteFormat.rawRgba,
+        format: ui.ImageByteFormat.rawStraightRgba,
       );
 
       if (byteData == null) {
@@ -206,7 +214,10 @@ class WidgetWrapper extends pw.ImageProvider {
         ..flushPaint();
 
       image = await repaintBoundary.toImage(pixelRatio: pixelRatio);
-      final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      // Straight alpha, not premultiplied: see fromKey above.
+      final bytes = await image.toByteData(
+        format: ui.ImageByteFormat.rawStraightRgba,
+      );
       if (bytes == null) {
         throw Exception('Unable to read image data');
       }
@@ -245,16 +256,50 @@ class WidgetWrapper extends pw.ImageProvider {
     }
   }
 
-  /// The image data
+  /// The image data, as straight-alpha RGBA.
   final Uint8List bytes;
+
+  /// The captured buffer's own pixel dimensions.
+  ///
+  /// Not the inherited [width] and [height], which are display values: those
+  /// swap the two axes for a rotated orientation, while PdfImage writes its
+  /// arguments straight into /Width and /Height and drives its pixel loops with
+  /// them. Handing it the display values made a rotated capture decode at the
+  /// wrong row stride and come out sheared.
+  final int _pixelWidth;
+
+  final int _pixelHeight;
 
   @override
   PdfImage buildImage(pw.Context context, {int? width, int? height}) {
-    return PdfImage(
+    // A resample request is a request to resample. This used to hand PdfImage the
+    // full-resolution capture while labelling it with the requested size, so the
+    // RGB and SMask loops read at the wrong stride - a diagonally sheared sliver
+    // of the top of the widget - and off the end of the buffer entirely when the
+    // requested pixel count exceeded the capture's.
+    if (width == null || _pixelWidth == 0 || width >= _pixelWidth) {
+      return PdfImage(
+        context.document,
+        image: bytes,
+        width: _pixelWidth,
+        height: _pixelHeight,
+        orientation: orientation,
+      );
+    }
+
+    final captured = im.Image.fromBytes(
+      width: _pixelWidth,
+      height: _pixelHeight,
+      bytes: bytes.buffer,
+      bytesOffset: bytes.offsetInBytes,
+      numChannels: 4,
+    );
+
+    // The height is derived from the width, so the aspect ratio holds whatever
+    // the caller's box asked for.
+    return PdfImage.fromImage(
       context.document,
-      image: bytes,
-      width: width ?? this.width!,
-      height: height ?? this.height!,
+      image: im.copyResize(captured, width: width),
       orientation: orientation,
     );
   }

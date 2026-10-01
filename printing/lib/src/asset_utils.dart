@@ -15,6 +15,7 @@
  */
 
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart' as rdr;
 import 'package:flutter/services.dart';
@@ -41,7 +42,15 @@ Future<ImageProvider> flutterImageProvider(
       // the completer was simply never settled: on web, a CORS-tainted canvas
       // made the returned future hang for ever, with no error reaching the app.
       try {
-        final bytes = await image.image.toByteData();
+        // Straight alpha, not dart:ui's premultiplied default: the PDF layer
+        // stores these bytes as /DeviceRGB plus a /DeviceGray /SMask, which
+        // ISO 32000-1 11.6.5.2 defines as straight alpha, so a premultiplied
+        // buffer was composited as Cs*a^2 + Cb*(1-a) - a dark fringe on every
+        // anti-aliased edge, and 50% red over white at (191,127,127) instead of
+        // (255,127,127).
+        final bytes = await image.image.toByteData(
+          format: ui.ImageByteFormat.rawStraightRgba,
+        );
 
         if (bytes == null) {
           throw Exception(

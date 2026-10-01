@@ -63,6 +63,18 @@ typedef PdfImageStreamWriter = void Function(PdfStream output);
 /// Image object stored in the Pdf document
 class PdfImage extends PdfXObject {
   /// Creates a new [PdfImage] instance.
+  /// Embed a raw pixel buffer.
+  ///
+  /// [image] is `width * height` pixels of 8-bit RGB, or RGBA when [alpha] is
+  /// set. **The alpha is straight, not premultiplied**: the colour bytes go to a
+  /// `/DeviceRGB` stream and the alpha byte to a `/DeviceGray` `/SMask`, and
+  /// ISO 32000-1 11.6.5.2 defines that pair as straight alpha. A premultiplied
+  /// buffer - which is what `dart:ui` hands back by default - is composited as
+  /// `Cs*a^2 + Cb*(1-a)`, so translucent pixels come out too dark.
+  ///
+  /// [width] and [height] describe [image] itself, not how it is displayed:
+  /// `image.length` must be `width * height * (alpha ? 4 : 3)`. A rotated
+  /// [orientation] changes where the pixels are drawn, never how they are read.
   factory PdfImage(
     PdfDocument pdfDocument, {
     required Uint8List image,

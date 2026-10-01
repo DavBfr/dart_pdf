@@ -23,7 +23,10 @@ import 'color.dart';
 
 /// Represents a bitmap image
 class PdfRasterBase {
-  /// Create a bitmap image
+  /// Create a bitmap image.
+  ///
+  /// [pixels] is `width * height` pixels of 8-bit RGBA with **straight, not
+  /// premultiplied, alpha** - see [PdfImage.new].
   const PdfRasterBase(this.width, this.height, this.alpha, this.pixels);
 
   factory PdfRasterBase.fromImage(im.Image image) {

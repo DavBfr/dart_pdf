@@ -298,6 +298,10 @@ class ImageImage extends ImageProvider {
   }
 }
 
+/// An image from a raw pixel buffer.
+///
+/// [bytes] is `width * height` pixels of 8-bit RGBA with **straight, not
+/// premultiplied, alpha** - see [PdfImage.new].
 class RawImage extends ImageImage {
   RawImage({
     required Uint8List bytes,
