@@ -38,6 +38,36 @@ class PdfRasterBase {
     return PdfRasterBase.fromImage(img);
   }
 
+  /// How far a shadow bitmap reaches past the box it belongs to, on every side.
+  ///
+  /// The shape is drawn inflated by [spreadRadius] plus [blurRadius], so that
+  /// blurring it by [blurRadius] erodes the soft edge back to the box inflated by
+  /// [spreadRadius] and spreads the same distance outward - and one more
+  /// [blurRadius] of bitmap holds that outward half. The bitmap used to be only
+  /// `spreadRadius` larger than the box and was filled edge to edge, so with the
+  /// default spreadRadius of 0 the blur had nowhere to bleed and gave back the
+  /// same opaque rectangle: a BoxShadow(blurRadius: 8) painted a hard box.
+  static double shadowMargin(double spreadRadius, double blurRadius) =>
+      spreadRadius + blurRadius * 2;
+
+  static im.ColorUint8 _shadowColor(PdfColor color) => im.ColorUint8(4)
+    ..r = color.red * 255
+    ..g = color.green * 255
+    ..b = color.blue * 255
+    ..a = color.alpha * 255;
+
+  static im.Image _shadowBitmap(
+    double width,
+    double height,
+    double spreadRadius,
+    double blurRadius,
+  ) => im.Image(
+    width: (width + shadowMargin(spreadRadius, blurRadius) * 2).round(),
+    height: (height + shadowMargin(spreadRadius, blurRadius) * 2).round(),
+    format: im.Format.uint8,
+    numChannels: 4,
+  );
+
   static im.Image shadowRect(
     double width,
     double height,
@@ -45,24 +75,16 @@ class PdfRasterBase {
     double blurRadius,
     PdfColor color,
   ) {
-    final shadow = im.Image(
-      width: (width + spreadRadius * 2).round(),
-      height: (height + spreadRadius * 2).round(),
-      format: im.Format.uint8,
-      numChannels: 4,
-    );
+    final shadow = _shadowBitmap(width, height, spreadRadius, blurRadius);
+    final inset = blurRadius.round();
 
     im.fillRect(
       shadow,
-      x1: spreadRadius.round(),
-      y1: spreadRadius.round(),
-      x2: (spreadRadius + width).round(),
-      y2: (spreadRadius + height).round(),
-      color: im.ColorUint8(4)
-        ..r = color.red * 255
-        ..g = color.green * 255
-        ..b = color.blue * 255
-        ..a = color.alpha * 255,
+      x1: inset,
+      y1: inset,
+      x2: shadow.width - 1 - inset,
+      y2: shadow.height - 1 - inset,
+      color: _shadowColor(color),
     );
 
     return im.gaussianBlur(shadow, radius: blurRadius.round());
@@ -75,24 +97,28 @@ class PdfRasterBase {
     double blurRadius,
     PdfColor color,
   ) {
-    final shadow = im.Image(
-      width: (width + spreadRadius * 2).round(),
-      height: (height + spreadRadius * 2).round(),
-      format: im.Format.uint8,
-      numChannels: 4,
-    );
+    final shadow = _shadowBitmap(width, height, spreadRadius, blurRadius);
+    final inset = blurRadius.round();
 
-    im.fillCircle(
-      shadow,
-      x: (spreadRadius + width / 2).round(),
-      y: (spreadRadius + height / 2).round(),
-      radius: (width / 2).round(),
-      color: im.ColorUint8(4)
-        ..r = color.red * 255
-        ..g = color.green * 255
-        ..b = color.blue * 255
-        ..a = color.alpha * 255,
-    );
+    // The image package has fillCircle but no fillEllipse, and a shadow has two
+    // radii whenever the box is not square.
+    final cx = (shadow.width - 1) / 2;
+    final cy = (shadow.height - 1) / 2;
+    final rx = cx - inset;
+    final ry = cy - inset;
+    final fill = _shadowColor(color);
+
+    if (rx > 0 && ry > 0) {
+      for (var y = 0; y < shadow.height; y++) {
+        final dy = (y - cy) / ry;
+        for (var x = 0; x < shadow.width; x++) {
+          final dx = (x - cx) / rx;
+          if (dx * dx + dy * dy <= 1.0) {
+            shadow.setPixel(x, y, fill);
+          }
+        }
+      }
+    }
 
     return im.gaussianBlur(shadow, radius: blurRadius.round());
   }

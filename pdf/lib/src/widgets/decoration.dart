@@ -317,11 +317,19 @@ class BoxDecoration {
                     s.blurRadius,
                     s.color,
                   );
+                  final margin = PdfRasterBase.shadowMargin(
+                    s.spreadRadius,
+                    s.blurRadius,
+                  );
                   final m = PdfImage.fromImage(context.document, image: i);
+                  // One bitmap pixel is one point, so the size has to be the
+                  // bitmap's and not whatever drawImage would infer.
                   context.canvas.drawImage(
                     m,
-                    box.left + s.offset.x - s.spreadRadius,
-                    box.bottom - s.offset.y - s.spreadRadius,
+                    box.left + s.offset.x - margin,
+                    box.bottom - s.offset.y - margin,
+                    i.width.toDouble(),
+                    i.height.toDouble(),
                   );
                 }
               }
@@ -336,11 +344,19 @@ class BoxDecoration {
                     s.blurRadius,
                     s.color,
                   );
+                  final margin = PdfRasterBase.shadowMargin(
+                    s.spreadRadius,
+                    s.blurRadius,
+                  );
                   final m = PdfImage.fromImage(context.document, image: i);
+                  // One bitmap pixel is one point, so the size has to be the
+                  // bitmap's and not whatever drawImage would infer.
                   context.canvas.drawImage(
                     m,
-                    box.left + s.offset.x - s.spreadRadius,
-                    box.bottom - s.offset.y - s.spreadRadius,
+                    box.left + s.offset.x - margin,
+                    box.bottom - s.offset.y - margin,
+                    i.width.toDouble(),
+                    i.height.toDouble(),
                   );
                 }
               }
@@ -357,11 +373,19 @@ class BoxDecoration {
                   s.blurRadius,
                   s.color,
                 );
+                final margin = PdfRasterBase.shadowMargin(
+                  s.spreadRadius,
+                  s.blurRadius,
+                );
                 final m = PdfImage.fromImage(context.document, image: i);
+                // One bitmap pixel is one point, so the size has to be the
+                // bitmap's and not whatever drawImage would infer.
                 context.canvas.drawImage(
                   m,
-                  box.left + s.offset.x - s.spreadRadius,
-                  box.bottom - s.offset.y - s.spreadRadius,
+                  box.left + s.offset.x - margin,
+                  box.bottom - s.offset.y - margin,
+                  i.width.toDouble(),
+                  i.height.toDouble(),
                 );
               }
             }
