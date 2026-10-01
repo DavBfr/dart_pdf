@@ -268,7 +268,10 @@ class Flex extends MultiChildWidget with SpanningWidget {
     var allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
     var index = _context.firstChild;
 
-    for (final child in children.sublist(_context.firstChild)) {
+    // Iterate by index rather than children.sublist(...), which allocated a
+    // fresh list per layout pass of every Row/Column.
+    for (; index < children.length; index++) {
+      final child = children[index];
       final flex = child is Flexible ? child.flex : 0;
       final fit = child is Flexible ? child.fit : FlexFit.loose;
       if (flex > 0) {
@@ -329,7 +332,6 @@ class Flex extends MultiChildWidget with SpanningWidget {
         }
       }
       lastFlexChild = child;
-      index++;
     }
     _context.lastChild = index;
     assert(
@@ -487,10 +489,8 @@ class Flex extends MultiChildWidget with SpanningWidget {
         ? actualSize - leadingSpace
         : leadingSpace;
 
-    for (var child in children.sublist(
-      _context.firstChild,
-      _context.lastChild,
-    )) {
+    for (var c = _context.firstChild; c < _context.lastChild; c++) {
+      final child = children[c];
       double? childCrossPosition;
       switch (crossAxisAlignment) {
         case CrossAxisAlignment.start:
@@ -597,11 +597,8 @@ class Flex extends MultiChildWidget with SpanningWidget {
         ..clipPath();
     }
 
-    for (final child in children.sublist(
-      _context.firstChild,
-      _context.lastChild,
-    )) {
-      child.paint(context);
+    for (var c = _context.firstChild; c < _context.lastChild; c++) {
+      children[c].paint(context);
     }
     context.canvas.restoreContext();
   }

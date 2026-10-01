@@ -213,7 +213,9 @@ class PieDataSet extends Dataset {
   ///
   /// [angleStart] and [angleEnd] are public and mutable, so a caller can leave a
   /// sweep a hair under a full turn; an exact test sent it to the wedge branch,
-  /// which draws nothing when its two endpoints coincide.
+  /// which draws nothing when its two endpoints coincide. Upstream fixed the same
+  /// defect with a 1e-12 tolerance, which covers the accumulated sum but not a
+  /// caller who sets the angles directly; this is the wider of the two.
   bool get _isFullCircle => angleEnd - angleStart >= pi * 2 - 1e-9;
 
   /// Whether this slice has no sweep, so there is nothing to draw for it.
