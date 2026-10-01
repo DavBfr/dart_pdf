@@ -124,6 +124,7 @@ class PdfImage extends PdfXObject {
     PdfDocument pdfDocument, {
     required Uint8List image,
     PdfImageOrientation? orientation,
+    bool? cmykInverted,
   }) {
     final info = PdfJpegInfo(image);
     final im = PdfImage._(
@@ -145,9 +146,11 @@ class PdfImage extends PdfXObject {
 
     if (info.isCMYK) {
       im.params['/ColorSpace'] = const PdfName('/DeviceCMYK');
-      if (info.isCMYKInverted) {
-        // CMYK JPEGs from Adobe use inverted values (YCCK encoding).
-        // The /Decode array inverts each component back to proper CMYK.
+      if (cmykInverted ?? info.isCMYKInverted) {
+        // A CMYK JPEG written by Adobe stores its samples inverted, whatever its
+        // APP14 transform byte says. The /Decode array inverts each component
+        // back. cmykInverted is the override for the rare four-component file
+        // that carries no Adobe marker but is inverted anyway, or the reverse.
         im.params['/Decode'] = PdfArray.fromNum(<int>[1, 0, 1, 0, 1, 0, 1, 0]);
       }
     } else if (info.isRGB) {
