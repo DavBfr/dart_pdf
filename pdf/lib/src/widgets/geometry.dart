@@ -114,11 +114,11 @@ class BoxConstraints {
   }
 
   double constrainWidth([double width = double.infinity]) {
-    return width.clamp(minWidth, maxWidth);
+    return _clamp(width, minWidth, maxWidth);
   }
 
   double constrainHeight([double height = double.infinity]) {
-    return height.clamp(minHeight, maxHeight);
+    return _clamp(height, minHeight, maxHeight);
   }
 
   /// Returns a size that attempts to meet the conditions
@@ -201,12 +201,49 @@ class BoxConstraints {
   /// Returns new box constraints that respect the given constraints while being
   /// as close as possible to the original constraints.
   BoxConstraints enforce(BoxConstraints constraints) {
+    final loW = constraints.minWidth;
+    final hiW = constraints.maxWidth;
+    final loH = constraints.minHeight;
+    final hiH = constraints.maxHeight;
+    final nMinW = _clamp(minWidth, loW, hiW);
+    final nMaxW = _clamp(maxWidth, loW, hiW);
+    final nMinH = _clamp(minHeight, loH, hiH);
+    final nMaxH = _clamp(maxHeight, loH, hiH);
+    // Most layout passes already satisfy the incoming constraints; reusing the
+    // receiver when the clamped result is unchanged avoids allocating a fresh
+    // BoxConstraints for every enforcement in the layout hot path. The class
+    // is immutable, so callers cannot tell the difference.
+    if (nMinW == minWidth &&
+        nMaxW == maxWidth &&
+        nMinH == minHeight &&
+        nMaxH == maxHeight) {
+      return this;
+    }
     return BoxConstraints(
-      minWidth: minWidth.clamp(constraints.minWidth, constraints.maxWidth),
-      maxWidth: maxWidth.clamp(constraints.minWidth, constraints.maxWidth),
-      minHeight: minHeight.clamp(constraints.minHeight, constraints.maxHeight),
-      maxHeight: maxHeight.clamp(constraints.minHeight, constraints.maxHeight),
+      minWidth: nMinW,
+      maxWidth: nMaxW,
+      minHeight: nMinH,
+      maxHeight: nMaxH,
     );
+  }
+
+  /// Same contract as `double.clamp` for valid bounds, without its cost:
+  /// `num.clamp` goes through several `compareTo` calls plus a range check on
+  /// every call, and layout calls it constantly. Mirrors Flutter's
+  /// `clampDouble`: a NaN value still collapses to [hi] as `clamp` does, and
+  /// an inverted or NaN range is caught by the assert rather than thrown.
+  static double _clamp(double v, double lo, double hi) {
+    assert(lo <= hi && !lo.isNaN && !hi.isNaN);
+    if (v < lo) {
+      return lo;
+    }
+    if (v > hi) {
+      return hi;
+    }
+    if (v.isNaN) {
+      return hi;
+    }
+    return v;
   }
 
   BoxConstraints copyWith({
