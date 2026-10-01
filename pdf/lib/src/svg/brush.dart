@@ -48,6 +48,7 @@ class SvgBrush {
     required this.blendMode,
     this.currentColor,
     this.mask,
+    this.preserveSpace,
   });
 
   factory SvgBrush.fromXml(
@@ -134,6 +135,14 @@ class SvgBrush {
         fontStyle: element.getAttribute('font-style'),
         fontWeight: element.getAttribute('font-weight'),
         textAnchor: _textAnchors[element.getAttribute('text-anchor')],
+        preserveSpace: switch (element.getAttribute(
+          'space',
+          namespaceUri: 'http://www.w3.org/XML/1998/namespace',
+        )) {
+          'preserve' => true,
+          'default' => false,
+          _ => null,
+        },
         // Descendants resolve `currentColor` against this element's value.
         currentColor: currentColor,
       ),
@@ -169,6 +178,12 @@ class SvgBrush {
     currentColor: PdfColors.black,
     mask: null,
   );
+
+  /// Whether white space inside `<text>` is kept as written: `xml:space`.
+  ///
+  /// Inherited, like every other property here, which is what the attribute
+  /// means.
+  final bool? preserveSpace;
 
   static const _blendModes = <String, PdfBlendMode>{
     'normal': PdfBlendMode.normal,
@@ -275,6 +290,7 @@ class SvgBrush {
       strokeMiterLimit: other.strokeMiterLimit ?? strokeMiterLimit,
       currentColor: other.currentColor ?? currentColor,
       mask: other.mask,
+      preserveSpace: other.preserveSpace ?? preserveSpace,
     );
   }
 
@@ -299,6 +315,7 @@ class SvgBrush {
     PdfBlendMode? blendMode,
     PdfColor? currentColor,
     SvgMaskPath? mask,
+    bool? preserveSpace,
   }) {
     return SvgBrush(
       opacity: opacity ?? this.opacity,
@@ -321,6 +338,7 @@ class SvgBrush {
       blendMode: blendMode ?? this.blendMode,
       currentColor: currentColor ?? this.currentColor,
       mask: mask ?? this.mask,
+      preserveSpace: preserveSpace ?? this.preserveSpace,
     );
   }
 
