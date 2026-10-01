@@ -788,6 +788,9 @@ class PdfGraphics {
         color.black,
       ]).output(_page, _buf);
       _buf.putString(' k ');
+    } else if (color is PdfColorGrey) {
+      PdfNumList(<double>[color.red]).output(_page, _buf);
+      _buf.putString(' g ');
     } else {
       PdfNumList(<double>[
         color.red,
@@ -831,6 +834,9 @@ class PdfGraphics {
         color.black,
       ]).output(_page, _buf);
       _buf.putString(' K ');
+    } else if (color is PdfColorGrey) {
+      PdfNumList(<double>[color.red]).output(_page, _buf);
+      _buf.putString(' G ');
     } else {
       PdfNumList(<double>[
         color.red,
