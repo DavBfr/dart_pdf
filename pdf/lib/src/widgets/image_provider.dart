@@ -17,6 +17,7 @@
 import 'dart:typed_data';
 
 import 'package:image/image.dart' as im;
+import 'package:meta/meta.dart';
 
 import '../../pdf.dart';
 import 'widget.dart';
@@ -40,7 +41,22 @@ abstract class ImageProvider {
   /// The internal orientation of the image
   final PdfImageOrientation orientation;
 
-  final _cache = <int, PdfImage>{};
+  /// One cache per document, held weakly, so the images and the document they
+  /// belong to die together.
+  ///
+  /// This used to be an unbounded map on the provider itself, keyed only by the
+  /// pixel width: a long-lived provider kept one PdfImage per distinct layout
+  /// width for ever, and a PdfImage holds its PdfDocument, which holds every
+  /// page, font and content stream in it. A service reusing one provider leaked
+  /// roughly a finished document per width.
+  static final _caches = Expando<Map<int, PdfImage>>('PdfImage cache');
+
+  Map<int, PdfImage> _cacheFor(PdfDocument document) =>
+      _caches[document] ??= <int, PdfImage>{};
+
+  /// How many images this provider has cached for [document].
+  @visibleForTesting
+  int debugCacheLength(PdfDocument document) => _caches[document]?.length ?? 0;
 
   PdfImage buildImage(Context context, {int? width, int? height});
 
@@ -68,25 +84,31 @@ abstract class ImageProvider {
           : sourceWidth;
 
       if (resampleBound != null && width > 0 && width < resampleBound) {
-        if (!_cache.containsKey(width)) {
-          _cache[width] ??= buildImage(context, width: width, height: height);
-        }
+        final cache = _cacheFor(context.document);
+        final image = cache[width] ??= buildImage(
+          context,
+          width: width,
+          height: height,
+        );
 
-        if (_cache[width]!.pdfDocument != context.document) {
-          _cache[width] = buildImage(context, width: width, height: height);
-        }
-
-        return _cache[width]!;
+        assert(
+          identical(image.pdfDocument, context.document),
+          'buildImage returned an image belonging to another document. A '
+          'provider has to build against the context it is given.',
+        );
+        return image;
       }
     }
 
-    _cache[0] ??= buildImage(context);
+    final cache = _cacheFor(context.document);
+    final image = cache[0] ??= buildImage(context);
 
-    if (_cache[0]!.pdfDocument != context.document) {
-      _cache[0] = buildImage(context);
-    }
-
-    return _cache[0]!;
+    assert(
+      identical(image.pdfDocument, context.document),
+      'buildImage returned an image belonging to another document. A provider '
+      'has to build against the context it is given.',
+    );
+    return image;
   }
 }
 
@@ -98,7 +120,22 @@ class ImageProxy extends ImageProvider {
   final PdfImage _image;
 
   @override
-  PdfImage buildImage(Context context, {int? width, int? height}) => _image;
+  PdfImage buildImage(Context context, {int? width, int? height}) {
+    // An ImageProxy wraps an image that already belongs to a document, and
+    // resolve() used to answer a mismatch by calling buildImage again - which
+    // hands back the same foreign image. Nothing downstream checks ownership, so
+    // document A's object number landed in document B's /XObject dictionary and
+    // the viewer drew nothing, or an unrelated object, with no error at all.
+    if (!identical(_image.pdfDocument, context.document)) {
+      throw PdfException(
+        'This PdfImage belongs to another PdfDocument and cannot be drawn in '
+        'this one. Build the image against this document, or use MemoryImage '
+        'or RawImage, which build one per document.',
+      );
+    }
+
+    return _image;
+  }
 }
 
 class MemoryImage extends ImageProvider {
