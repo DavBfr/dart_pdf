@@ -121,6 +121,9 @@ class PdfFunction extends PdfObjectStream implements PdfBaseFunction {
 
   @override
   void prepare() {
+    // Rebuilt, not appended to: a second write doubled the sample data behind a
+    // /Size that described one copy.
+    buf.reset();
     buf.putBytes(data!);
     super.prepare();
 

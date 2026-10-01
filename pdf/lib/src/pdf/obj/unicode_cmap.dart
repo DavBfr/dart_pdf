@@ -35,6 +35,10 @@ class PdfUnicodeCmap extends PdfObjectStream {
 
   @override
   void prepare() {
+    // Rebuilt, not appended to: a second write gave /ToUnicode two begincmap
+    // programs.
+    buf.reset();
+
     if (protect) {
       cmap.fillRange(1, cmap.length, 0x20);
     }

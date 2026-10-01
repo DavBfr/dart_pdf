@@ -112,6 +112,12 @@ class PdfTtfFont extends PdfFont {
     int charMin;
     int charMax;
 
+    // prepare() runs on every write, and both of these build by appending - so
+    // writing one document twice embedded the font program twice behind a
+    // /Length1 that described one copy, and listed every width twice.
+    file.buf.reset();
+    widthsObject.params.values.clear();
+
     // The font's own bytes, not the whole backing buffer: a partial view used to
     // embed everything behind it while /Length1 described only the view, so the
     // two disagreed - 1,093,112 bytes of stream for a /Length1 of 93,112.
@@ -144,6 +150,10 @@ class PdfTtfFont extends PdfFont {
   void _buildType0(PdfDict params) {
     int charMin;
     int charMax;
+
+    // See _buildTrueType: rebuilt rather than appended to.
+    file.buf.reset();
+    widthsObject.params.values.clear();
 
     final ttfWriter = TtfWriter(font);
     final data = ttfWriter.withChars(unicodeCMap.cmap);

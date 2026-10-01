@@ -22,6 +22,7 @@ import '../format/name.dart';
 import '../format/num.dart';
 import '../graphics.dart';
 import '../page_format.dart';
+import '../point.dart';
 import 'annotation.dart';
 import 'graphic_stream.dart';
 import 'object.dart';
@@ -50,6 +51,8 @@ class PdfPage extends PdfObject<PdfDict> with PdfGraphicStream {
     PdfDocument pdfDocument, {
     this.pageFormat = PdfPageFormat.standard,
     this.rotate = PdfPageRotation.none,
+    this.origin = PdfPoint.zero,
+    this.protectImportedContents = true,
     int? index,
     int? objser,
     int objgen = 0,
@@ -72,6 +75,22 @@ class PdfPage extends PdfObject<PdfDict> with PdfGraphicStream {
   /// The page rotation angle
   PdfPageRotation rotate;
 
+  /// The lower left corner of the page, in PDF units.
+  ///
+  /// [pageFormat] carries only a width and a height, and `/MediaBox` was written
+  /// as `[0 0 w h]` whatever the page said - so loading a PDF whose box has a
+  /// negative origin and re-saving it pinned the box to 0,0 and the imported
+  /// content at negative coordinates fell off the page.
+  PdfPoint origin;
+
+  /// Whether content appended to an imported page starts from the default
+  /// graphics state.
+  ///
+  /// ISO 32000-1 7.8.2 concatenates a `/Contents` array into one stream, so the
+  /// producer's leftover state - a top-level flip, an unbalanced `q` - was still
+  /// in force for anything added afterwards. Set false to go back to that.
+  final bool protectImportedContents;
+
   /// This holds the contents of the page.
   final contents = <PdfObject>[];
 
@@ -80,11 +99,35 @@ class PdfPage extends PdfObject<PdfDict> with PdfGraphicStream {
 
   final _contentGraphics = <PdfObject, PdfGraphics>{};
 
+  /// The two streams that bracket imported content, created on the first
+  /// [getGraphics] of a page that has some.
+  ///
+  /// They are made here and not in prepare(), because PdfDocument._write
+  /// iterates the object list while calling prepare() and a new PdfObject
+  /// registers itself in it - a ConcurrentModificationError. They stay out of
+  /// [contents], whose _contentGraphics lookup would not find them.
+  PdfObjectStream? _importedOpen;
+
+  PdfObjectStream? _importedClose;
+
   /// This returns a [PdfGraphics] object, which can then be used to render
   /// on to this page. If a previous [PdfGraphics] object was used, this object
   /// is appended to the page, and will be drawn over the top of any previous
   /// objects.
   PdfGraphics getGraphics() {
+    // ISO 32000-1 7.8.2 concatenates a /Contents array into one stream, so
+    // whatever graphics state the imported content leaves behind - a top-level
+    // flip, an unbalanced q - is still in force for anything appended after it.
+    // Stamping text onto a loaded page came out mirrored, rotated or offset
+    // depending on which tool wrote the file. Bracketing the imported entries
+    // puts the default state back first.
+    if (protectImportedContents &&
+        _importedOpen == null &&
+        params.containsKey('/Contents')) {
+      _importedOpen = PdfObjectStream(pdfDocument)..buf.putString('q ');
+      _importedClose = PdfObjectStream(pdfDocument)..buf.putString('Q ');
+    }
+
     final stream = PdfObjectStream(pdfDocument);
     final g = PdfGraphics(this, stream.buf);
     _contentGraphics[stream] = g;
@@ -108,13 +151,19 @@ class PdfPage extends PdfObject<PdfDict> with PdfGraphicStream {
       params['/Rotate'] = PdfNum(rotate.index * 90);
     }
 
-    // the /MediaBox for the page size
+    // the /MediaBox for the page size, from the page's own origin
     params['/MediaBox'] = PdfArray.fromNum(<double>[
-      0,
-      0,
-      pageFormat.width,
-      pageFormat.height,
+      origin.x,
+      origin.y,
+      origin.x + pageFormat.width,
+      origin.y + pageFormat.height,
     ]);
+
+    // An inherited /CropBox was written in the source page's coordinates and is
+    // not rewritten here, so it could name a region outside the box above.
+    if (origin != PdfPoint.zero) {
+      params.values.remove('/CropBox');
+    }
 
     for (final content in contents) {
       if (!_contentGraphics[content]!.altered) {
@@ -129,14 +178,21 @@ class PdfPage extends PdfObject<PdfDict> with PdfGraphicStream {
 
     if (params.containsKey('/Contents')) {
       final prevContent = params['/Contents']!;
-      if (prevContent is PdfArray) {
-        contentList.values.insertAll(
-          0,
-          prevContent.values.whereType<PdfIndirect>(),
-        );
-      } else if (prevContent is PdfIndirect) {
-        contentList.values.insert(0, prevContent);
-      }
+      final previous = <PdfIndirect>[
+        if (prevContent is PdfArray)
+          ...prevContent.values.whereType<PdfIndirect>()
+        else if (prevContent is PdfIndirect)
+          prevContent,
+      ];
+
+      // uniq() runs below and these two are distinct objects, so the brackets
+      // survive it while a repeated imported reference still collapses.
+      contentList.values.insertAll(0, <PdfIndirect>[
+        if (_importedOpen != null && previous.isNotEmpty) _importedOpen!.ref(),
+        ...previous,
+        if (_importedClose != null && previous.isNotEmpty)
+          _importedClose!.ref(),
+      ]);
     }
 
     contentList.uniq();
@@ -147,18 +203,24 @@ class PdfPage extends PdfObject<PdfDict> with PdfGraphicStream {
       params['/Contents'] = contentList;
     }
 
-    // The /Annots object
+    // The /Annots object, built the way /Contents is above: appending to the
+    // array already in params re-added every annotation on each prepare(), so
+    // writing one document twice listed them twice.
     if (annotations.isNotEmpty) {
-      if (params.containsKey('/Annots')) {
-        final annotationList = params['/Annots'];
-        if (annotationList is PdfArray) {
-          annotationList.values.addAll(
-            PdfArray.fromObjects(annotations).values,
-          );
-        }
-      } else {
-        params['/Annots'] = PdfArray.fromObjects(annotations);
+      final annotationList = PdfArray.fromObjects(annotations);
+
+      final previous = params['/Annots'];
+      if (previous is PdfArray) {
+        annotationList.values.insertAll(
+          0,
+          previous.values.whereType<PdfIndirect>(),
+        );
+      } else if (previous is PdfIndirect) {
+        annotationList.values.insert(0, previous);
       }
+
+      annotationList.uniq();
+      params['/Annots'] = annotationList;
     }
   }
 }

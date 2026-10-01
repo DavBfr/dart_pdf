@@ -61,6 +61,16 @@ class PdfStream {
 
   int get offset => _offset;
 
+  /// Forget everything written so far.
+  ///
+  /// prepare() runs on every write, and several implementations append to their
+  /// buffer rather than rebuilding it - so writing one document twice embedded
+  /// the font program twice, with a stale /Length1, and gave /ToUnicode two
+  /// begincmap programs.
+  void reset() {
+    _offset = 0;
+  }
+
   Uint8List output() => _stream.sublist(0, _offset);
 
   void putString(String? s) {
