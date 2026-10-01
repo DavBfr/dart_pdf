@@ -184,7 +184,8 @@ class PieDataSet extends Dataset {
   PdfPoint? _legendPivot;
   PdfPoint? _legendStart;
 
-  bool get _isFullCircle => angleEnd - angleStart >= pi * 2;
+  // Summing the angles can fall a few ulps short of 2 * pi; allow 1e-12 rad.
+  bool get _isFullCircle => angleEnd - angleStart >= pi * 2 - 1e-12;
 
   @override
   void layout(
