@@ -187,19 +187,74 @@ class SvgParser {
   }
 
   /// Convert style to attributes
+  static final _declaration = RegExp(r'^\s*([\w-]+)\s*:\s*(.*)$', dotAll: true);
+
+  /// Split a style attribute on the semicolons that separate declarations.
+  ///
+  /// Not the ones inside a quoted string or a function: a legal
+  /// `font-family:'A;B'` or `background:url(data:image/png;base64,AAAA)` used to
+  /// be cut in two, and the halves then had no colon between them.
+  static List<String> _splitDeclarations(String style) {
+    final parts = <String>[];
+    final buffer = StringBuffer();
+    var depth = 0;
+    String? quote;
+
+    for (final rune in style.runes) {
+      final char = String.fromCharCode(rune);
+
+      if (quote != null) {
+        if (char == quote) {
+          quote = null;
+        }
+      } else if (char == '"' || char == "'") {
+        quote = char;
+      } else if (char == '(') {
+        depth++;
+      } else if (char == ')') {
+        depth = depth > 0 ? depth - 1 : 0;
+      } else if (char == ';' && depth == 0) {
+        parts.add(buffer.toString());
+        buffer.clear();
+        continue;
+      }
+
+      buffer.write(char);
+    }
+
+    parts.add(buffer.toString());
+    return parts;
+  }
+
+  /// Copy an element's `style` declarations onto it as attributes.
+  ///
+  /// Idempotent, side-effect-only, and total: it used to call `.first` on the
+  /// matches of a declaration, which throws 'Bad state: No element' out of
+  /// Document.save() for anything without a colon in it - a valueless or
+  /// vendor-prefixed declaration, or the half of a value that a naive split on
+  /// ';' had cut off.
   static void convertStyle(XmlElement element) {
     final style = element.getAttribute('style')?.trim();
-    if (style != null && style.isNotEmpty) {
-      for (final style in style.split(';')) {
-        if (style.trim().isEmpty) {
-          continue;
-        }
-        final kv = RegExp(r'([\w-]+)\s*:\s*(.*)').allMatches(style).first;
-        final key = kv.group(1)!;
-        final value = kv.group(2)!;
+    if (style == null || style.isEmpty) {
+      return;
+    }
 
-        element.setAttribute(key, value);
+    for (final declaration in _splitDeclarations(style)) {
+      if (declaration.trim().isEmpty) {
+        continue;
       }
+
+      final kv = _declaration.firstMatch(declaration);
+      if (kv == null) {
+        continue; // A malformed declaration costs itself, not its neighbours.
+      }
+
+      final key = kv.group(1)!;
+      if (key == 'style') {
+        continue; // Never rewrite the attribute being read.
+      }
+
+      element.setAttribute(key, kv.group(2)!.trim());
     }
   }
 }

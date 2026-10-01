@@ -20,6 +20,7 @@ import '../widgets/svg.dart';
 import 'brush.dart';
 import 'color.dart';
 import 'group.dart';
+import 'operation.dart';
 import 'parser.dart';
 
 class SvgPainter {
@@ -68,6 +69,12 @@ class SvgPainter {
         : SvgBrush.defaultContext.copyWith(
             fill: SvgColor(color: parser.colorFilter),
           );
+
+    // The root never goes through SvgOperation.fromXml, so its own display and
+    // visibility were never tested at all.
+    if (SvgOperation.isHidden(parser.root)) {
+      return;
+    }
 
     SvgGroup.fromXml(parser.root, this, brush).paint(_canvas!);
   }

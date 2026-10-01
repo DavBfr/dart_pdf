@@ -24,6 +24,7 @@ import 'group.dart';
 import 'image.dart';
 import 'nested_svg.dart';
 import 'painter.dart';
+import 'parser.dart';
 import 'path.dart';
 import 'symbol.dart';
 import 'text.dart';
@@ -45,11 +46,7 @@ abstract class SvgOperation {
     SvgBrush brush, {
     Set<String> expanding = const <String>{},
   }) {
-    if (element.getAttribute('visibility') == 'hidden') {
-      return null;
-    }
-
-    if (element.getAttribute('display') == 'none') {
+    if (isHidden(element)) {
       return null;
     }
 
@@ -92,6 +89,20 @@ abstract class SvgOperation {
     }
 
     return null;
+  }
+
+  /// Whether [element] asks not to be rendered.
+  ///
+  /// The `style` attribute is flattened onto the element first, because that is
+  /// the form every drawing tool exports a hidden layer in -
+  /// `<g style="display:none">` - and these two tests read raw XML attributes.
+  /// convertStyle ran only later, from SvgBrush.fromXml, so the style form never
+  /// worked and hidden layers were painted over the visible artwork.
+  static bool isHidden(XmlElement element) {
+    SvgParser.convertStyle(element);
+
+    return element.getAttribute('display')?.trim() == 'none' ||
+        element.getAttribute('visibility')?.trim() == 'hidden';
   }
 
   final SvgBrush brush;
