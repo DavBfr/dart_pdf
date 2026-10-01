@@ -212,12 +212,15 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
     }
 
     /// send pdf to raster data result to flutter
-    public func onPageRasterized(printJob: PrintJob, imageData: Data, width: Int, height: Int) {
+    public func onPageRasterized(printJob: PrintJob, imageData: Data, width: Int, height: Int, isPng: Bool) {
         let data: NSDictionary = [
             "image": FlutterStandardTypedData(bytes: imageData),
             "width": width,
             "height": height,
             "job": printJob.index,
+            // Tells the Dart side whether `image` is already PNG-encoded bytes
+            // (no decode/re-encode needed) or a raw ARGB buffer (legacy path).
+            "isPng": isPng,
         ]
         DispatchQueue.main.async {
             self.channel.invokeMethod("onPageRasterized", arguments: data)
