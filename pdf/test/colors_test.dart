@@ -805,6 +805,42 @@ void main() {
     });
   });
 
+  test('isLight and isDark are each other\'s opposite', () {
+    // The luminance test is Flutter's estimateBrightnessForColor, whose true
+    // branch means light, and it was returned from isDark - so white reported
+    // dark and black reported light, and user code following the doc comments
+    // drew white on white.
+    expect(PdfColors.white.isLight, isTrue);
+    expect(PdfColors.white.isDark, isFalse);
+    expect(PdfColors.black.isDark, isTrue);
+    expect(PdfColors.black.isLight, isFalse);
+
+    for (final color in PdfColors.primaries) {
+      expect(color.isDark, !color.isLight, reason: '$color');
+    }
+  });
+
+  test('the light threshold has not moved', () {
+    // The crossover is a relative luminance of about 0.3373, not 0.5: grey500 is
+    // light and teal is dark. Pinned so it cannot drift silently.
+    expect(PdfColors.grey500.isLight, isTrue);
+    expect(PdfColors.teal.isDark, isTrue);
+
+    var lastDark = 0.0;
+    var firstLight = 1.0;
+    for (var i = 0; i <= 100; i++) {
+      final grey = PdfColor(i / 100, i / 100, i / 100);
+      if (grey.isLight) {
+        firstLight = grey.luminance < firstLight ? grey.luminance : firstLight;
+      } else {
+        lastDark = grey.luminance > lastDark ? grey.luminance : lastDark;
+      }
+    }
+
+    expect(lastDark, lessThan(0.3373));
+    expect(firstLight, greaterThan(0.3373 - 0.02));
+  });
+
   tearDownAll(() async {
     final file = File('colors.pdf');
     await file.writeAsBytes(await pdf.save());

@@ -215,14 +215,19 @@ class PdfColor {
   }
 
   /// Determines whether the given [PdfColor] is light.
-  bool get isLight => !isDark;
-
-  /// Determines whether the given [PdfColor] is dark.
-  bool get isDark {
+  ///
+  /// The test itself is Flutter's estimateBrightnessForColor, whose true branch
+  /// means light - and it used to be returned from [isDark], so white reported
+  /// dark and black reported light. The crossover is at a relative luminance of
+  /// about 0.3373.
+  bool get isLight {
     final relativeLuminance = luminance;
     const kThreshold = 0.15;
     return (relativeLuminance + 0.05) * (relativeLuminance + 0.05) > kThreshold;
   }
+
+  /// Determines whether the given [PdfColor] is dark.
+  bool get isDark => !isLight;
 
   /// Get the luminance
   double get luminance {

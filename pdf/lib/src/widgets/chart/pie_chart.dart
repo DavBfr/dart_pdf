@@ -258,8 +258,11 @@ class PieDataSet extends Dataset {
             text: TextSpan(
               children: [TextSpan(text: legend!, style: legendStyle)],
               style: TextStyle(
+                // isDark, not isLight: the two getters were each other's
+                // opposite, and this read the one that was wrong. Flipping both
+                // together keeps the output it has always produced.
                 color: lp == PieLegendPosition.inside
-                    ? color!.isLight
+                    ? color!.isDark
                           ? PdfColors.white
                           : PdfColors.black
                     : null,
