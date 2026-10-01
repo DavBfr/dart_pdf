@@ -81,7 +81,8 @@ class Page {
 
   EdgeInsetsGeometry? get margin => pageTheme.margin;
 
-  EdgeInsets? get resolvedMargin => margin?.resolve(pageTheme.textDirection);
+  EdgeInsets? get resolvedMargin =>
+      margin?.resolve(pageTheme.textDirection ?? TextDirection.ltr);
 
   @protected
   void debugPaint(Context context) {

@@ -61,13 +61,18 @@ class PageTheme {
 
   EdgeInsetsGeometry? get margin {
     if (_margin != null) {
-      final resolvedMargin = _margin.resolve(textDirection);
       if (mustRotate) {
+        // Rotating needs physical edges, so a directional margin is resolved
+        // here - and only here. Resolving it before the test threw on any theme
+        // with a directional margin and no textDirection of its own, because
+        // EdgeInsetsDirectional.resolve asserts on a null direction. ltr is the
+        // fallback Directionality.of uses.
+        final resolved = _margin.resolve(textDirection ?? TextDirection.ltr);
         return EdgeInsets.fromLTRB(
-          resolvedMargin.bottom,
-          resolvedMargin.left,
-          resolvedMargin.top,
-          resolvedMargin.right,
+          resolved.bottom,
+          resolved.left,
+          resolved.top,
+          resolved.right,
         );
       } else {
         return _margin;
@@ -97,7 +102,7 @@ class PageTheme {
     BuildCallback? buildForeground,
     ThemeData? theme,
     PageOrientation? orientation,
-    EdgeInsets? margin,
+    EdgeInsetsGeometry? margin,
     bool? clip,
     TextDirection? textDirection,
   }) => PageTheme(
@@ -106,7 +111,11 @@ class PageTheme {
     buildForeground: buildForeground ?? this.buildForeground,
     theme: theme ?? this.theme,
     orientation: orientation ?? this.orientation,
-    margin: margin ?? this.margin,
+    // The raw field, not the margin getter: the getter is where rotation and
+    // falling back to the page format's own margins happen, so feeding it back
+    // in rotated the edges one more quarter turn on every call and froze an
+    // implicit margin into an explicit one.
+    margin: margin ?? _margin,
     clip: clip ?? this.clip,
     textDirection: textDirection ?? this.textDirection,
   );
