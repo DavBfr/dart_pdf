@@ -269,7 +269,10 @@ void main() {
         build: (Context context) => Directionality(
           textDirection: TextDirection.rtl,
           child: TableHelper.fromTextArray(
-            headers: <dynamic>['ثلاثة', 'اثنان', 'واحد'],
+            // In logical order - one, two, three. It used to read three, two, one,
+            // because the columns were laid out left to right whatever the
+            // direction and the caller had to reverse them by hand.
+            headers: <dynamic>['واحد', 'اثنان', 'ثلاثة'],
             cellAlignment: Alignment.centerRight,
             data: <List<dynamic>>[
               <dynamic>['الكلب', 'قط', 'ذئب'],
@@ -738,6 +741,179 @@ void main() {
         RegExp(r'\[\(a\)\]TJ').allMatches(String.fromCharCodes(bytes)),
         hasLength(pages),
       );
+    });
+  });
+
+  group('a Table under rtl', () {
+    /// Lay a three-column table out on a 300pt page and return it with the raw
+    /// PDF. The widths are fixed so the cell edges are known exactly.
+    Future<List<Object>> build({
+      TextDirection page = TextDirection.ltr,
+      TextDirection? table,
+      TableCellVerticalAlignment alignment = TableCellVerticalAlignment.top,
+      int rows = 2,
+    }) async {
+      late Table built;
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(300, 200, marginAll: 0),
+          textDirection: page,
+          build: (Context context) => built = Table(
+            textDirection: table,
+            border: TableBorder.all(),
+            defaultVerticalAlignment: alignment,
+            columnWidths: const <int, TableColumnWidth>{
+              0: FixedColumnWidth(60),
+              1: FixedColumnWidth(90),
+              2: FixedColumnWidth(150),
+            },
+            children: <TableRow>[
+              for (var r = 0; r < rows; r++)
+                TableRow(
+                  children: <Widget>[Text('a$r'), Text('b$r'), Text('c$r')],
+                ),
+            ],
+          ),
+        ),
+      );
+      final pdf = String.fromCharCodes(await document.save());
+      return <Object>[built, pdf];
+    }
+
+    const widths = <double>[60, 90, 150];
+
+    test('runs its columns right to left', () async {
+      // Table.layout accumulated cell origins from x = 0 in source order and
+      // never asked for the direction, so an Arabic report read backwards while
+      // Row, Wrap, Stack and GridView all mirrored.
+      final table = (await build(page: TextDirection.rtl)).first as Table;
+
+      expect(table.box!.width, 300);
+      for (final row in table.children) {
+        expect(row.children.first.box!.left, 300 - widths.first);
+        expect(row.children.map((Widget c) => c.box!.left), <double>[
+          240,
+          150,
+          0,
+        ]);
+      }
+    });
+
+    test('runs them left to right under ltr', () async {
+      final table = (await build()).first as Table;
+
+      for (final row in table.children) {
+        expect(row.children.map((Widget c) => c.box!.left), <double>[
+          0,
+          60,
+          150,
+        ]);
+      }
+    });
+
+    test('puts its border rules on the mirrored cell edges', () async {
+      // paintTable walks cumulative widths from box.left, so under rtl it needs
+      // them in the order the columns ended up in.
+      final result = await build(page: TextDirection.rtl);
+      final pdf = result.last as String;
+
+      // Every vertical segment: same x twice, different y.
+      final rules = <double>{};
+      for (final m in RegExp(
+        r'([-\d.]+) ([-\d.]+) m ([-\d.]+) ([-\d.]+) l',
+      ).allMatches(pdf)) {
+        final x1 = double.parse(m.group(1)!);
+        final x2 = double.parse(m.group(3)!);
+        if (x1 == x2) {
+          rules.add(x1);
+        }
+      }
+
+      // sum(w[n..last]) for n = 1 and n = 2, from the right edge.
+      expect(rules, containsAll(<double>[widths[1] + widths[2], widths[2]]));
+    });
+
+    test('mirrors full-height rows the same way', () async {
+      for (final alignment in TableCellVerticalAlignment.values) {
+        final table =
+            (await build(page: TextDirection.rtl, alignment: alignment)).first
+                as Table;
+
+        for (final row in table.children) {
+          expect(row.children.map((Widget c) => c.box!.left), <double>[
+            240,
+            150,
+            0,
+          ], reason: '$alignment');
+        }
+      }
+    });
+
+    test('keeps a table that asks for ltr left to right', () async {
+      // The opt-out for a caller who already reversed their own rows, or for a
+      // matrix of numbers that should not mirror.
+      final table =
+          (await build(page: TextDirection.rtl, table: TextDirection.ltr)).first
+              as Table;
+
+      for (final row in table.children) {
+        expect(row.children.map((Widget c) => c.box!.left), <double>[
+          0,
+          60,
+          150,
+        ]);
+      }
+
+      // columnWidths[0] still sizes the first child.
+      expect(table.children.first.children.first.box!.width, 60);
+    });
+
+    test('mirrors a table that asks for rtl on an ltr page', () async {
+      final table = (await build(table: TextDirection.rtl)).first as Table;
+
+      expect(
+        table.children.first.children.map((Widget c) => c.box!.left),
+        <double>[240, 150, 0],
+      );
+    });
+
+    test('mirrors on every page of a MultiPage', () async {
+      late Table table;
+      final document = Document(compress: false);
+      document.addPage(
+        MultiPage(
+          pageFormat: const PdfPageFormat(300, 120, marginAll: 0),
+          textDirection: TextDirection.rtl,
+          build: (Context context) => <Widget>[
+            table = Table(
+              border: TableBorder.all(),
+              columnWidths: const <int, TableColumnWidth>{
+                0: FixedColumnWidth(60),
+                1: FixedColumnWidth(90),
+                2: FixedColumnWidth(150),
+              },
+              children: <TableRow>[
+                for (var r = 0; r < 20; r++)
+                  TableRow(
+                    children: <Widget>[Text('a$r'), Text('b$r'), Text('c$r')],
+                  ),
+              ],
+            ),
+          ],
+        ),
+      );
+      await document.save();
+
+      expect(document.document.pdfPageList.pages.length, greaterThan(1));
+      // The last page's rows were laid out last, so this reads that page.
+      for (final row in table.children) {
+        expect(row.children.map((Widget c) => c.box!.left), <double>[
+          240,
+          150,
+          0,
+        ]);
+      }
     });
   });
 

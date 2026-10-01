@@ -281,6 +281,7 @@ class Table extends Widget with SpanningWidget {
     this.columnWidths,
     this.defaultColumnWidth = const IntrinsicColumnWidth(),
     this.tableWidth = TableWidth.max,
+    this.textDirection,
   }) : super();
 
   @Deprecated('Use TableHelper.fromTextArray() instead.')
@@ -367,6 +368,17 @@ class Table extends Widget with SpanningWidget {
 
   final TableWidth tableWidth;
 
+  /// The order the columns are laid out in.
+  ///
+  /// Defaults to the [Directionality] of the enclosing context, so a table on an
+  /// rtl page reads right to left. Pass [TextDirection.ltr] to keep a table
+  /// left-to-right inside an rtl subtree - for a matrix of numbers, say, or for a
+  /// caller that already reversed its own rows.
+  final TextDirection? textDirection;
+
+  /// The direction the last layout resolved to, which paint has to agree with.
+  TextDirection _layoutDirection = TextDirection.ltr;
+
   final List<double> _widths = <double>[];
   final List<double> _heights = <double>[];
 
@@ -406,7 +418,8 @@ class Table extends Widget with SpanningWidget {
     _heights.clear();
 
     final theme = Theme.of(context);
-    final direction = Directionality.of(context);
+    final direction = textDirection ?? Directionality.of(context);
+    _layoutDirection = direction;
     final cached = _cachedWidths;
     var index = 0;
 
@@ -534,6 +547,13 @@ class Table extends Widget with SpanningWidget {
 
     final totalWidth = _widths.fold(0.0, (sum, element) => sum + element);
 
+    // _widths stays in logical order, so columnWidths[i] still addresses the i-th
+    // child; only where each cell is put changes. Every other widget in the
+    // package mirrors on an rtl page, and this one laid its columns out from
+    // x = 0 in source order whatever the direction, so an Arabic report read
+    // backwards.
+    final rtl = direction == TextDirection.rtl;
+
     // Compute final widths
     var totalHeight = 0.0;
     index = 0;
@@ -551,7 +571,7 @@ class Table extends Widget with SpanningWidget {
         child.layout(context, childConstraints);
         assert(child.box != null);
         child.box = PdfRect(
-          x,
+          rtl ? totalWidth - x - _widths[n] : x,
           totalHeight,
           child.box!.width,
           child.box!.height,
@@ -575,7 +595,7 @@ class Table extends Widget with SpanningWidget {
           child.layout(context, childConstraints);
           assert(child.box != null);
           child.box = PdfRect(
-            x,
+            rtl ? totalWidth - x - _widths[n] : x,
             totalHeight,
             child.box!.width,
             child.box!.height,
@@ -716,7 +736,16 @@ class Table extends Widget with SpanningWidget {
     context.canvas.restoreContext();
 
     if (border != null) {
-      border!.paintTable(context, box!, _widths, _heights);
+      // The rules are drawn at cumulative widths from box.left, so under rtl they
+      // need the widths in the order the columns are actually in.
+      border!.paintTable(
+        context,
+        box!,
+        _layoutDirection == TextDirection.rtl
+            ? _widths.reversed.toList()
+            : _widths,
+        _heights,
+      );
     }
   }
 

@@ -1028,6 +1028,75 @@ void main() {
     }
   }
 
+  for (final direction in TextDirection.values) {
+    final label = direction == TextDirection.rtl ? 'RTL' : 'LTR';
+
+    test('Should render Table columns $label', () {
+      pdf.addPage(
+        Page(
+          textDirection: direction,
+          pageFormat: const PdfPageFormat(150, 150),
+          build: (Context context) => TestAnnotation(
+            anno: '$label Table columns',
+            child: Table(
+              border: TableBorder.all(),
+              children: <TableRow>[
+                for (var r = 0; r < 3; r++)
+                  TableRow(
+                    children: <Widget>[
+                      for (var c = 0; c < 3; c++)
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          color: <PdfColor>[
+                            PdfColors.blue100,
+                            PdfColors.red100,
+                            PdfColors.yellow100,
+                          ][c],
+                          child: Text('${r}x$c'),
+                        ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  test('Should render a Table that opts out of mirroring', () {
+    pdf.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(150, 150),
+        build: (Context context) => TestAnnotation(
+          anno: 'RTL page, Table textDirection: ltr',
+          child: Table(
+            textDirection: TextDirection.ltr,
+            border: TableBorder.all(),
+            children: <TableRow>[
+              for (var r = 0; r < 3; r++)
+                TableRow(
+                  children: <Widget>[
+                    for (var c = 0; c < 3; c++)
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        color: <PdfColor>[
+                          PdfColors.blue100,
+                          PdfColors.red100,
+                          PdfColors.yellow100,
+                        ][c],
+                        child: Text('${r}x$c'),
+                      ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  });
+
   test('RTL Stack, should directional child to right44', () {
     pdf.addPage(
       Page(
