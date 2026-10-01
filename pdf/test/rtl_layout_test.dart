@@ -981,6 +981,53 @@ void main() {
     );
   });
 
+  // crossAxisCount 3 with no padding and no spacing was the one configuration the
+  // old rtl expression placed correctly. These are the ones it did not.
+  for (final count in <int>[2, 4]) {
+    for (final padded in <bool>[false, true]) {
+      for (final direction in TextDirection.values) {
+        final label = direction == TextDirection.rtl ? 'RTL' : 'LTR';
+        final what =
+            '$label GridView $count columns${padded ? ', padded' : ''}';
+
+        test(
+          'Should render Grid $count columns $label${padded ? ' padded' : ''}',
+          () {
+            pdf.addPage(
+              Page(
+                textDirection: direction,
+                pageFormat: const PdfPageFormat(150, 150),
+                build: (Context context) => TestAnnotation(
+                  anno: what,
+                  child: GridView(
+                    crossAxisCount: count,
+                    childAspectRatio: 1,
+                    direction: Axis.vertical,
+                    crossAxisSpacing: padded ? 4 : 0,
+                    mainAxisSpacing: padded ? 4 : 0,
+                    padding: padded
+                        ? const EdgeInsetsDirectional.only(start: 16, end: 4)
+                        : EdgeInsets.zero,
+                    children: <Widget>[
+                      for (var i = 0; i < count * 2 + 1; i++)
+                        Container(
+                          color: <PdfColor>[
+                            PdfColors.blue,
+                            PdfColors.red,
+                            PdfColors.yellow,
+                          ][i % 3],
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      }
+    }
+  }
+
   test('RTL Stack, should directional child to right44', () {
     pdf.addPage(
       Page(

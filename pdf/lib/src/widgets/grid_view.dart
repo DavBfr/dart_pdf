@@ -207,12 +207,18 @@ class GridView extends MultiChildWidget with SpanningWidget {
 
       switch (direction) {
         case Axis.vertical:
+          // Place the child as an ltr grid would, then mirror that about the
+          // padded band it sits in. Writing the rtl position directly - as this
+          // did - means writing a second expression that has to agree with the
+          // first for every cell count, spacing and padding, and it did not.
+          final ltrCross =
+              (_context.childCrossAxis! - child.box!.width) / 2.0 + crossAxis;
+
           child.box = PdfRect.fromPoints(
             PdfPoint(
               isRtl
-                  ? (_context.childCrossAxis! + child.box!.width - crossAxis)
-                  : (_context.childCrossAxis! - child.box!.width) / 2.0 +
-                        crossAxis,
+                  ? 2 * startX + totalCross - ltrCross - child.box!.width
+                  : ltrCross,
               totalMain +
                   resolvedPadding.bottom -
                   (_context.childMainAxis! - child.box!.height) / 2.0 -
@@ -224,12 +230,14 @@ class GridView extends MultiChildWidget with SpanningWidget {
 
           break;
         case Axis.horizontal:
+          final ltrMain =
+              (_context.childMainAxis! - child.box!.width) / 2.0 + mainAxis;
+
           child.box = PdfRect.fromPoints(
             PdfPoint(
               isRtl
-                  ? totalMain - (child.box!.width + mainAxis)
-                  : (_context.childMainAxis! - child.box!.width) / 2.0 +
-                        mainAxis,
+                  ? 2 * startX + totalMain - ltrMain - child.box!.width
+                  : ltrMain,
               totalCross +
                   resolvedPadding.bottom -
                   (_context.childCrossAxis! - child.box!.height) / 2.0 -
