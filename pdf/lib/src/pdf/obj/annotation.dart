@@ -495,9 +495,13 @@ class PdfAnnotPolygon extends PdfAnnotBase {
     this.interiorColor,
     String? subject,
     String? author,
-    bool closed = true,
+    this.closed = true,
   }) : super(
-         subtype: closed ? '/PolyLine' : '/Polygon',
+         // ISO 32000-1 12.5.6.9: a closed polygon is /Polygon and an open run of
+         // segments is /PolyLine. These two names were the wrong way round, so
+         // both widgets emitted /PolyLine - a polygon was drawn open, missing its
+         // last edge, and never filled, which made interiorColor inert.
+         subtype: closed ? '/Polygon' : '/PolyLine',
          rect: rect,
          border: border,
          flags: flags,
@@ -513,19 +517,22 @@ class PdfAnnotPolygon extends PdfAnnotBase {
 
   final PdfColor? interiorColor;
 
+  /// Whether the last point joins back to the first.
+  final bool closed;
+
   @override
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
 
-    // Flip the points on the Y axis.
-    final flippedPoints = points
-        .map((e) => PdfPoint(e.x, rect.height - e.y))
-        .toList();
-
+    // [points] are in default user space, as /Vertices has to be. This used to
+    // flip them against rect.height - on points the widget layer had already put
+    // in page space - which sent every vertex to about -pageY, below the
+    // MediaBox, where the annotation is dead even though the page still paints.
     final vertices = <num>[];
-    for (var i = 0; i < flippedPoints.length; i++) {
-      vertices.add(flippedPoints[i].x);
-      vertices.add(flippedPoints[i].y);
+    for (final point in points) {
+      vertices
+        ..add(point.x)
+        ..add(point.y);
     }
 
     params['/Vertices'] = PdfArray.fromNum(vertices);
@@ -569,21 +576,20 @@ class PdfAnnotInk extends PdfAnnotBase {
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
 
-    final vertices = List<List<num>>.filled(points.length, <num>[]);
-    for (var listIndex = 0; listIndex < points.length; listIndex++) {
-      // Flip the points on the Y axis.
-      final flippedPoints = points[listIndex]
-          .map((e) => PdfPoint(e.x, rect.height - e.y))
-          .toList();
-      for (var i = 0; i < flippedPoints.length; i++) {
-        vertices[listIndex].add(flippedPoints[i].x);
-        vertices[listIndex].add(flippedPoints[i].y);
-      }
-    }
-
-    params['/InkList'] = PdfArray(
-      vertices.map((v) => PdfArray.fromNum(v)).toList(),
-    );
+    // One array per stroke. List.filled puts the *same* growable list in every
+    // slot, so every stroke was appended to one shared list and /InkList came out
+    // as N references to all the points at once: a captured signature was drawn
+    // N times with spurious lines joining the strokes. With a single stroke it
+    // was invisible.
+    //
+    // The points are in default user space, as /InkList has to be; they used to
+    // be flipped here as well, see /Vertices above.
+    params['/InkList'] = PdfArray(<PdfDataType>[
+      for (final stroke in points)
+        PdfArray.fromNum(<num>[
+          for (final point in stroke) ...<num>[point.x, point.y],
+        ]),
+    ]);
   }
 }
 

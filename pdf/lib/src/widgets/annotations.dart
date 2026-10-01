@@ -237,6 +237,7 @@ class AnnotationPolygon extends AnnotationBuilder {
     this.subject,
     this.content,
     this.replaces,
+    this.closed = true,
   });
 
   final List<PdfPoint> points;
@@ -257,21 +258,27 @@ class AnnotationPolygon extends AnnotationBuilder {
 
   final PdfIndirect? replaces;
 
+  /// Whether the last point joins back to the first: `/Polygon` rather than
+  /// `/PolyLine`.
+  final bool closed;
+
   @override
   PdfAnnot build(Context context, PdfRect? box) {
+    // The sibling Polygon widget paints each point at (x, box.height - y), so
+    // the annotation has to name the same places. This conversion was missing,
+    // and the object layer flipped a second time instead - against its own rect,
+    // on points already in page space - so the vertices landed at about -pageY,
+    // outside the MediaBox, and the /Rect did not cover the shape either.
+    final height = box?.height ?? 0;
     final globalPoints = points
-        .map((e) => context.localToGlobalPoint(e))
+        .map((e) => context.localToGlobalPoint(PdfPoint(e.x, height - e.y)))
         .toList();
 
-    final rect = context.localToGlobal(
-      PdfRect(
-        points.map((point) => point.x).reduce(min),
-        points.map((point) => point.y).reduce(min),
-        points.map((point) => point.x).reduce(max) -
-            points.map((point) => point.x).reduce(min),
-        points.map((point) => point.y).reduce(max) -
-            points.map((point) => point.y).reduce(min),
-      ),
+    final rect = PdfRect.fromLBRT(
+      globalPoints.map((point) => point.x).reduce(min),
+      globalPoints.map((point) => point.y).reduce(min),
+      globalPoints.map((point) => point.x).reduce(max),
+      globalPoints.map((point) => point.y).reduce(max),
     );
 
     final pdfAnnotPolygon = PdfAnnotPolygon(
@@ -284,6 +291,7 @@ class AnnotationPolygon extends AnnotationBuilder {
       date: date,
       author: author,
       subject: subject,
+      closed: closed,
     );
 
     return PdfAnnot(
@@ -325,24 +333,28 @@ class AnnotationInk extends AnnotationBuilder {
 
   @override
   PdfAnnot build(Context context, PdfRect? box) {
+    // The sibling InkList widget paints at (x, box.height - y); see
+    // [AnnotationPolygon.build].
+    final height = box?.height ?? 0;
     final globalPoints = points
         .map(
           (pList) => pList
-              .map((e) => context.localToGlobalPoint(e))
+              .map(
+                (e) => context.localToGlobalPoint(PdfPoint(e.x, height - e.y)),
+              )
               .toList(growable: false),
         )
         .toList(growable: false);
 
-    final allPoints = points
+    final allPoints = globalPoints
         .expand((pointList) => pointList)
         .toList(growable: false);
 
-    final minX = allPoints.map((point) => point.x).reduce(min);
-    final minY = allPoints.map((point) => point.y).reduce(min);
-    final maxX = allPoints.map((point) => point.x).reduce(max);
-    final maxY = allPoints.map((point) => point.y).reduce(max);
-    final rect = context.localToGlobal(
-      PdfRect(minX, minY, maxX - minX, maxY - minY),
+    final rect = PdfRect.fromLBRT(
+      allPoints.map((point) => point.x).reduce(min),
+      allPoints.map((point) => point.y).reduce(min),
+      allPoints.map((point) => point.x).reduce(max),
+      allPoints.map((point) => point.y).reduce(max),
     );
 
     final pdfAnnotInk = PdfAnnotInk(
@@ -602,6 +614,7 @@ class PolyLineAnnotation extends Annotation {
            date: date,
            content: content,
            subject: subject,
+           closed: false,
          ),
        );
 }
