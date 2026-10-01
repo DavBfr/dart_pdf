@@ -188,6 +188,130 @@ void main() {
     });
   });
 
+  group('PageTheme.clip', () {
+    // Document.debug paints a page-wide background before anything else, which
+    // is a debug aid and not page content - it would sit outside the clip and
+    // say nothing about this.
+    setUp(() => Document.debug = false);
+    tearDown(() => Document.debug = true);
+
+    /// Every page's content stream.
+    List<String> contents(String pdf) => <String>[
+      for (final m in RegExp(
+        r'stream(.*?)endstream',
+        dotAll: true,
+      ).allMatches(pdf))
+        if (m.group(1)!.contains('0 Tr')) m.group(1)!.trim(),
+    ];
+
+    /// The clip rectangle a stream opens with, if any.
+    String? clipOf(String content) => RegExp(
+      r'([-\d.]+ [-\d.]+ [-\d.]+ [-\d.]+) re W n',
+    ).firstMatch(content)?.group(1);
+
+    Future<String> page(PageTheme theme) async {
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageTheme: theme,
+          build: (Context context) => Container(color: PdfColors.blue),
+        ),
+      );
+      return String.fromCharCodes(await document.save());
+    }
+
+    Future<String> multiPage(PageTheme theme) async {
+      final document = Document(compress: false);
+      document.addPage(
+        MultiPage(
+          pageTheme: theme,
+          header: (Context context) => Text('header'),
+          footer: (Context context) => Text('footer'),
+          build: (Context context) => <Widget>[
+            for (var i = 0; i < 40; i++)
+              Container(height: 30, color: PdfColors.blue, child: Text('$i')),
+          ],
+        ),
+      );
+      return String.fromCharCodes(await document.save());
+    }
+
+    final a4 = PageTheme(
+      pageFormat: PdfPageFormat.a4,
+      margin: const EdgeInsets.all(50),
+      clip: true,
+    );
+
+    test('applies to a MultiPage, on every page', () async {
+      // MultiPage overrides postProcess wholesale and never calls Page.paint, so
+      // the flag was dropped for every page it wrote: over-wide content bled past
+      // the margins and over the header and footer, and printers cropped it.
+      final streams = contents(await multiPage(a4));
+
+      expect(streams.length, greaterThan(1));
+      for (final content in streams) {
+        expect(content, contains('50 50 495.27559 741.88976 re'));
+        expect(clipOf(content), '50 50 495.27559 741.88976');
+      }
+    });
+
+    test('clips to the same box a Page does', () async {
+      final landscape = PageTheme(
+        pageFormat: PdfPageFormat.a4,
+        orientation: PageOrientation.landscape,
+        margin: const EdgeInsets.fromLTRB(10, 20, 30, 40),
+        clip: true,
+      );
+
+      for (final theme in <PageTheme>[a4, landscape]) {
+        final single = clipOf(contents(await page(theme)).single);
+        expect(single, isNotNull);
+        for (final content in contents(await multiPage(theme))) {
+          expect(clipOf(content), single);
+        }
+      }
+
+      expect(
+        clipOf(contents(await page(landscape)).single),
+        '40 30 535.27559 801.88976',
+      );
+    });
+
+    test('wraps every layer and stays balanced', () async {
+      for (final content in contents(await multiPage(a4))) {
+        // The clip is the first thing the page does, so nothing - background,
+        // header, body, footer, foreground - is painted outside it.
+        const painting = <String>{'f', 'f*', 'S', 's', 'B', 'B*', 'W', 'W*'};
+        final first = content
+            .split(RegExp(r'\s+'))
+            .firstWhere(painting.contains, orElse: () => '(none)');
+        expect(first, 'W');
+
+        var depth = 0;
+        for (final token in content.split(RegExp(r'\s+'))) {
+          if (token == 'q') {
+            depth++;
+          } else if (token == 'Q') {
+            depth--;
+          }
+          expect(depth, greaterThanOrEqualTo(0));
+        }
+        expect(depth, 0, reason: 'the q/Q depth returns to zero');
+      }
+    });
+
+    test('is absent when the theme does not ask for it', () async {
+      final plain = PageTheme(
+        pageFormat: PdfPageFormat.a4,
+        margin: const EdgeInsets.all(50),
+      );
+
+      for (final content in contents(await multiPage(plain))) {
+        expect(clipOf(content), isNull);
+      }
+    });
+  });
+
   tearDownAll(() async {
     final file = File('widgets-clip.pdf');
     await file.writeAsBytes(await pdf.save());

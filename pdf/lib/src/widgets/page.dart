@@ -227,21 +227,51 @@ class Page {
     return PdfPoint(width, height);
   }
 
+  /// The area inside the page's margins, in physical page coordinates.
+  @protected
+  PdfRect get printableBox {
+    final margin = resolvedMargin!;
+    return PdfRect(
+      margin.left,
+      margin.bottom,
+      pageFormat.width - margin.horizontal,
+      pageFormat.height - margin.vertical,
+    );
+  }
+
+  /// Clip whatever is painted next to [printableBox], if the theme asks for it.
+  ///
+  /// Paired with [popPageClip]. Both are no-ops when `pageTheme.clip` is false.
+  /// MultiPage overrides postProcess wholesale and never calls [paint], so it
+  /// used to drop the flag for every page it wrote: content bled past the
+  /// margins and over the header and footer, with no error anywhere.
+  @protected
+  void pushPageClip(Context context) {
+    if (!pageTheme.clip) {
+      return;
+    }
+
+    final box = printableBox;
+    context.canvas
+      ..saveContext()
+      ..drawRect(box.left, box.bottom, box.width, box.height)
+      ..clipPath();
+  }
+
+  /// Close the clip [pushPageClip] opened.
+  @protected
+  void popPageClip(Context context) {
+    if (!pageTheme.clip) {
+      return;
+    }
+
+    context.canvas.restoreContext();
+  }
+
   @protected
   void paint(Widget child, Context context) {
-    final _margin = resolvedMargin!;
-    final box = PdfRect(
-      _margin.left,
-      _margin.bottom,
-      pageFormat.width - _margin.horizontal,
-      pageFormat.height - _margin.vertical,
-    );
-    if (pageTheme.clip) {
-      context.canvas
-        ..saveContext()
-        ..drawRect(box.left, box.bottom, box.width, box.height)
-        ..clipPath();
-    }
+    final box = printableBox;
+    pushPageClip(context);
 
     if (pageTheme.textDirection == TextDirection.rtl) {
       child.box = PdfRect(
@@ -276,8 +306,6 @@ class Page {
       child.paint(context);
     }
 
-    if (pageTheme.clip) {
-      context.canvas.restoreContext();
-    }
+    popPageClip(context);
   }
 }

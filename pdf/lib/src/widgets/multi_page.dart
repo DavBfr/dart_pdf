@@ -556,6 +556,10 @@ class MultiPage extends Page {
     final availableWidth = pageWidth - pageWidthMargin;
     final isRTL = pageTheme.textDirection == TextDirection.rtl;
     for (final page in _pages) {
+      // Every layer of this page - background, header, body, footer, foreground -
+      // goes inside the one clip, as Page.paint puts its single child inside it.
+      pushPageClip(page.context);
+
       var offsetStart =
           pageHeight -
           (_mustRotate ? pageHeightMargin - _margin.bottom : _margin.top);
@@ -778,6 +782,8 @@ class MultiPage extends Page {
           pageFormat.height,
         );
       }
+
+      popPageClip(page.context);
     }
   }
 }
