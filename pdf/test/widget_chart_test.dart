@@ -668,6 +668,155 @@ void main() {
     });
   });
 
+  group('a rotated axis', () {
+    const style = TextStyle(fontSize: 30);
+
+    /// Lay a chart out and hand back both axes and the measured size of the
+    /// labels that bound them.
+    Future<Map<String, Object>> build(double angle) async {
+      late FixedAxis<int> xAxis;
+      late FixedAxis<int> yAxis;
+      late PdfPoint firstY;
+      late PdfPoint lastY;
+      late PdfPoint lastX;
+
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          pageFormat: PdfPageFormat.a4,
+          build: (Context context) {
+            PdfPoint label(String text) => Widget.measure(
+              angle == 0
+                  ? Text(text, style: style)
+                  : Transform.rotateBox(
+                      angle: angle,
+                      child: Text(text, style: style),
+                    ),
+              context: context,
+            );
+
+            firstY = label('0');
+            lastY = label('1000');
+            lastX = label('3');
+
+            return Chart(
+              grid: CartesianGrid(
+                xAxis: xAxis = FixedAxis<int>(
+                  <int>[0, 1, 2, 3],
+                  angle: angle,
+                  textStyle: style,
+                ),
+                yAxis: yAxis = FixedAxis<int>(
+                  <int>[0, 250, 500, 750, 1000],
+                  angle: angle,
+                  textStyle: style,
+                ),
+              ),
+              datasets: <Dataset>[
+                LineDataSet(
+                  data: const <PointChartValue>[
+                    PointChartValue(0, 0),
+                    PointChartValue(3, 1000),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+      );
+      await document.save();
+
+      return <String, Object>{
+        'x': xAxis,
+        'y': yAxis,
+        'firstY': firstY,
+        'lastY': lastY,
+        'lastX': lastX,
+      };
+    }
+
+    /// How much room the axis keeps past its last value.
+    double farEndOf(FixedAxis<int> axis, num last) =>
+        axis.direction == Axis.vertical
+        ? axis.box!.top - axis.toChart(last)
+        : axis.box!.right - axis.toChart(last);
+
+    test('keeps the height of its last label, not its width', () async {
+      // The vertical branch was copied from the horizontal one without swapping
+      // the axis: _marginEnd and crossAxisPosition are distances *along* the
+      // axis, so a vertical axis needs the label's height there, and this used
+      // PdfPoint.x - the rotated label's width.
+      final straight = await build(0);
+      final yStraight = straight['y']! as FixedAxis<int>;
+      final lastStraight = straight['lastY']! as PdfPoint;
+
+      // Half the label, because an unrotated one is centred on the tick.
+      expect(
+        farEndOf(yStraight, 1000),
+        closeTo(lastStraight.y / 2, 1e-6),
+        reason: 'was ${lastStraight.x / 2}, half the label width',
+      );
+
+      // Past a quarter turn the label hangs entirely past the end of the axis.
+      final back = await build(2.7);
+      final yBack = back['y']! as FixedAxis<int>;
+      final lastBack = back['lastY']! as PdfPoint;
+
+      expect(
+        farEndOf(yBack, 1000),
+        closeTo(lastBack.y, 1e-6),
+        reason: 'was ${lastBack.x}, the label width',
+      );
+    });
+
+    test(
+      'keeps nothing past the end when the label leans the other way',
+      () async {
+        for (final angle in <double>[0.4, 1.3]) {
+          final result = await build(angle);
+          expect(
+            farEndOf(result['y']! as FixedAxis<int>, 1000),
+            0.0,
+            reason: '$angle',
+          );
+        }
+      },
+    );
+
+    test('does not make the chart reserve a gutter it has no use for', () async {
+      // The two axes are coupled - each one's cross position is the other's
+      // axis position - so a vertical axis that over-reserves takes the plot's
+      // height with it. At 1.3 rad the y labels are 25.3pt tall and 37.9pt wide.
+      final result = await build(1.3);
+      final xAxis = result['x']! as FixedAxis<int>;
+      final yAxis = result['y']! as FixedAxis<int>;
+      final firstY = result['firstY']! as PdfPoint;
+
+      expect(yAxis.crossAxisPosition, closeTo(xAxis.axisPosition, 1e-9));
+      expect(
+        yAxis.crossAxisPosition,
+        lessThanOrEqualTo(firstY.y + 2 + 1e-6),
+        reason: 'was ${firstY.x}, the label width',
+      );
+    });
+
+    test('leaves the horizontal axis exactly as it was', () async {
+      // The horizontal branch was always right: there the label's extent along
+      // the axis is its width.
+      final straight = await build(0);
+      expect(
+        farEndOf(straight['x']! as FixedAxis<int>, 3),
+        closeTo((straight['lastX']! as PdfPoint).x / 2, 1e-6),
+      );
+
+      final back = await build(2.7);
+      expect(
+        farEndOf(back['x']! as FixedAxis<int>, 3),
+        closeTo((back['lastX']! as PdfPoint).x, 1e-6),
+      );
+    });
+  });
+
   tearDownAll(() async {
     final file = File('widgets-chart.pdf');
     await file.writeAsBytes(await pdf.save());

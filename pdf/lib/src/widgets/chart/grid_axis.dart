@@ -246,6 +246,22 @@ class FixedAxis<T extends num> extends GridAxis {
     return Transform.rotateBox(angle: angle, child: t);
   }
 
+  /// How far a label reaches along the axis it labels.
+  ///
+  /// [crossAxisPosition] and [_marginEnd] are distances along the axis, so a
+  /// label's extent along it is its width for a horizontal axis and its height
+  /// for a vertical one - [axisPosition] is the perpendicular one. The vertical
+  /// branch below was copied from the horizontal one without that swap, so a
+  /// rotated y-axis label reserved its width where it needed its height.
+  double _crossExtent(PdfPoint size) {
+    switch (direction) {
+      case Axis.horizontal:
+        return size.x;
+      case Axis.vertical:
+        return size.y;
+    }
+  }
+
   int _angleDirection() {
     if (angle == 0.0) {
       return 0;
@@ -291,11 +307,13 @@ class FixedAxis<T extends num> extends GridAxis {
         _textMargin = margin ?? 2;
         _axisTick ??= false;
         final minStart = ad == 0
-            ? firstSize.x / 2
-            : (ad > 0 ? firstSize.x : 0.0);
+            ? _crossExtent(firstSize) / 2
+            : (ad > 0 ? _crossExtent(firstSize) : 0.0);
         _marginEnd = math.max(
           _marginEnd,
-          ad == 0 ? lastSize.x / 2 : (ad > 0 ? 0.0 : lastSize.x),
+          ad == 0
+              ? _crossExtent(lastSize) / 2
+              : (ad > 0 ? 0.0 : _crossExtent(lastSize)),
         );
         crossAxisPosition = math.max(crossAxisPosition, minStart);
         axisPosition = math.max(axisPosition, maxHeight + _textMargin);
@@ -306,11 +324,13 @@ class FixedAxis<T extends num> extends GridAxis {
         _axisTick ??= true;
         _marginEnd = math.max(
           _marginEnd,
-          ad == 0 ? lastSize.x / 2 : (ad < 0 ? lastSize.x : 0.0),
+          ad == 0
+              ? _crossExtent(lastSize) / 2
+              : (ad < 0 ? _crossExtent(lastSize) : 0.0),
         );
         final minStart = ad == 0
-            ? firstSize.y / 2
-            : (ad > 0 ? firstSize.x : 0.0);
+            ? _crossExtent(firstSize) / 2
+            : (ad > 0 ? _crossExtent(firstSize) : 0.0);
         crossAxisPosition = math.max(crossAxisPosition, minStart);
         axisPosition = math.max(axisPosition, maxWidth + _textMargin);
         box = PdfRect(0, 0, axisPosition, size.y);
