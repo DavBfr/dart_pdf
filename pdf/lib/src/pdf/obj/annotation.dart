@@ -30,6 +30,7 @@ import '../format/string.dart';
 import '../graphics.dart';
 import '../point.dart';
 import '../rect.dart';
+import 'acroform_field.dart';
 import 'border.dart';
 import 'font.dart';
 import 'graphic_stream.dart';
@@ -56,24 +57,29 @@ class PdfChoiceField extends PdfAnnotWidget {
   final PdfFont font;
 
   final double fontSize;
+
+  @override
+  Iterable<PdfFont> get defaultAppearanceFonts => <PdfFont>[font];
+
   @override
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
     // What is /F?
     //params['/F'] = const PdfNum(4);
-    params['/Ff'] = PdfNum(fieldFlagsValue);
-    params['/Opt'] = PdfArray<PdfString>(
+    final field = fieldParams(params);
+    field['/Ff'] = PdfNum(fieldFlagsValue);
+    field['/Opt'] = PdfArray<PdfString>(
       items.map((e) => PdfString.fromString(e)).toList(),
     );
 
     if (defaultValue != null) {
-      params['/DV'] = PdfString.fromString(defaultValue!);
+      field['/DV'] = PdfString.fromString(defaultValue!);
     }
 
     if (value != null) {
-      params['/V'] = PdfString.fromString(value!);
+      field['/V'] = PdfString.fromString(value!);
     } else {
-      params['/V'] = const PdfNull();
+      field['/V'] = const PdfNull();
     }
 
     final buf = PdfStream();
@@ -81,7 +87,7 @@ class PdfChoiceField extends PdfAnnotWidget {
     g.setFillColor(textColor);
     g.setFont(font, fontSize);
 
-    params['/DA'] = PdfString.fromStream(buf);
+    field['/DA'] = PdfString.fromStream(buf);
 
     // What is /TU? Tooltip?
     //params['/TU'] = PdfString.fromString('Select from list');
@@ -189,6 +195,19 @@ abstract class PdfAnnotBase {
 
   /// The author of the annotation
   final String? author;
+
+  /// Whether this is a markup annotation, which is what `/T`, `/Subj` and the
+  /// other text-markup keys belong to.
+  bool get isMarkup => true;
+
+  /// The fonts this annotation names in its `/DA` string.
+  ///
+  /// ISO 32000-1 12.7.3.3 requires every font a `/DA` names to be a key of the
+  /// form's `/DR` `/Font` dictionary. The collector only recognised a
+  /// PdfTextField, so a ChoiceField's `/DA` named a font declared nowhere -
+  /// Acrobat then regenerated the appearance with Helvetica and CJK or Arabic
+  /// option text came out as boxes.
+  Iterable<PdfFont> get defaultAppearanceFonts => const <PdfFont>[];
 
   /// The subject of the annotation
   final String? subject;
@@ -309,7 +328,13 @@ abstract class PdfAnnotBase {
       params['/Subj'] = PdfString.fromString(subject!);
     }
 
-    if (author != null) {
+    // /T is only defined for a markup annotation - ISO 32000-1 12.5.6.4 - and on
+    // a merged field-and-widget dictionary it is the partial field name instead.
+    // Writing the author there made a widget given an author and no fieldName a
+    // form field named after the author, so an FDF export carried
+    // 'Jane Doe=hello'; with both set, the author silently won or lost depending
+    // on the order.
+    if (author != null && isMarkup) {
       params['/T'] = PdfString.fromString(author!);
     }
 
@@ -372,6 +397,10 @@ class PdfAnnotNamedLink extends PdfAnnotBase {
 
   final String dest;
 
+  /// A link is not a markup annotation either.
+  @override
+  bool get isMarkup => false;
+
   @override
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
@@ -405,6 +434,10 @@ class PdfAnnotUrlLink extends PdfAnnotBase {
        );
 
   final String url;
+
+  /// A link is not a markup annotation either.
+  @override
+  bool get isMarkup => false;
 
   @override
   void build(PdfPage page, PdfObject object, PdfDict params) {
@@ -608,6 +641,10 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
     this.backgroundColor,
     this.highlighting,
     String? subject,
+    @Deprecated(
+      'A widget annotation has no author: /T is its field name. '
+      'Use fieldName instead.',
+    )
     String? author,
   }) : super(
          subtype: '/Widget',
@@ -624,6 +661,22 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
 
   final String? fieldName;
 
+  /// The form field this widget displays, when several widgets share one.
+  ///
+  /// Set by [PdfDocument.prepareAcroForm] before anything is written. When it is
+  /// null this widget is a field in its own right, which is the merged form
+  /// ISO 32000-1 12.7.3.1 allows for a single-widget field, and what this
+  /// package has always produced.
+  PdfAcroFormField? fieldParent;
+
+  /// Where the field keys go: the parent when there is one, this widget's own
+  /// dictionary otherwise.
+  PdfDict fieldParams(PdfDict params) => fieldParent?.params ?? params;
+
+  /// A widget is not a markup annotation: its `/T` is the field name.
+  @override
+  bool get isMarkup => false;
+
   final PdfAnnotHighlighting? highlighting;
 
   final PdfColor? backgroundColor;
@@ -632,9 +685,13 @@ abstract class PdfAnnotWidget extends PdfAnnotBase {
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
 
-    params['/FT'] = PdfName(fieldType);
+    final field = fieldParams(params);
+    field['/FT'] = PdfName(fieldType);
 
-    if (fieldName != null) {
+    if (fieldParent != null) {
+      // The kid keeps /Rect, /AP, /AS and /P, and names its field.
+      params['/Parent'] = fieldParent!.ref();
+    } else if (fieldName != null) {
       params['/T'] = PdfString.fromString(fieldName!);
     }
 
@@ -811,6 +868,10 @@ class PdfFormField extends PdfAnnotWidget {
     Set<PdfAnnotFlags>? flags,
     DateTime? date,
     String? subject,
+    @Deprecated(
+      'A widget annotation has no author: /T is its field name. '
+      'Use fieldName instead.',
+    )
     String? author,
     PdfColor? color,
     PdfColor? backgroundColor,
@@ -849,14 +910,16 @@ class PdfFormField extends PdfAnnotWidget {
   @override
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
+
+    final field = fieldParams(params);
     if (alternateName != null) {
-      params['/TU'] = PdfString.fromString(alternateName!);
+      field['/TU'] = PdfString.fromString(alternateName!);
     }
     if (mappingName != null) {
-      params['/TM'] = PdfString.fromString(mappingName!);
+      field['/TM'] = PdfString.fromString(mappingName!);
     }
 
-    params['/Ff'] = PdfNum(fieldFlagsValue);
+    field['/Ff'] = PdfNum(fieldFlagsValue);
   }
 }
 
@@ -872,6 +935,10 @@ class PdfTextField extends PdfFormField {
     Set<PdfAnnotFlags>? flags,
     DateTime? date,
     String? subject,
+    @Deprecated(
+      'A widget annotation has no author: /T is its field name. '
+      'Use fieldName instead.',
+    )
     String? author,
     PdfColor? color,
     PdfColor? backgroundColor,
@@ -916,26 +983,30 @@ class PdfTextField extends PdfFormField {
   final PdfTextFieldAlign? textAlign;
 
   @override
+  Iterable<PdfFont> get defaultAppearanceFonts => <PdfFont>[font];
+
+  @override
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
+    final field = fieldParams(params);
     if (maxLength != null) {
-      params['/MaxLen'] = PdfNum(maxLength!);
+      field['/MaxLen'] = PdfNum(maxLength!);
     }
 
     final buf = PdfStream();
     final g = PdfGraphics(page, buf);
     g.setFillColor(textColor);
     g.setFont(font, fontSize);
-    params['/DA'] = PdfString.fromStream(buf);
+    field['/DA'] = PdfString.fromStream(buf);
 
     if (value != null) {
-      params['/V'] = PdfString.fromString(value!);
+      field['/V'] = PdfString.fromString(value!);
     }
     if (defaultValue != null) {
-      params['/DV'] = PdfString.fromString(defaultValue!);
+      field['/DV'] = PdfString.fromString(defaultValue!);
     }
     if (textAlign != null) {
-      params['/Q'] = PdfNum(textAlign!.index);
+      field['/Q'] = PdfNum(textAlign!.index);
     }
   }
 }
@@ -978,12 +1049,13 @@ class PdfButtonField extends PdfFormField {
   void build(PdfPage page, PdfObject object, PdfDict params) {
     super.build(page, object, params);
 
+    final field = fieldParams(params);
     if (value != null) {
-      params['/V'] = PdfName(value!);
+      field['/V'] = PdfName(value!);
     }
 
     if (defaultValue != null) {
-      params['/DV'] = PdfName(defaultValue!);
+      field['/DV'] = PdfName(defaultValue!);
     }
   }
 }
