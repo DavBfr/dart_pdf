@@ -27,7 +27,7 @@ import 'stream.dart';
 import 'string.dart';
 
 class PdfArray<T extends PdfDataType> extends PdfDataType {
-  PdfArray([Iterable<T>? values]) : values = [if (values != null) ...values];
+  PdfArray([Iterable<T>? values]) : values = [...?values];
 
   static PdfArray<PdfIndirect> fromObjects(Iterable<PdfObjectBase> objects) {
     return PdfArray(objects.map<PdfIndirect>((e) => e.ref()).toList());
@@ -45,12 +45,10 @@ class PdfArray<T extends PdfDataType> extends PdfDataType {
         color.yellow,
         color.black,
       ]);
+    } else if (color is PdfColorGrey) {
+      return PdfArray.fromNum(<double>[color.red]);
     } else {
-      return PdfArray.fromNum(<double>[
-        color.red,
-        color.green,
-        color.blue,
-      ]);
+      return PdfArray.fromNum(<double>[color.red, color.green, color.blue]);
     }
   }
 

@@ -33,7 +33,10 @@ abstract class SvgOperation {
   SvgOperation(this.brush, this.clip, this.transform, this.painter);
 
   static SvgOperation? fromXml(
-      XmlElement element, SvgPainter painter, SvgBrush brush) {
+    XmlElement element,
+    SvgPainter painter,
+    SvgBrush brush,
+  ) {
     if (element.getAttribute('visibility') == 'hidden') {
       return null;
     }
@@ -87,10 +90,12 @@ abstract class SvgOperation {
       canvas.setTransform(transform.matrix!);
     }
     if (brush.opacity! < 1.0 || brush.blendMode != null) {
-      canvas.setGraphicState(PdfGraphicState(
-        opacity: brush.opacity == 1 ? null : brush.opacity,
-        blendMode: brush.blendMode,
-      ));
+      canvas.setGraphicState(
+        PdfGraphicState(
+          opacity: brush.opacity == 1 ? null : brush.opacity,
+          blendMode: brush.blendMode,
+        ),
+      );
     }
     if (brush.mask != null) {
       brush.mask!.apply(canvas);

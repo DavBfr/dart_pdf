@@ -25,60 +25,54 @@ void main() {
   test('Pdf Minimal', () async {
     var objser = 1;
 
-    const settings = PdfSettings(
-      verbose: true,
-      version: PdfVersion.pdf_1_4,
-    );
+    const settings = PdfSettings(verbose: true, version: PdfVersion.pdf_1_4);
 
     final pages = PdfObjectBase(
-        objser: objser++,
-        settings: settings,
-        params: PdfDict.values({
-          '/Type': const PdfName('/Pages'),
-          '/Count': const PdfNum(1),
-        }));
+      objser: objser++,
+      settings: settings,
+      params: PdfDict.values({
+        '/Type': const PdfName('/Pages'),
+        '/Count': const PdfNum(1),
+      }),
+    );
 
     final content = PdfObjectBase(
-        objser: objser++,
-        settings: settings,
-        params: PdfDictStream(
-          data: latin1.encode('30 811.88976 m 200 641.88976 l S'),
-        ));
+      objser: objser++,
+      settings: settings,
+      params: PdfDictStream(
+        data: latin1.encode('30 811.88976 m 200 641.88976 l S'),
+      ),
+    );
 
     final page = PdfObjectBase(
-        objser: objser++,
-        settings: settings,
-        params: PdfDict.values({
-          '/Type': const PdfName('/Page'),
-          '/Parent': pages.ref(),
-          '/MediaBox': PdfArray.fromNum([0, 0, 595.27559, 841.88976]),
-          '/Resources': PdfDict.values({
-            '/ProcSet': PdfArray([
-              const PdfName('/PDF'),
-            ]),
-          }),
-          '/Contents': content.ref(),
-        }));
+      objser: objser++,
+      settings: settings,
+      params: PdfDict.values({
+        '/Type': const PdfName('/Page'),
+        '/Parent': pages.ref(),
+        '/MediaBox': PdfArray.fromNum([0, 0, 595.27559, 841.88976]),
+        '/Resources': PdfDict.values({
+          '/ProcSet': PdfArray([const PdfName('/PDF')]),
+        }),
+        '/Contents': content.ref(),
+      }),
+    );
 
     pages.params['/Kids'] = PdfArray([page.ref()]);
 
     final catalog = PdfObjectBase(
-        objser: objser++,
-        settings: settings,
-        params: PdfDict.values({
-          '/Type': const PdfName('/Catalog'),
-          '/Pages': pages.ref(),
-        }));
+      objser: objser++,
+      settings: settings,
+      params: PdfDict.values({
+        '/Type': const PdfName('/Catalog'),
+        '/Pages': pages.ref(),
+      }),
+    );
 
     final os = PdfStream();
 
     final xref = PdfXrefTable();
-    xref.objects.addAll([
-      catalog,
-      pages,
-      page,
-      content,
-    ]);
+    xref.objects.addAll([catalog, pages, page, content]);
 
     xref.output(catalog, os);
 

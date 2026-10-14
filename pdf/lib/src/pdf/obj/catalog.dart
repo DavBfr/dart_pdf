@@ -26,6 +26,8 @@ import 'object.dart';
 import 'outline.dart';
 import 'page_label.dart';
 import 'page_list.dart';
+import 'pdfa/pdfa_attached_files.dart';
+import 'pdfa/pdfa_color_profile.dart';
 
 /// Pdf Catalog object
 class PdfCatalog extends PdfObject<PdfDict> {
@@ -37,13 +39,11 @@ class PdfCatalog extends PdfObject<PdfDict> {
     int objgen = 0,
     int? objser,
   }) : super(
-          pdfDocument,
-          params: PdfDict.values({
-            '/Type': const PdfName('/Catalog'),
-          }),
-          objser: objser,
-          objgen: objgen,
-        );
+         pdfDocument,
+         params: PdfDict.values({'/Type': const PdfName('/Catalog')}),
+         objser: objser,
+         objgen: objgen,
+       );
 
   /// The pages of the document
   final PdfPageList pdfPageList;
@@ -53,6 +53,12 @@ class PdfCatalog extends PdfObject<PdfDict> {
 
   /// The document metadata
   PdfMetadata? metadata;
+
+  /// Colorprofile output intent (Pdf/A)
+  PdfaColorProfile? colorProfile;
+
+  /// Attached files (Pdf/A 3b)
+  PdfaAttachedFiles? attached;
 
   /// The initial page mode
   final PdfPageMode? pageMode;
@@ -68,7 +74,7 @@ class PdfCatalog extends PdfObject<PdfDict> {
     '/UseNone',
     '/UseOutlines',
     '/UseThumbs',
-    '/FullScreen'
+    '/FullScreen',
   ];
 
   @override
@@ -89,6 +95,11 @@ class PdfCatalog extends PdfObject<PdfDict> {
       params['/Metadata'] = metadata!.ref();
     }
 
+    if (attached != null && attached!.isNotEmpty) {
+      names!.params.merge(attached!.catalogNames());
+      params['/AF'] = attached!.catalogAF();
+    }
+
     // the Names object
     if (names != null) {
       params['/Names'] = names!.ref();
@@ -106,9 +117,7 @@ class PdfCatalog extends PdfObject<PdfDict> {
 
     if (pdfDocument.sign != null) {
       if (pdfDocument.sign!.value.hasMDP) {
-        params['/Perms'] = PdfDict.values({
-          '/DocMDP': pdfDocument.sign!.ref(),
-        });
+        params['/Perms'] = PdfDict.values({'/DocMDP': pdfDocument.sign!.ref()});
       }
 
       final dss = PdfDict();
@@ -138,7 +147,8 @@ class PdfCatalog extends PdfObject<PdfDict> {
 
     if (widgets.isNotEmpty) {
       final acroForm = (params['/AcroForm'] ??= PdfDict()) as PdfDict;
-      acroForm['/SigFlags'] = PdfNum(pdfDocument.sign?.flagsValue ?? 0) |
+      acroForm['/SigFlags'] =
+          PdfNum(pdfDocument.sign?.flagsValue ?? 0) |
           (acroForm['/SigFlags'] as PdfNum? ?? const PdfNum(0));
       final fields = (acroForm['/Fields'] ??= PdfArray()) as PdfArray;
       final fontRefs = PdfDict();
@@ -154,9 +164,15 @@ class PdfCatalog extends PdfObject<PdfDict> {
         }
       }
       if (fontRefs.isNotEmpty) {
-        acroForm['/DR'] = PdfDict.values(// "Document Resources"
-            {'/Font': fontRefs});
+        acroForm['/DR'] = PdfDict.values(
+          // "Document Resources"
+          {'/Font': fontRefs},
+        );
       }
+    }
+
+    if (colorProfile != null) {
+      params['/OutputIntents'] = colorProfile!.outputIntents();
     }
   }
 }

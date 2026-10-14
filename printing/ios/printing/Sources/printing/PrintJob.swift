@@ -17,21 +17,38 @@
 import Flutter
 import WebKit
 
-func dataProviderReleaseDataCallback(info _: UnsafeMutableRawPointer?, data: UnsafeRawPointer, size _: Int) {
-    data.deallocate()
-}
-
-// A variable that holds the selected printers to prevent recreate it if selected again
-// Each printer will be identified by its URL string
+/// A variable that holds the selected printers to prevent recreate it if selected again
+/// Each printer will be identified by its URL string
 var selectedPrinters = [String: UIPrinter]()
 
-// Holds the printer after it was picked
+/// Holds the printer after it was picked
 var pickedPrinter: UIPrinter?
 
 public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate {
     private var printing: PrintingPlugin
     public var index: Int
-    private var pdfDocument: CGPDFDocument?
+    private let pdfDocumentLock = NSLock()
+    private var _pdfDocument: CGPDFDocument?
+    /// UIKit queries numberOfPages from a background page-count thread
+    /// (UIPrintPreviewViewController.updatePageCount) while setDocument and
+    /// cancelJob replace the document on the main thread. An unsynchronized
+    /// swap lets ARC free the old CGPDFDocument mid-read, crashing in
+    /// CGPDFDocumentGetNumberOfPages. All access must go through this lock;
+    /// the getter retains the document under the lock so callers always hold
+    /// a strong reference to a live object.
+    private var pdfDocument: CGPDFDocument? {
+        get {
+            pdfDocumentLock.lock()
+            defer { pdfDocumentLock.unlock() }
+            return _pdfDocument
+        }
+        set {
+            pdfDocumentLock.lock()
+            defer { pdfDocumentLock.unlock() }
+            _pdfDocument = newValue
+        }
+    }
+
     private var urlObservation: NSKeyValueObservation?
     private var jobName: String?
     private var printerName: String?
@@ -44,13 +61,15 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     public init(printing: PrintingPlugin, index: Int) {
         self.printing = printing
         self.index = index
-        pdfDocument = nil
         super.init()
     }
 
     override public func drawPage(at pageIndex: Int, in _: CGRect) {
         let ctx = UIGraphicsGetCurrentContext()
-        let page = pdfDocument?.page(at: pageIndex + 1)
+        // Hold a strong local reference so a concurrent setDocument can't
+        // release the document (and the page it owns) while we draw.
+        let document = pdfDocument
+        let page = document?.page(at: pageIndex + 1)
         ctx?.scaleBy(x: 1.0, y: -1.0)
         ctx?.translateBy(x: 0.0, y: -paperRect.size.height)
         if page != nil {
@@ -68,14 +87,22 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     }
 
     func setDocument(_ data: Data?) {
-        let bytesPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: data?.count ?? 0)
-        data?.copyBytes(to: bytesPointer, count: data?.count ?? 0)
-        let dataProvider = CGDataProvider(dataInfo: nil, data: bytesPointer, size: data?.count ?? 0, releaseData: dataProviderReleaseDataCallback)
-        pdfDocument = CGPDFDocument(dataProvider!)
+        // An empty or malformed document must not crash: CGDataProvider returns
+        // nil for empty data, and CGPDFDocument returns nil for invalid data.
+        if let data, !data.isEmpty, let dataProvider = CGDataProvider(data: data as CFData) {
+            pdfDocument = CGPDFDocument(dataProvider)
+        } else {
+            pdfDocument = nil
+        }
 
         if dynamic {
-            // Unblock the main thread
+            // Unblock the thread waiting in numberOfPages
             semaphore.signal()
+            return
+        }
+
+        if pdfDocument == nil {
+            printing.onCompleted(printJob: self, completed: false, error: "Unable to load the PDF document")
             return
         }
 
@@ -84,7 +111,8 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             controller.delegate = self
 
             let printInfo = UIPrintInfo.printInfo()
-            printInfo.jobName = jobName!
+            let strippedJobName = jobName!.hasSuffix(".pdf") ? String(jobName!.dropLast(4)) : jobName!
+            printInfo.jobName = strippedJobName
             printInfo.outputType = .general
             if orientation != nil {
                 printInfo.orientation = orientation!
@@ -165,9 +193,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             }
         }
 
-        let bestPaper = UIPrintPaper.bestPaper(forPageSize: currentSize!, withPapersFrom: paperList)
-
-        return bestPaper
+        return UIPrintPaper.bestPaper(forPageSize: currentSize!, withPapersFrom: paperList)
     }
 
     func printPdf(name: String, withPageSize size: CGSize, andMargin margin: CGRect, withPrinter printerID: String?, dynamically dyn: Bool, outputType type: UIPrintInfo.OutputType, forceCustomPrintPaper: Bool = false) {
@@ -185,7 +211,8 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             orientation = UIPrintInfo.Orientation.landscape
         }
 
-        jobName = name
+        // Strip .pdf extension as UIPrintInteractionController appends it automatically
+        jobName = name.hasSuffix(".pdf") ? String(name.dropLast(4)) : name
         printerName = printerID
 
         let controller = UIPrintInteractionController.shared
@@ -220,7 +247,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             // Sometimes using UIPrinter(url:) gives a non-contactable printer.
             // https://stackoverflow.com/questions/34602302/creating-a-working-uiprinter-object-from-url-for-dialogue-free-printing
             // This lets use a printer saved during picking and fall back using a printer created with UIPrinter(url:)
-            if pickedPrinter != nil && selectedPrinters[printerURLString]!.url == pickedPrinter?.url {
+            if pickedPrinter != nil, selectedPrinters[printerURLString]!.url == pickedPrinter?.url {
                 controller.print(to: pickedPrinter!, completionHandler: completionHandler)
                 return
             }
@@ -252,6 +279,21 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         )
     }
 
+    /// UIScene-safe key window lookup. `UIApplication.shared.keyWindow` and
+    /// `UIApplication.shared.delegate.window` are nil under UISceneDelegate
+    /// (deprecated in iOS 26, mandatory when building with the iOS 27 SDK), so
+    /// resolve the key window from the connected window scenes instead.
+    static func sceneKeyWindow() -> UIWindow? {
+        if #available(iOS 13.0, *) {
+            let windows = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap { $0.windows }
+            return windows.first(where: { $0.isKeyWindow }) ?? windows.first
+        }
+        // iOS < 13 has no UIScene; fall back to the app delegate's window.
+        return UIApplication.shared.delegate?.window ?? nil
+    }
+
     static func sharePdf(data: Data, withSourceRect rect: CGRect, andName name: String, subject: String?, body: String?) {
         let tmpDirURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
         let fileURL = tmpDirURL.appendingPathComponent(name)
@@ -266,16 +308,22 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         let activityViewController = UIActivityViewController(activityItems: [fileURL, body as Any], applicationActivities: nil)
         activityViewController.setValue(subject, forKey: "subject")
         if UIDevice.current.userInterfaceIdiom == .pad {
-            let controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController
+            let controller: UIViewController? = PrintJob.sceneKeyWindow()?.rootViewController
             activityViewController.popoverPresentationController?.sourceView = controller?.view
             activityViewController.popoverPresentationController?.sourceRect = rect
         }
-        UIApplication.shared.keyWindow?.rootViewController?.present(activityViewController, animated: true)
+        PrintJob.sceneKeyWindow()?.rootViewController?.present(activityViewController, animated: true)
     }
 
     func convertHtml(_ data: String, withPageSize rect: CGRect, andMargin margin: CGRect, andBaseUrl baseUrl: URL?) {
-        let viewController = UIApplication.shared.delegate?.window?!.rootViewController
-        let wkWebView = WKWebView(frame: viewController!.view.bounds)
+        // UIScene fix: delegate.window is nil under UISceneDelegate; force-
+        // unwrapping it crashed convertHtml. Use the scene key window instead.
+        let viewController = PrintJob.sceneKeyWindow()?.rootViewController
+        guard let rootView = viewController?.view else {
+            printing.onHtmlError(printJob: self, error: "No key window available to render HTML to PDF")
+            return
+        }
+        let wkWebView = WKWebView(frame: rootView.bounds)
         wkWebView.isHidden = true
         wkWebView.tag = 100
         viewController?.view.addSubview(wkWebView)
@@ -340,8 +388,15 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             }
 
             let printer = printerPickerController.selectedPrinter!
+            // UIPrinter.url is non-optional in Swift but the underlying ObjC NSURL can be
+            // nil for partially resolved printers (e.g. discovered over a personal hotspot);
+            // force-bridging a nil NSURL to URL traps at runtime. Read it via KVC instead.
+            guard let url = printer.value(forKey: "URL") as? URL else {
+                result(nil)
+                return
+            }
             let data: NSDictionary = [
-                "url": printer.url.absoluteString as Any,
+                "url": url.absoluteString as Any,
                 "name": printer.displayName as Any,
                 "model": printer.makeAndModel as Any,
                 "location": printer.displayLocation as Any,
@@ -353,7 +408,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
         }
 
         if UIDevice.current.userInterfaceIdiom == .pad {
-            let viewController: UIViewController? = UIApplication.shared.keyWindow?.rootViewController
+            let viewController: UIViewController? = PrintJob.sceneKeyWindow()?.rootViewController
             if viewController != nil {
                 controller.present(from: rect, in: viewController!.view, animated: true, completionHandler: pickPrinterCompletionHandler)
                 return
@@ -421,7 +476,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
     }
 
     public static func printingInfo() -> NSDictionary {
-        let data: NSDictionary = [
+        return [
             "directPrint": true,
             "dynamicLayout": true,
             "canPrint": true,
@@ -429,6 +484,5 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             "canRaster": true,
             "canListPrinters": false,
         ]
-        return data
     }
 }

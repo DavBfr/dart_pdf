@@ -25,16 +25,22 @@ import 'utils.dart';
 
 late Document pdf;
 
-List<TableRow> buildTable(
-    {required Context? context, int count = 10, bool repeatHeader = false}) {
+List<TableRow> buildTable({
+  required Context? context,
+  int count = 10,
+  bool repeatHeader = false,
+}) {
   final rows = <TableRow>[];
   {
     final tableRow = <Widget>[];
     for (final cell in <String>['Hue', 'Color', 'RGBA']) {
-      tableRow.add(Container(
+      tableRow.add(
+        Container(
           alignment: Alignment.center,
           margin: const EdgeInsets.all(5),
-          child: Text(cell, style: Theme.of(context!).tableHeader)));
+          child: Text(cell, style: Theme.of(context!).tableHeader),
+        ),
+      );
     }
     rows.add(TableRow(children: tableRow, repeat: repeatHeader));
   }
@@ -44,18 +50,21 @@ List<TableRow> buildTable(
     final PdfColor color = PdfColorHsv(h, 1.0, 1.0);
     final tableRow = <Widget>[
       Container(
-          margin: const EdgeInsets.all(5),
-          child: Text('${h.toInt()}°', style: Theme.of(context!).tableCell)),
+        margin: const EdgeInsets.all(5),
+        child: Text('${h.toInt()}°', style: Theme.of(context!).tableCell),
+      ),
       Container(
-          margin: const EdgeInsets.all(5),
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: const BorderRadius.all(Radius.circular(5)),
-          ),
-          height: Theme.of(context).tableCell.fontSize),
+        margin: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: const BorderRadius.all(Radius.circular(5)),
+        ),
+        height: Theme.of(context).tableCell.fontSize,
+      ),
       Container(
-          margin: const EdgeInsets.all(5),
-          child: Text(color.toHex(), style: Theme.of(context).tableCell)),
+        margin: const EdgeInsets.all(5),
+        child: Text(color.toHex(), style: Theme.of(context).tableCell),
+      ),
     ];
     rows.add(TableRow(children: tableRow));
   }
@@ -71,81 +80,101 @@ void main() {
   });
 
   test('Table Widget empty', () {
-    pdf.addPage(Page(
-      build: (Context context) => Table(),
-    ));
+    pdf.addPage(Page(build: (Context context) => Table()));
   });
 
   test('Table Widget filled', () {
-    pdf.addPage(Page(
-      build: (Context context) => Table(
-        children: buildTable(context: context, count: 20),
-        border: TableBorder.all(),
-        tableWidth: TableWidth.max,
+    pdf.addPage(
+      Page(
+        build: (Context context) => Table(
+          children: buildTable(context: context, count: 20),
+          border: TableBorder.all(),
+          tableWidth: TableWidth.max,
+        ),
       ),
-    ));
+    );
   });
 
   test('Table Widget multi-pages', () {
-    pdf.addPage(MultiPage(
+    pdf.addPage(
+      MultiPage(
         build: (Context context) => <Widget>[
-              Table(
-                children: buildTable(context: context, count: 200),
-                border: TableBorder.all(),
-                tableWidth: TableWidth.max,
-              ),
-            ]));
+          Table(
+            children: buildTable(context: context, count: 200),
+            border: TableBorder.all(),
+            tableWidth: TableWidth.max,
+          ),
+        ],
+      ),
+    );
   });
 
   test('Table Widget multi-pages with header', () {
-    pdf.addPage(MultiPage(
+    pdf.addPage(
+      MultiPage(
         build: (Context context) => <Widget>[
-              Table(
-                children: buildTable(
-                    context: context, count: 200, repeatHeader: true),
-                border: TableBorder.all(),
-                tableWidth: TableWidth.max,
-              ),
-            ]));
+          Table(
+            children: buildTable(
+              context: context,
+              count: 200,
+              repeatHeader: true,
+            ),
+            border: TableBorder.all(),
+            tableWidth: TableWidth.max,
+          ),
+        ],
+      ),
+    );
   });
 
   test('Table Widget multi-pages short', () {
-    pdf.addPage(MultiPage(
+    pdf.addPage(
+      MultiPage(
         build: (Context context) => <Widget>[
-              SizedBox(height: 710),
-              Table(
-                children: buildTable(context: context, count: 4),
-                border: TableBorder.all(),
-                tableWidth: TableWidth.max,
-              ),
-            ]));
+          SizedBox(height: 710),
+          Table(
+            children: buildTable(context: context, count: 4),
+            border: TableBorder.all(),
+            tableWidth: TableWidth.max,
+          ),
+        ],
+      ),
+    );
   });
 
   test('Table Widget multi-pages short header', () {
-    pdf.addPage(MultiPage(
+    pdf.addPage(
+      MultiPage(
         build: (Context context) => <Widget>[
-              SizedBox(height: 710),
-              Table(
-                children:
-                    buildTable(context: context, count: 4, repeatHeader: true),
-                border: TableBorder.all(),
-                tableWidth: TableWidth.max,
-              ),
-            ]));
+          SizedBox(height: 710),
+          Table(
+            children: buildTable(
+              context: context,
+              count: 4,
+              repeatHeader: true,
+            ),
+            border: TableBorder.all(),
+            tableWidth: TableWidth.max,
+          ),
+        ],
+      ),
+    );
   });
 
   test('Table Widget Widths', () {
-    pdf.addPage(Page(
-      build: (Context context) => Table(
-        children: buildTable(context: context, count: 20),
-        border: TableBorder.all(),
-        columnWidths: <int, TableColumnWidth>{
-          0: const FixedColumnWidth(80),
-          1: const FlexColumnWidth(2),
-          2: const FractionColumnWidth(.2),
-        },
+    pdf.addPage(
+      Page(
+        build: (Context context) => Table(
+          children: buildTable(context: context, count: 20),
+          border: TableBorder.all(),
+          columnWidths: <int, TableColumnWidth>{
+            0: const FixedColumnWidth(80),
+            1: const FlexColumnWidth(2),
+            2: const FractionColumnWidth(.2),
+          },
+        ),
       ),
-    ));
+    );
   });
 
   test('Table Widget TableCellVerticalAlignment', () {
@@ -164,10 +193,7 @@ void main() {
                   return TableRow(
                     verticalAlignment: align,
                     children: <Widget>[
-                      Container(
-                        child: Text('Vertical'),
-                        color: PdfColors.red,
-                      ),
+                      Container(child: Text('Vertical'), color: PdfColors.red),
                       Container(
                         child: Text('alignment $index'),
                         color: PdfColors.yellow,
@@ -189,69 +215,70 @@ void main() {
   });
 
   test('Table fromTextArray', () {
-    pdf.addPage(Page(
-      build: (Context context) => TableHelper.fromTextArray(
-        context: context,
-        tableWidth: TableWidth.min,
-        data: <List<dynamic>>[
-          <dynamic>['One', 'Two', 'Three'],
-          <dynamic>[1, 2, 3],
-          <dynamic>[4, 5, 6],
-        ],
-      ),
-    ));
-  });
-
-  test('Table fromTextArray with formatting', () {
-    pdf.addPage(Page(
-      build: (Context context) => TableHelper.fromTextArray(
-        border: null,
-        cellAlignment: Alignment.center,
-        headerDecoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(2)),
-          color: PdfColors.indigo,
-        ),
-        headerHeight: 25,
-        cellHeight: 40,
-        headerStyle: TextStyle(
-          color: PdfColors.white,
-          fontWeight: FontWeight.bold,
-        ),
-        rowDecoration: const BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: PdfColors.indigo,
-              width: .5,
-            ),
-          ),
-        ),
-        headers: <dynamic>['One', 'Two', 'Three'],
-        data: <List<dynamic>>[
-          <dynamic>[1, 2, 3],
-          <dynamic>[4, 5, 6],
-          <dynamic>[7, 8, 9],
-        ],
-      ),
-    ));
-  });
-
-  test('Table fromTextArray with directionality', () {
-    pdf.addPage(Page(
-      theme: ThemeData.withFont(
-        base: loadFont('hacen-tunisia.ttf'),
-      ),
-      build: (Context context) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: TableHelper.fromTextArray(
-          headers: <dynamic>['ثلاثة', 'اثنان', 'واحد'],
-          cellAlignment: Alignment.centerRight,
+    pdf.addPage(
+      Page(
+        build: (Context context) => TableHelper.fromTextArray(
+          context: context,
+          tableWidth: TableWidth.min,
           data: <List<dynamic>>[
-            <dynamic>['الكلب', 'قط', 'ذئب'],
-            <dynamic>['فأر', 'بقرة', 'طائر'],
+            <dynamic>['One', 'Two', 'Three'],
+            <dynamic>[1, 2, 3],
+            <dynamic>[4, 5, 6],
           ],
         ),
       ),
-    ));
+    );
+  });
+
+  test('Table fromTextArray with formatting', () {
+    pdf.addPage(
+      Page(
+        build: (Context context) => TableHelper.fromTextArray(
+          border: null,
+          cellAlignment: Alignment.center,
+          headerDecoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(2)),
+            color: PdfColors.indigo,
+          ),
+          headerHeight: 25,
+          cellHeight: 40,
+          headerStyle: TextStyle(
+            color: PdfColors.white,
+            fontWeight: FontWeight.bold,
+          ),
+          rowDecoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: PdfColors.indigo, width: .5),
+            ),
+          ),
+          headers: <dynamic>['One', 'Two', 'Three'],
+          data: <List<dynamic>>[
+            <dynamic>[1, 2, 3],
+            <dynamic>[4, 5, 6],
+            <dynamic>[7, 8, 9],
+          ],
+        ),
+      ),
+    );
+  });
+
+  test('Table fromTextArray with directionality', () {
+    pdf.addPage(
+      Page(
+        theme: ThemeData.withFont(base: loadFont('hacen-tunisia.ttf')),
+        build: (Context context) => Directionality(
+          textDirection: TextDirection.rtl,
+          child: TableHelper.fromTextArray(
+            headers: <dynamic>['ثلاثة', 'اثنان', 'واحد'],
+            cellAlignment: Alignment.centerRight,
+            data: <List<dynamic>>[
+              <dynamic>['الكلب', 'قط', 'ذئب'],
+              <dynamic>['فأر', 'بقرة', 'طائر'],
+            ],
+          ),
+        ),
+      ),
+    );
   });
 
   test('Table fromTextArray with alignment', () {

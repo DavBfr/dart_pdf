@@ -22,11 +22,7 @@ import 'painter.dart';
 import 'parser.dart';
 
 class SvgColor {
-  const SvgColor({
-    this.color,
-    this.opacity,
-    this.inherit = false,
-  });
+  const SvgColor({this.color, this.opacity, this.inherit = false});
 
   factory SvgColor.fromXml(String? color, SvgPainter painter) {
     if (color == null) {
@@ -95,8 +91,9 @@ class SvgColor {
     }
 
     if (color.toLowerCase().startsWith('url(#')) {
-      final gradient =
-          painter.parser.findById(color.substring(5, color.indexOf(')')))!;
+      final gradient = painter.parser.findById(
+        color.substring(5, color.indexOf(')')),
+      )!;
       if (gradient.name.local == 'linearGradient') {
         return SvgLinearGradient.fromXml(gradient, painter);
       }
@@ -130,9 +127,7 @@ class SvgColor {
   bool get isNotEmpty => !isEmpty;
 
   SvgColor merge(SvgColor other) {
-    return SvgColor(
-      color: other.color ?? color,
-    );
+    return SvgColor(color: other.color ?? color);
   }
 
   void setFillColor(SvgOperation op, PdfGraphics canvas) {

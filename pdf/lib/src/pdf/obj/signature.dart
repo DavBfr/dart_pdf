@@ -26,7 +26,6 @@ import 'object_stream.dart';
 /// Signature flags
 enum PdfSigFlags {
   /// The document contains at least one signature field.
-
   signaturesExist,
 
   /// The document contains signatures that may be invalidated if the file is
@@ -44,11 +43,9 @@ class PdfSignature extends PdfObject<PdfDict> {
     List<Uint8List>? cert,
     List<Uint8List>? ocsp,
   }) : super(
-          pdfDocument,
-          params: PdfDict.values({
-            '/Type': const PdfName('/Sig'),
-          }),
-        ) {
+         pdfDocument,
+         params: PdfDict.values({'/Type': const PdfName('/Sig')}),
+       ) {
     if (crl != null) {
       for (final o in crl) {
         this.crl.add(PdfObjectStream(pdfDocument)..buf.putBytes(o));
@@ -73,8 +70,8 @@ class PdfSignature extends PdfObject<PdfDict> {
   int get flagsValue => flags.isEmpty
       ? 0
       : flags
-          .map<int>((PdfSigFlags e) => 1 << e.index)
-          .reduce((int a, int b) => a | b);
+            .map<int>((PdfSigFlags e) => 1 << e.index)
+            .reduce((int a, int b) => a | b);
 
   final crl = <PdfObjectStream>[];
 
@@ -97,8 +94,10 @@ class PdfSignature extends PdfObject<PdfDict> {
   }
 
   Future<void> writeSignature(PdfStream os) async {
-    assert(_offsetStart != null && _offsetEnd != null,
-        'Must reserve the object space before signing the document');
+    assert(
+      _offsetStart != null && _offsetEnd != null,
+      'Must reserve the object space before signing the document',
+    );
 
     await value.sign(this, os, params, _offsetStart, _offsetEnd);
   }
@@ -110,6 +109,11 @@ abstract class PdfSignatureBase {
 
   void preSign(PdfObject object, PdfDict params);
 
-  Future<void> sign(PdfObject object, PdfStream os, PdfDict params,
-      int? offsetStart, int? offsetEnd);
+  Future<void> sign(
+    PdfObject object,
+    PdfStream os,
+    PdfDict params,
+    int? offsetStart,
+    int? offsetEnd,
+  );
 }

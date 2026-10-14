@@ -20,8 +20,8 @@ import 'stream.dart';
 
 class PdfNum extends PdfDataType {
   const PdfNum(this.value)
-      : assert(value != double.infinity),
-        assert(value != double.negativeInfinity);
+    : assert(value != double.infinity),
+      assert(value != double.negativeInfinity);
 
   static const int precision = 5;
 

@@ -24,7 +24,9 @@ import 'package:printing/printing.dart';
 import '../data.dart';
 
 Future<Uint8List> generateReport(
-    PdfPageFormat pageFormat, CustomData data) async {
+  PdfPageFormat pageFormat,
+  CustomData data,
+) async {
   const tableHeaders = ['Category', 'Budget', 'Expense', 'Result'];
 
   const dataTable = [
@@ -60,25 +62,21 @@ Future<Uint8List> generateReport(
     left: pw.Container(
       alignment: pw.Alignment.topCenter,
       margin: const pw.EdgeInsets.only(right: 5, top: 10),
-      child: pw.Transform.rotateBox(
-        angle: pi / 2,
-        child: pw.Text('Amount'),
-      ),
+      child: pw.Transform.rotateBox(angle: pi / 2, child: pw.Text('Amount')),
     ),
     overlay: pw.ChartLegend(
       position: const pw.Alignment(-.7, 1),
       decoration: pw.BoxDecoration(
         color: PdfColors.white,
-        border: pw.Border.all(
-          color: PdfColors.black,
-          width: .5,
-        ),
+        border: pw.Border.all(color: PdfColors.black, width: .5),
       ),
     ),
     grid: pw.CartesianGrid(
       xAxis: pw.FixedAxis.fromStrings(
         List<String>.generate(
-            dataTable.length, (index) => dataTable[index][0] as String),
+          dataTable.length,
+          (index) => dataTable[index][0] as String,
+        ),
         marginStart: 30,
         marginEnd: 30,
         ticks: true,
@@ -96,13 +94,10 @@ Future<Uint8List> generateReport(
         width: 15,
         offset: -10,
         borderColor: baseColor,
-        data: List<pw.PointChartValue>.generate(
-          dataTable.length,
-          (i) {
-            final v = dataTable[i][2] as num;
-            return pw.PointChartValue(i.toDouble(), v.toDouble());
-          },
-        ),
+        data: List<pw.PointChartValue>.generate(dataTable.length, (i) {
+          final v = dataTable[i][2] as num;
+          return pw.PointChartValue(i.toDouble(), v.toDouble());
+        }),
       ),
       pw.BarDataSet(
         color: PdfColors.amber100,
@@ -110,13 +105,10 @@ Future<Uint8List> generateReport(
         width: 15,
         offset: 10,
         borderColor: PdfColors.amber,
-        data: List<pw.PointChartValue>.generate(
-          dataTable.length,
-          (i) {
-            final v = dataTable[i][1] as num;
-            return pw.PointChartValue(i.toDouble(), v.toDouble());
-          },
-        ),
+        data: List<pw.PointChartValue>.generate(dataTable.length, (i) {
+          final v = dataTable[i][1] as num;
+          return pw.PointChartValue(i.toDouble(), v.toDouble());
+        }),
       ),
     ],
   );
@@ -126,10 +118,7 @@ Future<Uint8List> generateReport(
     right: pw.ChartLegend(),
     grid: pw.CartesianGrid(
       xAxis: pw.FixedAxis([0, 1, 2, 3, 4, 5, 6]),
-      yAxis: pw.FixedAxis(
-        [0, 200, 400, 600],
-        divisions: true,
-      ),
+      yAxis: pw.FixedAxis([0, 200, 400, 600], divisions: true),
     ),
     datasets: [
       pw.LineDataSet(
@@ -138,13 +127,10 @@ Future<Uint8List> generateReport(
         isCurved: true,
         drawPoints: false,
         color: baseColor,
-        data: List<pw.PointChartValue>.generate(
-          dataTable.length,
-          (i) {
-            final v = dataTable[i][2] as num;
-            return pw.PointChartValue(i.toDouble(), v.toDouble());
-          },
-        ),
+        data: List<pw.PointChartValue>.generate(dataTable.length, (i) {
+          final v = dataTable[i][2] as num;
+          return pw.PointChartValue(i.toDouble(), v.toDouble());
+        }),
       ),
     ],
   );
@@ -166,16 +152,9 @@ Future<Uint8List> generateReport(
       color: PdfColors.white,
       fontWeight: pw.FontWeight.bold,
     ),
-    headerDecoration: const pw.BoxDecoration(
-      color: baseColor,
-    ),
+    headerDecoration: const pw.BoxDecoration(color: baseColor),
     rowDecoration: const pw.BoxDecoration(
-      border: pw.Border(
-        bottom: pw.BorderSide(
-          color: baseColor,
-          width: .5,
-        ),
-      ),
+      border: pw.Border(bottom: pw.BorderSide(color: baseColor, width: .5)),
     ),
     cellAlignment: pw.Alignment.centerRight,
     cellAlignments: {0: pw.Alignment.centerLeft},
@@ -190,11 +169,10 @@ Future<Uint8List> generateReport(
         // Page layout
         return pw.Column(
           children: [
-            pw.Text('Budget Report',
-                style: const pw.TextStyle(
-                  color: baseColor,
-                  fontSize: 40,
-                )),
+            pw.Text(
+              'Budget Report',
+              style: const pw.TextStyle(color: baseColor, fontSize: 40),
+            ),
             pw.Divider(thickness: 4),
             pw.Expanded(flex: 3, child: chart1),
             pw.Divider(),
@@ -204,23 +182,26 @@ Future<Uint8List> generateReport(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Expanded(
-                    child: pw.Column(children: [
-                  pw.Container(
-                    alignment: pw.Alignment.centerLeft,
-                    padding: const pw.EdgeInsets.only(bottom: 10),
-                    child: pw.Text(
-                      'Expense By Sub-Categories',
-                      style: const pw.TextStyle(
-                        color: baseColor,
-                        fontSize: 16,
+                  child: pw.Column(
+                    children: [
+                      pw.Container(
+                        alignment: pw.Alignment.centerLeft,
+                        padding: const pw.EdgeInsets.only(bottom: 10),
+                        child: pw.Text(
+                          'Expense By Sub-Categories',
+                          style: const pw.TextStyle(
+                            color: baseColor,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
-                    ),
+                      pw.Text(
+                        'Total expenses are broken into different categories for closer look into where the money was spent.',
+                        textAlign: pw.TextAlign.justify,
+                      ),
+                    ],
                   ),
-                  pw.Text(
-                    'Total expenses are broken into different categories for closer look into where the money was spent.',
-                    textAlign: pw.TextAlign.justify,
-                  )
-                ])),
+                ),
                 pw.SizedBox(width: 10),
                 pw.Expanded(
                   child: pw.Column(
@@ -239,7 +220,7 @@ Future<Uint8List> generateReport(
                       pw.Text(
                         'Budget was originally \$$budget. A total of \$$expense was spent on the month of January which exceeded the overall budget by \$${expense - budget}',
                         textAlign: pw.TextAlign.justify,
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -273,10 +254,7 @@ Future<Uint8List> generateReport(
               child: pw.Chart(
                 title: pw.Text(
                   'Expense breakdown',
-                  style: const pw.TextStyle(
-                    color: baseColor,
-                    fontSize: 20,
-                  ),
+                  style: const pw.TextStyle(color: baseColor, fontSize: 20),
                 ),
                 grid: pw.PieGrid(),
                 datasets: List<pw.Dataset>.generate(dataTable.length, (index) {

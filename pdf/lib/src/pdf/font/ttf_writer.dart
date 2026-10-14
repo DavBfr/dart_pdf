@@ -42,18 +42,36 @@ class TtfWriter {
 
   void _updateCompoundGlyph(TtfGlyphInfo glyph, Map<int, int?> compoundMap) {
     const arg1And2AreWords = 1;
+    const weHaveAScale = 8;
     const moreComponents = 32;
+    const weHaveAnXAndYScale = 64;
+    const weHaveATwoByTwo = 128;
 
     var offset = 10;
-    final bytes = glyph.data.buffer
-        .asByteData(glyph.data.offsetInBytes, glyph.data.lengthInBytes);
+    final bytes = glyph.data.buffer.asByteData(
+      glyph.data.offsetInBytes,
+      glyph.data.lengthInBytes,
+    );
     var flags = moreComponents;
 
     while (flags & moreComponents != 0) {
+      if (offset + 4 > bytes.lengthInBytes) {
+        break;
+      }
       flags = bytes.getUint16(offset);
       final glyphIndex = bytes.getUint16(offset + 2);
-      bytes.setUint16(offset + 2, compoundMap[glyphIndex]!);
+      final newIndex = compoundMap[glyphIndex];
+      if (newIndex != null) {
+        bytes.setUint16(offset + 2, newIndex);
+      }
       offset += (flags & arg1And2AreWords != 0) ? 8 : 6;
+      if (flags & weHaveAScale != 0) {
+        offset += 2;
+      } else if (flags & weHaveAnXAndYScale != 0) {
+        offset += 4;
+      } else if (flags & weHaveATwoByTwo != 0) {
+        offset += 8;
+      }
     }
   }
 
@@ -75,7 +93,10 @@ class TtfWriter {
     for (final char in chars) {
       if (char == 32) {
         final glyph = TtfGlyphInfo(
-            ttf.charToGlyphIndexMap[char]!, Uint8List(0), const <int>[]);
+          ttf.charToGlyphIndexMap[char]!,
+          Uint8List(0),
+          const <int>[],
+        );
         glyphsMap[glyph.index] = glyph;
         charMap[char] = glyph.index;
         continue;
@@ -109,7 +130,24 @@ class TtfWriter {
     for (final char in chars) {
       final glyphsIndex = charMap[char];
       if (glyphsIndex != null) {
-        glyphsInfo.add(glyphsMap[glyphsIndex] ?? glyphsMap.values.first);
+        final glyph = glyphsMap[glyphsIndex];
+        if (glyph != null) {
+          glyphsInfo.add(glyph);
+        } else if (glyphsMap.isNotEmpty) {
+          glyphsInfo.add(glyphsMap.values.first);
+        } else {
+          // The font has no glyph reachable for [char] AND every other glyph in the
+          // subset has already been consumed, so `glyphsMap.values.first` would throw
+          // `Bad state: No element`. Surface a clearer diagnostic that names the
+          // offending codepoint — this is typically a font/charset mismatch
+          // (e.g. Arabic Presentation Forms in a font with no Presentation glyphs).
+          throw Exception(
+            "Missing glyph for character '${String.fromCharCode(char)}' "
+            '(U+${char.toRadixString(16).toUpperCase().padLeft(4, '0')}) '
+            'in font ${ttf.fontName}. Use a font that includes this codepoint, '
+            'or strip/normalize the character before passing it to the PDF.',
+          );
+        }
         glyphsMap.remove(glyphsIndex);
       }
     }
@@ -118,8 +156,9 @@ class TtfWriter {
 
     // Add compound glyphs
     for (final compound in compounds.keys) {
-      final index = glyphsInfo
-          .firstWhere((TtfGlyphInfo glyph) => glyph.index == compound);
+      final index = glyphsInfo.firstWhere(
+        (TtfGlyphInfo glyph) => glyph.index == compound,
+      );
       compounds[compound] = glyphsInfo.indexOf(index);
       assert((compounds[compound] ?? 0) >= 0, 'Unable to find the glyph');
     }
@@ -133,8 +172,9 @@ class TtfWriter {
 
     var glyphsTableLength = 0;
     for (final glyph in glyphsInfo) {
-      glyphsTableLength =
-          _wordAlign(glyphsTableLength + glyph.data.lengthInBytes);
+      glyphsTableLength = _wordAlign(
+        glyphsTableLength + glyph.data.lengthInBytes,
+      );
     }
     var offset = 0;
     final glyphsTable = Uint8List(_wordAlign(glyphsTableLength));
@@ -143,12 +183,14 @@ class TtfWriter {
 
     // Loca
     if (ttf.indexToLocFormat == 0) {
-      tables[TtfParser.loca_table] =
-          Uint8List(_wordAlign((glyphsInfo.length + 1) * 2)); // uint16
+      tables[TtfParser.loca_table] = Uint8List(
+        _wordAlign((glyphsInfo.length + 1) * 2),
+      ); // uint16
       tablesLength[TtfParser.loca_table] = (glyphsInfo.length + 1) * 2;
     } else {
-      tables[TtfParser.loca_table] =
-          Uint8List(_wordAlign((glyphsInfo.length + 1) * 4)); // uint32
+      tables[TtfParser.loca_table] = Uint8List(
+        _wordAlign((glyphsInfo.length + 1) * 4),
+      ); // uint32
       tablesLength[TtfParser.loca_table] = (glyphsInfo.length + 1) * 4;
     }
 
@@ -186,30 +228,32 @@ class TtfWriter {
       }
       final len = ttf.tableSize[tn]!;
       final data = Uint8List.fromList(
-          ttf.bytes.buffer.asUint8List(start, _wordAlign(len)));
+        ttf.bytes.buffer.asUint8List(start, _wordAlign(len)),
+      );
       tables[tn] = data;
       tablesLength[tn] = len;
     }
 
-    tables[TtfParser.head_table]!
-        .buffer
-        .asByteData()
-        .setUint32(8, 0); // checkSumAdjustment
-    tables[TtfParser.maxp_table]!
-        .buffer
-        .asByteData()
-        .setUint16(4, glyphsInfo.length);
-    tables[TtfParser.hhea_table]!
-        .buffer
-        .asByteData()
-        .setUint16(34, glyphsInfo.length); // numOfLongHorMetrics
+    tables[TtfParser.head_table]!.buffer.asByteData().setUint32(
+      8,
+      0,
+    ); // checkSumAdjustment
+    tables[TtfParser.maxp_table]!.buffer.asByteData().setUint16(
+      4,
+      glyphsInfo.length,
+    );
+    tables[TtfParser.hhea_table]!.buffer.asByteData().setUint16(
+      34,
+      glyphsInfo.length,
+    ); // numOfLongHorMetrics
 
     {
       // post Table
       final start = ttf.tableOffsets[TtfParser.post_table]!;
       const len = 32;
       final data = Uint8List.fromList(
-          ttf.bytes.buffer.asUint8List(start, _wordAlign(len)));
+        ttf.bytes.buffer.asUint8List(start, _wordAlign(len)),
+      );
       data.buffer.asByteData().setUint32(0, 0x00030000); // Version 3.0 no names
       tables[TtfParser.post_table] = data;
       tablesLength[TtfParser.post_table] = len;
@@ -222,8 +266,9 @@ class TtfWriter {
       final hmtxOffset = ttf.tableOffsets[TtfParser.hmtx_table]!;
       final hmtxData = hmtx.buffer.asByteData();
       final numOfLongHorMetrics = ttf.numOfLongHorMetrics;
-      final defaultAdvanceWidth =
-          ttf.bytes.getUint16(hmtxOffset + (numOfLongHorMetrics - 1) * 4);
+      final defaultAdvanceWidth = ttf.bytes.getUint16(
+        hmtxOffset + (numOfLongHorMetrics - 1) * 4,
+      );
       var index = 0;
       for (final glyph in glyphsInfo) {
         final advanceWidth = glyph.index < numOfLongHorMetrics
@@ -231,9 +276,11 @@ class TtfWriter {
             : defaultAdvanceWidth;
         final leftBearing = glyph.index < numOfLongHorMetrics
             ? ttf.bytes.getInt16(hmtxOffset + glyph.index * 4 + 2)
-            : ttf.bytes.getInt16(hmtxOffset +
-                numOfLongHorMetrics * 4 +
-                (glyph.index - numOfLongHorMetrics) * 2);
+            : ttf.bytes.getInt16(
+                hmtxOffset +
+                    numOfLongHorMetrics * 4 +
+                    (glyph.index - numOfLongHorMetrics) * 2,
+              );
         hmtxData.setUint16(index, advanceWidth);
         hmtxData.setInt16(index + 2, leftBearing);
         index += 4;
@@ -318,8 +365,10 @@ class TtfWriter {
         start.setUint8(12 + count * 16 + 1, runes[1]);
         start.setUint8(12 + count * 16 + 2, runes[2]);
         start.setUint8(12 + count * 16 + 3, runes[3]);
-        start.setUint32(12 + count * 16 + 4,
-            _calcTableChecksum(data.buffer.asByteData())); // checkSum
+        start.setUint32(
+          12 + count * 16 + 4,
+          _calcTableChecksum(data.buffer.asByteData()),
+        ); // checkSum
         start.setUint32(12 + count * 16 + 8, offset); // offset
         start.setUint32(12 + count * 16 + 12, tablesLength[name]!); // length
 
@@ -339,9 +388,10 @@ class TtfWriter {
       final output = bytes.toBytes();
 
       final crc = 0xB1B0AFBA - _calcTableChecksum(output.buffer.asByteData());
-      output.buffer
-          .asByteData()
-          .setUint32(headOffset + 8, crc & 0xffffffff); // checkSumAdjustment
+      output.buffer.asByteData().setUint32(
+        headOffset + 8,
+        crc & 0xffffffff,
+      ); // checkSumAdjustment
 
       return output;
     }

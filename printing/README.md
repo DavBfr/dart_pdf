@@ -49,7 +49,7 @@ for documentation.
 
    ```html
    <script>
-     var dartPdfJsVersion = "3.2.146";
+     var dartPdfJsVersion = "6.2.108";
    </script>
    ```
     5.1. If you want to manually set the alternative location for loading Pdf.js library for the web, the following script has to be added to your `web/index.html` file, just before `</head>`.

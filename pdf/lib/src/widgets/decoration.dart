@@ -49,18 +49,26 @@ class DecorationImage extends DecorationGraphic {
   void paint(Context context, PdfRect box) {
     final _image = image.resolve(context, box.size, dpi: dpi);
 
-    final imageSize =
-        PdfPoint(_image.width.toDouble(), _image.height.toDouble());
+    final imageSize = PdfPoint(
+      _image.width.toDouble(),
+      _image.height.toDouble(),
+    );
     final sizes = applyBoxFit(fit, imageSize, box.size);
     final scaleX = sizes.destination!.x / sizes.source!.x;
     final scaleY = sizes.destination!.y / sizes.source!.y;
     final sourceRect = alignment.inscribe(
-        sizes.source!, PdfRect.fromPoints(PdfPoint.zero, imageSize));
+      sizes.source!,
+      PdfRect.fromPoints(PdfPoint.zero, imageSize),
+    );
     final destinationRect = alignment.inscribe(sizes.destination!, box);
     final mat =
-        Matrix4.translationValues(destinationRect.x, destinationRect.y, 0)
-          ..scale(scaleX, scaleY, 1)
-          ..translate(-sourceRect.x, -sourceRect.y);
+        Matrix4.translationValues(
+            destinationRect.left,
+            destinationRect.bottom,
+            0,
+          )
+          ..scaleByDouble(scaleX, scaleY, 1, 1)
+          ..translateByDouble(-sourceRect.left, -sourceRect.bottom, 0, 1);
 
     context.canvas
       ..saveContext()
@@ -88,10 +96,7 @@ enum TileMode {
 @immutable
 abstract class Gradient {
   /// Initialize the gradient's colors and stops.
-  const Gradient({
-    required this.colors,
-    this.stops,
-  });
+  const Gradient({required this.colors, this.stops});
 
   final List<PdfColor> colors;
 
@@ -277,8 +282,9 @@ class BoxDecoration {
     PdfRect box, [
     PaintPhase phase = PaintPhase.all,
   ]) {
-    final resolvedBorderRadius =
-        borderRadius?.resolve(Directionality.of(context));
+    final resolvedBorderRadius = borderRadius?.resolve(
+      Directionality.of(context),
+    );
     if (phase == PaintPhase.all || phase == PaintPhase.background) {
       if (color != null) {
         switch (shape) {
@@ -286,13 +292,18 @@ class BoxDecoration {
             if (resolvedBorderRadius == null) {
               if (boxShadow != null) {
                 for (final s in boxShadow!) {
-                  final i = PdfRasterBase.shadowRect(box.width, box.height,
-                      s.spreadRadius, s.blurRadius, s.color);
+                  final i = PdfRasterBase.shadowRect(
+                    box.width,
+                    box.height,
+                    s.spreadRadius,
+                    s.blurRadius,
+                    s.color,
+                  );
                   final m = PdfImage.fromImage(context.document, image: i);
                   context.canvas.drawImage(
                     m,
-                    box.x + s.offset.x - s.spreadRadius,
-                    box.y - s.offset.y - s.spreadRadius,
+                    box.left + s.offset.x - s.spreadRadius,
+                    box.bottom - s.offset.y - s.spreadRadius,
                   );
                 }
               }
@@ -300,13 +311,18 @@ class BoxDecoration {
             } else {
               if (boxShadow != null) {
                 for (final s in boxShadow!) {
-                  final i = PdfRasterBase.shadowRect(box.width, box.height,
-                      s.spreadRadius, s.blurRadius, s.color);
+                  final i = PdfRasterBase.shadowRect(
+                    box.width,
+                    box.height,
+                    s.spreadRadius,
+                    s.blurRadius,
+                    s.color,
+                  );
                   final m = PdfImage.fromImage(context.document, image: i);
                   context.canvas.drawImage(
                     m,
-                    box.x + s.offset.x - s.spreadRadius,
-                    box.y - s.offset.y - s.spreadRadius,
+                    box.left + s.offset.x - s.spreadRadius,
+                    box.bottom - s.offset.y - s.spreadRadius,
                   );
                 }
               }
@@ -316,18 +332,27 @@ class BoxDecoration {
           case BoxShape.circle:
             if (boxShadow != null && box.width == box.height) {
               for (final s in boxShadow!) {
-                final i = PdfRasterBase.shadowEllipse(box.width, box.height,
-                    s.spreadRadius, s.blurRadius, s.color);
+                final i = PdfRasterBase.shadowEllipse(
+                  box.width,
+                  box.height,
+                  s.spreadRadius,
+                  s.blurRadius,
+                  s.color,
+                );
                 final m = PdfImage.fromImage(context.document, image: i);
                 context.canvas.drawImage(
                   m,
-                  box.x + s.offset.x - s.spreadRadius,
-                  box.y - s.offset.y - s.spreadRadius,
+                  box.left + s.offset.x - s.spreadRadius,
+                  box.bottom - s.offset.y - s.spreadRadius,
                 );
               }
             }
-            context.canvas.drawEllipse(box.x + box.width / 2.0,
-                box.y + box.height / 2.0, box.width / 2.0, box.height / 2.0);
+            context.canvas.drawEllipse(
+              box.left + box.width / 2.0,
+              box.bottom + box.height / 2.0,
+              box.width / 2.0,
+              box.height / 2.0,
+            );
             break;
         }
         context.canvas
@@ -345,8 +370,12 @@ class BoxDecoration {
             }
             break;
           case BoxShape.circle:
-            context.canvas.drawEllipse(box.x + box.width / 2.0,
-                box.y + box.height / 2.0, box.width / 2.0, box.height / 2.0);
+            context.canvas.drawEllipse(
+              box.left + box.width / 2.0,
+              box.bottom + box.height / 2.0,
+              box.width / 2.0,
+              box.height / 2.0,
+            );
             break;
         }
 
@@ -358,8 +387,12 @@ class BoxDecoration {
         switch (shape) {
           case BoxShape.circle:
             context.canvas
-              ..drawEllipse(box.x + box.width / 2.0, box.y + box.height / 2.0,
-                  box.width / 2.0, box.height / 2.0)
+              ..drawEllipse(
+                box.left + box.width / 2.0,
+                box.bottom + box.height / 2.0,
+                box.width / 2.0,
+                box.height / 2.0,
+              )
               ..clipPath();
 
             break;

@@ -200,11 +200,7 @@ class _OutlineBuilder {
       MultiPage(
         build: (Context context) => <Widget>[
           for (int i = 0; i < _titles.length; i++)
-            Outline(
-              name: 'anchor$i',
-              title: _titles[i],
-              level: _levels[i],
-            )
+            Outline(name: 'anchor$i', title: _titles[i], level: _levels[i]),
         ],
       ),
     );

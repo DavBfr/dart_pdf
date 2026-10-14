@@ -42,21 +42,23 @@ class BarDataSet<T extends PointChartValue> extends PointDataSet<T> {
     BuildCallback? shape,
     Widget Function(Context context, T value)? buildValue,
     ValuePosition valuePosition = ValuePosition.auto,
-  })  : drawBorder = drawBorder ?? borderColor != null && color != borderColor,
-        assert((drawBorder ?? borderColor != null && color != borderColor) ||
-            drawSurface),
-        super(
-          legend: legend,
-          color: pointColor ?? color,
-          data: data,
-          buildValue: buildValue,
-          drawPoints: drawPoints,
-          pointSize: pointSize,
-          shape: shape,
-          valuePosition: valuePosition,
-          borderColor: borderColor,
-          borderWidth: borderWidth,
-        );
+  }) : drawBorder = drawBorder ?? borderColor != null && color != borderColor,
+       assert(
+         (drawBorder ?? borderColor != null && color != borderColor) ||
+             drawSurface,
+       ),
+       super(
+         legend: legend,
+         color: pointColor ?? color,
+         data: data,
+         buildValue: buildValue,
+         drawPoints: drawPoints,
+         pointSize: pointSize,
+         shape: shape,
+         valuePosition: valuePosition,
+         borderColor: borderColor,
+         borderWidth: borderWidth,
+       );
 
   final bool drawBorder;
 
@@ -91,8 +93,11 @@ class BarDataSet<T extends PointChartValue> extends PointDataSet<T> {
   }
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
   }
 
@@ -114,9 +119,7 @@ class BarDataSet<T extends PointChartValue> extends PointDataSet<T> {
       if (surfaceOpacity != 1) {
         context.canvas
           ..saveContext()
-          ..setGraphicState(
-            PdfGraphicState(opacity: surfaceOpacity),
-          );
+          ..setGraphicState(PdfGraphicState(opacity: surfaceOpacity));
       }
 
       context.canvas

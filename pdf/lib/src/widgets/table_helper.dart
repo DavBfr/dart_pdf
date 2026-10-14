@@ -24,6 +24,10 @@ import 'text_style.dart';
 import 'theme.dart';
 import 'widget.dart';
 
+typedef OnCell = Widget? Function(int index, dynamic data, int rowNum);
+typedef OnCellTextStyle =
+    TextStyle? Function(int index, dynamic data, int rowNum);
+
 mixin TableHelper {
   static TextAlign _textAlign(Alignment align) {
     if (align.x == 0) {
@@ -71,6 +75,8 @@ mixin TableHelper {
     BoxDecoration? oddRowDecoration,
     TextDirection? headerDirection,
     TextDirection? tableDirection,
+    OnCell? cellBuilder,
+    OnCellTextStyle? textStyleBuilder,
   }) {
     assert(headerCount >= 0);
 
@@ -112,16 +118,19 @@ mixin TableHelper {
           ),
         );
       }
-      rows.add(TableRow(
-        children: tableRow,
-        repeat: true,
-        decoration: headerDecoration,
-      ));
+      rows.add(
+        TableRow(
+          children: tableRow,
+          repeat: true,
+          decoration: headerDecoration,
+        ),
+      );
       rowNum++;
     }
 
-    final textDirection =
-        context == null ? TextDirection.ltr : Directionality.of(context);
+    final textDirection = context == null
+        ? TextDirection.ltr
+        : Directionality.of(context);
     for (final row in data) {
       final tableRow = <Widget>[];
       final isOdd = (rowNum - headerCount) % 2 != 0;
@@ -161,14 +170,21 @@ mixin TableHelper {
                   : cellDecoration(tableRow.length, cell, rowNum),
               child: cell is Widget
                   ? cell
-                  : Text(
-                      cellFormat == null
-                          ? cell.toString()
-                          : cellFormat(tableRow.length, cell),
-                      style: isOdd ? oddCellStyle : cellStyle,
-                      textAlign: _textAlign(align.resolve(textDirection)),
-                      textDirection: tableDirection,
-                    ),
+                  : cellBuilder?.call(tableRow.length, cell, rowNum) ??
+                        Text(
+                          cellFormat == null
+                              ? cell.toString()
+                              : cellFormat(tableRow.length, cell),
+                          style:
+                              textStyleBuilder?.call(
+                                tableRow.length,
+                                cell,
+                                rowNum,
+                              ) ??
+                              (isOdd ? oddCellStyle : cellStyle),
+                          textAlign: _textAlign(align.resolve(textDirection)),
+                          textDirection: tableDirection,
+                        ),
             ),
           );
         }
@@ -179,11 +195,13 @@ mixin TableHelper {
         decoration = headerDecoration;
       }
 
-      rows.add(TableRow(
-        children: tableRow,
-        repeat: rowNum < headerCount,
-        decoration: decoration,
-      ));
+      rows.add(
+        TableRow(
+          children: tableRow,
+          repeat: rowNum < headerCount,
+          decoration: decoration,
+        ),
+      );
       rowNum++;
     }
     return Table(

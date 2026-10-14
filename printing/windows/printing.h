@@ -17,12 +17,15 @@
 #ifndef PRINTING_PLUGIN_PRINTING_H_
 #define PRINTING_PLUGIN_PRINTING_H_
 
+#include <windows.h>
+
 #include <map>
 #include <memory>
 #include <sstream>
 #include <vector>
 
 #include <flutter/method_channel.h>
+#include <flutter/plugin_registrar_windows.h>
 
 namespace nfet {
 
@@ -30,10 +33,18 @@ class PrintJob;
 
 class Printing {
  private:
+  flutter::MethodChannel<flutter::EncodableValue>* channel;
+  flutter::PluginRegistrarWindows* registrar;
+
  public:
-  Printing();
+  Printing(flutter::MethodChannel<flutter::EncodableValue>* channel,
+           flutter::PluginRegistrarWindows* registrar);
 
   virtual ~Printing();
+
+  // Top-level window of the engine owning this plugin instance, or nullptr.
+  // Resolved on demand: the view is reparented after plugin registration.
+  HWND getWindow();
 
   void onPageRasterized(std::vector<uint8_t> data,
                         int width,
@@ -50,9 +61,7 @@ class Printing {
                 double marginRight,
                 double marginBottom);
 
-  void Printing::onCompleted(PrintJob* job,
-                             bool completed,
-                             const std::string& error);
+  void onCompleted(PrintJob* job, bool completed, const std::string& error);
 };
 
 }  // namespace nfet

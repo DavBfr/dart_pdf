@@ -32,15 +32,11 @@ void main() {
     RichText.debug = true;
     pdf = Document();
 
-    image = MemoryImage(
-      await download('https://www.nfet.net/nfet.jpg'),
-    );
+    image = MemoryImage(await download('https://www.nfet.net/nfet.jpg'));
   });
 
   test('Pdf Jpeg Download', () async {
-    pdf.addPage(Page(
-      build: (Context context) => Center(child: Image(image)),
-    ));
+    pdf.addPage(Page(build: (Context context) => Center(child: Image(image))));
   });
 
   test('Pdf Jpeg Orientations', () {
@@ -51,11 +47,7 @@ void main() {
           crossAxisSpacing: 10,
           children: List<Widget>.generate(
             images.length,
-            (int index) => Image(
-              MemoryImage(
-                base64.decode(images[index]),
-              ),
-            ),
+            (int index) => Image(MemoryImage(base64.decode(images[index]))),
           ),
         ),
       ),
@@ -67,16 +59,13 @@ void main() {
       MultiPage(
         build: (Context context) =>
             List<Widget>.generate(BoxFit.values.length, (int index) {
-          final fit = BoxFit.values[index];
-          return SizedBox(
-            width: 200,
-            height: 100,
-            child: Image(
-              image,
-              fit: fit,
-            ),
-          );
-        }),
+              final fit = BoxFit.values[index];
+              return SizedBox(
+                width: 200,
+                height: 100,
+                child: Image(image, fit: fit),
+              );
+            }),
       ),
     );
   });
@@ -85,9 +74,7 @@ void main() {
     final imageWidgets = imageFiles.map<Widget>(
       (String image) => SizedBox(
         child: Image(
-          MemoryImage(
-            Uint8List.fromList(gzip.decode(base64.decode(image))),
-          ),
+          MemoryImage(Uint8List.fromList(gzip.decode(base64.decode(image)))),
         ),
         width: 200,
         height: 200,
@@ -128,5 +115,5 @@ const List<String> images = <String>[
 const List<String> imageFiles = <String>[
   'H4sIAKx0cl4AA/t/4/8DBgEvN083BkZGRgYPIGT4f5vBmeE/pQBoCCPFhhxgEORgUGQwYmZUYmASZGQWZPx/hEEM7FQUwMgEFBcVQBdmEAQJY6hmAJkiIoguyvD/FgMPMyPQImZBBnuGVU0LGLS1GpoaVqiyCi1lm8gY4iDK4MAYwMDA/v8mAIKohPQ4AQAA',
   'H4sIAAV2cl4AA+sM8HPn5ZLiYmBg4PX0cAkC0kZArMjBBCRF5PMvAylTTxfHkIjDb88ZMjIYcDAoxP5XM9vcsvrBS0bOEy+7quPmLFmKDrZ+Yjx0ienafeXk7UADGDxd/VzWOSU0AQCMWbgebgAAAA==',
-  'H4sIAFZ2cl4AA3P3dLMwTzRiUGRoYGDIXCUJRDoMQAASYWBSb+lfefot/+I5W251b7635zd/2yOPac86l706te0d9/FPPte/9T7/de41K4M1ANAWLyFIAAAA'
+  'H4sIAFZ2cl4AA3P3dLMwTzRiUGRoYGDIXCUJRDoMQAASYWBSb+lfefot/+I5W251b7635zd/2yOPac86l706te0d9/FPPte/9T7/de41K4M1ANAWLyFIAAAA',
 ];

@@ -86,7 +86,7 @@ abstract class _Span {
 
 class _TextDecoration {
   _TextDecoration(this.style, this.annotation, this.startSpan, this.endSpan)
-      : assert(startSpan <= endSpan);
+    : assert(startSpan <= endSpan);
 
   static const double _space = -0.15;
 
@@ -118,7 +118,7 @@ class _TextDecoration {
       y2 = math.max(y2, ny2);
     }
 
-    _box = PdfRect.fromLTRB(x1, y1, x2, y2);
+    _box = PdfRect.fromLBRT(x1, y1, x2, y2);
     return _box;
   }
 
@@ -135,7 +135,7 @@ class _TextDecoration {
 
     if (annotation != null) {
       final spanBox = PdfRect(
-        globalBox!.x + box!.left,
+        globalBox!.left + box!.left,
         globalBox.top + box.bottom,
         box.width,
         box.height,
@@ -145,7 +145,7 @@ class _TextDecoration {
 
     if (style.background != null) {
       final boundingBox = PdfRect(
-        globalBox!.x + box!.left,
+        globalBox!.left + box!.left,
         globalBox.top + box.bottom,
         box.width,
         box.height,
@@ -173,16 +173,15 @@ class _TextDecoration {
 
     context.canvas
       ..setStrokeColor(style.decorationColor ?? style.color)
-      ..setLineWidth(style.decorationThickness! *
-          style.fontSize! *
-          textScaleFactor *
-          0.05);
+      ..setLineWidth(
+        style.decorationThickness! * style.fontSize! * textScaleFactor * 0.05,
+      );
 
     if (style.decoration!.contains(TextDecoration.underline)) {
       final base = -font.descent * style.fontSize! * textScaleFactor / 2;
       final l = box!.left;
       final r = box.right;
-      final x = globalBox!.x;
+      final x = globalBox!.left;
       context.canvas.drawLine(
         x + l,
         globalBox.top + box.bottom + base,
@@ -191,9 +190,9 @@ class _TextDecoration {
       );
       if (style.decorationStyle == TextDecorationStyle.double) {
         context.canvas.drawLine(
-          globalBox.x + box.left,
+          globalBox.left + box.left,
           globalBox.top + box.bottom + base + space,
-          globalBox.x + box.right,
+          globalBox.left + box.right,
           globalBox.top + box.bottom + base + space,
         );
       }
@@ -203,16 +202,16 @@ class _TextDecoration {
     if (style.decoration!.contains(TextDecoration.overline)) {
       final base = style.fontSize! * textScaleFactor;
       context.canvas.drawLine(
-        globalBox!.x + box!.left,
+        globalBox!.left + box!.left,
         globalBox.top + box.bottom + base,
-        globalBox.x + box.right,
+        globalBox.left + box.right,
         globalBox.top + box.bottom + base,
       );
       if (style.decorationStyle == TextDecorationStyle.double) {
         context.canvas.drawLine(
-          globalBox.x + box.left,
+          globalBox.left + box.left,
           globalBox.top + box.bottom + base - space,
-          globalBox.x + box.right,
+          globalBox.left + box.right,
           globalBox.top + box.bottom + base - space,
         );
       }
@@ -222,16 +221,16 @@ class _TextDecoration {
     if (style.decoration!.contains(TextDecoration.lineThrough)) {
       final base = (1 - font.descent) * style.fontSize! * textScaleFactor / 2;
       context.canvas.drawLine(
-        globalBox!.x + box!.left,
+        globalBox!.left + box!.left,
         globalBox.top + box.bottom + base,
-        globalBox.x + box.right,
+        globalBox.left + box.right,
         globalBox.top + box.bottom + base,
       );
       if (style.decorationStyle == TextDecorationStyle.double) {
         context.canvas.drawLine(
-          globalBox.x + box.left,
+          globalBox.left + box.left,
           globalBox.top + box.bottom + base + space,
-          globalBox.x + box.right,
+          globalBox.left + box.right,
           globalBox.top + box.bottom + base + space,
         );
       }
@@ -250,18 +249,37 @@ class _TextDecoration {
     context.canvas
       ..setLineWidth(.5)
       ..drawRect(
-          globalBox.x + box.x, globalBox.top + box.y, box.width, box.height)
+        globalBox.left + box.left,
+        globalBox.top + box.bottom,
+        box.width,
+        box.height,
+      )
       ..setStrokeColor(PdfColors.yellow)
       ..strokePath();
   }
 }
 
+/// The word-split pattern, hoisted so layout does not rebuild it per line.
+final RegExp _splitWhitespace = RegExp(r'\s');
+
+/// Whether [s] is entirely printable ASCII with no space — text that cannot
+/// contain a word or line break under `\n` and [_splitWhitespace]. Kept
+/// deliberately narrower than "no ASCII whitespace": `\s` also matches
+/// Unicode whitespace such as U+00A0 and U+2000–U+200A, so any code unit
+/// outside printable ASCII disqualifies the string rather than risk
+/// reclassifying an exotic space as a word character.
+bool _isSingleAsciiWord(String s) {
+  for (var i = 0; i < s.length; i++) {
+    final c = s.codeUnitAt(i);
+    if (c <= 0x20 || c >= 0x7f) {
+      return false;
+    }
+  }
+  return true;
+}
+
 class _Word extends _Span {
-  _Word(
-    this.text,
-    TextStyle style,
-    this.metrics,
-  ) : super(style);
+  _Word(this.text, TextStyle style, this.metrics) : super(style);
 
   final String text;
 
@@ -303,24 +321,25 @@ class _Word extends _Span {
   }
 
   @override
-  void debugPaint(
-    Context context,
-    double textScaleFactor,
-    PdfRect? globalBox,
-  ) {
+  void debugPaint(Context context, double textScaleFactor, PdfRect? globalBox) {
     const deb = 5;
 
     context.canvas
       ..setLineWidth(.5)
-      ..drawRect(globalBox!.x + offset.x + metrics.left,
-          globalBox.top + offset.y + metrics.top, metrics.width, metrics.height)
+      ..drawRect(
+        globalBox!.left + offset.x + metrics.left,
+        globalBox.top + offset.y + metrics.top,
+        metrics.width,
+        metrics.height,
+      )
       ..setStrokeColor(PdfColors.orange)
       ..strokePath()
       ..drawLine(
-          globalBox.x + offset.x - deb,
-          globalBox.top + offset.y,
-          globalBox.x + offset.x + metrics.right + deb,
-          globalBox.top + offset.y)
+        globalBox.left + offset.x - deb,
+        globalBox.top + offset.y,
+        globalBox.left + offset.x + metrics.right + deb,
+        globalBox.top + offset.y,
+      )
       ..setStrokeColor(PdfColors.deepPurple)
       ..strokePath();
   }
@@ -366,30 +385,30 @@ class _WidgetSpan extends _Span {
     PdfPoint point,
   ) {
     widget.box = PdfRect.fromPoints(
-        PdfPoint(
-            point.x + widget.box!.offset.x, point.y + widget.box!.offset.y),
-        widget.box!.size);
+      PdfPoint(point.x + widget.box!.offset.x, point.y + widget.box!.offset.y),
+      widget.box!.size,
+    );
     widget.paint(context);
   }
 
   @override
-  void debugPaint(
-    Context context,
-    double textScaleFactor,
-    PdfRect? globalBox,
-  ) {
+  void debugPaint(Context context, double textScaleFactor, PdfRect? globalBox) {
     const deb = 5;
 
     context.canvas
       ..setLineWidth(.5)
       ..drawRect(
-          globalBox!.x + offset.x, globalBox.top + offset.y, width, height)
+        globalBox!.left + offset.x,
+        globalBox.top + offset.y,
+        width,
+        height,
+      )
       ..setStrokeColor(PdfColors.orange)
       ..strokePath()
       ..drawLine(
-        globalBox.x + offset.x - deb,
+        globalBox.left + offset.x - deb,
         globalBox.top + offset.y - baseline,
-        globalBox.x + offset.x + width + deb,
+        globalBox.left + offset.x + width + deb,
         globalBox.top + offset.y - baseline,
       )
       ..setStrokeColor(PdfColors.deepPurple)
@@ -397,19 +416,16 @@ class _WidgetSpan extends _Span {
   }
 }
 
-typedef VisitorCallback = bool Function(
-  InlineSpan span,
-  TextStyle? parentStyle,
-  AnnotationBuilder? annotation,
-);
+typedef VisitorCallback =
+    bool Function(
+      InlineSpan span,
+      TextStyle? parentStyle,
+      AnnotationBuilder? annotation,
+    );
 
 @immutable
 abstract class InlineSpan {
-  const InlineSpan({
-    this.style,
-    required this.baseline,
-    this.annotation,
-  });
+  const InlineSpan({this.style, required this.baseline, this.annotation});
 
   final TextStyle? style;
 
@@ -425,16 +441,16 @@ abstract class InlineSpan {
 
   String toPlainText() {
     final buffer = StringBuffer();
-    visitChildren((
-      InlineSpan span,
-      TextStyle? style,
-      AnnotationBuilder? annotation,
-    ) {
-      if (span is TextSpan) {
-        buffer.write(span.text);
-      }
-      return true;
-    }, null, null);
+    visitChildren(
+      (InlineSpan span, TextStyle? style, AnnotationBuilder? annotation) {
+        if (span is TextSpan) {
+          buffer.write(span.text);
+        }
+        return true;
+      },
+      null,
+      null,
+    );
     return buffer.toString();
   }
 
@@ -462,13 +478,12 @@ class WidgetSpan extends InlineSpan {
     TextStyle? style,
     double? baseline,
     AnnotationBuilder? annotation,
-  }) =>
-      WidgetSpan(
-        child: child,
-        style: style ?? this.style,
-        baseline: baseline ?? this.baseline,
-        annotation: annotation ?? this.annotation,
-      );
+  }) => WidgetSpan(
+    child: child,
+    style: style ?? this.style,
+    baseline: baseline ?? this.baseline,
+    annotation: annotation ?? this.annotation,
+  );
 
   /// Calls `visitor` on this [WidgetSpan]. There are no children spans to walk.
   @override
@@ -502,14 +517,13 @@ class TextSpan extends InlineSpan {
     TextStyle? style,
     double? baseline,
     AnnotationBuilder? annotation,
-  }) =>
-      TextSpan(
-        style: style ?? this.style,
-        text: text,
-        baseline: baseline ?? this.baseline,
-        children: children,
-        annotation: annotation ?? this.annotation,
-      );
+  }) => TextSpan(
+    style: style ?? this.style,
+    text: text,
+    baseline: baseline ?? this.baseline,
+    children: children,
+    annotation: annotation ?? this.annotation,
+  );
 
   @override
   bool visitChildren(
@@ -662,6 +676,36 @@ class RichTextContext extends WidgetContext {
 
 typedef Hyphenation = List<String> Function(String word);
 
+/// Signature of a function that splits a line of text into words that may be
+/// wrapped independently.
+///
+/// By default, lines are split at whitespace, which means that scripts without
+/// word separators (Chinese, Japanese, Korean...) are treated as a single
+/// word and can only be broken by the hard-splitting fallback, without any
+/// line breaking rule (no prohibition of closing punctuation at the beginning
+/// of a line, etc.).
+///
+/// Providing a custom splitter enables script-aware line wrapping, for
+/// instance breaking between CJK characters, or implementing the Unicode Line
+/// Breaking Algorithm (UAX #14):
+///
+/// ```dart
+/// RichText(
+///   text: TextSpan(
+///     text: '你好，世界',
+///     // Each CJK character may wrap independently. Spaces are not inserted
+///     // between the words, so the space width must be cleared.
+///     style: TextStyle(font: myCjkFont, wordSpacing: 0),
+///   ),
+///   lineSplitter: (line) => line.split(''),
+/// );
+/// ```
+///
+/// Whitespace runs must be returned the same way [String.split] does (as empty
+/// strings) when they are expected to keep their width, so that the default
+/// behavior is preserved for mixed content.
+typedef LineSplitter = List<String> Function(String line);
+
 class RichText extends Widget with SpanningWidget {
   RichText({
     required this.text,
@@ -673,6 +717,7 @@ class RichText extends Widget with SpanningWidget {
     this.maxLines,
     this.overflow = TextOverflow.visible,
     this.hyphenation,
+    this.lineSplitter,
   });
 
   static bool debug = false;
@@ -707,12 +752,19 @@ class RichText extends Widget with SpanningWidget {
 
   final Hyphenation? hyphenation;
 
+  /// A custom function to split lines of text into words that may be wrapped
+  /// independently. When `null` (the default), lines are split at whitespace.
+  ///
+  /// See [LineSplitter] for details and for an example enabling CJK wrapping.
+  final LineSplitter? lineSplitter;
+
   void _appendDecoration(bool append, _TextDecoration td) {
     if (append && _decorations.isNotEmpty) {
       final last = _decorations.last;
       if (last.style == td.style && last.annotation == td.annotation) {
-        _decorations[_decorations.length - 1] =
-            last.copyWith(endSpan: td.endSpan);
+        _decorations[_decorations.length - 1] = last.copyWith(
+          endSpan: td.endSpan,
+        );
         return;
       }
     }
@@ -763,10 +815,7 @@ class RichText extends Widget with SpanningWidget {
       child: SizedBox(
         height: style.fontSize,
         width: style.fontSize! / 2,
-        child: Placeholder(
-          color: style.color!,
-          strokeWidth: 1,
-        ),
+        child: Placeholder(color: style.color!, strokeWidth: 1),
       ),
       style: style,
       baseline: baseline,
@@ -781,104 +830,156 @@ class RichText extends Widget with SpanningWidget {
     final defaultStyle = theme.defaultTextStyle;
     final spans = <InlineSpan>[];
 
-    text.visitChildren((
-      InlineSpan span,
-      TextStyle? style,
-      AnnotationBuilder? annotation,
-    ) {
-      if (span is! TextSpan) {
-        spans.add(span.copyWith(style: style, annotation: annotation));
-        return true;
-      }
-      if (span.text == null) {
-        return true;
-      }
-
-      final baseFont = style!.font!.getFont(context);
-      final accumulatedRunes = <int>[];
-      var currentFont = baseFont;
-      var currentTextStyle = style;
-
-      void flushAccumulatedRunes() {
-        if (accumulatedRunes.isNotEmpty) {
-          spans.add(_addText(
-            text: accumulatedRunes,
-            style: currentTextStyle,
-            baseline: span.baseline,
-            annotation: annotation,
-          ));
-          accumulatedRunes.clear();
+    text.visitChildren(
+      (InlineSpan span, TextStyle? style, AnnotationBuilder? annotation) {
+        if (span is! TextSpan) {
+          spans.add(span.copyWith(style: style, annotation: annotation));
+          return true;
         }
-      }
-
-      final text = span.text!.runes.toList();
-      for (var index = 0; index < text.length; index++) {
-        final rune = text[index];
-        const spaces = {
-          0x0a, 0x09, 0x00A0, 0x1680, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, //
-          0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x202F, 0x205F, 0x3000
-        };
-
-        if (spaces.contains(rune)) {
-          accumulatedRunes.add(rune);
-          continue;
+        if (span.text == null) {
+          return true;
         }
 
-        // Check if the current font supports the rune
-        if (!currentFont.isRuneSupported(rune)) {
+        final baseFont = style!.font!.getFont(context);
+        final text = span.text!.runes.toList();
+
+        // Consecutive runes drawn with the same font stay in one span so
+        // complex scripts (Arabic) can be shaped as a whole word.
+        var runStart = 0;
+        var runFont = baseFont;
+        var runStyle = style;
+
+        void flushRun(int end) {
+          if (end > runStart) {
+            spans.add(
+              _addText(
+                text: text,
+                start: runStart,
+                end: end,
+                style: runStyle,
+                baseline: span.baseline,
+                annotation: annotation,
+              ),
+            );
+          }
+          runStart = end;
+        }
+
+        for (var index = 0; index < text.length; index++) {
+          final rune = text[index];
+          const spaces = {
+            0x0a,
+            0x09,
+            0x00A0,
+            0x1680,
+            0x2000,
+            0x2001,
+            0x2002,
+            0x2003,
+            0x2004, //
+            0x2005,
+            0x2006,
+            0x2007,
+            0x2008,
+            0x2009,
+            0x200A,
+            0x202F,
+            0x205F,
+            0x3000,
+          };
+          if (spaces.contains(rune)) {
+            continue;
+          }
+
+          if (baseFont.isRuneSupported(rune)) {
+            if (runFont != baseFont) {
+              flushRun(index);
+              runFont = baseFont;
+              runStyle = style;
+            }
+            continue;
+          }
+
           var found = false;
-          for (final fallback in style.fontFallback) {
-            final fallbackFont = fallback.getFont(context);
-
-            if (fallbackFont.isRuneSupported(rune)) {
-              // Check if the font has changed; only flush if the font is different
-              if (currentFont != fallbackFont) {
-                flushAccumulatedRunes();
-                currentFont = fallbackFont;
-                currentTextStyle = style.copyWith(
-                  font: fallback,
-                  fontNormal: fallback,
-                  fontBold: fallback,
-                  fontBoldItalic: fallback,
-                  fontItalic: fallback,
+          for (final fb in style.fontFallback) {
+            final font = fb.getFont(context);
+            if (font.isRuneSupported(rune)) {
+              if (font is PdfTtfFont) {
+                final bitmap = font.font.getBitmap(rune);
+                if (bitmap != null) {
+                  flushRun(index);
+                  spans.add(
+                    _addEmoji(
+                      bitmap: bitmap,
+                      style: style,
+                      baseline: span.baseline,
+                      annotation: annotation,
+                    ),
+                  );
+                  runStart = index + 1;
+                  found = true;
+                  break;
+                }
+              }
+              if (runFont != font) {
+                flushRun(index);
+                runFont = font;
+                runStyle = style.copyWith(
+                  font: fb,
+                  fontNormal: fb,
+                  fontBold: fb,
+                  fontBoldItalic: fb,
+                  fontItalic: fb,
                 );
               }
-              accumulatedRunes.add(rune);
               found = true;
               break;
             }
           }
-
           if (!found) {
-            flushAccumulatedRunes();  // Flush before adding placeholder
-            spans.add(_addPlaceholder(
-              style: style,
-              baseline: span.baseline,
-              annotation: annotation,
-            ));
+            flushRun(index);
+            spans.add(
+              _addPlaceholder(
+                style: style,
+                baseline: span.baseline,
+                annotation: annotation,
+              ),
+            );
+            runStart = index + 1;
             assert(() {
               print(
-                  'Unable to find a font to draw "${String.fromCharCode(rune)}" (U+${rune.toRadixString(16)}) try to provide a TextStyle.fontFallback');
+                'Unable to find a font to draw "${String.fromCharCode(rune)}" (U+${rune.toRadixString(16)}) try to provide a TextStyle.fontFallback',
+              );
               return true;
             }());
           }
-        } else {
-          accumulatedRunes.add(rune);  // Accumulate runes supported by current font
         }
-      }
 
-      // Flush any remaining runes
-      flushAccumulatedRunes();
+        spans.add(
+          _addText(
+            text: text,
+            start: runStart,
+            style: runStyle,
+            baseline: span.baseline,
+            annotation: annotation,
+          ),
+        );
 
-      return true;
-    }, defaultStyle, null);
+        return true;
+      },
+      defaultStyle,
+      null,
+    );
 
     return spans;
   }
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     _spans.clear();
     _decorations.clear();
 
@@ -925,27 +1026,51 @@ class RichText extends Widget with SpanningWidget {
           final space =
               font.stringMetrics(' ') * (style.fontSize! * textScaleFactor);
 
-          final spanLines = (useArabic && _textDirection == TextDirection.rtl
-                  ? arabic.convert(span.text!)
-                  : useBidi && _textDirection == TextDirection.rtl
-                      ? bidi.logicalToVisual(span.text!)
-                      : span.text)!
-              .split('\n');
+          final spanText = (useArabic && _textDirection == TextDirection.rtl
+              ? arabic.convert(span.text!)
+              : useBidi && _textDirection == TextDirection.rtl
+              ? bidi.logicalToVisual(span.text!)
+              : span.text)!;
+          // Fast path: a run of printable ASCII with no space is one word on
+          // one line, so both splits — and the regex engine behind the word
+          // split — can be skipped. Serial numbers and ticket numbers, the
+          // strings a document lays out by the hundreds of thousands, all
+          // qualify. Anything outside printable ASCII goes through the full
+          // split: `\s` matches Unicode whitespace (U+00A0, U+2000…) that a
+          // byte scan must not quietly reclassify as a word character. A
+          // custom [lineSplitter] must see every line, so it disables the
+          // fast path too.
+          final singleWord =
+              lineSplitter == null && _isSingleAsciiWord(spanText);
+          final spanLines = singleWord
+              ? <String>[spanText]
+              : spanText.split('\n');
 
           for (var line = 0; line < spanLines.length; line++) {
-            final words = spanLines[line].split(RegExp(r'\s'));
+            // Always a fresh list: an overflowing word is split in place
+            // below (words.insert), and aliasing spanLines would turn the
+            // remainder into an extra line.
+            final words = singleWord
+                ? <String>[spanText]
+                : lineSplitter?.call(spanLines[line]) ??
+                      spanLines[line].split(_splitWhitespace);
             for (var index = 0; index < words.length; index++) {
               final word = words[index];
 
               if (word.isEmpty) {
-                offsetX += space.advanceWidth * style.wordSpacing! +
+                offsetX +=
+                    space.advanceWidth * style.wordSpacing! +
                     style.letterSpacing!;
                 continue;
               }
 
-              final metrics = font.stringMetrics(word,
-                      letterSpacing: style.letterSpacing! /
-                          (style.fontSize! * textScaleFactor)) *
+              final metrics =
+                  font.stringMetrics(
+                    word,
+                    letterSpacing:
+                        style.letterSpacing! /
+                        (style.fontSize! * textScaleFactor),
+                  ) *
                   (style.fontSize! * textScaleFactor);
 
               if (_softWrap &&
@@ -956,10 +1081,12 @@ class RichText extends Widget with SpanningWidget {
                     var fits = '';
                     for (var syllable in syllables) {
                       if (offsetX +
-                              ((font.stringMetrics('$fits$syllable-',
-                                          letterSpacing: style.letterSpacing! /
-                                              (style.fontSize! *
-                                                  textScaleFactor)) *
+                              ((font.stringMetrics(
+                                        '$fits$syllable-',
+                                        letterSpacing:
+                                            style.letterSpacing! /
+                                            (style.fontSize! * textScaleFactor),
+                                      ) *
                                       (style.fontSize! * textScaleFactor))
                                   .width) >
                           constraintWidth + 0.00001) {
@@ -978,17 +1105,19 @@ class RichText extends Widget with SpanningWidget {
 
                 if (spanCount > 0 && metrics.width <= constraintWidth) {
                   overflow = true;
-                  lines.add(_Line(
-                    this,
-                    spanStart,
-                    spanCount,
-                    bottom,
-                    offsetX -
-                        space.advanceWidth * style.wordSpacing! -
-                        style.letterSpacing!,
-                    _textDirection,
-                    true,
-                  ));
+                  lines.add(
+                    _Line(
+                      this,
+                      spanStart,
+                      spanCount,
+                      bottom,
+                      offsetX -
+                          space.advanceWidth * style.wordSpacing! -
+                          style.letterSpacing!,
+                      _textDirection,
+                      true,
+                    ),
+                  );
 
                   spanStart += spanCount;
                   spanCount = 0;
@@ -1028,11 +1157,7 @@ class RichText extends Widget with SpanningWidget {
               top = math.min(top, mt + baseline);
               bottom = math.max(bottom, mb + baseline);
 
-              final wd = _Word(
-                word,
-                style,
-                metrics,
-              );
+              final wd = _Word(word, style, metrics);
               wd.offset = PdfPoint(offsetX, -offsetY + baseline);
               _spans.add(wd);
               spanCount++;
@@ -1047,23 +1172,26 @@ class RichText extends Widget with SpanningWidget {
                 ),
               );
 
-              offsetX += metrics.advanceWidth +
+              offsetX +=
+                  metrics.advanceWidth +
                   space.advanceWidth * style.wordSpacing! +
                   style.letterSpacing!;
             }
 
             if (line < spanLines.length - 1) {
-              lines.add(_Line(
-                this,
-                spanStart,
-                spanCount,
-                bottom,
-                offsetX -
-                    space.advanceWidth * style.wordSpacing! -
-                    style.letterSpacing!,
-                _textDirection,
-                false,
-              ));
+              lines.add(
+                _Line(
+                  this,
+                  spanStart,
+                  spanCount,
+                  bottom,
+                  offsetX -
+                      space.advanceWidth * style.wordSpacing! -
+                      style.letterSpacing!,
+                  _textDirection,
+                  false,
+                ),
+              );
 
               spanStart += spanCount;
 
@@ -1094,28 +1222,27 @@ class RichText extends Widget with SpanningWidget {
               space.advanceWidth * style.wordSpacing! - style.letterSpacing!;
         } else if (span is WidgetSpan) {
           span.child.layout(
-              context,
-              BoxConstraints(
-                maxWidth: constraintWidth,
-                maxHeight: constraintHeight,
-              ));
-          final ws = _WidgetSpan(
-            span.child,
-            style!,
-            span.baseline,
+            context,
+            BoxConstraints(
+              maxWidth: constraintWidth,
+              maxHeight: constraintHeight,
+            ),
           );
+          final ws = _WidgetSpan(span.child, style!, span.baseline);
 
           if (offsetX + ws.width > constraintWidth && spanCount > 0) {
             overflow = true;
-            lines.add(_Line(
-              this,
-              spanStart,
-              spanCount,
-              bottom,
-              offsetX,
-              _textDirection,
-              true,
-            ));
+            lines.add(
+              _Line(
+                this,
+                spanStart,
+                spanCount,
+                bottom,
+                offsetX,
+                _textDirection,
+                true,
+              ),
+            );
 
             spanStart += spanCount;
             spanCount = 0;
@@ -1138,10 +1265,7 @@ class RichText extends Widget with SpanningWidget {
 
           final baseline = span.baseline * textScaleFactor;
           top = math.min(top, baseline);
-          bottom = math.max(
-            bottom,
-            ws.height + baseline,
-          );
+          bottom = math.max(bottom, ws.height + baseline);
 
           ws.offset = PdfPoint(offsetX, -offsetY + baseline);
           _spans.add(ws);
@@ -1165,15 +1289,17 @@ class RichText extends Widget with SpanningWidget {
     _buildLines();
 
     if (spanCount > 0) {
-      lines.add(_Line(
-        this,
-        spanStart,
-        spanCount,
-        bottom,
-        offsetX,
-        _textDirection,
-        false,
-      ));
+      lines.add(
+        _Line(
+          this,
+          spanStart,
+          spanCount,
+          bottom,
+          offsetX,
+          _textDirection,
+          false,
+        ),
+      );
       offsetY += bottom - top;
     }
 
@@ -1194,8 +1320,12 @@ class RichText extends Widget with SpanningWidget {
       }
     }
 
-    box = PdfRect(0, 0, constraints.constrainWidth(width),
-        constraints.constrainHeight(offsetY));
+    box = PdfRect(
+      0,
+      0,
+      constraints.constrainWidth(width),
+      constraints.constrainHeight(offsetY),
+    );
 
     _context
       ..endOffset = offsetY - _context.startOffset
@@ -1229,8 +1359,8 @@ class RichText extends Widget with SpanningWidget {
       ..setStrokeColor(PdfColors.blue)
       ..setLineWidth(1)
       ..drawRect(
-        box!.x,
-        box!.y,
+        box!.left,
+        box!.bottom,
         box!.width == double.infinity ? 1000 : box!.width,
         box!.height == double.infinity ? 1000 : box!.height,
       )
@@ -1258,12 +1388,7 @@ class RichText extends Widget with SpanningWidget {
         return true;
       }());
 
-      decoration.backgroundPaint(
-        context,
-        textScaleFactor,
-        box,
-        _spans,
-      );
+      decoration.backgroundPaint(context, textScaleFactor, box, _spans);
     }
 
     for (final span in _spans.sublist(_context.spanStart, _context.spanEnd)) {
@@ -1291,12 +1416,7 @@ class RichText extends Widget with SpanningWidget {
     }
 
     for (final decoration in _decorations) {
-      decoration.foregroundPaint(
-        context,
-        textScaleFactor,
-        box,
-        _spans,
-      );
+      decoration.foregroundPaint(context, textScaleFactor, box, _spans);
     }
 
     if (_mustClip) {
@@ -1310,9 +1430,12 @@ class RichText extends Widget with SpanningWidget {
     var pos = (low + high) ~/ 2;
 
     while (low + 1 < high) {
-      final metrics = font.stringMetrics(word.substring(0, pos),
-              letterSpacing:
-                  style.letterSpacing! / (style.fontSize! * textScaleFactor)) *
+      final metrics =
+          font.stringMetrics(
+            word.substring(0, pos),
+            letterSpacing:
+                style.letterSpacing! / (style.fontSize! * textScaleFactor),
+          ) *
           (style.fontSize! * textScaleFactor);
 
       if (metrics.width > maxWidth) {
@@ -1356,14 +1479,18 @@ class Text extends RichText {
     double textScaleFactor = 1.0,
     int? maxLines,
     TextOverflow? overflow,
+    Hyphenation? hyphenation,
+    LineSplitter? lineSplitter,
   }) : super(
-          text: TextSpan(text: text, style: style),
-          textAlign: textAlign,
-          softWrap: softWrap,
-          tightBounds: tightBounds,
-          textDirection: textDirection,
-          textScaleFactor: textScaleFactor,
-          maxLines: maxLines,
-          overflow: overflow,
-        );
+         text: TextSpan(text: text, style: style),
+         textAlign: textAlign,
+         softWrap: softWrap,
+         tightBounds: tightBounds,
+         textDirection: textDirection,
+         textScaleFactor: textScaleFactor,
+         maxLines: maxLines,
+         overflow: overflow,
+         hyphenation: hyphenation,
+         lineSplitter: lineSplitter,
+       );
 }

@@ -45,15 +45,24 @@ void main() {
   test('PdfDataTypes String', () {
     expect(PdfString.fromString('test').toString(), '(test)');
     expect(PdfString.fromString('Zoé').toString(), '(Zoé)');
-    expect(PdfString.fromString('\r\n\t\b\f)()(\\').toString(),
-        r'(\r\n\t\b\f\)\(\)\(\\)');
     expect(
-      PdfString.fromString('你好').toList(),
-      <int>[40, 254, 255, 79, 96, 89, 125, 41],
+      PdfString.fromString('\r\n\t\b\f)()(\\').toString(),
+      r'(\r\n\t\b\f\)\(\)\(\\)',
     );
+    expect(PdfString.fromString('你好').toList(), <int>[
+      40,
+      254,
+      255,
+      79,
+      96,
+      89,
+      125,
+      41,
+    ]);
     expect(
-      PdfString.fromDate(DateTime.fromMillisecondsSinceEpoch(1583606302000))
-          .toString(),
+      PdfString.fromDate(
+        DateTime.fromMillisecondsSinceEpoch(1583606302000),
+      ).toString(),
       '(D:20200307183822Z)',
     );
     expect(
@@ -79,10 +88,7 @@ void main() {
 
   test('PdfDataTypes Array', () {
     expect(PdfArray().toString(), '[]');
-    expect(
-      PdfArray([const PdfNum(1), const PdfNum(2)]).toString(),
-      '[1 2]',
-    );
+    expect(PdfArray([const PdfNum(1), const PdfNum(2)]).toString(), '[1 2]');
     expect(
       PdfArray([
         const PdfName('/Name'),

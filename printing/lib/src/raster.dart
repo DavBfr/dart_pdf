@@ -24,11 +24,8 @@ import 'package:pdf/pdf.dart';
 /// Represents a bitmap image
 class PdfRaster extends PdfRasterBase {
   /// Create a bitmap image
-  PdfRaster(
-    int width,
-    int height,
-    Uint8List pixels,
-  ) : super(width, height, true, pixels);
+  PdfRaster(int width, int height, Uint8List pixels)
+    : super(width, height, true, pixels);
 
   /// Decode RGBA raw image to dart:ui Image
   Future<ui.Image> toImage() {

@@ -26,7 +26,7 @@ import 'shading.dart';
 
 abstract class PdfPattern extends PdfObject<PdfDict> {
   PdfPattern(PdfDocument pdfDocument, this.patternType, this.matrix)
-      : super(pdfDocument, params: PdfDict());
+    : super(pdfDocument, params: PdfDict());
 
   /// Name of the Pattern object
   String get name => '/P$objser';
@@ -43,8 +43,14 @@ abstract class PdfPattern extends PdfObject<PdfDict> {
 
     if (matrix != null) {
       final s = matrix!.storage;
-      params['/Matrix'] =
-          PdfArray.fromNum(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]);
+      params['/Matrix'] = PdfArray.fromNum(<double>[
+        s[0],
+        s[1],
+        s[4],
+        s[5],
+        s[12],
+        s[13],
+      ]);
     }
   }
 }

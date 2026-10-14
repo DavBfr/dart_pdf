@@ -19,6 +19,7 @@ import 'dart:typed_data';
 import 'package:xml/xml.dart';
 
 import '../../pdf.dart';
+import '../pdf/io/event_loop_balancer.dart';
 import 'page.dart';
 import 'theme.dart';
 
@@ -29,6 +30,7 @@ class Document {
     bool compress = true,
     bool verbose = false,
     PdfVersion version = PdfVersion.pdf_1_5,
+    bool simpleTrueTypeFonts = false,
     this.theme,
     String? title,
     String? author,
@@ -38,12 +40,13 @@ class Document {
     String? producer,
     XmlDocument? metadata,
   }) : document = PdfDocument(
-          pageMode: pageMode,
-          deflate: deflate,
-          compress: compress,
-          verbose: verbose,
-          version: version,
-        ) {
+         pageMode: pageMode,
+         deflate: deflate,
+         compress: compress,
+         verbose: verbose,
+         version: version,
+         simpleTrueTypeFonts: simpleTrueTypeFonts,
+       ) {
     if (title != null ||
         author != null ||
         creator != null ||
@@ -79,11 +82,11 @@ class Document {
     String? keywords,
     String? producer,
   }) : document = PdfDocument.load(
-          parser,
-          deflate: deflate,
-          compress: compress,
-          verbose: verbose,
-        ) {
+         parser,
+         deflate: deflate,
+         compress: compress,
+         verbose: verbose,
+       ) {
     if (title != null ||
         author != null ||
         creator != null ||
@@ -124,13 +127,45 @@ class Document {
     _pages.add(page);
   }
 
-  Future<Uint8List> save() async {
+  /// Generates the PDF document as a memory file.
+  ///
+  /// If [enableEventLoopBalancing] is `true`, the method yields periodically
+  /// during processing to keep the event loop responsive. This can help
+  /// avoid blocking during the processing of large documents.
+  ///
+  /// Returns a [Uint8List] containing the document data.
+  Future<Uint8List> save({bool enableEventLoopBalancing = false}) async {
+    await _postProcess(enableEventLoopBalancing);
+
+    return await document.save(
+      enableEventLoopBalancing: enableEventLoopBalancing,
+    );
+  }
+
+  /// Writes the PDF to [output] without creating a complete in-memory copy.
+  Future<void> write(
+    PdfStream output, {
+    bool enableEventLoopBalancing = false,
+  }) async {
+    await _postProcess(enableEventLoopBalancing);
+    await document.write(
+      output,
+      enableEventLoopBalancing: enableEventLoopBalancing,
+    );
+  }
+
+  Future<void> _postProcess(bool enableEventLoopBalancing) async {
     if (!_paint) {
+      final balancer = enableEventLoopBalancing ? EventLoopBalancer() : null;
+      balancer?.start();
+
       for (final page in _pages) {
+        await balancer?.yieldIfNeeded();
         page.postProcess(this);
       }
+
+      balancer?.stop();
       _paint = true;
     }
-    return await document.save();
   }
 }

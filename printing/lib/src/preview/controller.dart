@@ -27,9 +27,10 @@ class PdfPreviewData extends ChangeNotifier {
     required this.buildDocument,
     required Map<String, PdfPageFormat> pageFormats,
     required ComputePageFormat onComputeActualPageFormat,
-  })  : assert(pageFormats.isNotEmpty),
-        _onComputeActualPageFormat = onComputeActualPageFormat {
-    _pageFormat = initialPageFormat ??
+  }) : assert(pageFormats.isNotEmpty),
+       _onComputeActualPageFormat = onComputeActualPageFormat {
+    _pageFormat =
+        initialPageFormat ??
         (pageFormats[localPageFormat] ?? pageFormats.values.first);
   }
 
@@ -87,15 +88,15 @@ class PdfPreviewController extends InheritedNotifier {
   final PdfPreviewData data;
 
   static PdfPreviewData of(BuildContext context) {
-    final result =
-        context.findAncestorWidgetOfExactType<PdfPreviewController>();
+    final result = context
+        .findAncestorWidgetOfExactType<PdfPreviewController>();
     assert(result != null, 'No PdfPreview found in context');
     return result!.data;
   }
 
   static PdfPreviewData listen(BuildContext context) {
-    final result =
-        context.dependOnInheritedWidgetOfExactType<PdfPreviewController>();
+    final result = context
+        .dependOnInheritedWidgetOfExactType<PdfPreviewController>();
     assert(result != null, 'No PdfPreview found in context');
     return result!.data;
   }

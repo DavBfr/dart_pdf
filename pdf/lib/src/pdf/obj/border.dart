@@ -39,7 +39,7 @@ enum PdfBorderStyle {
   inset,
 
   /// The border is drawn as a line on the bottom of the annotation rectangle
-  underlined
+  underlined,
 }
 
 /// Defines a border object
@@ -65,8 +65,9 @@ class PdfBorder extends PdfObject<PdfDict> {
   void prepare() {
     super.prepare();
 
-    params['/S'] =
-        PdfName('/${'SDBIU'.substring(style.index, style.index + 1)}');
+    params['/S'] = PdfName(
+      '/${'SDBIU'.substring(style.index, style.index + 1)}',
+    );
     params['/W'] = PdfNum(width);
 
     if (dash != null) {

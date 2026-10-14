@@ -32,12 +32,10 @@ abstract class PdfFont extends PdfObject<PdfDict> {
   /// Constructs a [PdfFont]. This will attempt to map the font from a known
   /// font name to that in Pdf, defaulting to Helvetica if not possible.
   PdfFont.create(PdfDocument pdfDocument, {required this.subtype})
-      : super(
-          pdfDocument,
-          params: PdfDict.values({
-            '/Type': const PdfName('/Font'),
-          }),
-        ) {
+    : super(
+        pdfDocument,
+        params: PdfDict.values({'/Type': const PdfName('/Font')}),
+      ) {
     pdfDocument.fonts.add(this);
   }
 
@@ -333,9 +331,11 @@ See https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
   /// Draw some text
   void putText(PdfStream stream, String text) {
     try {
-      PdfString(latin1.encode(text),
-              format: PdfStringFormat.literal, encrypted: false)
-          .output(this, stream);
+      PdfString(
+        latin1.encode(text),
+        format: PdfStringFormat.literal,
+        encrypted: false,
+      ).output(this, stream);
     } catch (_) {
       assert(() {
         print(_cannotDecodeMessage);

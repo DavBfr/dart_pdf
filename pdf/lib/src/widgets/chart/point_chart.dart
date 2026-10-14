@@ -44,11 +44,11 @@ class PointDataSet<T extends PointChartValue> extends Dataset {
     this.buildValue,
     this.valuePosition = ValuePosition.auto,
   }) : super(
-          legend: legend,
-          color: color,
-          borderColor: borderColor,
-          borderWidth: borderWidth,
-        );
+         legend: legend,
+         color: color,
+         borderColor: borderColor,
+         borderWidth: borderWidth,
+       );
 
   final List<T> data;
 
@@ -65,8 +65,11 @@ class PointDataSet<T extends PointChartValue> extends Dataset {
   double get delta => pointSize * .5;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
   }
 
@@ -118,10 +121,7 @@ class PointDataSet<T extends PointChartValue> extends Dataset {
           final p = grid.toChart(value.point);
 
           Widget.draw(
-            SizedBox.square(
-              dimension: pointSize * 2,
-              child: shape!(context),
-            ),
+            SizedBox.square(dimension: pointSize * 2, child: shape!(context)),
             offset: p,
             alignment: Alignment.center,
             context: context,
@@ -145,8 +145,9 @@ class PointDataSet<T extends PointChartValue> extends Dataset {
         final PdfPoint offset;
         var pos = valuePosition;
         if (pos == ValuePosition.auto) {
-          final next =
-              index < data.length ? grid.toChart(data[index++].point) : null;
+          final next = index < data.length
+              ? grid.toChart(data[index++].point)
+              : null;
           pos = automaticValuePosition(p, size, previous, next);
         }
 

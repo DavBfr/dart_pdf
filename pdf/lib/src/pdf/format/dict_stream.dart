@@ -31,8 +31,8 @@ class PdfDictStream extends PdfDict<PdfDataType> {
     this.isBinary = false,
     this.encrypt = true,
     this.compress = true,
-  })  : data = data ?? Uint8List(0),
-        super.values(values ?? {});
+  }) : data = data ?? Uint8List(0),
+       super.values(values ?? {});
 
   @Deprecated('Use PdfDictStream() instead')
   PdfDictStream.values({

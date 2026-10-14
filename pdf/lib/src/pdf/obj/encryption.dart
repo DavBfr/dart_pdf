@@ -25,7 +25,7 @@ import 'object.dart';
 abstract class PdfEncryption extends PdfObject<PdfDict> {
   /// Creates an encryption object
   PdfEncryption(PdfDocument pdfDocument)
-      : super(pdfDocument, params: PdfDict());
+    : super(pdfDocument, params: PdfDict());
 
   /// Encrypt some data
   Uint8List encrypt(Uint8List input, PdfObjectBase object);

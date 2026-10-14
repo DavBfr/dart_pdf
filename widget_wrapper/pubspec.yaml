@@ -13,14 +13,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  pdf: ^3.10.0
+  pdf: ^3.13.0
 
 dependency_overrides:
   pdf:
     path: ../pdf
 
 dev_dependencies:
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
 

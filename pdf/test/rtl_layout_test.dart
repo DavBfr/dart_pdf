@@ -22,23 +22,11 @@ import 'package:test/test.dart';
 
 late Document pdf;
 
-final _blueBox = Container(
-  width: 50,
-  height: 50,
-  color: PdfColors.blue,
-);
+final _blueBox = Container(width: 50, height: 50, color: PdfColors.blue);
 
-final _redBox = Container(
-  width: 50,
-  height: 50,
-  color: PdfColors.red,
-);
+final _redBox = Container(width: 50, height: 50, color: PdfColors.red);
 
-final _yellowBox = Container(
-  width: 50,
-  height: 50,
-  color: PdfColors.yellow,
-);
+final _yellowBox = Container(width: 50, height: 50, color: PdfColors.yellow);
 
 void main() {
   setUpAll(() {
@@ -51,9 +39,7 @@ void main() {
       Page(
         textDirection: TextDirection.rtl,
         pageFormat: const PdfPageFormat(150, 50),
-        build: (Context context) => Text(
-          'RTL Text',
-        ),
+        build: (Context context) => Text('RTL Text'),
       ),
     );
   });
@@ -64,10 +50,7 @@ void main() {
         pageFormat: const PdfPageFormat(150, 50),
         build: (Context context) => SizedBox(
           width: 150,
-          child: Text(
-            'RTL Text : TextAlign.end',
-            textAlign: TextAlign.end,
-          ),
+          child: Text('RTL Text : TextAlign.end', textAlign: TextAlign.end),
         ),
       ),
     );
@@ -80,10 +63,7 @@ void main() {
         pageFormat: const PdfPageFormat(150, 50),
         build: (Context context) => SizedBox(
           width: 150,
-          child: Text(
-            'RTL Text : TextAlign.left',
-            textAlign: TextAlign.left,
-          ),
+          child: Text('RTL Text : TextAlign.left', textAlign: TextAlign.left),
         ),
       ),
     );
@@ -94,9 +74,7 @@ void main() {
       Page(
         textDirection: TextDirection.ltr,
         pageFormat: const PdfPageFormat(150, 50),
-        build: (Context context) => Text(
-          'LTR Text',
-        ),
+        build: (Context context) => Text('LTR Text'),
       ),
     );
   });
@@ -107,10 +85,7 @@ void main() {
         pageFormat: const PdfPageFormat(150, 50),
         build: (Context context) => SizedBox(
           width: 150,
-          child: Text(
-            'RTL Text : TextAlign.end',
-            textAlign: TextAlign.end,
-          ),
+          child: Text('RTL Text : TextAlign.end', textAlign: TextAlign.end),
         ),
       ),
     );
@@ -123,128 +98,127 @@ void main() {
         pageFormat: const PdfPageFormat(150, 50),
         build: (Context context) => SizedBox(
           width: 150,
-          child: Text(
-            'LTR Text : TextAlign.right',
-            textAlign: TextAlign.right,
-          ),
+          child: Text('LTR Text : TextAlign.right', textAlign: TextAlign.right),
         ),
       ),
     );
   });
 
   test(
-      'Should render a blue box followed by a red box ordered RTL aligned right',
-      () {
-    pdf.addPage(
-      Page(
-        textDirection: TextDirection.rtl,
-        pageFormat: const PdfPageFormat(150, 50),
-        build: (Context context) => TestAnnotation(
-          anno: 'RTL Row',
-          child: Row(
-            children: [_blueBox, _redBox],
+    'Should render a blue box followed by a red box ordered RTL aligned right',
+    () {
+      pdf.addPage(
+        Page(
+          textDirection: TextDirection.rtl,
+          pageFormat: const PdfPageFormat(150, 50),
+          build: (Context context) => TestAnnotation(
+            anno: 'RTL Row',
+            child: Row(children: [_blueBox, _redBox]),
           ),
         ),
-      ),
-    );
-  });
+      );
+    },
+  );
 
   test(
-      'Should render a blue box followed by a red box ordered RTL with aligned center',
-      () {
-    pdf.addPage(
-      Page(
-        textDirection: TextDirection.rtl,
-        pageFormat: const PdfPageFormat(150, 50),
-        build: (Context context) => TestAnnotation(
-          anno: 'RTL Row MainAlignment.center',
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [_blueBox, _redBox],
-          ),
-        ),
-      ),
-    );
-  });
-
-  test(
-      'Should render a blue box followed by a red box ordered RTL with CrossAxisAlignment.end aligned right',
-      () {
-    pdf.addPage(
-      Page(
-        pageFormat: const PdfPageFormat(150, 100),
-        textDirection: TextDirection.rtl,
-        build: (Context context) => TestAnnotation(
-          anno: 'RTL Row CrossAlignment.end',
-          child: SizedBox(
-            width: 150,
-            height: 100,
+    'Should render a blue box followed by a red box ordered RTL with aligned center',
+    () {
+      pdf.addPage(
+        Page(
+          textDirection: TextDirection.rtl,
+          pageFormat: const PdfPageFormat(150, 50),
+          build: (Context context) => TestAnnotation(
+            anno: 'RTL Row MainAlignment.center',
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [_blueBox, _redBox],
             ),
           ),
         ),
-      ),
-    );
-  });
+      );
+    },
+  );
+
   test(
-      'Should render a blue box followed by a red box ordered LTR aligned left',
-      () {
-    pdf.addPage(
-      Page(
-        pageFormat: const PdfPageFormat(150, 50),
-        build: (Context context) => TestAnnotation(
-          anno: 'LTR Row',
-          child: Row(
-            children: [_blueBox, _redBox],
-          ),
-        ),
-      ),
-    );
-  });
-  test(
-      'Should render a blue box followed by a red box ordered TTB aligned right',
-      () {
-    pdf.addPage(
-      Page(
-        textDirection: TextDirection.rtl,
-        pageFormat: const PdfPageFormat(150, 150),
-        build: (Context context) => TestAnnotation(
-          anno: 'RTL Column crossAlignment.start',
-          child: SizedBox(
-            width: 150,
-            height: 150,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [_blueBox, _redBox],
+    'Should render a blue box followed by a red box ordered RTL with CrossAxisAlignment.end aligned right',
+    () {
+      pdf.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(150, 100),
+          textDirection: TextDirection.rtl,
+          build: (Context context) => TestAnnotation(
+            anno: 'RTL Row CrossAlignment.end',
+            child: SizedBox(
+              width: 150,
+              height: 100,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [_blueBox, _redBox],
+              ),
             ),
           ),
         ),
-      ),
-    );
-  });
+      );
+    },
+  );
   test(
-      'Should render a blue box followed by a red box ordered TTB aligned left',
-      () {
-    pdf.addPage(
-      Page(
-        textDirection: TextDirection.ltr,
-        pageFormat: const PdfPageFormat(150, 150),
-        build: (Context context) => TestAnnotation(
-          anno: 'LTR Column crossAlignment.start',
-          child: SizedBox(
-            width: 150,
-            height: 150,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [_blueBox, _redBox],
+    'Should render a blue box followed by a red box ordered LTR aligned left',
+    () {
+      pdf.addPage(
+        Page(
+          pageFormat: const PdfPageFormat(150, 50),
+          build: (Context context) => TestAnnotation(
+            anno: 'LTR Row',
+            child: Row(children: [_blueBox, _redBox]),
+          ),
+        ),
+      );
+    },
+  );
+  test(
+    'Should render a blue box followed by a red box ordered TTB aligned right',
+    () {
+      pdf.addPage(
+        Page(
+          textDirection: TextDirection.rtl,
+          pageFormat: const PdfPageFormat(150, 150),
+          build: (Context context) => TestAnnotation(
+            anno: 'RTL Column crossAlignment.start',
+            child: SizedBox(
+              width: 150,
+              height: 150,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [_blueBox, _redBox],
+              ),
             ),
           ),
         ),
-      ),
-    );
-  });
+      );
+    },
+  );
+  test(
+    'Should render a blue box followed by a red box ordered TTB aligned left',
+    () {
+      pdf.addPage(
+        Page(
+          textDirection: TextDirection.ltr,
+          pageFormat: const PdfPageFormat(150, 150),
+          build: (Context context) => TestAnnotation(
+            anno: 'LTR Column crossAlignment.start',
+            child: SizedBox(
+              width: 150,
+              height: 150,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [_blueBox, _redBox],
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
 
   test('Wrap Should render blue,red,yellow ordered RTL', () {
     pdf.addPage(
@@ -256,9 +230,7 @@ void main() {
           child: SizedBox(
             width: 150,
             height: 150,
-            child: Wrap(
-              children: [_blueBox, _redBox, _yellowBox],
-            ),
+            child: Wrap(children: [_blueBox, _redBox, _yellowBox]),
           ),
         ),
       ),
@@ -275,9 +247,7 @@ void main() {
           child: SizedBox(
             width: 150,
             height: 150,
-            child: Wrap(
-              children: [_blueBox, _redBox, _yellowBox],
-            ),
+            child: Wrap(children: [_blueBox, _redBox, _yellowBox]),
           ),
         ),
       ),
@@ -313,14 +283,15 @@ void main() {
         build: (Context context) => TestAnnotation(
           anno: 'RTL Wrap WrapAlignment.end',
           child: SizedBox(
-              width: 150,
-              height: 150,
-              child: Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                runAlignment: WrapAlignment.end,
-                children: [_blueBox, _redBox, _yellowBox],
-              )),
+            width: 150,
+            height: 150,
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              runAlignment: WrapAlignment.end,
+              children: [_blueBox, _redBox, _yellowBox],
+            ),
+          ),
         ),
       ),
     );
@@ -332,10 +303,7 @@ void main() {
         textDirection: TextDirection.rtl,
         pageFormat: const PdfPageFormat(150, 150),
         build: (Context context) {
-          return TestAnnotation(
-            anno: 'RTL Page',
-            child: _blueBox,
-          );
+          return TestAnnotation(anno: 'RTL Page', child: _blueBox);
         },
       ),
     );
@@ -347,10 +315,7 @@ void main() {
         textDirection: TextDirection.ltr,
         pageFormat: const PdfPageFormat(150, 150),
         build: (Context context) {
-          return TestAnnotation(
-            anno: 'LTR Page',
-            child: _blueBox,
-          );
+          return TestAnnotation(anno: 'LTR Page', child: _blueBox);
         },
       ),
     );
@@ -365,9 +330,7 @@ void main() {
           return [
             Text('RTL MultiPage', style: const TextStyle(fontSize: 9)),
             ListView(
-              children: [
-                for (int i = 0; i < 15; i++) Text('List item'),
-              ],
+              children: [for (int i = 0; i < 15; i++) Text('List item')],
             ),
           ];
         },
@@ -383,9 +346,9 @@ void main() {
         build: (Context context) {
           return [
             Text('LTR MultiPage', style: const TextStyle(fontSize: 9)),
-            ListView(children: [
-              for (int i = 0; i < 15; i++) Text('List item'),
-            ]),
+            ListView(
+              children: [for (int i = 0; i < 15; i++) Text('List item')],
+            ),
           ];
         },
       ),
@@ -582,7 +545,7 @@ void main() {
                     color: [
                       PdfColors.blue,
                       PdfColors.red,
-                      PdfColors.yellow
+                      PdfColors.yellow,
                     ][i % 3],
                   ),
               ],
@@ -611,7 +574,7 @@ void main() {
                     color: [
                       PdfColors.blue,
                       PdfColors.red,
-                      PdfColors.yellow
+                      PdfColors.yellow,
                     ][i % 3],
                   ),
               ],
@@ -639,7 +602,7 @@ void main() {
                     color: [
                       PdfColors.blue,
                       PdfColors.red,
-                      PdfColors.yellow
+                      PdfColors.yellow,
                     ][i % 3],
                   ),
               ],
@@ -668,7 +631,7 @@ void main() {
                     color: [
                       PdfColors.blue,
                       PdfColors.red,
-                      PdfColors.yellow
+                      PdfColors.yellow,
                     ][i % 3],
                   ),
               ],
@@ -687,12 +650,9 @@ void main() {
         build: (Context context) {
           return TestAnnotation(
             anno: 'RTL Stack PositionDirectional.start',
-            child: Stack(children: [
-              PositionedDirectional(
-                start: 0,
-                child: _blueBox,
-              )
-            ]),
+            child: Stack(
+              children: [PositionedDirectional(start: 0, child: _blueBox)],
+            ),
           );
         },
       ),
@@ -707,12 +667,9 @@ void main() {
         build: (Context context) {
           return TestAnnotation(
             anno: 'LTR Stack PositionDirectional.start',
-            child: Stack(children: [
-              PositionedDirectional(
-                start: 0,
-                child: _blueBox,
-              )
-            ]),
+            child: Stack(
+              children: [PositionedDirectional(start: 0, child: _blueBox)],
+            ),
           );
         },
       ),
@@ -733,22 +690,24 @@ class TestAnnotation extends StatelessWidget {
 
   @override
   Widget build(Context context) {
-    return Stack(children: [
-      child,
-      Positioned(
-        top: 0,
-        right: 0,
-        left: 0,
-        child: Container(
-          color: PdfColors.white,
-          child: Text(
-            anno,
-            style: const TextStyle(color: PdfColors.black, fontSize: 9),
-            textDirection: TextDirection.ltr,
-            textAlign: TextAlign.center,
+    return Stack(
+      children: [
+        child,
+        Positioned(
+          top: 0,
+          right: 0,
+          left: 0,
+          child: Container(
+            color: PdfColors.white,
+            child: Text(
+              anno,
+              style: const TextStyle(color: PdfColors.black, fontSize: 9),
+              textDirection: TextDirection.ltr,
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 }

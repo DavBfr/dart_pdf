@@ -16,15 +16,48 @@
 
 #include "printing.h"
 
+#include <fpdfview.h>
+
+#include <mutex>
+
 #include "print_job.h"
 
 namespace nfet {
 
-extern std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel;
+// PDFium is a process-wide library: only the first instance initializes it and
+// only the last one destroys it.
+static int libraryRefCount = 0;
+static std::mutex libraryMutex;
 
-Printing::Printing() {}
+Printing::Printing(flutter::MethodChannel<flutter::EncodableValue>* channel,
+                   flutter::PluginRegistrarWindows* registrar)
+    : channel{channel}, registrar{registrar} {
+  const std::lock_guard<std::mutex> lock{libraryMutex};
+  if (libraryRefCount++ == 0) {
+    FPDF_LIBRARY_CONFIG config;
+    config.version = 2;
+    config.m_pUserFontPaths = nullptr;
+    config.m_pIsolate = nullptr;
+    config.m_v8EmbedderSlot = 0;
+    FPDF_InitLibraryWithConfig(&config);
+  }
+}
 
-Printing::~Printing() {}
+Printing::~Printing() {
+  const std::lock_guard<std::mutex> lock{libraryMutex};
+  if (--libraryRefCount == 0) {
+    FPDF_DestroyLibrary();
+  }
+}
+
+HWND Printing::getWindow() {
+  auto* view = registrar->GetView();
+  if (!view) {
+    return nullptr;
+  }
+  HWND hwnd = view->GetNativeWindow();
+  return hwnd ? GetAncestor(hwnd, GA_ROOT) : nullptr;
+}
 
 void Printing::onPageRasterized(std::vector<uint8_t> data,
                                 int width,

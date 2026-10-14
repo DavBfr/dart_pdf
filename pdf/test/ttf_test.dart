@@ -21,7 +21,12 @@ import 'package:pdf/src/pdf/font/ttf_writer.dart';
 import 'package:test/test.dart';
 
 void printText(
-    PdfPage page, PdfGraphics canvas, String text, PdfFont font, double top) {
+  PdfPage page,
+  PdfGraphics canvas,
+  String text,
+  PdfFont font,
+  double top,
+) {
   text = text + font.fontName;
   const fontSize = 20.0;
   final metrics = font.stringMetrics(text) * fontSize;
@@ -38,12 +43,20 @@ void printText(
     ..drawLine(x + metrics.left - deb, y, x + metrics.right + deb, y)
     ..setColor(PdfColors.blue)
     ..strokePath()
-    ..drawLine(x + metrics.left - deb, y + metrics.ascent,
-        x + metrics.right + deb, y + metrics.ascent)
+    ..drawLine(
+      x + metrics.left - deb,
+      y + metrics.ascent,
+      x + metrics.right + deb,
+      y + metrics.ascent,
+    )
     ..setColor(PdfColors.green)
     ..strokePath()
-    ..drawLine(x + metrics.left - deb, y + metrics.descent,
-        x + metrics.right + deb, y + metrics.descent)
+    ..drawLine(
+      x + metrics.left - deb,
+      y + metrics.descent,
+      x + metrics.right + deb,
+      y + metrics.descent,
+    )
     ..setColor(PdfColors.purple)
     ..strokePath()
     ..setColor(const PdfColor(0.3, 0.3, 0.3))
@@ -51,7 +64,12 @@ void printText(
 }
 
 void printTextTtf(
-    PdfPage page, PdfGraphics canvas, String text, File ttfFont, double top) {
+  PdfPage page,
+  PdfGraphics canvas,
+  String text,
+  File ttfFont,
+  double top,
+) {
   final fontData = ttfFont.readAsBytesSync();
   final font = PdfTtfFont(page.pdfDocument, fontData.buffer.asByteData());
 
@@ -72,7 +90,12 @@ void main() {
     printTextTtf(page, g, s, File('roboto.ttf'), 30.0 + 30.0 * top++);
     printTextTtf(page, g, s, File('noto-sans.ttf'), 30.0 + 30.0 * top++);
     printTextTtf(
-        page, g, '你好 檯號 ', File('genyomintw.ttf'), 30.0 + 30.0 * top++);
+      page,
+      g,
+      '你好 檯號 ',
+      File('genyomintw.ttf'),
+      30.0 + 30.0 * top++,
+    );
 
     final file = File('ttf.pdf');
     await file.writeAsBytes(await pdf.save());

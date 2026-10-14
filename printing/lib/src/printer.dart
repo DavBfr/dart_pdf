@@ -28,20 +28,20 @@ class Printer {
     this.comment,
     bool? isDefault,
     bool? isAvailable,
-  })  : name = name ?? url,
-        isDefault = isDefault ?? false,
-        isAvailable = isAvailable ?? true;
+  }) : name = name ?? url,
+       isDefault = isDefault ?? false,
+       isAvailable = isAvailable ?? true;
 
   /// Create an information object from a dictionnary
   factory Printer.fromMap(Map<dynamic, dynamic> map) => Printer(
-        url: map['url'],
-        name: map['name'],
-        model: map['model'],
-        location: map['location'],
-        comment: map['comment'],
-        isDefault: map['default'],
-        isAvailable: map['available'],
-      );
+    url: map['url'],
+    name: map['name'],
+    model: map['model'],
+    location: map['location'],
+    comment: map['comment'],
+    isDefault: map['default'],
+    isAvailable: map['available'],
+  );
 
   /// The platform specific printer identification
   final String url;
@@ -65,7 +65,8 @@ class Printer {
   final bool isAvailable;
 
   @override
-  String toString() => '''
+  String toString() =>
+      '''
 $runtimeType $name
   url:$url
   location:$location
@@ -75,12 +76,12 @@ $runtimeType $name
   isAvailable: $isAvailable''';
 
   Map<String, Object?> toMap() => {
-        'url': url,
-        'name': name,
-        'model': model,
-        'location': location,
-        'comment': comment,
-        'default': isDefault,
-        'available': isAvailable,
-      };
+    'url': url,
+    'name': name,
+    'model': model,
+    'location': location,
+    'comment': comment,
+    'default': isDefault,
+    'available': isAvailable,
+  };
 }

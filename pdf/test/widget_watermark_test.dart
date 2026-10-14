@@ -30,17 +30,11 @@ void main() {
     pdf = Document();
 
     pageTheme = PageTheme(
-      buildBackground: (Context context) => FullPage(
-        ignoreMargins: true,
-        child: Watermark.text('DRAFT'),
-      ),
+      buildBackground: (Context context) =>
+          FullPage(ignoreMargins: true, child: Watermark.text('DRAFT')),
       buildForeground: (Context context) => Align(
         alignment: Alignment.bottomLeft,
-        child: SizedBox(
-          width: 100,
-          height: 100,
-          child: PdfLogo(),
-        ),
+        child: SizedBox(width: 100, height: 100, child: PdfLogo()),
       ),
     );
   });
@@ -49,11 +43,7 @@ void main() {
     pdf.addPage(
       Page(
         pageTheme: pageTheme,
-        build: (Context context) => Center(
-          child: Text(
-            'Hello World',
-          ),
-        ),
+        build: (Context context) => Center(child: Text('Hello World')),
       ),
     );
   });
@@ -62,12 +52,8 @@ void main() {
     pdf.addPage(
       MultiPage(
         pageTheme: pageTheme,
-        build: (Context context) => List<Widget>.filled(
-          100,
-          Text(
-            'Hello World',
-          ),
-        ),
+        build: (Context context) =>
+            List<Widget>.filled(100, Text('Hello World')),
       ),
     );
   });
@@ -76,14 +62,15 @@ void main() {
     final pageTheme = PageTheme(
       buildBackground: (Context context) =>
           (context.pageNumber == context.pagesCount)
-              ? Align(
-                  alignment: Alignment.topRight,
-                  child: SizedBox(
-                      width: 200,
-                      height: 200,
-                      child: PdfLogo(color: PdfColors.blue200)),
-                )
-              : Container(),
+          ? Align(
+              alignment: Alignment.topRight,
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: PdfLogo(color: PdfColors.blue200),
+              ),
+            )
+          : Container(),
     );
 
     pdf.addPage(
@@ -91,10 +78,7 @@ void main() {
         pageTheme: pageTheme,
         build: (Context context) => <Widget>[
           Wrap(
-            children: List<Widget>.generate(
-              670,
-              (_) => Text('Hello World '),
-            ),
+            children: List<Widget>.generate(670, (_) => Text('Hello World ')),
           ),
         ],
       ),

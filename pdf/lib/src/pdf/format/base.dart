@@ -31,11 +31,7 @@ abstract class PdfDataType {
   PdfStream _toStream([int? indent]) {
     final s = PdfStream();
     output(
-      PdfObjectBase(
-        objser: 0,
-        params: this,
-        settings: const PdfSettings(),
-      ),
+      PdfObjectBase(objser: 0, params: this, settings: const PdfSettings()),
       s,
       indent,
     );

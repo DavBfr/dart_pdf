@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-import 'dart:typed_data';
+import '../format/object_base.dart';
 
-import 'print_job.dart';
+/// Zip compression function
+DeflateCallback defaultDeflate = (List<int> a) => a;
 
-/// Set the Pdf document data
-void setDocumentFfi(PrintJob job, Uint8List data) {
-  throw UnimplementedError('Not using FFI');
-}
-
-/// Set the Pdf Error message
-void setErrorFfi(PrintJob job, String message) {
-  throw UnimplementedError('Not using FFI');
+/// Computation function
+Future<R> pdfCompute<R>(Future<R> Function() computation) async {
+  await null;
+  return computation();
 }

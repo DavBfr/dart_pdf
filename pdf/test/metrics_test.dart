@@ -56,8 +56,12 @@ void printMetrics(
     ..setStrokeColor(PdfColors.amber)
     ..strokePath()
     // Glyph baseline
-    ..drawLine(x + metrics.effectiveLeft - deb, y,
-        x + metrics.maxWidth + metrics.effectiveLeft + deb, y)
+    ..drawLine(
+      x + metrics.effectiveLeft - deb,
+      y,
+      x + metrics.maxWidth + metrics.effectiveLeft + deb,
+      y,
+    )
     ..setColor(PdfColors.blue)
     ..strokePath()
     // Drawing Start
@@ -80,22 +84,62 @@ void printMetrics(
     ..drawString(font, fontSize, String.fromCharCode(codeUnit), x, y)
     // Metrics information
     ..setFillColor(PdfColors.black)
-    ..drawString(canvas.defaultFont!, s,
-        'unicode: 0x${codeUnit.toRadixString(16)}', 10, size.y - 20 - s * 0)
-    ..drawString(canvas.defaultFont!, s, 'index: 0x${index!.toRadixString(16)}',
-        10, size.y - 20 - s * 1)
-    ..drawString(canvas.defaultFont!, s, 'left: ${m.left.toInt()}', 10,
-        size.y - 20 - s * 2)
-    ..drawString(canvas.defaultFont!, s, 'right: ${m.right.toInt()}', 10,
-        size.y - 20 - s * 3)
-    ..drawString(canvas.defaultFont!, s, 'top: ${m.top.toInt()}', 10,
-        size.y - 20 - s * 4)
-    ..drawString(canvas.defaultFont!, s, 'bottom: ${m.bottom.toInt()}', 10,
-        size.y - 20 - s * 5)
-    ..drawString(canvas.defaultFont!, s,
-        'advanceWidth: ${m.advanceWidth.toInt()}', 10, size.y - 20 - s * 6)
-    ..drawString(canvas.defaultFont!, s,
-        'leftBearing: ${m.leftBearing.toInt()}', 10, size.y - 20 - s * 7);
+    ..drawString(
+      canvas.defaultFont!,
+      s,
+      'unicode: 0x${codeUnit.toRadixString(16)}',
+      10,
+      size.y - 20 - s * 0,
+    )
+    ..drawString(
+      canvas.defaultFont!,
+      s,
+      'index: 0x${index!.toRadixString(16)}',
+      10,
+      size.y - 20 - s * 1,
+    )
+    ..drawString(
+      canvas.defaultFont!,
+      s,
+      'left: ${m.left.toInt()}',
+      10,
+      size.y - 20 - s * 2,
+    )
+    ..drawString(
+      canvas.defaultFont!,
+      s,
+      'right: ${m.right.toInt()}',
+      10,
+      size.y - 20 - s * 3,
+    )
+    ..drawString(
+      canvas.defaultFont!,
+      s,
+      'top: ${m.top.toInt()}',
+      10,
+      size.y - 20 - s * 4,
+    )
+    ..drawString(
+      canvas.defaultFont!,
+      s,
+      'bottom: ${m.bottom.toInt()}',
+      10,
+      size.y - 20 - s * 5,
+    )
+    ..drawString(
+      canvas.defaultFont!,
+      s,
+      'advanceWidth: ${m.advanceWidth.toInt()}',
+      10,
+      size.y - 20 - s * 6,
+    )
+    ..drawString(
+      canvas.defaultFont!,
+      s,
+      'leftBearing: ${m.leftBearing.toInt()}',
+      10,
+      size.y - 20 - s * 7,
+    );
 }
 
 void main() {
@@ -110,22 +154,29 @@ void main() {
     final fontData = ttfFont.readAsBytesSync();
     final font = PdfTtfFont(pdf.document, fontData.buffer.asByteData());
 
-    for (final letter in
+    for (final letter
+        in
         //font.font.charToGlyphIndexMap.keys
         'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz&%!?0123456789'
             .codeUnits) {
-      pdf.addPage(Page(
+      pdf.addPage(
+        Page(
           pageFormat: const PdfPageFormat(500, 500, marginAll: 20),
           build: (Context context) {
             return ConstrainedBox(
-                constraints: const BoxConstraints.expand(),
-                child: FittedBox(
-                    child: CustomPaint(
-                        size: const PdfPoint(200, 200),
-                        painter: (PdfGraphics canvas, PdfPoint size) {
-                          printMetrics(canvas, letter, font, size);
-                        })));
-          }));
+              constraints: const BoxConstraints.expand(),
+              child: FittedBox(
+                child: CustomPaint(
+                  size: const PdfPoint(200, 200),
+                  painter: (PdfGraphics canvas, PdfPoint size) {
+                    printMetrics(canvas, letter, font, size);
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      );
     }
 
     final file = File('metrics.pdf');

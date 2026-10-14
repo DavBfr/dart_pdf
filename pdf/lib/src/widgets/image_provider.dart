@@ -23,12 +23,7 @@ import 'widget.dart';
 
 /// Identifies an image without committing to the precise final asset
 abstract class ImageProvider {
-  ImageProvider(
-    this._width,
-    this._height,
-    this.orientation,
-    this.dpi,
-  );
+  ImageProvider(this._width, this._height, this.orientation, this.dpi);
 
   final double? dpi;
 
@@ -54,36 +49,50 @@ abstract class ImageProvider {
   PdfImage resolve(Context context, PdfPoint size, {double? dpi}) {
     final effectiveDpi = dpi ?? this.dpi;
 
-    if (effectiveDpi == null || _cache[0] != null) {
-      _cache[0] ??= buildImage(context);
+    if (effectiveDpi != null) {
+      final width = (size.x / PdfPageFormat.inch * effectiveDpi).toInt();
+      final height = (size.y / PdfPageFormat.inch * effectiveDpi).toInt();
 
-      if (_cache[0]!.pdfDocument != context.document) {
-        _cache[0] = buildImage(context);
+      // Never resample above the source resolution: upscaling adds no detail
+      // but discards the original (possibly better compressed) image data.
+      // For rotated orientations the axis buildImage resizes depends on
+      // whether decoding bakes the rotation into the pixels, so only an
+      // upper bound is checked here; buildImage itself skips the resample
+      // when the target is at or above the decoded pixel width. An unknown
+      // source width keeps the original: it cannot be proven a downsample.
+      final sourceWidth = _width;
+      final resampleBound = sourceWidth == null
+          ? null
+          : orientation.index >= 4
+          ? (sourceWidth > _height ? sourceWidth : _height)
+          : sourceWidth;
+
+      if (resampleBound != null && width > 0 && width < resampleBound) {
+        if (!_cache.containsKey(width)) {
+          _cache[width] ??= buildImage(context, width: width, height: height);
+        }
+
+        if (_cache[width]!.pdfDocument != context.document) {
+          _cache[width] = buildImage(context, width: width, height: height);
+        }
+
+        return _cache[width]!;
       }
-
-      return _cache[0]!;
     }
 
-    final width = (size.x / PdfPageFormat.inch * effectiveDpi).toInt();
-    final height = (size.y / PdfPageFormat.inch * effectiveDpi).toInt();
+    _cache[0] ??= buildImage(context);
 
-    if (!_cache.containsKey(width)) {
-      _cache[width] ??= buildImage(context, width: width, height: height);
+    if (_cache[0]!.pdfDocument != context.document) {
+      _cache[0] = buildImage(context);
     }
 
-    if (_cache[width]!.pdfDocument != context.document) {
-      _cache[width] = buildImage(context, width: width, height: height);
-    }
-
-    return _cache[width]!;
+    return _cache[0]!;
   }
 }
 
 class ImageProxy extends ImageProvider {
-  ImageProxy(
-    this._image, {
-    double? dpi,
-  }) : super(_image.width, _image.height, _image.orientation, dpi);
+  ImageProxy(this._image, {double? dpi})
+    : super(_image.width, _image.height, _image.orientation, dpi);
 
   /// The proxy image
   final PdfImage _image;
@@ -100,7 +109,9 @@ class MemoryImage extends ImageProvider {
   }) {
     final decoder = im.findDecoderForData(bytes);
     if (decoder == null) {
-      throw Exception('Unable to guess the image type ${bytes.length} bytes');
+      throw PdfException(
+        'Unable to guess the image type ${bytes.length} bytes',
+      );
     }
 
     if (decoder is im.JpegDecoder) {
@@ -118,7 +129,7 @@ class MemoryImage extends ImageProvider {
     final info = decoder.startDecode(bytes);
 
     if (info == null) {
-      throw Exception('Unable decode the image');
+      throw PdfException('Unable decode the image');
     }
 
     return MemoryImage._(
@@ -150,28 +161,53 @@ class MemoryImage extends ImageProvider {
     final image = im.decodeImage(bytes);
 
     if (image == null) {
-      throw Exception('Unable decode the image');
+      throw PdfException('Unable decode the image');
+    }
+
+    // The decoded (orientation-baked) pixels are the ground truth for the
+    // no-upscale rule: for rotated images the metadata bound checked by
+    // resolve() cannot know which axis copyResize will scale.
+    if (width >= image.width) {
+      return PdfImage.file(context.document, bytes: bytes);
     }
 
     final resized = im.copyResize(image, width: width);
+
+    if (im.JpegDecoder().isValidFile(bytes)) {
+      // Do not carry the source metadata over: EXIF can hold sensitive data
+      // (GPS position, device serial numbers) and its orientation is already
+      // baked into the decoded pixels.
+      resized.exif = im.ExifData();
+
+      // Keep DCT (JPEG) encoding for resampled JPEG images: embedding the
+      // raw pixels with Flate compression would inflate the file size.
+      return PdfImage.jpeg(
+        context.document,
+        image: im.encodeJpg(resized, quality: 90),
+      );
+    }
+
     return PdfImage.fromImage(context.document, image: resized);
   }
 }
 
 class ImageImage extends ImageProvider {
-  ImageImage(
-    this._image, {
-    double? dpi,
-    PdfImageOrientation? orientation,
-  }) : super(_image.width, _image.height,
-            orientation ?? PdfImageOrientation.topLeft, dpi);
+  ImageImage(this._image, {double? dpi, PdfImageOrientation? orientation})
+    : super(
+        _image.width,
+        _image.height,
+        orientation ?? PdfImageOrientation.topLeft,
+        dpi,
+      );
 
   /// The image data
   final im.Image _image;
 
   @override
   PdfImage buildImage(Context context, {int? width, int? height}) {
-    if (width == null) {
+    // Resampling at or above the pixel width could only upscale: keep the
+    // original pixels (see ImageProvider.resolve).
+    if (width == null || width >= _image.width) {
       return PdfImage.fromImage(context.document, image: _image);
     }
 
@@ -187,6 +223,9 @@ class RawImage extends ImageImage {
     required int height,
     PdfImageOrientation? orientation,
     double? dpi,
-  }) : super(PdfRasterBase(width, height, true, bytes).asImage(),
-            orientation: orientation, dpi: dpi);
+  }) : super(
+         PdfRasterBase(width, height, true, bytes).asImage(),
+         orientation: orientation,
+         dpi: dpi,
+       );
 }

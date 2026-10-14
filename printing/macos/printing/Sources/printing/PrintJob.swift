@@ -18,10 +18,6 @@ import FlutterMacOS
 import Foundation
 import WebKit
 
-func dataProviderReleaseDataCallback(info _: UnsafeMutableRawPointer?, data: UnsafeRawPointer, size _: Int) {
-    data.deallocate()
-}
-
 public class PrintJob: NSView, NSSharingServicePickerDelegate {
     private var printing: PrintingPlugin
     public var index: Int
@@ -29,9 +25,11 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     private var printOperation: NSPrintOperation?
     private var pdfDocument: CGPDFDocument?
     private var page: CGPDFPage?
-    private let semaphore = DispatchSemaphore(value: 0)
+    private var isWaitingForDocument = false
+    private var documentReceived = false
     private var dynamic = false
     private var _window: NSWindow?
+    private var lastLayoutParams: (width: CGFloat, height: CGFloat, marginLeft: CGFloat, marginTop: CGFloat, marginRight: CGFloat, marginBottom: CGFloat)?
 
     public init(printing: PrintingPlugin, index: Int) {
         self.printing = printing
@@ -44,7 +42,14 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // Return the number of pages available for printing
+    private func layoutParamsChanged(_ new: (width: CGFloat, height: CGFloat, marginLeft: CGFloat, marginTop: CGFloat, marginRight: CGFloat, marginBottom: CGFloat)) -> Bool {
+        guard let last = lastLayoutParams else { return true }
+        return last.width != new.width || last.height != new.height ||
+            last.marginLeft != new.marginLeft || last.marginTop != new.marginTop ||
+            last.marginRight != new.marginRight || last.marginBottom != new.marginBottom
+    }
+
+    /// Return the number of pages available for printing
     override public func knowsPageRange(_ range: NSRangePointer) -> Bool {
         let size = printOperation!.showsPrintPanel ? printOperation!.printPanel.printInfo.paperSize : printOperation!.printInfo.paperSize
 
@@ -52,8 +57,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         setBoundsSize(size)
 
         if dynamic {
-            printing.onLayout(
-                printJob: self,
+            let currentParams = (
                 width: printOperation!.printInfo.paperSize.width,
                 height: printOperation!.printInfo.paperSize.height,
                 marginLeft: printOperation!.printInfo.leftMargin,
@@ -62,8 +66,29 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
                 marginBottom: printOperation!.printInfo.bottomMargin
             )
 
-            // Block the main thread, waiting for a document
-            semaphore.wait()
+            if layoutParamsChanged(currentParams) {
+                lastLayoutParams = currentParams
+
+                printing.onLayout(
+                    printJob: self,
+                    width: currentParams.width,
+                    height: currentParams.height,
+                    marginLeft: currentParams.marginLeft,
+                    marginTop: currentParams.marginTop,
+                    marginRight: currentParams.marginRight,
+                    marginBottom: currentParams.marginBottom
+                )
+
+                // Wait for document using RunLoop to keep main thread responsive
+                isWaitingForDocument = true
+                documentReceived = false
+                let runLoop = RunLoop.current
+                let timeout = Date(timeIntervalSinceNow: 30.0)
+                while !documentReceived && Date() < timeout {
+                    runLoop.run(mode: .default, before: Date(timeIntervalSinceNow: 0.1))
+                }
+                isWaitingForDocument = false
+            }
         }
 
         if pdfDocument != nil {
@@ -78,7 +103,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         return true
     }
 
-    // Return the drawing rectangle for a particular page number
+    /// Return the drawing rectangle for a particular page number
     override public func rectForPage(_ page: Int) -> NSRect {
         self.page = pdfDocument?.page(at: page)
         return self.page?.getBoxRect(CGPDFBox.mediaBox) ?? NSZeroRect
@@ -89,14 +114,22 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     }
 
     func setDocument(_ data: Data?) {
-        let bytesPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: data?.count ?? 0)
-        data?.copyBytes(to: bytesPointer, count: data?.count ?? 0)
-        let dataProvider = CGDataProvider(dataInfo: nil, data: bytesPointer, size: data?.count ?? 0, releaseData: dataProviderReleaseDataCallback)
-        pdfDocument = CGPDFDocument(dataProvider!)
+        // An empty or malformed document must not crash: CGDataProvider returns
+        // nil for empty data, and CGPDFDocument returns nil for invalid data.
+        if let data, !data.isEmpty, let dataProvider = CGDataProvider(data: data as CFData) {
+            pdfDocument = CGPDFDocument(dataProvider)
+        } else {
+            pdfDocument = nil
+        }
 
         if dynamic {
-            // Unblock the main thread
-            semaphore.signal()
+            // Signal that document is ready
+            documentReceived = true
+            return
+        }
+
+        if pdfDocument == nil {
+            printing.onCompleted(printJob: self, completed: false, error: "Unable to load the PDF document")
             return
         }
 
@@ -136,6 +169,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     public func printPdf(name: String, withPageSize size: CGSize, andMargin _: CGRect, withPrinter printer: String?, dynamically dyn: Bool, andWindow window: NSWindow) {
         dynamic = dyn
         _window = window
+        lastLayoutParams = nil
         let sharedInfo = NSPrintInfo.shared
         let sharedDict = sharedInfo.dictionary()
         let printInfoDict = NSMutableDictionary(dictionary: sharedDict)
@@ -184,8 +218,9 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
 
     func cancelJob(_ error: String?) {
         pdfDocument = nil
+        lastLayoutParams = nil
         if dynamic {
-            semaphore.signal()
+            documentReceived = true
         } else {
             printing.onCompleted(printJob: self, completed: false, error: error as NSString?)
         }
@@ -215,6 +250,7 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
 //        }
     }
 
+    @available(macOS 11.0, *)
     public func convertHtml(_ data: String, withPageSize size: CGRect, andMargin margin: CGRect, andBaseUrl baseUrl: URL?) {
         let tempFile = NSTemporaryDirectory() + NSUUID().uuidString
         let directoryURL = URL(fileURLWithPath: tempFile)
@@ -230,23 +266,20 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         printInfo.rightMargin = size.width - margin.maxX
         printInfo.bottomMargin = size.height - margin.maxY
 
-        let webView = WebView()
-        webView.mainFrame.loadHTMLString(data, baseURL: baseUrl)
+        let webView = WKWebView(frame: CGRect.zero)
+        webView.loadHTMLString(data, baseURL: baseUrl)
         let when = DispatchTime.now() + 1
 
         DispatchQueue.main.asyncAfter(deadline: when) {
-            let printOperation = NSPrintOperation(view: webView.mainFrame.frameView.documentView, printInfo: printInfo)
-            printOperation.showsPrintPanel = false
-            printOperation.showsProgressPanel = false
-            printOperation.run()
-
-            do {
-                let data = try Data(contentsOf: directoryURL)
-                self.printing.onHtmlRendered(printJob: self, pdfData: data)
-                let fileManager = FileManager.default
-                try fileManager.removeItem(atPath: tempFile)
-            } catch {
-                self.printing.onHtmlError(printJob: self, error: "Unable to load the pdf file from \(tempFile)")
+            webView.createPDF { result in
+                switch result {
+                case let .success(data):
+                    self.printing.onHtmlRendered(printJob: self, pdfData: data)
+                    let fileManager = FileManager.default
+                    try? fileManager.removeItem(atPath: tempFile)
+                case let .failure(error):
+                    self.printing.onHtmlError(printJob: self, error: "Unable to create PDF: \(error.localizedDescription)")
+                }
             }
         }
     }
@@ -305,14 +338,18 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
     }
 
     public static func printingInfo() -> NSDictionary {
-        let data: NSDictionary = [
+        var html = false
+        if #available(macOS 11.0, *) {
+            html = true
+        }
+        return [
             "directPrint": true,
             "dynamicLayout": true,
             "canPrint": true,
+            "canConvertHtml": html,
             "canShare": true,
             "canRaster": true,
             "canListPrinters": true,
         ]
-        return data
     }
 }

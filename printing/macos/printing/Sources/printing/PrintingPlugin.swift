@@ -21,7 +21,9 @@ import Foundation
 public class PrintingPlugin: NSObject, FlutterPlugin {
     private static var instance: PrintingPlugin?
     private var channel: FlutterMethodChannel
-    public var jobs = [UInt32: PrintJob]()
+    // Shared jobs across all plugin instances (for multi-window support)
+    private static var sharedJobs = [UInt32: PrintJob]()
+    private static let jobsLock = NSLock()
     private var registrar: FlutterPluginRegistrar
 
     init(_ channel: FlutterMethodChannel, _ registrar: FlutterPluginRegistrar) {
@@ -29,16 +31,6 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
         self.registrar = registrar
         super.init()
         PrintingPlugin.instance = self
-    }
-
-    @objc
-    public static func setDocument(job: UInt32, doc: UnsafePointer<UInt8>, size: UInt64) {
-        instance!.jobs[job]?.setDocument(Data(bytes: doc, count: Int(size)))
-    }
-
-    @objc
-    public static func setError(job: UInt32, message: UnsafePointer<CChar>) {
-        instance!.jobs[job]?.cancelJob(String(cString: message))
     }
 
     /// Entry point
@@ -62,7 +54,10 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             let marginBottom = CGFloat((args["marginBottom"] as! NSNumber).floatValue)
             let printJob = PrintJob(printing: self, index: args["job"] as! Int)
             let dynamic = args["dynamic"] as! Bool
-            jobs[args["job"] as! UInt32] = printJob
+
+            PrintingPlugin.jobsLock.lock()
+            PrintingPlugin.sharedJobs[args["job"] as! UInt32] = printJob
+            PrintingPlugin.jobsLock.unlock()
 
             guard let window = registrar.view?.window else {
                 result(NSNumber(value: 0))
@@ -115,23 +110,27 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             let marginBottom = CGFloat((args["marginBottom"] as? NSNumber)?.floatValue ?? 0.0)
             let printJob = PrintJob(printing: self, index: args["job"] as! Int)
 
-            printJob.convertHtml(
-                args["html"] as! String,
-                withPageSize: CGRect(
-                    x: 0.0,
-                    y: 0.0,
-                    width: width,
-                    height: height
-                ),
-                andMargin: CGRect(
-                    x: marginLeft,
-                    y: marginTop,
-                    width: width - marginRight - marginLeft,
-                    height: height - marginBottom - marginTop
-                ),
-                andBaseUrl: args["baseUrl"] as? String == nil ? nil : URL(string: args["baseUrl"] as! String)
-            )
-            result(NSNumber(value: 1))
+            if #available(macOS 11.0, *) {
+                printJob.convertHtml(
+                    args["html"] as! String,
+                    withPageSize: CGRect(
+                        x: 0.0,
+                        y: 0.0,
+                        width: width,
+                        height: height
+                    ),
+                    andMargin: CGRect(
+                        x: marginLeft,
+                        y: marginTop,
+                        width: width - marginRight - marginLeft,
+                        height: height - marginBottom - marginTop
+                    ),
+                    andBaseUrl: args["baseUrl"] as? String == nil ? nil : URL(string: args["baseUrl"] as! String)
+                )
+                result(NSNumber(value: 1))
+            } else {
+                result(NSNumber(value: 0))
+            }
         } else if call.method == "printingInfo" {
             result(PrintJob.printingInfo())
         } else if call.method == "rasterPdf" {
@@ -148,7 +147,11 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
         }
     }
 
-    /// Request the Pdf document from flutter
+    /// Request the Pdf document from flutter. The document (or an error) comes
+    /// back as the method-channel reply. A dlsym-based FFI callback was used here
+    /// before, but the exported symbols get stripped from statically linked apps
+    /// in App Store distribution builds, silently breaking the lookup and leaving
+    /// the print dialog waiting forever.
     public func onLayout(printJob: PrintJob, width: CGFloat, height: CGFloat, marginLeft: CGFloat, marginTop: CGFloat, marginRight: CGFloat, marginBottom: CGFloat) {
         let arg = [
             "width": width,
@@ -160,7 +163,15 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             "job": printJob.index,
         ] as [String: Any]
 
-        channel.invokeMethod("onLayout", arguments: arg)
+        channel.invokeMethod("onLayout", arguments: arg) { result in
+            if let data = result as? FlutterStandardTypedData {
+                printJob.setDocument(data.data)
+            } else if let error = result as? FlutterError {
+                printJob.cancelJob(error.message)
+            } else {
+                printJob.cancelJob(nil)
+            }
+        }
     }
 
     /// send completion status to flutter
@@ -171,7 +182,10 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             "job": printJob.index,
         ]
         channel.invokeMethod("onCompleted", arguments: data)
-        jobs.removeValue(forKey: UInt32(printJob.index))
+
+        PrintingPlugin.jobsLock.lock()
+        PrintingPlugin.sharedJobs.removeValue(forKey: UInt32(printJob.index))
+        PrintingPlugin.jobsLock.unlock()
     }
 
     /// send html to pdf data result to flutter

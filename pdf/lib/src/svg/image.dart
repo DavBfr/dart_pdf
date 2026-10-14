@@ -49,21 +49,39 @@ class SvgImg extends SvgOperation {
   ) {
     final _brush = SvgBrush.fromXml(element, brush, painter);
 
-    final width =
-        SvgParser.getNumeric(element, 'width', _brush, defaultValue: 0)!
-            .sizeValue;
-    final height =
-        SvgParser.getNumeric(element, 'height', _brush, defaultValue: 0)!
-            .sizeValue;
-    final x =
-        SvgParser.getNumeric(element, 'x', _brush, defaultValue: 0)!.sizeValue;
-    final y =
-        SvgParser.getNumeric(element, 'y', _brush, defaultValue: 0)!.sizeValue;
+    final width = SvgParser.getNumeric(
+      element,
+      'width',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final height = SvgParser.getNumeric(
+      element,
+      'height',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final x = SvgParser.getNumeric(
+      element,
+      'x',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
+    final y = SvgParser.getNumeric(
+      element,
+      'y',
+      _brush,
+      defaultValue: 0,
+    )!.sizeValue;
 
     PdfImage? image;
 
-    final hrefAttr = element.getAttribute('href') ??
-        element.getAttribute('href', namespace: 'http://www.w3.org/1999/xlink');
+    final hrefAttr =
+        element.getAttribute('href') ??
+        element.getAttribute(
+          'href',
+          namespaceUri: 'http://www.w3.org/1999/xlink',
+        );
 
     if (hrefAttr != null) {
       if (hrefAttr.startsWith('data:')) {
@@ -118,8 +136,8 @@ class SvgImg extends SvgOperation {
     canvas
       ..setTransform(
         Matrix4.identity()
-          ..translate(x, y + height, 0)
-          ..scale(sx, -sy),
+          ..translateByDouble(x, y + height, 0, 1)
+          ..scaleByDouble(sx, -sy, 1, 1),
       )
       ..drawImage(image!, 0, 0);
   }

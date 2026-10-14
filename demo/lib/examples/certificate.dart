@@ -26,7 +26,9 @@ import 'package:vector_math/vector_math_64.dart';
 import '../data.dart';
 
 Future<Uint8List> generateCertificate(
-    PdfPageFormat pageFormat, CustomData data) async {
+  PdfPageFormat pageFormat,
+  CustomData data,
+) async {
   final lorem = pw.LoremText();
   final pdf = pw.Document();
 
@@ -48,21 +50,19 @@ Future<Uint8List> generateCertificate(
           pw.Spacer(flex: 2),
           pw.RichText(
             text: pw.TextSpan(
-                style: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold,
-                  fontSize: 25,
-                ),
-                children: [
-                  const pw.TextSpan(text: 'CERTIFICATE '),
-                  pw.TextSpan(
-                    text: 'of',
-                    style: pw.TextStyle(
-                      fontStyle: pw.FontStyle.italic,
-                      fontWeight: pw.FontWeight.normal,
-                    ),
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 25),
+              children: [
+                const pw.TextSpan(text: 'CERTIFICATE '),
+                pw.TextSpan(
+                  text: 'of',
+                  style: pw.TextStyle(
+                    fontStyle: pw.FontStyle.italic,
+                    fontWeight: pw.FontWeight.normal,
                   ),
-                  const pw.TextSpan(text: ' ACHIEVEMENT'),
-                ]),
+                ),
+                const pw.TextSpan(text: ' ACHIEVEMENT'),
+              ],
+            ),
           ),
           pw.Spacer(),
           pw.Text(
@@ -81,10 +81,7 @@ Future<Uint8List> generateCertificate(
           pw.Text(
             data.name,
             textAlign: pw.TextAlign.center,
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 20,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 20),
           ),
           pw.SizedBox(
             width: 300,
@@ -103,34 +100,23 @@ Future<Uint8List> generateCertificate(
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.center,
             children: [
-              pw.SvgImage(
-                svg: swirls,
-                height: 10,
-              ),
+              pw.SvgImage(svg: swirls, height: 10),
               pw.Padding(
                 padding: const pw.EdgeInsets.symmetric(horizontal: 10),
                 child: pw.Text(
                   'Flutter PDF Demo',
-                  style: const pw.TextStyle(
-                    fontSize: 10,
-                  ),
+                  style: const pw.TextStyle(fontSize: 10),
                 ),
               ),
               pw.Transform(
                 transform: Matrix4.diagonal3Values(-1, 1, 1),
                 adjustLayout: true,
-                child: pw.SvgImage(
-                  svg: swirls,
-                  height: 10,
-                ),
+                child: pw.SvgImage(svg: swirls, height: 10),
               ),
             ],
           ),
           pw.Spacer(),
-          pw.SvgImage(
-            svg: swirls2,
-            width: 150,
-          ),
+          pw.SvgImage(svg: swirls2, width: 150),
           pw.Spacer(),
           pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -143,10 +129,7 @@ Future<Uint8List> generateCertificate(
                 ),
               ),
               pw.SizedBox(width: 100),
-              pw.SvgImage(
-                svg: medail,
-                width: 100,
-              ),
+              pw.SvgImage(svg: medail, width: 100),
             ],
           ),
         ],
@@ -164,13 +147,17 @@ Future<Uint8List> generateCertificate(
             margin: const pw.EdgeInsets.all(10),
             decoration: pw.BoxDecoration(
               border: pw.Border.all(
-                  color: const PdfColor.fromInt(0xffe435), width: 1),
+                color: const PdfColor.fromInt(0xffe435),
+                width: 1,
+              ),
             ),
             child: pw.Container(
               margin: const pw.EdgeInsets.all(5),
               decoration: pw.BoxDecoration(
                 border: pw.Border.all(
-                    color: const PdfColor.fromInt(0xffe435), width: 5),
+                  color: const PdfColor.fromInt(0xffe435),
+                  width: 5,
+                ),
               ),
               width: double.infinity,
               height: double.infinity,
@@ -179,29 +166,20 @@ Future<Uint8List> generateCertificate(
                 children: [
                   pw.Positioned(
                     top: 5,
-                    child: pw.SvgImage(
-                      svg: swirls1,
-                      height: 60,
-                    ),
+                    child: pw.SvgImage(svg: swirls1, height: 60),
                   ),
                   pw.Positioned(
                     bottom: 5,
                     child: pw.Transform(
                       transform: Matrix4.diagonal3Values(1, -1, 1),
                       adjustLayout: true,
-                      child: pw.SvgImage(
-                        svg: swirls1,
-                        height: 60,
-                      ),
+                      child: pw.SvgImage(svg: swirls1, height: 60),
                     ),
                   ),
                   pw.Positioned(
                     top: 5,
                     left: 5,
-                    child: pw.SvgImage(
-                      svg: swirls3,
-                      height: 160,
-                    ),
+                    child: pw.SvgImage(svg: swirls3, height: 160),
                   ),
                   pw.Positioned(
                     top: 5,
@@ -209,10 +187,7 @@ Future<Uint8List> generateCertificate(
                     child: pw.Transform(
                       transform: Matrix4.diagonal3Values(-1, 1, 1),
                       adjustLayout: true,
-                      child: pw.SvgImage(
-                        svg: swirls3,
-                        height: 160,
-                      ),
+                      child: pw.SvgImage(svg: swirls3, height: 160),
                     ),
                   ),
                   pw.Positioned(
@@ -221,10 +196,7 @@ Future<Uint8List> generateCertificate(
                     child: pw.Transform(
                       transform: Matrix4.diagonal3Values(1, -1, 1),
                       adjustLayout: true,
-                      child: pw.SvgImage(
-                        svg: swirls3,
-                        height: 160,
-                      ),
+                      child: pw.SvgImage(svg: swirls3, height: 160),
                     ),
                   ),
                   pw.Positioned(
@@ -233,10 +205,7 @@ Future<Uint8List> generateCertificate(
                     child: pw.Transform(
                       transform: Matrix4.diagonal3Values(-1, -1, 1),
                       adjustLayout: true,
-                      child: pw.SvgImage(
-                        svg: swirls3,
-                        height: 160,
-                      ),
+                      child: pw.SvgImage(svg: swirls3, height: 160),
                     ),
                   ),
                   pw.Padding(
@@ -246,9 +215,7 @@ Future<Uint8List> generateCertificate(
                       right: 80,
                       bottom: 80,
                     ),
-                    child: pw.SvgImage(
-                      svg: garland,
-                    ),
+                    child: pw.SvgImage(svg: garland),
                   ),
                 ],
               ),

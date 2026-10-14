@@ -54,10 +54,7 @@ class Decorated extends StatelessWidget {
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: color ?? PdfColors.yellow100,
-        border: Border.all(
-          color: PdfColors.grey,
-          width: .5,
-        ),
+        border: Border.all(color: PdfColors.grey, width: .5),
       ),
     );
   }
@@ -70,94 +67,81 @@ void main() {
     pdf = Document();
   });
 
-  test(
-    'Form',
-    () {
-      pdf.addPage(
-        Page(
-          build: (Context context) => Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: <Widget>[
-              Label(label: 'Given Name:', width: 100),
-              Decorated(
-                  child: TextField(
+  test('Form', () {
+    pdf.addPage(
+      Page(
+        build: (Context context) => Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: <Widget>[
+            Label(label: 'Given Name:', width: 100),
+            Decorated(
+              child: TextField(
                 name: 'Given Name',
                 value: 'David',
                 textStyle: const TextStyle(color: PdfColors.amber),
-              )),
-              //
-              SizedBox(width: double.infinity, height: 10),
-              //
-              Label(label: 'Family Name:', width: 100),
-              Decorated(
-                  child: TextField(name: 'Family Name', value: 'PHAM-VAN')),
-              //
-              SizedBox(width: double.infinity, height: 10),
-              //
-              Label(label: 'Address:', width: 100),
-              Decorated(child: TextField(name: 'Address')),
-              //
-              SizedBox(width: double.infinity, height: 10),
-              Label(label: 'ChoiceField:', width: 100),
-              Decorated(
-                  child: ChoiceField(name: 'Test Choice', items: [
-                'One',
-                'Two',
-                'Blue',
-                'Yellow',
-                'Test äöüß',
-              ])),
-              //
-              SizedBox(width: double.infinity, height: 10),
-              //
-              Label(label: 'Postcode:', width: 100),
-              Decorated(
-                  child: TextField(name: 'Postcode', width: 60, maxLength: 6)),
-              //
-              Label(label: 'City:', width: 30),
-              Decorated(child: TextField(name: 'City')),
-              //
-              SizedBox(width: double.infinity, height: 10),
-              //
-              Label(label: 'Country:', width: 100),
-              Decorated(
-                  child: TextField(
-                name: 'Country',
-                color: PdfColors.blue,
-              )),
+              ),
+            ),
+            //
+            SizedBox(width: double.infinity, height: 10),
+            //
+            Label(label: 'Family Name:', width: 100),
+            Decorated(
+              child: TextField(name: 'Family Name', value: 'PHAM-VAN'),
+            ),
+            //
+            SizedBox(width: double.infinity, height: 10),
+            //
+            Label(label: 'Address:', width: 100),
+            Decorated(child: TextField(name: 'Address')),
+            //
+            SizedBox(width: double.infinity, height: 10),
+            Label(label: 'ChoiceField:', width: 100),
+            Decorated(
+              child: ChoiceField(
+                name: 'Test Choice',
+                items: ['One', 'Two', 'Blue', 'Yellow', 'Test äöüß'],
+              ),
+            ),
+            //
+            SizedBox(width: double.infinity, height: 10),
+            //
+            Label(label: 'Postcode:', width: 100),
+            Decorated(
+              child: TextField(name: 'Postcode', width: 60, maxLength: 6),
+            ),
+            //
+            Label(label: 'City:', width: 30),
+            Decorated(child: TextField(name: 'City')),
+            //
+            SizedBox(width: double.infinity, height: 10),
+            //
+            Label(label: 'Country:', width: 100),
+            Decorated(
+              child: TextField(name: 'Country', color: PdfColors.blue),
+            ),
 
-              //
-              SizedBox(width: double.infinity, height: 10),
-              //
-              Label(label: 'Checkbox:', width: 100),
-              Checkbox(
-                name: 'Checkbox',
-                value: true,
-              ),
-              //
-              SizedBox(width: 20, height: 10),
-              //
-              Label(label: 'unchecked:', width: 100),
-              Checkbox(
-                name: 'Unchecked',
-                value: false,
-              ),
-              //
-              SizedBox(width: double.infinity, height: 10),
-              //
-              Transform.rotateBox(
-                angle: .7,
-                child: FlatButton(
-                  name: 'submit',
-                  child: Text('Submit'),
-                ),
-              )
-            ],
-          ),
+            //
+            SizedBox(width: double.infinity, height: 10),
+            //
+            Label(label: 'Checkbox:', width: 100),
+            Checkbox(name: 'Checkbox', value: true),
+            //
+            SizedBox(width: 20, height: 10),
+            //
+            Label(label: 'unchecked:', width: 100),
+            Checkbox(name: 'Unchecked', value: false),
+            //
+            SizedBox(width: double.infinity, height: 10),
+            //
+            Transform.rotateBox(
+              angle: .7,
+              child: FlatButton(name: 'submit', child: Text('Submit')),
+            ),
+          ],
         ),
-      );
-    },
-  );
+      ),
+    );
+  });
 
   tearDownAll(() async {
     final file = File('widgets-form.pdf');

@@ -51,7 +51,7 @@ class PrintingPlugin extends PrintingPlatform {
 
   static const _pdfJsCdnPath = 'https://unpkg.com/pdfjs-dist';
 
-  static const _pdfJsVersion = '3.2.146';
+  static const _pdfJsVersion = '6.2.108';
 
   final _loading = Mutex();
 
@@ -70,70 +70,38 @@ class PrintingPlugin extends PrintingPlatform {
     await _loading.acquire();
 
     if (!_hasPdfJsLib) {
-      js.JSObject? amd;
-      js.JSObject? define;
-      js.JSObject? module;
-      js.JSObject? exports;
-      if (web.window.hasProperty('define'.toJS).toDart) {
-        // In dev, requireJs is loaded in. Disable it here.
-        define = web.window.getProperty('define'.toJS);
-        amd = define!.getProperty('amd'.toJS);
-        define.setProperty('amd'.toJS, false.toJS);
-      }
-
-      // Save Webpack values and make typeof module != object
-      if (web.window.hasProperty('exports'.toJS).toDart) {
-        exports = web.window.getProperty('exports'.toJS);
-      }
-      web.window.setProperty('exports'.toJS, 0.toJS);
-
-      if (web.window.hasProperty('module'.toJS).toDart) {
-        module = web.window.getProperty('module'.toJS);
-      }
-      web.window.setProperty('module'.toJS, 0.toJS);
-
       // Check if the source of PDF.js library is overridden via
-      // [dartPdfJsBaseUrl] JavaScript  variable.
+      // [dartPdfJsBaseUrl] JavaScript variable.
       if (web.window.hasProperty(_dartPdfJsBaseUrl.toJS).toDart) {
-        _pdfJsUrlBase = web.window.getProperty(_dartPdfJsBaseUrl.toJS);
+        _pdfJsUrlBase = web.window
+            .getProperty<js.JSString?>(_dartPdfJsBaseUrl.toJS)!
+            .toDart;
       } else {
         final pdfJsVersion =
             web.window.hasProperty(_dartPdfJsVersion.toJS).toDart
-                ? web.window
-                    .getProperty<js.JSString?>(_dartPdfJsVersion.toJS)!
-                    .toDart
-                : _pdfJsVersion;
+            ? web.window
+                  .getProperty<js.JSString?>(_dartPdfJsVersion.toJS)!
+                  .toDart
+            : _pdfJsVersion;
         _pdfJsUrlBase = '$_pdfJsCdnPath@$pdfJsVersion/build/';
       }
 
-      final script = web.HTMLScriptElement()
-        ..type = 'text/javascript'
-        ..async = true
-        ..src = '${_pdfJsUrlBase}pdf.min.js';
-      assert(web.document.head != null);
-      web.document.head!.append(script);
-      await script.onLoad.first;
-
-      if (amd != null) {
-        // Re-enable requireJs
-        define!.setProperty('amd'.toJS, amd);
-      }
-
-      web.window
-          .getProperty<js.JSObject>('pdfjsLib'.toJS)
-          .getProperty<js.JSObject>('GlobalWorkerOptions'.toJS)
-          .setProperty(
-            'workerSrc'.toJS,
-            '${_pdfJsUrlBase}pdf.worker.min.js'.toJS,
-          );
-
-      // Restore module and exports
-      if (module != null) {
-        web.window['module'] = module;
-      }
-      if (exports != null) {
-        web.window['exports'] = exports;
-      }
+      // pdf.js 4+ ships ES modules only (.mjs), so load it with a dynamic
+      // import() instead of a classic <script> tag.
+      final importUrl = '${_pdfJsUrlBase}pdf.min.mjs';
+      final workerUrl = '${_pdfJsUrlBase}pdf.worker.min.mjs';
+      await web.window
+          .callMethod<js.JSPromise>(
+            'eval'.toJS,
+            '''
+(async function() {
+  var m = await import("$importUrl");
+  window.pdfjsLib = m;
+  m.GlobalWorkerOptions.workerSrc = "$workerUrl";
+})()'''
+                .toJS,
+          )
+          .toDart;
     }
 
     _loading.release();
@@ -159,6 +127,7 @@ class PrintingPlugin extends PrintingPlatform {
     bool usePrinterSettings,
     OutputType outputType,
     bool forceCustomPrintPaper,
+    bool windowsModernDialog,
   ) async {
     late Uint8List result;
     try {
@@ -191,12 +160,13 @@ class PrintingPlugin extends PrintingPlatform {
       return false;
     }
 
+    // UserAgent can contain both Chrome and Safari for Chrome browser.
+    // UserAgent contains only Safari for Safari browser.
     final userAgent = web.window.navigator.userAgent;
-    final isChrome = web.window['chrome'] != null;
-    final isSafari = web.window['safari'] != null &&
-        !userAgent.contains(RegExp(r'Version/14\.1\.'));
-    final isMobile = userAgent.contains('Mobile');
+    final isChrome = userAgent.contains('Chrome');
+    final isSafari = userAgent.contains('Safari') && !isChrome;
     final isFirefox = userAgent.contains('Firefox');
+    final isMobile = userAgent.contains('Mobile');
 
     // Chrome, Safari, and Firefox on a desktop computer
     if ((isChrome || isSafari || isFirefox) && !isMobile) {
@@ -321,9 +291,7 @@ class PrintingPlugin extends PrintingPlatform {
   }
 
   @override
-  Future<Printer> pickPrinter(
-    Rect bounds,
-  ) {
+  Future<Printer> pickPrinter(Rect bounds) {
     throw UnimplementedError();
   }
 
@@ -335,7 +303,10 @@ class PrintingPlugin extends PrintingPlatform {
   ) async* {
     await _initPlugin();
 
-    final settings = Settings()..data = document.toJS;
+    // pdf.js 4+ transfers TypedArrays to the worker and takes ownership of the
+    // buffer, which neuters the caller's Uint8List. Copy first so the app can
+    // still download/share the same document bytes after preview rasterization.
+    final settings = Settings()..data = Uint8List.fromList(document).toJS;
 
     if (!_hasPdfJsLib) {
       settings
@@ -358,8 +329,9 @@ class PrintingPlugin extends PrintingPlatform {
       for (final pageIndex in computedPages) {
         final page = await doc.getPage(pageIndex + 1).toDart;
         try {
-          final viewport =
-              page.getViewport(Settings()..scale = dpi / PdfPageFormat.inch);
+          final viewport = page.getViewport(
+            Settings()..scale = dpi / PdfPageFormat.inch,
+          );
 
           canvas.height = viewport.height.toInt();
           canvas.width = viewport.width.toInt();
@@ -387,19 +359,13 @@ class PrintingPlugin extends PrintingPlatform {
           final r = web.FileReader();
           r.readAsArrayBuffer(blob);
 
-          r.onLoadEnd.listen(
-            (web.ProgressEvent e) {
-              data.add((r.result! as js.JSArrayBuffer).toDart.asInt8List());
-              completer.complete();
-            },
-          );
+          r.onLoadEnd.listen((web.ProgressEvent e) {
+            data.add((r.result! as js.JSArrayBuffer).toDart.asInt8List());
+            completer.complete();
+          });
           await completer.future;
 
-          yield _WebPdfRaster(
-            canvas.width,
-            canvas.height,
-            data.toBytes(),
-          );
+          yield _WebPdfRaster(canvas.width, canvas.height, data.toBytes());
         } finally {
           page.cleanup();
         }
@@ -411,11 +377,8 @@ class PrintingPlugin extends PrintingPlatform {
 }
 
 class _WebPdfRaster extends PdfRaster {
-  _WebPdfRaster(
-    int width,
-    int height,
-    this.png,
-  ) : super(width, height, Uint8List(0));
+  _WebPdfRaster(int width, int height, this.png)
+    : super(width, height, Uint8List(0));
 
   final Uint8List png;
 

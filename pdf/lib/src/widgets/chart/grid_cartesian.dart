@@ -24,11 +24,9 @@ import 'chart.dart';
 import 'grid_axis.dart';
 
 class CartesianGrid extends ChartGrid {
-  CartesianGrid({
-    required GridAxis xAxis,
-    required GridAxis yAxis,
-  })  : _xAxis = xAxis..direction = Axis.horizontal,
-        _yAxis = yAxis..direction = Axis.vertical;
+  CartesianGrid({required GridAxis xAxis, required GridAxis yAxis})
+    : _xAxis = xAxis..direction = Axis.horizontal,
+      _yAxis = yAxis..direction = Axis.vertical;
 
   final GridAxis _xAxis;
   final GridAxis _yAxis;
@@ -36,8 +34,11 @@ class CartesianGrid extends ChartGrid {
   late PdfRect gridBox;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     super.layout(context, constraints, parentUsesSize: parentUsesSize);
 
     final datasets = Chart.of(context).datasets;
@@ -47,13 +48,17 @@ class CartesianGrid extends ChartGrid {
     var count = 5;
     while (count-- > 0) {
       _xAxis.crossAxisPosition = _yAxis.axisPosition;
-      _xAxis.axisPosition =
-          math.max(_xAxis.axisPosition, _yAxis.crossAxisPosition);
+      _xAxis.axisPosition = math.max(
+        _xAxis.axisPosition,
+        _yAxis.crossAxisPosition,
+      );
       _xAxis.layout(context, constraints);
       assert(_xAxis.box != null);
       _yAxis.crossAxisPosition = _xAxis.axisPosition;
-      _yAxis.axisPosition =
-          math.max(_yAxis.axisPosition, _xAxis.crossAxisPosition);
+      _yAxis.axisPosition = math.max(
+        _yAxis.axisPosition,
+        _xAxis.crossAxisPosition,
+      );
       _yAxis.layout(context, constraints);
       assert(_yAxis.box != null);
       if (_yAxis.crossAxisPosition == _xAxis.axisPosition &&
@@ -68,17 +73,16 @@ class CartesianGrid extends ChartGrid {
 
     for (final dataset in datasets) {
       dataset.layout(context, BoxConstraints.tight(gridBox.size));
-      dataset.box =
-          PdfRect.fromPoints(PdfPoint(width, height), dataset.box!.size);
+      dataset.box = PdfRect.fromPoints(
+        PdfPoint(width, height),
+        dataset.box!.size,
+      );
     }
   }
 
   @override
   PdfPoint toChart(PdfPoint p) {
-    return PdfPoint(
-      _xAxis.toChart(p.x),
-      _yAxis.toChart(p.y),
-    );
+    return PdfPoint(_xAxis.toChart(p.x), _yAxis.toChart(p.y));
   }
 
   double get xAxisOffset => _xAxis.axisPosition;

@@ -25,15 +25,11 @@ import 'ttffont.dart';
 /// Font descriptor object
 class PdfFontDescriptor extends PdfObject<PdfDict> {
   /// Create a Font descriptor object
-  PdfFontDescriptor(
-    this.ttfFont,
-    this.file,
-  ) : super(
-          ttfFont.pdfDocument,
-          params: PdfDict.values({
-            '/Type': const PdfName('/FontDescriptor'),
-          }),
-        );
+  PdfFontDescriptor(this.ttfFont, this.file)
+    : super(
+        ttfFont.pdfDocument,
+        params: PdfDict.values({'/Type': const PdfName('/FontDescriptor')}),
+      );
 
   /// File data
   final PdfObjectStream file;
@@ -47,12 +43,18 @@ class PdfFontDescriptor extends PdfObject<PdfDict> {
 
     params['/FontName'] = PdfName('/${ttfFont.fontName}');
     params['/FontFile2'] = file.ref();
-    params['/Flags'] = PdfNum(ttfFont.font.unicode ? 4 : 32);
+    // 4 = Symbolic, 32 = Nonsymbolic. A symbolic font is defined to use its
+    // built-in encoding, so consumers may ignore /Encoding entirely; declaring
+    // symbolic alongside /WinAnsiEncoding contradicts itself and lets a strict
+    // RIP resolve glyphs against a (3,0) cmap that simple fonts do not carry.
+    // Key off how the font is actually written, not font.unicode, which only
+    // reports the sfnt version tag.
+    params['/Flags'] = PdfNum(ttfFont.isCidFont ? 4 : 32);
     params['/FontBBox'] = PdfArray.fromNum(<int>[
       (ttfFont.font.xMin / ttfFont.font.unitsPerEm * 1000).toInt(),
       (ttfFont.font.yMin / ttfFont.font.unitsPerEm * 1000).toInt(),
       (ttfFont.font.xMax / ttfFont.font.unitsPerEm * 1000).toInt(),
-      (ttfFont.font.yMax / ttfFont.font.unitsPerEm * 1000).toInt()
+      (ttfFont.font.yMax / ttfFont.font.unitsPerEm * 1000).toInt(),
     ]);
     params['/Ascent'] = PdfNum((ttfFont.ascent * 1000).toInt());
     params['/Descent'] = PdfNum((ttfFont.descent * 1000).toInt());

@@ -100,7 +100,10 @@ Iterable<FontDesc> getFonts(Map m) sync* {
         'https://rawcdn.githack.com/googlefonts/noto-emoji/9a5261d871451f9b5183c93483cbd68ed916b1e9/fonts/NotoColorEmoji.ttf',
   }.entries) {
     yield FontDesc(
-        key: entry.key, uri: Uri.parse(entry.value), name: entry.key);
+      key: entry.key,
+      uri: Uri.parse(entry.value),
+      name: entry.key,
+    );
   }
 }
 
@@ -131,8 +134,9 @@ void main(List<String> args) async {
     final key = results['key'];
     final http = HttpClient();
     print('Downloading...');
-    final q = await http.getUrl(Uri.parse(
-        'https://content-webfonts.googleapis.com/v1/webfonts?key=$key'));
+    final q = await http.getUrl(
+      Uri.parse('https://content-webfonts.googleapis.com/v1/webfonts?key=$key'),
+    );
     final r = await q.close();
 
     await for (final c in r.transform(utf8.decoder)) {
@@ -150,24 +154,31 @@ void main(List<String> args) async {
 
   output.writeln('/*');
   output.writeln(
-      ' * Copyright (C) 2017, David PHAM-VAN <dev.nfet.net@gmail.com>');
+    ' * Copyright (C) 2017, David PHAM-VAN <dev.nfet.net@gmail.com>',
+  );
   output.writeln(' *');
   output.writeln(
-      ' * Licensed under the Apache License, Version 2.0 (the "License");');
+    ' * Licensed under the Apache License, Version 2.0 (the "License");',
+  );
   output.writeln(
-      ' * you may not use this file except in compliance with the License.');
+    ' * you may not use this file except in compliance with the License.',
+  );
   output.writeln(' * You may obtain a copy of the License at');
   output.writeln(' *');
   output.writeln(' *     http://www.apache.org/licenses/LICENSE-2.0');
   output.writeln(' *');
   output.writeln(
-      ' * Unless required by applicable law or agreed to in writing, software');
+    ' * Unless required by applicable law or agreed to in writing, software',
+  );
   output.writeln(
-      ' * distributed under the License is distributed on an "AS IS" BASIS,');
+    ' * distributed under the License is distributed on an "AS IS" BASIS,',
+  );
   output.writeln(
-      ' * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.');
+    ' * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.',
+  );
   output.writeln(
-      ' * See the License for the specific language governing permissions and');
+    ' * See the License for the specific language governing permissions and',
+  );
   output.writeln(' * limitations under the License.');
   output.writeln(' */');
   output.writeln('');
@@ -193,7 +204,8 @@ void main(List<String> args) async {
     output.writeln('/// ${f.fontName}');
     output.writeln('static Future<Font> ${f.fontDartName}() {');
     output.writeln(
-        'const font = PdfGoogleFonts._(\'${f.uri}\', \'${f.name}\',);');
+      'const font = PdfGoogleFonts._(\'${f.uri}\', \'${f.name}\',);',
+    );
     output.writeln('return font.getFont();');
     output.writeln('}');
   }

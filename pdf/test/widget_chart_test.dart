@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:pdf/pdf.dart';
+import 'package:pdf/src/priv.dart';
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
 
@@ -31,102 +33,10 @@ void main() {
 
   group('LineChart test', () {
     test('Default LineChart', () {
-      pdf.addPage(Page(
-        pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context context) => Chart(
-          grid: CartesianGrid(
-            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
-            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
-          ),
-          datasets: <Dataset>[
-            LineDataSet(
-              data: const <PointChartValue>[
-                PointChartValue(1, 1),
-                PointChartValue(2, 3),
-                PointChartValue(3, 7),
-              ],
-            ),
-          ],
-        ),
-      ));
-    });
-
-    test('Default LineChart without lines connecting points', () {
-      pdf.addPage(Page(
-        pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context context) => Chart(
-          grid: CartesianGrid(
-            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
-            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
-          ),
-          datasets: <Dataset>[
-            LineDataSet(
-              data: const <PointChartValue>[
-                PointChartValue(1, 1),
-                PointChartValue(2, 3),
-                PointChartValue(3, 7),
-              ],
-              drawLine: false,
-            ),
-          ],
-        ),
-      ));
-    });
-
-    test('Default ScatterChart without dots', () {
-      pdf.addPage(Page(
-        build: (Context context) => Chart(
-          grid: CartesianGrid(
-            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
-            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
-          ),
-          datasets: <Dataset>[
-            LineDataSet(
-              data: const <PointChartValue>[
-                PointChartValue(1, 1),
-                PointChartValue(2, 3),
-                PointChartValue(3, 7),
-              ],
-              drawPoints: false,
-            ),
-          ],
-        ),
-      ));
-    });
-
-    test('ScatterChart with custom points and lines', () {
-      pdf.addPage(Page(
-        pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context context) => Chart(
-          grid: CartesianGrid(
-            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
-            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
-          ),
-          datasets: <Dataset>[
-            LineDataSet(
-              data: const <PointChartValue>[
-                PointChartValue(1, 1),
-                PointChartValue(2, 3),
-                PointChartValue(3, 7),
-              ],
-              drawLine: false,
-              pointColor: PdfColors.red,
-              pointSize: 4,
-              color: PdfColors.purple,
-              lineWidth: 4,
-            ),
-          ],
-        ),
-      ));
-    });
-
-    test('ScatterChart with custom size', () {
-      pdf.addPage(Page(
-        pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context context) => SizedBox(
-          width: 200,
-          height: 100,
-          child: Chart(
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.standard.landscape,
+          build: (Context context) => Chart(
             grid: CartesianGrid(
               xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
               yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
@@ -142,75 +52,183 @@ void main() {
             ],
           ),
         ),
-      ));
+      );
+    });
+
+    test('Default LineChart without lines connecting points', () {
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.standard.landscape,
+          build: (Context context) => Chart(
+            grid: CartesianGrid(
+              xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+              yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
+            ),
+            datasets: <Dataset>[
+              LineDataSet(
+                data: const <PointChartValue>[
+                  PointChartValue(1, 1),
+                  PointChartValue(2, 3),
+                  PointChartValue(3, 7),
+                ],
+                drawLine: false,
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+
+    test('Default ScatterChart without dots', () {
+      pdf.addPage(
+        Page(
+          build: (Context context) => Chart(
+            grid: CartesianGrid(
+              xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+              yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
+            ),
+            datasets: <Dataset>[
+              LineDataSet(
+                data: const <PointChartValue>[
+                  PointChartValue(1, 1),
+                  PointChartValue(2, 3),
+                  PointChartValue(3, 7),
+                ],
+                drawPoints: false,
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+
+    test('ScatterChart with custom points and lines', () {
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.standard.landscape,
+          build: (Context context) => Chart(
+            grid: CartesianGrid(
+              xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+              yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
+            ),
+            datasets: <Dataset>[
+              LineDataSet(
+                data: const <PointChartValue>[
+                  PointChartValue(1, 1),
+                  PointChartValue(2, 3),
+                  PointChartValue(3, 7),
+                ],
+                drawLine: false,
+                pointColor: PdfColors.red,
+                pointSize: 4,
+                color: PdfColors.purple,
+                lineWidth: 4,
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+
+    test('ScatterChart with custom size', () {
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.standard.landscape,
+          build: (Context context) => SizedBox(
+            width: 200,
+            height: 100,
+            child: Chart(
+              grid: CartesianGrid(
+                xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+                yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
+              ),
+              datasets: <Dataset>[
+                LineDataSet(
+                  data: const <PointChartValue>[
+                    PointChartValue(1, 1),
+                    PointChartValue(2, 3),
+                    PointChartValue(3, 7),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
     });
 
     test('LineChart with curved lines', () {
-      pdf.addPage(Page(
-        pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context context) => Chart(
-          grid: CartesianGrid(
-            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
-            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
-          ),
-          datasets: <Dataset>[
-            LineDataSet(
-              drawPoints: false,
-              isCurved: true,
-              data: const <PointChartValue>[
-                PointChartValue(1, 1),
-                PointChartValue(3, 7),
-                PointChartValue(5, 3),
-              ],
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.standard.landscape,
+          build: (Context context) => Chart(
+            grid: CartesianGrid(
+              xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+              yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
             ),
-          ],
+            datasets: <Dataset>[
+              LineDataSet(
+                drawPoints: false,
+                isCurved: true,
+                data: const <PointChartValue>[
+                  PointChartValue(1, 1),
+                  PointChartValue(3, 7),
+                  PointChartValue(5, 3),
+                ],
+              ),
+            ],
+          ),
         ),
-      ));
+      );
     });
   });
 
   group('BarChart test', () {
     test('Default BarChart', () {
-      pdf.addPage(Page(
-        pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context context) => Chart(
-          grid: CartesianGrid(
-            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
-            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
-          ),
-          datasets: <Dataset>[
-            BarDataSet(
-              data: const <PointChartValue>[
-                PointChartValue(1, 1),
-                PointChartValue(2, 3),
-                PointChartValue(3, 7),
-              ],
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.standard.landscape,
+          build: (Context context) => Chart(
+            grid: CartesianGrid(
+              xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+              yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
             ),
-          ],
+            datasets: <Dataset>[
+              BarDataSet(
+                data: const <PointChartValue>[
+                  PointChartValue(1, 1),
+                  PointChartValue(2, 3),
+                  PointChartValue(3, 7),
+                ],
+              ),
+            ],
+          ),
         ),
-      ));
+      );
     });
 
     test('Vertical BarChart', () {
-      pdf.addPage(Page(
-        pageFormat: PdfPageFormat.standard.landscape,
-        build: (Context context) => Chart(
-          grid: CartesianGrid(
-            xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
-            yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
-          ),
-          datasets: <Dataset>[
-            BarDataSet(
-              axis: Axis.vertical,
-              data: const <PointChartValue>[
-                PointChartValue(1, 1),
-                PointChartValue(2, 3),
-                PointChartValue(3, 7),
-              ],
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.standard.landscape,
+          build: (Context context) => Chart(
+            grid: CartesianGrid(
+              xAxis: FixedAxis<int>(<int>[0, 1, 2, 3, 4, 5, 6]),
+              yAxis: FixedAxis<int>(<int>[0, 3, 6, 9], divisions: true),
             ),
-          ],
+            datasets: <Dataset>[
+              BarDataSet(
+                axis: Axis.vertical,
+                data: const <PointChartValue>[
+                  PointChartValue(1, 1),
+                  PointChartValue(2, 3),
+                  PointChartValue(3, 7),
+                ],
+              ),
+            ],
+          ),
         ),
-      ));
+      );
     });
   });
 
@@ -289,6 +307,74 @@ void main() {
         ),
       ),
     );
+  });
+
+  group('PieChart full circle', () {
+    // https://github.com/DavBfr/dart_pdf/issues/1963
+    // A full circle is drawn as a move and four curves, while a slice starts
+    // with a line from the centre.
+    const fullCircle = 'm c c c c f';
+
+    // The path operators of the last filled path: the last dataset painted.
+    Future<String> lastFilledPath(
+      List<Dataset> datasets, {
+      double startAngle = 0,
+    }) async {
+      final document = Document(compress: false);
+      document.addPage(
+        Page(
+          build: (Context context) => Chart(
+            grid: PieGrid(startAngle: startAngle),
+            datasets: datasets,
+          ),
+        ),
+      );
+      await document.save();
+
+      final operators = document.document.pdfPageList.pages.single.contents
+          .whereType<PdfObjectStream>()
+          .map((stream) => latin1.decode(stream.buf.output()))
+          .join(' ')
+          .split(RegExp(r'\s+'))
+          .where(const {'m', 'l', 'c', 'f'}.contains)
+          .join(' ');
+      return operators.split(RegExp(r'(?<= f) ')).last;
+    }
+
+    PieDataSet slice(double value, {double innerRadius = 0}) => PieDataSet(
+      value: value,
+      color: PdfColors.blue,
+      drawBorder: false,
+      innerRadius: innerRadius,
+    );
+
+    // With these values the angle of a single dataset rounds to just below
+    // 2 * pi.
+    for (final value in <double>[75, 87.5]) {
+      for (final startAngle in <double>[0, 0.1]) {
+        test('draws a full circle for a single dataset of $value '
+            'starting at $startAngle', () async {
+          expect(
+            await lastFilledPath([slice(value)], startAngle: startAngle),
+            fullCircle,
+          );
+        });
+      }
+
+      test('draws a full donut for a single dataset of $value', () async {
+        expect(
+          await lastFilledPath([slice(value, innerRadius: 50)]),
+          'm c c c c m c c c c f',
+        );
+      });
+    }
+
+    test('still draws a slice just short of a full turn as a slice', () async {
+      expect(
+        await lastFilledPath([slice(1), slice(999999)]),
+        startsWith('m l c'),
+      );
+    });
   });
 
   tearDownAll(() async {

@@ -134,7 +134,7 @@ mixin PdfGraphicStream on PdfObject<PdfDict> {
       resources['/XObject'] = PdfDict.fromObjectMap(xObjects);
     }
 
-    if (pdfDocument.hasGraphicStates) {
+    if (pdfDocument.hasGraphicStates && !params.containsKey('/Group')) {
       // Declare Transparency Group settings
       params['/Group'] = PdfDict.values({
         '/Type': const PdfName('/Group'),
@@ -164,8 +164,6 @@ mixin PdfGraphicStream on PdfObject<PdfDict> {
 /// Graphic XObject
 class PdfGraphicXObject extends PdfXObject with PdfGraphicStream {
   /// Creates a Graphic XObject
-  PdfGraphicXObject(
-    PdfDocument pdfDocument, [
-    String? subtype,
-  ]) : super(pdfDocument, subtype);
+  PdfGraphicXObject(PdfDocument pdfDocument, [String? subtype])
+    : super(pdfDocument, subtype);
 }

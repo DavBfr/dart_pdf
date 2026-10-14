@@ -1,5 +1,57 @@
 # Changelog
 
+## 3.13.1
+
+- Add output-stream serialization for memory-bounded PDF generation.
+- Add lazy JPEG streams that do not retain encoded image bytes.
+- Fix setting a dpi on an Image widget massively inflating the PDF size (dart_pdf#1841): never resample above the source resolution, and keep DCT (JPEG) encoding instead of raw Flate pixels when a JPEG image is downsampled. Note that downsampled JPEG images are re-encoded at quality 90 (lossy); omit dpi to embed the original bytes unchanged
+- Check the no-upscale rule against the decoded pixels, so rotated images can no longer be accidentally upscaled, and keep the original image when the source resolution is unknown
+- Keep dpi downsampling working after the same image was resolved at or above its source resolution
+- Strip the source EXIF metadata (GPS position, device serial numbers, ...) from downsampled JPEG images instead of copying it into the document
+
+## 3.13.0
+
+- Fix lint issues
+- Update xml dependency
+- Add PdfException over the pdf classes
+- Made svg path xml functions safer for malformed documents
+- Update min dart sdk to 3.12.0
+
+## 3.12.0
+
+- Imroved assertion readability [tmbenhura]
+- Dropped unachievable assertion check [tmbenhura]
+- Correctly calculating bounding boxes from children [tmbenhura]
+- Update pdfa README.md [pldelattre]
+- Improve pdfa attached files logic [pldelattre]
+- Adds Multipage and Inseparable documentation [Ortes]
+- import formxobject [gs]
+- Subclasses of PdfFormXObject for drawing widgets and SVG [gs]
+- new Method drawXObject [gs]
+- feat: add CMYK and Adobe APP14 JPEG support [Michael Ryan]
+- fix: handle compound glyph offset calculation and null sub-glyph index [illia-romanenko]
+- Improve performance of table layout [Pieter van Loon]
+- Reduce freezes on web [Kostia Sokolovskyi]
+- creates catalog.names earlier for attached files [ilaurillard]
+- fix: Prevent "Index out of range" error when reading simple glyphs in certain fonts  [Eghosa Osayande]
+- Improve PdfRect naming consistency
+- Migrate to vector_math 2.2.0
+
+## 3.11.3
+
+- Fix CMYK
+
+## 3.11.2
+
+- Add support for custom fonts in SVGs. [Tyler Denniston]
+- Fix MultiPage.maxPages not checked with release builds
+- Fix PdfColorCmyk.fromRgb
+- Table widget refactors [Graham Smith]
+- Add support for creating PDF/A 3b [ilaurillard]
+- Add helper functions to replace text styles and cell content [Brian Kayfitz]
+- Fix TextStyle merge decoration [AtlasAutocode]
+- Use secure random number generator for document ID generation
+
 ## 3.11.1
 
 - Fixed display problems with textfields [ilaurillard]

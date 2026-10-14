@@ -40,9 +40,12 @@ void main() {
     pdf.addPage(
       MultiPage(
         footer: (c) => Padding(
-            padding: const EdgeInsets.only(top: 20),
-            child: Align(
-                alignment: Alignment.centerRight, child: Text(c.pageLabel))),
+          padding: const EdgeInsets.only(top: 20),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Text(c.pageLabel),
+          ),
+        ),
         build: (context) => [
           ...Iterable<Widget>.generate(40, (index) {
             final level = (sin(index / 5) * 6).abs().toInt();
@@ -64,13 +67,16 @@ void main() {
     pdf.addPage(
       MultiPage(
         footer: (c) => Padding(
-            padding: const EdgeInsets.only(top: 20),
-            child: Align(
-                alignment: Alignment.centerRight, child: Text(c.pageLabel))),
+          padding: const EdgeInsets.only(top: 20),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Text(c.pageLabel),
+          ),
+        ),
         build: (context) => [
           Center(
-              child:
-                  Text('Table of content', style: Theme.of(context).header0)),
+            child: Text('Table of content', style: Theme.of(context).header0),
+          ),
           SizedBox(height: 20),
           TableOfContent(),
         ],

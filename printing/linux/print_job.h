@@ -27,17 +27,21 @@
 
 class print_job {
  private:
+  // Not owned: belongs to the plugin instance this job was created by.
+  FlMethodChannel* channel;
   const int index;
   GtkPrintJob* printJob = nullptr;
 
  public:
   GtkPrintUnixDialog* dialog = nullptr;
 
-  explicit print_job(int index);
+  print_job(FlMethodChannel* channel, int index);
 
   ~print_job();
 
   int get_id() { return index; };
+
+  FlMethodChannel* get_channel() { return channel; };
 
   static FlValue* list_printers();
 

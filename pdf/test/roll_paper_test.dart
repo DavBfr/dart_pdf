@@ -30,21 +30,24 @@ void main() {
   });
 
   test('Pdf Roll Paper', () async {
-    pdf.addPage(Page(
-      pageFormat: PdfPageFormat.roll80,
-      build: (Context context) => Padding(
-        padding: const EdgeInsets.all(30),
-        child: Center(
-          child: Text('Hello World!'),
+    pdf.addPage(
+      Page(
+        pageFormat: PdfPageFormat.roll80,
+        build: (Context context) => Padding(
+          padding: const EdgeInsets.all(30),
+          child: Center(child: Text('Hello World!')),
         ),
       ),
-    ));
+    );
   });
 
   test('Pdf Automatic Paper', () async {
-    pdf.addPage(Page(
+    pdf.addPage(
+      Page(
         pageFormat: PdfPageFormat.undefined,
-        build: (Context context) => Text('Hello World!')));
+        build: (Context context) => Text('Hello World!'),
+      ),
+    );
   });
 
   tearDownAll(() async {

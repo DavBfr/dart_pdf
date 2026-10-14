@@ -41,10 +41,7 @@ void main() {
             direction: Axis.horizontal,
             verticalDirection: direction,
             alignment: alignment,
-            children: List<Widget>.generate(
-              40,
-              (int n) => Text('${n + 1}'),
-            ),
+            children: List<Widget>.generate(40, (int n) => Text('${n + 1}')),
           ),
         );
       }
@@ -73,10 +70,7 @@ void main() {
             direction: Axis.vertical,
             verticalDirection: direction,
             alignment: alignment,
-            children: List<Widget>.generate(
-              40,
-              (int n) => Text('${n + 1}'),
-            ),
+            children: List<Widget>.generate(40, (int n) => Text('${n + 1}')),
           ),
         );
       }
@@ -106,12 +100,13 @@ void main() {
           runSpacing: 20,
           spacing: 20,
           children: List<Widget>.generate(
-              20,
-              (int n) => SizedBox(
-                    width: rnd.nextDouble() * 100,
-                    height: rnd.nextDouble() * 50,
-                    child: Placeholder(),
-                  )),
+            20,
+            (int n) => SizedBox(
+              width: rnd.nextDouble() * 100,
+              height: rnd.nextDouble() * 50,
+              child: Placeholder(),
+            ),
+          ),
         ),
       );
     }
@@ -140,12 +135,13 @@ void main() {
           runSpacing: 20,
           spacing: 20,
           children: List<Widget>.generate(
-              20,
-              (int n) => SizedBox(
-                    width: rnd.nextDouble() * 50,
-                    height: rnd.nextDouble() * 100,
-                    child: Placeholder(),
-                  )),
+            20,
+            (int n) => SizedBox(
+              width: rnd.nextDouble() * 50,
+              height: rnd.nextDouble() * 100,
+              child: Placeholder(),
+            ),
+          ),
         ),
       );
     }
@@ -175,12 +171,13 @@ void main() {
             runAlignment: alignment,
             spacing: 20,
             children: List<Widget>.generate(
-                15,
-                (int n) => SizedBox(
-                      width: rnd.nextDouble() * 100,
-                      height: 20,
-                      child: Placeholder(),
-                    )),
+              15,
+              (int n) => SizedBox(
+                width: rnd.nextDouble() * 100,
+                height: 20,
+                child: Placeholder(),
+              ),
+            ),
           ),
         ),
       );
@@ -211,12 +208,13 @@ void main() {
             runAlignment: alignment,
             spacing: 20,
             children: List<Widget>.generate(
-                15,
-                (int n) => SizedBox(
-                      width: 20,
-                      height: rnd.nextDouble() * 100,
-                      child: Placeholder(),
-                    )),
+              15,
+              (int n) => SizedBox(
+                width: 20,
+                height: rnd.nextDouble() * 100,
+                child: Placeholder(),
+              ),
+            ),
           ),
         ),
       );
@@ -244,12 +242,13 @@ void main() {
           spacing: 10,
           runSpacing: 10,
           children: List<Widget>.generate(
-              15,
-              (int n) => SizedBox(
-                    width: rnd.nextDouble() * 100,
-                    height: rnd.nextDouble() * 100,
-                    child: Placeholder(),
-                  )),
+            15,
+            (int n) => SizedBox(
+              width: rnd.nextDouble() * 100,
+              height: rnd.nextDouble() * 100,
+              child: Placeholder(),
+            ),
+          ),
         ),
       ),
     );
@@ -271,15 +270,16 @@ void main() {
             spacing: 10,
             runSpacing: 10,
             children: List<Widget>.generate(
-                17,
-                (int n) => Container(
-                      width: rnd.nextDouble() * 100,
-                      height: rnd.nextDouble() * 100,
-                      alignment: Alignment.center,
-                      color: PdfColors.blue800,
-                      child: Text('$n'),
-                    )),
-          )
+              17,
+              (int n) => Container(
+                width: rnd.nextDouble() * 100,
+                height: rnd.nextDouble() * 100,
+                alignment: Alignment.center,
+                color: PdfColors.blue800,
+                child: Text('$n'),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -310,7 +310,7 @@ void main() {
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );

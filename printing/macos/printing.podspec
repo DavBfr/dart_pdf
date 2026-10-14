@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.license          = { :type => 'Apache2' }
   s.author           = { 'David PHAM-VAN' => 'dev.nfet.net@gmail.com' }
   s.source           = { :git => 'https://github.com/DavBfr/dart_pdf.git', :branch => 'master' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'printing/Sources/printing/**/*'
   s.dependency 'FlutterMacOS'
   s.platform = :osx
   s.osx.deployment_target = '10.11'

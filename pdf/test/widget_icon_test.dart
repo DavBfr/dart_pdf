@@ -54,10 +54,12 @@ void main() {
               runSpacing: 10,
               children: <Widget>[
                 ...iconList.map<Widget>(
-                  (e) => Column(children: [
-                    Icon(e, size: 50, color: PdfColors.blueGrey),
-                    Text('0x${e.codePoint.toRadixString(16)}'),
-                  ]),
+                  (e) => Column(
+                    children: [
+                      Icon(e, size: 50, color: PdfColors.blueGrey),
+                      Text('0x${e.codePoint.toRadixString(16)}'),
+                    ],
+                  ),
                 ),
               ],
             ),

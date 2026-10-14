@@ -368,11 +368,7 @@ class PdfPreviewState extends State<PdfPreview> {
     }
 
     if (widget.useActions && widget.canChangePageFormat) {
-      actions.add(
-        PdfPageFormatAction(
-          pageFormats: widget.pageFormats,
-        ),
-      );
+      actions.add(PdfPageFormatAction(pageFormats: widget.pageFormats));
     }
 
     if (widget.useActions && widget.canChangeOrientation) {
@@ -386,7 +382,7 @@ class PdfPreviewState extends State<PdfPreview> {
       if (actions.isNotEmpty && widget.canDebug) {
         actions.add(
           Switch(
-            activeColor: Colors.red,
+            activeThumbColor: Colors.red,
             value: pw.Document.debug,
             onChanged: (bool value) {
               setState(() {

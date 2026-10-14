@@ -26,8 +26,11 @@ class Circle extends Widget {
   final double strokeWidth;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
   }
 
@@ -49,7 +52,11 @@ class Circle extends Widget {
     canvas.setLineWidth(strokeWidth);
 
     canvas.drawEllipse(
-        box!.width / 2, box!.height / 2, box!.width / 2, box!.height / 2);
+      box!.width / 2,
+      box!.height / 2,
+      box!.width / 2,
+      box!.height / 2,
+    );
 
     if (strokeColor != null && fillColor != null) {
       canvas.fillAndStrokePath();
@@ -71,8 +78,11 @@ class Rectangle extends Widget {
   final double strokeWidth;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
   }
 
@@ -108,12 +118,13 @@ class Rectangle extends Widget {
 }
 
 class Polygon extends Widget {
-  Polygon(
-      {required this.points,
-      this.fillColor,
-      this.strokeColor,
-      this.strokeWidth = 1.0,
-      this.close = true});
+  Polygon({
+    required this.points,
+    this.fillColor,
+    this.strokeColor,
+    this.strokeWidth = 1.0,
+    this.close = true,
+  });
 
   final List<PdfPoint> points;
   final PdfColor? fillColor;
@@ -122,8 +133,11 @@ class Polygon extends Widget {
   final bool close;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
   }
 
@@ -150,8 +164,9 @@ class Polygon extends Widget {
     canvas.setLineWidth(strokeWidth);
 
     // Flip the points on the Y axis.
-    final flippedPoints =
-        points.map((e) => PdfPoint(e.x, box!.height - e.y)).toList();
+    final flippedPoints = points
+        .map((e) => PdfPoint(e.x, box!.height - e.y))
+        .toList();
 
     canvas.moveTo(flippedPoints[0].x, flippedPoints[0].y);
     for (var i = 0; i < flippedPoints.length; i++) {
@@ -182,8 +197,11 @@ class InkList extends Widget {
   final double strokeWidth;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
   }
 

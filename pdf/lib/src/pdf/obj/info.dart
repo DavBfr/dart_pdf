@@ -32,21 +32,22 @@ class PdfInfo extends PdfObject<PdfDict> {
     this.keywords,
     this.producer,
   }) : super(
-          pdfDocument,
-          params: PdfDict.values({
-            if (author != null) '/Author': PdfString.fromString(author),
-            if (creator != null) '/Creator': PdfString.fromString(creator),
-            if (title != null) '/Title': PdfString.fromString(title),
-            if (subject != null) '/Subject': PdfString.fromString(subject),
-            if (keywords != null) '/Keywords': PdfString.fromString(keywords),
-            if (producer != null)
-              '/Producer': PdfString.fromString(
-                  '$producer (${PdfXrefTable.libraryName})')
-            else
-              '/Producer': PdfString.fromString(PdfXrefTable.libraryName),
-            '/CreationDate': PdfString.fromDate(DateTime.now()),
-          }),
-        );
+         pdfDocument,
+         params: PdfDict.values({
+           if (author != null) '/Author': PdfString.fromString(author),
+           if (creator != null) '/Creator': PdfString.fromString(creator),
+           if (title != null) '/Title': PdfString.fromString(title),
+           if (subject != null) '/Subject': PdfString.fromString(subject),
+           if (keywords != null) '/Keywords': PdfString.fromString(keywords),
+           if (producer != null)
+             '/Producer': PdfString.fromString(
+               '$producer (${PdfXrefTable.libraryName})',
+             )
+           else
+             '/Producer': PdfString.fromString(PdfXrefTable.libraryName),
+           '/CreationDate': PdfString.fromDate(DateTime.now()),
+         }),
+       );
 
   /// Author of this document
   final String? author;

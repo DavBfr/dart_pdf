@@ -6,6 +6,14 @@ analyzer:
     missing_return: warning
     public_member_api_docs: ignore
     todo: ignore
+    prefer_initializing_formals: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   rules:
@@ -28,7 +36,6 @@ linter:
     - no_adjacent_strings_in_list
     - no_default_cases
     - omit_local_variable_types
-    - package_api_docs
     - parameter_assignments
     - prefer_asserts_in_initializer_lists
     - prefer_const_constructors_in_immutables

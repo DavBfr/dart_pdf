@@ -1,6 +1,1 @@
-enum OutputType {
-  generic,
-  photo,
-  grayscale,
-  photoGrayscale,
-}
+enum OutputType { generic, photo, grayscale, photoGrayscale }

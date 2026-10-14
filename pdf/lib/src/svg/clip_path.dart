@@ -27,7 +27,10 @@ class SvgClipPath {
   const SvgClipPath(this.children, this.isEmpty, this.painter);
 
   factory SvgClipPath.fromXml(
-      XmlElement element, SvgPainter painter, SvgBrush brush) {
+    XmlElement element,
+    SvgPainter painter,
+    SvgBrush brush,
+  ) {
     final clipPathAttr = element.getAttribute('clip-path');
     if (clipPathAttr == null) {
       return const SvgClipPath(null, true, null);
@@ -39,9 +42,9 @@ class SvgClipPath {
       final id = clipPathAttr.substring(5, clipPathAttr.lastIndexOf(')'));
       final clipPath = painter.parser.findById(id);
       if (clipPath != null) {
-        children = clipPath.children
-            .whereType<XmlElement>()
-            .map<SvgOperation?>((c) => SvgOperation.fromXml(c, painter, brush));
+        children = clipPath.children.whereType<XmlElement>().map<SvgOperation?>(
+          (c) => SvgOperation.fromXml(c, painter, brush),
+        );
         return SvgClipPath(children, false, painter);
       }
     }

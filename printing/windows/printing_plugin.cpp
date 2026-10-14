@@ -32,19 +32,19 @@
 
 namespace nfet {
 
-std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel;
-
 class PrintingPlugin : public flutter::Plugin {
  public:
   static void RegisterWithRegistrar(
       flutter::PluginRegistrarWindows* registrar) {
-    channel = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
-        registrar->messenger(), "net.nfet.printing",
-        &flutter::StandardMethodCodec::GetInstance());
+    auto channel =
+        std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+            registrar->messenger(), "net.nfet.printing",
+            &flutter::StandardMethodCodec::GetInstance());
 
-    auto plugin = std::make_unique<PrintingPlugin>();
+    auto plugin =
+        std::make_unique<PrintingPlugin>(std::move(channel), registrar);
 
-    channel->SetMethodCallHandler(
+    plugin->channel->SetMethodCallHandler(
         [plugin_pointer = plugin.get()](const auto& call, auto result) {
           plugin_pointer->HandleMethodCall(call, std::move(result));
         });
@@ -52,12 +52,17 @@ class PrintingPlugin : public flutter::Plugin {
     registrar->AddPlugin(std::move(plugin));
   }
 
-  PrintingPlugin() {}
+  PrintingPlugin(
+      std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel,
+      flutter::PluginRegistrarWindows* registrar)
+      : channel{std::move(channel)}, printing{this->channel.get(), registrar} {}
 
   virtual ~PrintingPlugin() {}
 
  private:
-  Printing printing{};
+  // Declared before printing so it outlives it.
+  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel;
+  Printing printing;
 
   // Called when a method is called on this plugin's channel from Dart.
   void HandleMethodCall(
@@ -81,11 +86,16 @@ class PrintingPlugin : public flutter::Plugin {
       auto usePrinterSettings = std::get<bool>(
           arguments->find(flutter::EncodableValue("usePrinterSettings"))
               ->second);
+      bool windowsModernDialog = false;
+      auto it = arguments->find(flutter::EncodableValue("windowsModernDialog"));
+      if (it != arguments->end() && !it->second.IsNull()) {
+        windowsModernDialog = std::get<bool>(it->second);
+      }
       auto vJob = arguments->find(flutter::EncodableValue("job"));
       auto jobNum = vJob != arguments->end() ? std::get<int>(vJob->second) : -1;
       auto job = new PrintJob{&printing, jobNum};
-      auto res =
-          job->printPdf(name, printer, width, height, usePrinterSettings);
+      auto res = job->printPdf(name, printer, width, height, usePrinterSettings,
+                               windowsModernDialog);
       if (!res) {
         delete job;
       }

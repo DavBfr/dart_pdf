@@ -27,16 +27,11 @@ import 'object.dart';
 /// Pdf Metadata
 class PdfMetadata extends PdfObject<PdfDictStream> {
   /// Store an Xml object
-  PdfMetadata(
-    PdfDocument pdfDocument,
-    this.metadata,
-  ) : super(
-          pdfDocument,
-          params: PdfDictStream(
-            compress: false,
-            encrypt: false,
-          ),
-        ) {
+  PdfMetadata(PdfDocument pdfDocument, this.metadata)
+    : super(
+        pdfDocument,
+        params: PdfDictStream(compress: false, encrypt: false),
+      ) {
     pdfDocument.catalog.metadata = this;
   }
 
@@ -45,7 +40,8 @@ class PdfMetadata extends PdfObject<PdfDictStream> {
   @override
   void prepare() {
     super.prepare();
-    params['/SubType'] = const PdfName('/XML');
+    params['/Type'] = const PdfName('/Metadata');
+    params['/Subtype'] = const PdfName('/XML');
     params.data = Uint8List.fromList(utf8.encode(metadata.toString()));
   }
 }

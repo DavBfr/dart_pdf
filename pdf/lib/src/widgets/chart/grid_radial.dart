@@ -30,8 +30,11 @@ class RadialGrid extends ChartGrid {
   late PdfRect gridBox;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     super.layout(context, constraints, parentUsesSize: parentUsesSize);
 
     final datasets = Chart.of(context).datasets;

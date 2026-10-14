@@ -85,32 +85,32 @@ class Chart extends Widget implements Inherited {
   Widget _build(Context context) {
     return Column(
       children: <Widget>[
-        if (title != null) title!,
+        ?title,
         Expanded(
           child: Row(
             children: <Widget>[
-              if (left != null) left!,
+              ?left,
               Expanded(
                 child: Stack(
                   overflow: Overflow.visible,
-                  children: <Widget>[
-                    grid,
-                    if (overlay != null) overlay!,
-                  ],
+                  children: <Widget>[grid, ?overlay],
                 ),
               ),
-              if (right != null) right!,
+              ?right,
             ],
           ),
         ),
-        if (bottom != null) bottom!,
+        ?bottom,
       ],
     );
   }
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     box = PdfRect.fromPoints(PdfPoint.zero, _computeSize(constraints));
     _context = context.inheritFrom(this);
     _child = _build(_context!);
@@ -122,7 +122,7 @@ class Chart extends Widget implements Inherited {
     super.paint(_context!);
 
     final mat = Matrix4.identity();
-    mat.translate(box!.x, box!.y);
+    mat.translateByDouble(box!.left, box!.bottom, 0, 1);
     _context!.canvas
       ..saveContext()
       ..setTransform(mat);
@@ -135,8 +135,11 @@ class Chart extends Widget implements Inherited {
 
 abstract class ChartGrid extends Widget {
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     box = PdfRect.fromPoints(PdfPoint.zero, constraints.biggest);
   }
 
@@ -149,12 +152,7 @@ abstract class ChartValue {
 }
 
 abstract class Dataset extends Widget {
-  Dataset({
-    this.legend,
-    this.color,
-    this.borderColor,
-    this.borderWidth = .5,
-  });
+  Dataset({this.legend, this.color, this.borderColor, this.borderWidth = .5});
 
   final String? legend;
 

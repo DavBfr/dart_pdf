@@ -15,7 +15,6 @@
  */
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -24,6 +23,7 @@ import 'package:flutter/foundation.dart'
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 
+import '../platform_js.dart' if (dart.library.io) '../platform_os.dart';
 import '../printing.dart';
 import '../printing_info.dart';
 import '../raster.dart';
@@ -74,7 +74,7 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
       } else {
         final mq = MediaQuery.of(context);
         final double dpr;
-        if (!kIsWeb && Platform.isAndroid) {
+        if (isAndroid) {
           if (mq.size.shortestSide * mq.devicePixelRatio < 800) {
             dpr = 2 * mq.devicePixelRatio;
           } else {
@@ -85,9 +85,9 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         }
         dpi =
             (min(mq.size.width - 16, widget.maxPageWidth ?? double.infinity)) *
-                dpr /
-                pageFormat.width *
-                PdfPageFormat.inch;
+            dpr /
+            pageFormat.width *
+            PdfPageFormat.inch;
       }
 
       _raster();
@@ -168,14 +168,19 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         dpi: dpi,
         pages: widget.pages,
       )) {
+        final png = await page.toPng();
+
+        // `dispose()` clears `pages`, and this resumes after the await above:
+        // `pageNum` may no longer be a valid index by the time it does.
         if (!mounted) {
           _rastering = false;
           return;
         }
+
         if (pages.length <= pageNum) {
           pages.add(
             PdfPreviewPageData(
-              image: MemoryImage(await page.toPng()),
+              image: MemoryImage(png),
               width: page.width,
               height: page.height,
             ),
@@ -183,7 +188,7 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         } else {
           pages[pageNum].image.evict();
           pages[pageNum] = PdfPreviewPageData(
-            image: MemoryImage(await page.toPng()),
+            image: MemoryImage(png),
             width: page.width,
             height: page.height,
           );
@@ -196,10 +201,12 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         pageNum++;
       }
 
-      for (var index = pageNum; index < pages.length; index++) {
-        pages[index].image.evict();
+      if (pageNum < pages.length) {
+        for (var index = pageNum; index < pages.length; index++) {
+          pages[index].image.evict();
+        }
+        pages.removeRange(pageNum, pages.length);
       }
-      pages.removeRange(pageNum, pages.length);
       if (mounted) {
         setState(() {});
       }

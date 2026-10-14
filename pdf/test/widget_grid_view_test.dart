@@ -29,36 +29,47 @@ void main() {
   });
 
   test('Pdf Widgets GridView empty', () {
-    pdf.addPage(MultiPage(
+    pdf.addPage(
+      MultiPage(
         build: (Context context) => <Widget>[
-              GridView(
-                crossAxisCount: 1,
-                childAspectRatio: 1,
-              ),
-            ]));
+          GridView(crossAxisCount: 1, childAspectRatio: 1),
+        ],
+      ),
+    );
   });
 
   test('Pdf Widgets GridView Vertical', () {
-    pdf.addPage(MultiPage(
+    pdf.addPage(
+      MultiPage(
         build: (Context context) => <Widget>[
-              GridView(
-                  crossAxisCount: 3,
-                  childAspectRatio: 1,
-                  direction: Axis.vertical,
-                  children: List<Widget>.generate(
-                      20, (int index) => Center(child: Text('$index')))),
-            ]));
+          GridView(
+            crossAxisCount: 3,
+            childAspectRatio: 1,
+            direction: Axis.vertical,
+            children: List<Widget>.generate(
+              20,
+              (int index) => Center(child: Text('$index')),
+            ),
+          ),
+        ],
+      ),
+    );
   });
 
   test('Pdf Widgets GridView Horizontal', () {
-    pdf.addPage(Page(
-      build: (Context context) => GridView(
+    pdf.addPage(
+      Page(
+        build: (Context context) => GridView(
           crossAxisCount: 5,
           direction: Axis.horizontal,
           childAspectRatio: 1,
           children: List<Widget>.generate(
-              20, (int index) => Center(child: Text('$index')))),
-    ));
+            20,
+            (int index) => Center(child: Text('$index')),
+          ),
+        ),
+      ),
+    );
   });
 
   tearDownAll(() async {

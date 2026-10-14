@@ -28,10 +28,8 @@ import 'raster.dart';
 
 /// Custom widget builder that's used for custom
 /// rasterized pdf pages rendering
-typedef CustomPdfPagesBuilder = Widget Function(
-  BuildContext context,
-  List<PdfPreviewPageData> pages,
-);
+typedef CustomPdfPagesBuilder =
+    Widget Function(BuildContext context, List<PdfPreviewPageData> pages);
 
 /// Flutter widget that uses the rasterized pdf pages to display a document.
 class PdfPreviewCustom extends StatefulWidget {
@@ -229,9 +227,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
 
     if (pages.isEmpty) {
       return widget.loadingWidget ??
-          const Center(
-            child: CircularProgressIndicator(),
-          );
+          const Center(child: CircularProgressIndicator());
     }
 
     if (widget.enableScrollToPage) {
@@ -243,22 +239,22 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     }
 
     Widget pageWidget(int index, {Key? key}) => GestureDetector(
-          onDoubleTap: () {
-            setState(() {
-              updatePosition = scrollController.position.pixels;
-              preview = index;
-              transformationController.value.setIdentity();
-              _updateCursor(SystemMouseCursors.grab);
-            });
-            _zoomChanged();
-          },
-          child: PdfPreviewPage(
-            key: key,
-            pageData: pages[index],
-            pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
-            pageMargin: widget.previewPageMargin,
-          ),
-        );
+      onDoubleTap: () {
+        setState(() {
+          updatePosition = scrollController.position.pixels;
+          preview = index;
+          transformationController.value.setIdentity();
+          _updateCursor(SystemMouseCursors.grab);
+        });
+        _zoomChanged();
+      },
+      child: PdfPreviewPage(
+        key: key,
+        pageData: pages[index],
+        pdfPreviewPageDecoration: widget.pdfPreviewPageDecoration,
+        pageMargin: widget.previewPageMargin,
+      ),
+    );
 
     return widget.enableScrollToPage
         ? Scrollbar(
@@ -294,15 +290,18 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
         });
         _zoomChanged();
       },
-      onLongPressCancel:
-          kIsWeb ? () => _updateCursor(SystemMouseCursors.grab) : null,
-      onLongPressDown:
-          kIsWeb ? (_) => _updateCursor(SystemMouseCursors.grabbing) : null,
+      onLongPressCancel: kIsWeb
+          ? () => _updateCursor(SystemMouseCursors.grab)
+          : null,
+      onLongPressDown: kIsWeb
+          ? (_) => _updateCursor(SystemMouseCursors.grabbing)
+          : null,
       child: InteractiveViewer(
         transformationController: transformationController,
         maxScale: 5,
-        onInteractionEnd:
-            kIsWeb ? (_) => _updateCursor(SystemMouseCursors.grab) : null,
+        onInteractionEnd: kIsWeb
+            ? (_) => _updateCursor(SystemMouseCursors.grab)
+            : null,
         child: Center(
           child: PdfPreviewPage(
             pageData: pages[preview!],
@@ -312,10 +311,7 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
         ),
       ),
     );
-    return MouseRegion(
-      cursor: _mouseCursor,
-      child: zoomPreview,
-    );
+    return MouseRegion(cursor: _mouseCursor, child: zoomPreview);
   }
 
   void _zoomChanged() => widget.onZoomChanged?.call(preview != null);
@@ -351,7 +347,8 @@ class PdfPreviewCustomState extends State<PdfPreviewCustom>
     }
 
     return Container(
-      decoration: widget.scrollViewDecoration ??
+      decoration:
+          widget.scrollViewDecoration ??
           BoxDecoration(
             gradient: LinearGradient(
               colors: <Color>[Colors.grey.shade400, Colors.grey.shade200],

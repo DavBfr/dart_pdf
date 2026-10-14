@@ -30,11 +30,11 @@
 
 struct _PrintingPlugin {
   GObject parent_instance;
+
+  FlMethodChannel* channel;
 };
 
 G_DEFINE_TYPE(PrintingPlugin, printing_plugin, g_object_get_type())
-
-static FlMethodChannel* channel;
 
 // Called when a method call is received from Flutter.
 static void printing_plugin_handle_method_call(PrintingPlugin* self,
@@ -70,7 +70,7 @@ static void printing_plugin_handle_method_call(PrintingPlugin* self,
     auto marginBottom =
         fl_value_get_float(fl_value_lookup_string(args, "marginBottom"));
 
-    auto job = new print_job(jobNum);
+    auto job = new print_job(self->channel, jobNum);
     auto res = job->print_pdf(name, printer, pageWidth, pageHeight, marginLeft,
                               marginTop, marginRight, marginBottom);
     if (!res) {
@@ -103,7 +103,7 @@ static void printing_plugin_handle_method_call(PrintingPlugin* self,
     }
     auto scale = fl_value_get_float(fl_value_lookup_string(args, "scale"));
     auto jobNum = fl_value_get_int(fl_value_lookup_string(args, "job"));
-    auto job = std::make_unique<print_job>(jobNum);
+    auto job = std::make_unique<print_job>(self->channel, jobNum);
     job->raster_pdf(doc, size, pages, pages_count, scale);
     free(pages);
 
@@ -139,8 +139,12 @@ void printing_plugin_register_with_registrar(FlPluginRegistrar* registrar) {
       PRINTING_PLUGIN(g_object_new(printing_plugin_get_type(), nullptr));
 
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
-  channel = fl_method_channel_new(fl_plugin_registrar_get_messenger(registrar),
-                                  "net.nfet.printing", FL_METHOD_CODEC(codec));
+  // The messenger keeps the channel alive for the engine's lifetime and the
+  // channel keeps the plugin; the plugin only borrows the channel pointer.
+  g_autoptr(FlMethodChannel) channel =
+      fl_method_channel_new(fl_plugin_registrar_get_messenger(registrar),
+                            "net.nfet.printing", FL_METHOD_CODEC(codec));
+  plugin->channel = channel;
   fl_method_channel_set_method_call_handler(
       channel, method_call_cb, g_object_ref(plugin), g_object_unref);
 
@@ -158,8 +162,8 @@ void on_page_rasterized(print_job* job,
   fl_value_set_string(map, "height", fl_value_new_int(height));
   fl_value_set_string(map, "job", fl_value_new_int(job->get_id()));
 
-  fl_method_channel_invoke_method(channel, "onPageRasterized", map, nullptr,
-                                  nullptr, nullptr);
+  fl_method_channel_invoke_method(job->get_channel(), "onPageRasterized", map,
+                                  nullptr, nullptr, nullptr);
 }
 
 void on_page_raster_end(print_job* job, const char* error) {
@@ -169,14 +173,15 @@ void on_page_raster_end(print_job* job, const char* error) {
     fl_value_set_string(map, "error", fl_value_new_string(error));
   }
 
-  fl_method_channel_invoke_method(channel, "onPageRasterEnd", map, nullptr,
-                                  nullptr, nullptr);
+  fl_method_channel_invoke_method(job->get_channel(), "onPageRasterEnd", map,
+                                  nullptr, nullptr, nullptr);
 }
 
 static void on_layout_response_cb(GObject* object,
                                   GAsyncResult* result,
                                   gpointer user_data) {
   print_job* job = static_cast<print_job*>(user_data);
+  FlMethodChannel* channel = job->get_channel();
   g_autoptr(GError) error = nullptr;
   g_autoptr(FlMethodResponse) response =
       fl_method_channel_invoke_method_finish(channel, result, &error);
@@ -215,7 +220,7 @@ void on_layout(print_job* job,
   fl_value_set_string(map, "marginRight", fl_value_new_float(marginRight));
   fl_value_set_string(map, "marginBottom", fl_value_new_float(marginBottom));
 
-  fl_method_channel_invoke_method(channel, "onLayout", map, nullptr,
+  fl_method_channel_invoke_method(job->get_channel(), "onLayout", map, nullptr,
                                   on_layout_response_cb, job);
 }
 
@@ -227,6 +232,6 @@ void on_completed(print_job* job, bool completed, const char* error) {
     fl_value_set_string(map, "error", fl_value_new_string(error));
   }
 
-  fl_method_channel_invoke_method(channel, "onCompleted", map, nullptr, nullptr,
-                                  nullptr);
+  fl_method_channel_invoke_method(job->get_channel(), "onCompleted", map,
+                                  nullptr, nullptr, nullptr);
 }

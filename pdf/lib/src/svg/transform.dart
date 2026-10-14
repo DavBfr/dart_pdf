@@ -41,23 +41,41 @@ class SvgTransform {
         case 'matrix':
           final mm = <double>[
             ...parameterList,
-            ...List.filled(6 - parameterList.length, 0.0)
+            ...List.filled(6 - parameterList.length, 0.0),
           ];
 
-          mat.multiply(Matrix4(mm[0], mm[1], 0, 0, mm[2], mm[3], 0, 0, 0, 0, 1,
-              0, mm[4], mm[5], 0, 1));
+          mat.multiply(
+            Matrix4(
+              mm[0],
+              mm[1],
+              0,
+              0,
+              mm[2],
+              mm[3],
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              mm[4],
+              mm[5],
+              0,
+              1,
+            ),
+          );
           break;
         case 'translate':
           final dx = parameterList[0];
           final dy = [...parameterList, .0][1];
 
-          mat.multiply(Matrix4.identity()..translate(dx, dy));
+          mat.multiply(Matrix4.identity()..translateByDouble(dx, dy, 0, 1));
           break;
         case 'scale':
           final sw = parameterList[0];
           final sh = [...parameterList, sw][1];
 
-          mat.multiply(Matrix4.identity()..scale(sw, sh));
+          mat.multiply(Matrix4.identity()..scaleByDouble(sw, sh, 1, 1));
           break;
         case 'rotate':
           final degrees = parameterList[0];
@@ -68,13 +86,13 @@ class SvgTransform {
             // Rotation about the origin (ox, oy)
             ox = parameterList[1];
             oy = [...parameterList, .0][2];
-            mat.translate(ox, oy);
+            mat.translateByDouble(ox, oy, 0, 1);
           }
 
           mat.multiply(Matrix4.rotationZ(radians(degrees)));
 
           if (ox != 0 || oy != 0) {
-            mat.translate(-ox, -oy);
+            mat.translateByDouble(-ox, -oy, 0, 1);
           }
           break;
 
@@ -100,6 +118,7 @@ class SvgTransform {
 
   static const none = SvgTransform(null);
 
-  static final _transformRegExp =
-      RegExp(r'(matrix|translate|scale|rotate|skewX|skewY)\s*\(([^)]*)\)\s*');
+  static final _transformRegExp = RegExp(
+    r'(matrix|translate|scale|rotate|skewX|skewY)\s*\(([^)]*)\)\s*',
+  );
 }

@@ -23,11 +23,11 @@ import 'geometry.dart';
 import 'widget.dart';
 
 class DecoratedBox extends SingleChildWidget {
-  DecoratedBox(
-      {required this.decoration,
-      this.position = DecorationPosition.background,
-      Widget? child})
-      : super(child: child);
+  DecoratedBox({
+    required this.decoration,
+    this.position = DecorationPosition.background,
+    Widget? child,
+  }) : super(child: child);
 
   /// What decoration to paint.
   final BoxDecoration decoration;
@@ -61,17 +61,18 @@ class Container extends StatelessWidget {
     this.margin,
     this.transform,
     this.child,
-  })  : assert(
-            color == null || decoration == null,
-            'Cannot provide both a color and a decoration\n'
-            'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'),
-        decoration =
-            decoration ?? (color != null ? BoxDecoration(color: color) : null),
-        constraints = (width != null || height != null)
-            ? constraints?.tighten(width: width, height: height) ??
-                BoxConstraints.tightFor(width: width, height: height)
-            : constraints,
-        super();
+  }) : assert(
+         color == null || decoration == null,
+         'Cannot provide both a color and a decoration\n'
+         'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".',
+       ),
+       decoration =
+           decoration ?? (color != null ? BoxDecoration(color: color) : null),
+       constraints = (width != null || height != null)
+           ? constraints?.tighten(width: width, height: height) ??
+                 BoxConstraints.tightFor(width: width, height: height)
+           : constraints,
+       super();
 
   final Widget? child;
 
@@ -100,9 +101,10 @@ class Container extends StatelessWidget {
 
     if (child == null && (constraints == null || !constraints!.isTight)) {
       current = LimitedBox(
-          maxWidth: 0,
-          maxHeight: 0,
-          child: ConstrainedBox(constraints: const BoxConstraints.expand()));
+        maxWidth: 0,
+        maxHeight: 0,
+        child: ConstrainedBox(constraints: const BoxConstraints.expand()),
+      );
     }
 
     if (alignment != null) {
@@ -119,9 +121,10 @@ class Container extends StatelessWidget {
 
     if (foregroundDecoration != null) {
       current = DecoratedBox(
-          decoration: foregroundDecoration!,
-          position: DecorationPosition.foreground,
-          child: current);
+        decoration: foregroundDecoration!,
+        position: DecorationPosition.foreground,
+        child: current,
+      );
     }
 
     if (constraints != null) {

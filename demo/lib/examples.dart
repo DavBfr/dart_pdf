@@ -10,18 +10,20 @@ import 'examples/document.dart';
 import 'examples/invoice.dart';
 import 'examples/report.dart';
 import 'examples/resume.dart';
+import 'examples/server.dart';
 
 const examples = <Example>[
   Example('RÉSUMÉ', 'resume.dart', generateResume),
   Example('DOCUMENT', 'document.dart', generateDocument),
   Example('INVOICE', 'invoice.dart', generateInvoice),
   Example('REPORT', 'report.dart', generateReport),
+  Example('SERVER', 'server.dart', generateServer),
   Example('CALENDAR', 'calendar.dart', generateCalendar),
   Example('CERTIFICATE', 'certificate.dart', generateCertificate, true),
 ];
 
-typedef LayoutCallbackWithData = Future<Uint8List> Function(
-    PdfPageFormat pageFormat, CustomData data);
+typedef LayoutCallbackWithData =
+    Future<Uint8List> Function(PdfPageFormat pageFormat, CustomData data);
 
 class Example {
   const Example(this.name, this.file, this.builder, [this.needsData = false]);

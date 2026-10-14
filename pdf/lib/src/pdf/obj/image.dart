@@ -20,9 +20,11 @@ import 'package:image/image.dart' as im;
 
 import '../document.dart';
 import '../exif.dart';
+import '../format/array.dart';
 import '../format/indirect.dart';
 import '../format/name.dart';
 import '../format/num.dart';
+import '../format/stream.dart';
 import '../raster.dart';
 import 'xobject.dart';
 
@@ -54,6 +56,9 @@ enum PdfImageOrientation {
   leftBottom,
 }
 
+/// Writes already encoded image bytes to a PDF output stream.
+typedef PdfImageStreamWriter = void Function(PdfStream output);
+
 /// Image object stored in the Pdf document
 class PdfImage extends PdfXObject {
   /// Creates a new [PdfImage] instance.
@@ -65,12 +70,7 @@ class PdfImage extends PdfXObject {
     bool alpha = true,
     PdfImageOrientation orientation = PdfImageOrientation.topLeft,
   }) {
-    final im = PdfImage._(
-      pdfDocument,
-      width,
-      height,
-      orientation,
-    );
+    final im = PdfImage._(pdfDocument, width, height, orientation);
 
     assert(() {
       im.startStopwatch();
@@ -143,7 +143,14 @@ class PdfImage extends PdfXObject {
     im.params['/Intent'] = const PdfName('/RelativeColorimetric');
     im.params['/Filter'] = const PdfName('/DCTDecode');
 
-    if (info.isRGB) {
+    if (info.isCMYK) {
+      im.params['/ColorSpace'] = const PdfName('/DeviceCMYK');
+      if (info.isCMYKInverted) {
+        // CMYK JPEGs from Adobe use inverted values (YCCK encoding).
+        // The /Decode array inverts each component back to proper CMYK.
+        im.params['/Decode'] = PdfArray.fromNum(<int>[1, 0, 1, 0, 1, 0, 1, 0]);
+      }
+    } else if (info.isRGB) {
       im.params['/ColorSpace'] = const PdfName('/DeviceRGB');
     } else {
       im.params['/ColorSpace'] = const PdfName('/DeviceGray');
@@ -155,6 +162,38 @@ class PdfImage extends PdfXObject {
       return true;
     }());
     return im;
+  }
+
+  /// Creates a JPEG image whose encoded bytes are supplied only when the PDF
+  /// is serialized. This avoids retaining a copy of the JPEG in the document
+  /// object graph.
+  ///
+  /// The supplied bytes must be an RGB JPEG with the stated dimensions. The
+  /// callback is synchronous because PDF object serialization is synchronous.
+  /// Streamed JPEGs cannot be used with document encryption because encryption
+  /// requires the complete stream contents to be available as a byte array.
+  factory PdfImage.jpegStream(
+    PdfDocument pdfDocument, {
+    required int width,
+    required int height,
+    required int length,
+    required PdfImageStreamWriter write,
+    PdfImageOrientation orientation = PdfImageOrientation.topLeft,
+  }) {
+    final image = PdfImage._(
+      pdfDocument,
+      width,
+      height,
+      orientation,
+      streamLength: length,
+      streamWriter: write,
+    );
+    image.params['/BitsPerComponent'] = const PdfNum(8);
+    image.params['/Name'] = PdfName(image.name);
+    image.params['/Intent'] = const PdfName('/RelativeColorimetric');
+    image.params['/Filter'] = const PdfName('/DCTDecode');
+    image.params['/ColorSpace'] = const PdfName('/DeviceRGB');
+    return image;
   }
 
   /// Create an image from an [im.Image] object
@@ -202,12 +241,7 @@ class PdfImage extends PdfXObject {
     int height,
     PdfImageOrientation orientation,
   ) {
-    final im = PdfImage._(
-      pdfDocument,
-      width,
-      height,
-      orientation,
-    );
+    final im = PdfImage._(pdfDocument, width, height, orientation);
 
     assert(() {
       im.startStopwatch();
@@ -240,8 +274,12 @@ class PdfImage extends PdfXObject {
     PdfDocument pdfDocument,
     this._width,
     this._height,
-    this.orientation,
-  ) : super(pdfDocument, '/Image', isBinary: true) {
+    this.orientation, {
+    int? streamLength,
+    PdfImageStreamWriter? streamWriter,
+  }) : _streamLength = streamLength,
+       _streamWriter = streamWriter,
+       super(pdfDocument, '/Image', isBinary: true) {
     params['/Width'] = PdfNum(_width);
     params['/Height'] = PdfNum(_height);
     assert(() {
@@ -251,6 +289,10 @@ class PdfImage extends PdfXObject {
   }
 
   final int _width;
+
+  final int? _streamLength;
+
+  final PdfImageStreamWriter? _streamWriter;
 
   /// Image width
   int get width => orientation.index >= 4 ? _height : _width;
@@ -266,4 +308,34 @@ class PdfImage extends PdfXObject {
   /// Name of the image
   @override
   String get name => '/I$objser';
+
+  @override
+  void writeContent(PdfStream s) {
+    final writer = _streamWriter;
+    if (writer == null) {
+      super.writeContent(s);
+      return;
+    }
+    if (pdfDocument.encryption != null) {
+      throw UnsupportedError(
+        'PdfImage.jpegStream does not support encrypted documents',
+      );
+    }
+
+    params['/Length'] = PdfNum(_streamLength!);
+    params.output(this, s, settings.verbose ? 0 : null);
+    if (settings.verbose) {
+      s.putByte(0x0a);
+    }
+    s.putString('stream\n');
+    final start = s.offset;
+    writer(s);
+    final bytesWritten = s.offset - start;
+    if (bytesWritten != _streamLength) {
+      throw StateError(
+        'JPEG stream wrote $bytesWritten bytes; expected $_streamLength',
+      );
+    }
+    s.putString('\nendstream\n');
+  }
 }

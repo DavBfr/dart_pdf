@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,7 +15,6 @@
  */
 
 #include "print_job.h"
-
 #include "printing.h"
 
 #include <fpdfview.h>
@@ -78,7 +77,8 @@ bool PrintJob::printPdf(const std::string& name,
                         std::string printer,
                         double width,
                         double height,
-                        bool usePrinterSettings) {
+                        bool usePrinterSettings,
+                        bool windowsModernDialog) {
   documentName = name;
 
   std::size_t dmSize = sizeof(DEVMODE);
@@ -94,7 +94,7 @@ bool PrintJob::printPdf(const std::string& name,
   if (usePrinterSettings) {
     dm = nullptr;  // to use default driver config
   } else {
-    ZeroMemory(dm, sizeof(DEVMODE));
+    ZeroMemory(dm, dmSize + dmExtra);
     dm->dmSize = (WORD)dmSize;
     dm->dmDriverExtra = (WORD)dmExtra;
     dm->dmFields =
@@ -111,40 +111,84 @@ bool PrintJob::printPdf(const std::string& name,
     }
   }
 
+  // nullptr when the engine has no view; both dialogs then keep the owner
+  // they had before.
+  auto owner = printing->getWindow();
+
   if (printer.empty()) {
-    PRINTDLG pd;
+    if (windowsModernDialog) {
+      // --- MODERN OPTION (PrintDlgEx) ---
+      PRINTDLGEX pdx = {0};
+      pdx.lStructSize = sizeof(PRINTDLGEX);
+      pdx.hwndOwner = owner ? owner : GetActiveWindow();
+      pdx.hDevMode = dm;
+      dm = nullptr;  // dialog takes ownership; may replace with new alloc
+      pdx.hDevNames = nullptr;
+      pdx.hDC = nullptr;
 
-    // Initialize PRINTDLG
-    ZeroMemory(&pd, sizeof(pd));
-    pd.lStructSize = sizeof(pd);
+      // Flags: Use PD_RETURNDC to get the context we need for PDFium
+      pdx.Flags = PD_RETURNDC | PD_USEDEVMODECOPIESANDCOLLATE | PD_NOPAGENUMS |
+                  PD_NOSELECTION;
 
-    // Initialize PRINTDLG
-    pd.hwndOwner = nullptr;
-    pd.hDevMode = dm;
-    pd.hDevNames = nullptr;  // Don't forget to free or store hDevNames.
-    pd.hDC = nullptr;
-    pd.Flags = PD_USEDEVMODECOPIES | PD_RETURNDC | PD_PRINTSETUP |
-               PD_NOSELECTION | PD_NOPAGENUMS;
-    pd.nCopies = 1;
-    pd.nFromPage = 0xFFFF;
-    pd.nToPage = 0xFFFF;
-    pd.nMinPage = 1;
-    pd.nMaxPage = 0xFFFF;
+      pdx.nStartPage = START_PAGE_GENERAL;
+      pdx.nMaxPageRanges = 1;
+      PRINTPAGERANGE ranges[1] = {{1, 1}};  // Required structure for PDX
+      pdx.lpPageRanges = ranges;
 
-    auto r = PrintDlg(&pd);
+      HRESULT hr = PrintDlgEx(&pdx);
 
-    if (r != 1) {
-      printing->onCompleted(this, false, "");
-      DeleteDC(hDC);
-      GlobalFree(hDevNames);
-      ClosePrinter(hDevMode);
-      return true;
+      // Check if the user actually clicked "Print"
+      if (hr == S_OK && pdx.dwResultAction == PD_RESULT_PRINT) {
+        this->hDC = pdx.hDC;
+        this->hDevMode = pdx.hDevMode;
+        this->hDevNames = pdx.hDevNames;
+        // success = true;
+      } else {
+        // User cancelled or error occurred — notify Dart so its future
+        // completes.
+        if (pdx.hDC)
+          DeleteDC(pdx.hDC);
+        if (pdx.hDevMode)
+          GlobalFree(pdx.hDevMode);
+        if (pdx.hDevNames)
+          GlobalFree(pdx.hDevNames);
+        printing->onCompleted(this, false, "");
+        return false;
+      }
+    } else {
+      // --- CLASSIC DEFAULT  ---
+      PRINTDLG pd;
+      ZeroMemory(&pd, sizeof(pd));
+      pd.lStructSize = sizeof(pd);
+      pd.hwndOwner = owner;
+      pd.hDevMode = dm;
+      pd.hDevNames = nullptr;
+      pd.hDC = nullptr;
+      pd.Flags = PD_USEDEVMODECOPIES | PD_RETURNDC | PD_PRINTSETUP |
+                 PD_NOSELECTION | PD_NOPAGENUMS;
+      pd.nCopies = 1;
+      pd.nFromPage = 0xFFFF;
+      pd.nToPage = 0xFFFF;
+      pd.nMinPage = 1;
+      pd.nMaxPage = 0xFFFF;
+
+      auto r = PrintDlg(&pd);
+
+      if (r != 1) {
+        printing->onCompleted(this, false, "");
+        if (pd.hDC)
+          DeleteDC(pd.hDC);
+        if (pd.hDevNames)
+          GlobalFree(pd.hDevNames);
+        if (pd.hDevMode)
+          GlobalFree(pd.hDevMode);
+        return true;
+      }
+
+      hDC = pd.hDC;
+      hDevMode = pd.hDevMode;
+      hDevNames = pd.hDevNames;
     }
-
-    hDC = pd.hDC;
-    hDevMode = pd.hDevMode;
-    hDevNames = pd.hDevNames;
-
   } else {
     hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), nullptr, dm);
     if (!hDC) {
@@ -235,16 +279,17 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
 
   auto r = StartDoc(hDC, &docInfo);
 
-  FPDF_LIBRARY_CONFIG config;
-  config.version = 2;
-  config.m_pUserFontPaths = nullptr;
-  config.m_pIsolate = nullptr;
-  config.m_v8EmbedderSlot = 0;
-  FPDF_InitLibraryWithConfig(&config);
-
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
-    FPDF_DestroyLibrary();
+    // Returning here without calling onCompleted() leaves the Dart-side Future
+    // pending forever. Abort the document StartDoc already opened so no
+    // half-open job is left in the queue, release the handles like the success
+    // path below does, and report the failure.
+    AbortDoc(hDC);
+    DeleteDC(hDC);
+    GlobalFree(hDevNames);
+    GlobalFree(hDevMode);
+    printing->onCompleted(this, false, "Cannot print a malformed PDF file");
     return;
   }
 
@@ -274,13 +319,12 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
   }
 
   FPDF_CloseDocument(doc);
-  FPDF_DestroyLibrary();
 
   EndDoc(hDC);
 
   DeleteDC(hDC);
   GlobalFree(hDevNames);
-  ClosePrinter(hDevMode);
+  GlobalFree(hDevMode);
 
   printing->onCompleted(this, true, "");
 }
@@ -323,16 +367,8 @@ void PrintJob::pickPrinter(void* result) {}
 void PrintJob::rasterPdf(std::vector<uint8_t> data,
                          std::vector<int> pages,
                          double scale) {
-  FPDF_LIBRARY_CONFIG config;
-  config.version = 2;
-  config.m_pUserFontPaths = nullptr;
-  config.m_pIsolate = nullptr;
-  config.m_v8EmbedderSlot = 0;
-  FPDF_InitLibraryWithConfig(&config);
-
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
-    FPDF_DestroyLibrary();
     printing->onPageRasterEnd(this, "Cannot raster a malformed PDF file");
     return;
   }
@@ -390,8 +426,6 @@ void PrintJob::rasterPdf(std::vector<uint8_t> data,
   }
 
   FPDF_CloseDocument(doc);
-
-  FPDF_DestroyLibrary();
 
   printing->onPageRasterEnd(this, "");
 }

@@ -187,6 +187,20 @@ final file = File("example.pdf");
 await file.writeAsBytes(await pdf.save());
 ```
 
+For memory-bounded output, implement a `PdfStream` backed by a seekable file
+or another destination and write the document directly to it:
+
+```text
+final output = MyFilePdfStream('example.pdf');
+try {
+  await pdf.write(output);
+} finally {
+  output.close();
+}
+```
+
+A custom output must implement byte writes, offsets, and random-access patches.
+
 To save the pdf file (Web):
 (saved as a unique name based on milliseconds since epoch)
 
@@ -197,6 +211,74 @@ web.HTMLAnchorElement()
   ..href = "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(fileInts)}"
   ..setAttribute("download", "${DateTime.now().millisecondsSinceEpoch}.pdf")
   ..click();
+```
+
+## MultiPage (automatic pagination)
+
+`pw.MultiPage` automatically flows content across pages, creating page breaks when content doesn't fit.
+
+### Key behaviors
+- **Automatic page breaks**: Creates new pages when children don't fit the remaining space.
+- **Headers/footers**: Built per page; their space is reserved before laying out content.
+- **Spanning vs. inseparable widgets**:
+  - Most widgets are inseparable (must fit on one page or trigger a new page).
+  - Spanning widgets (`pw.Flex`, `pw.Partition`, `pw.Table`, `pw.Wrap`, `pw.GridView`, `pw.Column`) can split across pages.
+  - Use `pw.Inseparable` to control behavior. By default (`canSpan: true`) children can
+  span on other pages.
+- **Page breaks**: `pw.NewPage()` always breaks. `pw.NewPage(freeSpace: 40)` breaks if < 40pt remain.
+- **Safety**: `maxPages` (default 20) prevents runaway pagination in debug mode (not checked in release).
+- `pw.Flexible` children consume remaining space on a page; spanning widgets cannot be flexible within `MultiPage`.
+
+### Example
+```dart
+pdf.addPage(pw.MultiPage(
+  pageFormat: PdfPageFormat.a4,
+  header: (context) => pw.Padding(
+    padding: const pw.EdgeInsets.only(bottom: 8),
+    child: pw.Text('Document Header'),
+  ),
+  footer: (context) => pw.Padding(
+    padding: const pw.EdgeInsets.only(top: 8),
+    child: pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      children: [
+        pw.Text('Footer'),
+        pw.Text('Page ${context.pageNumber} of ${context.pagesCount}'),
+      ],
+    ),
+  ),
+  build: (context) => [
+    pw.Text('Section 1: Introduction'),
+    pw.SizedBox(height: 20),
+
+    // Spanning content that can break across pages
+    pw.Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: List.generate(50, (i) => pw.Container(
+        padding: const pw.EdgeInsets.all(8),
+        decoration: pw.BoxDecoration(
+          border: pw.Border.all(),
+          borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+        ),
+        child: pw.Text('Item $i'),
+      )),
+    ),
+
+    pw.NewPage(), // Force page break
+
+    // Inseparable content that stays together
+    pw.Inseparable(
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text('• This content must stay together'),
+          pw.Text('• It cannot be split across pages'),
+        ],
+      ),
+    ),
+  ],
+));
 ```
 
 ## Encryption, Digital Signature, and loading a PDF Document

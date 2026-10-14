@@ -20,7 +20,12 @@ import 'package:pdf/pdf.dart';
 import 'package:test/test.dart';
 
 void printText(
-    PdfPage page, PdfGraphics canvas, String text, PdfFont font, double top) {
+  PdfPage page,
+  PdfGraphics canvas,
+  String text,
+  PdfFont font,
+  double top,
+) {
   text = text + font.fontName;
   const fontSize = 20.0;
   final metrics = font.stringMetrics(text) * fontSize;
@@ -37,12 +42,20 @@ void printText(
     ..drawLine(x + metrics.left - deb, y, x + metrics.right + deb, y)
     ..setColor(PdfColors.blue)
     ..strokePath()
-    ..drawLine(x + metrics.left - deb, y + metrics.ascent,
-        x + metrics.right + deb, y + metrics.ascent)
+    ..drawLine(
+      x + metrics.left - deb,
+      y + metrics.ascent,
+      x + metrics.right + deb,
+      y + metrics.ascent,
+    )
     ..setColor(PdfColors.green)
     ..strokePath()
-    ..drawLine(x + metrics.left - deb, y + metrics.descent,
-        x + metrics.right + deb, y + metrics.descent)
+    ..drawLine(
+      x + metrics.left - deb,
+      y + metrics.descent,
+      x + metrics.right + deb,
+      y + metrics.descent,
+    )
     ..setColor(PdfColors.purple)
     ..strokePath()
     ..setColor(const PdfColor(0.3, 0.3, 0.3))
@@ -67,7 +80,12 @@ void main() {
     printText(page, g, s, PdfFont.helveticaBold(pdf), 20.0 + 30.0 * top++);
     printText(page, g, s, PdfFont.helveticaOblique(pdf), 20.0 + 30.0 * top++);
     printText(
-        page, g, s, PdfFont.helveticaBoldOblique(pdf), 20.0 + 30.0 * top++);
+      page,
+      g,
+      s,
+      PdfFont.helveticaBoldOblique(pdf),
+      20.0 + 30.0 * top++,
+    );
 
     printText(page, g, s, PdfFont.times(pdf), 20.0 + 30.0 * top++);
     printText(page, g, s, PdfFont.timesBold(pdf), 20.0 + 30.0 * top++);

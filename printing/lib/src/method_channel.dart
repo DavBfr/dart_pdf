@@ -30,7 +30,6 @@ import 'package:pdf/pdf.dart';
 
 import 'callback.dart';
 import 'interface.dart';
-import 'method_channel_ffi.dart' if (dart.library.js) 'method_channel_js.dart';
 import 'output_type.dart';
 import 'print_job.dart';
 import 'printer.dart';
@@ -89,15 +88,7 @@ class MethodChannelPrinting extends PrintingPlatform {
             ),
           );
 
-          if (job.useFFI) {
-            return setErrorFfi(job, e.toString());
-          }
-
           rethrow;
-        }
-
-        if (job.useFFI) {
-          return setDocumentFfi(job, bytes);
         }
 
         return Uint8List.fromList(bytes);
@@ -156,10 +147,7 @@ class MethodChannelPrinting extends PrintingPlatform {
     Map<dynamic, dynamic>? result;
 
     try {
-      result = await _channel.invokeMethod(
-        'printingInfo',
-        <String, dynamic>{},
-      );
+      result = await _channel.invokeMethod('printingInfo', <String, dynamic>{});
     } catch (e) {
       assert(() {
         // ignore: avoid_print
@@ -183,6 +171,7 @@ class MethodChannelPrinting extends PrintingPlatform {
     bool usePrinterSettings,
     OutputType outputType,
     bool forceCustomPrintPaper,
+    bool windowsModernDialog,
   ) async {
     final job = _printJobs.add(
       onCompleted: Completer<bool>(),
@@ -203,6 +192,7 @@ class MethodChannelPrinting extends PrintingPlatform {
       'usePrinterSettings': usePrinterSettings,
       'outputType': outputType.index,
       'forceCustomPrintPaper': forceCustomPrintPaper,
+      if (windowsModernDialog) 'windowsModernDialog': windowsModernDialog,
     };
 
     await _channel.invokeMethod<int>('printPdf', params);
@@ -216,8 +206,10 @@ class MethodChannelPrinting extends PrintingPlatform {
   @override
   Future<List<Printer>> listPrinters() async {
     final params = <String, dynamic>{};
-    final list =
-        await _channel.invokeMethod<List<dynamic>>('listPrinters', params);
+    final list = await _channel.invokeMethod<List<dynamic>>(
+      'listPrinters',
+      params,
+    );
 
     final printers = <Printer>[];
 
@@ -275,9 +267,7 @@ class MethodChannelPrinting extends PrintingPlatform {
     String? baseUrl,
     PdfPageFormat format,
   ) async {
-    final job = _printJobs.add(
-      onHtmlRendered: Completer<Uint8List>(),
-    );
+    final job = _printJobs.add(onHtmlRendered: Completer<Uint8List>());
 
     final params = <String, dynamic>{
       'html': html,
@@ -298,14 +288,8 @@ class MethodChannelPrinting extends PrintingPlatform {
   }
 
   @override
-  Stream<PdfRaster> raster(
-    Uint8List document,
-    List<int>? pages,
-    double dpi,
-  ) {
-    final job = _printJobs.add(
-      onPageRasterized: StreamController<PdfRaster>(),
-    );
+  Stream<PdfRaster> raster(Uint8List document, List<int>? pages, double dpi) {
+    final job = _printJobs.add(onPageRasterized: StreamController<PdfRaster>());
 
     final params = <String, dynamic>{
       'doc': Uint8List.fromList(document),

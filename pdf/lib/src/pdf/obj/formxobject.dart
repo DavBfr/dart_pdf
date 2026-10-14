@@ -40,8 +40,14 @@ class PdfFormXObject extends PdfXObject {
   /// Transformation matrix
   void setMatrix(Matrix4 t) {
     final s = t.storage;
-    params['/Matrix'] =
-        PdfArray.fromNum(<double>[s[0], s[1], s[4], s[5], s[12], s[13]]);
+    params['/Matrix'] = PdfArray.fromNum(<double>[
+      s[0],
+      s[1],
+      s[4],
+      s[5],
+      s[12],
+      s[13],
+    ]);
   }
 
   @override

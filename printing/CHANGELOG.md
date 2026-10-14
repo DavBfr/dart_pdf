@@ -1,8 +1,55 @@
 # Changelog
 
+## 5.15.1
+
+- Fix iOS use-after-free crash in `CGPDFDocumentGetNumberOfPages`: UIKit reads the PDF document from a background page-count thread while dynamic layout replaces it on the main thread; document access is now lock-guarded
+- Fix GHSA-hq66-cqwq-w95j: update pdf.js to 6.2.108
+- Fix `RangeError` in `PdfPreviewRaster._raster` when the preview is disposed while a page is being rasterized: re-check `mounted` after awaiting `page.toPng()`, since `dispose()` clears `pages` and the resumed continuation would write to a stale index [PiotrWpl]
+- Fix layoutPdf hanging forever in iOS App Store builds: return the document via the method-channel reply instead of a dlsym FFI callback, whose symbols are stripped from statically linked (Swift Package Manager) apps by distribution builds
+- Fix iOS/macOS crash (force-unwrapped CGDataProvider) when layoutPdf receives empty or malformed document data
+- Fix iOS `convertHtml` crash on iOS 26+ (UISceneDelegate lifecycle): resolve the key window from `connectedScenes` instead of the deprecated `delegate.window`/`keyWindow` lookup [Bilonik]
+- Fix Windows memory initialization in `print_job.cpp`: use `dmSize + dmDriverExtra` instead of `sizeof(DEVMODE)` for `ZeroMemory` — `DEVMODE` is a variable-length struct [timothee-escandell]
+- Fix Windows and Linux callbacks being routed to the wrong isolate with multiple `FlutterEngine`s (multi-window): the method channel is now owned by the plugin instance instead of a global
+- Fix PDFium being destroyed on Windows while another plugin instance is still using it: the library is now reference counted on Windows and Linux
+- Fix the Windows print dialog not being owned by the window that started the job with multiple windows
+
+## 5.15.0
+
+- Fix CVE-2024-4367: load pdf.js via ESM import (pdf.js 5.7.284)
+- Fix lint issues
+- Add Swift Package Manager support
+- Fix iOS crash in pickPrinter when the selected printer has a nil URL
+- fix printing web override and update pdf dependencies
+- Fix Windows PDFium lifecycle
+- Implementing support for modern print dialog on windows
+- Fix thread issues on iOS and MacOS printing plugin
+- Use random starting point for job IDs
+- PrintJob list shared between instances to avoid problems with multiple windows.
+- Fixed deadlock on macOS with newer Flutter versions & added filtering of redundant pdf layout requests.
+- Update min dart sdk to 3.12.0
+
+## 5.14.3
+
+- Update according to breaking changes in the new AssetManifest API [Pierre Fellendael]
+
+## 5.14.2
+
+- Fix wasm dart.pub warning
+
+## 5.14.0
+
+- Replace WebView with WKWebView on macOS
+- Upgrade archive [CodeDoctor]
+- Fix wasm import [CodeDoctor]
+
+## 5.13.4
+
+- Improve Web Browser detection logic
+
 ## 5.13.3
 
 - Update gfonts [Minh-Danh]
+- Add compatibility with web 1.1.0
 
 ## 5.13.2
 

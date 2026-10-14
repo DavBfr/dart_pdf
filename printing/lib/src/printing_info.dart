@@ -29,14 +29,14 @@ class PrintingInfo {
 
   /// Create an information object from a dictionary
   factory PrintingInfo.fromMap(Map<dynamic, dynamic> map) => PrintingInfo(
-        directPrint: map['directPrint'] ?? false,
-        dynamicLayout: map['dynamicLayout'] ?? false,
-        canPrint: map['canPrint'] ?? false,
-        canConvertHtml: map['canConvertHtml'] ?? false,
-        canListPrinters: map['canListPrinters'] ?? false,
-        canShare: map['canShare'] ?? false,
-        canRaster: map['canRaster'] ?? false,
-      );
+    directPrint: map['directPrint'] ?? false,
+    dynamicLayout: map['dynamicLayout'] ?? false,
+    canPrint: map['canPrint'] ?? false,
+    canConvertHtml: map['canConvertHtml'] ?? false,
+    canListPrinters: map['canListPrinters'] ?? false,
+    canShare: map['canShare'] ?? false,
+    canRaster: map['canRaster'] ?? false,
+  );
 
   /// Default information with no feature available
   static const PrintingInfo unavailable = PrintingInfo();
@@ -66,7 +66,8 @@ class PrintingInfo {
   final bool canRaster;
 
   @override
-  String toString() => '''
+  String toString() =>
+      '''
 $runtimeType:
   canPrint: $canPrint
   directPrint: $directPrint

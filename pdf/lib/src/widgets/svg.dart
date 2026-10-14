@@ -32,12 +32,10 @@ class SvgImage extends Widget {
     double? width,
     double? height,
     PdfColor? colorFilter,
+    SvgCustomFontLookup? customFontLookup,
   }) {
     final xml = XmlDocument.parse(svg);
-    final parser = SvgParser(
-      xml: xml,
-      colorFilter: colorFilter,
-    );
+    final parser = SvgParser(xml: xml, colorFilter: colorFilter);
 
     return SvgImage._fromParser(
       parser,
@@ -46,6 +44,7 @@ class SvgImage extends Widget {
       clip,
       width,
       height,
+      customFontLookup,
     );
   }
 
@@ -56,6 +55,7 @@ class SvgImage extends Widget {
     this.clip,
     this.width,
     this.height,
+    this.customFontLookup,
   );
 
   final SvgParser _svgParser;
@@ -70,21 +70,26 @@ class SvgImage extends Widget {
 
   final double? height;
 
+  final SvgCustomFontLookup? customFontLookup;
+
   late FittedSizes sizes;
 
   @override
-  void layout(Context context, BoxConstraints constraints,
-      {bool parentUsesSize = false}) {
+  void layout(
+    Context context,
+    BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
     final w = width != null || _svgParser.width != null
         ? constraints.constrainWidth(width ?? _svgParser.width!)
         : constraints.hasBoundedWidth
-            ? constraints.maxWidth
-            : constraints.constrainWidth(_svgParser.viewBox.width);
+        ? constraints.maxWidth
+        : constraints.constrainWidth(_svgParser.viewBox.width);
     final h = height != null || _svgParser.height != null
         ? constraints.constrainHeight(height ?? _svgParser.height!)
         : constraints.hasBoundedHeight
-            ? constraints.maxHeight
-            : constraints.constrainHeight(_svgParser.viewBox.height);
+        ? constraints.maxHeight
+        : constraints.constrainHeight(_svgParser.viewBox.height);
 
     sizes = applyBoxFit(fit, _svgParser.viewBox.size, PdfPoint(w, h));
     box = PdfRect.fromPoints(PdfPoint.zero, sizes.destination!);
@@ -98,15 +103,12 @@ class SvgImage extends Widget {
     final sourceRect = _alignment.inscribe(sizes.source!, _svgParser.viewBox);
     final sx = sizes.destination!.x / sizes.source!.x;
     final sy = sizes.destination!.y / sizes.source!.y;
-    final dx = sourceRect.x * sx;
-    final dy = sourceRect.y * sy;
+    final dx = sourceRect.left * sx;
+    final dy = sourceRect.bottom * sy;
 
     final mat = Matrix4.identity()
-      ..translate(
-        box!.x - dx,
-        box!.y + dy + box!.height,
-      )
-      ..scale(sx, -sy);
+      ..translateByDouble(box!.left - dx, box!.bottom + dy + box!.height, 0, 1)
+      ..scaleByDouble(sx, -sy, 1, 1);
 
     context.canvas.saveContext();
     if (clip) {
@@ -126,6 +128,7 @@ class SvgImage extends Widget {
         context.page.pageFormat.width,
         context.page.pageFormat.height,
       ),
+      customFontLookup: customFontLookup,
     );
     painter.paint();
     context.canvas.restoreContext();
@@ -154,3 +157,6 @@ class DecorationSvgImage extends DecorationGraphic {
     );
   }
 }
+
+typedef SvgCustomFontLookup =
+    Font? Function(String fontFamily, String fontStyle, String fontWeight);

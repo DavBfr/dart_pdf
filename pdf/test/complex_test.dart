@@ -28,19 +28,21 @@ void main() {
     img.fillRange(0, img.length - 1, 0x12345678);
 
     final pdf = PdfDocument();
-    PdfInfo(pdf,
-        author: 'David PHAM-VAN',
-        creator: 'David PHAM-VAN',
-        title: 'My Title',
-        subject: 'My Subject');
+    PdfInfo(
+      pdf,
+      author: 'David PHAM-VAN',
+      creator: 'David PHAM-VAN',
+      title: 'My Title',
+      subject: 'My Subject',
+    );
     final page = PdfPage(pdf, pageFormat: const PdfPageFormat(500, 300));
 
     final g = page.getGraphics();
 
     g.saveContext();
     var tm = Matrix4.identity();
-    tm.translate(10.0, 290);
-    tm.scale(1.0, -1);
+    tm.translateByDouble(10.0, 290, 0, 1);
+    tm.scaleByDouble(1, -1, 1, 1);
     g.setTransform(tm);
     g.setColor(const PdfColor(0, 0, 0));
     g.drawShape(
@@ -51,12 +53,13 @@ void main() {
 
     g.saveContext();
     tm = Matrix4.identity();
-    tm.translate(200.0, 290);
-    tm.scale(.1, -.1);
+    tm.translateByDouble(200, 290, 0, 1);
+    tm.scaleByDouble(.1, -.1, 1, 1);
     g.setTransform(tm);
     g.setColor(const PdfColor(0, 0, 0));
     g.drawShape(
-        'M300,200 h-150 a150,150 0 1,0 150,-150 z M275,175 v-150 a150,150 0 0,0 -150,150 z');
+      'M300,200 h-150 a150,150 0 1,0 150,-150 z M275,175 v-150 a150,150 0 0,0 -150,150 z',
+    );
     g.strokePath();
     g.restoreContext();
 
@@ -69,7 +72,11 @@ void main() {
     const fs = 20.0;
     g.setColor(const PdfColor(0, 1, 1));
     g.drawRect(
-        50.0 + r.left * fs, 30.0 + r.top * fs, r.width * fs, r.height * fs);
+      50.0 + r.left * fs,
+      30.0 + r.top * fs,
+      r.width * fs,
+      r.height * fs,
+    );
     g.fillPath();
     g.setColor(const PdfColor(0.3, 0.3, 0.3));
     g.drawString(font2, fs, s, 50, 30);
@@ -82,13 +89,17 @@ void main() {
     g.drawRect(300, 150, 50, 50);
     g.fillPath();
     g.setColor(const PdfColor(0, 0.5, 0));
-    final image =
-        PdfImage(pdf, image: img.buffer.asUint8List(), width: 10, height: 10);
+    final image = PdfImage(
+      pdf,
+      image: img.buffer.asUint8List(),
+      width: 10,
+      height: 10,
+    );
     for (var i = 10.0; i < 90.0; i += 5.0) {
       g.saveContext();
       final tm = Matrix4.identity();
       tm.rotateZ(i * pi / 360.0);
-      tm.translate(300.0, -100);
+      tm.translateByDouble(300, -100, 0, 1);
       g.setTransform(tm);
       g.drawString(font1!, 12, 'Hello $i', 20, 100);
       g.drawImage(image, 100, 100);
