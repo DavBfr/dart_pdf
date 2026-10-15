@@ -476,6 +476,33 @@ void main() {
     );
   });
 
+  test('Text Widgets fallback font keeps runs together', () async {
+    final latin = loadFont('open-sans.ttf');
+    final arabic = loadFont('hacen-tunisia.ttf');
+    final doc = Document();
+    doc.addPage(
+      Page(
+        build: (Context context) => Text(
+          'مرحبا world',
+          textDirection: TextDirection.rtl,
+          style: TextStyle(font: latin, fontFallback: [arabic]),
+        ),
+      ),
+    );
+    await doc.save();
+
+    List<int> cmapOf(Font font) => doc.document.fonts
+        .whereType<PdfTtfFont>()
+        .singleWhere((f) => f.fontName == font.fontName)
+        .unicodeCMap
+        .cmap;
+
+    // Initial-form meem (U+FEE3) only appears when the word is shaped whole.
+    expect(cmapOf(arabic), contains(0xFEE3));
+    expect(cmapOf(arabic), isNot(contains(0xFEE1)));
+    expect(cmapOf(latin), contains('w'.codeUnitAt(0)));
+  });
+
   tearDownAll(() async {
     final file = File('widgets-text.pdf');
     await file.writeAsBytes(await pdf.save());

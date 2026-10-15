@@ -840,9 +840,30 @@ class RichText extends Widget with SpanningWidget {
           return true;
         }
 
-        final font = style!.font!.getFont(context);
+        final baseFont = style!.font!.getFont(context);
+        final text = span.text!.runes.toList();
 
-        var text = span.text!.runes.toList();
+        // Consecutive runes drawn with the same font stay in one span so
+        // complex scripts (Arabic) can be shaped as a whole word.
+        var runStart = 0;
+        var runFont = baseFont;
+        var runStyle = style;
+
+        void flushRun(int end) {
+          if (end > runStart) {
+            spans.add(
+              _addText(
+                text: text,
+                start: runStart,
+                end: end,
+                style: runStyle,
+                baseline: span.baseline,
+                annotation: annotation,
+              ),
+            );
+          }
+          runStart = end;
+        }
 
         for (var index = 0; index < text.length; index++) {
           final rune = text[index];
@@ -870,79 +891,75 @@ class RichText extends Widget with SpanningWidget {
             continue;
           }
 
-          if (!font.isRuneSupported(rune)) {
-            if (index > 0) {
-              spans.add(
-                _addText(
-                  text: text,
-                  end: index,
-                  style: style,
-                  baseline: span.baseline,
-                  annotation: annotation,
-                ),
-              );
+          if (baseFont.isRuneSupported(rune)) {
+            if (runFont != baseFont) {
+              flushRun(index);
+              runFont = baseFont;
+              runStyle = style;
             }
-            var found = false;
-            for (final fb in style.fontFallback) {
-              final font = fb.getFont(context);
-              if (font.isRuneSupported(rune)) {
-                if (font is PdfTtfFont) {
-                  final bitmap = font.font.getBitmap(rune);
-                  if (bitmap != null) {
-                    spans.add(
-                      _addEmoji(
-                        bitmap: bitmap,
-                        style: style,
-                        baseline: span.baseline,
-                        annotation: annotation,
-                      ),
-                    );
-                    found = true;
-                    break;
-                  }
-                }
-                spans.add(
-                  _addText(
-                    text: [rune],
-                    style: style.copyWith(
-                      font: fb,
-                      fontNormal: fb,
-                      fontBold: fb,
-                      fontBoldItalic: fb,
-                      fontItalic: fb,
+            continue;
+          }
+
+          var found = false;
+          for (final fb in style.fontFallback) {
+            final font = fb.getFont(context);
+            if (font.isRuneSupported(rune)) {
+              if (font is PdfTtfFont) {
+                final bitmap = font.font.getBitmap(rune);
+                if (bitmap != null) {
+                  flushRun(index);
+                  spans.add(
+                    _addEmoji(
+                      bitmap: bitmap,
+                      style: style,
+                      baseline: span.baseline,
+                      annotation: annotation,
                     ),
-                    baseline: span.baseline,
-                    annotation: annotation,
-                  ),
-                );
-                found = true;
-                break;
+                  );
+                  runStart = index + 1;
+                  found = true;
+                  break;
+                }
               }
-            }
-            if (!found) {
-              spans.add(
-                _addPlaceholder(
-                  style: style,
-                  baseline: span.baseline,
-                  annotation: annotation,
-                ),
-              );
-              assert(() {
-                print(
-                  'Unable to find a font to draw "${String.fromCharCode(rune)}" (U+${rune.toRadixString(16)}) try to provide a TextStyle.fontFallback',
+              if (runFont != font) {
+                flushRun(index);
+                runFont = font;
+                runStyle = style.copyWith(
+                  font: fb,
+                  fontNormal: fb,
+                  fontBold: fb,
+                  fontBoldItalic: fb,
+                  fontItalic: fb,
                 );
-                return true;
-              }());
+              }
+              found = true;
+              break;
             }
-            text = text.sublist(index + 1);
-            index = -1;
+          }
+          if (!found) {
+            flushRun(index);
+            spans.add(
+              _addPlaceholder(
+                style: style,
+                baseline: span.baseline,
+                annotation: annotation,
+              ),
+            );
+            runStart = index + 1;
+            assert(() {
+              print(
+                'Unable to find a font to draw "${String.fromCharCode(rune)}" (U+${rune.toRadixString(16)}) try to provide a TextStyle.fontFallback',
+              );
+              return true;
+            }());
           }
         }
 
         spans.add(
           _addText(
             text: text,
-            style: style,
+            start: runStart,
+            style: runStyle,
             baseline: span.baseline,
             annotation: annotation,
           ),
