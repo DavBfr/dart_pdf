@@ -805,8 +805,119 @@ void main() {
     });
   });
 
+  test('isLight and isDark are each other\'s opposite', () {
+    // The luminance test is Flutter's estimateBrightnessForColor, whose true
+    // branch means light, and it was returned from isDark - so white reported
+    // dark and black reported light, and user code following the doc comments
+    // drew white on white.
+    expect(PdfColors.white.isLight, isTrue);
+    expect(PdfColors.white.isDark, isFalse);
+    expect(PdfColors.black.isDark, isTrue);
+    expect(PdfColors.black.isLight, isFalse);
+
+    for (final color in PdfColors.primaries) {
+      expect(color.isDark, !color.isLight, reason: '$color');
+    }
+  });
+
+  test('the light threshold has not moved', () {
+    // The crossover is a relative luminance of about 0.3373, not 0.5: grey500 is
+    // light and teal is dark. Pinned so it cannot drift silently.
+    expect(PdfColors.grey500.isLight, isTrue);
+    expect(PdfColors.teal.isDark, isTrue);
+
+    var lastDark = 0.0;
+    var firstLight = 1.0;
+    for (var i = 0; i <= 100; i++) {
+      final grey = PdfColor(i / 100, i / 100, i / 100);
+      if (grey.isLight) {
+        firstLight = grey.luminance < firstLight ? grey.luminance : firstLight;
+      } else {
+        lastDark = grey.luminance > lastDark ? grey.luminance : lastDark;
+      }
+    }
+
+    expect(lastDark, lessThan(0.3373));
+    expect(firstLight, greaterThan(0.3373 - 0.02));
+  });
+
   tearDownAll(() async {
     final file = File('colors.pdf');
     await file.writeAsBytes(await pdf.save());
+  });
+
+  test('PdfColorCmyk.fromRgb picks the real maximum channel', () {
+    // r > g with b > r used to return r as the maximum, so black came out too
+    // large and the other components went negative.
+    const blue = PdfColorCmyk.fromRgb(0.2, 0.1, 0.9);
+    expect(blue.black, closeTo(0.1, 1e-9));
+    expect(blue.cyan, closeTo((0.9 - 0.2) / 0.9, 1e-9));
+    expect(blue.magenta, closeTo((0.9 - 0.1) / 0.9, 1e-9));
+    expect(blue.yellow, closeTo(0.0, 1e-9));
+
+    for (final color in <PdfColor>[
+      const PdfColor(0.2, 0.1, 0.9),
+      const PdfColor(0.9, 0.5, 0.1),
+      const PdfColor(0.1, 0.9, 0.5),
+      PdfColors.blue,
+      PdfColors.purple,
+      PdfColors.teal,
+    ]) {
+      final cmyk = color.toCmyk();
+      for (final value in <double>[
+        cmyk.cyan,
+        cmyk.magenta,
+        cmyk.yellow,
+        cmyk.black,
+      ]) {
+        expect(value.isNaN, isFalse);
+        expect(value, inInclusiveRange(0.0, 1.0));
+      }
+    }
+  });
+
+  test('a black PdfColor converts to CMYK without dividing by zero', () {
+    final cmyk = PdfColors.black.toCmyk();
+    expect(cmyk.cyan, 0.0);
+    expect(cmyk.magenta, 0.0);
+    expect(cmyk.yellow, 0.0);
+    expect(cmyk.black, 1.0);
+
+    const direct = PdfColorCmyk.fromRgb(0, 0, 0);
+    expect(direct.cyan.isNaN, isFalse);
+    expect(direct.black, 1.0);
+  });
+
+  test('a black PdfColor converts to HSL with no saturation', () {
+    final hsl = PdfColors.black.toHsl();
+    expect(hsl.saturation, 0.0);
+    expect(hsl.lightness, 0.0);
+    expect(hsl.toHex(), '#000000ff');
+
+    final white = PdfColors.white.toHsl();
+    expect(white.saturation, 0.0);
+    expect(white.lightness, 1.0);
+
+    final grey = const PdfColor(0.5, 0.5, 0.5).toHsl();
+    expect(grey.saturation, 0.0);
+  });
+  test('a CMYK black writes no non-finite operand', () async {
+    // A regression guard rather than a reproduction: this is the shape the
+    // acceptance criteria name, and it is clean on HEAD too.
+    final document = Document(compress: false);
+    document.addPage(
+      Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (Context context) => Container(
+          width: 50,
+          height: 50,
+          color: PdfColorCmyk.fromRgb(0, 0, 0),
+        ),
+      ),
+    );
+
+    final pdf = String.fromCharCodes(await document.save());
+    expect(pdf, isNot(contains('NaN')));
+    expect(pdf, isNot(contains('Infinity')));
   });
 }

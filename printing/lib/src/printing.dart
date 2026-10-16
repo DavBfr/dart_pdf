@@ -49,6 +49,13 @@ mixin Printing {
   /// Use value `true` to use [format] as custom paper size, when the printer
   /// driver will not allows the user to use papers which are actually supported by the printer.
   /// (Supported platforms: iOS)
+  ///
+  /// On the web a true result means the browser's print dialog was invoked, not
+  /// that the document reached a printer: no browser reports whether the user
+  /// then printed or cancelled, and [PrintingInfo.reportsPrintOutcome] is false
+  /// there. A browser that cannot print a document from a hidden frame - Android
+  /// Chrome, and any web view - is given it as a download instead, and that
+  /// returns false.
   static Future<bool> layoutPdf({
     required LayoutCallback onLayout,
     String name = 'Document',
@@ -157,6 +164,13 @@ mixin Printing {
   /// Use value `true` to use [format] as custom paper size, when the printer
   /// driver will not allows the user to use papers which are actually supported by the printer.
   /// (Supported platforms: iOS)
+  ///
+  /// On the web a true result means the browser's print dialog was invoked, not
+  /// that the document reached a printer: no browser reports whether the user
+  /// then printed or cancelled, and [PrintingInfo.reportsPrintOutcome] is false
+  /// there. A browser that cannot print a document from a hidden frame - Android
+  /// Chrome, and any web view - is given it as a download instead, and that
+  /// returns false.
   static FutureOr<bool> directPrintPdf({
     required Printer printer,
     required LayoutCallback onLayout,
@@ -194,6 +208,7 @@ mixin Printing {
   ///
   /// [subject] and [body] will only work for Android and iOS platforms.
   /// [emails] will only work for Android Platform.
+  /// [filename] is a file name, not a path: any directory part is dropped.
   static Future<bool> sharePdf({
     required Uint8List bytes,
     String filename = 'document.pdf',
@@ -206,12 +221,32 @@ mixin Printing {
 
     return PrintingPlatform.instance.sharePdf(
       bytes,
-      filename,
+      safeFilename(filename),
       bounds,
       subject,
       body,
       emails,
     );
+  }
+
+  /// Reduce [filename] to a name that is safe to use inside a temp directory
+  ///
+  /// Every backend joined the caller's string onto a directory, so a name
+  /// carrying a separator pointed somewhere that does not exist - silently
+  /// nothing on most platforms, a crash on Linux - and one carrying '..'
+  /// escaped the directory altogether.
+  @visibleForTesting
+  static String safeFilename(
+    String filename, {
+    String fallback = 'document.pdf',
+  }) {
+    final name = filename.split(RegExp(r'[/\\]')).last.trim();
+
+    if (name.isEmpty || name == '.' || name == '..') {
+      return fallback;
+    }
+
+    return name;
   }
 
   /// Convert an html document to a pdf data
@@ -242,13 +277,26 @@ mixin Printing {
   ///
   /// This is not supported on all platforms. Check the result of [info] to
   /// find at runtime if this feature is available or not.
+  ///
+  /// [background] is the ARGB colour painted behind each page, opaque white by
+  /// default. A PDF page has no background of its own - the imaging model leaves
+  /// it to whatever displays the document - and the native backends used to
+  /// leave it transparent, so saving a rastered page as PNG or re-encoding it as
+  /// JPEG produced a black page. Pass `0x00000000` for the transparent pages of
+  /// printing 5.17 and earlier.
   static Stream<PdfRaster> raster(
     Uint8List document, {
     List<int>? pages,
     double dpi = PdfPageFormat.inch,
+    int background = 0xffffffff,
   }) {
     assert(dpi > 0);
 
-    return PrintingPlatform.instance.raster(document, pages, dpi);
+    return PrintingPlatform.instance.raster(
+      document,
+      pages,
+      dpi,
+      background: background,
+    );
   }
 }

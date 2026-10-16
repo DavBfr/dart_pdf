@@ -25,11 +25,13 @@ import '../pdf/options.dart';
 import 'annotations.dart';
 import 'basic.dart';
 import 'document.dart';
+import 'font.dart';
 import 'geometry.dart';
 import 'image.dart';
 import 'image_provider.dart';
 import 'multi_page.dart';
 import 'placeholders.dart';
+import 'text_segmentation.dart';
 import 'text_style.dart';
 import 'theme.dart';
 import 'widget.dart';
@@ -105,13 +107,18 @@ class _TextDecoration {
       return _box;
     }
 
-    final x1 = spans[startSpan].offset.x + spans[startSpan].left;
-    final x2 =
-        spans[endSpan].offset.x + spans[endSpan].left + spans[endSpan].width;
+    // The extremes over the whole range, not the first and last span: a line is
+    // reordered into visual order after it is built, so the first span of a
+    // decoration is not necessarily its leftmost.
+    var x1 = spans[startSpan].offset.x + spans[startSpan].left;
+    var x2 = x1 + spans[startSpan].width;
     var y1 = spans[startSpan].offset.y + spans[startSpan].top;
     var y2 = y1 + spans[startSpan].height;
 
     for (var n = startSpan + 1; n <= endSpan; n++) {
+      final nx1 = spans[n].offset.x + spans[n].left;
+      x1 = math.min(x1, nx1);
+      x2 = math.max(x2, nx1 + spans[n].width);
       final ny1 = spans[n].offset.y + spans[n].top;
       final ny2 = ny1 + spans[n].height;
       y1 = math.min(y1, ny1);
@@ -259,19 +266,19 @@ class _TextDecoration {
   }
 }
 
-/// The word-split pattern, hoisted so layout does not rebuild it per line.
-final RegExp _splitWhitespace = RegExp(r'\s');
-
-/// Whether [s] is entirely printable ASCII with no space — text that cannot
-/// contain a word or line break under `\n` and [_splitWhitespace]. Kept
-/// deliberately narrower than "no ASCII whitespace": `\s` also matches
+/// Whether [s] is entirely printable ASCII with no space and no hyphen — text
+/// that cannot contain a word break, a line break or a break opportunity.
+///
+/// Kept deliberately narrower than "no ASCII whitespace": `\s` also matches
 /// Unicode whitespace such as U+00A0 and U+2000–U+200A, so any code unit
 /// outside printable ASCII disqualifies the string rather than risk
-/// reclassifying an exotic space as a word character.
+/// reclassifying an exotic space as a word character. A U+002D is excluded
+/// because [tokenize] breaks a run there, so 'long-hyphenated-word' has to go
+/// the long way round.
 bool _isSingleAsciiWord(String s) {
   for (var i = 0; i < s.length; i++) {
     final c = s.codeUnitAt(i);
-    if (c <= 0x20 || c >= 0x7f) {
+    if (c <= 0x20 || c >= 0x7f || c == 0x2d) {
       return false;
     }
   }
@@ -593,48 +600,65 @@ class _Line {
     final spans = parent._spans.sublist(firstSpan, lastSpan);
     final isRTL = textDirection == TextDirection.rtl;
 
+    // The bidi algorithm has already put this line in visual order, so all that
+    // is left is a uniform shift. Only the legacy arabic.convert path, which
+    // shapes without reordering, still needs the line mirrored here.
+    final mirror = !useBidi && isRTL;
+
     var delta = 0.0;
     switch (textAlign) {
       case TextAlign.left:
-        delta = isRTL ? wordsWidth : 0;
+        delta = mirror ? wordsWidth : 0;
         break;
       case TextAlign.right:
-        delta = isRTL ? totalWidth : totalWidth - wordsWidth;
+        delta = mirror ? totalWidth : totalWidth - wordsWidth;
         break;
       case TextAlign.start:
-        delta = isRTL ? totalWidth : 0;
+        delta = mirror ? totalWidth : (isRTL ? totalWidth - wordsWidth : 0);
         break;
       case TextAlign.end:
-        delta = isRTL ? wordsWidth : totalWidth - wordsWidth;
+        delta = mirror ? wordsWidth : (isRTL ? 0 : totalWidth - wordsWidth);
         break;
       case TextAlign.center:
         delta = (totalWidth - wordsWidth) / 2.0;
-        if (isRTL) {
+        if (mirror) {
           delta += wordsWidth;
         }
         break;
       case TextAlign.justify:
-        delta = isRTL ? totalWidth : 0;
+        delta = mirror ? totalWidth : (isRTL ? totalWidth - wordsWidth : 0);
         if (!justify) {
           break;
         }
 
         final gap = (totalWidth - wordsWidth) / (spans.length - 1);
         var x = 0.0;
-        for (final span in spans) {
-          span.offset = PdfPoint(
-            isRTL
-                ? delta - x - (span.offset.x + span.width)
-                : span.offset.x + x,
-            span.offset.y - baseline,
-          );
+
+        if (mirror) {
+          for (final span in spans) {
+            span.offset = PdfPoint(
+              delta - x - (span.offset.x + span.width),
+              span.offset.y - baseline,
+            );
+            x += gap;
+          }
+
+          return;
+        }
+
+        // Widen the gaps the line already has, which means walking it as it is
+        // drawn rather than as it was built.
+        for (final span
+            in spans.toList()
+              ..sort((_Span a, _Span b) => a.offset.x.compareTo(b.offset.x))) {
+          span.offset = PdfPoint(span.offset.x + x, span.offset.y - baseline);
           x += gap;
         }
 
         return;
     }
 
-    if (isRTL) {
+    if (mirror) {
       for (final span in spans) {
         span.offset = PdfPoint(
           delta - (span.offset.x + span.width),
@@ -668,6 +692,13 @@ class RichTextContext extends WidgetContext {
   WidgetContext clone() {
     return RichTextContext()..apply(this);
   }
+
+  @override
+  bool isSameAs(RichTextContext other) =>
+      spanStart == other.spanStart &&
+      spanEnd == other.spanEnd &&
+      startOffset == other.startOffset &&
+      endOffset == other.endOffset;
 
   @override
   String toString() =>
@@ -842,12 +873,51 @@ class RichText extends Widget with SpanningWidget {
 
         final font = style!.font!.getFont(context);
 
-        var text = span.text!.runes.toList();
+        final runes = span.text!.runes.toList();
 
-        for (var index = 0; index < text.length; index++) {
-          final rune = text[index];
+        // One span per maximal run of runes served by the same font. A span was
+        // emitted for each unsupported rune on its own, so a fallback-served
+        // Arabic word arrived as a string of one-character spans - and shaping
+        // works on a span, so every letter could only come out in its isolated
+        // form, each became its own word for wrapping, and justify stretched the
+        // gaps between letters.
+        Font? served;
+        var start = 0;
+
+        void flush(int end) {
+          if (end <= start) {
+            return;
+          }
+
+          spans.add(
+            _addText(
+              text: runes,
+              start: start,
+              end: end,
+              style: served == null
+                  ? style
+                  : style.copyWith(
+                      font: served,
+                      fontNormal: served,
+                      fontBold: served,
+                      fontBoldItalic: served,
+                      fontItalic: served,
+                    ),
+              baseline: span.baseline,
+              annotation: annotation,
+            ),
+          );
+
+          start = end;
+        }
+
+        for (var index = 0; index < runes.length; index++) {
+          final rune = runes[index];
           const spaces = {
             0x0a,
+            0x0b,
+            0x0c,
+            0x0d,
             0x09,
             0x00A0,
             0x1680,
@@ -864,88 +934,105 @@ class RichText extends Widget with SpanningWidget {
             0x200A,
             0x202F,
             0x205F,
+            0x2028,
+            0x2029,
             0x3000,
           };
-          if (spaces.contains(rune)) {
+          // Whitespace stays with whatever run is open, so a space cannot chop a
+          // sentence in two. A default ignorable is never drawn, so it must not
+          // reach the fallback scan either: with no font covering it the scan
+          // ended at _addPlaceholder and painted a crossed box for a soft hyphen,
+          // a variation selector or a bidi mark.
+          if (spaces.contains(rune) || isDefaultIgnorable(rune)) {
             continue;
           }
 
-          if (!font.isRuneSupported(rune)) {
-            if (index > 0) {
-              spans.add(
-                _addText(
-                  text: text,
-                  end: index,
-                  style: style,
-                  baseline: span.baseline,
-                  annotation: annotation,
-                ),
-              );
+          if (font.isRuneSupported(rune)) {
+            if (served != null) {
+              flush(index);
+              served = null;
             }
-            var found = false;
-            for (final fb in style.fontFallback) {
-              final font = fb.getFont(context);
-              if (font.isRuneSupported(rune)) {
-                if (font is PdfTtfFont) {
-                  final bitmap = font.font.getBitmap(rune);
-                  if (bitmap != null) {
-                    spans.add(
-                      _addEmoji(
-                        bitmap: bitmap,
-                        style: style,
-                        baseline: span.baseline,
-                        annotation: annotation,
-                      ),
-                    );
-                    found = true;
-                    break;
-                  }
-                }
-                spans.add(
-                  _addText(
-                    text: [rune],
-                    style: style.copyWith(
-                      font: fb,
-                      fontNormal: fb,
-                      fontBold: fb,
-                      fontBoldItalic: fb,
-                      fontItalic: fb,
-                    ),
-                    baseline: span.baseline,
-                    annotation: annotation,
-                  ),
-                );
-                found = true;
-                break;
-              }
-            }
-            if (!found) {
-              spans.add(
-                _addPlaceholder(
-                  style: style,
-                  baseline: span.baseline,
-                  annotation: annotation,
-                ),
-              );
-              assert(() {
-                print(
-                  'Unable to find a font to draw "${String.fromCharCode(rune)}" (U+${rune.toRadixString(16)}) try to provide a TextStyle.fontFallback',
-                );
-                return true;
-              }());
-            }
-            text = text.sublist(index + 1);
-            index = -1;
+            continue;
           }
+
+          // The span's own font cannot draw it. Take the first fallback that can.
+          Font? fallback;
+          TtfBitmapInfo? bitmap;
+          for (final candidate in style.fontFallback) {
+            final resolved = candidate.getFont(context);
+            if (!resolved.isRuneSupported(rune)) {
+              continue;
+            }
+            fallback = candidate;
+            if (resolved is PdfTtfFont) {
+              bitmap = resolved.font.getBitmap(rune);
+            }
+            break;
+          }
+
+          if (bitmap != null) {
+            // An emoji is its own object: it ends the run before it and starts a
+            // new one after it.
+            flush(index);
+            spans.add(
+              _addEmoji(
+                bitmap: bitmap,
+                style: style,
+                baseline: span.baseline,
+                annotation: annotation,
+              ),
+            );
+            start = index + 1;
+            served = null;
+            continue;
+          }
+
+          if (fallback != null) {
+            if (served != fallback) {
+              flush(index);
+              served = fallback;
+            }
+            continue;
+          }
+
+          flush(index);
+          spans.add(
+            _addPlaceholder(
+              style: style,
+              baseline: span.baseline,
+              annotation: annotation,
+            ),
+          );
+          start = index + 1;
+          served = null;
+
+          assert(() {
+            print(
+              'Unable to find a font to draw "${String.fromCharCode(rune)}" (U+${rune.toRadixString(16)}) try to provide a TextStyle.fontFallback',
+            );
+            return true;
+          }());
         }
 
-        spans.add(
-          _addText(
-            text: text,
-            style: style,
-            baseline: span.baseline,
-            annotation: annotation,
-          ),
+        if (runes.isEmpty) {
+          // An empty span still carries its style, which is where a blank
+          // paragraph's line height comes from.
+          spans.add(
+            _addText(
+              text: runes,
+              style: style,
+              baseline: span.baseline,
+              annotation: annotation,
+            ),
+          );
+        }
+
+        flush(runes.length);
+
+        // Every rune was either written into a run or replaced by a widget.
+        assert(
+          start == runes.length,
+          'the emitted spans have to cover the whole source text',
         );
 
         return true;
@@ -974,9 +1061,13 @@ class RichText extends Widget with SpanningWidget {
 
     final _overflow = this.overflow ?? theme.overflow;
 
-    final constraintWidth = constraints.hasBoundedWidth
-        ? constraints.maxWidth
-        : constraints.constrainWidth();
+    // A min-content pass lays the paragraph out at its own minimum, so the box
+    // that comes back is that minimum and nothing in it is cut in half.
+    final constraintWidth = context.dependsOn<MinContentWidth>() != null
+        ? _minContentWidth(context)
+        : (constraints.hasBoundedWidth
+              ? constraints.maxWidth
+              : constraints.constrainWidth());
     final constraintHeight = constraints.hasBoundedHeight
         ? constraints.maxHeight
         : constraints.constrainHeight();
@@ -987,12 +1078,44 @@ class RichText extends Widget with SpanningWidget {
     var top = 0.0;
     var bottom = 0.0;
 
+    // The largest TextStyle.height among the spans of the line being built, as a
+    // multiple of the natural line height, and zero until the line has one. The
+    // field was declared, defaulted and carried by copyWith, apply and merge, and
+    // read by nothing: a paragraph measured the same at height null, 0.5, 1, 2, 4
+    // and 10, so Flutter code ported with height: 1.5 came out single-spaced.
+    var lineHeight = 0.0;
+
     final lines = <_Line>[];
     var spanCount = 0;
     var spanStart = 0;
     var overflow = false;
 
+    // The height one empty line of this paragraph's tallest font takes. A
+    // paragraph of nothing but whitespace produces no word, so no line, so
+    // nothing ever advanced offsetY and the box came out 0 x 0: a table row of
+    // empty cells collapsed to a hairline and a Text(' ') spacer added no width.
+    var blankHeight = 0.0;
+
     _preprocessed ??= _preProcessSpans(context);
+
+    // Whether the bidi algorithm shapes and reorders this paragraph.
+    //
+    // It used to run only when the resolved direction was rtl, and
+    // Directionality defaults to ltr, so an Arabic or Hebrew fragment inside an
+    // English paragraph - a name, an address line, a currency symbol - got no
+    // reordering and no shaping and came out backwards and unjoined. UAX #9 uses
+    // the base direction to pick the embedding level, not to decide whether to
+    // run at all. Text with nothing bidirectional in it is skipped, so a
+    // left-to-right document is untouched.
+    final _bidi =
+        useBidi &&
+        (_textDirection == TextDirection.rtl ||
+            _preprocessed!.any(
+              (InlineSpan span) =>
+                  span is TextSpan &&
+                  span.text != null &&
+                  bidi.hasBidi(span.text!),
+            ));
 
     void _buildLines() {
       for (final span in _preprocessed!) {
@@ -1006,55 +1129,110 @@ class RichText extends Widget with SpanningWidget {
 
           final font = style!.font!.getFont(context);
 
-          final space =
-              font.stringMetrics(' ') * (style.fontSize! * textScaleFactor);
+          blankHeight = math.max(
+            blankHeight,
+            font.emptyLineHeight * style.fontSize! * textScaleFactor,
+          );
+
+          /// What one separator advances the pen by, measured in this font
+          /// instead of assumed to be a U+0020: an em space, an ideographic
+          /// space and a tab are nothing like a space wide.
+          double gapOf(String separator) => separator.isEmpty
+              ? 0
+              : (font.stringMetrics(separator) *
+                            (style.fontSize! * textScaleFactor))
+                        .advanceWidth *
+                    style.wordSpacing!;
+
+          /// [text] with every whitespace character this font cannot draw
+          /// replaced by a plain space.
+          ///
+          /// Whitespace carries its own width now, so a character the font does
+          /// not map would advance by nothing: no font has a glyph for U+0009,
+          /// and hacen-tunisia has none for U+00A0. A U+0020 is what the layout
+          /// charged for all of them before.
+          String drawable(String text) {
+            if (!whitespace.hasMatch(text)) {
+              return text;
+            }
+
+            return text.replaceAllMapped(whitespace, (Match match) {
+              final found = match.group(0)!;
+              final rune = found.codeUnitAt(0);
+              return rune < 0x20 || !font.isRuneSupported(rune) ? ' ' : found;
+            });
+          }
 
           final spanText = (useArabic && _textDirection == TextDirection.rtl
               ? arabic.convert(span.text!)
-              : useBidi && _textDirection == TextDirection.rtl
-              ? bidi.logicalToVisual(span.text!)
+              : _bidi
+              // Shaped, but still in logical order: line breaking, metrics
+              // and hyphenation all need that, and rule L2 belongs to a
+              // finished line. Reordering the paragraph first and reversing
+              // its word order cancelled out only while every word of a run
+              // stayed on one line.
+              ? bidi.shapeLogical(span.text!)
               : span.text)!;
-          // Fast path: a run of printable ASCII with no space is one word on
-          // one line, so both splits — and the regex engine behind the word
-          // split — can be skipped. Serial numbers and ticket numbers, the
-          // strings a document lays out by the hundreds of thousands, all
-          // qualify. Anything outside printable ASCII goes through the full
-          // split: `\s` matches Unicode whitespace (U+00A0, U+2000…) that a
-          // byte scan must not quietly reclassify as a word character. A
-          // custom [lineSplitter] must see every line, so it disables the
-          // fast path too.
+
+          // Fast path: a run of printable ASCII with no space and no hyphen is
+          // one word on one line with no break opportunity in it, so the strip,
+          // the line split and the tokenizer can all be skipped. Serial numbers
+          // and ticket numbers, the strings a document lays out by the hundreds
+          // of thousands, all qualify. Anything else goes the long way round: a
+          // default ignorable, a CR, an exotic space and a hyphen all mean
+          // something to the code below. A custom [lineSplitter] must see every
+          // line, so it disables the fast path too.
           final singleWord =
               lineSplitter == null && _isSingleAsciiWord(spanText);
+
+          // The strip runs after the shaping and the bidi reordering, which both
+          // need the joiners and the bidi marks, and before the line split, so
+          // no invisible character is ever measured or drawn. U+000D is a line
+          // terminator: the split used to look for U+000A alone, so a document
+          // written with CRLF or CR line endings ran every line together and
+          // drew a placeholder box at each break.
           final spanLines = singleWord
               ? <String>[spanText]
-              : spanText.split('\n');
+              : stripDefaultIgnorable(
+                  spanText,
+                  // The soft hyphen, the zero-width space and the word joiner
+                  // are break opportunities: tokenize reads them and drops them.
+                  keep: breakControls,
+                ).split(RegExp(r'\r\n|\r|\n'));
+
+          // The gap charged after the last run. The line-closing sites take it
+          // back out, so a line's width ends at its last glyph.
+          var lastGap = 0.0;
 
           for (var line = 0; line < spanLines.length; line++) {
-            // Always a fresh list: an overflowing word is split in place
-            // below (words.insert), and aliasing spanLines would turn the
-            // remainder into an extra line.
-            final words = singleWord
-                ? <String>[spanText]
-                : lineSplitter?.call(spanLines[line]) ??
-                      spanLines[line].split(_splitWhitespace);
-            for (var index = 0; index < words.length; index++) {
-              final word = words[index];
+            final chunks = singleWord
+                ? <TextChunk>[TextChunk(spanText, '')]
+                : lineSplitter == null
+                ? tokenize(spanLines[line])
+                : <TextChunk>[
+                    // A caller-supplied splitter says nothing about what it
+                    // took out, so every run keeps the U+0020 it always got. It
+                    // is also the authority on where lines break, so the break
+                    // controls are dropped here without becoming opportunities.
+                    for (final word in lineSplitter!(spanLines[line]))
+                      TextChunk(stripDefaultIgnorable(word), ' '),
+                  ];
+            for (var index = 0; index < chunks.length; index++) {
+              final chunk = chunks[index];
+              final word = drawable(chunk.text);
 
               if (word.isEmpty) {
-                offsetX +=
-                    space.advanceWidth * style.wordSpacing! +
-                    style.letterSpacing!;
+                // No glyphs, so no letter spacing to make up for: the spacing
+                // added after a run compensates for the trailing one
+                // PdfFontMetrics.append leaves out of the advance, and an empty
+                // run has no trailing glyph. Charging it moved every word after
+                // a run of whitespace, so splitting text into spans shifted it.
+                lastGap = gapOf(drawable(chunk.separator));
+                offsetX += lastGap;
                 continue;
               }
 
-              final metrics =
-                  font.stringMetrics(
-                    word,
-                    letterSpacing:
-                        style.letterSpacing! /
-                        (style.fontSize! * textScaleFactor),
-                  ) *
-                  (style.fontSize! * textScaleFactor);
+              final metrics = _metricsOf(word, font, style);
 
               if (_softWrap &&
                   offsetX + metrics.width > constraintWidth + 0.00001) {
@@ -1063,23 +1241,18 @@ class RichText extends Widget with SpanningWidget {
                   if (syllables.length > 1) {
                     var fits = '';
                     for (var syllable in syllables) {
-                      if (offsetX +
-                              ((font.stringMetrics(
-                                        '$fits$syllable-',
-                                        letterSpacing:
-                                            style.letterSpacing! /
-                                            (style.fontSize! * textScaleFactor),
-                                      ) *
-                                      (style.fontSize! * textScaleFactor))
-                                  .width) >
+                      if (offsetX + _textWidth('$fits$syllable-', font, style) >
                           constraintWidth + 0.00001) {
                         break;
                       }
                       fits += syllable;
                     }
                     if (fits.isNotEmpty) {
-                      words[index] = '$fits-';
-                      words.insert(index + 1, word.substring(fits.length));
+                      chunks[index] = TextChunk('$fits-', '');
+                      chunks.insert(
+                        index + 1,
+                        TextChunk(word.substring(fits.length), chunk.separator),
+                      );
                       index--;
                       continue;
                     }
@@ -1088,15 +1261,21 @@ class RichText extends Widget with SpanningWidget {
 
                 if (spanCount > 0 && metrics.width <= constraintWidth) {
                   overflow = true;
+                  if (_bidi) {
+                    _reorderVisual(
+                      spanStart,
+                      spanCount,
+                      offsetX,
+                      _textDirection == TextDirection.rtl,
+                    );
+                  }
                   lines.add(
                     _Line(
                       this,
                       spanStart,
                       spanCount,
                       bottom,
-                      offsetX -
-                          space.advanceWidth * style.wordSpacing! -
-                          style.letterSpacing!,
+                      offsetX - lastGap - style.letterSpacing!,
                       _textDirection,
                       true,
                     ),
@@ -1106,9 +1285,10 @@ class RichText extends Widget with SpanningWidget {
                   spanCount = 0;
 
                   offsetX = 0.0;
-                  offsetY += bottom - top;
+                  offsetY += (bottom - top) * lineHeight;
                   top = 0;
                   bottom = 0;
+                  lineHeight = 0.0;
 
                   if (_maxLines != null && lines.length >= _maxLines) {
                     return;
@@ -1120,16 +1300,61 @@ class RichText extends Widget with SpanningWidget {
 
                   offsetY += style.lineSpacing! * textScaleFactor;
                 } else {
-                  // One word Overflow, try to split it.
+                  // One word Overflow. Break it where it is meant to break
+                  // before falling back to a width search that knows nothing
+                  // about the text.
+                  final at = _lastBreakThatFits(
+                    chunk.breaks,
+                    word,
+                    font,
+                    style,
+                    constraintWidth,
+                  );
+
+                  if (at != null) {
+                    chunks[index] = TextChunk(
+                      word.substring(0, at.offset) + (at.hyphen ? '-' : ''),
+                      '',
+                    );
+                    chunks.insert(
+                      index + 1,
+                      TextChunk(
+                        word.substring(at.offset),
+                        chunk.separator,
+                        <TextBreak>[
+                          for (final rest in chunk.breaks)
+                            if (rest.offset > at.offset)
+                              TextBreak(
+                                rest.offset - at.offset,
+                                hyphen: rest.hyphen,
+                              ),
+                        ],
+                      ),
+                    );
+
+                    index--;
+                    continue;
+                  }
+
                   final pos = _splitWord(word, font, style, constraintWidth);
 
                   if (pos < word.length) {
-                    words[index] = word.substring(0, pos);
-                    words.insert(index + 1, word.substring(pos));
+                    chunks[index] = TextChunk(word.substring(0, pos), '');
+                    chunks.insert(
+                      index + 1,
+                      TextChunk(word.substring(pos), chunk.separator),
+                    );
 
                     // Try again
                     index--;
                     continue;
+                  }
+
+                  if (spanCount == 0 && offsetX > 0) {
+                    // The word fits a line of its own and only the leading
+                    // whitespace pushed it over the edge. Drop that
+                    // whitespace rather than splitting a word that fits.
+                    offsetX = 0.0;
                   }
                 }
               }
@@ -1139,8 +1364,19 @@ class RichText extends Widget with SpanningWidget {
               final mb = tightBounds ? metrics.bottom : metrics.ascent;
               top = math.min(top, mt + baseline);
               bottom = math.max(bottom, mb + baseline);
+              lineHeight = math.max(lineHeight, style.height ?? 1.0);
 
-              final wd = _Word(word, style, metrics);
+              // A right-to-left run reads backwards on the page, and every
+              // consumer of the span - the drawn string and its own metrics -
+              // has to agree on that.
+              final visual = _bidi && bidi.isRtlText(word)
+                  ? bidi.reversed(word)
+                  : word;
+              final wd = _Word(
+                visual,
+                style,
+                visual == word ? metrics : _metricsOf(visual, font, style),
+              );
               wd.offset = PdfPoint(offsetX, -offsetY + baseline);
               _spans.add(wd);
               spanCount++;
@@ -1155,22 +1391,26 @@ class RichText extends Widget with SpanningWidget {
                 ),
               );
 
-              offsetX +=
-                  metrics.advanceWidth +
-                  space.advanceWidth * style.wordSpacing! +
-                  style.letterSpacing!;
+              lastGap = gapOf(drawable(chunk.separator));
+              offsetX += metrics.advanceWidth + lastGap + style.letterSpacing!;
             }
 
             if (line < spanLines.length - 1) {
+              if (_bidi) {
+                _reorderVisual(
+                  spanStart,
+                  spanCount,
+                  offsetX,
+                  _textDirection == TextDirection.rtl,
+                );
+              }
               lines.add(
                 _Line(
                   this,
                   spanStart,
                   spanCount,
                   bottom,
-                  offsetX -
-                      space.advanceWidth * style.wordSpacing! -
-                      style.letterSpacing!,
+                  offsetX - lastGap - style.letterSpacing!,
                   _textDirection,
                   false,
                 ),
@@ -1180,13 +1420,17 @@ class RichText extends Widget with SpanningWidget {
 
               offsetX = 0.0;
               if (spanCount > 0) {
-                offsetY += bottom - top;
+                offsetY += (bottom - top) * lineHeight;
               } else {
                 offsetY +=
-                    font.emptyLineHeight * style.fontSize! * textScaleFactor;
+                    font.emptyLineHeight *
+                    style.fontSize! *
+                    textScaleFactor *
+                    (style.height ?? 1.0);
               }
               top = 0;
               bottom = 0;
+              lineHeight = 0.0;
               spanCount = 0;
 
               if (_maxLines != null && lines.length >= _maxLines) {
@@ -1201,8 +1445,14 @@ class RichText extends Widget with SpanningWidget {
             }
           }
 
-          offsetX -=
-              space.advanceWidth * style.wordSpacing! - style.letterSpacing!;
+          // Take back the gap charged after the last run, but not its letter
+          // spacing: PdfFontMetrics.append leaves the trailing one out of the
+          // advance while the emitted Tc still applies it, so the next span
+          // starts where continuous text would put it. This read
+          // `-= lastGap - letterSpacing`, which parses as -(gap) + spacing
+          // rather than -(gap + spacing), so every span boundary gained two
+          // letter spacings of gap.
+          offsetX -= lastGap;
         } else if (span is WidgetSpan) {
           span.child.layout(
             context,
@@ -1215,6 +1465,14 @@ class RichText extends Widget with SpanningWidget {
 
           if (offsetX + ws.width > constraintWidth && spanCount > 0) {
             overflow = true;
+            if (_bidi) {
+              _reorderVisual(
+                spanStart,
+                spanCount,
+                offsetX,
+                _textDirection == TextDirection.rtl,
+              );
+            }
             lines.add(
               _Line(
                 this,
@@ -1230,14 +1488,20 @@ class RichText extends Widget with SpanningWidget {
             spanStart += spanCount;
             spanCount = 0;
 
-            if (_maxLines != null && lines.length > _maxLines) {
-              return;
-            }
-
             offsetX = 0.0;
-            offsetY += bottom - top;
+            offsetY += (bottom - top) * lineHeight;
             top = 0;
             bottom = 0;
+            lineHeight = 0.0;
+
+            // Below the reset and `>=`, like the two text branches. It used to
+            // test `>` above them, so one line too many was built - and on the
+            // way out offsetY had not advanced for it and spanCount was 0, so the
+            // box was a line short of what was painted and the surplus line was
+            // drawn over whatever came next.
+            if (_maxLines != null && lines.length >= _maxLines) {
+              return;
+            }
 
             if (offsetY > constraintHeight) {
               return;
@@ -1249,6 +1513,7 @@ class RichText extends Widget with SpanningWidget {
           final baseline = span.baseline * textScaleFactor;
           top = math.min(top, baseline);
           bottom = math.max(bottom, ws.height + baseline);
+          lineHeight = math.max(lineHeight, style.height ?? 1.0);
 
           ws.offset = PdfPoint(offsetX, -offsetY + baseline);
           _spans.add(ws);
@@ -1272,6 +1537,14 @@ class RichText extends Widget with SpanningWidget {
     _buildLines();
 
     if (spanCount > 0) {
+      if (_bidi) {
+        _reorderVisual(
+          spanStart,
+          spanCount,
+          offsetX,
+          _textDirection == TextDirection.rtl,
+        );
+      }
       lines.add(
         _Line(
           this,
@@ -1283,7 +1556,12 @@ class RichText extends Widget with SpanningWidget {
           false,
         ),
       );
-      offsetY += bottom - top;
+      offsetY += (bottom - top) * lineHeight;
+    } else if (lines.isEmpty && blankHeight > 0) {
+      // Nothing was laid out, but there was a paragraph: it reserves one line,
+      // and whatever whitespace it held has already moved the pen.
+      lines.add(_Line(this, spanStart, 0, 0, offsetX, _textDirection, false));
+      offsetY += blankHeight;
     }
 
     assert(!overflow || constraintWidth.isFinite);
@@ -1407,37 +1685,207 @@ class RichText extends Widget with SpanningWidget {
     }
   }
 
-  int _splitWord(String word, PdfFont font, TextStyle style, double maxWidth) {
-    var low = 0;
-    var high = word.length;
-    var pos = (low + high) ~/ 2;
+  /// The narrowest this paragraph can be without a word being cut in half.
+  ///
+  /// The widest piece of text between two break opportunities, which is what CSS
+  /// calls the min-content width. [tokenize] is the same scanner the line breaker
+  /// uses, so the two cannot disagree about where a break is allowed.
+  double _minContentWidth(Context context) {
+    _preprocessed ??= _preProcessSpans(context);
 
-    while (low + 1 < high) {
-      final metrics =
-          font.stringMetrics(
-            word.substring(0, pos),
-            letterSpacing:
-                style.letterSpacing! / (style.fontSize! * textScaleFactor),
-          ) *
-          (style.fontSize! * textScaleFactor);
+    var widest = 0.0;
 
-      if (metrics.width > maxWidth) {
-        high = pos;
-      } else {
-        low = pos;
+    for (final span in _preprocessed!) {
+      if (span is WidgetSpan) {
+        span.child.layout(context, const BoxConstraints());
+        widest = math.max(widest, span.child.box?.width ?? 0);
+        continue;
+      }
+      if (span is! TextSpan || span.text == null) {
+        continue;
       }
 
-      pos = (low + high) ~/ 2;
+      final style = span.style!;
+      final font = style.font!.getFont(context);
+
+      for (final line in stripDefaultIgnorable(
+        span.text!,
+        keep: breakControls,
+      ).split(RegExp(r'\r\n|\r|\n'))) {
+        for (final chunk in tokenize(line)) {
+          var start = 0;
+          for (var at = 0; at <= chunk.breaks.length; at++) {
+            final end = at < chunk.breaks.length
+                ? chunk.breaks[at].offset
+                : chunk.text.length;
+            // A soft hyphen materialises a hyphen when the break is taken, so
+            // the piece before it is that much wider.
+            final piece =
+                chunk.text.substring(start, end) +
+                (at < chunk.breaks.length && chunk.breaks[at].hyphen
+                    ? '-'
+                    : '');
+            widest = math.max(widest, _textWidth(piece, font, style));
+            start = end;
+          }
+        }
+      }
     }
 
-    return math.max(1, pos);
+    return widest;
+  }
+
+  /// [TextStyle.letterSpacing] in font units, which is what stringMetrics takes.
+  ///
+  /// Zero when the effective size is zero or not finite. The division was
+  /// unguarded, so a font size of 0 - or a textScaleFactor of 0 - made it
+  /// 0.0/0.0 = NaN, PdfFontMetrics.append carried that into the advance and the
+  /// offset, and drawString emitted it as a coordinate: an AssertionError out of
+  /// save() where asserts are on, a bare NaN token where a number belongs in
+  /// release.
+  double _letterSpacingOf(TextStyle style) {
+    final size = style.fontSize! * textScaleFactor;
+    return size == 0 || !size.isFinite ? 0 : style.letterSpacing! / size;
+  }
+
+  /// The metrics [text] lays out to in this style.
+  PdfFontMetrics _metricsOf(String text, PdfFont font, TextStyle style) =>
+      font.stringMetrics(text, letterSpacing: _letterSpacingOf(style)) *
+      (style.fontSize! * textScaleFactor);
+
+  /// The width [text] lays out to in this style.
+  double _textWidth(String text, PdfFont font, TextStyle style) =>
+      _metricsOf(text, font, style).width;
+
+  /// Put one finished line into visual order.
+  ///
+  /// UAX #9 rule L2 applies to a line once its breaks are known, so it cannot be
+  /// done to the paragraph up front: every line would get a slice of a reordered
+  /// paragraph, and reordering a slice is not the same thing. That is why an
+  /// embedded Latin run straddling a wrap point landed on the wrong lines.
+  ///
+  /// The spans keep their logical order in [_spans] - the page-break
+  /// bookkeeping, the decorations and the span ranges all index them that way -
+  /// and only their x offsets move. [lineEnd] is where the pen stopped, so each
+  /// span's slot is the distance to the next one and the slots add up to what
+  /// the line already measured.
+  void _reorderVisual(int first, int count, double lineEnd, bool rtl) {
+    if (count < 2) {
+      return;
+    }
+
+    final spans = _spans.sublist(first, first + count);
+    final order = bidi.reorderLine(<String>[
+      for (final span in spans)
+        // A widget has no text of its own. U+FFFC is what the algorithm expects
+        // in its place: an object that takes the direction around it.
+        if (span is _Word) span.text else '\uFFFC',
+    ], rtl: rtl);
+
+    // What each span advanced the pen by, and the gap that followed it. The
+    // gap belongs between the two words it separates, wherever they end up, so
+    // it cannot travel with one of them.
+    final advance = <double>[
+      for (final span in spans)
+        if (span is _Word)
+          span.metrics.advanceWidth
+        else
+          span.left + span.width,
+    ];
+    final gaps = <double>[
+      for (var i = 0; i < count; i++)
+        ((i + 1 < count ? spans[i + 1].offset.x : lineEnd) -
+                spans[i].offset.x) -
+            advance[i],
+    ];
+
+    var x = spans.first.offset.x;
+    for (var at = 0; at < order.length; at++) {
+      final index = order[at];
+      spans[index].offset = PdfPoint(x, spans[index].offset.y);
+      x += advance[index];
+
+      if (at + 1 < order.length) {
+        // The gap recorded after whichever of the two neighbours comes first
+        // logically, which is the one that separated them.
+        x += gaps[math.min(index, order[at + 1])];
+      }
+    }
+  }
+
+  /// The last break opportunity of [word] whose head still fits [maxWidth], or
+  /// null if not even the first one does.
+  ///
+  /// [breaks] is ascending and each head is a prefix of the next, so the search
+  /// stops at the first one that overflows.
+  TextBreak? _lastBreakThatFits(
+    List<TextBreak> breaks,
+    String word,
+    PdfFont font,
+    TextStyle style,
+    double maxWidth,
+  ) {
+    TextBreak? fits;
+
+    for (final at in breaks) {
+      final head = word.substring(0, at.offset) + (at.hyphen ? '-' : '');
+      if (_textWidth(head, font, style) > maxWidth + 0.00001) {
+        break;
+      }
+      fits = at;
+    }
+
+    return fits;
+  }
+
+  /// Widest prefix of [word] that fits [maxWidth], as a UTF-16 offset
+  ///
+  /// The offset is always on a rune boundary: cutting between a surrogate pair
+  /// leaves an unpaired surrogate in both halves, which no font can map, so
+  /// the document would either draw an arbitrary glyph or fail to save. At
+  /// least one rune is always consumed, so a caller that re-queues the rest
+  /// makes progress.
+  int _splitWord(String word, PdfFont font, TextStyle style, double maxWidth) {
+    double widthOf(int end) => _textWidth(word.substring(0, end), font, style);
+
+    // Offsets just past each rune, so bounds.last == word.length.
+    final bounds = <int>[];
+    for (var i = 0; i < word.length;) {
+      final unit = word.codeUnitAt(i);
+      final isHighSurrogate = unit >= 0xd800 && unit <= 0xdbff;
+      i += isHighSurrogate && i + 1 < word.length ? 2 : 1;
+      bounds.add(i);
+    }
+
+    if (bounds.isEmpty) {
+      return word.length;
+    }
+
+    // The whole word was never measured, so a word that fits was still split.
+    if (widthOf(word.length) <= maxWidth) {
+      return word.length;
+    }
+
+    var low = 0;
+    var high = bounds.length;
+
+    while (low + 1 < high) {
+      final mid = (low + high) ~/ 2;
+      if (widthOf(bounds[mid - 1]) > maxWidth) {
+        high = mid;
+      } else {
+        low = mid;
+      }
+    }
+
+    return bounds[math.max(0, low - 1)];
   }
 
   @override
   bool get canSpan => overflow == TextOverflow.span;
 
   @override
-  bool get hasMoreWidgets => canSpan;
+  bool get hasMoreWidgets => canSpan && _context.spanEnd < _spans.length;
 
   @override
   void restoreContext(RichTextContext context) {

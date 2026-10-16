@@ -23,6 +23,7 @@ export 'package:pdf_widget_wrapper/pdf_widget_wrapper.dart';
 export 'src/asset_utils.dart';
 export 'src/cache.dart';
 export 'src/callback.dart';
+export 'src/fonts/font.dart';
 export 'src/fonts/gfonts.dart';
 export 'src/output_type.dart';
 export 'src/preview/action_bar_theme.dart';

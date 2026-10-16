@@ -97,7 +97,11 @@ class PdfString extends PdfDataType {
       encoding.add(unit & unicodeByteZeroMask);
     }
 
-    for (final unit in str.codeUnits) {
+    // Code points, not UTF-16 code units: the branch conditions below are
+    // written for code points, so iterating code units sent every surrogate to
+    // the else and wrote U+FFFD. An emoji in a title, a bookmark, a named
+    // destination or a field value became two replacement characters.
+    for (final unit in str.runes) {
       if ((unit >= 0 && unit < unicodeUtf16ReservedLo) ||
           (unit > unicodeUtf16ReservedHi && unit <= unicodePlaneOneMax)) {
         add(unit);

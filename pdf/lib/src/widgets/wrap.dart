@@ -58,6 +58,10 @@ class WrapContext extends WidgetContext {
   }
 
   @override
+  bool isSameAs(WrapContext other) =>
+      firstChild == other.firstChild && lastChild == other.lastChild;
+
+  @override
   String toString() => '$runtimeType first:$firstChild last:$lastChild';
 }
 
@@ -192,7 +196,6 @@ class Wrap extends MultiChildWidget with SpanningWidget {
     }
 
     final runMetrics = <_RunMetrics>[];
-    final childRunMetrics = <Widget, int>{};
     var mainAxisExtent = 0.0;
     var crossAxisExtent = 0.0;
     var runMainAxisExtent = 0.0;
@@ -228,8 +231,6 @@ class Wrap extends MultiChildWidget with SpanningWidget {
 
       runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       childCount += 1;
-
-      childRunMetrics[child] = runMetrics.length;
     }
 
     if (childCount > 0) {
@@ -358,12 +359,12 @@ class Wrap extends MultiChildWidget with SpanningWidget {
       }
 
       var currentWidget = _context.lastChild;
-      for (final child in children.sublist(currentWidget)) {
-        final runIndex = childRunMetrics[child];
-        if (runIndex != i) {
-          break;
-        }
-
+      // Runs are contiguous in child order, so the run holds exactly
+      // `childCount` children starting here. Looking the run up per child
+      // used object identity, which kept only the last occurrence of a
+      // reused widget instance and dropped every child after it.
+      for (var n = 0; n < childCount && currentWidget < children.length; n++) {
+        final child = children[currentWidget];
         currentWidget++;
         final childMainAxisExtent = _getMainAxisExtent(child);
         final childCrossAxisExtent = _getCrossAxisExtent(child)!;

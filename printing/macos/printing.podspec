@@ -13,5 +13,5 @@ Pod::Spec.new do |s|
   s.source_files = 'printing/Sources/printing/**/*'
   s.dependency 'FlutterMacOS'
   s.platform = :osx
-  s.osx.deployment_target = '10.11'
+  s.osx.deployment_target = '10.15'
 end

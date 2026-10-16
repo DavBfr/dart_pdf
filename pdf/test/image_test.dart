@@ -20,6 +20,19 @@ import 'package:image/image.dart' as im;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/src/priv.dart';
 import 'package:pdf/widgets.dart'
+    as pw
+    show
+        BoxConstraints,
+        BoxFit,
+        ConstrainedBox,
+        Container,
+        Document,
+        Image,
+        Page,
+        RawImage,
+        SizedBox,
+        Widget;
+import 'package:pdf/widgets.dart'
     show Context, ImageImage, ImageProvider, MemoryImage;
 import 'package:test/test.dart';
 
@@ -234,6 +247,342 @@ void main() {
 
     expect(provider.lastRequestedWidth, isNull);
   });
+
+  group('an Image widget', () {
+    /// A solid [width] x [height] bitmap.
+    ImageProvider bitmap(int width, int height) => pw.RawImage(
+      bytes: Uint32List(width * height).buffer.asUint8List(),
+      width: width,
+      height: height,
+    );
+
+    /// Lay [child] out on a page and hand back the widget.
+    Future<T> layOut<T extends pw.Widget>(T Function() child) async {
+      late T widget;
+      final document = pw.Document();
+      document.addPage(
+        pw.Page(
+          pageFormat: const PdfPageFormat(400, 300, marginAll: 0),
+          build: (Context context) => widget = child(),
+        ),
+      );
+      await document.save();
+      return widget;
+    }
+
+    test('an explicit width is clamped by a tight parent', () async {
+      // An explicit size was used verbatim, so the box could come out bigger than
+      // the slot: inside a 100x100 container this measured 200x100.
+      final image = await layOut(() => pw.Image(bitmap(100, 50), width: 400));
+      expect(image.box!.width, 400, reason: 'unconstrained, it is 400 wide');
+
+      late pw.Image inside;
+      await layOut(
+        () => pw.Container(
+          width: 100,
+          height: 100,
+          child: inside = pw.Image(bitmap(100, 50), width: 400),
+        ),
+      );
+
+      expect(inside.box!.width, 100);
+      expect(inside.box!.height, 50, reason: 'the aspect ratio is kept');
+    });
+
+    test('never exceeds its constraints, for any fit', () async {
+      for (final fit in pw.BoxFit.values) {
+        for (final entry in <String, pw.BoxConstraints>{
+          'tight': const pw.BoxConstraints.tightFor(width: 80, height: 40),
+          'loose': const pw.BoxConstraints(maxWidth: 80, maxHeight: 40),
+          'unbounded': const pw.BoxConstraints(),
+        }.entries) {
+          late pw.Image image;
+          await layOut(
+            () => pw.ConstrainedBox(
+              constraints: entry.value,
+              child: image = pw.Image(
+                bitmap(100, 50),
+                fit: fit,
+                width: 400,
+                height: 400,
+              ),
+            ),
+          );
+
+          final label = '$fit under ${entry.key} constraints';
+          expect(
+            image.box!.width,
+            lessThanOrEqualTo(entry.value.maxWidth),
+            reason: label,
+          );
+          expect(
+            image.box!.height,
+            lessThanOrEqualTo(entry.value.maxHeight),
+            reason: label,
+          );
+        }
+      }
+    });
+
+    test('a zero-sized slot draws nothing rather than NaN', () async {
+      // applyBoxFit returns a zero-sized source for a degenerate destination and
+      // the scale divided by it: save() threw '!value.isNaN' out of PdfNum with
+      // asserts on and wrote the token in release.
+      final document = pw.Document(compress: false);
+      document.addPage(
+        pw.Page(
+          pageFormat: const PdfPageFormat(400, 300, marginAll: 0),
+          build: (Context context) => pw.Container(
+            width: 0,
+            height: 100,
+            child: pw.Image(bitmap(10, 10)),
+          ),
+        ),
+      );
+
+      final pdf = String.fromCharCodes(await document.save());
+      expect(pdf, isNot(contains('NaN')));
+      expect(pdf, isNot(contains('Infinity')));
+    });
+  });
+  group('a raw pixel buffer', () {
+    test('is read as straight alpha, not premultiplied', () {
+      // The colour bytes go to a /DeviceRGB stream and the alpha byte to a
+      // /DeviceGray /SMask, which ISO 32000-1 11.6.5.2 defines as straight
+      // alpha. The three capture paths in printing and pdf_widget_wrapper used
+      // to hand over dart:ui's premultiplied default, so a viewer composited
+      // Cs*a^2 + Cb*(1-a) and 50% red came out (191,127,127) over white.
+      final document = PdfDocument();
+      final image = PdfImage(
+        document,
+        image: Uint8List.fromList(<int>[255, 0, 0, 128]),
+        width: 1,
+        height: 1,
+      );
+
+      expect(image.buf.output(), <int>[255, 0, 0]);
+
+      // The soft mask is the object the image points at.
+      final mask = RegExp(
+        r'(\d+) 0 R',
+      ).firstMatch(image.params['/SMask'].toString())!.group(1);
+      final smask = document.objects.firstWhere(
+        (PdfObject<PdfDataType> o) => o.objser.toString() == mask,
+      );
+
+      expect((smask as PdfObjectStream).buf.output(), <int>[128]);
+    });
+
+    test('is described by its own dimensions, not its display ones', () {
+      // ImageProvider's width and height swap the two axes for a rotated
+      // orientation; PdfImage's arguments are the buffer's own and drive its
+      // pixel loops. pdf_widget_wrapper used to pass the former as the latter.
+      final image = PdfImage(
+        PdfDocument(),
+        image: Uint8List(8 * 4 * 4),
+        width: 8,
+        height: 4,
+        orientation: PdfImageOrientation.rightTop,
+      );
+
+      expect(image.params['/Width'].toString(), '8');
+      expect(image.params['/Height'].toString(), '4');
+      expect(image.buf.output(), hasLength(8 * 4 * 3));
+
+      // The display values are the swapped ones.
+      expect(image.width, 4);
+      expect(image.height, 8);
+    });
+  });
+
+  group('an orientation asked of a provider', () {
+    /// A 50x200 PNG, so a rotated orientation is visible in the dimensions.
+    final png = Uint8List.fromList(
+      im.encodePng(im.Image(width: 50, height: 200)),
+    );
+
+    /// The same shape as a JPEG, with no EXIF orientation of its own.
+    final jpg = Uint8List.fromList(
+      im.encodeJpg(im.Image(width: 50, height: 200), quality: 40),
+    );
+
+    /// Resolve [provider] in a one-page document and hand back the PdfImage.
+    Future<PdfImage> resolve(
+      ImageProvider provider, {
+      double? dpi,
+      double size = 400,
+    }) async {
+      late PdfImage image;
+      final document = pw.Document();
+      document.addPage(
+        pw.Page(
+          pageFormat: const PdfPageFormat(400, 400, marginAll: 0),
+          build: (Context context) {
+            image = provider.resolve(context, PdfPoint(size, size), dpi: dpi);
+            return pw.SizedBox();
+          },
+        ),
+      );
+      await document.save();
+      return image;
+    }
+
+    test('reaches the PdfImage, for every provider and orientation', () async {
+      // ImageProvider stores the orientation and swaps the dimensions it
+      // reports, but no buildImage forwarded it: six call sites built a PdfImage
+      // without it. The image drew unrotated and, because the box had been sized
+      // for the rotated one, shrunk inside it.
+      for (final orientation in PdfImageOrientation.values) {
+        final providers = <String, ImageProvider>{
+          'MemoryImage(png)': MemoryImage(png, orientation: orientation),
+          'MemoryImage(jpg)': MemoryImage(jpg, orientation: orientation),
+          'ImageImage': ImageImage(
+            im.Image(width: 50, height: 200),
+            orientation: orientation,
+          ),
+          'RawImage': pw.RawImage(
+            bytes: createTestImage(50, 200),
+            width: 50,
+            height: 200,
+            orientation: orientation,
+          ),
+        };
+
+        for (final entry in providers.entries) {
+          final image = await resolve(entry.value);
+          final what = '${entry.key}, $orientation';
+
+          expect(image.orientation, orientation, reason: what);
+          expect(image.width, entry.value.width, reason: what);
+          expect(image.height, entry.value.height, reason: what);
+        }
+      }
+    });
+
+    test('survives the resample path', () async {
+      // Forcing a dpi low enough to downsample takes buildImage's other branch.
+      for (final orientation in PdfImageOrientation.values) {
+        final providers = <String, ImageProvider>{
+          'MemoryImage(png)': MemoryImage(png, orientation: orientation),
+          'MemoryImage(jpg)': MemoryImage(jpg, orientation: orientation),
+          'ImageImage': ImageImage(
+            im.Image(width: 50, height: 200),
+            orientation: orientation,
+          ),
+        };
+
+        for (final entry in providers.entries) {
+          final image = await resolve(entry.value, dpi: 4);
+          final what = '${entry.key}, $orientation, resampled';
+
+          expect(image.orientation, orientation, reason: what);
+        }
+      }
+    });
+
+    test('is the file\'s own when none is given', () async {
+      // A null orientation means the file decides, which is how an EXIF
+      // orientation has always reached the provider - it just never reached the
+      // image.
+      final oriented = _jpegWithOrientation(6);
+
+      expect(MemoryImage(oriented).orientation, PdfImageOrientation.rightTop);
+      expect(
+        (await resolve(MemoryImage(oriented))).orientation,
+        PdfImageOrientation.rightTop,
+      );
+    });
+
+    test('is not applied twice when the pixels already carry it', () async {
+      // im.decodeImage bakes a source EXIF orientation into the pixels it
+      // returns, so the resampled image must not be rotated again.
+      final oriented = _jpegWithOrientation(6);
+      final image = await resolve(MemoryImage(oriented), dpi: 4);
+
+      expect(image.orientation, PdfImageOrientation.topLeft);
+    });
+
+    test('reaches PdfImage.file for PNG and for JPEG bytes', () {
+      // PdfImage.file dropped it entirely for JPEG bytes, delegating to
+      // PdfImage.jpeg without the argument.
+      for (final bytes in <Uint8List>[png, jpg]) {
+        final image = PdfImage.file(
+          PdfDocument(),
+          bytes: bytes,
+          orientation: PdfImageOrientation.rightTop,
+        );
+
+        expect(image.orientation, PdfImageOrientation.rightTop);
+      }
+    });
+
+    test('leaves a JPEG\'s EXIF orientation alone when not given', () {
+      final image = PdfImage.file(
+        PdfDocument(),
+        bytes: _jpegWithOrientation(6),
+      );
+
+      expect(image.orientation, PdfImageOrientation.rightTop);
+    });
+
+    test('rotates the image over its whole layout box', () async {
+      // The box is sized for the rotated image, so the matrix has to fill it.
+      final document = pw.Document(compress: false);
+      document.addPage(
+        pw.Page(
+          pageFormat: const PdfPageFormat(400, 400, marginAll: 0),
+          build: (Context context) => pw.Image(
+            MemoryImage(png, orientation: PdfImageOrientation.rightTop),
+          ),
+        ),
+      );
+      final pdf = String.fromCharCodes(await document.save());
+
+      // ignore: avoid_print
+      print(
+        RegExp(
+          r'[-\d.]+ [-\d.]+ [-\d.]+ [-\d.]+ [-\d.]+ [-\d.]+ cm /I\d+ Do',
+        ).allMatches(pdf).map((m) => m.group(0)).toList().toString(),
+      );
+      expect(pdf, contains('0 -100 400 0 0 400 cm'));
+    });
+  });
+}
+
+/// A decodable JPEG carrying [value] as its EXIF Orientation.
+Uint8List _jpegWithOrientation(int value) {
+  final encoded = im.encodeJpg(im.Image(width: 50, height: 200), quality: 40);
+
+  void u16(List<int> to, int v) => to.addAll(<int>[(v >> 8) & 0xff, v & 0xff]);
+  void u32(List<int> to, int v) => to.addAll(<int>[
+    (v >> 24) & 0xff,
+    (v >> 16) & 0xff,
+    (v >> 8) & 0xff,
+    v & 0xff,
+  ]);
+
+  final tiff = <int>[0x4d, 0x4d, 0x00, 0x2a];
+  u32(tiff, 8);
+
+  final ifd = <int>[];
+  u16(ifd, 1);
+  u16(ifd, 0x0112); // Orientation
+  u16(ifd, 3); // SHORT
+  u32(ifd, 1);
+  ifd.addAll(<int>[0x00, value, 0, 0]);
+  u32(ifd, 0);
+
+  final payload = <int>[0x45, 0x78, 0x69, 0x66, 0, 0, ...tiff, ...ifd];
+  final segment = <int>[0xff, 0xe1];
+  u16(segment, payload.length + 2);
+
+  return Uint8List.fromList(<int>[
+    encoded[0],
+    encoded[1],
+    ...segment,
+    ...payload,
+    ...encoded.sublist(2),
+  ]);
 }
 
 class _UnknownWidthImage extends ImageProvider {

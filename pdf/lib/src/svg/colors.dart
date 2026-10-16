@@ -42,7 +42,7 @@ const svgColors = <String, PdfColor>{
   'fuchsia': PdfColor.fromInt(0xffff00ff),
   'papayawhip': PdfColor.fromInt(0xffffefd5),
   'blanchedalmond': PdfColor.fromInt(0xffffebcd),
-  'transparent': PdfColor.fromInt(0xffffff),
+  'transparent': PdfColor.fromInt(0x00000000),
   'chartreuse': PdfColor.fromInt(0xff7fff00),
   'dimgray': PdfColor.fromInt(0xff696969),
   'black': PdfColor.fromInt(0xff000000),

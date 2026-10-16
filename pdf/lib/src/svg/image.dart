@@ -15,9 +15,7 @@
  */
 
 import 'dart:convert';
-import 'dart:typed_data';
 
-import 'package:image/image.dart' as im;
 import 'package:vector_math/vector_math_64.dart';
 import 'package:xml/xml.dart';
 
@@ -54,25 +52,25 @@ class SvgImg extends SvgOperation {
       'width',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final height = SvgParser.getNumeric(
       element,
       'height',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
     final x = SvgParser.getNumeric(
       element,
       'x',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.horizontal);
     final y = SvgParser.getNumeric(
       element,
       'y',
       _brush,
       defaultValue: 0,
-    )!.sizeValue;
+    )!.sizeIn(painter.viewport, SvgAxis.vertical);
 
     PdfImage? image;
 
@@ -83,21 +81,45 @@ class SvgImg extends SvgOperation {
           namespaceUri: 'http://www.w3.org/1999/xlink',
         );
 
-    if (hrefAttr != null) {
-      if (hrefAttr.startsWith('data:')) {
-        final px = hrefAttr.substring(hrefAttr.indexOf(';') + 1);
-        if (px.startsWith('base64,')) {
-          final b = px.substring(7).replaceAll(RegExp(r'\s'), '');
-          final bytes = base64.decode(b);
-
-          final img = im.decodeImage(bytes)!;
-          image = PdfImage(
-            painter.document,
-            image: img.data?.buffer.asUint8List() ?? Uint8List(0),
-            width: img.width,
-            height: img.height,
-          );
+    if (hrefAttr != null && hrefAttr.startsWith('data:')) {
+      // An <image> is a sub-resource: whatever is wrong with it costs that one
+      // element, never the document. base64.decode throws on malformed input,
+      // im.decodeImage returns null for a format it does not know - a nested
+      // image/svg+xml payload, say - and throws outright on empty or truncated
+      // data, and none of that was guarded.
+      try {
+        final comma = hrefAttr.indexOf(',');
+        if (comma < 0) {
+          throw const FormatException('A data URI needs a comma');
         }
+
+        // Any header ending in ';base64', so 'data:image/png;charset=utf-8;
+        // base64,...' is read rather than dropped: only the part right after the
+        // first ';' used to be looked at.
+        final header = hrefAttr.substring(5, comma);
+        if (!header.endsWith(';base64')) {
+          throw FormatException('Not a base64 data URI: $header');
+        }
+
+        final bytes = base64.decode(
+          hrefAttr.substring(comma + 1).replaceAll(RegExp(r'\s'), ''),
+        );
+
+        // PdfImage.file sends a JPEG to /DCTDecode and everything else through
+        // PdfRasterBase.fromImage, which converts to the tightly packed uint8
+        // RGBA this used to assume it already had. package:image keeps 1 byte a
+        // pixel for grayscale and palette images, 3 for RGB, and packed bits for
+        // a 1-bit palette, so handing its own storage straight over overran the
+        // alpha loop with a RangeError - or, at equal length, permuted the
+        // colours.
+        image = PdfImage.file(painter.document, bytes: bytes);
+      } catch (e) {
+        assert(() {
+          if (painter.document.settings.verbose) {
+            print('Unable to decode the <image> data URI: $e');
+          }
+          return true;
+        }());
       }
     }
 

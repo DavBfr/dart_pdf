@@ -131,6 +131,18 @@ class Context {
   }
 }
 
+/// Marks a layout pass that is measuring how narrow a subtree can be without its
+/// content overflowing - what CSS calls the min-content width.
+///
+/// A widget that can be narrower than its content lays itself out at its own
+/// minimum instead of at the width it was offered, so the box that comes back is
+/// that minimum. Everything in between still contributes its own padding and
+/// constraints, because this is an ordinary layout pass; a widget that cannot be
+/// narrower than its content needs to do nothing at all.
+class MinContentWidth extends Inherited {
+  const MinContentWidth();
+}
+
 class Inherited {
   const Inherited();
 }

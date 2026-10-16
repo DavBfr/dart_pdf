@@ -16,6 +16,7 @@
 
 package net.nfet.flutter.printing;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -45,8 +46,10 @@ import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.annotation.VisibleForTesting;
 import androidx.core.content.FileProvider;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -56,30 +59,44 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * PrintJob
  */
 @RequiresApi(api = Build.VERSION_CODES.KITKAT)
 public class PrintingJob extends PrintDocumentAdapter {
-    private static PrintManager printManager;
     private final Context context;
     private final PrintingHandler printing;
     private PrintJob printJob;
     private byte[] documentData;
     private String jobName;
-    private LayoutResultCallback callback;
+    // Package-private, so the unit tests can put a job in the state the print
+    // framework would have put it in.
+    @VisibleForTesting LayoutResultCallback callback;
+    // Set from the CancellationSignal listener, so onLayoutCancelled is only
+    // ever used for a cancellation the framework actually asked for.
+    @VisibleForTesting boolean layoutCancelled;
+    // Whether the terminal result has already gone to Dart.
+    private boolean completed;
+    // The html conversion owns these for the length of one convertHtml call.
+    private WebView htmlWebView;
+    private PrintDocumentAdapter htmlAdapter;
+    private boolean htmlDone;
     int index;
 
     PrintingJob(Context context, PrintingHandler printing, int index) {
         this.context = context;
         this.printing = printing;
         this.index = index;
-        printManager = (PrintManager) context.getSystemService(Context.PRINT_SERVICE);
     }
 
-    static HashMap<String, Object> printingInfo() {
-        final boolean canPrint = android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+    static HashMap<String, Object> printingInfo(Context context) {
+        // PrintManager.print refuses anything but an Activity, so an engine
+        // with none attached - a background or cached engine - cannot print.
+        // This used to report canPrint true there and then fail the call.
+        final boolean canPrint = android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
+                && context instanceof Activity;
         final boolean canRaster = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
 
         HashMap<String, Object> result = new HashMap<>();
@@ -94,34 +111,86 @@ public class PrintingJob extends PrintDocumentAdapter {
     @Override
     public void onWrite(PageRange[] pageRanges, ParcelFileDescriptor parcelFileDescriptor,
             CancellationSignal cancellationSignal, WriteResultCallback writeResultCallback) {
-        OutputStream output = null;
+        // android.print requires exactly one of onWriteFinished,
+        // onWriteFailed or onWriteCancelled per onWrite, and has no timeout.
+        // A swallowed IOException left none of them, so the preview span on
+        // 'Preparing preview' and layoutPdf never returned.
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+            writeResultCallback.onWriteCancelled();
+            return;
+        }
+
+        if (documentData == null) {
+            writeResultCallback.onWriteFailed("No document to write");
+            return;
+        }
+
+        // The framework owns the descriptor, so this stream must not be an
+        // AutoCloseOutputStream.
+        final OutputStream output;
         try {
             output = new FileOutputStream(parcelFileDescriptor.getFileDescriptor());
+        } catch (RuntimeException e) {
+            reportWriteFailure(writeResultCallback, e);
+            return;
+        }
+
+        writeDocument(output, writeResultCallback);
+    }
+
+    /**
+     * Copy the document into an already-open stream and report exactly one
+     * result.
+     *
+     * <p>Separate from onWrite so it can be exercised without a
+     * ParcelFileDescriptor.
+     */
+    void writeDocument(OutputStream output, WriteResultCallback writeResultCallback) {
+        try {
             output.write(documentData, 0, documentData.length);
+            output.flush();
+            output.close();
             writeResultCallback.onWriteFinished(new PageRange[] {PageRange.ALL_PAGES});
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
+        } catch (IOException | RuntimeException e) {
+            reportWriteFailure(writeResultCallback, e);
             try {
-                if (output != null) {
-                    output.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                output.close();
+            } catch (IOException | RuntimeException ignored) {
+                // Already failing; the framework still owns the descriptor.
             }
         }
+    }
+
+    private void reportWriteFailure(WriteResultCallback writeResultCallback, Throwable e) {
+        Log.e("PDF", "Unable to write the document to the print spooler", e);
+        final String message = e.getMessage();
+        // onWriteFailed needs a message; null used to be the only outcome here
+        // because nothing was reported at all.
+        writeResultCallback.onWriteFailed(
+                message != null ? message : "Unable to write the document");
     }
 
     @Override
     public void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
             CancellationSignal cancellationSignal, LayoutResultCallback callback, Bundle extras) {
         // Respond to cancellation request
-        if (cancellationSignal.isCanceled()) {
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
             callback.onLayoutCancelled();
             return;
         }
 
         this.callback = callback;
+        layoutCancelled = false;
+
+        // Without this listener nothing ever set the flag, so every failure
+        // was reported as a cancellation.
+        if (cancellationSignal != null) {
+            cancellationSignal.setOnCancelListener(
+                    () -> new Handler(Looper.getMainLooper()).post(() -> {
+                        layoutCancelled = true;
+                        cancelJob(null);
+                    }));
+        }
 
         PrintAttributes.MediaSize size = newAttributes.getMediaSize();
         PrintAttributes.Margins margins = newAttributes.getMinMargins();
@@ -134,25 +203,51 @@ public class PrintingJob extends PrintDocumentAdapter {
                 margins.getBottomMils() * 72.0 / 1000.0);
     }
 
+    /**
+     * Report this job's single terminal result to Dart.
+     *
+     * <p>The onFinish poll below and a layout failure could both report, which
+     * the Dart side had to guard against; there is now one owner.
+     */
+    private void reportCompleted(final boolean success, final String message) {
+        if (completed) {
+            return;
+        }
+        completed = true;
+        printing.onCompleted(PrintingJob.this, success, message);
+    }
+
     @Override
     public void onFinish() {
+        if (completed) {
+            // Already reported - a layout failure, or a cancellation - so
+            // there is nothing left to wait for.
+            printJob = null;
+            return;
+        }
+
         Thread thread = new Thread(() -> {
             try {
                 final boolean[] wait = {true};
                 int count = 5 * 60 * 10; // That's 10 minutes.
                 while (wait[0]) {
                     new Handler(Looper.getMainLooper()).post(() -> {
+                        if (completed) {
+                            wait[0] = false;
+                            return;
+                        }
+
                         int state = printJob == null ? PrintJobInfo.STATE_FAILED
                                                      : printJob.getInfo().getState();
 
                         if (state == PrintJobInfo.STATE_COMPLETED) {
-                            printing.onCompleted(PrintingJob.this, true, null);
+                            reportCompleted(true, null);
                             wait[0] = false;
                         } else if (state == PrintJobInfo.STATE_CANCELED) {
-                            printing.onCompleted(PrintingJob.this, false, null);
+                            reportCompleted(false, null);
                             wait[0] = false;
                         } else if (state == PrintJobInfo.STATE_FAILED) {
-                            printing.onCompleted(PrintingJob.this, false, "Unable to print");
+                            reportCompleted(false, "Unable to print");
                             wait[0] = false;
                         }
                     });
@@ -168,8 +263,8 @@ public class PrintingJob extends PrintDocumentAdapter {
             } catch (final Exception e) {
                 new Handler(Looper.getMainLooper())
                         .post(()
-                                        -> printing.onCompleted(PrintingJob.this,
-                                                printJob != null && printJob.isCompleted(),
+                                        -> reportCompleted(printJob != null
+                                                        && printJob.isCompleted(),
                                                 e.getMessage()));
             }
 
@@ -184,23 +279,39 @@ public class PrintingJob extends PrintDocumentAdapter {
 
         PrintAttributes.Builder attrBuilder = new PrintAttributes.Builder();
 
-        int widthMils = Double.valueOf(width * 1000.0 / 72.0).intValue();
-        int heightMils = Double.valueOf(height * 1000.0 / 72.0).intValue();
+        // A zero axis means 'unspecified' in the channel protocol: a roll
+        // format has no length. Double.intValue() of an out-of-range value is
+        // Integer.MAX_VALUE, which then wrapped the comparisons below to
+        // negative and left the framework's 1x2-mil unknown-size sentinel.
+        final long widthMils = pointsToMils(width);
+        final long heightMils = pointsToMils(height);
 
         PrintAttributes.MediaSize mediaSize = null;
-        boolean isPortrait = heightMils >= widthMils;
+        boolean isPortrait = heightMils == 0 || heightMils >= widthMils;
 
-        // get the media size from predefined media sizes
-        for (PrintAttributes.MediaSize size : getAllPredefinedSizes()) {
-            // https://github.com/DavBfr/dart_pdf/issues/635
-            int err = 20;
-            PrintAttributes.MediaSize m = isPortrait ? size.asPortrait() : size.asLandscape();
-            if ((widthMils + err) >= m.getWidthMils() && (widthMils - err) <= m.getWidthMils()
-                    && (heightMils + err) >= m.getHeightMils()
-                    && (heightMils - err) <= m.getHeightMils()) {
-                mediaSize = m;
-                break;
+        if (widthMils > 0 && heightMils > 0) {
+            // get the media size from predefined media sizes
+            for (PrintAttributes.MediaSize size : getAllPredefinedSizes()) {
+                // https://github.com/DavBfr/dart_pdf/issues/635
+                final long err = 20;
+                PrintAttributes.MediaSize m = isPortrait ? size.asPortrait() : size.asLandscape();
+                // Compared in long so the tolerance cannot overflow.
+                if ((widthMils + err) >= m.getWidthMils() && (widthMils - err) <= m.getWidthMils()
+                        && (heightMils + err) >= m.getHeightMils()
+                        && (heightMils - err) <= m.getHeightMils()) {
+                    mediaSize = m;
+                    break;
+                }
             }
+        }
+
+        if (mediaSize == null && widthMils > 0) {
+            // One axis known: describe a custom sheet rather than falling back
+            // to the unknown-size sentinel, which makes the print UI resolve
+            // the media from the printer and lay the document out for Letter.
+            final long length = heightMils > 0 ? heightMils : widthMils * 2;
+            mediaSize = new PrintAttributes.MediaSize(
+                    "flutter_printing", "Provided size", (int) widthMils, (int) length);
         }
 
         if (mediaSize == null) {
@@ -210,6 +321,17 @@ public class PrintingJob extends PrintDocumentAdapter {
 
         attrBuilder.setMediaSize(mediaSize);
         PrintAttributes attrib = attrBuilder.build();
+
+        // Resolved here, the only place that needs it, and never stored: a
+        // static PrintManager kept its Context - the host Activity, with its
+        // Window and FlutterView - alive for the whole process.
+        final PrintManager printManager =
+                (PrintManager) context.getSystemService(Context.PRINT_SERVICE);
+        if (printManager == null) {
+            cancelJob("The print service is not available on this device");
+            return;
+        }
+
         printJob = printManager.print(name, this, attrib);
     }
 
@@ -308,15 +430,62 @@ public class PrintingJob extends PrintDocumentAdapter {
         return sizes;
     }
 
+    /**
+     * End the job because the print framework cancelled it.
+     *
+     * <p>onLayoutCancelled is reserved for a CancellationSignal cancellation;
+     * using it for a failure left the dialog on 'Preparing preview' with no
+     * message, because the message was dropped and printJob.cancel() cannot
+     * close a job that is still STATE_CREATED.
+     */
     void cancelJob(String message) {
-        if (callback != null) callback.onLayoutCancelled();
+        final LayoutResultCallback pending = callback;
+        callback = null;
+        if (pending != null) {
+            pending.onLayoutCancelled();
+        }
         if (printJob != null) printJob.cancel();
-        printing.onCompleted(PrintingJob.this, false, message);
+        reportCompleted(false, message);
     }
 
-    static void sharePdf(final Context context, final byte[] data, final String name,
+    /** End the job because the document could not be produced. */
+    void failJob(String message) {
+        if (layoutCancelled) {
+            // The framework asked for a cancellation first; that is the
+            // terminal callback it expects.
+            cancelJob(message);
+            return;
+        }
+
+        final String reported = message != null ? message : "Unable to produce the document";
+
+        final LayoutResultCallback pending = callback;
+        callback = null;
+        if (pending != null) {
+            pending.onLayoutFailed(reported);
+        }
+        if (printJob != null) printJob.cancel();
+        reportCompleted(false, message);
+    }
+
+    /**
+     * Write the document to the share cache and offer it to the chooser.
+     *
+     * <p>Returns false instead of reporting success blindly: the caller's
+     * Future used to complete with true even when nothing was presented.
+     */
+    static boolean sharePdf(final Context context, final byte[] data, final String name,
             final String subject, final String body, final ArrayList<String> emails) {
-        assert name != null;
+        if (data == null) {
+            return false;
+        }
+
+        // Defensive basename: the Dart side already does this, but a stale
+        // Dart layer must not be able to write outside the share directory.
+        final String safeName = new File(name != null ? name : "document.pdf").getName();
+        if (safeName.isEmpty()) {
+            return false;
+        }
 
         try {
             final File shareDirectory = new File(context.getCacheDir(), "share");
@@ -324,9 +493,21 @@ public class PrintingJob extends PrintDocumentAdapter {
                 if (!shareDirectory.mkdirs()) {
                     throw new IOException("Unable to create cache directory");
                 }
+            } else {
+                // The URI grant has to outlive this call, so the previous
+                // document can only be removed on the next one. deleteOnExit()
+                // does not help: Android kills the process without running it.
+                final File[] stale = shareDirectory.listFiles();
+                if (stale != null) {
+                    for (final File file : stale) {
+                        if (!file.getName().equals(safeName) && !file.delete()) {
+                            Log.w("PDF", "Unable to delete a stale shared file");
+                        }
+                    }
+                }
             }
 
-            File shareFile = new File(shareDirectory, name);
+            File shareFile = new File(shareDirectory, safeName);
 
             FileOutputStream stream = new FileOutputStream(shareFile);
             stream.write(data);
@@ -346,19 +527,34 @@ public class PrintingJob extends PrintDocumentAdapter {
             shareIntent.putExtra(
                     Intent.EXTRA_EMAIL, emails != null ? emails.toArray(new String[0]) : null);
             Intent chooserIntent = Intent.createChooser(shareIntent, null);
+            if (!(context instanceof Activity)) {
+                // startActivity on a non-Activity context needs its own task,
+                // and threw an AndroidRuntimeException without it, so sharing
+                // from a background or cached engine opened nothing.
+                chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
             List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(
                     chooserIntent, PackageManager.MATCH_DEFAULT_ONLY);
 
             for (ResolveInfo resolveInfo : resInfoList) {
                 String packageName = resolveInfo.activityInfo.packageName;
-                context.grantUriPermission(packageName, apkURI,
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                // Read is all a share needs; write let every matching app
+                // modify the document.
+                context.grantUriPermission(
+                        packageName, apkURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
             context.startActivity(chooserIntent);
             shareFile.deleteOnExit();
+            return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("PDF", "Unable to share the document", e);
+            return false;
+        } catch (RuntimeException e) {
+            // IllegalArgumentException from the FileProvider,
+            // ActivityNotFoundException and AndroidRuntimeException from the
+            // chooser: none of them should cross the channel raw.
+            Log.e("PDF", "Unable to share the document", e);
+            return false;
         }
     }
 
@@ -367,7 +563,12 @@ public class PrintingJob extends PrintDocumentAdapter {
         Configuration configuration = context.getResources().getConfiguration();
         configuration.fontScale = (float) 1;
         Context webContext = context.createConfigurationContext(configuration);
+        // Held in a field rather than a local: nothing else keeps the WebView
+        // or its adapter alive for the length of the conversion, and nothing
+        // used to destroy them afterwards.
+        htmlDone = false;
         final WebView webView = new WebView(webContext);
+        htmlWebView = webView;
 
         webView.loadDataWithBaseURL(baseUrl, data, "text/HTML", "UTF-8", null);
 
@@ -387,6 +588,7 @@ public class PrintingJob extends PrintDocumentAdapter {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         final PrintDocumentAdapter adapter =
                                 webView.createPrintDocumentAdapter("printing");
+                        htmlAdapter = adapter;
 
                         PdfConvert.print(context, adapter, attributes, new PdfConvert.Result() {
                             @Override
@@ -395,13 +597,15 @@ public class PrintingJob extends PrintDocumentAdapter {
                                     byte[] fileContent = PdfConvert.readFile(file);
                                     printing.onHtmlRendered(PrintingJob.this, fileContent);
                                 } catch (IOException e) {
-                                    onError(e.getMessage());
+                                    printing.onHtmlError(PrintingJob.this, e.getMessage());
                                 }
+                                finishHtmlJob();
                             }
 
                             @Override
                             public void onError(String message) {
                                 printing.onHtmlError(PrintingJob.this, message);
+                                finishHtmlJob();
                             }
                         });
                     }
@@ -410,87 +614,214 @@ public class PrintingJob extends PrintDocumentAdapter {
         });
     }
 
+    /// Release the WebView used by convertHtml, exactly once.
+    ///
+    /// Posted to the main looper on purpose: the result callbacks run inside a
+    /// Chromium callback stack, and destroying the WebView re-entrantly from
+    /// there crashes the renderer. WebView also demands the UI thread.
+    private void finishHtmlJob() {
+        if (htmlDone) {
+            return;
+        }
+        htmlDone = true;
+
+        new Handler(Looper.getMainLooper()).post(() -> {
+            // PdfConvert already called onFinish() on the adapter.
+            htmlAdapter = null;
+
+            final WebView webView = htmlWebView;
+            htmlWebView = null;
+            if (webView != null) {
+                webView.stopLoading();
+                webView.setWebViewClient(new WebViewClient());
+                webView.destroy();
+            }
+        });
+    }
+
     void setDocument(byte[] data) {
         documentData = data;
+
+        final LayoutResultCallback pending = callback;
+        if (pending == null) {
+            // The layout already ended - cancelled, or failed - so a second
+            // terminal callback would be a framework violation, and reading
+            // the null callback was a NullPointerException.
+            return;
+        }
+        callback = null;
 
         PrintDocumentInfo info = new PrintDocumentInfo.Builder(jobName)
                                          .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
                                          .build();
 
         // Content layout reflow is complete
-        callback.onLayoutFinished(info, true);
+        pending.onLayoutFinished(info, true);
     }
 
-    void rasterPdf(final byte[] data, final ArrayList<Integer> pages, final Double scale) {
+    void rasterPdf(final byte[] data, final ArrayList<Integer> pages, final Double scale,
+            final int background) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
             printing.onPageRasterEnd(
                     this, "PDF Raster available since Android 5.0 Lollipop (API 21)");
             return;
         }
 
+        // One terminal callback per call, whichever path gets there first: the
+        // uncaught-exception handler below used to be able to report a second
+        // one, and to report a null message, which the Dart side reads as a
+        // clean end of stream.
+        final AtomicBoolean ended = new AtomicBoolean(false);
+
         Thread thread = new Thread(() -> {
             String error = null;
+            File file = null;
+            FileOutputStream oStream = null;
+            FileInputStream iStream = null;
+            ParcelFileDescriptor parcelFD = null;
+            PdfRenderer renderer = null;
+
             try {
-                File tempDir = context.getCacheDir();
-                File file = File.createTempFile("printing", null, tempDir);
-                FileOutputStream oStream = new FileOutputStream(file);
+                file = File.createTempFile("printing", null, context.getCacheDir());
+                oStream = new FileOutputStream(file);
                 oStream.write(data);
                 oStream.close();
+                oStream = null;
 
-                FileInputStream iStream = new FileInputStream(file);
-                ParcelFileDescriptor parcelFD = ParcelFileDescriptor.dup(iStream.getFD());
-                PdfRenderer renderer = new PdfRenderer(parcelFD);
+                iStream = new FileInputStream(file);
+                parcelFD = ParcelFileDescriptor.dup(iStream.getFD());
+                renderer = new PdfRenderer(parcelFD);
+                // PdfRenderer owns the descriptor now, and closes it itself.
+                // Closing it here as well would close the dup twice.
+                parcelFD = null;
 
-                if (!file.delete()) {
-                    Log.e("PDF", "Unable to delete temporary file");
-                }
+                final int documentPages = renderer.getPageCount();
+                final int pageCount = pages != null ? pages.size() : documentPages;
 
-                final int pageCount = pages != null ? pages.size() : renderer.getPageCount();
                 for (int i = 0; i < pageCount; i++) {
-                    PdfRenderer.Page page = renderer.openPage(pages == null ? i : pages.get(i));
+                    final int pageIndex = pages == null ? i : pages.get(i);
+                    if (pageIndex < 0 || pageIndex >= documentPages) {
+                        // Used to reach openPage and throw
+                        // IllegalArgumentException, which nothing caught.
+                        throw new IOException("Page " + (pageIndex + 1)
+                                + " is out of range: the document has " + documentPages
+                                + " page(s)");
+                    }
 
-                    final int width = Double.valueOf(page.getWidth() * scale).intValue();
-                    final int height = Double.valueOf(page.getHeight() * scale).intValue();
-                    int stride = width * 4;
+                    PdfRenderer.Page page = renderer.openPage(pageIndex);
+                    try {
+                        // At least one pixel: Bitmap.createBitmap rejects a
+                        // zero-sized request.
+                        final int width =
+                                Math.max(Double.valueOf(page.getWidth() * scale).intValue(), 1);
+                        final int height =
+                                Math.max(Double.valueOf(page.getHeight() * scale).intValue(), 1);
+                        final int stride = width * 4;
 
-                    Matrix transform = new Matrix();
-                    transform.setScale(scale.floatValue(), scale.floatValue());
+                        Matrix transform = new Matrix();
+                        transform.setScale(scale.floatValue(), scale.floatValue());
 
-                    Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                        // A PDF page has no background of its own, and a fresh
+                        // bitmap is zero-filled, so a rastered page used to come
+                        // back transparent - and saving it as PNG, or re-encoding
+                        // it as JPEG, gave a black page.
+                        bitmap.eraseColor(background);
 
-                    page.render(bitmap, null, transform, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+                        page.render(
+                                bitmap, null, transform, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
 
-                    page.close();
+                        final ByteBuffer buf = ByteBuffer.allocate(stride * height);
+                        bitmap.copyPixelsToBuffer(buf);
+                        bitmap.recycle();
 
-                    final ByteBuffer buf = ByteBuffer.allocate(stride * height);
-                    bitmap.copyPixelsToBuffer(buf);
-                    bitmap.recycle();
-
-                    new Handler(Looper.getMainLooper())
-                            .post(()
-                                            -> printing.onPageRasterized(
-                                                    PrintingJob.this, buf.array(), width, height));
+                        new Handler(Looper.getMainLooper())
+                                .post(()
+                                                -> printing.onPageRasterized(PrintingJob.this,
+                                                        buf.array(), width, height));
+                    } finally {
+                        // In a finally, so renderer.close() below cannot throw
+                        // 'Cannot close a renderer with open pages'.
+                        page.close();
+                    }
                 }
+            } catch (Throwable e) {
+                // Widened from IOException: a password-protected or truncated
+                // document throws SecurityException or IllegalArgumentException
+                // from the PdfRenderer constructor, and neither was caught - so
+                // the temp file, both streams and the dup'ed descriptor all
+                // leaked, and the message that reached Dart was null.
+                Log.e("PDF", "Unable to raster the document", e);
+                error = e.getMessage() != null ? e.getMessage() : e.toString();
+            } finally {
+                closeQuietly(renderer);
+                closeQuietly(parcelFD);
+                closeQuietly(iStream);
+                closeQuietly(oStream);
 
-                renderer.close();
-                iStream.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                error = e.getMessage();
+                // Deleted last, and on every path. It used to be deleted after
+                // the PdfRenderer constructor, so it survived for ever exactly
+                // when that constructor threw.
+                if (file != null && file.exists() && !file.delete()) {
+                    Log.w("PDF", "Unable to delete a temporary file");
+                }
             }
 
-            final String finalError = error;
-            new Handler(Looper.getMainLooper())
-                    .post(() -> printing.onPageRasterEnd(PrintingJob.this, finalError));
+            reportRasterEnd(ended, error);
         });
 
         thread.setUncaughtExceptionHandler((t, e) -> {
-            final String finalError = e.getMessage();
-            new Handler(Looper.getMainLooper())
-                    .post(() -> printing.onPageRasterEnd(PrintingJob.this, finalError));
+            Log.e("PDF", "Unable to raster the document", e);
+            reportRasterEnd(ended, e.getMessage() != null ? e.getMessage() : e.toString());
         });
 
         thread.start();
+    }
+
+    /// Report the single end of a raster, on the main thread.
+    private void reportRasterEnd(final AtomicBoolean ended, final String error) {
+        if (!ended.compareAndSet(false, true)) {
+            return;
+        }
+
+        new Handler(Looper.getMainLooper())
+                .post(() -> printing.onPageRasterEnd(PrintingJob.this, error));
+    }
+
+    /// Close a handle, or do nothing when there is none.
+    ///
+    /// Each close is guarded on its own, so one failure cannot skip the rest.
+    /// Package-private so the unit tests can exercise it.
+    @VisibleForTesting
+    static void closeQuietly(final Object handle) {
+        if (handle == null) {
+            return;
+        }
+
+        try {
+            if (handle instanceof PdfRenderer) {
+                ((PdfRenderer) handle).close();
+            } else if (handle instanceof Closeable) {
+                ((Closeable) handle).close();
+            }
+        } catch (Throwable e) {
+            Log.w("PDF", "Unable to close a raster handle", e);
+        }
+    }
+
+    /// Convert PDF points to mils, clamped to what an int media size can hold.
+    ///
+    /// Returns 0 for a value that is not finite - a roll format carries
+    /// infinity - or that does not fit, so the caller can treat that axis as
+    /// unspecified instead of using a wrapped number.
+    private static long pointsToMils(double points) {
+        if (Double.isNaN(points) || Double.isInfinite(points) || points <= 0) {
+            return 0;
+        }
+        final double mils = points * 1000.0 / 72.0;
+        if (mils < 1 || mils > Integer.MAX_VALUE) {
+            return 0;
+        }
+        return (long) mils;
     }
 }

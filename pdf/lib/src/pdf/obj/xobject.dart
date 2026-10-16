@@ -26,5 +26,13 @@ class PdfXObject extends PdfObjectStream {
     }
   }
 
-  String get name => 'X$objser';
+  /// The key this object is registered under in a /XObject resource dictionary,
+  /// and the operand that names it in a content stream.
+  ///
+  /// Includes the leading solidus, like every other resource name in this
+  /// package. It used to be the only one that did not, so the dictionary key came
+  /// out as a bare 'X4' - which poppler rejects as a non-name key, dropping the
+  /// page - while the two form subclasses overrode it with a slash and the Do
+  /// operand then came out as '//X4'.
+  String get name => '/X$objser';
 }

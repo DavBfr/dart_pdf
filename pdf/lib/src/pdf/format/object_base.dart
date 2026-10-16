@@ -44,6 +44,7 @@ class PdfSettings {
     this.verbose = false,
     this.version = PdfVersion.pdf_1_5,
     this.simpleTrueTypeFonts = false,
+    this.colorAlpha = true,
   });
 
   /// Callback to compress the streams in the pdf file.
@@ -69,6 +70,13 @@ class PdfSettings {
   /// This lives on the settings rather than a static because [PdfDocument.save]
   /// writes the document on a separate isolate, where statics start fresh.
   final bool simpleTrueTypeFonts;
+
+  /// Honour the alpha channel of a [PdfColor] when it fills or strokes.
+  ///
+  /// A fill or stroke colour with an alpha below 1 emits an `/ExtGState` holding
+  /// the constant alpha, which PDF/A-1 forbids - and before this existed, such a
+  /// colour simply painted opaque. Set it false to go back to that.
+  final bool colorAlpha;
 
   /// Compress the document
   bool get compress => deflate != null;

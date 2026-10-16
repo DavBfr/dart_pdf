@@ -16,6 +16,8 @@
 
 import 'dart:io';
 
+import 'package:pdf/pdf.dart';
+import 'package:pdf/src/pdf/font/arabic.dart' as arabic;
 import 'package:pdf/src/pdf/font/bidi_utils.dart' as bidi;
 import 'package:pdf/widgets.dart';
 import 'package:test/test.dart';
@@ -43,6 +45,268 @@ void main() {
 
     arabicFont = loadFont('hacen-tunisia.ttf');
     style = TextStyle(font: arabicFont, fontSize: 30);
+  });
+
+  group('shaping and reordering are separate steps', () {
+    test('shapeLogical shapes without moving anything', () {
+      // The same glyphs logicalToVisual produces, in the order they were
+      // written. Line breaking, metrics and hyphenation all need logical order;
+      // rule L2 belongs to a finished line.
+      expect(
+        bidi.shapeLogical('محمد').codeUnits,
+        bidi.logicalToVisual('محمد').codeUnits.reversed,
+      );
+      expect(bidi.shapeLogical('السلام').codeUnits, <int>[
+        0xFE8D,
+        0xFEDF,
+        0xFEB4,
+        0xFEFC,
+        0xFEE1,
+      ]);
+
+      // Not one character moves in text that has no strong RTL run, where
+      // logicalToVisual reverses the word order outright.
+      expect(bidi.shapeLogical('Hello world foo'), 'Hello world foo');
+      expect(bidi.logicalToVisual('Hello world foo'), 'foo world Hello');
+
+      // An embedded Latin run keeps its place.
+      expect(
+        bidi.shapeLogical('إلى the historical'),
+        endsWith(' the historical'),
+      );
+    });
+
+    test('reorderLine applies L2 against the paragraph, not the line', () {
+      List<String> visual(List<String> runs, {required bool rtl}) =>
+          bidi.reorderLine(runs, rtl: rtl).map((int i) => runs[i]).toList();
+
+      // A Latin run inside an RTL line reads left to right, and the line as a
+      // whole reads right to left.
+      expect(visual(<String>['إلى', 'the', 'historical'], rtl: true), <String>[
+        'the',
+        'historical',
+        'إلى',
+      ]);
+
+      // An all-Latin line is still part of its RTL paragraph: it keeps reading
+      // order, and the alignment puts it on the right.
+      expect(visual(<String>['old', 'town'], rtl: true), <String>[
+        'old',
+        'town',
+      ]);
+
+      // Pure RTL is a straight reversal.
+      expect(visual(<String>['مرحبا', 'بالعالم'], rtl: true), <String>[
+        'بالعالم',
+        'مرحبا',
+      ]);
+
+      // The base direction decides, which is why it has to be the paragraph's.
+      expect(visual(<String>['Total:', 'مرحبا', 'today'], rtl: false), <String>[
+        'Total:',
+        'مرحبا',
+        'today',
+      ]);
+      expect(visual(<String>['Total:', 'مرحبا', 'today'], rtl: true), <String>[
+        'today',
+        'مرحبا',
+        'Total:',
+      ]);
+
+      // A number reads left to right wherever it sits.
+      expect(visual(<String>['مرحبا', '35', 'أهلا'], rtl: true), <String>[
+        'أهلا',
+        '35',
+        'مرحبا',
+      ]);
+
+      expect(bidi.reorderLine(<String>['one'], rtl: true), <int>[0]);
+      expect(bidi.reorderLine(<String>[], rtl: true), isEmpty);
+    });
+
+    test('isRtlText finds strong right-to-left characters only', () {
+      expect(bidi.isRtlText('مرحبا'), isTrue);
+      expect(bidi.isRtlText('\uFE8E'), isTrue, reason: 'a presentation form');
+      expect(bidi.isRtlText('\u05D0'), isTrue, reason: 'Hebrew');
+      expect(bidi.isRtlText('abc'), isFalse);
+      expect(bidi.isRtlText('35'), isFalse);
+      expect(bidi.isRtlText('(5) = 10'), isFalse);
+      expect(
+        bidi.isRtlText('\u0660\u0661'),
+        isFalse,
+        reason: 'Arabic-Indic digits are numbers, not strong RTL',
+      );
+      expect(bidi.isRtlText(''), isFalse);
+    });
+
+    test('hasBidi skips text the algorithm has nothing to do with', () {
+      expect(bidi.hasBidi('Hello world'), isFalse);
+      expect(bidi.hasBidi('35 + 7 = 42'), isFalse);
+      expect(bidi.hasBidi('caf\u00E9 na\u00EFve'), isFalse);
+      expect(bidi.hasBidi(''), isFalse);
+
+      expect(bidi.hasBidi('Total: مرحبا'), isTrue);
+      expect(bidi.hasBidi('\u05D0'), isTrue, reason: 'Hebrew');
+      expect(bidi.hasBidi('\u200F10'), isTrue, reason: 'an explicit RLM');
+      expect(bidi.hasBidi('\u200E10'), isTrue, reason: 'an explicit LRM');
+      expect(bidi.hasBidi('a\u202Bb'), isTrue, reason: 'an embedding');
+      expect(bidi.hasBidi('a\u2067b'), isTrue, reason: 'an isolate');
+    });
+
+    test('shapeLogical never throws', () {
+      // The same package:bidi normalizer bug B-024 guards logicalToVisual
+      // against. Here the text comes back as it went in, so its runs can still
+      // be placed and mirrored, only unjoined.
+      for (var carrier = 0x0622; carrier <= 0x0626; carrier++) {
+        for (final haraka in <int>[0x064C, 0x064E, 0x0650, 0x0670]) {
+          final text = String.fromCharCodes(<int>[carrier, haraka]);
+          expect(() => bidi.shapeLogical(text), returnsNormally);
+          expect(bidi.shapeLogical(text), text);
+        }
+      }
+    });
+
+    test('reversed walks whole code points', () {
+      expect(bidi.reversed('abc'), 'cba');
+      expect(bidi.reversed('a\u{1F600}b'), 'b\u{1F600}a');
+    });
+  });
+
+  group('the legacy arabic.convert path', () {
+    // Only reached in builds with --dart-define=use_arabic=true, or
+    // use_bidi=false, but the function is callable either way.
+    test('preserves line structure', () {
+      // The line separator was appended in the same statement that the
+      // empty-line skip jumped over, so a blank line swallowed its own break and
+      // a paragraph break inside one Text disappeared.
+      expect(arabic.convert('a\n\nb'), 'a\n\nb');
+      expect(arabic.convert('\na'), '\na');
+      expect(arabic.convert('a\n'), 'a\n');
+      expect(arabic.convert('\n\n'), '\n\n');
+
+      for (final text in <String>[
+        'a',
+        'a\nb',
+        'a\n\nb',
+        '\na\n',
+        'مرحبا\n\nأهلا',
+        'Title\n\nمرحبا',
+      ]) {
+        expect(
+          arabic.convert(text).split('\n'),
+          hasLength(text.split('\n').length),
+          reason: 'line count of "${text.replaceAll('\n', r'\n')}"',
+        );
+      }
+    });
+
+    test('does not indent a line that has no Arabic in it', () {
+      // The trailing flush tested a flag that every word set, emitted or held
+      // back, so it emitted a separator before the very first token.
+      expect(arabic.convert('a'), 'a');
+      expect(arabic.convert('Title'), 'Title');
+      expect(arabic.convert('hello world'), 'world hello');
+      expect(arabic.convert('Title\n\nمرحبا'), startsWith('Title'));
+
+      // A separator still goes between two emitted tokens, exactly once.
+      expect(arabic.convert('مرحبا world'), endsWith(' world'));
+      expect(arabic.convert('world مرحبا'), startsWith('world '));
+      expect(
+        arabic.convert('مرحبا أهلا').split(' '),
+        hasLength(2),
+        reason: 'one separator between two Arabic words',
+      );
+    });
+
+    test('keeps an unmapped Arabic-range character in its place', () {
+      // The word is built in reverse, and an Arabic-range character with no
+      // substitution of its own was appended instead of inserted, so it landed
+      // at the wrong end.
+      expect(arabic.convert('مائة١٢').codeUnits.take(2), <int>[0x0662, 0x0661]);
+
+      // The Arabic letters themselves are unchanged.
+      expect(arabic.convert('مائة١٢').codeUnits.skip(2), <int>[
+        0xFE94,
+        0xFE8B,
+        0xFE8E,
+        0xFEE3,
+      ]);
+      expect(arabic.convert('مرحبا').codeUnits, <int>[
+        0xFE8E,
+        0xFE92,
+        0xFEA3,
+        0xFEAE,
+        0xFEE3,
+      ]);
+    });
+  });
+
+  test('logicalToVisual never throws', () {
+    // package:bidi's normalizer indexes its length table out of step with the
+    // decomposition of the hamza carriers, so 40 of these 45 pairs threw
+    // 'RangeError (length): Not in inclusive range 0..1: 2' out of save(), with
+    // no runtime way to turn the call off.
+    var shaped = 0;
+
+    for (var carrier = 0x0622; carrier <= 0x0626; carrier++) {
+      for (final haraka in <int>[
+        0x064B,
+        0x064C,
+        0x064D,
+        0x064E,
+        0x064F,
+        0x0650,
+        0x0651,
+        0x0652,
+        0x0670,
+      ]) {
+        final text = String.fromCharCodes(<int>[carrier, haraka]);
+        final label =
+            'U+${carrier.toRadixString(16)} + U+${haraka.toRadixString(16)}';
+
+        late String visual;
+        expect(
+          () => visual = bidi.logicalToVisual(text),
+          returnsNormally,
+          reason: label,
+        );
+        expect(visual, isNotEmpty, reason: label);
+        if (visual != text) {
+          shaped++;
+        }
+      }
+    }
+
+    expect(shaped, 45, reason: 'every pair comes back shaped, not raw');
+  });
+
+  test('a paragraph of the failing pairs still saves', () async {
+    final document = Document();
+    document.addPage(
+      Page(
+        textDirection: TextDirection.rtl,
+        pageFormat: const PdfPageFormat(200, 100),
+        build: (Context context) => Text('\u0623\u064Fغلق في', style: style),
+      ),
+    );
+
+    expect(await document.save(), isNotEmpty);
+  });
+
+  test('where package:bidi succeeds the output is unchanged', () {
+    expect(bidi.logicalToVisual('محمد').codeUnits, <int>[
+      0xFEAA,
+      0xFEE4,
+      0xFEA4,
+      0xFEE3,
+    ]);
+    expect(bidi.logicalToVisual('السلام').codeUnits, <int>[
+      0xFEE1,
+      0xFEFC,
+      0xFEB4,
+      0xFEDF,
+      0xFE8D,
+    ]);
   });
 
   test('Arabic Diacritics', () {

@@ -14,10 +14,25 @@
  * limitations under the License.
  */
 
+import 'dart:math' as math;
+
 import 'package:xml/xml.dart';
 
 import '../../pdf.dart';
 import 'brush.dart';
+
+/// Which extent of the viewport a percentage length is a fraction of.
+enum SvgAxis {
+  /// The viewport's width: x, width, cx, dx.
+  horizontal,
+
+  /// Its height: y, height, cy, dy.
+  vertical,
+
+  /// sqrt((w^2 + h^2) / 2), for a length that is on neither axis - a radius, a
+  /// stroke width, a dash offset.
+  diagonal,
+}
 
 class SvgParser {
   /// Create an SVG parser
@@ -27,8 +42,19 @@ class SvgParser {
 
     final vbattr = root.getAttribute('viewBox');
 
-    final width = getNumeric(root, 'width', null)?.sizeValue;
-    final height = getNumeric(root, 'height', null)?.sizeValue;
+    // Kept as numerics, so a percentage root size stays a percentage: taking
+    // sizeValue here turned width="100%" into 1.0, which the widget then laid out
+    // as one point, and the fallback viewBox became 1x1 so the content was
+    // clipped away.
+    final rootWidth = getNumeric(root, 'width', null);
+    final rootHeight = getNumeric(root, 'height', null);
+
+    final width = rootWidth?.unit == SvgUnit.percent
+        ? null
+        : rootWidth?.sizeValue;
+    final height = rootHeight?.unit == SvgUnit.percent
+        ? null
+        : rootHeight?.sizeValue;
 
     final vb = vbattr == null
         ? <double>[0, 0, width ?? 1000, height ?? 1000]
@@ -42,12 +68,22 @@ class SvgParser {
 
     final viewBox = PdfRect(fvb[0], fvb[1], fvb[2], fvb[3]);
 
-    return SvgParser._(width, height, viewBox, root, colorFilter);
+    return SvgParser._(
+      width,
+      height,
+      rootWidth,
+      rootHeight,
+      viewBox,
+      root,
+      colorFilter,
+    );
   }
 
   SvgParser._(
     this.width,
     this.height,
+    this.rootWidth,
+    this.rootHeight,
     this.viewBox,
     this.root,
     this.colorFilter,
@@ -55,9 +91,18 @@ class SvgParser {
 
   final PdfRect viewBox;
 
+  /// The root width in points, or null when it is a percentage or absent.
   final double? width;
 
+  /// The root height in points, or null when it is a percentage or absent.
   final double? height;
+
+  /// The root `width` attribute as written, so a percentage can be resolved
+  /// against whatever box the SVG is given.
+  final SvgNumeric? rootWidth;
+
+  /// The root `height` attribute as written.
+  final SvgNumeric? rootHeight;
 
   final XmlElement root;
 
@@ -66,6 +111,21 @@ class SvgParser {
   static final _transformParameterRegExp = RegExp(
     r'[\w.-]+(px|pt|em|cm|mm|in|%|)',
   );
+
+  /// The `viewBox` attribute of [element], or null when it has none.
+  static PdfRect? getViewBox(XmlElement element) {
+    final attribute = element.getAttribute('viewBox');
+    if (attribute == null) {
+      return null;
+    }
+
+    final values = splitDoubles(attribute).toList(growable: false);
+    if (values.length != 4) {
+      return null;
+    }
+
+    return PdfRect(values[0], values[1], values[2], values[3]);
+  }
 
   XmlElement? findById(String id) {
     try {
@@ -127,19 +187,74 @@ class SvgParser {
   }
 
   /// Convert style to attributes
+  static final _declaration = RegExp(r'^\s*([\w-]+)\s*:\s*(.*)$', dotAll: true);
+
+  /// Split a style attribute on the semicolons that separate declarations.
+  ///
+  /// Not the ones inside a quoted string or a function: a legal
+  /// `font-family:'A;B'` or `background:url(data:image/png;base64,AAAA)` used to
+  /// be cut in two, and the halves then had no colon between them.
+  static List<String> _splitDeclarations(String style) {
+    final parts = <String>[];
+    final buffer = StringBuffer();
+    var depth = 0;
+    String? quote;
+
+    for (final rune in style.runes) {
+      final char = String.fromCharCode(rune);
+
+      if (quote != null) {
+        if (char == quote) {
+          quote = null;
+        }
+      } else if (char == '"' || char == "'") {
+        quote = char;
+      } else if (char == '(') {
+        depth++;
+      } else if (char == ')') {
+        depth = depth > 0 ? depth - 1 : 0;
+      } else if (char == ';' && depth == 0) {
+        parts.add(buffer.toString());
+        buffer.clear();
+        continue;
+      }
+
+      buffer.write(char);
+    }
+
+    parts.add(buffer.toString());
+    return parts;
+  }
+
+  /// Copy an element's `style` declarations onto it as attributes.
+  ///
+  /// Idempotent, side-effect-only, and total: it used to call `.first` on the
+  /// matches of a declaration, which throws 'Bad state: No element' out of
+  /// Document.save() for anything without a colon in it - a valueless or
+  /// vendor-prefixed declaration, or the half of a value that a naive split on
+  /// ';' had cut off.
   static void convertStyle(XmlElement element) {
     final style = element.getAttribute('style')?.trim();
-    if (style != null && style.isNotEmpty) {
-      for (final style in style.split(';')) {
-        if (style.trim().isEmpty) {
-          continue;
-        }
-        final kv = RegExp(r'([\w-]+)\s*:\s*(.*)').allMatches(style).first;
-        final key = kv.group(1)!;
-        final value = kv.group(2)!;
+    if (style == null || style.isEmpty) {
+      return;
+    }
 
-        element.setAttribute(key, value);
+    for (final declaration in _splitDeclarations(style)) {
+      if (declaration.trim().isEmpty) {
+        continue;
       }
+
+      final kv = _declaration.firstMatch(declaration);
+      if (kv == null) {
+        continue; // A malformed declaration costs itself, not its neighbours.
+      }
+
+      final key = kv.group(1)!;
+      if (key == 'style') {
+        continue; // Never rewrite the attribute being read.
+      }
+
+      element.setAttribute(key, kv.group(2)!.trim());
     }
   }
 }
@@ -196,6 +311,37 @@ class SvgNumeric {
       default:
         throw PdfException('Invalid color value $value ($unit)');
     }
+  }
+
+  /// This length in points, with a percentage resolved against [viewport].
+  ///
+  /// SVG 1.1 7.10: a percentage is a fraction of the current viewport - of its
+  /// width for a horizontal length, its height for a vertical one, and of
+  /// sqrt((w^2 + h^2) / 2) for anything else, such as a radius or a stroke width.
+  /// [sizeValue] cannot know which, so it treats a percentage as a bare fraction;
+  /// that is right for a gradient coordinate and wrong for geometry, where
+  /// width="100%" came out as 1.0 point.
+  double sizeIn(PdfPoint? viewport, SvgAxis axis) {
+    if (unit != SvgUnit.percent || viewport == null) {
+      return sizeValue;
+    }
+
+    final double basis;
+    switch (axis) {
+      case SvgAxis.horizontal:
+        basis = viewport.x;
+        break;
+      case SvgAxis.vertical:
+        basis = viewport.y;
+        break;
+      case SvgAxis.diagonal:
+        basis = math.sqrt(
+          (viewport.x * viewport.x + viewport.y * viewport.y) / 2.0,
+        );
+        break;
+    }
+
+    return value / 100.0 * basis;
   }
 
   double get sizeValue {

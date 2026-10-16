@@ -18,6 +18,7 @@ import '../../base/exceptions.dart';
 import '../../priv.dart';
 import '../document.dart';
 import '../font/font_metrics.dart';
+import '../font/win_ansi.dart' as win_ansi;
 import '../format/object_base.dart';
 import 'font.dart';
 import 'ttffont.dart';
@@ -108,7 +109,11 @@ class PdfType1Font extends PdfFont {
 
   @override
   PdfFontMetrics glyphMetrics(int charCode) {
-    if (!isRuneSupported(charCode)) {
+    // [widths] is indexed by WinAnsi code, which is what /Widths declares. The
+    // rune was used as the index directly, which is the same number wherever
+    // WinAnsi and Latin-1 agree and wrong over 0x80-0x9F.
+    final code = win_ansi.codeOfRune(charCode);
+    if (code == win_ansi.undefined) {
       throw PdfException(
         'Unable to display U+${charCode.toRadixString(16)} with $fontName',
       );
@@ -117,13 +122,12 @@ class PdfType1Font extends PdfFont {
     return PdfFontMetrics(
       left: 0,
       top: descent,
-      right: charCode < widths.length ? widths[charCode] : missingWidth,
+      right: code < widths.length ? widths[code] : missingWidth,
       bottom: ascent,
     );
   }
 
   @override
-  bool isRuneSupported(int charCode) {
-    return charCode >= 0x00 && charCode <= 0xff;
-  }
+  bool isRuneSupported(int charCode) =>
+      win_ansi.codeOfRune(charCode) != win_ansi.undefined;
 }

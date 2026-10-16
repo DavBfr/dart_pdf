@@ -100,19 +100,35 @@ class OnLayoutResult : public flutter::MethodResult<flutter::EncodableValue> {
 
  protected:
   void SuccessInternal(const flutter::EncodableValue* result) {
-    auto doc = std::get<std::vector<uint8_t>>(*result);
+    // The Dart handler answers null when it does not recognise the job id,
+    // for instance after a hot restart. std::get on the wrong alternative
+    // throws std::bad_variant_access, which aborts the whole process.
+    const auto* doc =
+        result ? std::get_if<std::vector<uint8_t>>(result) : nullptr;
+    if (!doc) {
+      job->cancelJob("The onLayout callback returned no document");
+      delete job;
+      return;
+    }
 
-    job->writeJob(doc);
+    job->writeJob(*doc);
     delete job;
   }
 
   void ErrorInternal(const std::string& error_code,
                      const std::string& error_message,
                      const flutter::EncodableValue* error_details) {
+    // The Dart builder threw. Report it instead of dropping the job, which
+    // left the caller's future pending and leaked the printer handles.
+    job->cancelJob(error_message.empty() ? error_code
+                                         : error_code + ": " + error_message);
     delete job;
   }
 
-  void NotImplementedInternal() { delete job; }
+  void NotImplementedInternal() {
+    job->cancelJob("onLayout is not implemented");
+    delete job;
+  }
 };
 
 void Printing::onLayout(PrintJob* job,

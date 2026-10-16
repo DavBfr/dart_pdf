@@ -16,7 +16,11 @@
 
 #include "print_job.h"
 
+#include "pdfium_raster.h"
+
+#include <errno.h>
 #include <linux/memfd.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
@@ -26,6 +30,7 @@
 #include <mutex>
 #include <string>
 
+#include <fpdf_formfill.h>
 #include <fpdfview.h>
 
 // PDFium is a process-wide library: only the first job initializes it and
@@ -55,7 +60,45 @@ static void release_pdfium() {
 print_job::print_job(FlMethodChannel* channel, int index)
     : channel(channel), index(index) {}
 
-print_job::~print_job() {}
+print_job::~print_job() {
+  release();
+}
+
+void print_job::release() {
+  if (dialog != nullptr) {
+    // Destroyed, not hidden: a hidden dialog stays alive and keeps answering
+    // backend signals.
+    gtk_widget_destroy(GTK_WIDGET(dialog));
+    dialog = nullptr;
+  }
+
+  if (printJob != nullptr) {
+    g_object_unref(printJob);
+    printJob = nullptr;
+  }
+
+  if (spool_fd >= 0) {
+    close(spool_fd);
+    spool_fd = -1;
+  }
+}
+
+void print_job::finish(bool completed, const gchar* error) {
+  if (is_completed) {
+    // A second result - a backend that reports twice, or a failure on a path
+    // that has already reported - must not reach Dart, where it used to raise
+    // 'Bad state: Future already completed'.
+    return;
+  }
+  is_completed = true;
+
+  release();
+  on_completed(this, completed, error);
+
+  if (owns_self) {
+    delete this;
+  }
+}
 
 static gboolean add_printer(GtkPrinter* printer, gpointer data) {
   auto printers = static_cast<FlValue*>(data);
@@ -89,43 +132,58 @@ FlValue* print_job::list_printers() {
   return printers;
 }
 
-static GtkPrinter* _printer;
+struct printer_search {
+  const gchar* name;
+  GtkPrinter* found;
+};
 
 static gboolean search_printer(GtkPrinter* printer, gpointer data) {
-  auto search = static_cast<gchar*>(data);
+  auto search = static_cast<printer_search*>(data);
   auto name = gtk_printer_get_name(printer);
 
-  if (strcmp(name, search) == 0) {
-    _printer = static_cast<GtkPrinter*>(g_object_ref(printer));
+  if (name != nullptr && strcmp(name, search->name) == 0) {
+    search->found = static_cast<GtkPrinter*>(g_object_ref(printer));
     return true;
   }
 
   return false;
 }
 
+/// Look a printer up by name, transfer full, or nullptr when there is none.
+static GtkPrinter* find_printer(const gchar* name) {
+  if (name == nullptr) {
+    return nullptr;
+  }
+
+  printer_search search{name, nullptr};
+  gtk_enumerate_printers(search_printer, &search, nullptr, true);
+  return search.found;
+}
+
 bool print_job::direct_print_pdf(const gchar* name,
                                  const uint8_t data[],
                                  size_t size,
                                  const gchar* printer) {
-  _printer = nullptr;
-  auto pname = strdup(printer);
-  gtk_enumerate_printers(search_printer, pname, nullptr, true);
-  free(pname);
+  auto target = find_printer(printer);
 
-  if (!_printer) {
+  if (target == nullptr) {
+    // This used to return without reporting anything, leaving the Dart future
+    // pending for ever.
+    finish(false, "Printer not found");
     return false;
   }
 
   auto settings = gtk_print_settings_new();
   auto setup = gtk_page_setup_new();
-  printJob = gtk_print_job_new(name, _printer, settings, setup);
-  this->write_job(data, size);
-
-  g_object_unref(_printer);
+  printJob = gtk_print_job_new(name, target, settings, setup);
+  g_object_unref(target);
   g_object_unref(settings);
   g_object_unref(setup);
-  g_object_unref(printJob);
 
+  // From here the job reports its own result, so it owns itself. printJob is
+  // released by finish(); gtk_print_job_send takes its own reference.
+  owns_self = true;
+  write_job(data, size);
   return true;
 }
 
@@ -133,11 +191,7 @@ static void job_completed(GtkPrintJob* gtk_print_job,
                           gpointer user_data,
                           const GError* error) {
   auto job = static_cast<print_job*>(user_data);
-  if (job->dialog) {
-    gtk_widget_destroy(GTK_WIDGET(job->dialog));
-  }
-  on_completed(job, error == nullptr,
-               error != nullptr ? error->message : nullptr);
+  job->finish(error == nullptr, error != nullptr ? error->message : nullptr);
 }
 
 bool print_job::print_pdf(const gchar* name,
@@ -148,17 +202,19 @@ bool print_job::print_pdf(const gchar* name,
                           double marginTop,
                           double marginRight,
                           double marginBottom) {
-  GtkPrintSettings* settings;
-  GtkPageSetup* setup;
+  // Every one of these is transfer full, on both branches, so both exit paths
+  // can unref unconditionally. Two of the three dialog getters below are
+  // transfer none, and unreffing those dropped references this function never
+  // took.
+  GtkPrinter* target = nullptr;
+  GtkPrintSettings* settings = nullptr;
+  GtkPageSetup* setup = nullptr;
 
   if (printer != nullptr) {
-    _printer = nullptr;
-    auto pname = strdup(printer);
-    gtk_enumerate_printers(search_printer, pname, nullptr, true);
-    free(pname);
+    target = find_printer(printer);
 
-    if (!_printer) {
-      on_completed(this, false, "Printer not found");
+    if (target == nullptr) {
+      finish(false, "Printer not found");
       return false;
     }
 
@@ -181,30 +237,42 @@ bool print_job::print_pdf(const gchar* name,
 
       switch (response) {
         case GTK_RESPONSE_OK: {
-          _printer = gtk_print_unix_dialog_get_selected_printer(
+          // transfer none
+          auto selected = gtk_print_unix_dialog_get_selected_printer(
               GTK_PRINT_UNIX_DIALOG(dialog));
+          if (selected == nullptr) {
+            finish(false, "No printer selected");
+            return false;
+          }
+          target = static_cast<GtkPrinter*>(g_object_ref(selected));
+          // transfer full
           settings =
               gtk_print_unix_dialog_get_settings(GTK_PRINT_UNIX_DIALOG(dialog));
-          setup = gtk_print_unix_dialog_get_page_setup(
+          // transfer none
+          auto page_setup = gtk_print_unix_dialog_get_page_setup(
               GTK_PRINT_UNIX_DIALOG(dialog));
+          setup = page_setup != nullptr
+                      ? static_cast<GtkPageSetup*>(g_object_ref(page_setup))
+                      : gtk_page_setup_new();
           gtk_widget_hide(GTK_WIDGET(dialog));
           loop = false;
         } break;
         case GTK_RESPONSE_APPLY:  // Preview
           break;
         default:  // Cancel
-          gtk_widget_destroy(GTK_WIDGET(dialog));
-          on_completed(this, false, nullptr);
-          return true;
+          // false, so the plugin reclaims the job; returning true leaked one
+          // job per cancel.
+          finish(false, nullptr);
+          return false;
       }
     }
   }
 
-  if (!gtk_printer_accepts_pdf(_printer)) {
-    on_completed(this, false, "This printer does not accept PDF jobs");
-    g_object_unref(_printer);
+  if (!gtk_printer_accepts_pdf(target)) {
+    g_object_unref(target);
     g_object_unref(settings);
     g_object_unref(setup);
+    finish(false, "This printer does not accept PDF jobs");
     return false;
   }
 
@@ -215,46 +283,104 @@ bool print_job::print_pdf(const gchar* name,
   auto _marginRight = gtk_page_setup_get_right_margin(setup, GTK_UNIT_POINTS);
   auto _marginBottom = gtk_page_setup_get_bottom_margin(setup, GTK_UNIT_POINTS);
 
-  printJob = gtk_print_job_new(name, _printer, settings, setup);
+  printJob = gtk_print_job_new(name, target, settings, setup);
 
-  on_layout(this, _width, _height, _marginLeft, _marginTop, _marginRight,
-            _marginBottom);
-
-  g_object_unref(_printer);
+  g_object_unref(target);
   g_object_unref(settings);
   g_object_unref(setup);
+
+  // From here the job reports its own result, so it owns itself.
+  owns_self = true;
+  on_layout(this, _width, _height, _marginLeft, _marginTop, _marginRight,
+            _marginBottom);
 
   return true;
 }
 
 void print_job::write_job(const uint8_t data[], size_t size) {
-  auto fd = syscall(SYS_memfd_create, "printing", 0);
+  if (printJob == nullptr) {
+    finish(false, "No print job to write to");
+    return;
+  }
+
+  // Owned by this job from here on, and closed exactly once in release(). The
+  // GIOChannel gtk_print_job_set_source_fd wraps it in has close_on_unref
+  // FALSE, so nothing else ever closed it: every print leaked one fd and one
+  // PDF-sized memfd.
+  spool_fd = static_cast<int>(syscall(SYS_memfd_create, "printing", 0));
+  if (spool_fd < 0) {
+    finish(false, "Unable to create the print spool");
+    return;
+  }
+
   size_t offset = 0;
-  ssize_t n;
-  while ((n = write(fd, data + offset, size - offset)) >= 0 &&
-         size - offset > 0) {
-    offset += n;
-  }
-  if (n < 0) {
-    on_completed(this, false, "Unable to copy the PDF data");
+  while (offset < size) {
+    const auto n = write(spool_fd, data + offset, size - offset);
+    if (n < 0) {
+      if (errno == EINTR) {
+        continue;
+      }
+      // Returning here is what stops a truncated document from being sent to
+      // the printer, and stops a second completion reaching Dart.
+      finish(false, "Unable to copy the PDF data");
+      return;
+    }
+    if (n == 0) {
+      finish(false, "Unable to copy the PDF data");
+      return;
+    }
+    offset += static_cast<size_t>(n);
   }
 
-  lseek(fd, 0, SEEK_SET);
+  if (lseek(spool_fd, 0, SEEK_SET) != 0) {
+    finish(false, "Unable to rewind the print spool");
+    return;
+  }
 
-  gtk_print_job_set_source_fd(printJob, fd, nullptr);
+  g_autoptr(GError) error = nullptr;
+  if (!gtk_print_job_set_source_fd(printJob, spool_fd, &error)) {
+    finish(false,
+           error != nullptr ? error->message : "Unable to spool the document");
+    return;
+  }
+
   gtk_print_job_send(printJob, job_completed, this, nullptr);
 }
 
-void print_job::cancel_job(const gchar* error) {}
+void print_job::cancel_job(const gchar* error) {
+  // A nullptr error means cancelled, which Dart completes as false. This used
+  // to be an empty body, so a failed onLayout left the future pending, the
+  // dialog hidden and everything the job owned alive.
+  finish(false, error);
+}
 
 bool print_job::share_pdf(const uint8_t data[],
                           size_t size,
                           const gchar* name) {
-  auto filename = "/tmp/" + std::string(name);
+  // Defensive basename: a name carrying a separator used to point at a
+  // directory that does not exist, and fopen then returned NULL, which the
+  // unchecked fwrite below turned into a crash of the whole application.
+  std::string base = name == nullptr ? "" : std::string(name);
+  const auto slash = base.find_last_of("/\\");
+  if (slash != std::string::npos) {
+    base = base.substr(slash + 1);
+  }
+  if (base.empty() || base == "." || base == "..") {
+    base = "document.pdf";
+  }
+
+  const auto filename = "/tmp/" + base;
 
   auto fd = fopen(filename.c_str(), "wb");
-  fwrite(data, size, 1, fd);
-  fclose(fd);
+  if (!fd) {
+    return false;
+  }
+  const auto written = size == 0 ? 0 : fwrite(data, size, 1, fd);
+  const auto closed = fclose(fd);
+  if ((size != 0 && written != 1) || closed != 0) {
+    remove(filename.c_str());
+    return false;
+  }
 
   auto pid = fork();
 
@@ -262,29 +388,141 @@ bool print_job::share_pdf(const uint8_t data[],
     return false;
   } else if (pid == 0) {  // child process
     execlp("xdg-open", "xdg-open", filename.c_str(), nullptr);
+    // Only reached when exec failed. Without this the child returns into the
+    // Flutter engine and a second copy of the whole application keeps running.
+    _exit(EXIT_FAILURE);
   }
 
   int status = 0;
   waitpid(pid, &status, 0);
 
-  return status == 0;
+  return WIFEXITED(status) && WEXITSTATUS(status) == 0;
 }
+
+/// Holds the process-wide pdfium reference for a scope.
+class pdfium_scope {
+ public:
+  pdfium_scope() { acquire_pdfium(); }
+  ~pdfium_scope() { release_pdfium(); }
+
+  pdfium_scope(const pdfium_scope&) = delete;
+  pdfium_scope& operator=(const pdfium_scope&) = delete;
+};
+
+/// Closes a pdfium handle however the scope is left.
+///
+/// The raster loop gained exit paths that must not skip FPDF_ClosePage,
+/// FPDFBitmap_Destroy or the library reference.
+template <typename Handle, void (*Close)(Handle)>
+class pdfium_handle {
+ public:
+  explicit pdfium_handle(Handle handle) : handle_(handle) {}
+  ~pdfium_handle() {
+    if (handle_ != nullptr) {
+      Close(handle_);
+    }
+  }
+
+  pdfium_handle(const pdfium_handle&) = delete;
+  pdfium_handle& operator=(const pdfium_handle&) = delete;
+
+  Handle get() const { return handle_; }
+  explicit operator bool() const { return handle_ != nullptr; }
+
+ private:
+  Handle handle_;
+};
+
+using document_handle = pdfium_handle<FPDF_DOCUMENT, &FPDF_CloseDocument>;
+using page_handle = pdfium_handle<FPDF_PAGE, &FPDF_ClosePage>;
+using bitmap_handle = pdfium_handle<FPDF_BITMAP, &FPDFBitmap_Destroy>;
+
+/// The pdfium form-fill environment for one document.
+///
+/// Widget annotations - checkboxes, text fields, buttons, signatures - keep
+/// their appearance in /AP streams and paint nothing into the page content
+/// stream, and FPDF_RenderPageBitmap draws every annotation except widget and
+/// popup ones. pdfium draws them through FPDF_FFLDraw, which needs this
+/// environment; without it those fields were simply missing, with no error.
+class form_environment {
+ public:
+  explicit form_environment(FPDF_DOCUMENT doc) {
+    // Zeroed first: every member other than the version is an optional callback
+    // this does not need. The struct has to outlive the handle, because pdfium
+    // keeps a pointer to it, which is why it is a member and not a local.
+    memset(&info_, 0, sizeof(info_));
+    info_.version = 2;
+
+    handle_ = FPDFDOC_InitFormFillEnvironment(doc, &info_);
+    if (handle_ != nullptr) {
+      // No selection highlight: this is a render, not an editor.
+      FPDF_SetFormFieldHighlightAlpha(handle_, 0);
+    }
+  }
+
+  ~form_environment() {
+    if (handle_ != nullptr) {
+      FPDFDOC_ExitFormFillEnvironment(handle_);
+    }
+  }
+
+  form_environment(const form_environment&) = delete;
+  form_environment& operator=(const form_environment&) = delete;
+
+  /// Null when pdfium refused the environment, in which case every call on it
+  /// is skipped and the render is exactly what it was before.
+  FPDF_FORMHANDLE get() const { return handle_; }
+
+ private:
+  FPDF_FORMFILLINFO info_;
+  FPDF_FORMHANDLE handle_ = nullptr;
+};
+
+/// Tells the form environment about a page for as long as it is open.
+///
+/// Declared after the page handle, so FORM_OnBeforeClosePage runs before
+/// FPDF_ClosePage.
+class form_page {
+ public:
+  form_page(FPDF_PAGE page, FPDF_FORMHANDLE form) : page_(page), form_(form) {
+    if (page_ != nullptr && form_ != nullptr) {
+      FORM_OnAfterLoadPage(page_, form_);
+    }
+  }
+
+  ~form_page() {
+    if (page_ != nullptr && form_ != nullptr) {
+      FORM_OnBeforeClosePage(page_, form_);
+    }
+  }
+
+  form_page(const form_page&) = delete;
+  form_page& operator=(const form_page&) = delete;
+
+ private:
+  FPDF_PAGE page_;
+  FPDF_FORMHANDLE form_;
+};
 
 void print_job::raster_pdf(const uint8_t data[],
                            size_t size,
                            const int32_t pages[],
                            size_t pages_count,
-                           double scale) {
-  acquire_pdfium();
+                           double scale,
+                           uint32_t background) {
+  const pdfium_scope pdfium;
 
-  auto doc = FPDF_LoadMemDocument64(data, size, nullptr);
+  document_handle doc{FPDF_LoadMemDocument64(data, size, nullptr)};
   if (!doc) {
-    release_pdfium();
     on_page_raster_end(this, "Cannot raster a malformed PDF file");
     return;
   }
 
-  auto pageCount = FPDF_GetPageCount(doc);
+  // Null when this document has no AcroForm, or pdfium refused: every call on
+  // it below is then skipped and the render is unchanged.
+  const form_environment form{doc.get()};
+
+  auto pageCount = FPDF_GetPageCount(doc.get());
   auto allPages = false;
 
   if (pages_count == 0) {
@@ -292,53 +530,62 @@ void print_job::raster_pdf(const uint8_t data[],
     pages_count = pageCount;
   }
 
-  for (auto pn = 0; pn < pages_count; pn++) {
-    auto n = allPages ? pn : pages[pn];
+  for (size_t pn = 0; pn < pages_count; pn++) {
+    auto n = allPages ? static_cast<int32_t>(pn) : pages[pn];
     if (n >= pageCount) {
       continue;
     }
 
-    auto page = FPDF_LoadPage(doc, n);
+    page_handle page{FPDF_LoadPage(doc.get(), n)};
     if (!page) {
       continue;
     }
+    const form_page formPage{page.get(), form.get()};
 
-    auto width = FPDF_GetPageWidth(page);
-    auto height = FPDF_GetPageHeight(page);
-
-    auto bWidth = static_cast<int>(width * scale);
-    auto bHeight = static_cast<int>(height * scale);
-
-    auto bitmap = FPDFBitmap_Create(bWidth, bHeight, 1);
-    FPDFBitmap_FillRect(bitmap, 0, 0, bWidth, bHeight, 0x00ffffff);
-
-    FPDF_RenderPageBitmap(bitmap, page, 0, 0, bWidth, bHeight, 0,
-                          FPDF_ANNOT | FPDF_LCD_TEXT | FPDF_NO_NATIVETEXT);
-
-    uint8_t* p = static_cast<uint8_t*>(FPDFBitmap_GetBuffer(bitmap));
-    auto stride = FPDFBitmap_GetStride(bitmap);
-    size_t l = static_cast<size_t>(bHeight * stride);
-
-    // BGRA to RGBA conversion
-    for (auto y = 0; y < bHeight; y++) {
-      auto offset = y * stride;
-      for (auto x = 0; x < bWidth; x++) {
-        auto t = p[offset];
-        p[offset] = p[offset + 2];
-        p[offset + 2] = t;
-        offset += 4;
-      }
+    const auto raster = nfet::rasterSizeFor(
+        FPDF_GetPageWidth(page.get()), FPDF_GetPageHeight(page.get()), scale);
+    if (!raster.valid) {
+      // pdfium answers a null bitmap for this, which the loop below used to
+      // write through.
+      on_page_raster_end(this, "Cannot raster a page this large");
+      return;
     }
 
-    on_page_rasterized(this, p, l, bWidth, bHeight);
+    bitmap_handle bitmap{FPDFBitmap_Create(raster.width, raster.height, 1)};
+    if (!bitmap) {
+      on_page_raster_end(this, "Out of memory rastering a page");
+      return;
+    }
 
-    FPDFBitmap_Destroy(bitmap);
-    FPDF_ClosePage(page);
+    // A PDF page has no background of its own. This used to be hard-coded to
+    // 0x00ffffff, which writes white but leaves alpha at 0, so a rastered page
+    // came back transparent and saving it as PNG gave a black page.
+    FPDFBitmap_FillRect(bitmap.get(), 0, 0, raster.width, raster.height,
+                        static_cast<unsigned long>(background));
+
+    FPDF_RenderPageBitmap(bitmap.get(), page.get(), 0, 0, raster.width,
+                          raster.height, 0,
+                          FPDF_ANNOT | FPDF_LCD_TEXT | FPDF_NO_NATIVETEXT);
+
+    if (form.get() != nullptr) {
+      // A second pass over the same bitmap, for the annotations the content
+      // stream does not carry.
+      FPDF_FFLDraw(form.get(), bitmap.get(), page.get(), 0, 0, raster.width,
+                   raster.height, 0,
+                   FPDF_ANNOT | FPDF_LCD_TEXT | FPDF_NO_NATIVETEXT);
+    }
+
+    uint8_t* p = static_cast<uint8_t*>(FPDFBitmap_GetBuffer(bitmap.get()));
+    if (p == nullptr) {
+      on_page_raster_end(this, "Unable to read the rastered page");
+      return;
+    }
+
+    nfet::bgraToPremultipliedRgba(p, raster.width, raster.height,
+                                  raster.stride);
+
+    on_page_rasterized(this, p, raster.bytes, raster.width, raster.height);
   }
-
-  FPDF_CloseDocument(doc);
-
-  release_pdfium();
 
   on_page_raster_end(this, nullptr);
 }

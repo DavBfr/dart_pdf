@@ -46,7 +46,9 @@ class SvgBrush {
     required this.fontWeight,
     required this.textAnchor,
     required this.blendMode,
+    this.currentColor,
     this.mask,
+    this.preserveSpace,
   });
 
   factory SvgBrush.fromXml(
@@ -58,9 +60,25 @@ class SvgBrush {
 
     final strokeDashArray = element.getAttribute('stroke-dasharray');
     final fillRule = element.getAttribute('fill-rule');
-    final strokeLineCap = element.getAttribute('stroke-linecap');
-    final strokeLineJoin = element.getAttribute('stroke-linejoin');
+    // Trimmed, because a presentation attribute may carry surrounding space.
+    final strokeLineCap = element.getAttribute('stroke-linecap')?.trim();
+    final strokeLineJoin = element.getAttribute('stroke-linejoin')?.trim();
     final blendMode = element.getAttribute('mix-blend-mode');
+
+    // `color` establishes what `currentColor` means for this element and its
+    // descendants, and must be resolved before fill and stroke are parsed.
+    final colorAttribute = element.getAttribute('color');
+    final currentColor =
+        colorAttribute == null ||
+            colorAttribute == 'inherit' ||
+            colorAttribute.toLowerCase() == 'currentcolor'
+        ? parent.currentColor
+        : (SvgColor.fromXml(
+                colorAttribute,
+                painter,
+                currentColor: parent.currentColor,
+              ).color ??
+              parent.currentColor);
 
     final result = parent.merge(
       SvgBrush(
@@ -87,9 +105,17 @@ class SvgBrush {
           'stroke-miterlimit',
           defaultValue: null,
         ),
-        fill: SvgColor.fromXml(element.getAttribute('fill'), painter),
+        fill: SvgColor.fromXml(
+          element.getAttribute('fill'),
+          painter,
+          currentColor: currentColor,
+        ),
         fillEvenOdd: fillRule == null ? null : fillRule == 'evenodd',
-        stroke: SvgColor.fromXml(element.getAttribute('stroke'), painter),
+        stroke: SvgColor.fromXml(
+          element.getAttribute('stroke'),
+          painter,
+          currentColor: currentColor,
+        ),
         strokeWidth: SvgParser.getNumeric(element, 'stroke-width', parent),
         strokeDashArray: strokeDashArray == null
             ? null
@@ -103,12 +129,22 @@ class SvgBrush {
           element,
           'stroke-dashoffset',
           parent,
-        )?.sizeValue,
+        )?.sizeIn(painter.viewport, SvgAxis.diagonal),
         fontSize: SvgParser.getNumeric(element, 'font-size', parent),
         fontFamily: element.getAttribute('font-family'),
         fontStyle: element.getAttribute('font-style'),
         fontWeight: element.getAttribute('font-weight'),
         textAnchor: _textAnchors[element.getAttribute('text-anchor')],
+        preserveSpace: switch (element.getAttribute(
+          'space',
+          namespaceUri: 'http://www.w3.org/XML/1998/namespace',
+        )) {
+          'preserve' => true,
+          'default' => false,
+          _ => null,
+        },
+        // Descendants resolve `currentColor` against this element's value.
+        currentColor: currentColor,
       ),
     );
 
@@ -139,8 +175,15 @@ class SvgBrush {
     fontWeight: 'normal',
     fontStyle: 'normal',
     textAnchor: SvgTextAnchor.start,
+    currentColor: PdfColors.black,
     mask: null,
   );
+
+  /// Whether white space inside `<text>` is kept as written: `xml:space`.
+  ///
+  /// Inherited, like every other property here, which is what the attribute
+  /// means.
+  final bool? preserveSpace;
 
   static const _blendModes = <String, PdfBlendMode>{
     'normal': PdfBlendMode.normal,
@@ -168,9 +211,15 @@ class SvgBrush {
   };
 
   static const _strokeLineJoin = <String, PdfLineJoin>{
-    'miter ': PdfLineJoin.miter,
+    // 'miter ' - with a trailing space - never matched, so a shape restating
+    // the default join under a round or bevel ancestor kept the inherited one:
+    // null from this lookup is indistinguishable from 'not specified'.
+    'miter': PdfLineJoin.miter,
     'bevel': PdfLineJoin.bevel,
     'round': PdfLineJoin.round,
+    // SVG 2 adds two more that fall back to a miter.
+    'miter-clip': PdfLineJoin.miter,
+    'arcs': PdfLineJoin.miter,
   };
 
   static const _textAnchors = <String, SvgTextAnchor>{
@@ -197,6 +246,10 @@ class SvgBrush {
   final String? fontWeight;
   final SvgTextAnchor? textAnchor;
   final PdfBlendMode? blendMode;
+
+  /// Value of the CSS `color` property, which `currentColor` resolves to.
+  final PdfColor? currentColor;
+
   final SvgMaskPath? mask;
 
   SvgBrush merge(SvgBrush? other) {
@@ -206,13 +259,13 @@ class SvgBrush {
 
     var _fill = other.fill ?? fill;
 
-    if (_fill?.inherit ?? false) {
+    if ((_fill?.inherit ?? false) && fill != null && other.fill != null) {
       _fill = fill!.merge(other.fill!);
     }
 
     var _stroke = other.stroke ?? stroke;
 
-    if (_stroke?.inherit ?? false) {
+    if ((_stroke?.inherit ?? false) && stroke != null && other.stroke != null) {
       _stroke = stroke!.merge(other.stroke!);
     }
 
@@ -235,7 +288,9 @@ class SvgBrush {
       strokeLineCap: other.strokeLineCap ?? strokeLineCap,
       strokeLineJoin: other.strokeLineJoin ?? strokeLineJoin,
       strokeMiterLimit: other.strokeMiterLimit ?? strokeMiterLimit,
+      currentColor: other.currentColor ?? currentColor,
       mask: other.mask,
+      preserveSpace: other.preserveSpace ?? preserveSpace,
     );
   }
 
@@ -258,7 +313,9 @@ class SvgBrush {
     String? fontWeight,
     SvgTextAnchor? textAnchor,
     PdfBlendMode? blendMode,
+    PdfColor? currentColor,
     SvgMaskPath? mask,
+    bool? preserveSpace,
   }) {
     return SvgBrush(
       opacity: opacity ?? this.opacity,
@@ -279,9 +336,20 @@ class SvgBrush {
       fontWeight: fontWeight ?? this.fontWeight,
       textAnchor: textAnchor ?? this.textAnchor,
       blendMode: blendMode ?? this.blendMode,
+      currentColor: currentColor ?? this.currentColor,
       mask: mask ?? this.mask,
+      preserveSpace: preserveSpace ?? this.preserveSpace,
     );
   }
+
+  /// Whether there is a stroke to paint at all.
+  ///
+  /// SVG reads stroke-width:0 as 'do not paint the stroke'; PDF reads '0 w' as
+  /// the thinnest line the device can draw. Entering the stroke block on the
+  /// colour alone therefore put a hairline on every shape that switched its
+  /// stroke off this way, which no browser draws.
+  bool get hasStroke =>
+      stroke != null && stroke!.isNotEmpty && (strokeWidth?.sizeValue ?? 0) > 0;
 
   @override
   String toString() =>

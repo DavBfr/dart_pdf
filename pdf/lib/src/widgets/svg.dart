@@ -80,13 +80,38 @@ class SvgImage extends Widget {
     BoxConstraints constraints, {
     bool parentUsesSize = false,
   }) {
-    final w = width != null || _svgParser.width != null
-        ? constraints.constrainWidth(width ?? _svgParser.width!)
+    // A percentage root size is a fraction of the box this SVG is given, and the
+    // viewBox when there is no box to take a fraction of. It used to be divided
+    // by 100 and consumed as points, so width="100%" laid out as a 1pt speck.
+    double? percentOf(SvgNumeric? root, bool bounded, double available) =>
+        root == null || root.unit != SvgUnit.percent
+        ? null
+        : bounded
+        ? available * root.value / 100.0
+        : null;
+
+    final rootW =
+        percentOf(
+          _svgParser.rootWidth,
+          constraints.hasBoundedWidth,
+          constraints.maxWidth,
+        ) ??
+        _svgParser.width;
+    final rootH =
+        percentOf(
+          _svgParser.rootHeight,
+          constraints.hasBoundedHeight,
+          constraints.maxHeight,
+        ) ??
+        _svgParser.height;
+
+    final w = width != null || rootW != null
+        ? constraints.constrainWidth(width ?? rootW!)
         : constraints.hasBoundedWidth
         ? constraints.maxWidth
         : constraints.constrainWidth(_svgParser.viewBox.width);
-    final h = height != null || _svgParser.height != null
-        ? constraints.constrainHeight(height ?? _svgParser.height!)
+    final h = height != null || rootH != null
+        ? constraints.constrainHeight(height ?? rootH!)
         : constraints.hasBoundedHeight
         ? constraints.maxHeight
         : constraints.constrainHeight(_svgParser.viewBox.height);

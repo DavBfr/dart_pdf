@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -48,6 +50,7 @@ class PdfPreview extends StatefulWidget {
     this.onPrinted,
     this.onPrintError,
     this.onShared,
+    this.onShareError,
     this.scrollViewDecoration,
     this.pdfPreviewPageDecoration,
     this.pdfFileName,
@@ -107,6 +110,7 @@ class PdfPreview extends StatefulWidget {
     this.onPrinted,
     this.onPrintError,
     this.onShared,
+    this.onShareError,
     this.scrollViewDecoration,
     this.pdfPreviewPageDecoration,
     this.pdfFileName,
@@ -177,6 +181,9 @@ class PdfPreview extends StatefulWidget {
 
   /// Called if the user shares the pdf document
   final void Function(BuildContext context)? onShared;
+
+  /// Called if an error occurred while sharing the Pdf
+  final void Function(BuildContext context, dynamic error)? onShareError;
 
   /// Decoration of scrollView
   final Decoration? scrollViewDecoration;
@@ -259,12 +266,29 @@ class PdfPreviewState extends State<PdfPreview> {
     final pages = previewWidget.currentState?.pages ?? const [];
     final dpi = previewWidget.currentState?.dpi ?? PdfPageFormat.inch;
 
-    if (!widget.canChangePageFormat && pages.isNotEmpty) {
-      format = PdfPageFormat(
-        pages.first.width * PdfPageFormat.inch / dpi,
-        pages.first.height * PdfPageFormat.inch / dpi,
-        marginAll: 5 * PdfPageFormat.mm,
-      );
+    if (pages.isNotEmpty) {
+      final rasterWidth = pages.first.width * PdfPageFormat.inch / dpi;
+      final rasterHeight = pages.first.height * PdfPageFormat.inch / dpi;
+
+      if (!widget.canChangePageFormat) {
+        format = PdfPageFormat(
+          rasterWidth,
+          rasterHeight,
+          marginAll: 5 * PdfPageFormat.mm,
+        );
+      } else if (!format.width.isFinite || !format.height.isFinite) {
+        // A roll format leaves one axis unspecified, and no platform can
+        // represent that. Keep the axis the user asked for - an 80mm roll
+        // stays 80mm - and take the other from the page just rasterized.
+        format = PdfPageFormat(
+          format.width.isFinite ? format.width : rasterWidth,
+          format.height.isFinite ? format.height : rasterHeight,
+          marginLeft: format.marginLeft.isFinite ? format.marginLeft : 0,
+          marginTop: format.marginTop.isFinite ? format.marginTop : 0,
+          marginRight: format.marginRight.isFinite ? format.marginRight : 0,
+          marginBottom: format.marginBottom.isFinite ? format.marginBottom : 0,
+        );
+      }
     }
 
     return format;
@@ -281,18 +305,30 @@ class PdfPreviewState extends State<PdfPreview> {
       onComputeActualPageFormat: computeActualPageFormat,
     );
 
-    previewData.addListener(() {
-      if (mounted) {
-        setState(() {});
-      }
-      widget.onPageFormatChanged?.call(previewData.pageFormat);
-    });
+    previewData.addListener(_onPreviewDataChanged);
 
     super.initState();
   }
 
+  /// A named method rather than a closure, so didUpdateWidget can move the
+  /// subscription to a replacement.
+  ///
+  /// It used to be an anonymous closure registered once in initState, and
+  /// didUpdateWidget built a fresh PdfPreviewData without re-registering it, so
+  /// onPageFormatChanged stopped firing after the first parent rebuild - a
+  /// persisted paper-size choice silently stopped being saved - while the
+  /// preview kept re-rendering, because PdfPreviewController subscribes to the
+  /// new object itself.
+  void _onPreviewDataChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+    widget.onPageFormatChanged?.call(previewData.pageFormat);
+  }
+
   @override
   void dispose() {
+    previewData.removeListener(_onPreviewDataChanged);
     previewData.dispose();
     super.dispose();
   }
@@ -302,14 +338,23 @@ class PdfPreviewState extends State<PdfPreview> {
     if (oldWidget.build != widget.build ||
         widget.shouldRepaint ||
         widget.pageFormats != oldWidget.pageFormats) {
+      final replaced = previewData;
+
       previewData = PdfPreviewData(
         buildDocument: widget.build,
         pageFormats: widget.pageFormats.isNotEmpty
             ? widget.pageFormats
             : PdfPreview._defaultPageFormats,
-        initialPageFormat: previewData.pageFormat,
+        // The selection survives the swap.
+        initialPageFormat: replaced.pageFormat,
         onComputeActualPageFormat: computeActualPageFormat,
       );
+      previewData.addListener(_onPreviewDataChanged);
+
+      // Exactly one live PdfPreviewData per state: the replaced one used to be
+      // left subscribed to nothing and never disposed.
+      replaced.removeListener(_onPreviewDataChanged);
+      replaced.dispose();
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -318,17 +363,35 @@ class PdfPreviewState extends State<PdfPreview> {
   void didChangeDependencies() {
     if (!infoLoaded) {
       infoLoaded = true;
-      Printing.info().then((PrintingInfo printingInfo) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          info = printingInfo;
-        });
-      });
+      unawaited(_loadPrintingInfo());
     }
 
     super.didChangeDependencies();
+  }
+
+  /// Read the platform capabilities used to decide which actions to offer.
+  ///
+  /// A failure leaves the actions as they are; the inner [PdfPreviewCustom]
+  /// reports it, so this only keeps it from becoming an unhandled error.
+  Future<void> _loadPrintingInfo() async {
+    try {
+      final printingInfo = await Printing.info();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        info = printingInfo;
+      });
+    } catch (exception, stack) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'printing',
+          context: ErrorDescription('while reading the printing capabilities'),
+        ),
+      );
+    }
   }
 
   @override
@@ -357,9 +420,13 @@ class PdfPreviewState extends State<PdfPreview> {
       actions.add(
         PdfShareAction(
           filename: widget.pdfFileName,
-          onShared: widget.onPrinted == null
+          // onShared, not onPrinted: sharing used to report itself as a print.
+          onShared: widget.onShared == null
               ? null
-              : () => widget.onPrinted!(context),
+              : () => widget.onShared!(context),
+          onShareError: widget.onShareError == null
+              ? null
+              : (dynamic error) => widget.onShareError!(context, error),
           subject: widget.shareActionExtraSubject,
           emails: widget.shareActionExtraEmails,
           body: widget.shareActionExtraBody,

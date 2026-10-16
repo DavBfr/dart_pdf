@@ -24,7 +24,11 @@ import 'parser.dart';
 class SvgColor {
   const SvgColor({this.color, this.opacity, this.inherit = false});
 
-  factory SvgColor.fromXml(String? color, SvgPainter painter) {
+  factory SvgColor.fromXml(
+    String? color,
+    SvgPainter painter, {
+    PdfColor? currentColor,
+  }) {
     if (color == null) {
       return inherited;
     }
@@ -37,8 +41,13 @@ class SvgColor {
       return SvgColor(color: painter.parser.colorFilter);
     }
 
+    if (color.toLowerCase() == 'currentcolor') {
+      return SvgColor(color: currentColor ?? PdfColors.black);
+    }
+
     if (svgColors.containsKey(color)) {
-      return SvgColor(color: svgColors[color]);
+      final named = svgColors[color]!;
+      return SvgColor(color: named, opacity: named.alpha);
     }
 
     // handle rgba() colors e.g. rgba(255, 255, 255, 1.0)
@@ -55,22 +64,26 @@ class SvgColor {
           rgba[2].colorValue,
           rgba[3].value,
         ),
+        opacity: rgba[3].value,
       );
     }
 
-    // handle hsl() colors e.g. hsl(255, 255, 255)
+    // handle hsl() and hsla() colors e.g. hsl(255, 255, 255)
     if (color.toLowerCase().startsWith('hsl')) {
       final hsl = SvgParser.splitNumeric(
         color.substring(color.indexOf('(') + 1, color.indexOf(')')),
         null,
       ).toList();
 
+      final alpha = hsl.length > 3 ? hsl[3].value : 1.0;
       return SvgColor(
         color: PdfColorHsl(
           hsl[0].colorValue,
           hsl[1].colorValue,
           hsl[2].colorValue,
+          alpha,
         ),
+        opacity: alpha,
       );
     }
 
@@ -90,23 +103,52 @@ class SvgColor {
       );
     }
 
-    if (color.toLowerCase().startsWith('url(#')) {
-      final gradient = painter.parser.findById(
-        color.substring(5, color.indexOf(')')),
-      )!;
-      if (gradient.name.local == 'linearGradient') {
-        return SvgLinearGradient.fromXml(gradient, painter);
+    if (color.toLowerCase().startsWith('url(')) {
+      final close = color.indexOf(')');
+      if (close > 0) {
+        var reference = color.substring(4, close).trim();
+        if ((reference.startsWith("'") && reference.endsWith("'")) ||
+            (reference.startsWith('"') && reference.endsWith('"'))) {
+          reference = reference.substring(1, reference.length - 1).trim();
+        }
+        // A paint server reference may be followed by a fallback colour,
+        // which is what to use when the reference cannot be resolved.
+        final fallback = color.substring(close + 1).trim();
+
+        if (reference.startsWith('#')) {
+          final gradient = painter.parser.findById(reference.substring(1));
+          if (gradient != null) {
+            if (gradient.name.local == 'linearGradient') {
+              return SvgLinearGradient.fromXml(gradient, painter);
+            }
+            if (gradient.name.local == 'radialGradient') {
+              return SvgRadialGradient.fromXml(gradient, painter);
+            }
+          }
+        }
+
+        // Unresolvable: the fallback if there is one, otherwise no paint.
+        // This used to force-unwrap the lookup and crash the whole document.
+        if (fallback.isNotEmpty) {
+          return SvgColor.fromXml(
+            fallback,
+            painter,
+            currentColor: currentColor,
+          );
+        }
       }
-      if (gradient.name.local == 'radialGradient') {
-        return SvgRadialGradient.fromXml(gradient, painter);
-      }
-      return SvgColor.unknown;
+      return SvgColor.none;
     }
 
     try {
-      return SvgColor(color: PdfColor.fromHex(color));
+      final parsed = PdfColor.fromHex(color);
+      return SvgColor(color: parsed, opacity: parsed.alpha);
     } catch (e) {
-      print('Unknown color: $color');
+      assert(() {
+        // ignore: avoid_print
+        print('Unknown color: $color');
+        return true;
+      }());
       return SvgColor.unknown;
     }
   }
@@ -127,7 +169,13 @@ class SvgColor {
   bool get isNotEmpty => !isEmpty;
 
   SvgColor merge(SvgColor other) {
-    return SvgColor(color: other.color ?? color);
+    if (other.color == null) {
+      // `other` only inherits, so keep this instance: returning a plain
+      // SvgColor here erased paint-server subclasses, which is why a gradient
+      // declared on an ancestor was lost by its children.
+      return this;
+    }
+    return SvgColor(color: other.color, opacity: other.opacity ?? opacity);
   }
 
   void setFillColor(SvgOperation op, PdfGraphics canvas) {

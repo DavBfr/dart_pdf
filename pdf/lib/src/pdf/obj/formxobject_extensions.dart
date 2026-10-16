@@ -29,13 +29,17 @@ class SvgPdfFormXObject extends PdfFormXObject {
     params['/BBox'] = PdfArray.fromNum([0, 0, width, height]);
 
     final rect = PdfRect(0, 0, width, height);
-    final td = pw.Document().document;
-    final tp = PdfPage(td, pageFormat: PdfPageFormat.a4);
-    final g = PdfGraphics(tp, buf);
+
+    // Painted into this form, against the document that owns it: everything
+    // PdfGraphics and SvgPainter register - fonts, shaders, patterns - then
+    // belongs to this form's /Resources and is serialised with the file. It used
+    // to be a page of a second, discarded document, so the form's stream named
+    // objects nobody ever wrote.
+    final g = PdfGraphics(this, buf);
 
     final document = XmlDocument.parse(utf8.decode(svgBytes));
     final svgp = SvgParser(xml: document);
-    final p = SvgPainter(svgp, g, td, rect);
+    final p = SvgPainter(svgp, g, pdfDocument, rect);
 
     g.saveContext();
     // Create the transform: scale y by -1 (flip), then translate to compensate.
@@ -47,9 +51,6 @@ class SvgPdfFormXObject extends PdfFormXObject {
     g.restoreContext();
     //_printContent(buf);
   }
-
-  @override
-  String get name => '/X$objser';
 }
 
 /// A [PdfFormXObject] that renders a  PDF widget into the form's content stream.
@@ -66,24 +67,26 @@ class WidgetPdfFormXObject extends PdfFormXObject {
     double width,
     double height, {
     pw.ThemeData? themeData,
+    PdfPage? page,
   }) : super(doc) {
     params['/BBox'] = PdfArray.fromNum([0, 0, width, height]);
-    final td = pw.Document(theme: themeData ?? pw.ThemeData()).document;
-    final tp = PdfPage(td, pageFormat: PdfPageFormat.a4);
-    final g = PdfGraphics(tp, buf);
+
+    // Painted into this form, against the document that owns it, so its
+    // resources are its own and are written with the file.
+    final g = PdfGraphics(this, buf);
     final themedWidget = pw.Theme(
       data: themeData ?? pw.ThemeData(),
       child: widget,
     );
-    final context = pw.Context(document: doc, page: tp, canvas: g);
+
+    // A widget that reads Context.page - a page number, a page label - needs a
+    // real one; there is no page of our own to offer it.
+    final context = pw.Context(document: doc, page: page, canvas: g);
     // Create layout constraints and box
     themedWidget.layout(
       context,
       pw.BoxConstraints.tightFor(width: width, height: height),
     );
     themedWidget.paint(context);
-    fonts.addAll(tp.fonts);
   }
-  @override
-  String get name => '/X$objser';
 }

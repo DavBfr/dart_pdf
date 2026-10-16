@@ -19,6 +19,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import '../../pdf.dart' show PdfException;
 import 'obj/image.dart';
 
 /// Jpeg metadata extraction
@@ -29,15 +30,24 @@ class PdfJpegInfo {
       image.offsetInBytes,
       image.lengthInBytes,
     );
+    final length = buffer.lengthInBytes;
 
     int? width;
     int? height;
     int? color;
     int? adobeColorTransform;
+    var hasAdobeMarker = false;
     var offset = 0;
-    while (offset < buffer.lengthInBytes) {
-      while (buffer.getUint8(offset) == 0xff) {
+
+    // Every read below is on bytes someone else wrote, so the walk stops at the
+    // end of the buffer rather than reading past it: a truncated upload used to
+    // throw a bare RangeError out of PdfImage.jpeg and abort the document.
+    while (offset < length) {
+      while (offset < length && buffer.getUint8(offset) == 0xff) {
         offset++;
+      }
+      if (offset >= length) {
+        break;
       }
 
       final mrkr = buffer.getUint8(offset);
@@ -59,24 +69,42 @@ class PdfJpegInfo {
         continue; // TEM
       }
 
+      if (offset + 2 > length) {
+        break;
+      }
       final len = buffer.getUint16(offset);
       offset += 2;
 
+      // A declared length of 0 or 1 would move the cursor backwards and spin
+      // here for ever.
+      if (len < 2) {
+        break;
+      }
+
       if (mrkr >= 0xc0 && mrkr <= 0xc2) {
+        if (offset + 6 > length) {
+          break;
+        }
         height = buffer.getUint16(offset + 1);
         width = buffer.getUint16(offset + 3);
         color = buffer.getUint8(offset + 5);
         break;
       }
 
-      // Adobe APP14 marker
-      if (mrkr == 0xee && len >= 14) {
+      // Adobe APP14 marker. Its presence is what says the CMYK samples are
+      // inverted; the transform byte says which flavour, and is only there if the
+      // segment is long enough to hold it. One field used to mean both, so a
+      // transform of 0 was indistinguishable from no marker at all.
+      if (mrkr == 0xee && offset + 5 <= length) {
         if (buffer.getUint8(offset) == 0x41 &&
             buffer.getUint8(offset + 1) == 0x64 &&
             buffer.getUint8(offset + 2) == 0x6F &&
             buffer.getUint8(offset + 3) == 0x62 &&
             buffer.getUint8(offset + 4) == 0x65) {
-          adobeColorTransform = buffer.getUint8(offset + 11);
+          hasAdobeMarker = true;
+          if (len >= 14 && offset + 12 <= length) {
+            adobeColorTransform = buffer.getUint8(offset + 11);
+          }
         }
       }
 
@@ -84,12 +112,25 @@ class PdfJpegInfo {
     }
 
     if (height == null) {
-      throw 'Unable to find a Jpeg image in the file';
+      throw PdfException('Unable to find a Jpeg image in the file');
     }
 
-    final tags = _findExifInJpeg(buffer);
+    // An EXIF block that does not parse means no tags, not a failed image.
+    Map<PdfExifTag, dynamic>? tags;
+    try {
+      tags = _findExifInJpeg(buffer);
+    } on RangeError {
+      tags = <PdfExifTag, dynamic>{};
+    }
 
-    return PdfJpegInfo._(width, height, color, adobeColorTransform, tags);
+    return PdfJpegInfo._(
+      width,
+      height,
+      color,
+      adobeColorTransform,
+      hasAdobeMarker,
+      tags,
+    );
   }
 
   PdfJpegInfo._(
@@ -97,6 +138,7 @@ class PdfJpegInfo {
     this.height,
     this._color,
     this._adobeColorTransform,
+    this._hasAdobeMarker,
     this.tags,
   );
 
@@ -110,75 +152,141 @@ class PdfJpegInfo {
 
   final int? _adobeColorTransform;
 
+  /// Whether an APP14 'Adobe' segment is present at all, which is a different
+  /// question from what its transform byte says.
+  final bool _hasAdobeMarker;
+
   /// Is the image color or greyscale
   bool get isRGB => _color == 3;
 
   /// Whether the image uses CMYK color space (4 components)
   bool get isCMYK => _color == 4;
 
-  /// Whether this CMYK JPEG uses inverted color values (Adobe YCCK convention).
-  /// Returns true when there is no Adobe APP14 marker (assumed inverted, the
-  /// most common case) or when the marker explicitly indicates YCCK encoding.
-  bool get isCMYKInverted => isCMYK && _adobeColorTransform != 0;
+  /// The Adobe APP14 colour transform, if the marker carried one.
+  int? get adobeColorTransform => _adobeColorTransform;
+
+  /// Whether an APP14 'Adobe' segment is present.
+  bool get hasAdobeMarker => _hasAdobeMarker;
+
+  /// Whether this CMYK JPEG stores inverted sample values.
+  ///
+  /// Every writer that emits the APP14 'Adobe' marker stores CMYK inverted,
+  /// whatever its transform byte says - transform 0 means the components were not
+  /// transformed, not that they were not inverted. A four-component JPEG with no
+  /// Adobe marker is stored straight.
+  bool get isCMYKInverted => isCMYK && _hasAdobeMarker;
 
   /// Exif tags discovered
   final Map<PdfExifTag, dynamic>? tags;
 
+  /// A tag value as an int, whatever shape the file declared it in.
+  ///
+  /// _readTagValue hands back an int, a String, a double, a typed integer or
+  /// float list, a list of numerator/denominator pairs, or null, depending on the
+  /// type and count bytes - all of them attacker-controlled. Every accessor here
+  /// used to assume the one shape it wanted.
+  int? _asInt(PdfExifTag tag) {
+    final dynamic value = tags?[tag];
+
+    if (value is int) {
+      return value;
+    }
+    if (value is double) {
+      return value.isFinite ? value.round() : null;
+    }
+    if (value is String) {
+      return int.tryParse(value.trim());
+    }
+    if (value is List) {
+      if (value.isEmpty) {
+        return null;
+      }
+      final dynamic first = value.first;
+      if (first is int) {
+        return first;
+      }
+      if (first is double) {
+        return first.isFinite ? first.round() : null;
+      }
+      if (first is List && first.isNotEmpty && first.first is int) {
+        return first.first as int;
+      }
+    }
+    return null;
+  }
+
+  /// A tag value as a list of bytes, for the version tags.
+  List<int>? _asBytes(PdfExifTag tag) {
+    final dynamic value = tags?[tag];
+
+    if (value is List<int>) {
+      return value;
+    }
+    if (value is int) {
+      return <int>[value];
+    }
+    if (value is String) {
+      return utf8.encode(value);
+    }
+    return null;
+  }
+
+  /// A rational tag as a double, however it was stored.
+  double? _asRational(PdfExifTag tag) {
+    final dynamic value = tags?[tag];
+
+    if (value is List && value.length >= 2) {
+      final dynamic numerator = value[0];
+      final dynamic denominator = value[1];
+      if (numerator is num && denominator is num && denominator != 0) {
+        return numerator.toDouble() / denominator.toDouble();
+      }
+      return null;
+    }
+    if (value is num) {
+      return value.toDouble();
+    }
+    if (value is String) {
+      return double.tryParse(value.trim());
+    }
+    return null;
+  }
+
   /// EXIF version
-  String? get exifVersion =>
-      tags == null || tags![PdfExifTag.ExifVersion] == null
-      ? null
-      : utf8.decode(tags![PdfExifTag.ExifVersion]);
+  String? get exifVersion {
+    final bytes = _asBytes(PdfExifTag.ExifVersion);
+    return bytes == null ? null : utf8.decode(bytes, allowMalformed: true);
+  }
 
   /// Flashpix format version
-  String? get flashpixVersion =>
-      tags == null || tags![PdfExifTag.FlashpixVersion] == null
-      ? null
-      : utf8.decode(tags![PdfExifTag.FlashpixVersion]);
+  String? get flashpixVersion {
+    final bytes = _asBytes(PdfExifTag.FlashpixVersion);
+    return bytes == null ? null : utf8.decode(bytes, allowMalformed: true);
+  }
 
   /// Rotation angle of this image
   PdfImageOrientation get orientation {
-    if (tags == null || tags![PdfExifTag.Orientation] == null) {
+    final value = _asInt(PdfExifTag.Orientation);
+    if (value == null ||
+        value < 1 ||
+        value > PdfImageOrientation.values.length) {
       return PdfImageOrientation.topLeft;
     }
 
-    try {
-      final int index = tags![PdfExifTag.Orientation] - 1;
-      const orientations = PdfImageOrientation.values;
-      if (index >= 0 && index < orientations.length) {
-        return orientations[index];
-      }
-      return PdfImageOrientation.topLeft;
-    } on RangeError {
-      return PdfImageOrientation.topLeft;
-    }
+    return PdfImageOrientation.values[value - 1];
   }
 
   /// Exif horizontal resolution
-  double? get xResolution =>
-      tags == null || tags![PdfExifTag.XResolution] == null
-      ? null
-      : tags![PdfExifTag.XResolution][0].toDouble() /
-            tags![PdfExifTag.XResolution][1].toDouble();
+  double? get xResolution => _asRational(PdfExifTag.XResolution);
 
   /// Exif vertical resolution
-  double? get yResolution =>
-      tags == null || tags![PdfExifTag.YResolution] == null
-      ? null
-      : tags![PdfExifTag.YResolution][0].toDouble() /
-            tags![PdfExifTag.YResolution][1].toDouble();
+  double? get yResolution => _asRational(PdfExifTag.YResolution);
 
   /// Exif horizontal pixel dimension
-  int? get pixelXDimension =>
-      tags == null || tags![PdfExifTag.PixelXDimension] == null
-      ? width
-      : tags![PdfExifTag.PixelXDimension];
+  int? get pixelXDimension => _asInt(PdfExifTag.PixelXDimension) ?? width;
 
   /// Exif vertical pixel dimension
-  int? get pixelYDimension =>
-      tags == null || tags![PdfExifTag.PixelYDimension] == null
-      ? height
-      : tags![PdfExifTag.PixelYDimension];
+  int? get pixelYDimension => _asInt(PdfExifTag.PixelYDimension) ?? height;
 
   @override
   String toString() =>
@@ -189,15 +297,17 @@ pixelXDimension: $pixelXDimension pixelYDimension: $pixelYDimension
 orientation: $orientation''';
 
   static Map<PdfExifTag, dynamic>? _findExifInJpeg(ByteData buffer) {
-    if ((buffer.getUint8(0) != 0xFF) || (buffer.getUint8(1) != 0xD8)) {
+    final length = buffer.lengthInBytes;
+    if (length < 4 ||
+        buffer.getUint8(0) != 0xFF ||
+        buffer.getUint8(1) != 0xD8) {
       return <PdfExifTag, dynamic>{}; // Not a valid JPEG
     }
 
     var offset = 2;
-    final length = buffer.lengthInBytes;
     int marker;
 
-    while (offset < length) {
+    while (offset + 4 <= length) {
       final lastValue = buffer.getUint8(offset);
       if (lastValue != 0xFF) {
         return <
@@ -212,9 +322,13 @@ orientation: $orientation''';
       // but we're only looking for 0xFFE1 for EXIF data
       if (marker == 0xE1) {
         return _readEXIFData(buffer, offset + 4);
-      } else {
-        offset += 2 + buffer.getUint16(offset + 2);
       }
+
+      final segment = buffer.getUint16(offset + 2);
+      if (segment < 2) {
+        break; // Would move the cursor backwards and spin here for ever.
+      }
+      offset += 2 + segment;
     }
 
     return <PdfExifTag, dynamic>{};
@@ -226,12 +340,21 @@ orientation: $orientation''';
     int dirStart,
     Endian bigEnd,
   ) {
-    final entries = file.getUint16(dirStart, bigEnd);
     final tags = <PdfExifTag, dynamic>{};
+    if (dirStart < 0 || dirStart + 2 > file.lengthInBytes) {
+      return tags;
+    }
+
+    final entries = file.getUint16(dirStart, bigEnd);
     int entryOffset;
 
     for (var i = 0; i < entries; i++) {
       entryOffset = dirStart + i * 12 + 2;
+      // The entry count is a uint16 read before any of the entries exist, so
+      // 0xffff of them can be declared in a file that holds none.
+      if (entryOffset + 12 > file.lengthInBytes) {
+        break;
+      }
       final tagId = file.getUint16(entryOffset, bigEnd);
       final tag = _exifTags[tagId];
       if (tag != null) {
@@ -247,6 +370,22 @@ orientation: $orientation''';
     return tags;
   }
 
+  /// How many bytes one value of each EXIF type takes.
+  static const Map<int, int> _typeSize = <int, int>{
+    1: 1, // byte
+    2: 1, // ascii
+    3: 2, // short
+    4: 4, // long
+    5: 8, // rational
+    6: 1, // signed byte
+    7: 1, // undefined
+    8: 2, // signed short
+    9: 4, // signed long
+    10: 8, // signed rational
+    11: 4, // float
+    12: 8, // double
+  };
+
   static dynamic _readTagValue(
     ByteData file,
     int entryOffset,
@@ -256,86 +395,121 @@ orientation: $orientation''';
   ) {
     final type = file.getUint16(entryOffset + 2, bigEnd);
     final numValues = file.getUint32(entryOffset + 4, bigEnd);
-    final valueOffset = file.getUint32(entryOffset + 8, bigEnd) + tiffStart;
+
+    // numValues came straight off the wire and was used as the allocation size
+    // and the loop bound for every typed list below, so a 60-byte file could ask
+    // for 32 GiB or read a gigabyte past its own end. The declared extent has to
+    // fit in the buffer before anything is allocated, and a count of zero is not
+    // a value at all - it used to underflow the ASCII length to -1.
+    final elementSize = _typeSize[type];
+    if (elementSize == null || numValues == 0) {
+      return null;
+    }
+
+    final byteCount = numValues * elementSize;
+    if (byteCount > file.lengthInBytes) {
+      return null;
+    }
+
+    // Four bytes or fewer live in the value field itself; anything larger is out
+    // of line. Deciding on the byte count rather than the value count is also
+    // what stops a single DOUBLE reading eight bytes from that four-byte field.
+    final int offset;
+    if (byteCount <= 4) {
+      offset = entryOffset + 8;
+    } else {
+      offset = file.getUint32(entryOffset + 8, bigEnd) + tiffStart;
+    }
+
+    if (offset < 0 || offset + byteCount > file.lengthInBytes) {
+      return null;
+    }
 
     switch (type) {
       case 1: // byte, 8-bit unsigned int
+      case 6: // signed byte
       case 7: // undefined, 8-bit byte, value depending on field
         if (numValues == 1) {
-          return file.getUint8(entryOffset + 8);
+          return file.getUint8(offset);
         }
-        final offset = numValues > 4 ? valueOffset : (entryOffset + 8);
         final result = Uint8List(numValues);
         for (var i = 0; i < result.length; ++i) {
           result[i] = file.getUint8(offset + i);
         }
         return result;
       case 2: // ascii, 8-bit byte
-        final offset = numValues > 4 ? valueOffset : (entryOffset + 8);
+        // The declared length includes the trailing NUL.
         return _getStringFromDB(file, offset, numValues - 1);
       case 3: // short, 16 bit int
         if (numValues == 1) {
-          return file.getUint16(entryOffset + 8, bigEnd);
+          return file.getUint16(offset, bigEnd);
         }
-        final offset = numValues > 2 ? valueOffset : (entryOffset + 8);
         final result = Uint16List(numValues);
         for (var i = 0; i < result.length; ++i) {
           result[i] = file.getUint16(offset + i * 2, bigEnd);
         }
         return result;
+      case 8: // signed short
+        if (numValues == 1) {
+          return file.getInt16(offset, bigEnd);
+        }
+        final result = Int16List(numValues);
+        for (var i = 0; i < result.length; ++i) {
+          result[i] = file.getInt16(offset + i * 2, bigEnd);
+        }
+        return result;
       case 4: // long, 32 bit int
         if (numValues == 1) {
-          return file.getUint32(entryOffset + 8, bigEnd);
+          return file.getUint32(offset, bigEnd);
         }
-        final offset = valueOffset;
         final result = Uint32List(numValues);
         for (var i = 0; i < result.length; ++i) {
           result[i] = file.getUint32(offset + i * 4, bigEnd);
         }
         return result;
-      case 5: // rational = two long values, first is numerator, second is denominator
+      case 5: // rational: a numerator and a denominator, both long
         if (numValues == 1) {
-          final numerator = file.getUint32(valueOffset, bigEnd);
-          final denominator = file.getUint32(valueOffset + 4, bigEnd);
-          return <int>[numerator, denominator];
+          return <int>[
+            file.getUint32(offset, bigEnd),
+            file.getUint32(offset + 4, bigEnd),
+          ];
         }
-        final offset = valueOffset;
         final result = <List<int>>[];
         for (var i = 0; i < numValues; ++i) {
-          final numerator = file.getUint32(offset + i * 8, bigEnd);
-          final denominator = file.getUint32(offset + i * 8 + 4, bigEnd);
-          result.add(<int>[numerator, denominator]);
+          result.add(<int>[
+            file.getUint32(offset + i * 8, bigEnd),
+            file.getUint32(offset + i * 8 + 4, bigEnd),
+          ]);
         }
         return result;
       case 9: // slong, 32 bit signed int
         if (numValues == 1) {
-          return file.getInt32(entryOffset + 8, bigEnd);
+          return file.getInt32(offset, bigEnd);
         }
-        final offset = valueOffset;
         final result = Int32List(numValues);
         for (var i = 0; i < result.length; ++i) {
           result[i] = file.getInt32(offset + i * 4, bigEnd);
         }
         return result;
-      case 10: // signed rational, two slongs, first is numerator, second is denominator
+      case 10: // signed rational, two slongs
         if (numValues == 1) {
-          final numerator = file.getInt32(valueOffset, bigEnd);
-          final denominator = file.getInt32(valueOffset + 4, bigEnd);
-          return <int>[numerator, denominator];
+          return <int>[
+            file.getInt32(offset, bigEnd),
+            file.getInt32(offset + 4, bigEnd),
+          ];
         }
-        final offset = valueOffset;
         final result = <List<int>>[];
         for (var i = 0; i < numValues; ++i) {
-          final numerator = file.getInt32(offset + i * 8, bigEnd);
-          final denominator = file.getInt32(offset + i * 8 + 4, bigEnd);
-          result.add(<int>[numerator, denominator]);
+          result.add(<int>[
+            file.getInt32(offset + i * 8, bigEnd),
+            file.getInt32(offset + i * 8 + 4, bigEnd),
+          ]);
         }
         return result;
       case 11: // single float, 32 bit float
         if (numValues == 1) {
-          return file.getFloat32(entryOffset + 8, bigEnd);
+          return file.getFloat32(offset, bigEnd);
         }
-        final offset = valueOffset;
         final result = Float32List(numValues);
         for (var i = 0; i < result.length; ++i) {
           result[i] = file.getFloat32(offset + i * 4, bigEnd);
@@ -343,25 +517,35 @@ orientation: $orientation''';
         return result;
       case 12: // double float, 64 bit float
         if (numValues == 1) {
-          return file.getFloat64(entryOffset + 8, bigEnd);
+          return file.getFloat64(offset, bigEnd);
         }
-        final offset = valueOffset;
         final result = Float64List(numValues);
         for (var i = 0; i < result.length; ++i) {
           result[i] = file.getFloat64(offset + i * 8, bigEnd);
         }
         return result;
     }
+
+    return null;
   }
 
   static String _getStringFromDB(ByteData buffer, int start, int length) {
+    // A declared length of 0 used to underflow to -1 here, and nothing stopped a
+    // declared length from running off the end of the buffer.
+    final from = start.clamp(0, buffer.lengthInBytes);
+    final to = (start + length).clamp(from, buffer.lengthInBytes);
+
     return utf8.decode(
-      List<int>.generate(length, (int i) => buffer.getUint8(start + i)),
+      Uint8List.sublistView(buffer, from, to),
       allowMalformed: true,
     );
   }
 
   static Map<PdfExifTag, dynamic>? _readEXIFData(ByteData buffer, int start) {
+    if (start < 0 || start + 14 > buffer.lengthInBytes) {
+      return null;
+    }
+
     final startingString = _getStringFromDB(buffer, start, 4);
     if (startingString != 'Exif') {
       // Not valid EXIF data! $startingString
@@ -400,14 +584,9 @@ orientation: $orientation''';
       bigEnd,
     );
 
-    if (tags.containsKey(PdfExifTag.ExifIFDPointer)) {
-      final exifData = _readTags(
-        buffer,
-        tiffOffset,
-        tiffOffset + tags[PdfExifTag.ExifIFDPointer] as int,
-        bigEnd,
-      );
-      tags.addAll(exifData);
+    final pointer = tags[PdfExifTag.ExifIFDPointer];
+    if (pointer is int) {
+      tags.addAll(_readTags(buffer, tiffOffset, tiffOffset + pointer, bigEnd));
     }
 
     return tags;

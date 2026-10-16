@@ -1,7 +1,9 @@
 package net.nfet.flutter.printing;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 import android.print.PrintAttributes;
 
 import androidx.annotation.NonNull;
@@ -24,6 +26,19 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+        try {
+            handleMethodCall(call, result);
+        } catch (final RuntimeException e) {
+            // A framework exception used to escape this method, which Flutter
+            // reports to Dart as an anonymous PlatformException carrying a raw
+            // platform message and no indication of which call failed.
+            Log.e("PDF", "Unable to handle " + call.method, e);
+            result.error("printing", e.getMessage(), call.method);
+        }
+    }
+
+    private void handleMethodCall(
+            @NonNull MethodCall call, @NonNull MethodChannel.Result result) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
             switch (call.method) {
                 case "printPdf": {
@@ -36,6 +51,19 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     assert name != null;
                     assert width != null;
                     assert height != null;
+
+                    if (!(context instanceof Activity)) {
+                        // PrintManager.print refuses a non-Activity context.
+                        // Report it as a job failure, so the Dart future
+                        // completes with a message that says what is wrong
+                        // instead of an anonymous PlatformException carrying a
+                        // raw framework message.
+                        printJob.cancelJob("Printing needs an Activity, and this Flutter engine"
+                                + " has none attached");
+                        result.success(0);
+                        break;
+                    }
+
                     printJob.printPdf(name, width, height);
 
                     result.success(1);
@@ -54,8 +82,9 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     final String subject = call.argument("subject");
                     final String body = call.argument("body");
                     final ArrayList<String> emails = call.argument("emails");
-                    PrintingJob.sharePdf(context, document, name, subject, body, emails);
-                    result.success(1);
+                    final boolean shared = PrintingJob.sharePdf(
+                            context, document, name, subject, body, emails);
+                    result.success(shared ? 1 : 0);
                     break;
                 }
                 case "convertHtml": {
@@ -76,15 +105,12 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     assert marginBottom != null;
 
                     PrintAttributes.Margins margins = new PrintAttributes.Margins(
-                            Double.valueOf(marginLeft * 1000.0).intValue(),
-                            Double.valueOf(marginTop * 1000.0 / 72.0).intValue(),
-                            Double.valueOf(marginRight * 1000.0 / 72.0).intValue(),
-                            Double.valueOf(marginBottom * 1000.0 / 72.0).intValue());
+                            pointsToMils(marginLeft), pointsToMils(marginTop),
+                            pointsToMils(marginRight), pointsToMils(marginBottom));
 
                     PrintAttributes.MediaSize size =
                             new PrintAttributes.MediaSize("flutter_printing", "Provided size",
-                                    Double.valueOf(width * 1000.0 / 72.0).intValue(),
-                                    Double.valueOf(height * 1000.0 / 72.0).intValue());
+                                    pointsToMils(width), pointsToMils(height));
 
                     printJob.convertHtml((String) call.argument("html"), size, margins,
                             (String) call.argument("baseUrl"));
@@ -92,16 +118,19 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     break;
                 }
                 case "printingInfo": {
-                    result.success(PrintingJob.printingInfo());
+                    result.success(PrintingJob.printingInfo(context));
                     break;
                 }
                 case "rasterPdf": {
                     final byte[] document = call.argument("doc");
                     final ArrayList<Integer> pages = call.argument("pages");
                     Double scale = call.argument("scale");
+                    // Opaque white when an older Dart side does not send one.
+                    final Integer background = call.argument("background");
                     final PrintingJob printJob =
                             new PrintingJob(context, this, (int) call.argument("job"));
-                    printJob.rasterPdf(document, pages, scale);
+                    printJob.rasterPdf(document, pages, scale,
+                            background != null ? background : 0xffffffff);
                     result.success(1);
                     break;
                 }
@@ -134,18 +163,20 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                 if (result instanceof byte[]) {
                     printJob.setDocument((byte[]) result);
                 } else {
-                    printJob.cancelJob("Unknown data received");
+                    // A failure, not a cancellation: reported as one, the
+                    // print dialog sat on 'Preparing preview' for ever.
+                    printJob.failJob("Unknown data received");
                 }
             }
 
             @Override
             public void error(@NonNull String errorCode, String errorMessage, Object errorDetails) {
-                printJob.cancelJob(errorMessage);
+                printJob.failJob(errorMessage);
             }
 
             @Override
             public void notImplemented() {
-                printJob.cancelJob("notImplemented");
+                printJob.failJob("notImplemented");
             }
         });
     }
@@ -204,5 +235,14 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
         }
 
         channel.invokeMethod("onPageRasterEnd", args);
+    }
+
+    /// The channel carries lengths in PDF points; Android wants mils.
+    ///
+    /// The left margin used to be multiplied by 1000 without dividing by 72,
+    /// making it 72 times too wide, which pushed the content off the page and
+    /// produced a zero-page conversion.
+    private static int pointsToMils(double points) {
+        return Double.valueOf(points * 1000.0 / 72.0).intValue();
     }
 }

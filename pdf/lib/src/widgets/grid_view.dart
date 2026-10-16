@@ -47,6 +47,10 @@ class GridViewContext extends WidgetContext {
   }
 
   @override
+  bool isSameAs(GridViewContext other) =>
+      firstChild == other.firstChild && lastChild == other.lastChild;
+
+  @override
   String toString() =>
       '$runtimeType first:$firstChild last:$lastChild size:${childCrossAxis}x$childMainAxis';
 }
@@ -133,7 +137,24 @@ class GridView extends MultiChildWidget with SpanningWidget {
                   (mainAxisSpacing + _context.childMainAxis!))
               .floor();
 
-      if (_mainAxisCount! < 0) {
+      if (_context.firstChild < children.length) {
+        // A cell taller than the space available still has to be emitted:
+        // with zero rows nothing is placed, the cursor never advances and a
+        // spanning parent keeps asking for another page for ever.
+        if (_mainAxisCount! < 1) {
+          assert(() {
+            print(
+              'A GridView cell is taller than the available space '
+              '(${_context.childMainAxis!.toStringAsFixed(1)} > '
+              '${mainAxisExtent.toStringAsFixed(1)}). '
+              'The row will overflow; lower childAspectRatio or raise '
+              'crossAxisCount.',
+            );
+            return true;
+          }());
+          _mainAxisCount = 1;
+        }
+      } else if (_mainAxisCount! < 0) {
         // Not enough space to put one line, try to ask for more space.
         _mainAxisCount = 0;
       }
@@ -186,12 +207,18 @@ class GridView extends MultiChildWidget with SpanningWidget {
 
       switch (direction) {
         case Axis.vertical:
+          // Place the child as an ltr grid would, then mirror that about the
+          // padded band it sits in. Writing the rtl position directly - as this
+          // did - means writing a second expression that has to agree with the
+          // first for every cell count, spacing and padding, and it did not.
+          final ltrCross =
+              (_context.childCrossAxis! - child.box!.width) / 2.0 + crossAxis;
+
           child.box = PdfRect.fromPoints(
             PdfPoint(
               isRtl
-                  ? (_context.childCrossAxis! + child.box!.width - crossAxis)
-                  : (_context.childCrossAxis! - child.box!.width) / 2.0 +
-                        crossAxis,
+                  ? 2 * startX + totalCross - ltrCross - child.box!.width
+                  : ltrCross,
               totalMain +
                   resolvedPadding.bottom -
                   (_context.childMainAxis! - child.box!.height) / 2.0 -
@@ -203,12 +230,14 @@ class GridView extends MultiChildWidget with SpanningWidget {
 
           break;
         case Axis.horizontal:
+          final ltrMain =
+              (_context.childMainAxis! - child.box!.width) / 2.0 + mainAxis;
+
           child.box = PdfRect.fromPoints(
             PdfPoint(
               isRtl
-                  ? totalMain - (child.box!.width + mainAxis)
-                  : (_context.childMainAxis! - child.box!.width) / 2.0 +
-                        mainAxis,
+                  ? 2 * startX + totalMain - ltrMain - child.box!.width
+                  : ltrMain,
               totalCross +
                   resolvedPadding.bottom -
                   (_context.childCrossAxis! - child.box!.height) / 2.0 -
@@ -375,7 +404,7 @@ class GridView extends MultiChildWidget with SpanningWidget {
   bool get canSpan => true;
 
   @override
-  bool get hasMoreWidgets => true;
+  bool get hasMoreWidgets => _context.lastChild < children.length;
 
   @override
   void restoreContext(GridViewContext context) {

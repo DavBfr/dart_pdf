@@ -12,6 +12,6 @@ Pod::Spec.new do |s|
   s.source           = { :git => 'https://github.com/DavBfr/dart_pdf.git', :branch => 'master' }
   s.source_files = 'printing/Sources/printing/**/*'
   s.dependency 'Flutter'
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '13.0'
   s.swift_version = '4.2'
 end

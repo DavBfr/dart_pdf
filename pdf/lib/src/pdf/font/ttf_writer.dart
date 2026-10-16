@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'ttf_parser.dart';
@@ -84,83 +83,63 @@ class TtfWriter {
     final tables = <String, Uint8List>{};
     final tablesLength = <String, int>{};
 
-    // Create the glyphs table
-    final glyphsMap = <int, TtfGlyphInfo>{};
-    final charMap = <int, int>{};
-    final overflow = <int>{};
+    // Create the glyphs table.
+    //
+    // The caller writes /CIDToGIDMap /Identity and uses the position in
+    // `chars` as the CID, so subset glyph i must be the glyph for chars[i],
+    // with no gaps. Several characters legitimately share one source glyph -
+    // canonical duplicates such as U+0394 and U+2206, every codepoint the font
+    // does not map (all funnelled onto glyph 0), and the Arabic presentation
+    // forms this package points at their base letter - so the mapping from
+    // characters to source glyphs is many-to-one and each CID needs its own
+    // copy of the outline.
+    final glyphsInfo = <TtfGlyphInfo>[];
+    final sourceGlyphs = <int, TtfGlyphInfo>{};
+    // Component glyphs of compound glyphs, which live after the CID region.
     final compounds = <int, int>{};
 
-    for (final char in chars) {
-      if (char == 32) {
-        final glyph = TtfGlyphInfo(
-          ttf.charToGlyphIndexMap[char]!,
-          Uint8List(0),
-          const <int>[],
-        );
-        glyphsMap[glyph.index] = glyph;
-        charMap[char] = glyph.index;
-        continue;
+    TtfGlyphInfo readSource(int glyphIndex) {
+      final cached = sourceGlyphs[glyphIndex];
+      if (cached != null) {
+        return cached;
       }
+      final glyph = ttf.readGlyph(glyphIndex).copy();
+      sourceGlyphs[glyphIndex] = glyph;
+      for (final component in glyph.compounds) {
+        compounds[component] = -1;
+        readSource(component);
+      }
+      return glyph;
+    }
 
+    for (final char in chars) {
       final glyphIndex = ttf.charToGlyphIndexMap[char] ?? 0;
+
+      // A glyph the font does not have. The space used to be special-cased here
+      // too, because readGlyph returned the next glyph's outline for it; now an
+      // empty glyph reads as empty, so a font whose space really does carry an
+      // outline keeps it.
       if (glyphIndex >= ttf.glyphOffsets.length) {
         assert(() {
           print('Glyph $glyphIndex not in the font ${ttf.fontName}');
           return true;
         }());
+        // Still occupy this CID slot: skipping it would shift every later
+        // character onto the wrong glyph.
+        glyphsInfo.add(TtfGlyphInfo(glyphIndex, Uint8List(0), const <int>[]));
         continue;
       }
 
-      void addGlyph(glyphIndex) {
-        final glyph = ttf.readGlyph(glyphIndex).copy();
-        for (final g in glyph.compounds) {
-          compounds[g] = -1;
-          overflow.add(g);
-          addGlyph(g);
-        }
-        glyphsMap[glyph.index] = glyph;
-      }
-
-      charMap[char] = glyphIndex;
-      addGlyph(glyphIndex);
+      // One copy per CID: _updateCompoundGlyph rewrites the component indices
+      // in place, so two slots must not share a buffer.
+      glyphsInfo.add(readSource(glyphIndex).copy());
     }
 
-    final glyphsInfo = <TtfGlyphInfo>[];
-
-    for (final char in chars) {
-      final glyphsIndex = charMap[char];
-      if (glyphsIndex != null) {
-        final glyph = glyphsMap[glyphsIndex];
-        if (glyph != null) {
-          glyphsInfo.add(glyph);
-        } else if (glyphsMap.isNotEmpty) {
-          glyphsInfo.add(glyphsMap.values.first);
-        } else {
-          // The font has no glyph reachable for [char] AND every other glyph in the
-          // subset has already been consumed, so `glyphsMap.values.first` would throw
-          // `Bad state: No element`. Surface a clearer diagnostic that names the
-          // offending codepoint — this is typically a font/charset mismatch
-          // (e.g. Arabic Presentation Forms in a font with no Presentation glyphs).
-          throw Exception(
-            "Missing glyph for character '${String.fromCharCode(char)}' "
-            '(U+${char.toRadixString(16).toUpperCase().padLeft(4, '0')}) '
-            'in font ${ttf.fontName}. Use a font that includes this codepoint, '
-            'or strip/normalize the character before passing it to the PDF.',
-          );
-        }
-        glyphsMap.remove(glyphsIndex);
-      }
-    }
-
-    glyphsInfo.addAll(glyphsMap.values);
-
-    // Add compound glyphs
-    for (final compound in compounds.keys) {
-      final index = glyphsInfo.firstWhere(
-        (TtfGlyphInfo glyph) => glyph.index == compound,
-      );
-      compounds[compound] = glyphsInfo.indexOf(index);
-      assert((compounds[compound] ?? 0) >= 0, 'Unable to find the glyph');
+    // Append the component glyphs after the CID region and record where they
+    // landed, so the compound outlines can point at them.
+    for (final component in compounds.keys.toList()) {
+      compounds[component] = glyphsInfo.length;
+      glyphsInfo.add(readSource(component).copy());
     }
 
     // update compound indices
@@ -221,17 +200,52 @@ class TtfWriter {
       TtfParser.maxp_table,
       TtfParser.hhea_table,
       TtfParser.os_2_table,
+      // The glyph outlines are copied with their instructions, so the programs
+      // those instructions call have to come too. Without them every subset was
+      // structurally invalid: glyph programs called missing functions and
+      // indexed an absent control-value table.
+      TtfParser.cvt_table,
+      TtfParser.fpgm_table,
+      TtfParser.prep_table,
+      TtfParser.gasp_table,
     }) {
       final start = ttf.tableOffsets[tn];
       if (start == null) {
         continue;
       }
+
       final len = ttf.tableSize[tn]!;
-      final data = Uint8List.fromList(
-        ttf.bytes.buffer.asUint8List(start, _wordAlign(len)),
-      );
+      // Sliced through the parser, so a font handed over as a view of a larger
+      // buffer copies its own bytes and not whatever precedes them. _wordAlign
+      // can also round past the end of the font, so the copy is clamped and the
+      // padding is zeroed rather than read.
+      final source = ttf.tableBytes(start, _wordAlign(len));
+      final data = Uint8List(_wordAlign(len));
+      data.setRange(0, source.length, source);
+
       tables[tn] = data;
       tablesLength[tn] = len;
+    }
+
+    if (!tables.containsKey(TtfParser.head_table) ||
+        !tables.containsKey(TtfParser.maxp_table) ||
+        !tables.containsKey(TtfParser.hhea_table)) {
+      throw Exception(
+        'Unable to subset the font ${ttf.fontName}: it has no '
+        '${!tables.containsKey(TtfParser.head_table)
+            ? 'head'
+            : !tables.containsKey(TtfParser.maxp_table)
+            ? 'maxp'
+            : 'hhea'} table',
+      );
+    }
+
+    if (ttf.tableOffsets[TtfParser.hmtx_table] == null) {
+      // Read unguarded further down; this used to be a bare null-check error
+      // naming neither the font nor the table.
+      throw Exception(
+        'Unable to subset the font ${ttf.fontName}: it has no hmtx table',
+      );
     }
 
     tables[TtfParser.head_table]!.buffer.asByteData().setUint32(
@@ -249,12 +263,16 @@ class TtfWriter {
 
     {
       // post Table
-      final start = ttf.tableOffsets[TtfParser.post_table]!;
       const len = 32;
-      final data = Uint8List.fromList(
-        ttf.bytes.buffer.asUint8List(start, _wordAlign(len)),
-      );
-      data.buffer.asByteData().setUint32(0, 0x00030000); // Version 3.0 no names
+      final data = Uint8List(_wordAlign(len));
+      final start = ttf.tableOffsets[TtfParser.post_table];
+      if (start != null) {
+        final source = ttf.tableBytes(start, _wordAlign(len));
+        data.setRange(0, source.length, source);
+      }
+      // Version 3.0, no names. Synthesised outright when the source font has no
+      // post table at all, which used to be a null-check error.
+      data.buffer.asByteData().setUint32(0, 0x00030000);
       tables[TtfParser.post_table] = data;
       tablesLength[TtfParser.post_table] = len;
     }
@@ -332,31 +350,35 @@ class TtfWriter {
       final start = ByteData(12 + numTables * 16);
       start.setUint32(0, 0x00010000);
       start.setUint16(4, numTables);
-      var pot = numTables;
-      while (pot & (pot - 1) != 0) {
-        pot++;
+
+      // The spec's own formulas. The loop this replaces found the next power of
+      // two at or above numTables rather than the largest at or below it, took
+      // the natural log instead of log2, and inverted rangeShift, so every
+      // subset carried 256/2/96 where 128/3/32 is required.
+      var entrySelector = 0;
+      while (1 << (entrySelector + 1) <= numTables) {
+        entrySelector++;
       }
-      start.setUint16(6, pot * 16);
-      start.setUint16(8, math.log(pot).toInt());
-      start.setUint16(10, pot * 16 - numTables * 16);
+      final searchRange = numTables == 0 ? 0 : 16 << entrySelector;
+
+      start.setUint16(6, searchRange);
+      start.setUint16(8, numTables == 0 ? 0 : entrySelector);
+      start.setUint16(10, numTables * 16 - searchRange);
 
       // Create the table directory
       var count = 0;
       var offset = 12 + numTables * 16;
       var headOffset = 0;
 
-      final tableKeys = [
-        TtfParser.head_table,
-        TtfParser.hhea_table,
-        TtfParser.maxp_table,
-        TtfParser.os_2_table,
-        TtfParser.hmtx_table,
-        TtfParser.cmap_table,
-        TtfParser.loca_table,
-        TtfParser.glyf_table,
-        TtfParser.name_table,
-        TtfParser.post_table,
-      ];
+      // The tables that are actually here, in ascending tag order as the spec
+      // requires. This used to be a hard-coded ten-entry list in layout order,
+      // which both broke the ordering and dereferenced tables[name]! for an
+      // entry a tolerant source-table copy may never have produced - so a font
+      // without an OS/2 table aborted save() with 'Null check operator used on
+      // a null value', naming neither the font nor the table. numTables comes
+      // from the same map, so the header, the records and the payloads now agree
+      // by construction.
+      final tableKeys = tables.keys.toList()..sort();
 
       for (final name in tableKeys) {
         final data = tables[name]!;

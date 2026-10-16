@@ -35,6 +35,7 @@ extension type Settings._(JSObject _) implements JSObject {
   external set scale(double value);
   external set canvasContext(CanvasRenderingContext2D value);
   external set viewport(PdfJsViewport value);
+  external set background(String value);
   external set cMapUrl(String value);
   external set cMapPacked(bool value);
 }

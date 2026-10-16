@@ -53,11 +53,24 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
 
   var _rastering = false;
 
+  /// Set when a raster was asked for while one was already running.
+  ///
+  /// A depth-one queue: the catch-up pass reads live widget state, so it renders
+  /// the newest request and never an intermediate one. Without it a page format
+  /// or orientation change made while pages were still streaming was simply
+  /// dropped, and the preview stayed on the old rendering while the action bar
+  /// showed the new setting.
+  var _rasterPending = false;
+
   Timer? _previewUpdate;
+
+  /// The dpi the last raster was requested at, or null before the first one.
+  double? _requestedDpi;
 
   @override
   void dispose() {
     _previewUpdate?.cancel();
+    _rasterPending = false;
     for (final e in pages) {
       e.image.evict();
     }
@@ -65,41 +78,94 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
     super.dispose();
   }
 
+  /// Called when the page list changed, before the change is published.
+  ///
+  /// Anything derived from [pages] - a key per page, an index into it - has to
+  /// be reconciled here, because a raster can shrink the list under state that
+  /// was valid for the old one. Runs inside the mounted guard, so a subclass
+  /// may touch its own state.
+  @protected
+  void onPagesChanged() {}
+
+  /// The resolution to rasterize at, from the current widget and media query.
+  ///
+  /// Only the size and the device pixel ratio feed this, so a MediaQuery change
+  /// that touches anything else leaves it untouched.
+  @protected
+  double computeDpi() {
+    final forced = forcedDpi;
+    if (forced != null) {
+      return forced;
+    }
+
+    final mq = MediaQuery.of(context);
+    final double dpr;
+    if (isAndroid) {
+      if (mq.size.shortestSide * mq.devicePixelRatio < 800) {
+        dpr = 2 * mq.devicePixelRatio;
+      } else {
+        dpr = mq.devicePixelRatio;
+      }
+    } else {
+      dpr = mq.devicePixelRatio;
+    }
+
+    return (min(mq.size.width - 16, widget.maxPageWidth ?? double.infinity)) *
+        dpr /
+        pageFormat.width *
+        PdfPageFormat.inch;
+  }
+
+  /// Whether a raster at the current dpi would render anything new.
+  ///
+  /// Used to keep a dependency change that cannot have moved the dpi from
+  /// re-running the app's document build.
+  bool get needsRasterForDpi {
+    // Read unconditionally, and before the null check: this is what registers
+    // the MediaQuery dependency, so short-circuiting past it would leave the
+    // state depending on nothing and never hearing about a resize at all.
+    final current = computeDpi();
+
+    return _requestedDpi == null || _requestedDpi != current;
+  }
+
   /// Rasterize the document
   void raster() {
     _previewUpdate?.cancel();
     _previewUpdate = Timer(_updateTime, () {
-      if (forcedDpi != null) {
-        dpi = forcedDpi!;
-      } else {
-        final mq = MediaQuery.of(context);
-        final double dpr;
-        if (isAndroid) {
-          if (mq.size.shortestSide * mq.devicePixelRatio < 800) {
-            dpr = 2 * mq.devicePixelRatio;
-          } else {
-            dpr = mq.devicePixelRatio;
-          }
-        } else {
-          dpr = mq.devicePixelRatio;
-        }
-        dpi =
-            (min(mq.size.width - 16, widget.maxPageWidth ?? double.infinity)) *
-            dpr /
-            pageFormat.width *
-            PdfPageFormat.inch;
-      }
-
+      dpi = computeDpi();
+      _requestedDpi = dpi;
       _raster();
     });
   }
 
   Future<void> _raster() async {
     if (_rastering) {
+      // Queued rather than dropped, and run from the finally below.
+      _rasterPending = true;
       return;
     }
     _rastering = true;
 
+    try {
+      await _rasterOnce();
+    } finally {
+      _rastering = false;
+
+      // Set before the await above completed, so it asked for a render of state
+      // that is newer than what was just drawn.
+      if (_rasterPending && mounted) {
+        _rasterPending = false;
+        dpi = computeDpi();
+        _requestedDpi = dpi;
+        unawaited(_raster());
+      } else {
+        _rasterPending = false;
+      }
+    }
+  }
+
+  Future<void> _rasterOnce() async {
     Uint8List doc;
 
     final printingInfo = info;
@@ -120,7 +186,6 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         return true;
       }());
 
-      _rastering = false;
       return;
     }
 
@@ -148,10 +213,11 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
       if (mounted) {
         setState(() {
           error = exception;
-          _rastering = false;
         });
       }
 
+      // The flag used to be cleared only on this branch, so a build that threw
+      // while the widget was unmounted wedged the preview for good.
       return;
     }
 
@@ -173,7 +239,6 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         // `dispose()` clears `pages`, and this resumes after the await above:
         // `pageNum` may no longer be a valid index by the time it does.
         if (!mounted) {
-          _rastering = false;
           return;
         }
 
@@ -195,6 +260,7 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         }
 
         if (mounted) {
+          onPagesChanged();
           setState(() {});
         }
 
@@ -208,6 +274,7 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         pages.removeRange(pageNum, pages.length);
       }
       if (mounted) {
+        onPagesChanged();
         setState(() {});
       }
     } catch (exception, stack) {
@@ -236,7 +303,5 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         });
       }
     }
-
-    _rastering = false;
   }
 }

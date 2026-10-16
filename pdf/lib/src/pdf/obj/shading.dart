@@ -68,12 +68,7 @@ class PdfShading extends PdfObject<PdfDict> {
 
     params['/ShadingType'] = PdfNum(shadingType.index + 2);
     if (boundingBox != null) {
-      params['/BBox'] = PdfArray.fromNum([
-        boundingBox!.left,
-        boundingBox!.bottom,
-        boundingBox!.right,
-        boundingBox!.top,
-      ]);
+      params['/BBox'] = PdfArray.fromRect(boundingBox!);
     }
     params['/AntiAlias'] = const PdfBool(true);
     params['/ColorSpace'] = const PdfName('/DeviceRGB');

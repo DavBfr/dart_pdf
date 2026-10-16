@@ -22,7 +22,9 @@ import 'brush.dart';
 import 'clip_path.dart';
 import 'group.dart';
 import 'image.dart';
+import 'nested_svg.dart';
 import 'painter.dart';
+import 'parser.dart';
 import 'path.dart';
 import 'symbol.dart';
 import 'text.dart';
@@ -32,16 +34,19 @@ import 'use.dart';
 abstract class SvgOperation {
   SvgOperation(this.brush, this.clip, this.transform, this.painter);
 
+  /// Build the operation [element] describes.
+  ///
+  /// [expanding] is the set of element ids currently being expanded through
+  /// `<use>`. It is a value, not painter state, because children are built
+  /// lazily - inside the parent's paint - so a mutable stack would already have
+  /// been popped by the time a child is parsed.
   static SvgOperation? fromXml(
     XmlElement element,
     SvgPainter painter,
-    SvgBrush brush,
-  ) {
-    if (element.getAttribute('visibility') == 'hidden') {
-      return null;
-    }
-
-    if (element.getAttribute('display') == 'none') {
+    SvgBrush brush, {
+    Set<String> expanding = const <String>{},
+  }) {
+    if (isHidden(element)) {
       return null;
     }
 
@@ -51,7 +56,7 @@ abstract class SvgOperation {
       case 'ellipse':
         return SvgPath.fromEllipseXml(element, painter, brush);
       case 'g':
-        return SvgGroup.fromXml(element, painter, brush);
+        return SvgGroup.fromXml(element, painter, brush, expanding: expanding);
       case 'image':
         return SvgImg.fromXml(element, painter, brush);
       case 'line':
@@ -64,15 +69,40 @@ abstract class SvgOperation {
         return SvgPath.fromPolylineXml(element, painter, brush);
       case 'rect':
         return SvgPath.fromRectXml(element, painter, brush);
+      case 'svg':
+        // A nested <svg> used to fall through to the return null below, and
+        // SvgGroup dropped it through whereType - the subtree simply vanished.
+        // The root <svg> does not come through here: SvgPainter.paint builds it
+        // as a group directly.
+        return SvgNestedSvg.fromXml(
+          element,
+          painter,
+          brush,
+          expanding: expanding,
+        );
       case 'symbol':
-        return SvgSymbol.fromXml(element, painter, brush);
+        return SvgSymbol.fromXml(element, painter, brush, expanding: expanding);
       case 'text':
         return SvgText.fromXml(element, painter, brush);
       case 'use':
-        return SvgUse.fromXml(element, painter, brush);
+        return SvgUse.fromXml(element, painter, brush, expanding: expanding);
     }
 
     return null;
+  }
+
+  /// Whether [element] asks not to be rendered.
+  ///
+  /// The `style` attribute is flattened onto the element first, because that is
+  /// the form every drawing tool exports a hidden layer in -
+  /// `<g style="display:none">` - and these two tests read raw XML attributes.
+  /// convertStyle ran only later, from SvgBrush.fromXml, so the style form never
+  /// worked and hidden layers were painted over the visible artwork.
+  static bool isHidden(XmlElement element) {
+    SvgParser.convertStyle(element);
+
+    return element.getAttribute('display')?.trim() == 'none' ||
+        element.getAttribute('visibility')?.trim() == 'hidden';
   }
 
   final SvgBrush brush;
@@ -85,7 +115,7 @@ abstract class SvgOperation {
 
   void paint(PdfGraphics canvas) {
     canvas.saveContext();
-    clip.apply(canvas);
+    clip.apply(canvas, boundingBox());
     if (transform.isNotEmpty) {
       canvas.setTransform(transform.matrix!);
     }

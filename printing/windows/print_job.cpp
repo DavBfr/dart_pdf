@@ -15,14 +15,20 @@
  */
 
 #include "print_job.h"
+
+#include "paper_size.h"
+#include "pdfium_raster.h"
 #include "printing.h"
 
+#include <fpdf_flatten.h>
+#include <fpdf_formfill.h>
 #include <fpdfview.h>
 #include <objbase.h>
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <tchar.h>
 #include <codecvt>
+#include <cstring>
 #include <fstream>
 #include <iterator>
 #include <numeric>
@@ -70,6 +76,44 @@ std::wstring fromUtf8(std::string str) {
   return wstr;
 }
 
+/// Describe the last Win32 error, prefixed with what was being attempted.
+///
+/// Returns an empty string for a cancellation, so the Dart side completes with
+/// false instead of throwing: the user cancelling a Save-As dialog is not an
+/// error.
+std::string lastErrorMessage(const std::string& what) {
+  const auto code = GetLastError();
+
+  if (code == ERROR_CANCELLED || code == ERROR_PRINT_CANCELLED) {
+    return std::string{};
+  }
+
+  LPWSTR text = nullptr;
+  const auto length = FormatMessageW(
+      FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+          FORMAT_MESSAGE_IGNORE_INSERTS,
+      nullptr, code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+      reinterpret_cast<LPWSTR>(&text), 0, nullptr);
+
+  auto message = what;
+  if (length > 0 && text != nullptr) {
+    auto detail = std::wstring{text, length};
+    while (!detail.empty() &&
+           (detail.back() == L'\r' || detail.back() == L'\n')) {
+      detail.pop_back();
+    }
+    message += ": " + toUtf8(detail);
+  } else {
+    message += " (error " + std::to_string(code) + ")";
+  }
+
+  if (text != nullptr) {
+    LocalFree(text);
+  }
+
+  return message;
+}
+
 PrintJob::PrintJob(Printing* printing, int index)
     : printing{printing}, index{index} {}
 
@@ -81,34 +125,63 @@ bool PrintJob::printPdf(const std::string& name,
                         bool windowsModernDialog) {
   documentName = name;
 
-  std::size_t dmSize = sizeof(DEVMODE);
-  std::size_t dmExtra = 0;
+  // Only allocate when the DEVMODE will be used: the usePrinterSettings path
+  // used to allocate one and then drop the pointer, leaking it on every job.
+  DEVMODE* dm = nullptr;
 
-  if (!printer.empty()) {
-    dmExtra = DeviceCapabilities(fromUtf8(printer).c_str(), NULL, DC_EXTRA,
-                                 NULL, NULL);
-  }
+  if (!usePrinterSettings) {
+    const std::size_t dmSize = sizeof(DEVMODE);
+    std::size_t dmExtra = 0;
 
-  auto dm = static_cast<DEVMODE*>(GlobalAlloc(0, dmSize + dmExtra));
+    if (!printer.empty()) {
+      // DeviceCapabilities answers -1 for an unknown or unavailable printer;
+      // assigning that to an unsigned type wrapped it to SIZE_MAX, so the
+      // allocation failed and dmDriverExtra claimed 65535 bytes of a struct
+      // that was never allocated.
+      const int extra = DeviceCapabilities(fromUtf8(printer).c_str(), nullptr,
+                                           DC_EXTRA, nullptr, nullptr);
+      if (extra < 0) {
+        cancelJob("Unknown or unavailable printer: " + printer);
+        return false;
+      }
+      dmExtra = static_cast<std::size_t>(extra);
+    }
 
-  if (usePrinterSettings) {
-    dm = nullptr;  // to use default driver config
-  } else {
+    dm = static_cast<DEVMODE*>(GlobalAlloc(GMEM_FIXED, dmSize + dmExtra));
+    if (!dm) {
+      cancelJob("Out of memory allocating the printer settings");
+      return false;
+    }
+
     ZeroMemory(dm, dmSize + dmExtra);
     dm->dmSize = (WORD)dmSize;
     dm->dmDriverExtra = (WORD)dmExtra;
-    dm->dmFields =
-        DM_ORIENTATION | DM_PAPERSIZE | DM_PAPERLENGTH | DM_PAPERWIDTH;
-    dm->dmPaperSize = 0;
-    if (width > height) {
-      dm->dmOrientation = DMORIENT_LANDSCAPE;
-      dm->dmPaperWidth = static_cast<short>(round(height * 254 / pdfDpi));
-      dm->dmPaperLength = static_cast<short>(round(width * 254 / pdfDpi));
-    } else {
-      dm->dmOrientation = DMORIENT_PORTRAIT;
-      dm->dmPaperWidth = static_cast<short>(round(width * 254 / pdfDpi));
-      dm->dmPaperLength = static_cast<short>(round(height * 254 / pdfDpi));
+
+    // dmPaperSize, dmPaperWidth and dmPaperLength always describe the portrait
+    // sheet; dmOrientation rotates it. A zero axis means 'unspecified' in the
+    // channel protocol, and selectPaper() drops it, so the driver keeps its
+    // own paper for that axis instead of being handed a wrapped short.
+    const auto portraitWidth = width > height ? height : width;
+    const auto portraitHeight = width > height ? width : height;
+    const auto paper = selectPaper(portraitWidth, portraitHeight);
+
+    dm->dmOrientation = width > height ? DMORIENT_LANDSCAPE : DMORIENT_PORTRAIT;
+    dm->dmFields = DM_ORIENTATION;
+
+    if (paper.isStandardForm()) {
+      // A dmPaperSize of 0, as this used to send, is not a valid form number,
+      // so drivers fell back to their own default paper. Do not also send the
+      // dimensions: they would override the form.
+      dm->dmFields |= DM_PAPERSIZE;
+      dm->dmPaperSize = paper.paperSize;
+    } else if (paper.hasDimensions()) {
+      dm->dmFields |= DM_PAPERSIZE | DM_PAPERLENGTH | DM_PAPERWIDTH;
+      dm->dmPaperSize = DMPAPER_USER;
+      dm->dmPaperWidth = paper.widthTenthsMm;
+      dm->dmPaperLength = paper.lengthTenthsMm;
     }
+    // Otherwise the size cannot be expressed - a roll format carries infinity
+    // - so ask only for the orientation and let the driver choose the media.
   }
 
   // nullptr when the engine has no view; both dialogs then keep the owner
@@ -162,6 +235,7 @@ bool PrintJob::printPdf(const std::string& name,
       pd.lStructSize = sizeof(pd);
       pd.hwndOwner = owner;
       pd.hDevMode = dm;
+      dm = nullptr;  // dialog takes ownership; may replace with new alloc
       pd.hDevNames = nullptr;
       pd.hDC = nullptr;
       pd.Flags = PD_USEDEVMODECOPIES | PD_RETURNDC | PD_PRINTSETUP |
@@ -175,14 +249,18 @@ bool PrintJob::printPdf(const std::string& name,
       auto r = PrintDlg(&pd);
 
       if (r != 1) {
-        printing->onCompleted(this, false, "");
+        // User cancelled or error occurred - release what the dialog handed
+        // back, notify Dart so its future completes, then return false so the
+        // caller reclaims this job. Returning true leaked one job per cancel,
+        // because nothing was ever handed a pointer to it.
         if (pd.hDC)
           DeleteDC(pd.hDC);
         if (pd.hDevNames)
           GlobalFree(pd.hDevNames);
         if (pd.hDevMode)
           GlobalFree(pd.hDevMode);
-        return true;
+        printing->onCompleted(this, false, "");
+        return false;
       }
 
       hDC = pd.hDC;
@@ -190,12 +268,17 @@ bool PrintJob::printPdf(const std::string& name,
       hDevNames = pd.hDevNames;
     }
   } else {
-    hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), nullptr, dm);
-    if (!hDC) {
-      return false;
-    }
+    // Take ownership before the call can fail, so cancelJob() below releases
+    // the DEVMODE instead of leaking it.
     hDevMode = dm;
     hDevNames = nullptr;
+    hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), nullptr, dm);
+    if (!hDC) {
+      // The caller deletes this job, so nothing could report the failure
+      // later: the Dart future would wait for ever.
+      cancelJob("Cannot open the printer '" + printer + "'");
+      return false;
+    }
   }
 
   auto dpiX = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSX)) / pdfDpi;
@@ -219,49 +302,66 @@ bool PrintJob::printPdf(const std::string& name,
   return true;
 }
 
-std::vector<Printer> PrintJob::listPrinters() {
-  LPTSTR defaultPrinter;
+std::vector<Printer> PrintJob::listPrinters(std::string* error) {
+  // Both buffers are vectors, so no exit path can leak them - the malloc'd
+  // default-printer name used to leak on every early return - and neither
+  // allocation needs a null check.
   DWORD size = 0;
   GetDefaultPrinter(nullptr, &size);
 
-  defaultPrinter = static_cast<LPTSTR>(malloc(size * sizeof(TCHAR)));
-  if (!GetDefaultPrinter(defaultPrinter, &size)) {
+  auto defaultPrinter = std::vector<TCHAR>(size > 0 ? size : 1);
+  if (size == 0 || !GetDefaultPrinter(defaultPrinter.data(), &size)) {
     size = 0;
   }
 
   auto printers = std::vector<Printer>{};
-  DWORD needed = 0;
-  DWORD returned = 0;
   const auto flags = PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS;
 
-  EnumPrinters(flags, nullptr, 2, nullptr, 0, &needed, &returned);
+  DWORD needed = 0;
+  DWORD returned = 0;
+  auto buffer = std::vector<BYTE>{};
 
-  auto buffer = (PRINTER_INFO_2*)malloc(needed);
-  if (!buffer) {
-    return printers;
+  // Probe then fill is a race: a printer added in between makes the fill fail
+  // with ERROR_INSUFFICIENT_BUFFER, which used to be reported as a machine
+  // with no printers at all.
+  for (auto attempt = 0; attempt < 3; attempt++) {
+    needed = 0;
+    returned = 0;
+    EnumPrinters(flags, nullptr, 2, nullptr, 0, &needed, &returned);
+
+    if (needed == 0) {
+      // No printers, which is not a failure.
+      return printers;
+    }
+
+    buffer.assign(needed, 0);
+    if (EnumPrinters(flags, nullptr, 2, buffer.data(), needed, &needed,
+                     &returned) != 0) {
+      const auto info = reinterpret_cast<PRINTER_INFO_2*>(buffer.data());
+
+      for (DWORD i = 0; i < returned; i++) {
+        printers.push_back(
+            Printer{toUtf8(info[i].pPrinterName), toUtf8(info[i].pPrinterName),
+                    toUtf8(info[i].pDriverName), toUtf8(info[i].pLocation),
+                    toUtf8(info[i].pComment),
+                    size > 0 && _tcsncmp(info[i].pPrinterName,
+                                         defaultPrinter.data(), size) == 0,
+                    (info[i].Status &
+                     (PRINTER_STATUS_NOT_AVAILABLE | PRINTER_STATUS_ERROR |
+                      PRINTER_STATUS_OFFLINE | PRINTER_STATUS_PAUSED)) == 0});
+      }
+
+      return printers;
+    }
+
+    if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+      break;
+    }
   }
 
-  auto result = EnumPrinters(flags, nullptr, 2, (LPBYTE)buffer, needed, &needed,
-                             &returned);
-
-  if (result == 0) {
-    free(buffer);
-    return printers;
+  if (error != nullptr) {
+    *error = lastErrorMessage("Unable to list the printers");
   }
-
-  for (DWORD i = 0; i < returned; i++) {
-    printers.push_back(Printer{
-        toUtf8(buffer[i].pPrinterName), toUtf8(buffer[i].pPrinterName),
-        toUtf8(buffer[i].pDriverName), toUtf8(buffer[i].pLocation),
-        toUtf8(buffer[i].pComment),
-        size > 0 && _tcsncmp(buffer[i].pPrinterName, defaultPrinter, size) == 0,
-        (buffer[i].Status &
-         (PRINTER_STATUS_NOT_AVAILABLE | PRINTER_STATUS_ERROR |
-          PRINTER_STATUS_OFFLINE | PRINTER_STATUS_PAUSED)) == 0});
-  }
-
-  free(buffer);
-  free(defaultPrinter);
   return printers;
 }
 
@@ -277,19 +377,22 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
   auto docName = fromUtf8(documentName);
   docInfo.lpszDocName = docName.c_str();
 
-  auto r = StartDoc(hDC, &docInfo);
+  // StartDoc's result used to be overwritten and never read, so a job that was
+  // never spooled - Save-As cancelled, out of paper, access denied, spooler
+  // stopped - still reported success.
+  if (StartDoc(hDC, &docInfo) <= 0) {
+    // A cancellation gives an empty message, which Dart completes as false
+    // rather than throwing.
+    failJob(lastErrorMessage("Unable to start the print job"));
+    return;
+  }
+  documentOpen = true;
 
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
     // Returning here without calling onCompleted() leaves the Dart-side Future
-    // pending forever. Abort the document StartDoc already opened so no
-    // half-open job is left in the queue, release the handles like the success
-    // path below does, and report the failure.
-    AbortDoc(hDC);
-    DeleteDC(hDC);
-    GlobalFree(hDevNames);
-    GlobalFree(hDevMode);
-    printing->onCompleted(this, false, "Cannot print a malformed PDF file");
+    // pending forever.
+    failJob("Cannot print a malformed PDF file");
     return;
   }
 
@@ -298,11 +401,24 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
   auto marginTop = GetDeviceCaps(hDC, PHYSICALOFFSETY);
 
   for (auto pageNum = 0; pageNum < pages; pageNum++) {
-    StartPage(hDC);
+    if (StartPage(hDC) <= 0) {
+      const auto message = lastErrorMessage("Unable to start a printed page");
+      FPDF_CloseDocument(doc);
+      failJob(message);
+      return;
+    }
 
     auto page = FPDF_LoadPage(doc, pageNum);
     if (!page) {
-      EndPage(hDC);
+      // A page pdfium cannot load is left blank rather than failing the whole
+      // document, but the page itself still has to close cleanly.
+      if (EndPage(hDC) <= 0) {
+        const auto message =
+            lastErrorMessage("Unable to finish a printed page");
+        FPDF_CloseDocument(doc);
+        failJob(message);
+        return;
+      }
       continue;
     }
 
@@ -312,24 +428,83 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
     int bWidth = static_cast<int>(pdfWidth * dpiX);
     int bHeight = static_cast<int>(pdfHeight * dpiY);
 
+    // Widget annotations are not drawn by FPDF_RenderPage, so a filled form
+    // printed without its field values. Flattening merges their appearance
+    // streams into the page content, which keeps the output vector - unlike
+    // rasterizing the page - and honours the Print flag, so a non-print widget
+    // still stays out. FLATTEN_FAIL leaves the page untouched, which is exactly
+    // the old behaviour.
+    FPDFPage_Flatten(page, FLAT_PRINT);
+
     FPDF_RenderPage(hDC, page, -marginLeft, -marginTop, bWidth, bHeight, 0,
                     FPDF_ANNOT | FPDF_PRINTING);
     FPDF_ClosePage(page);
-    r = EndPage(hDC);
+
+    if (EndPage(hDC) <= 0) {
+      const auto message = lastErrorMessage("Unable to finish a printed page");
+      FPDF_CloseDocument(doc);
+      failJob(message);
+      return;
+    }
   }
+
+  // EndDoc before closing the document, so GetLastError still describes the
+  // GDI call rather than whatever pdfium did last.
+  const auto ended = EndDoc(hDC) > 0;
+  const auto endError =
+      ended ? std::string{}
+            : lastErrorMessage("Unable to finish the print job");
 
   FPDF_CloseDocument(doc);
 
-  EndDoc(hDC);
+  if (!ended) {
+    failJob(endError);
+    return;
+  }
+  documentOpen = false;
 
-  DeleteDC(hDC);
-  GlobalFree(hDevNames);
-  GlobalFree(hDevMode);
+  releaseHandles();
 
   printing->onCompleted(this, true, "");
 }
 
-void PrintJob::cancelJob(const std::string& error) {}
+void PrintJob::releaseHandles() {
+  if (hDC) {
+    DeleteDC(hDC);
+    hDC = nullptr;
+  }
+  if (hDevNames) {
+    GlobalFree(hDevNames);
+    hDevNames = nullptr;
+  }
+  if (hDevMode) {
+    GlobalFree(hDevMode);
+    hDevMode = nullptr;
+  }
+}
+
+/// End a job that never reached writeJob.
+///
+/// This was an empty body, so every failure path that could not print simply
+/// dropped the job: the Dart side awaits onCompleted unconditionally, so its
+/// future never settled and the printer HDC and DEVMODEs leaked.
+void PrintJob::cancelJob(const std::string& error) {
+  releaseHandles();
+  printing->onCompleted(this, false, error);
+}
+
+/// End a job that failed while it was being spooled.
+///
+/// AbortDoc runs only when StartDoc actually opened a document, so no call is
+/// made on a device context with nothing to abort.
+void PrintJob::failJob(const std::string& error) {
+  if (documentOpen) {
+    AbortDoc(hDC);
+    documentOpen = false;
+  }
+  releaseHandles();
+  printing->onCompleted(this, false, error);
+}
 
 bool PrintJob::sharePdf(std::vector<uint8_t> data, const std::string& name) {
   TCHAR lpTempPathBuffer[MAX_PATH];
@@ -339,14 +514,31 @@ bool PrintJob::sharePdf(std::vector<uint8_t> data, const std::string& name) {
     return false;
   }
 
-  auto filename = fromUtf8(toUtf8(lpTempPathBuffer) + "\\" + name);
+  // Defensive basename: the name comes from Dart and used to be pasted into
+  // the path as-is, so one carrying a separator wrote outside the temp
+  // directory.
+  auto basename = name.substr(name.find_last_of("/\\") + 1);
+  if (basename.empty() || basename == "." || basename == "..") {
+    basename = "document.pdf";
+  }
+
+  auto directory = toUtf8(lpTempPathBuffer);
+  if (!directory.empty() && directory.back() != '\\') {
+    directory += "\\";
+  }
+  auto filename = fromUtf8(directory + basename);
 
   auto output_file =
       std::basic_ofstream<uint8_t>{filename, std::ios::out | std::ios::binary};
   output_file.write(data.data(), data.size());
   output_file.close();
+  if (!output_file) {
+    // A full disk or an unwritable temp directory used to be reported as a
+    // successful share.
+    return false;
+  }
 
-  SHELLEXECUTEINFO ShExecInfo;
+  SHELLEXECUTEINFO ShExecInfo = {};
   ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
   ShExecInfo.fMask = 0;
   ShExecInfo.hwnd = nullptr;
@@ -364,16 +556,116 @@ bool PrintJob::sharePdf(std::vector<uint8_t> data, const std::string& name) {
 
 void PrintJob::pickPrinter(void* result) {}
 
+/// The pdfium form-fill environment for one document.
+///
+/// Widget annotations - checkboxes, text fields, buttons, signatures - keep
+/// their appearance in /AP streams and paint nothing into the page content
+/// stream, and FPDF_RenderPageBitmap draws every annotation except widget and
+/// popup ones. pdfium draws them through FPDF_FFLDraw, which needs this
+/// environment; without it those fields were simply missing, with no error.
+class FormEnvironment {
+ public:
+  explicit FormEnvironment(FPDF_DOCUMENT doc) {
+    // Zeroed first: every member other than the version is an optional callback
+    // this does not need. The struct has to outlive the handle, because pdfium
+    // keeps a pointer to it, which is why it is a member and not a local.
+    memset(&info_, 0, sizeof(info_));
+    info_.version = 2;
+
+    handle_ = FPDFDOC_InitFormFillEnvironment(doc, &info_);
+    if (handle_ != nullptr) {
+      // No selection highlight: this is a render, not an editor.
+      FPDF_SetFormFieldHighlightAlpha(handle_, 0);
+    }
+  }
+
+  ~FormEnvironment() {
+    if (handle_ != nullptr) {
+      FPDFDOC_ExitFormFillEnvironment(handle_);
+    }
+  }
+
+  FormEnvironment(const FormEnvironment&) = delete;
+  FormEnvironment& operator=(const FormEnvironment&) = delete;
+
+  /// Null when pdfium refused the environment, in which case every call on it
+  /// is skipped and the render is exactly what it was before.
+  FPDF_FORMHANDLE get() const { return handle_; }
+
+ private:
+  FPDF_FORMFILLINFO info_;
+  FPDF_FORMHANDLE handle_ = nullptr;
+};
+
+/// Tells the form environment about a page for as long as it is open.
+///
+/// Declared after the page handle, so FORM_OnBeforeClosePage runs before
+/// FPDF_ClosePage.
+class FormPage {
+ public:
+  FormPage(FPDF_PAGE page, FPDF_FORMHANDLE form) : page_(page), form_(form) {
+    if (page_ != nullptr && form_ != nullptr) {
+      FORM_OnAfterLoadPage(page_, form_);
+    }
+  }
+
+  ~FormPage() {
+    if (page_ != nullptr && form_ != nullptr) {
+      FORM_OnBeforeClosePage(page_, form_);
+    }
+  }
+
+  FormPage(const FormPage&) = delete;
+  FormPage& operator=(const FormPage&) = delete;
+
+ private:
+  FPDF_PAGE page_;
+  FPDF_FORMHANDLE form_;
+};
+
+/// Closes a pdfium handle however the scope is left.
+///
+/// The raster loop gained exit paths that must not skip FPDF_ClosePage or
+/// FPDFBitmap_Destroy.
+template <typename Handle, void (*Close)(Handle)>
+class PdfiumHandle {
+ public:
+  explicit PdfiumHandle(Handle handle) : handle_(handle) {}
+  ~PdfiumHandle() {
+    if (handle_ != nullptr) {
+      Close(handle_);
+    }
+  }
+
+  PdfiumHandle(const PdfiumHandle&) = delete;
+  PdfiumHandle& operator=(const PdfiumHandle&) = delete;
+
+  Handle get() const { return handle_; }
+  explicit operator bool() const { return handle_ != nullptr; }
+
+ private:
+  Handle handle_;
+};
+
+using DocumentHandle = PdfiumHandle<FPDF_DOCUMENT, &FPDF_CloseDocument>;
+using PageHandle = PdfiumHandle<FPDF_PAGE, &FPDF_ClosePage>;
+using BitmapHandle = PdfiumHandle<FPDF_BITMAP, &FPDFBitmap_Destroy>;
+
 void PrintJob::rasterPdf(std::vector<uint8_t> data,
                          std::vector<int> pages,
-                         double scale) {
-  auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
+                         double scale,
+                         uint32_t background) {
+  DocumentHandle doc{FPDF_LoadMemDocument64(data.data(), data.size(), nullptr)};
   if (!doc) {
     printing->onPageRasterEnd(this, "Cannot raster a malformed PDF file");
     return;
   }
 
-  auto pageCount = FPDF_GetPageCount(doc);
+  // Null when this document has no AcroForm, or pdfium refused: every call on
+  // it below is then skipped and the render is unchanged.
+  const FormEnvironment form{doc.get()};
+
+  auto pageCount = FPDF_GetPageCount(doc.get());
 
   if (pages.size() == 0) {
     // Use all pages
@@ -386,48 +678,56 @@ void PrintJob::rasterPdf(std::vector<uint8_t> data,
       continue;
     }
 
-    auto page = FPDF_LoadPage(doc, n);
+    PageHandle page{FPDF_LoadPage(doc.get(), n)};
     if (!page) {
       continue;
     }
+    const FormPage formPage{page.get(), form.get()};
 
-    auto width = FPDF_GetPageWidth(page);
-    auto height = FPDF_GetPageHeight(page);
-
-    auto bWidth = static_cast<int>(width * scale);
-    auto bHeight = static_cast<int>(height * scale);
-
-    auto bitmap = FPDFBitmap_Create(bWidth, bHeight, 1);
-    FPDFBitmap_FillRect(bitmap, 0, 0, bWidth, bHeight, 0x00ffffff);
-
-    FPDF_RenderPageBitmap(bitmap, page, 0, 0, bWidth, bHeight, 0,
-                          FPDF_ANNOT | FPDF_LCD_TEXT);
-
-    uint8_t* p = static_cast<uint8_t*>(FPDFBitmap_GetBuffer(bitmap));
-    auto stride = FPDFBitmap_GetStride(bitmap);
-    size_t l = static_cast<size_t>(bHeight * stride);
-
-    // BGRA to RGBA conversion
-    for (auto y = 0; y < bHeight; y++) {
-      auto offset = y * stride;
-      for (auto x = 0; x < bWidth; x++) {
-        auto t = p[offset];
-        p[offset] = p[offset + 2];
-        p[offset + 2] = t;
-        offset += 4;
-      }
+    const auto raster = rasterSizeFor(FPDF_GetPageWidth(page.get()),
+                                      FPDF_GetPageHeight(page.get()), scale);
+    if (!raster.valid) {
+      // pdfium answers a null bitmap for this, which the loop below used to
+      // write through.
+      printing->onPageRasterEnd(this, "Cannot raster a page this large");
+      return;
     }
 
-    printing->onPageRasterized(std::vector<uint8_t>{p, p + l}, bWidth, bHeight,
-                               this);
+    BitmapHandle bitmap{FPDFBitmap_Create(raster.width, raster.height, 1)};
+    if (!bitmap) {
+      printing->onPageRasterEnd(this, "Out of memory rastering a page");
+      return;
+    }
 
-    FPDFBitmap_Destroy(bitmap);
-    FPDF_ClosePage(page);
+    // A PDF page has no background of its own. This used to be hard-coded to
+    // 0x00ffffff, which writes white but leaves alpha at 0, so a rastered page
+    // came back transparent and saving it as PNG gave a black page.
+    FPDFBitmap_FillRect(bitmap.get(), 0, 0, raster.width, raster.height,
+                        static_cast<unsigned long>(background));
+
+    FPDF_RenderPageBitmap(bitmap.get(), page.get(), 0, 0, raster.width,
+                          raster.height, 0, FPDF_ANNOT | FPDF_LCD_TEXT);
+
+    if (form.get() != nullptr) {
+      // A second pass over the same bitmap, for the annotations the content
+      // stream does not carry.
+      FPDF_FFLDraw(form.get(), bitmap.get(), page.get(), 0, 0, raster.width,
+                   raster.height, 0, FPDF_ANNOT | FPDF_LCD_TEXT);
+    }
+
+    uint8_t* p = static_cast<uint8_t*>(FPDFBitmap_GetBuffer(bitmap.get()));
+    if (p == nullptr) {
+      printing->onPageRasterEnd(this, "Unable to read the rastered page");
+      return;
+    }
+
+    bgraToPremultipliedRgba(p, raster.width, raster.height, raster.stride);
+
+    printing->onPageRasterized(std::vector<uint8_t>{p, p + raster.bytes},
+                               raster.width, raster.height, this);
   }
 
-  FPDF_CloseDocument(doc);
-
-  printing->onPageRasterEnd(this, "");
+  printing->onPageRasterEnd(this, nullptr);
 }
 
 std::map<std::string, bool> PrintJob::printingInfo() {

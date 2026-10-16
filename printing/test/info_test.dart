@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:printing/printing.dart';
 
+const _channel = MethodChannel('net.nfet.printing');
+
 void main() {
   setUp(TestWidgetsFlutterBinding.ensureInitialized);
+
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(_channel, null);
+  });
 
   test('PrintingInfo', () async {
     const info = PrintingInfo.unavailable;
@@ -43,5 +51,54 @@ void main() {
     expect(info.canConvertHtml, false);
     expect(info.canShare, false);
     expect(info.canRaster, false);
+  });
+
+  test('Printing.info surfaces a platform that cannot print', () async {
+    // An Android engine with no Activity attached cannot print, and used to
+    // report that it could and then fail the call.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(_channel, (MethodCall call) async {
+          if (call.method == 'printingInfo') {
+            return <String, dynamic>{
+              'canPrint': false,
+              'canShare': true,
+              'canRaster': true,
+              'dynamicLayout': false,
+            };
+          }
+          return null;
+        });
+
+    final info = await Printing.info();
+
+    expect(info.canPrint, isFalse);
+    expect(info.dynamicLayout, isFalse);
+    expect(info.canShare, isTrue, reason: 'sharing works without an Activity');
+    expect(info.canRaster, isTrue);
+  });
+
+  test('reportsPrintOutcome is true for a method-channel platform', () {
+    // The native backends all report the real outcome through onCompleted, and
+    // none of them sends this key, so an absent value has to mean true.
+    final info = PrintingInfo.fromMap(<dynamic, dynamic>{'canPrint': true});
+
+    expect(info.reportsPrintOutcome, isTrue);
+    expect(info.toString(), contains('reportsPrintOutcome: true'));
+  });
+
+  test('reportsPrintOutcome can be reported false', () {
+    // What the web plugin answers: a true result there only means the print
+    // dialog was invoked.
+    final info = PrintingInfo.fromMap(<dynamic, dynamic>{
+      'canPrint': true,
+      'reportsPrintOutcome': false,
+    });
+
+    expect(info.reportsPrintOutcome, isFalse);
+    expect(info.toString(), contains('reportsPrintOutcome: false'));
+  });
+
+  test('an unavailable platform reports no outcome either', () {
+    expect(PrintingInfo.unavailable.reportsPrintOutcome, isFalse);
   });
 }

@@ -40,6 +40,7 @@ class Header extends StatelessWidget {
     this.padding,
     this.textStyle,
     String? title,
+    this.anchorName,
     this.outlineColor,
     this.outlineStyle = PdfOutlineStyle.normal,
   }) : assert(level >= 0 && level <= 5),
@@ -48,9 +49,22 @@ class Header extends StatelessWidget {
 
   final String? title;
 
+  /// The name of the destination this heading registers.
+  ///
+  /// One is generated when this is null. The name used to be
+  /// `text.hashCode.toString()`, a function of the heading's text and not of the
+  /// heading - so three `Header(text: 'Summary')` widgets registered one
+  /// destination and all three bookmarks jumped to the last of them, and a
+  /// `Header(child:)` with no text used `null.hashCode`, one constant for the
+  /// whole document.
+  final String? anchorName;
+
   final String? text;
 
   final Widget? child;
+
+  /// Held so a MultiPage re-layout does not renumber the anchor.
+  String? _anchorName;
 
   final int level;
 
@@ -133,8 +147,10 @@ class Header extends StatelessWidget {
       return container;
     }
 
+    _anchorName ??= anchorName ?? context.document.pdfNames.uniqueDestName();
+
     return Outline(
-      name: text.hashCode.toString(),
+      name: _anchorName!,
       title: title!,
       child: container,
       level: level,

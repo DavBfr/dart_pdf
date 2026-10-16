@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import 'dart:math' as math;
+
 import 'package:vector_math/vector_math_64.dart';
 
 import '../../pdf.dart';
@@ -66,6 +68,16 @@ void _drawImageRect(
   PdfRect sourceRect,
   PdfRect destinationRect,
 ) {
+  // applyBoxFit returns a zero-sized source for a degenerate destination, and
+  // the scale below divided by it: the NaN that came out went straight into the
+  // content stream as an operand. Nothing to draw either way.
+  if (sourceRect.width == 0 ||
+      sourceRect.height == 0 ||
+      destinationRect.width == 0 ||
+      destinationRect.height == 0) {
+    return;
+  }
+
   final fw = destinationRect.width / sourceRect.width;
   final fh = destinationRect.height / sourceRect.height;
 
@@ -111,23 +123,37 @@ class Image extends Widget {
     BoxConstraints constraints, {
     bool parentUsesSize = false,
   }) {
-    final w =
-        width ??
-        (constraints.hasBoundedWidth
-            ? constraints.maxWidth
-            : constraints.constrainWidth(image.width!.toDouble()));
-    final h =
-        height ??
-        (constraints.hasBoundedHeight
-            ? constraints.maxHeight
-            : constraints.constrainHeight(image.height!.toDouble()));
+    // An explicit width or height is a preferred size the parent may override,
+    // not a way out of the constraints it was given. Taken verbatim, it made an
+    // Expanded child wider than its slot - 'childSize <= maxChildExtent' in
+    // debug, a silent overlap in release.
+    final w = constraints.constrainWidth(
+      width ??
+          (constraints.hasBoundedWidth
+              ? constraints.maxWidth
+              : image.width!.toDouble()),
+    );
+    final h = constraints.constrainHeight(
+      height ??
+          (constraints.hasBoundedHeight
+              ? constraints.maxHeight
+              : image.height!.toDouble()),
+    );
 
     final sizes = applyBoxFit(
       fit,
       PdfPoint(image.width!.toDouble(), image.height!.toDouble()),
       PdfPoint(w, h),
     );
-    box = PdfRect.fromPoints(PdfPoint.zero, sizes.destination!);
+    // An upper bound only: the fit has already chosen a size, and forcing a tight
+    // constraint's minimum on it would throw the aspect ratio away.
+    box = PdfRect.fromPoints(
+      PdfPoint.zero,
+      PdfPoint(
+        math.min(sizes.destination!.x, constraints.maxWidth),
+        math.min(sizes.destination!.y, constraints.maxHeight),
+      ),
+    );
   }
 
   @override

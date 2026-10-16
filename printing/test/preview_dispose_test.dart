@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:printing/printing.dart';
+import 'package:printing/src/preview/page.dart';
 
 const _channel = MethodChannel('net.nfet.printing');
 const _codec = StandardMethodCodec();
@@ -119,6 +120,76 @@ void main() {
     await sendPage();
     await tester.pump();
     await tester.pumpWidget(const SizedBox.shrink());
+    await settle(tester);
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the scroll controller is disposed with the preview', (
+    tester,
+  ) async {
+    final key = GlobalKey<PdfPreviewCustomState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PdfPreviewCustom(
+          key: key,
+          dpi: 72,
+          build: (_) async => Uint8List(0),
+        ),
+      ),
+    );
+    await startRaster(tester);
+    await sendPage();
+    await settle(tester);
+    final ended = endRaster();
+    await settle(tester);
+    await ended;
+
+    // The state creates this, so the state has to dispose it. Every mount and
+    // unmount used to leak one, with its listener list.
+    final controller = key.currentState!.scrollController;
+    expect(() => controller.addListener(() {}), returnsNormally);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await settle(tester);
+
+    expect(() => controller.addListener(() {}), throwsFlutterError);
+  });
+
+  testWidgets('unmounting with a pending scroll restore does not throw', (
+    tester,
+  ) async {
+    await tester.pumpWidget(host((_) async => Uint8List(0)));
+    await startRaster(tester);
+    await sendPage();
+    await settle(tester);
+    final ended = endRaster();
+    await settle(tester);
+    await ended;
+
+    // Zoom in and out. Coming out of the zoom schedules a Timer.run that jumps
+    // the scroll position; unmounting before it runs used to reach a disposed
+    // controller.
+    final page = find.byType(PdfPreviewPage);
+    expect(page, findsOneWidget);
+    await tester.tap(page);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tap(page);
+    await tester.pumpAndSettle();
+
+    final zoomed = find.byType(InteractiveViewer);
+    expect(zoomed, findsOneWidget);
+    await tester.tap(zoomed);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tap(zoomed);
+    await tester.pump();
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    // The clock has to be elapsed for the pending timers to fire at all:
+    // pump() with no duration only flushes microtasks. This is where the
+    // scroll restore runs, with nothing left to restore onto.
+    await tester.pump(const Duration(seconds: 1));
     await settle(tester);
 
     expect(tester.takeException(), isNull);

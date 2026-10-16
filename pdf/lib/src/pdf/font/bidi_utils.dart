@@ -1,4 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:bidi/bidi.dart' as bidi;
+
+import 'arabic.dart' as arabic;
 
 /*
  * Copyright (C) 2017, David PHAM-VAN <dev.nfet.net@gmail.com>
@@ -80,7 +84,29 @@ const Map<int, int> basicToIsolatedMappings = {
 };
 
 /// Applies THE BIDIRECTIONAL ALGORITHM using (https://pub.dev/packages/bidi)
+///
+/// Never throws. package:bidi's normalizer indexes its length table out of step
+/// with the decomposition of U+0622-U+0626, so a hamza carrier followed by a
+/// haraka - 40 of the 45 pairs - threw `RangeError (length): Not in inclusive
+/// range 0..1: 2` out of `Document.save()`, with no runtime way to opt out of
+/// the call. On failure the text is shaped without the reordering, which is a
+/// different rendering but still Arabic; returning the logical string would draw
+/// it reversed and unjoined.
 String logicalToVisual(String input) {
+  try {
+    return _logicalToVisual(input);
+  } catch (e) {
+    assert(() {
+      // ignore: avoid_print
+      print('Unable to apply the bidi algorithm to "$input": $e');
+      return true;
+    }());
+
+    return arabic.convert(input);
+  }
+}
+
+String _logicalToVisual(String input) {
   final buffer = StringBuffer();
   final paragraphs = bidi.BidiString.fromLogical(input).paragraphs;
   for (final paragraph in paragraphs) {
@@ -93,4 +119,217 @@ String logicalToVisual(String input) {
     }
   }
   return buffer.toString();
+}
+
+/// Shape [input] for rendering without reordering it.
+///
+/// The characters come back in logical order, which is what line breaking,
+/// metrics and hyphenation need: UAX #9 rule L2 reorders a *line*, once its
+/// breaks are known, and that is [reorderLine]'s job. [logicalToVisual] reorders
+/// the whole paragraph instead and then reverses its word order; the two
+/// reversals cancel only while every word of a run stays on one line.
+///
+/// Never throws: on failure the text comes back as it went in, so it is placed
+/// and mirrored but unjoined.
+String shapeLogical(String input) {
+  try {
+    final buffer = StringBuffer();
+
+    for (final paragraph in bidi.BidiString.fromLogical(input).paragraphs) {
+      final visual = paragraph.bidiText;
+      final indices = paragraph.indices;
+      final endsWithNewLine = paragraph.separator == 10;
+
+      // bidiText carries the separator, indices does not, and a ligature such as
+      // lam-alef turns two source characters into one, so the two lengths do not
+      // have to agree.
+      final count = math.min(
+        indices.length,
+        visual.length - (endsWithNewLine ? 1 : 0),
+      );
+
+      // indices[i] is the source position of the character now at visual
+      // position i, so ordering the visual positions by it undoes the reorder
+      // and leaves the shaping in place.
+      final order = List<int>.generate(count, (int i) => i)
+        ..sort((int a, int b) => indices[a].compareTo(indices[b]));
+
+      buffer.write(
+        String.fromCharCodes(<int>[for (final i in order) visual[i]]),
+      );
+      if (endsWithNewLine) {
+        buffer.writeln();
+      }
+    }
+
+    return buffer.toString();
+  } catch (e) {
+    assert(() {
+      // ignore: avoid_print
+      print('Unable to shape "$input": $e');
+      return true;
+    }());
+
+    // The text itself, in logical order: [reorderLine] can still place its runs
+    // and the letters still read in the right direction, only unjoined. What
+    // arabic.convert returns is already reversed, which this pipeline would
+    // reverse a second time.
+    return input;
+  }
+}
+
+/// [text] with its characters in the opposite order.
+String reversed(String text) =>
+    String.fromCharCodes(text.runes.toList().reversed);
+
+/// Whether [rune] is a strong right-to-left character.
+///
+/// Arabic-Indic digits are deliberately not strong: a number reads left to right
+/// wherever it sits, so a run of them must not be mirrored.
+bool _isStrongRtl(int rune) {
+  if (rune < 0x0590) {
+    return false;
+  }
+  if ((rune >= 0x0660 && rune <= 0x0669) ||
+      (rune >= 0x06F0 && rune <= 0x06F9)) {
+    return false;
+  }
+
+  return (rune >= 0x0590 && rune <= 0x05FF) || // Hebrew
+      (rune >= 0x0600 && rune <= 0x08FF) || // Arabic, Syriac, Thaana, NKo
+      (rune >= 0xFB1D && rune <= 0xFDFF) || // Hebrew, Arabic forms A
+      (rune >= 0xFE70 && rune <= 0xFEFF) || // Arabic forms B
+      (rune >= 0x10800 && rune <= 0x10FFF) ||
+      (rune >= 0x1E800 && rune <= 0x1EFFF);
+}
+
+/// Whether [text] holds a strong right-to-left character.
+bool isRtlText(String text) {
+  for (final rune in text.runes) {
+    if (_isStrongRtl(rune)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/// Whether the bidirectional algorithm has anything to do with [text].
+///
+/// Text with no strong right-to-left character and no bidi control is already in
+/// visual order, so the whole pass can be skipped - which is what keeps a
+/// left-to-right document byte for byte what it was.
+bool hasBidi(String text) {
+  for (final rune in text.runes) {
+    if (rune < 0x0590) {
+      continue;
+    }
+    if (_isStrongRtl(rune) ||
+        rune == 0x061C || // ARABIC LETTER MARK
+        rune == 0x200E || // LEFT-TO-RIGHT MARK
+        rune == 0x200F || // RIGHT-TO-LEFT MARK
+        (rune >= 0x202A && rune <= 0x202E) || // embeddings and overrides
+        (rune >= 0x2066 && rune <= 0x2069)) {
+      // isolates
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/// The inert character that stands for [run] in a line skeleton.
+///
+/// Hebrew alef for anything with a strong right-to-left character in it - it is
+/// strong R and, unlike the Arabic letters, is never shaped, ligated or
+/// decomposed. Otherwise the run's own first character when that is ASCII, which
+/// carries its real class: a letter is L, a digit EN, punctuation ON. Otherwise
+/// a latin letter, since everything left is left-to-right.
+int _skeletonOf(String run) {
+  for (final rune in run.runes) {
+    if (_isStrongRtl(rune)) {
+      return 0x05D0;
+    }
+  }
+
+  final first = run.isEmpty ? 0 : run.codeUnitAt(0);
+  return first >= 0x20 && first <= 0x7E ? first : 0x61;
+}
+
+/// Apply UAX #9 rule L2 to one line: the logical indices of [runs] in visual
+/// left-to-right order.
+///
+/// [rtl] is the *paragraph's* base direction, not the line's. A line is
+/// reordered against its paragraph - an all-Latin line inside an Arabic
+/// paragraph is still part of that paragraph - and package:bidi picks the base
+/// from the first strong character it sees, so the level is forced with an
+/// embedding control. The control is removed again on the way out, which shifts
+/// every index by the one character it occupied.
+///
+/// The algorithm is run over a skeleton of one character per run rather than over
+/// the line itself: the real text shapes, ligates and decomposes, so its indices
+/// do not line up with the runs, while the skeleton's do, one for one.
+///
+/// Returns the identity order if the algorithm cannot account for every run.
+List<int> reorderLine(List<String> runs, {required bool rtl}) {
+  final order = List<int>.generate(runs.length, (int i) => i);
+  if (runs.length < 2) {
+    return order;
+  }
+
+  final skeleton = StringBuffer(rtl ? '\u202B' : '\u202A');
+  for (var run = 0; run < runs.length; run++) {
+    if (run > 0) {
+      skeleton.write(' ');
+    }
+    skeleton.writeCharCode(_skeletonOf(runs[run]));
+  }
+
+  List<int> indices;
+  try {
+    indices = bidi.BidiString.fromLogical(
+      skeleton.toString(),
+    ).paragraphs.first.indices;
+  } catch (e) {
+    assert(() {
+      // ignore: avoid_print
+      print('Unable to reorder a line of ${runs.length} runs: $e');
+      return true;
+    }());
+
+    return order;
+  }
+
+  // Position 0 is the embedding control, which has been taken back out; run r
+  // sits at 1 + 2 * r, with the separators on the odd offsets.
+  final rank = List<int>.filled(runs.length, -1);
+
+  for (var visual = 0; visual < indices.length; visual++) {
+    final logical = indices[visual] - 1;
+    if (logical < 0 || logical.isOdd) {
+      continue;
+    }
+
+    final run = logical ~/ 2;
+    if (run < runs.length && rank[run] < 0) {
+      rank[run] = visual;
+    }
+  }
+
+  if (rank.contains(-1)) {
+    assert(() {
+      // ignore: avoid_print
+      print('Unable to place every run of a line of ${runs.length}');
+      return true;
+    }());
+
+    return order;
+  }
+
+  order.sort(
+    (int a, int b) =>
+        rank[a] != rank[b] ? rank[a].compareTo(rank[b]) : a.compareTo(b),
+  );
+
+  return order;
 }

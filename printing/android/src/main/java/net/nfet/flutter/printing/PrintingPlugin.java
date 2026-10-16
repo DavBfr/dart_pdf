@@ -23,53 +23,48 @@ import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
-import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodChannel;
 
 /**
  * PrintingPlugin
  */
 public class PrintingPlugin implements FlutterPlugin, ActivityAware {
-    private Context context;
+    // Kept for the whole engine lifetime, so the handler can fall back to it
+    // when the Activity goes away.
+    private Context applicationContext;
     private MethodChannel channel;
     private PrintingHandler handler;
 
     @Override
     public void onAttachedToEngine(FlutterPluginBinding binding) {
-        context = binding.getApplicationContext();
-        onAttachedToEngine(binding.getBinaryMessenger());
+        applicationContext = binding.getApplicationContext();
+        channel = new MethodChannel(binding.getBinaryMessenger(), "net.nfet.printing");
+        setHandlerContext(applicationContext);
     }
 
-    private void onAttachedToEngine(BinaryMessenger messenger) {
-        channel = new MethodChannel(messenger, "net.nfet.printing");
-
-        if (context != null) {
-            handler = new PrintingHandler(context, channel);
-            channel.setMethodCallHandler(handler);
+    /** Point the channel at a handler bound to the given context. */
+    private void setHandlerContext(Context context) {
+        if (channel == null || context == null) {
+            return;
         }
+
+        handler = new PrintingHandler(context, channel);
+        channel.setMethodCallHandler(handler);
     }
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-        channel.setMethodCallHandler(null);
-        channel = null;
+        if (channel != null) {
+            channel.setMethodCallHandler(null);
+            channel = null;
+        }
         handler = null;
+        applicationContext = null;
     }
 
     @Override
     public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
-        if (context != null) {
-            context = null;
-        }
-        context = binding.getActivity();
-        onAttachedToActivity(context);
-    }
-
-    private void onAttachedToActivity(Context context) {
-        if (context != null && channel != null) {
-            handler = new PrintingHandler(context, channel);
-            channel.setMethodCallHandler(handler);
-        }
+        setHandlerContext(binding.getActivity());
     }
 
     @Override
@@ -79,15 +74,14 @@ public class PrintingPlugin implements FlutterPlugin, ActivityAware {
 
     @Override
     public void onReattachedToActivityForConfigChanges(ActivityPluginBinding binding) {
-        context = null;
-        context = binding.getActivity();
-        onAttachedToActivity(context);
+        setHandlerContext(binding.getActivity());
     }
 
     @Override
     public void onDetachedFromActivity() {
-        channel.setMethodCallHandler(null);
-        context = null;
-        handler = null;
+        // Back to the application context, not to no handler at all: a cached
+        // engine outlives its Activity, and sharing still works there. Nulling
+        // the handler turned every later call into a MissingPluginException.
+        setHandlerContext(applicationContext);
     }
 }

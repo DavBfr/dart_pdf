@@ -63,13 +63,22 @@ class PrintJob {
   HGLOBAL hDevNames = nullptr;
   HDC hDC = nullptr;
   std::string documentName;
+  // Whether StartDoc has opened a document that AbortDoc still has to close.
+  bool documentOpen = false;
+
+  /// Abort any open document, release the handles and report one failure.
+  void failJob(const std::string& error);
 
  public:
   PrintJob(Printing* printing, int index);
 
   int id() { return index; }
 
-  std::vector<Printer> listPrinters();
+  /// Enumerate the installed printers.
+  ///
+  /// On failure the result is empty and error holds a message, so a stopped
+  /// spooler is reported instead of looking like a machine with no printers.
+  std::vector<Printer> listPrinters(std::string* error);
 
   bool printPdf(const std::string& name,
                 std::string printer,
@@ -82,13 +91,18 @@ class PrintJob {
 
   void cancelJob(const std::string& error);
 
+  // Release the printer device context and the DEVMODE/DEVNAMES blocks.
+  // Idempotent, so a job may be cancelled after a partial setup.
+  void releaseHandles();
+
   bool sharePdf(std::vector<uint8_t> data, const std::string& name);
 
   void pickPrinter(void* result);
 
   void rasterPdf(std::vector<uint8_t> data,
                  std::vector<int> pages,
-                 double scale);
+                 double scale,
+                 uint32_t background);
 
   std::map<std::string, bool> printingInfo();
 };

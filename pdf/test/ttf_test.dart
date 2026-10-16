@@ -15,6 +15,8 @@
  */
 
 import 'dart:io';
+import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/src/pdf/font/ttf_writer.dart';
@@ -117,5 +119,258 @@ void main() {
     final data = ttfWriter.withChars('hçHée 你好 檯號 ☃'.runes.toList());
     final output = File('${font.fontName}.ttf');
     output.writeAsBytesSync(data);
+  });
+
+  group('readGlyph', () {
+    const fonts = <String>[
+      'open-sans',
+      'roboto',
+      'noto-sans',
+      'hacen-tunisia',
+      'genyomintw',
+    ];
+
+    test('returns nothing for a glyph loca says is empty', () {
+      // An empty glyph has loca[i] == loca[i + 1], so the start offset points at
+      // the next glyph's record and the readers used to return its outline. Every
+      // blank in every one of these fonts came back drawn.
+      for (final name in fonts) {
+        final font = TtfParser(
+          File('$name.ttf').readAsBytesSync().buffer.asByteData(),
+        );
+
+        for (var g = 0; g < font.glyphOffsets.length; g++) {
+          if (font.glyphSizes[g] > 0) {
+            continue;
+          }
+
+          final glyph = font.readGlyph(g);
+          expect(glyph.data, isEmpty, reason: '$name glyph $g');
+          expect(glyph.compounds, isEmpty, reason: '$name glyph $g');
+        }
+      }
+    });
+
+    test('never returns more than loca says the glyph occupies', () {
+      for (final name in fonts) {
+        final font = TtfParser(
+          File('$name.ttf').readAsBytesSync().buffer.asByteData(),
+        );
+
+        for (var g = 0; g < font.glyphOffsets.length; g++) {
+          expect(
+            font.readGlyph(g).data.length,
+            lessThanOrEqualTo(math.max(font.glyphSizes[g], 0)),
+            reason: '$name glyph $g',
+          );
+        }
+      }
+    });
+
+    test('an empty glyph is not its neighbour', () {
+      final font = TtfParser(
+        File('open-sans.ttf').readAsBytesSync().buffer.asByteData(),
+      );
+
+      // Glyph 97 is U+00A0, the no-break space; 98 is U+00A1. readGlyph(97) used
+      // to return 98's outline, byte for byte.
+      expect(font.glyphSizes[97], 0);
+      expect(font.readGlyph(97).data, isEmpty);
+      expect(font.readGlyph(98).data, hasLength(font.glyphSizes[98]));
+      expect(font.readGlyph(97).data, isNot(font.readGlyph(98).data));
+    });
+
+    test('a subset keeps the empty glyphs empty', () {
+      final data = File('open-sans.ttf').readAsBytesSync();
+      final font = TtfParser(data.buffer.asByteData());
+
+      // 0x00A0 is a no-break space and 0x200B a zero-width space: both empty.
+      final subset = TtfWriter(
+        font,
+      ).withChars(<int>[0x41, 0x00A0, 0x200B, 0x42]);
+      final reparsed = TtfParser(subset.buffer.asByteData());
+
+      expect(reparsed.glyphSizes.where((int s) => s == 0), hasLength(2));
+      for (var g = 0; g < reparsed.glyphOffsets.length; g++) {
+        if (reparsed.glyphSizes[g] == 0) {
+          expect(reparsed.readGlyph(g).data, isEmpty);
+        }
+      }
+    });
+  });
+
+  group('a sliced view', () {
+    /// The same font, as a view starting [pad] bytes into a larger buffer.
+    TtfParser padded(String name, int pad) {
+      final font = File('$name.ttf').readAsBytesSync();
+      final buffer = Uint8List(pad + font.length + 7)
+        // Something other than zeros in front, so a parse that ignores the
+        // offset reads nonsense rather than accidentally working.
+        ..fillRange(0, pad, 0x5A)
+        ..setRange(pad, pad + font.length, font);
+
+      return TtfParser(ByteData.view(buffer.buffer, pad, font.length));
+    }
+
+    test('parses identically to offset zero', () {
+      // Every accessor is view-relative but the reach-throughs to the backing
+      // buffer were absolute, so this threw a FormatException decoding table
+      // tags, or silently parsed a shifted window.
+      final base = TtfParser(
+        File('open-sans.ttf').readAsBytesSync().buffer.asByteData(),
+      );
+
+      for (final pad in <int>[1, 8, 4096]) {
+        final view = padded('open-sans', pad);
+
+        expect(view.fontName, base.fontName, reason: 'pad $pad');
+        expect(view.numGlyphs, base.numGlyphs, reason: 'pad $pad');
+        expect(view.tableOffsets, base.tableOffsets, reason: 'pad $pad');
+        expect(view.tableSize, base.tableSize, reason: 'pad $pad');
+        expect(
+          view.charToGlyphIndexMap,
+          base.charToGlyphIndexMap,
+          reason: 'pad $pad',
+        );
+      }
+    });
+
+    test('reads every glyph identically', () {
+      final base = TtfParser(
+        File('open-sans.ttf').readAsBytesSync().buffer.asByteData(),
+      );
+      final view = padded('open-sans', 8);
+
+      for (var g = 0; g < base.glyphOffsets.length; g++) {
+        expect(
+          view.readGlyph(g).data,
+          base.readGlyph(g).data,
+          reason: 'glyph $g',
+        );
+      }
+    });
+
+    test('subsets identically', () {
+      final base = TtfParser(
+        File('open-sans.ttf').readAsBytesSync().buffer.asByteData(),
+      );
+      final view = padded('open-sans', 4096);
+      const chars = <int>[0x41, 0x42, 0x61, 0x62, 0x20];
+
+      expect(
+        TtfWriter(view).withChars(chars),
+        TtfWriter(base).withChars(chars),
+      );
+    });
+
+    test('fontData is exactly the view', () {
+      final font = File('open-sans.ttf').readAsBytesSync();
+      final view = padded('open-sans', 8);
+
+      expect(view.fontData, hasLength(font.length));
+      expect(view.fontData, font);
+    });
+
+    test('an emoji font reads the same bitmaps', () {
+      final base = TtfParser(
+        File('emoji.ttf').readAsBytesSync().buffer.asByteData(),
+      );
+      final view = padded('emoji', 8);
+
+      expect(view.bitmapOffsets.keys, base.bitmapOffsets.keys);
+      for (final glyph in base.bitmapOffsets.keys) {
+        expect(
+          view.getBitmap(glyph)?.data,
+          base.getBitmap(glyph)?.data,
+          reason: 'glyph $glyph',
+        );
+      }
+    });
+  });
+
+  group('the GSUB joining features', () {
+    TtfParser parse(String name) =>
+        TtfParser(File(name).readAsBytesSync().buffer.asByteData());
+
+    test('are read from a font that has them', () {
+      final font = parse('hacen-tunisia.ttf');
+
+      expect(font.arabicJoining.keys.toList()..sort(), <String>[
+        'fina',
+        'init',
+        'isol',
+        'medi',
+      ]);
+      for (final feature in <String>['fina', 'init', 'medi']) {
+        expect(font.arabicJoining[feature], isNotEmpty, reason: feature);
+        for (final entry in font.arabicJoining[feature]!.entries) {
+          expect(entry.value, isNot(0), reason: '$feature: no .notdef');
+          expect(
+            entry.value,
+            isNot(entry.key),
+            reason: '$feature: a real move',
+          );
+          expect(entry.value, lessThan(font.numGlyphs));
+        }
+      }
+    });
+
+    test('are empty, and harmless, for a font without them', () {
+      for (final name in <String>[
+        'open-sans.ttf',
+        'roboto.ttf',
+        'noto-sans.ttf',
+        'genyomintw.ttf',
+        'material.ttf',
+        'emoji.ttf',
+      ]) {
+        late TtfParser font;
+        expect(() => font = parse(name), returnsNormally, reason: name);
+        expect(font.arabicJoining, isEmpty, reason: name);
+      }
+    });
+
+    test('make the joined forms reachable by their code point', () {
+      // A glyph is only addressable through the cmap, and the shaper
+      // substitutes code points, so a font that joins through GSUB could not be
+      // asked for its final, initial and medial glyphs at all: they came out as
+      // .notdef with no width. hacen-tunisia carries the base letters and the
+      // isolated forms only.
+      final font = parse('hacen-tunisia.ttf');
+
+      // U+0628 BEH: nominal, final, initial, medial.
+      final nominal = font.charToGlyphIndexMap[0x0628];
+      expect(nominal, isNotNull);
+      expect(font.charToGlyphIndexMap[0xFE8F], nominal, reason: 'isolated');
+
+      final joined = <int>[
+        for (final form in <int>[0xFE90, 0xFE91, 0xFE92])
+          font.charToGlyphIndexMap[form]!,
+      ];
+      expect(joined.toSet(), hasLength(3), reason: 'three distinct glyphs');
+      expect(joined, isNot(contains(nominal)));
+
+      for (final glyph in joined) {
+        expect(
+          font.glyphInfoMap[glyph]!.advanceWidth,
+          greaterThan(0),
+          reason: 'glyph $glyph has a width',
+        );
+      }
+    });
+
+    test('a font that already maps a form keeps its own glyph', () {
+      // Only what the cmap does not carry is filled in, so nothing that renders
+      // today renders differently.
+      final font = parse('hacen-tunisia.ttf');
+      final isolated = font.charToGlyphIndexMap[0xFE8D];
+
+      expect(isolated, font.charToGlyphIndexMap[0x0627]);
+      expect(
+        font.arabicJoining['isol']![isolated!],
+        isNotNull,
+        reason: 'the isol feature does have something to say about it',
+      );
+    });
   });
 }

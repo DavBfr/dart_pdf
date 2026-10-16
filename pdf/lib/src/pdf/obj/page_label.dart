@@ -31,22 +31,35 @@ enum PdfPageLabelStyle {
 }
 
 class PdfPageLabel {
-  PdfPageLabel(this.prefix, {this.style, this.subsequent});
+  PdfPageLabel(this.prefix, {this.style, this.subsequent})
+    : assert(_validStart(subsequent), _startMessage);
 
   PdfPageLabel.arabic({this.prefix, this.subsequent})
-    : style = PdfPageLabelStyle.arabic;
+    : style = PdfPageLabelStyle.arabic,
+      assert(_validStart(subsequent), _startMessage);
 
   PdfPageLabel.romanUpper({this.prefix, this.subsequent})
-    : style = PdfPageLabelStyle.romanUpper;
+    : style = PdfPageLabelStyle.romanUpper,
+      assert(_validStart(subsequent), _startMessage);
 
   PdfPageLabel.romanLower({this.prefix, this.subsequent})
-    : style = PdfPageLabelStyle.romanLower;
+    : style = PdfPageLabelStyle.romanLower,
+      assert(_validStart(subsequent), _startMessage);
 
   PdfPageLabel.lettersUpper({this.prefix, this.subsequent})
-    : style = PdfPageLabelStyle.lettersUpper;
+    : style = PdfPageLabelStyle.lettersUpper,
+      assert(_validStart(subsequent), _startMessage);
 
   PdfPageLabel.lettersLower({this.prefix, this.subsequent})
-    : style = PdfPageLabelStyle.lettersLower;
+    : style = PdfPageLabelStyle.lettersLower,
+      assert(_validStart(subsequent), _startMessage);
+
+  /// /St is the number of the first page in the range, so it starts at 1.
+  static bool _validStart(int? subsequent) =>
+      subsequent == null || subsequent >= 1;
+
+  static const _startMessage =
+      'The first page number of a labelling range is at least 1.';
 
   final PdfPageLabelStyle? style;
   final String? prefix;
@@ -86,7 +99,7 @@ class PdfPageLabel {
       1000: 'M',
       900: 'CM',
       500: 'D',
-      400: 'CD,',
+      400: 'CD',
       100: 'C',
       90: 'XC',
       50: 'L',
@@ -98,8 +111,10 @@ class PdfPageLabel {
       1: 'I',
     };
 
+    // Inclusive, as the message says: 3999 is MMMCMXCIX and used to throw with
+    // asserts on while working in release.
     assert(
-      decimal > 0 && decimal < 3999,
+      decimal > 0 && decimal <= 3999,
       'Roman numerals are limited to the inclusive range of 1 to 3999.',
     );
 
@@ -120,7 +135,11 @@ class PdfPageLabel {
   }
 
   String asString([int index = 0]) {
-    final i = subsequent == null ? index : index + subsequent!;
+    // /St defaults to 1 - ISO 32000-1 Table 159 - and the style switch below adds
+    // another 1 for arabic and roman, so `index + subsequent` double-counted the
+    // first page of every explicit range: arabic(subsequent: 5).asString(0)
+    // returned '6'. _toLetters is 0-based and was off by the same one.
+    final i = index + (subsequent ?? 1) - 1;
 
     final String suffix;
     switch (style) {
@@ -190,10 +209,24 @@ class PdfPageLabels extends PdfObject<PdfDict> {
   void prepare() {
     super.prepare();
 
+    // A number tree's keys have to ascend - ISO 32000-1 7.9.7 - and `labels` is a
+    // public insertion-ordered map, so writing labels[3] before labels[0] emitted
+    // [3 ... 0 ... 1 ...] and a reader that binary-searches the tree lost a whole
+    // labelling range. Rebuilt from scratch here, so a second prepare() cannot
+    // duplicate anything.
+    final keys = labels.keys.toList()..sort();
     final nums = PdfArray();
-    for (final entry in labels.entries) {
-      nums.add(PdfNum(entry.key));
-      nums.add(entry.value.toDict());
+
+    // 12.4.2 requires an entry for page index 0. pageLabel and names already
+    // report the leading range as plain arabic, so the file now says the same.
+    if (keys.isNotEmpty && keys.first != 0) {
+      nums.add(const PdfNum(0));
+      nums.add(PdfPageLabel.arabic().toDict());
+    }
+
+    for (final key in keys) {
+      nums.add(PdfNum(key));
+      nums.add(labels[key]!.toDict());
     }
 
     params['/Nums'] = nums;

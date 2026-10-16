@@ -221,6 +221,9 @@ class TextStyle {
   // spacing between words, 1.0 being natural spacing
   final double? wordSpacing;
 
+  /// The line height, as a multiple of the natural height of a line in this
+  /// font - unlike [lineSpacing], which is an absolute number of points added
+  /// between lines.
   final double? height;
 
   final BoxDecoration? background;
@@ -310,7 +313,7 @@ class TextStyle {
       wordSpacing != null ||
           (wordSpacingFactor == 1.0 && wordSpacingDelta == 0.0),
     );
-    assert(heightFactor == 1.0 && heightDelta == 0.0);
+    assert(height != null || (heightFactor == 1.0 && heightDelta == 0.0));
 
     return TextStyle(
       inherit: inherit,

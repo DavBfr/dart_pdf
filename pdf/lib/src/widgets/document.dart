@@ -31,6 +31,7 @@ class Document {
     bool verbose = false,
     PdfVersion version = PdfVersion.pdf_1_5,
     bool simpleTrueTypeFonts = false,
+    bool colorAlpha = true,
     this.theme,
     String? title,
     String? author,
@@ -46,6 +47,7 @@ class Document {
          verbose: verbose,
          version: version,
          simpleTrueTypeFonts: simpleTrueTypeFonts,
+         colorAlpha: colorAlpha,
        ) {
     if (title != null ||
         author != null ||

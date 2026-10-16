@@ -79,6 +79,17 @@ class BoxConstraints {
 
   bool get hasBoundedWidth => maxWidth < double.infinity;
 
+  /// The same constraints with the width and height exchanged.
+  ///
+  /// A child that is painted a quarter turn round measures in its own frame, so
+  /// this is the box it has to fit into.
+  BoxConstraints get flipped => BoxConstraints(
+    minWidth: minHeight,
+    maxWidth: maxHeight,
+    minHeight: minWidth,
+    maxHeight: maxWidth,
+  );
+
   bool get hasBoundedHeight => maxHeight < double.infinity;
 
   bool get hasInfiniteWidth => minWidth >= double.infinity;
@@ -761,13 +772,14 @@ class Alignment extends AlignmentGeometry {
   String toString() => _stringify(x, y);
 
   static String _stringify(double x, double y) {
-    if (x == -1.0 && y == -1.0) {
+    // y runs up: y = 1 is the top edge, as the constants above declare.
+    if (x == -1.0 && y == 1.0) {
       return 'Alignment.topLeft';
     }
-    if (x == 0.0 && y == -1.0) {
+    if (x == 0.0 && y == 1.0) {
       return 'Alignment.topCenter';
     }
-    if (x == 1.0 && y == -1.0) {
+    if (x == 1.0 && y == 1.0) {
       return 'Alignment.topRight';
     }
     if (x == -1.0 && y == 0.0) {
@@ -779,13 +791,13 @@ class Alignment extends AlignmentGeometry {
     if (x == 1.0 && y == 0.0) {
       return 'Alignment.centerRight';
     }
-    if (x == -1.0 && y == 1.0) {
+    if (x == -1.0 && y == -1.0) {
       return 'Alignment.bottomLeft';
     }
-    if (x == 0.0 && y == 1.0) {
+    if (x == 0.0 && y == -1.0) {
       return 'Alignment.bottomCenter';
     }
-    if (x == 1.0 && y == 1.0) {
+    if (x == 1.0 && y == -1.0) {
       return 'Alignment.bottomRight';
     }
     return 'Alignment(${x.toStringAsFixed(1)}, '
@@ -828,26 +840,27 @@ class AlignmentDirectional extends AlignmentGeometry {
 
   /// The distance fraction in the vertical direction.
   ///
-  /// A value of -1.0 corresponds to the topmost edge. A value of 1.0
+  /// A value of 1.0 corresponds to the topmost edge. A value of -1.0
   /// corresponds to the bottommost edge. Values are not limited to that range;
-  /// values less than -1.0 represent positions above the top, and values
-  /// greater than 1.0 represent positions below the bottom.
+  /// values greater than 1.0 represent positions above the top, and values
+  /// less than -1.0 represent positions below the bottom. This is the same
+  /// y-up convention as [Alignment.y], and is the opposite of Flutter's.
   ///
   /// This value is passed through to [Alignment.y] unmodified by the
   /// [resolve] method.
   final double y;
 
   /// The top corner on the "start" side.
-  static const AlignmentDirectional topStart = AlignmentDirectional(-1.0, -1.0);
+  static const AlignmentDirectional topStart = AlignmentDirectional(-1.0, 1.0);
 
   /// The center point along the top edge.
   ///
   /// Consider using [Alignment.topCenter] instead, as it does not need
   /// to be [resolve]d to be used.
-  static const AlignmentDirectional topCenter = AlignmentDirectional(0.0, -1.0);
+  static const AlignmentDirectional topCenter = AlignmentDirectional(0.0, 1.0);
 
   /// The top corner on the "end" side.
-  static const AlignmentDirectional topEnd = AlignmentDirectional(1.0, -1.0);
+  static const AlignmentDirectional topEnd = AlignmentDirectional(1.0, 1.0);
 
   /// The center point along the "start" edge.
   static const AlignmentDirectional centerStart = AlignmentDirectional(
@@ -867,7 +880,7 @@ class AlignmentDirectional extends AlignmentGeometry {
   /// The bottom corner on the "start" side.
   static const AlignmentDirectional bottomStart = AlignmentDirectional(
     -1.0,
-    1.0,
+    -1.0,
   );
 
   /// The center point along the bottom edge.
@@ -876,20 +889,21 @@ class AlignmentDirectional extends AlignmentGeometry {
   /// need to be [resolve]d to be used.
   static const AlignmentDirectional bottomCenter = AlignmentDirectional(
     0.0,
-    1.0,
+    -1.0,
   );
 
   /// The bottom corner on the "end" side.
-  static const AlignmentDirectional bottomEnd = AlignmentDirectional(1.0, 1.0);
+  static const AlignmentDirectional bottomEnd = AlignmentDirectional(1.0, -1.0);
 
   static String _stringify(double start, double y) {
-    if (start == -1.0 && y == -1.0) {
+    // y runs up, as in [Alignment]: y = 1 is the top edge.
+    if (start == -1.0 && y == 1.0) {
       return 'AlignmentDirectional.topStart';
     }
-    if (start == 0.0 && y == -1.0) {
+    if (start == 0.0 && y == 1.0) {
       return 'AlignmentDirectional.topCenter';
     }
-    if (start == 1.0 && y == -1.0) {
+    if (start == 1.0 && y == 1.0) {
       return 'AlignmentDirectional.topEnd';
     }
     if (start == -1.0 && y == 0.0) {
@@ -901,13 +915,13 @@ class AlignmentDirectional extends AlignmentGeometry {
     if (start == 1.0 && y == 0.0) {
       return 'AlignmentDirectional.centerEnd';
     }
-    if (start == -1.0 && y == 1.0) {
+    if (start == -1.0 && y == -1.0) {
       return 'AlignmentDirectional.bottomStart';
     }
-    if (start == 0.0 && y == 1.0) {
+    if (start == 0.0 && y == -1.0) {
       return 'AlignmentDirectional.bottomCenter';
     }
-    if (start == 1.0 && y == 1.0) {
+    if (start == 1.0 && y == -1.0) {
       return 'AlignmentDirectional.bottomEnd';
     }
     return 'AlignmentDirectional(${start.toStringAsFixed(1)}, '
