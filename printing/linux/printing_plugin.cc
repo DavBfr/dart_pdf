@@ -187,6 +187,8 @@ static void on_layout_response_cb(GObject* object,
       fl_method_channel_invoke_method_finish(channel, result, &error);
   if (!response) {
     job->cancel_job(error->message);
+    delete job;
+    return;
   }
 
   if (FL_IS_METHOD_SUCCESS_RESPONSE(response)) {
@@ -201,6 +203,7 @@ static void on_layout_response_cb(GObject* object,
     auto message = fl_method_error_response_get_message(error_response);
     //  fl_method_error_response_get_details(error_response);
     job->cancel_job(message);
+    delete job;
   }
 }
 
