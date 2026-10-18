@@ -14,6 +14,7 @@
 - Fix the Windows print dialog not being owned by the window that started the job with multiple windows
 - Initialize PDFium on Windows on first use instead of at plugin registration, and destroy it only if the plugin initialized it
 - Add the `PRINTING_PDFIUM_DIR` CMake option on Windows to use an existing PDFium build instead of downloading one
+- Fix the Windows build bundling a `pdfium.dll` found on `PATH` instead of the one it compiles against
 
 ## 5.15.0
 

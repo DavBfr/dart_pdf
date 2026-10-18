@@ -49,6 +49,17 @@ endif()
 # changed
 set(PLUGIN_NAME "printing_plugin")
 
+# PDFiumConfig.cmake searches PATH before its own directory and caches the
+# result: resolve the files here so another pdfium.dll is never bundled.
+unset(PDFium_INCLUDE_DIR CACHE)
+unset(PDFium_LIBRARY CACHE)
+unset(PDFium_IMPLIB CACHE)
+find_path(PDFium_INCLUDE_DIR fpdfview.h PATHS "${pdfium_SOURCE_DIR}/include"
+          NO_DEFAULT_PATH)
+find_file(PDFium_LIBRARY pdfium.dll PATHS "${pdfium_SOURCE_DIR}/bin"
+          NO_DEFAULT_PATH)
+find_file(PDFium_IMPLIB pdfium.dll.lib PATHS "${pdfium_SOURCE_DIR}/lib"
+          NO_DEFAULT_PATH)
 include(${pdfium_SOURCE_DIR}/PDFiumConfig.cmake)
 
 add_library(${PLUGIN_NAME} SHARED
