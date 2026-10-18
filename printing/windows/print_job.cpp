@@ -85,8 +85,12 @@ bool PrintJob::printPdf(const std::string& name,
   std::size_t dmExtra = 0;
 
   if (!printer.empty()) {
-    dmExtra = DeviceCapabilities(fromUtf8(printer).c_str(), NULL, DC_EXTRA,
-                                 NULL, NULL);
+    // Returns -1 when the printer cannot be queried.
+    auto extra = DeviceCapabilities(fromUtf8(printer).c_str(), NULL, DC_EXTRA,
+                                    NULL, NULL);
+    if (extra > 0) {
+      dmExtra = static_cast<std::size_t>(extra);
+    }
   }
 
   auto dm = static_cast<DEVMODE*>(GlobalAlloc(0, dmSize + dmExtra));
