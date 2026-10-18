@@ -77,6 +77,14 @@ for documentation.
 
   See the releases here: <https://github.com/bblanchon/pdfium-binaries/releases>
 
+   On Windows, an app that already ships PDFium can make the plugin use that
+   build instead of downloading one. The directory must contain the
+   `PDFiumConfig.cmake` of a [pdfium-binaries](https://github.com/bblanchon/pdfium-binaries) release:
+
+   ```python
+   set(PRINTING_PDFIUM_DIR "C:/path/to/pdfium" CACHE PATH "" FORCE)
+   ```
+
 ## Examples
 
 ```dart

@@ -46,6 +46,9 @@ class Printing {
   // Resolved on demand: the view is reparented after plugin registration.
   HWND getWindow();
 
+  // Initializes PDFium if needed; call it before any other PDFium function.
+  static void initLibrary();
+
   void onPageRasterized(std::vector<uint8_t> data,
                         int width,
                         int height,

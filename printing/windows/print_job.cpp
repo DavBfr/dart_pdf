@@ -277,6 +277,8 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
   auto docName = fromUtf8(documentName);
   docInfo.lpszDocName = docName.c_str();
 
+  Printing::initLibrary();
+
   auto r = StartDoc(hDC, &docInfo);
 
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
@@ -367,6 +369,8 @@ void PrintJob::pickPrinter(void* result) {}
 void PrintJob::rasterPdf(std::vector<uint8_t> data,
                          std::vector<int> pages,
                          double scale) {
+  Printing::initLibrary();
+
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
     printing->onPageRasterEnd(this, "Cannot raster a malformed PDF file");

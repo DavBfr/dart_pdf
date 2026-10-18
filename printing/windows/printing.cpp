@@ -19,34 +19,71 @@
 #include <fpdfview.h>
 
 #include <mutex>
+#include <string>
+
+#include <delayimp.h>
 
 #include "print_job.h"
 
+// pdfium.dll is delay-loaded from the plugin's directory under a private name:
+// a pdfium.dll loaded by the application is a separate module and its global
+// state is not shared with this plugin.
+static FARPROC WINAPI loadPrivatePdfium(unsigned notify, PDelayLoadInfo info) {
+  if (notify != dliNotePreLoadLibrary || _stricmp(info->szDll, "pdfium.dll")) {
+    return nullptr;
+  }
+
+  HMODULE module = nullptr;
+  wchar_t path[MAX_PATH];
+  if (!GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                             GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                         reinterpret_cast<LPCWSTR>(&loadPrivatePdfium),
+                         &module) ||
+      !GetModuleFileName(module, path, MAX_PATH)) {
+    return nullptr;
+  }
+
+  auto file = std::wstring{path};
+  file = file.substr(0, file.find_last_of(L'\\') + 1) + L"pdfium_printing.dll";
+  return reinterpret_cast<FARPROC>(
+      LoadLibraryEx(file.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH));
+}
+
+extern "C" const PfnDliHook __pfnDliNotifyHook2 = loadPrivatePdfium;
+
 namespace nfet {
 
-// PDFium is a process-wide library: only the first instance initializes it and
-// only the last one destroys it.
+// PDFium is a process-wide library: it is initialized on first use and
+// destroyed with the last instance, only if this plugin initialized it.
 static int libraryRefCount = 0;
+static bool libraryInitialized = false;
 static std::mutex libraryMutex;
 
 Printing::Printing(flutter::MethodChannel<flutter::EncodableValue>* channel,
                    flutter::PluginRegistrarWindows* registrar)
     : channel{channel}, registrar{registrar} {
   const std::lock_guard<std::mutex> lock{libraryMutex};
-  if (libraryRefCount++ == 0) {
+  libraryRefCount++;
+}
+
+Printing::~Printing() {
+  const std::lock_guard<std::mutex> lock{libraryMutex};
+  if (--libraryRefCount == 0 && libraryInitialized) {
+    FPDF_DestroyLibrary();
+    libraryInitialized = false;
+  }
+}
+
+void Printing::initLibrary() {
+  const std::lock_guard<std::mutex> lock{libraryMutex};
+  if (!libraryInitialized) {
     FPDF_LIBRARY_CONFIG config;
     config.version = 2;
     config.m_pUserFontPaths = nullptr;
     config.m_pIsolate = nullptr;
     config.m_v8EmbedderSlot = 0;
     FPDF_InitLibraryWithConfig(&config);
-  }
-}
-
-Printing::~Printing() {
-  const std::lock_guard<std::mutex> lock{libraryMutex};
-  if (--libraryRefCount == 0) {
-    FPDF_DestroyLibrary();
+    libraryInitialized = true;
   }
 }
 
