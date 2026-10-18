@@ -19,25 +19,31 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 set(PDFIUM_VERSION "5200" CACHE STRING "Version of pdfium used")
 string(REPLACE "windows-" "" TARGET_ARCH ${FLUTTER_TARGET_PLATFORM})
 set(PDFIUM_ARCH ${TARGET_ARCH} CACHE STRING "Architecture of pdfium used")
+set(PRINTING_PDFIUM_DIR "" CACHE PATH
+    "Existing pdfium build to use instead of downloading one")
 
-if(${PDFIUM_VERSION} STREQUAL "latest")
-  set(
-    PDFIUM_URL
-    "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-win-${PDFIUM_ARCH}.tgz"
-    )
+if(PRINTING_PDFIUM_DIR)
+  set(pdfium_SOURCE_DIR ${PRINTING_PDFIUM_DIR})
 else()
-  set(
-    PDFIUM_URL
-    "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/${PDFIUM_VERSION}/pdfium-win-${PDFIUM_ARCH}.tgz"
-    )
-endif()
+  if(${PDFIUM_VERSION} STREQUAL "latest")
+    set(
+      PDFIUM_URL
+      "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-win-${PDFIUM_ARCH}.tgz"
+      )
+  else()
+    set(
+      PDFIUM_URL
+      "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/${PDFIUM_VERSION}/pdfium-win-${PDFIUM_ARCH}.tgz"
+      )
+  endif()
 
-# Download pdfium
-include(../windows/DownloadProject.cmake)
-download_project(PROJ
-                 pdfium
-                 URL
-                 ${PDFIUM_URL})
+  # Download pdfium
+  include(../windows/DownloadProject.cmake)
+  download_project(PROJ
+                   pdfium
+                   URL
+                   ${PDFIUM_URL})
+endif()
 
 # This value is used when generating builds using this plugin, so it must not be
 # changed
