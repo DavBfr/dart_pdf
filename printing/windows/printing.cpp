@@ -19,8 +19,37 @@
 #include <fpdfview.h>
 
 #include <mutex>
+#include <string>
+
+#include <delayimp.h>
 
 #include "print_job.h"
+
+// pdfium.dll is delay-loaded from the plugin's directory under a private name:
+// a pdfium.dll loaded by the application is a separate module and its global
+// state is not shared with this plugin.
+static FARPROC WINAPI loadPrivatePdfium(unsigned notify, PDelayLoadInfo info) {
+  if (notify != dliNotePreLoadLibrary || _stricmp(info->szDll, "pdfium.dll")) {
+    return nullptr;
+  }
+
+  HMODULE module = nullptr;
+  wchar_t path[MAX_PATH];
+  if (!GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                             GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                         reinterpret_cast<LPCWSTR>(&loadPrivatePdfium),
+                         &module) ||
+      !GetModuleFileName(module, path, MAX_PATH)) {
+    return nullptr;
+  }
+
+  auto file = std::wstring{path};
+  file = file.substr(0, file.find_last_of(L'\\') + 1) + L"pdfium_printing.dll";
+  return reinterpret_cast<FARPROC>(
+      LoadLibraryEx(file.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH));
+}
+
+extern "C" const PfnDliHook __pfnDliNotifyHook2 = loadPrivatePdfium;
 
 namespace nfet {
 

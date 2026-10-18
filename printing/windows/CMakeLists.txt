@@ -76,7 +76,14 @@ target_compile_definitions(${PLUGIN_NAME} PRIVATE FLUTTER_PLUGIN_IMPL)
 target_include_directories(${PLUGIN_NAME}
                            INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(${PLUGIN_NAME}
-                      PRIVATE pdfium flutter flutter_wrapper_plugin)
+                      PRIVATE pdfium flutter flutter_wrapper_plugin delayimp)
+
+# PDFium is bundled under a private name and loaded on first use (see
+# printing.cpp), so it never shares global state with another pdfium.dll
+# loaded by the application.
+target_link_options(${PLUGIN_NAME} PRIVATE "/DELAYLOAD:pdfium.dll")
+set(PRINTING_PDFIUM_LIBRARY "${CMAKE_CURRENT_BINARY_DIR}/pdfium_printing.dll")
+configure_file("${PDFium_LIBRARY}" "${PRINTING_PDFIUM_LIBRARY}" COPYONLY)
 
 # List of absolute paths to libraries that should be bundled with the plugin
-set(printing_bundled_libraries "${PDFium_LIBRARY}" PARENT_SCOPE)
+set(printing_bundled_libraries "${PRINTING_PDFIUM_LIBRARY}" PARENT_SCOPE)

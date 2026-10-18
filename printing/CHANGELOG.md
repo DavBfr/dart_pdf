@@ -15,6 +15,7 @@
 - Initialize PDFium on Windows on first use instead of at plugin registration, and destroy it only if the plugin initialized it
 - Add the `PRINTING_PDFIUM_DIR` CMake option on Windows to use an existing PDFium build instead of downloading one
 - Fix the Windows build bundling a `pdfium.dll` found on `PATH` instead of the one it compiles against
+- Load PDFium on Windows from a private `pdfium_printing.dll` next to the plugin, so it no longer shares its non-thread-safe global state with another `pdfium.dll` loaded by the application
 
 ## 5.15.0
 
