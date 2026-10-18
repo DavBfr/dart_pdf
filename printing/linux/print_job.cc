@@ -245,7 +245,14 @@ void print_job::write_job(const uint8_t data[], size_t size) {
   gtk_print_job_send(printJob, job_completed, this, nullptr);
 }
 
-void print_job::cancel_job(const gchar* error) {}
+void print_job::cancel_job(const gchar* error) {
+  if (dialog) {
+    gtk_widget_destroy(GTK_WIDGET(dialog));
+    dialog = nullptr;
+  }
+  g_clear_object(&printJob);
+  on_completed(this, false, error);
+}
 
 bool print_job::share_pdf(const uint8_t data[],
                           size_t size,
