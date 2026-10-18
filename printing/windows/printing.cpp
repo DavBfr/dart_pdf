@@ -236,10 +236,18 @@ class OnLayoutResult : public flutter::MethodResult<flutter::EncodableValue> {
   void ErrorInternal(const std::string& error_code,
                      const std::string& error_message,
                      const flutter::EncodableValue* error_details) {
-    delete job;
+    fail(error_message.empty() ? error_code : error_message);
   }
 
-  void NotImplementedInternal() { delete job; }
+  void NotImplementedInternal() { fail("onLayout is not implemented"); }
+
+  // Released on the worker like the other job paths; Dart awaits onCompleted.
+  void fail(const std::string& error) {
+    printing->runOnWorker([job = job, error]() {
+      job->cancelJob(error);
+      delete job;
+    });
+  }
 };
 
 void Printing::onLayout(PrintJob* job,
