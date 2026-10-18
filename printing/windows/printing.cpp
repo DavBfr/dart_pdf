@@ -24,29 +24,37 @@
 
 namespace nfet {
 
-// PDFium is a process-wide library: only the first instance initializes it and
-// only the last one destroys it.
+// PDFium is a process-wide library: it is initialized on first use and
+// destroyed with the last instance, only if this plugin initialized it.
 static int libraryRefCount = 0;
+static bool libraryInitialized = false;
 static std::mutex libraryMutex;
 
 Printing::Printing(flutter::MethodChannel<flutter::EncodableValue>* channel,
                    flutter::PluginRegistrarWindows* registrar)
     : channel{channel}, registrar{registrar} {
   const std::lock_guard<std::mutex> lock{libraryMutex};
-  if (libraryRefCount++ == 0) {
+  libraryRefCount++;
+}
+
+Printing::~Printing() {
+  const std::lock_guard<std::mutex> lock{libraryMutex};
+  if (--libraryRefCount == 0 && libraryInitialized) {
+    FPDF_DestroyLibrary();
+    libraryInitialized = false;
+  }
+}
+
+void Printing::initLibrary() {
+  const std::lock_guard<std::mutex> lock{libraryMutex};
+  if (!libraryInitialized) {
     FPDF_LIBRARY_CONFIG config;
     config.version = 2;
     config.m_pUserFontPaths = nullptr;
     config.m_pIsolate = nullptr;
     config.m_v8EmbedderSlot = 0;
     FPDF_InitLibraryWithConfig(&config);
-  }
-}
-
-Printing::~Printing() {
-  const std::lock_guard<std::mutex> lock{libraryMutex};
-  if (--libraryRefCount == 0) {
-    FPDF_DestroyLibrary();
+    libraryInitialized = true;
   }
 }
 

@@ -19,30 +19,47 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 set(PDFIUM_VERSION "5200" CACHE STRING "Version of pdfium used")
 string(REPLACE "windows-" "" TARGET_ARCH ${FLUTTER_TARGET_PLATFORM})
 set(PDFIUM_ARCH ${TARGET_ARCH} CACHE STRING "Architecture of pdfium used")
+set(PRINTING_PDFIUM_DIR "" CACHE PATH
+    "Existing pdfium build to use instead of downloading one")
 
-if(${PDFIUM_VERSION} STREQUAL "latest")
-  set(
-    PDFIUM_URL
-    "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-win-${PDFIUM_ARCH}.tgz"
-    )
+if(PRINTING_PDFIUM_DIR)
+  set(pdfium_SOURCE_DIR ${PRINTING_PDFIUM_DIR})
 else()
-  set(
-    PDFIUM_URL
-    "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/${PDFIUM_VERSION}/pdfium-win-${PDFIUM_ARCH}.tgz"
-    )
-endif()
+  if(${PDFIUM_VERSION} STREQUAL "latest")
+    set(
+      PDFIUM_URL
+      "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-win-${PDFIUM_ARCH}.tgz"
+      )
+  else()
+    set(
+      PDFIUM_URL
+      "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/${PDFIUM_VERSION}/pdfium-win-${PDFIUM_ARCH}.tgz"
+      )
+  endif()
 
-# Download pdfium
-include(../windows/DownloadProject.cmake)
-download_project(PROJ
-                 pdfium
-                 URL
-                 ${PDFIUM_URL})
+  # Download pdfium
+  include(../windows/DownloadProject.cmake)
+  download_project(PROJ
+                   pdfium
+                   URL
+                   ${PDFIUM_URL})
+endif()
 
 # This value is used when generating builds using this plugin, so it must not be
 # changed
 set(PLUGIN_NAME "printing_plugin")
 
+# PDFiumConfig.cmake searches PATH before its own directory and caches the
+# result: resolve the files here so another pdfium.dll is never bundled.
+unset(PDFium_INCLUDE_DIR CACHE)
+unset(PDFium_LIBRARY CACHE)
+unset(PDFium_IMPLIB CACHE)
+find_path(PDFium_INCLUDE_DIR fpdfview.h PATHS "${pdfium_SOURCE_DIR}/include"
+          NO_DEFAULT_PATH)
+find_file(PDFium_LIBRARY pdfium.dll PATHS "${pdfium_SOURCE_DIR}/bin"
+          NO_DEFAULT_PATH)
+find_file(PDFium_IMPLIB pdfium.dll.lib PATHS "${pdfium_SOURCE_DIR}/lib"
+          NO_DEFAULT_PATH)
 include(${pdfium_SOURCE_DIR}/PDFiumConfig.cmake)
 
 add_library(${PLUGIN_NAME} SHARED
