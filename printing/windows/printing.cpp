@@ -207,9 +207,29 @@ class OnLayoutResult : public flutter::MethodResult<flutter::EncodableValue> {
   void SuccessInternal(const flutter::EncodableValue* result) {
     auto doc = std::get<std::vector<uint8_t>>(*result);
 
-    printing->runOnWorker([job = job, doc = std::move(doc)] {
-      job->writeJob(doc);
-      delete job;
+    printing->runOnWorker([printing = printing, job = job,
+                           doc = std::move(doc)]() mutable {
+      auto extension = job->outputFileExtension();
+      if (extension.empty()) {
+        job->writeJob(std::move(doc));
+        delete job;
+        return;
+      }
+
+      // The driver would prompt from this thread with no owner window, and
+      // the dialog could open behind the app while it blocks the queue.
+      printing->runOnPlatform([printing, job, extension,
+                               doc = std::move(doc)]() mutable {
+        auto accepted = job->askOutputFile(extension);
+        printing->runOnWorker([job, accepted, doc = std::move(doc)]() mutable {
+          if (accepted) {
+            job->writeJob(std::move(doc));
+          } else {
+            job->cancelJob("");
+          }
+          delete job;
+        });
+      });
     });
   }
 
