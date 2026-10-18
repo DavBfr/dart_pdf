@@ -12,6 +12,7 @@
 - Fix Windows and Linux callbacks being routed to the wrong isolate with multiple `FlutterEngine`s (multi-window): the method channel is now owned by the plugin instance instead of a global
 - Fix PDFium being destroyed on Windows while another plugin instance is still using it: the library is now reference counted on Windows and Linux
 - Fix the Windows print dialog not being owned by the window that started the job with multiple windows
+- Fix a Windows crash in `directPrintPdf` when the printer driver cannot be queried: the `DC_EXTRA` error value `-1` was used as the size of the driver data
 
 ## 5.15.0
 
