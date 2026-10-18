@@ -64,6 +64,8 @@ class PrintJob {
   HDC hDC = nullptr;
   std::string documentName;
 
+  void sendLayout();
+
  public:
   PrintJob(Printing* printing, int index);
 

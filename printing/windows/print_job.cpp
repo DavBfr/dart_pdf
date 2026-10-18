@@ -190,14 +190,27 @@ bool PrintJob::printPdf(const std::string& name,
       hDevNames = pd.hDevNames;
     }
   } else {
-    hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), nullptr, dm);
-    if (!hDC) {
-      return false;
-    }
-    hDevMode = dm;
-    hDevNames = nullptr;
+    // CreateDC loads the printer driver, which can take seconds.
+    printing->runOnWorker([this, printer, dm] {
+      hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), nullptr, dm);
+      if (!hDC) {
+        GlobalFree(dm);
+        printing->onCompleted(this, false, "Unable to open the printer");
+        delete this;
+        return;
+      }
+      hDevMode = dm;
+      hDevNames = nullptr;
+      printing->runOnPlatform([this] { sendLayout(); });
+    });
+    return true;
   }
 
+  sendLayout();
+  return true;
+}
+
+void PrintJob::sendLayout() {
   auto dpiX = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSX)) / pdfDpi;
   auto dpiY = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSY)) / pdfDpi;
   auto pageWidth =
@@ -216,7 +229,6 @@ bool PrintJob::printPdf(const std::string& name,
 
   printing->onLayout(this, pageWidth, pageHeight, marginLeft, marginTop,
                      marginRight, marginBottom);
-  return true;
 }
 
 std::vector<Printer> PrintJob::listPrinters() {
@@ -266,6 +278,8 @@ std::vector<Printer> PrintJob::listPrinters() {
 }
 
 void PrintJob::writeJob(std::vector<uint8_t> data) {
+  const std::lock_guard<std::mutex> lock{Printing::pdfiumMutex};
+
   auto dpiX = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSX)) / pdfDpi;
   auto dpiY = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSY)) / pdfDpi;
 
@@ -367,6 +381,8 @@ void PrintJob::pickPrinter(void* result) {}
 void PrintJob::rasterPdf(std::vector<uint8_t> data,
                          std::vector<int> pages,
                          double scale) {
+  const std::lock_guard<std::mutex> lock{Printing::pdfiumMutex};
+
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
     printing->onPageRasterEnd(this, "Cannot raster a malformed PDF file");

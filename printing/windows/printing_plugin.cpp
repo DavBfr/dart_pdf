@@ -115,28 +115,35 @@ class PrintingPlugin : public flutter::Plugin {
       auto res = job->sharePdf(doc, name);
       result->Success(flutter::EncodableValue(res ? 1 : 0));
     } else if (method_call.method_name().compare("listPrinters") == 0) {
-      auto job = std::make_unique<PrintJob>(&printing, -1);
-      auto printers = job->listPrinters();
-      auto pl = flutter::EncodableList{};
-      for (auto printer : printers) {
-        auto mp = flutter::EncodableMap{};
-        mp[flutter::EncodableValue("name")] =
-            flutter::EncodableValue(printer.name);
-        mp[flutter::EncodableValue("url")] =
-            flutter::EncodableValue(printer.url);
-        mp[flutter::EncodableValue("model")] =
-            flutter::EncodableValue(printer.model);
-        mp[flutter::EncodableValue("location")] =
-            flutter::EncodableValue(printer.location);
-        mp[flutter::EncodableValue("comment")] =
-            flutter::EncodableValue(printer.comment);
-        mp[flutter::EncodableValue("default")] =
-            flutter::EncodableValue(printer.default);
-        mp[flutter::EncodableValue("available")] =
-            flutter::EncodableValue(printer.available);
-        pl.push_back(mp);
-      }
-      result->Success(pl);
+      // EnumPrinters can stall on network printers.
+      auto sharedResult =
+          std::shared_ptr<flutter::MethodResult<flutter::EncodableValue>>{
+              std::move(result)};
+      printing.runOnWorker([printing = &printing, sharedResult] {
+        auto job = std::make_unique<PrintJob>(printing, -1);
+        auto printers = job->listPrinters();
+        auto pl = flutter::EncodableList{};
+        for (auto printer : printers) {
+          auto mp = flutter::EncodableMap{};
+          mp[flutter::EncodableValue("name")] =
+              flutter::EncodableValue(printer.name);
+          mp[flutter::EncodableValue("url")] =
+              flutter::EncodableValue(printer.url);
+          mp[flutter::EncodableValue("model")] =
+              flutter::EncodableValue(printer.model);
+          mp[flutter::EncodableValue("location")] =
+              flutter::EncodableValue(printer.location);
+          mp[flutter::EncodableValue("comment")] =
+              flutter::EncodableValue(printer.comment);
+          mp[flutter::EncodableValue("default")] =
+              flutter::EncodableValue(printer.default);
+          mp[flutter::EncodableValue("available")] =
+              flutter::EncodableValue(printer.available);
+          pl.push_back(mp);
+        }
+        printing->runOnPlatform(
+            [sharedResult, pl] { sharedResult->Success(pl); });
+      });
     } else if (method_call.method_name().compare("rasterPdf") == 0) {
       const auto* arguments =
           std::get_if<flutter::EncodableMap>(method_call.arguments());
@@ -157,8 +164,10 @@ class PrintingPlugin : public flutter::Plugin {
           vScale != arguments->end() ? std::get<double>(vScale->second) : 1;
       auto vJob = arguments->find(flutter::EncodableValue("job"));
       auto jobNum = vJob != arguments->end() ? std::get<int>(vJob->second) : -1;
-      auto job = std::make_unique<PrintJob>(&printing, jobNum);
-      job->rasterPdf(doc, pages, scale);
+      auto job = std::make_shared<PrintJob>(&printing, jobNum);
+      printing.runOnWorker([job, doc = std::move(doc), pages, scale] {
+        job->rasterPdf(doc, pages, scale);
+      });
       result->Success(nullptr);
     } else if (method_call.method_name().compare("printingInfo") == 0) {
       auto job = std::make_unique<PrintJob>(&printing, -1);
