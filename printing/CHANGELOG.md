@@ -12,7 +12,7 @@
 - Fix Windows and Linux callbacks being routed to the wrong isolate with multiple `FlutterEngine`s (multi-window): the method channel is now owned by the plugin instance instead of a global
 - Fix PDFium being destroyed on Windows while another plugin instance is still using it: the library is now reference counted on Windows and Linux
 - Fix the Windows print dialog not being owned by the window that started the job with multiple windows
-- Fix `layoutPdf` and `directPrintPdf` never completing on Linux when the `onLayout` callback throws: the job is now cancelled and completes with the error, as on the other platforms
+- Fix `layoutPdf` and `directPrintPdf` never completing on Linux when the `onLayout` callback throws: the job is now cancelled and completes with the error, as on Android, iOS and macOS
 
 ## 5.15.0
 
