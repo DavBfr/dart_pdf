@@ -9,6 +9,8 @@ import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -16,6 +18,14 @@ import io.flutter.plugin.common.MethodChannel;
 public class PrintingHandler implements MethodChannel.MethodCallHandler {
     private final Context context;
     private final MethodChannel channel;
+
+    /// The html conversions still running. A conversion's WebView is not
+    /// attached to a window and nothing else references it, so without this
+    /// set the job, its WebView and the print adapter are all unreachable
+    /// while the page loads and prints: a garbage collection takes them, the
+    /// renderer goes away, and neither onHtmlRendered nor onHtmlError is ever
+    /// sent. Only touched on the main thread.
+    private final Set<PrintingJob> htmlJobs = new HashSet<>();
 
     PrintingHandler(@NonNull Context context, @NonNull MethodChannel channel) {
         this.context = context;
@@ -76,7 +86,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                     assert marginBottom != null;
 
                     PrintAttributes.Margins margins = new PrintAttributes.Margins(
-                            Double.valueOf(marginLeft * 1000.0).intValue(),
+                            Double.valueOf(marginLeft * 1000.0 / 72.0).intValue(),
                             Double.valueOf(marginTop * 1000.0 / 72.0).intValue(),
                             Double.valueOf(marginRight * 1000.0 / 72.0).intValue(),
                             Double.valueOf(marginBottom * 1000.0 / 72.0).intValue());
@@ -86,6 +96,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
                                     Double.valueOf(width * 1000.0 / 72.0).intValue(),
                                     Double.valueOf(height * 1000.0 / 72.0).intValue());
 
+                    htmlJobs.add(printJob);
                     printJob.convertHtml((String) call.argument("html"), size, margins,
                             (String) call.argument("baseUrl"));
                     result.success(1);
@@ -165,6 +176,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
     /// send html to pdf data result to flutter
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     void onHtmlRendered(PrintingJob printJob, byte[] pdfData) {
+        htmlJobs.remove(printJob);
         HashMap<String, Object> args = new HashMap<>();
         args.put("doc", pdfData);
         args.put("job", printJob.index);
@@ -175,6 +187,7 @@ public class PrintingHandler implements MethodChannel.MethodCallHandler {
     /// send html to pdf conversion error to flutter
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     void onHtmlError(PrintingJob printJob, String error) {
+        htmlJobs.remove(printJob);
         HashMap<String, Object> args = new HashMap<>();
         args.put("error", error);
         args.put("job", printJob.index);
