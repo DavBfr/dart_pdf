@@ -596,6 +596,72 @@ void main() {
     );
   });
 
+  test(
+    'Text Widgets Arabic word gaps do not depend on side bearings',
+    () async {
+      // RTL words must be mirrored by the advance the layout gave them, not by
+      // their ink box, otherwise each gap moves by the glyphs' side bearings
+      // (the space after a final ر disappears, others widen).
+      final text = 'لم يذكر سبباً تقارير الحضور ' * 3;
+      const fontSize = 30.0;
+      final words = bidi.logicalToVisual(text.trim()).split(' ');
+
+      for (final textAlign in [TextAlign.start, TextAlign.justify]) {
+        final doc = Document(compress: false);
+        final font = arabicFont!.getFont(Context(document: doc.document));
+        double advance(String word) =>
+            font.stringMetrics(word).advanceWidth * fontSize;
+
+        doc.addPage(
+          Page(
+            build: (Context context) => SizedBox(
+              width: 400,
+              child: RichText(
+                textDirection: TextDirection.rtl,
+                textAlign: textAlign,
+                text: TextSpan(
+                  text: text,
+                  style: TextStyle(font: arabicFont, fontSize: fontSize),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final runs = [
+          for (final m in RegExp(
+            r'([\d.]+) ([\d.]+) Td',
+          ).allMatches(String.fromCharCodes(await doc.save())))
+            (double.parse(m[1]!), double.parse(m[2]!)),
+        ];
+        final ys = runs.map((r) => r.$2).toSet().toList()
+          ..sort((a, b) => b.compareTo(a));
+        expect(ys.length, greaterThan(1), reason: 'the text should wrap');
+
+        // Lines from the top, words from the right: the logical word order.
+        var w = 0;
+        for (final y in ys) {
+          final line = runs.where((r) => r.$2 == y).map((r) => r.$1).toList()
+            ..sort((a, b) => b.compareTo(a));
+          final gaps = [
+            for (var i = 1; i < line.length; i++)
+              line[i - 1] - line[i] - advance(words[w + i]),
+          ];
+          w += line.length;
+
+          // Justified lines spread their gaps evenly, the others use a space.
+          final expected = textAlign == TextAlign.justify && y != ys.last
+              ? gaps.first
+              : advance(' ');
+          for (final gap in gaps) {
+            expect(gap, closeTo(expected, 0.001), reason: '$textAlign');
+          }
+        }
+        expect(w, words.length);
+      }
+    },
+  );
+
   tearDownAll(() async {
     final file = File('arabic.pdf');
     await file.writeAsBytes(await pdf.save());
