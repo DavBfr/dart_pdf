@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.15.2
+
+- Fix TypeError when reading `dartPdfJsBaseUrl` for a local Pdf.js path on web [khlebobul]
+
 ## 5.15.1
 
 - Fix iOS use-after-free crash in `CGPDFDocumentGetNumberOfPages`: UIKit reads the PDF document from a background page-count thread while dynamic layout replaces it on the main thread; document access is now lock-guarded
