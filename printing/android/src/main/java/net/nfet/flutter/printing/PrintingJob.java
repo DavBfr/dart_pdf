@@ -69,6 +69,7 @@ public class PrintingJob extends PrintDocumentAdapter {
     private byte[] documentData;
     private String jobName;
     private LayoutResultCallback callback;
+    private WebView htmlWebView;
     int index;
 
     PrintingJob(Context context, PrintingHandler printing, int index) {
@@ -367,20 +368,37 @@ public class PrintingJob extends PrintDocumentAdapter {
         Configuration configuration = context.getResources().getConfiguration();
         configuration.fontScale = (float) 1;
         Context webContext = context.createConfigurationContext(configuration);
-        final WebView webView = new WebView(webContext);
+        // Kept in a field, and this job is kept by PrintingHandler.htmlJobs,
+        // until the conversion has answered: see htmlJobs for why.
+        htmlWebView = new WebView(webContext);
+        final WebView webView = htmlWebView;
 
         webView.loadDataWithBaseURL(baseUrl, data, "text/HTML", "UTF-8", null);
 
         webView.setWebViewClient(new WebViewClient() {
+            private boolean printed = false;
+
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                // Some WebView versions finish the same page more than once;
+                // printing it twice would answer the job twice.
+                if (printed) {
+                    return;
+                }
+                printed = true;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    // 72 dpi, because WebView converts the margins as if
+                    // one device unit were a point: at 600 dpi every margin
+                    // came out 600/72 times too wide, and a margin wider than
+                    // the page left no room to print and never answered. The
+                    // PDF is vector either way; the resolution only sets the
+                    // units Chromium lays the page out in.
                     PrintAttributes attributes =
                             new PrintAttributes.Builder()
                                     .setMediaSize(size)
                                     .setResolution(
-                                            new PrintAttributes.Resolution("pdf", "pdf", 600, 600))
+                                            new PrintAttributes.Resolution("pdf", "pdf", 72, 72))
                                     .setMinMargins(margins)
                                     .build();
 
@@ -394,6 +412,7 @@ public class PrintingJob extends PrintDocumentAdapter {
                                 try {
                                     byte[] fileContent = PdfConvert.readFile(file);
                                     printing.onHtmlRendered(PrintingJob.this, fileContent);
+                                    releaseHtmlWebView();
                                 } catch (IOException e) {
                                     onError(e.getMessage());
                                 }
@@ -402,12 +421,26 @@ public class PrintingJob extends PrintDocumentAdapter {
                             @Override
                             public void onError(String message) {
                                 printing.onHtmlError(PrintingJob.this, message);
+                                releaseHtmlWebView();
                             }
                         });
                     }
                 }
             }
         });
+    }
+
+    /// Destroys the WebView of a finished html conversion.
+    ///
+    /// Posted rather than done here: the result arrives from inside the
+    /// WebView's own print callback, which must not destroy it under itself.
+    private void releaseHtmlWebView() {
+        final WebView webView = htmlWebView;
+        htmlWebView = null;
+        if (webView == null) {
+            return;
+        }
+        new Handler(Looper.getMainLooper()).post(webView::destroy);
     }
 
     void setDocument(byte[] data) {

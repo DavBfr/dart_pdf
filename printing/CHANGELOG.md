@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.15.2
+
+- Fix Android `convertHtml` hanging with a left margin: it was not converted from points [#1694]
+- Fix Android `convertHtml` margins printing 600/72 times too wide, and hanging when that exceeded the page
+- Fix Android `convertHtml` never answering when its WebView was garbage collected mid-conversion
+- Fix Android `convertHtml` never answering when the print adapter fails or cancels [#1897]
+
 ## 5.15.1
 
 - Fix iOS use-after-free crash in `CGPDFDocumentGetNumberOfPages`: UIKit reads the PDF document from a background page-count thread while dynamic layout replaces it on the main thread; document access is now lock-guarded

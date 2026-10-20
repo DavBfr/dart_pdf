@@ -46,38 +46,80 @@ public class PdfConvert {
                     return;
                 }
 
+                final ParcelFileDescriptor descriptor;
                 try {
-                    final File finalOutputFile = outputFile;
-                    adapter.onWrite(new PageRange[] {PageRange.ALL_PAGES},
-                            ParcelFileDescriptor.open(
-                                    outputFile, ParcelFileDescriptor.MODE_READ_WRITE),
-                            new CancellationSignal(),
-                            new PrintDocumentAdapter.WriteResultCallback() {
-                                @Override
-                                public void onWriteFinished(PageRange[] pages) {
-                                    super.onWriteFinished(pages);
-
-                                    if (pages.length == 0) {
-                                        if (!finalOutputFile.delete()) {
-                                            Log.e("PDF", "Unable to delete temporary file");
-                                        }
-                                        result.onError("No page created");
-                                    }
-
-                                    result.onSuccess(finalOutputFile);
-                                    if (!finalOutputFile.delete()) {
-                                        Log.e("PDF", "Unable to delete temporary file");
-                                    }
-                                }
-                            });
+                    descriptor = ParcelFileDescriptor.open(
+                            outputFile, ParcelFileDescriptor.MODE_READ_WRITE);
                 } catch (FileNotFoundException e) {
-                    if (!outputFile.delete()) {
-                        Log.e("PDF", "Unable to delete temporary file");
-                    }
+                    delete(outputFile);
                     result.onError(e.getMessage());
+                    return;
                 }
+
+                final File finalOutputFile = outputFile;
+                adapter.onWrite(new PageRange[] {PageRange.ALL_PAGES}, descriptor,
+                        new CancellationSignal(), new PrintDocumentAdapter.WriteResultCallback() {
+                            @Override
+                            public void onWriteFinished(PageRange[] pages) {
+                                super.onWriteFinished(pages);
+                                close(descriptor);
+
+                                if (pages.length == 0) {
+                                    delete(finalOutputFile);
+                                    result.onError("No page created");
+                                    return;
+                                }
+
+                                result.onSuccess(finalOutputFile);
+                                delete(finalOutputFile);
+                            }
+
+                            // Without these, a failed or cancelled write never
+                            // answered, and the Dart future waited forever.
+                            @Override
+                            public void onWriteFailed(CharSequence error) {
+                                super.onWriteFailed(error);
+                                close(descriptor);
+                                delete(finalOutputFile);
+                                result.onError(error != null ? error.toString() : "Write failed");
+                            }
+
+                            @Override
+                            public void onWriteCancelled() {
+                                super.onWriteCancelled();
+                                close(descriptor);
+                                delete(finalOutputFile);
+                                result.onError("Write cancelled");
+                            }
+                        });
+            }
+
+            @Override
+            public void onLayoutFailed(CharSequence error) {
+                super.onLayoutFailed(error);
+                result.onError(error != null ? error.toString() : "Layout failed");
+            }
+
+            @Override
+            public void onLayoutCancelled() {
+                super.onLayoutCancelled();
+                result.onError("Layout cancelled");
             }
         }, null);
+    }
+
+    private static void close(ParcelFileDescriptor descriptor) {
+        try {
+            descriptor.close();
+        } catch (IOException e) {
+            Log.e("PDF", "Unable to close temporary file");
+        }
+    }
+
+    private static void delete(File file) {
+        if (file.exists() && !file.delete()) {
+            Log.e("PDF", "Unable to delete temporary file");
+        }
     }
 
     public static byte[] readFile(File file) throws IOException {
