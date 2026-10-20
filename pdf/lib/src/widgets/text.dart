@@ -63,6 +63,9 @@ abstract class _Span {
 
   double get width;
 
+  /// How far the layout moved the pen past this span
+  double get advance;
+
   double get height;
 
   @override
@@ -295,6 +298,9 @@ class _Word extends _Span {
   double get width => metrics.width;
 
   @override
+  double get advance => metrics.advanceWidth;
+
+  @override
   double get height => metrics.maxHeight;
 
   @override
@@ -360,6 +366,9 @@ class _WidgetSpan extends _Span {
 
   @override
   double get width => widget.box!.width;
+
+  @override
+  double get advance => left + width;
 
   @override
   double get height => widget.box!.height;
@@ -624,7 +633,7 @@ class _Line {
         for (final span in spans) {
           span.offset = PdfPoint(
             isRTL
-                ? delta - x - (span.offset.x + span.width)
+                ? delta - x - (span.offset.x + span.advance)
                 : span.offset.x + x,
             span.offset.y - baseline,
           );
@@ -637,7 +646,7 @@ class _Line {
     if (isRTL) {
       for (final span in spans) {
         span.offset = PdfPoint(
-          delta - (span.offset.x + span.width),
+          delta - (span.offset.x + span.advance),
           span.offset.y - baseline,
         );
       }
