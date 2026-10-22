@@ -51,6 +51,13 @@ Printing::~Printing() {
 }
 
 HWND Printing::getWindow() {
+  // With several Flutter views (multi-window apps) the registrar's view is
+  // only the first one, possibly hidden. Method calls arrive on the platform
+  // thread, which owns every view, so its active window is the one the user
+  // is printing from.
+  if (HWND active = GetActiveWindow()) {
+    return GetAncestor(active, GA_ROOT);
+  }
   auto* view = registrar->GetView();
   if (!view) {
     return nullptr;
