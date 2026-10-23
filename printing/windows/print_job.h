@@ -70,6 +70,7 @@ class PrintJob {
   // Owner of the print dialog, kept for the "print to file" dialog that
   // follows it.
   HWND ownerWindow = nullptr;
+  bool explicitOwnerWindow = false;
 
   void sendLayout();
 
@@ -85,7 +86,9 @@ class PrintJob {
                 double width,
                 double height,
                 bool usePrinterSettings,
-                bool windowsModernDialog);
+                bool windowsModernDialog,
+                HWND owner = nullptr,
+                bool explicitOwner = false);
 
   // Print thread. Extension of the file the driver would ask for, or empty
   // when the job goes to a device.

@@ -72,6 +72,32 @@ abstract class PrintingPlatform extends PlatformInterface {
     bool windowsModernDialog,
   );
 
+  /// Prints in the originating window. Platforms without window support keep
+  /// their existing behavior; implementations of layoutPdf remain compatible.
+  Future<bool> layoutPdfForWindow(
+    Printer? printer,
+    LayoutCallback onLayout,
+    String name,
+    PdfPageFormat format,
+    bool dynamicLayout,
+    bool usePrinterSettings,
+    OutputType outputType,
+    bool forceCustomPrintPaper,
+    bool windowsModernDialog, {
+    int? windowHandle,
+    int? viewId,
+  }) => layoutPdf(
+    printer,
+    onLayout,
+    name,
+    format,
+    dynamicLayout,
+    usePrinterSettings,
+    outputType,
+    forceCustomPrintPaper,
+    windowsModernDialog,
+  );
+
   /// Enumerate the available printers on the system.
   Future<List<Printer>> listPrinters();
 

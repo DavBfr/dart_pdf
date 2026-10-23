@@ -100,12 +100,20 @@ bool PrintJob::printPdf(const std::string& name,
                         double width,
                         double height,
                         bool usePrinterSettings,
-                        bool windowsModernDialog) {
+                        bool windowsModernDialog,
+                        HWND requestedOwner,
+                        bool explicitOwner) {
   documentName = name;
 
-  // nullptr when the engine has no view; both dialogs then keep the owner
-  // they had before.
-  auto owner = printing->getWindow();
+  explicitOwnerWindow = explicitOwner;
+  auto owner = explicitOwner ? requestedOwner : printing->getWindow();
+  DWORD ownerProcess = 0;
+  if (explicitOwner) GetWindowThreadProcessId(owner, &ownerProcess);
+  if (explicitOwner && (!IsWindow(owner) || !IsWindowVisible(owner) ||
+                        ownerProcess != GetCurrentProcessId())) {
+    printing->onCompleted(this, false, "");
+    return false;
+  }
   ownerWindow = owner;
 
   if (printer.empty()) {
@@ -427,6 +435,10 @@ bool PrintJob::askOutputFile(const std::wstring& extension) {
   ofn.lStructSize = sizeof(ofn);
   // The window may have been deactivated, or closed, while the job was
   // spooling.
+  if (explicitOwnerWindow &&
+      (!IsWindow(ownerWindow) || !IsWindowVisible(ownerWindow))) {
+    return false;
+  }
   ofn.hwndOwner = IsWindow(ownerWindow) ? ownerWindow : printing->getWindow();
   ofn.lpstrFilter = filter.c_str();
   ofn.lpstrFile = file;

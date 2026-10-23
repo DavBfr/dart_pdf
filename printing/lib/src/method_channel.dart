@@ -172,13 +172,40 @@ class MethodChannelPrinting extends PrintingPlatform {
     OutputType outputType,
     bool forceCustomPrintPaper,
     bool windowsModernDialog,
-  ) async {
+  ) => layoutPdfForWindow(
+    printer,
+    onLayout,
+    name,
+    format,
+    dynamicLayout,
+    usePrinterSettings,
+    outputType,
+    forceCustomPrintPaper,
+    windowsModernDialog,
+  );
+
+  @override
+  Future<bool> layoutPdfForWindow(
+    Printer? printer,
+    LayoutCallback onLayout,
+    String name,
+    PdfPageFormat format,
+    bool dynamicLayout,
+    bool usePrinterSettings,
+    OutputType outputType,
+    bool forceCustomPrintPaper,
+    bool windowsModernDialog, {
+    int? windowHandle,
+    int? viewId,
+  }) async {
     final job = _printJobs.add(
       onCompleted: Completer<bool>(),
       onLayout: onLayout,
     );
 
     final params = <String, dynamic>{
+      'windowHandle': ?windowHandle,
+      'viewId': ?viewId,
       if (printer != null) 'printer': printer.url,
       'name': name,
       'job': job.index,

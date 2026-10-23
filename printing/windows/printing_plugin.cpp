@@ -94,8 +94,18 @@ class PrintingPlugin : public flutter::Plugin {
       auto vJob = arguments->find(flutter::EncodableValue("job"));
       auto jobNum = vJob != arguments->end() ? std::get<int>(vJob->second) : -1;
       auto job = new PrintJob{&printing, jobNum};
+      auto vOwner = arguments->find(flutter::EncodableValue("windowHandle"));
+      bool explicitOwner = vOwner != arguments->end();
+      HWND owner = nullptr;
+      if (explicitOwner) {
+        const auto& value = vOwner->second;
+        auto handle = std::holds_alternative<int64_t>(value)
+                          ? std::get<int64_t>(value)
+                          : static_cast<int64_t>(std::get<int32_t>(value));
+        owner = reinterpret_cast<HWND>(handle);
+      }
       auto res = job->printPdf(name, printer, width, height, usePrinterSettings,
-                               windowsModernDialog);
+                               windowsModernDialog, owner, explicitOwner);
       if (!res) {
         delete job;
       }
