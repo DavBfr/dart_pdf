@@ -55,6 +55,10 @@ void main() {
     expect((calls[1].arguments as Map)['windowHandle'], 202);
     expect((calls[1].arguments as Map)['viewId'], 2);
   });
+  test('share retains an explicit view zero', () async {
+    await Printing.sharePdf(bytes: Uint8List(0), viewId: 0);
+    expect((calls.single.arguments as Map)['viewId'], 0);
+  });
   test('legacy calls omit owner arguments', () async {
     await Printing.layoutPdf(onLayout: (_) => Uint8List(0));
     expect(calls.single.arguments as Map, isNot(contains('windowHandle')));
