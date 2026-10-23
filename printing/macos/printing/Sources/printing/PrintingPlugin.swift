@@ -40,6 +40,19 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
 
+    /// The window the print panel and the share picker attach to. With several Flutter
+    /// views (multi-window) the user works in the key window, which may not host
+    /// `registrar.view`; a hidden window is skipped because a sheet on it is invisible.
+    private func presentingWindow() -> NSWindow? {
+        if let keyWindow = NSApp.keyWindow, keyWindow.isVisible {
+            return keyWindow
+        }
+        if let mainWindow = NSApp.mainWindow, mainWindow.isVisible {
+            return mainWindow
+        }
+        return registrar.view?.window
+    }
+
     /// Flutter method handlers
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args = call.arguments! as! [String: Any]
@@ -59,7 +72,7 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             PrintingPlugin.sharedJobs[args["job"] as! UInt32] = printJob
             PrintingPlugin.jobsLock.unlock()
 
-            guard let window = registrar.view?.window else {
+            guard let window = presentingWindow() else {
                 result(NSNumber(value: 0))
                 onCompleted(printJob: printJob, completed: false, error: "Unable to find the main window")
                 return
@@ -85,7 +98,7 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
         } else if call.method == "sharePdf" {
             let object = args["doc"] as! FlutterStandardTypedData
 
-            guard let view = registrar.view else {
+            guard let view = presentingWindow()?.contentView ?? registrar.view else {
                 result(NSNumber(value: 0))
                 return
             }
