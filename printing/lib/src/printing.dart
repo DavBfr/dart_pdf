@@ -235,9 +235,21 @@ mixin Printing {
     String? subject,
     String? body,
     List<String>? emails,
+    int? viewId,
   }) {
     bounds ??= Rect.fromCircle(center: Offset.zero, radius: 10);
 
+    if (viewId != null) {
+      return PrintingPlatform.instance.sharePdfForWindow(
+        bytes,
+        filename,
+        bounds,
+        subject,
+        body,
+        emails,
+        viewId: viewId,
+      );
+    }
     return PrintingPlatform.instance.sharePdf(
       bytes,
       filename,

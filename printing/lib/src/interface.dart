@@ -126,6 +126,17 @@ abstract class PrintingPlatform extends PlatformInterface {
     List<String>? emails,
   );
 
+  /// Shares from the explicit originating Flutter view when supported.
+  Future<bool> sharePdfForWindow(
+    Uint8List bytes,
+    String filename,
+    Rect bounds,
+    String? subject,
+    String? body,
+    List<String>? emails, {
+    required int viewId,
+  }) => sharePdf(bytes, filename, bounds, subject, body, emails);
+
   /// Convert an html document to a pdf data
   Future<Uint8List> convertHtml(
     String html,

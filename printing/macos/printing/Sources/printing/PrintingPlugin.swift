@@ -40,16 +40,20 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
 
-    /// The window the print panel and the share picker attach to. With several Flutter
-    /// views (multi-window) the user works in the key window, which may not host
-    /// `registrar.view`; a hidden window is skipped because a sheet on it is invisible.
-    private func presentingWindow() -> NSWindow? {
-        if let keyWindow = NSApp.keyWindow, keyWindow.isVisible {
-            return keyWindow
+    /// Explicit view ownership survives focus changes while a PDF is prepared.
+    /// A closed or hidden source is cancelled instead of selecting another window.
+    private func presentingWindow(viewId: Int64? = nil) -> NSWindow? {
+        if let viewId = viewId {
+            let engine = (registrar.view?.window?.contentViewController as? FlutterViewController)?.engine
+            return NSApp.windows.first { window in
+                guard window.isVisible,
+                    let controller = window.contentViewController as? FlutterViewController,
+                    let engine = engine else { return false }
+                return controller.engine === engine && controller.viewIdentifier == viewId
+            }
         }
-        if let mainWindow = NSApp.mainWindow, mainWindow.isVisible {
-            return mainWindow
-        }
+        if let keyWindow = NSApp.keyWindow, keyWindow.isVisible { return keyWindow }
+        if let mainWindow = NSApp.mainWindow, mainWindow.isVisible { return mainWindow }
         return registrar.view?.window
     }
 
@@ -72,7 +76,7 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
             PrintingPlugin.sharedJobs[args["job"] as! UInt32] = printJob
             PrintingPlugin.jobsLock.unlock()
 
-            guard let window = presentingWindow() else {
+            guard let window = presentingWindow(viewId: (args["viewId"] as? NSNumber)?.int64Value) else {
                 result(NSNumber(value: 0))
                 onCompleted(printJob: printJob, completed: false, error: "Unable to find the main window")
                 return
@@ -98,7 +102,9 @@ public class PrintingPlugin: NSObject, FlutterPlugin {
         } else if call.method == "sharePdf" {
             let object = args["doc"] as! FlutterStandardTypedData
 
-            guard let view = presentingWindow()?.contentView ?? registrar.view else {
+            let explicitViewId = (args["viewId"] as? NSNumber)?.int64Value
+            let source = presentingWindow(viewId: explicitViewId)?.contentView
+            guard let view = source ?? (explicitViewId == nil ? registrar.view : nil) else {
                 result(NSNumber(value: 0))
                 return
             }
