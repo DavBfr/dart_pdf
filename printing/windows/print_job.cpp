@@ -204,6 +204,15 @@ bool PrintJob::printPdf(const std::string& name,
       static_cast<double>(GetDeviceCaps(hDC, PHYSICALWIDTH)) / dpiX;
   auto pageHeight =
       static_cast<double>(GetDeviceCaps(hDC, PHYSICALHEIGHT)) / dpiY;
+  // A DC whose driver reports no device metrics returns 0 here: the page
+  // size would reach onLayout as NaN or infinity, and nothing could print.
+  if (!(dpiX > 0) || !(dpiY > 0) || !(pageWidth > 0) || !(pageHeight > 0)) {
+    printing->onCompleted(this, false, "Unable to read the printer page size");
+    DeleteDC(hDC);
+    GlobalFree(hDevNames);
+    GlobalFree(hDevMode);
+    return true;
+  }
   auto printableWidth = static_cast<double>(GetDeviceCaps(hDC, HORZRES)) / dpiX;
   auto printableHeight =
       static_cast<double>(GetDeviceCaps(hDC, VERTRES)) / dpiY;
