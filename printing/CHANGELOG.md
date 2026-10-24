@@ -15,6 +15,7 @@
 - Fix Windows printing, `listPrinters` and `raster` blocking the UI thread: they now run on a dedicated print thread that serializes PDFium calls
 - Fix `directPrintPdf` on Windows never completing when the printer cannot be opened
 - Fix the Windows file dialog of print-to-file printers (Microsoft Print to PDF, XPS Document Writer, `FILE:` port) opening without an owner window, possibly behind the app: the file name is now asked in a dialog owned by the app window, and cancelling it or a failing `StartDoc` completes the job
+- Add `windowHandle` (Windows) and `viewId` (macOS) to `layoutPdf` and `directPrintPdf`, and `viewId` to `sharePdf`: the dialogs stay owned by that window for the whole job, even when focus moves while the document is prepared. If that window was closed or hidden, the job completes with `false` instead of opening on another window
 
 ## 5.15.0
 
