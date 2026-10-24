@@ -67,6 +67,9 @@ class PrintJob {
   // Port chosen in the print dialog; empty for direct printing.
   std::wstring outputPort;
   std::wstring outputFile;
+  // Owner of the print dialog, kept for the "print to file" dialog that
+  // follows it.
+  HWND ownerWindow = nullptr;
 
   void sendLayout();
 

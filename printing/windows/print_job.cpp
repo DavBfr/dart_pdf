@@ -106,6 +106,7 @@ bool PrintJob::printPdf(const std::string& name,
   // nullptr when the engine has no view; both dialogs then keep the owner
   // they had before.
   auto owner = printing->getWindow();
+  ownerWindow = owner;
 
   if (printer.empty()) {
     // nullptr uses the default driver config.
@@ -424,7 +425,9 @@ bool PrintJob::askOutputFile(const std::wstring& extension) {
 
   OPENFILENAME ofn{};
   ofn.lStructSize = sizeof(ofn);
-  ofn.hwndOwner = printing->getWindow();
+  // The window may have been deactivated, or closed, while the job was
+  // spooling.
+  ofn.hwndOwner = IsWindow(ownerWindow) ? ownerWindow : printing->getWindow();
   ofn.lpstrFilter = filter.c_str();
   ofn.lpstrFile = file;
   ofn.nMaxFile = MAX_PATH;
