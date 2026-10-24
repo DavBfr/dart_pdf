@@ -73,49 +73,53 @@ std::wstring fromUtf8(std::string str) {
 PrintJob::PrintJob(Printing* printing, int index)
     : printing{printing}, index{index} {}
 
+static DEVMODE* createDevMode(double width,
+                              double height,
+                              std::size_t dmExtra) {
+  std::size_t dmSize = sizeof(DEVMODE);
+  auto dm = static_cast<DEVMODE*>(GlobalAlloc(0, dmSize + dmExtra));
+  ZeroMemory(dm, dmSize + dmExtra);
+  dm->dmSize = (WORD)dmSize;
+  dm->dmDriverExtra = (WORD)dmExtra;
+  dm->dmFields = DM_ORIENTATION | DM_PAPERSIZE | DM_PAPERLENGTH | DM_PAPERWIDTH;
+  dm->dmPaperSize = 0;
+  if (width > height) {
+    dm->dmOrientation = DMORIENT_LANDSCAPE;
+    dm->dmPaperWidth = static_cast<short>(round(height * 254 / pdfDpi));
+    dm->dmPaperLength = static_cast<short>(round(width * 254 / pdfDpi));
+  } else {
+    dm->dmOrientation = DMORIENT_PORTRAIT;
+    dm->dmPaperWidth = static_cast<short>(round(width * 254 / pdfDpi));
+    dm->dmPaperLength = static_cast<short>(round(height * 254 / pdfDpi));
+  }
+  return dm;
+}
+
 bool PrintJob::printPdf(const std::string& name,
                         std::string printer,
                         double width,
                         double height,
                         bool usePrinterSettings,
-                        bool windowsModernDialog) {
+                        bool windowsModernDialog,
+                        HWND requestedOwner,
+                        bool explicitOwner) {
   documentName = name;
 
-  std::size_t dmSize = sizeof(DEVMODE);
-  std::size_t dmExtra = 0;
-
-  if (!printer.empty()) {
-    dmExtra = DeviceCapabilities(fromUtf8(printer).c_str(), NULL, DC_EXTRA,
-                                 NULL, NULL);
+  explicitOwnerWindow = explicitOwner;
+  auto owner = explicitOwner ? requestedOwner : printing->getWindow();
+  DWORD ownerProcess = 0;
+  if (explicitOwner) GetWindowThreadProcessId(owner, &ownerProcess);
+  if (explicitOwner && (!IsWindow(owner) || !IsWindowVisible(owner) ||
+                        ownerProcess != GetCurrentProcessId())) {
+    printing->onCompleted(this, false, "");
+    return false;
   }
-
-  auto dm = static_cast<DEVMODE*>(GlobalAlloc(0, dmSize + dmExtra));
-
-  if (usePrinterSettings) {
-    dm = nullptr;  // to use default driver config
-  } else {
-    ZeroMemory(dm, dmSize + dmExtra);
-    dm->dmSize = (WORD)dmSize;
-    dm->dmDriverExtra = (WORD)dmExtra;
-    dm->dmFields =
-        DM_ORIENTATION | DM_PAPERSIZE | DM_PAPERLENGTH | DM_PAPERWIDTH;
-    dm->dmPaperSize = 0;
-    if (width > height) {
-      dm->dmOrientation = DMORIENT_LANDSCAPE;
-      dm->dmPaperWidth = static_cast<short>(round(height * 254 / pdfDpi));
-      dm->dmPaperLength = static_cast<short>(round(width * 254 / pdfDpi));
-    } else {
-      dm->dmOrientation = DMORIENT_PORTRAIT;
-      dm->dmPaperWidth = static_cast<short>(round(width * 254 / pdfDpi));
-      dm->dmPaperLength = static_cast<short>(round(height * 254 / pdfDpi));
-    }
-  }
-
-  // nullptr when the engine has no view; both dialogs then keep the owner
-  // they had before.
-  auto owner = printing->getWindow();
+  ownerWindow = owner;
 
   if (printer.empty()) {
+    // nullptr uses the default driver config.
+    auto dm = usePrinterSettings ? nullptr : createDevMode(width, height, 0);
+
     if (windowsModernDialog) {
       // --- MODERN OPTION (PrintDlgEx) ---
       PRINTDLGEX pdx = {0};
@@ -190,14 +194,42 @@ bool PrintJob::printPdf(const std::string& name,
       hDevNames = pd.hDevNames;
     }
   } else {
-    hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), nullptr, dm);
-    if (!hDC) {
-      return false;
-    }
-    hDevMode = dm;
-    hDevNames = nullptr;
+    // DeviceCapabilities and CreateDC load the printer driver, which can take
+    // seconds.
+    printing->runOnWorker([this, printer, width, height, usePrinterSettings] {
+      printerName = fromUtf8(printer);
+      DEVMODE* dm = nullptr;
+      if (!usePrinterSettings) {
+        std::size_t dmExtra =
+            DeviceCapabilities(printerName.c_str(), NULL, DC_EXTRA, NULL, NULL);
+        dm = createDevMode(width, height, dmExtra);
+      }
+      hDC = CreateDC(TEXT("WINSPOOL"), printerName.c_str(), nullptr, dm);
+      if (!hDC) {
+        GlobalFree(dm);
+        printing->onCompleted(this, false, "Unable to open the printer");
+        delete this;
+        return;
+      }
+      hDevMode = dm;
+      hDevNames = nullptr;
+      printing->runOnPlatform([this] { sendLayout(); });
+    });
+    return true;
   }
 
+  if (auto names = static_cast<DEVNAMES*>(GlobalLock(hDevNames))) {
+    auto strings = reinterpret_cast<wchar_t*>(names);
+    printerName = strings + names->wDeviceOffset;
+    outputPort = strings + names->wOutputOffset;
+    GlobalUnlock(hDevNames);
+  }
+
+  sendLayout();
+  return true;
+}
+
+void PrintJob::sendLayout() {
   auto dpiX = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSX)) / pdfDpi;
   auto dpiY = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSY)) / pdfDpi;
   auto pageWidth =
@@ -216,7 +248,6 @@ bool PrintJob::printPdf(const std::string& name,
 
   printing->onLayout(this, pageWidth, pageHeight, marginLeft, marginTop,
                      marginRight, marginBottom);
-  return true;
 }
 
 std::vector<Printer> PrintJob::listPrinters() {
@@ -266,6 +297,8 @@ std::vector<Printer> PrintJob::listPrinters() {
 }
 
 void PrintJob::writeJob(std::vector<uint8_t> data) {
+  const std::lock_guard<std::mutex> lock{Printing::pdfiumMutex};
+
   auto dpiX = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSX)) / pdfDpi;
   auto dpiY = static_cast<double>(GetDeviceCaps(hDC, LOGPIXELSY)) / pdfDpi;
 
@@ -276,8 +309,16 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
 
   auto docName = fromUtf8(documentName);
   docInfo.lpszDocName = docName.c_str();
+  docInfo.lpszOutput = outputFile.empty() ? nullptr : outputFile.c_str();
 
   auto r = StartDoc(hDC, &docInfo);
+  if (r <= 0) {
+    auto error = GetLastError();
+    cancelJob(error == ERROR_CANCELLED || error == ERROR_PRINT_CANCELLED
+                  ? ""
+                  : "Unable to start the print job");
+    return;
+  }
 
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
@@ -286,10 +327,7 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
     // half-open job is left in the queue, release the handles like the success
     // path below does, and report the failure.
     AbortDoc(hDC);
-    DeleteDC(hDC);
-    GlobalFree(hDevNames);
-    GlobalFree(hDevMode);
-    printing->onCompleted(this, false, "Cannot print a malformed PDF file");
+    cancelJob("Cannot print a malformed PDF file");
     return;
   }
 
@@ -329,7 +367,92 @@ void PrintJob::writeJob(std::vector<uint8_t> data) {
   printing->onCompleted(this, true, "");
 }
 
-void PrintJob::cancelJob(const std::string& error) {}
+void PrintJob::cancelJob(const std::string& error) {
+  DeleteDC(hDC);
+  GlobalFree(hDevNames);
+  GlobalFree(hDevMode);
+  printing->onCompleted(this, false, error);
+}
+
+// Ports on which StartDoc asks the user for a file name.
+static bool isFilePort(const std::wstring& port) {
+  return _wcsicmp(port.c_str(), L"PORTPROMPT:") == 0 ||
+         _wcsicmp(port.c_str(), L"FILE:") == 0;
+}
+
+std::wstring PrintJob::outputFileExtension() {
+  if (!outputPort.empty() && !isFilePort(outputPort)) {
+    return L"";
+  }
+
+  auto port = outputPort;
+  std::wstring driver;
+  HANDLE hPrinter;
+  if (OpenPrinter(printerName.data(), &hPrinter, nullptr)) {
+    DWORD needed = 0;
+    GetPrinter(hPrinter, 2, nullptr, 0, &needed);
+    auto buffer = std::vector<BYTE>(needed);
+    if (needed > 0 && GetPrinter(hPrinter, 2, buffer.data(), needed, &needed)) {
+      auto info = reinterpret_cast<PRINTER_INFO_2*>(buffer.data());
+      if (port.empty() && info->pPortName) {
+        port = info->pPortName;
+      }
+      if (info->pDriverName) {
+        driver = info->pDriverName;
+        CharUpperBuff(driver.data(), static_cast<DWORD>(driver.size()));
+      }
+    }
+    ClosePrinter(hPrinter);
+  }
+
+  if (!isFilePort(port)) {
+    return L"";
+  }
+  if (driver.find(L"PDF") != std::wstring::npos) {
+    return L"pdf";
+  }
+  if (driver.find(L"XPS") != std::wstring::npos) {
+    return L"oxps";
+  }
+  return L"prn";
+}
+
+bool PrintJob::askOutputFile(const std::wstring& extension) {
+  wchar_t file[MAX_PATH] = {};
+  auto name = fromUtf8(documentName);
+  for (auto& c : name) {
+    if (wcschr(L"\\/:*?\"<>|", c)) {
+      c = L'_';
+    }
+  }
+  wcsncpy_s(file, name.c_str(), _TRUNCATE);
+
+  auto pattern = L"*." + extension;
+  auto filter =
+      pattern + L'\0' + pattern + L'\0' + L"*.*" + L'\0' + L"*.*" + L'\0';
+
+  OPENFILENAME ofn{};
+  ofn.lStructSize = sizeof(ofn);
+  // The window may have been deactivated, or closed, while the job was
+  // spooling.
+  if (explicitOwnerWindow &&
+      (!IsWindow(ownerWindow) || !IsWindowVisible(ownerWindow))) {
+    return false;
+  }
+  ofn.hwndOwner = IsWindow(ownerWindow) ? ownerWindow : printing->getWindow();
+  ofn.lpstrFilter = filter.c_str();
+  ofn.lpstrFile = file;
+  ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrDefExt = extension.c_str();
+  ofn.Flags =
+      OFN_EXPLORER | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
+  if (!GetSaveFileName(&ofn)) {
+    return false;
+  }
+
+  outputFile = file;
+  return true;
+}
 
 bool PrintJob::sharePdf(std::vector<uint8_t> data, const std::string& name) {
   TCHAR lpTempPathBuffer[MAX_PATH];
@@ -367,6 +490,8 @@ void PrintJob::pickPrinter(void* result) {}
 void PrintJob::rasterPdf(std::vector<uint8_t> data,
                          std::vector<int> pages,
                          double scale) {
+  const std::lock_guard<std::mutex> lock{Printing::pdfiumMutex};
+
   auto doc = FPDF_LoadMemDocument64(data.data(), data.size(), nullptr);
   if (!doc) {
     printing->onPageRasterEnd(this, "Cannot raster a malformed PDF file");

@@ -172,13 +172,40 @@ class MethodChannelPrinting extends PrintingPlatform {
     OutputType outputType,
     bool forceCustomPrintPaper,
     bool windowsModernDialog,
-  ) async {
+  ) => layoutPdfForWindow(
+    printer,
+    onLayout,
+    name,
+    format,
+    dynamicLayout,
+    usePrinterSettings,
+    outputType,
+    forceCustomPrintPaper,
+    windowsModernDialog,
+  );
+
+  @override
+  Future<bool> layoutPdfForWindow(
+    Printer? printer,
+    LayoutCallback onLayout,
+    String name,
+    PdfPageFormat format,
+    bool dynamicLayout,
+    bool usePrinterSettings,
+    OutputType outputType,
+    bool forceCustomPrintPaper,
+    bool windowsModernDialog, {
+    int? windowHandle,
+    int? viewId,
+  }) async {
     final job = _printJobs.add(
       onCompleted: Completer<bool>(),
       onLayout: onLayout,
     );
 
     final params = <String, dynamic>{
+      'windowHandle': ?windowHandle,
+      'viewId': ?viewId,
       if (printer != null) 'printer': printer.url,
       'name': name,
       'job': job.index,
@@ -246,8 +273,31 @@ class MethodChannelPrinting extends PrintingPlatform {
     String? subject,
     String? body,
     List<String>? emails,
-  ) async {
+  ) => _sharePdf(bytes, filename, bounds, subject, body, emails);
+
+  @override
+  Future<bool> sharePdfForWindow(
+    Uint8List bytes,
+    String filename,
+    Rect bounds,
+    String? subject,
+    String? body,
+    List<String>? emails, {
+    required int viewId,
+  }) =>
+      _sharePdf(bytes, filename, bounds, subject, body, emails, viewId: viewId);
+
+  Future<bool> _sharePdf(
+    Uint8List bytes,
+    String filename,
+    Rect bounds,
+    String? subject,
+    String? body,
+    List<String>? emails, {
+    int? viewId,
+  }) async {
     final params = <String, dynamic>{
+      'viewId': ?viewId,
       'doc': Uint8List.fromList(bytes),
       'name': filename,
       'subject': subject,

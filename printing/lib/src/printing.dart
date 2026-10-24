@@ -58,8 +58,23 @@ mixin Printing {
     OutputType outputType = OutputType.generic,
     bool forceCustomPrintPaper = false,
     bool windowsModernDialog = false,
+    int? windowHandle,
+    int? viewId,
   }) {
-    return PrintingPlatform.instance.layoutPdf(
+    if (windowHandle == null && viewId == null) {
+      return PrintingPlatform.instance.layoutPdf(
+        null,
+        onLayout,
+        name,
+        format,
+        dynamicLayout,
+        usePrinterSettings,
+        outputType,
+        forceCustomPrintPaper,
+        windowsModernDialog,
+      );
+    }
+    return PrintingPlatform.instance.layoutPdfForWindow(
       null,
       onLayout,
       name,
@@ -69,6 +84,8 @@ mixin Printing {
       outputType,
       forceCustomPrintPaper,
       windowsModernDialog,
+      windowHandle: windowHandle,
+      viewId: viewId,
     );
   }
 
@@ -167,8 +184,23 @@ mixin Printing {
     OutputType outputType = OutputType.generic,
     bool forceCustomPrintPaper = false,
     bool windowsModernDialog = false,
+    int? windowHandle,
+    int? viewId,
   }) {
-    return PrintingPlatform.instance.layoutPdf(
+    if (windowHandle == null && viewId == null) {
+      return PrintingPlatform.instance.layoutPdf(
+        printer,
+        onLayout,
+        name,
+        format,
+        dynamicLayout,
+        usePrinterSettings,
+        outputType,
+        forceCustomPrintPaper,
+        windowsModernDialog,
+      );
+    }
+    return PrintingPlatform.instance.layoutPdfForWindow(
       printer,
       onLayout,
       name,
@@ -178,6 +210,8 @@ mixin Printing {
       outputType,
       forceCustomPrintPaper,
       windowsModernDialog,
+      windowHandle: windowHandle,
+      viewId: viewId,
     );
   }
 
@@ -201,9 +235,21 @@ mixin Printing {
     String? subject,
     String? body,
     List<String>? emails,
+    int? viewId,
   }) {
     bounds ??= Rect.fromCircle(center: Offset.zero, radius: 10);
 
+    if (viewId != null) {
+      return PrintingPlatform.instance.sharePdfForWindow(
+        bytes,
+        filename,
+        bounds,
+        subject,
+        body,
+        emails,
+        viewId: viewId,
+      );
+    }
     return PrintingPlatform.instance.sharePdf(
       bytes,
       filename,

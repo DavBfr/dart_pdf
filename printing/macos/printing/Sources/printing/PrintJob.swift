@@ -134,6 +134,10 @@ public class PrintJob: NSView, NSSharingServicePickerDelegate {
         }
 
         DispatchQueue.main.async {
+            guard self._window?.isVisible == true else {
+                self.printing.onCompleted(printJob: self, completed: false, error: nil)
+                return
+            }
             self.printOperation!.runModal(for: self._window!, delegate: self, didRun: #selector(self.printOperationDidRun(printOperation:success:contextInfo:)), contextInfo: nil)
         }
     }

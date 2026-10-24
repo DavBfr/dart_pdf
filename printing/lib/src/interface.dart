@@ -72,6 +72,32 @@ abstract class PrintingPlatform extends PlatformInterface {
     bool windowsModernDialog,
   );
 
+  /// Prints in the originating window. Platforms without window support keep
+  /// their existing behavior; implementations of layoutPdf remain compatible.
+  Future<bool> layoutPdfForWindow(
+    Printer? printer,
+    LayoutCallback onLayout,
+    String name,
+    PdfPageFormat format,
+    bool dynamicLayout,
+    bool usePrinterSettings,
+    OutputType outputType,
+    bool forceCustomPrintPaper,
+    bool windowsModernDialog, {
+    int? windowHandle,
+    int? viewId,
+  }) => layoutPdf(
+    printer,
+    onLayout,
+    name,
+    format,
+    dynamicLayout,
+    usePrinterSettings,
+    outputType,
+    forceCustomPrintPaper,
+    windowsModernDialog,
+  );
+
   /// Enumerate the available printers on the system.
   Future<List<Printer>> listPrinters();
 
@@ -99,6 +125,17 @@ abstract class PrintingPlatform extends PlatformInterface {
     String? body,
     List<String>? emails,
   );
+
+  /// Shares from the explicit originating Flutter view when supported.
+  Future<bool> sharePdfForWindow(
+    Uint8List bytes,
+    String filename,
+    Rect bounds,
+    String? subject,
+    String? body,
+    List<String>? emails, {
+    required int viewId,
+  }) => sharePdf(bytes, filename, bounds, subject, body, emails);
 
   /// Convert an html document to a pdf data
   Future<Uint8List> convertHtml(
