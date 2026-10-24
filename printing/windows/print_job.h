@@ -63,6 +63,15 @@ class PrintJob {
   HGLOBAL hDevNames = nullptr;
   HDC hDC = nullptr;
   std::string documentName;
+  std::wstring printerName;
+  // Port chosen in the print dialog; empty for direct printing.
+  std::wstring outputPort;
+  std::wstring outputFile;
+  // Owner of the print dialog, kept for the "print to file" dialog that
+  // follows it.
+  HWND ownerWindow = nullptr;
+
+  void sendLayout();
 
  public:
   PrintJob(Printing* printing, int index);
@@ -77,6 +86,13 @@ class PrintJob {
                 double height,
                 bool usePrinterSettings,
                 bool windowsModernDialog);
+
+  // Print thread. Extension of the file the driver would ask for, or empty
+  // when the job goes to a device.
+  std::wstring outputFileExtension();
+
+  // Platform thread. Returns false when the user cancels.
+  bool askOutputFile(const std::wstring& extension);
 
   void writeJob(std::vector<uint8_t> data);
 
