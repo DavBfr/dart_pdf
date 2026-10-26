@@ -119,11 +119,18 @@ class MethodChannelPrinting extends PrintingPlatform {
       case 'onPageRasterized':
         final job = _printJobs.getJob(call.arguments['job']);
         if (job != null) {
-          final raster = PdfRaster(
-            call.arguments['width'],
-            call.arguments['height'],
-            call.arguments['image'],
-          );
+          final isPng = call.arguments['isPng'] == true;
+          final raster = isPng
+              ? PngPdfRaster(
+                  call.arguments['width'],
+                  call.arguments['height'],
+                  call.arguments['image'],
+                )
+              : PdfRaster(
+                  call.arguments['width'],
+                  call.arguments['height'],
+                  call.arguments['image'],
+                );
           job.onPageRasterized!.add(raster);
         }
         break;
