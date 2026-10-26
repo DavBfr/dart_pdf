@@ -433,10 +433,7 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
             for pageNum in pages ?? Array(0 ... pageCount - 1) {
                 guard let page = document.page(at: pageNum + 1) else { continue }
                 let angle = CGFloat(page.rotationAngle) * CGFloat.pi / -180
-                let rect = page.getBoxRect(.mediaBox)
                 let rectCrop = page.getBoxRect(.cropBox)
-                let diffHeight = rectCrop.height - rect.height
-                let diffWidth = rectCrop.width - rect.width
                 let width = Int(abs((cos(angle) * rectCrop.width + sin(angle) * rectCrop.height) * scale))
                 let height = Int(abs((cos(angle) * rectCrop.height + sin(angle) * rectCrop.width) * scale))
                 let stride = width * 4
@@ -458,8 +455,10 @@ public class PrintJob: UIPrintPageRenderer, UIPrintInteractionControllerDelegate
                         context!.translateBy(x: CGFloat(width) / 2, y: CGFloat(height) / 2)
                         context!.scaleBy(x: scale, y: scale)
                         context!.rotate(by: angle)
-                        context!.translateBy(x: -rectCrop.width / 2, y: -rectCrop.height / 2)
-                        context!.translateBy(x: diffWidth, y: diffHeight)
+                        // drawPDFPage draws in PDF user space with no offset for the
+                        // crop box, so center on the crop box itself: its origin is
+                        // not always (0, 0), nor at the top right of the media box.
+                        context!.translateBy(x: -rectCrop.midX, y: -rectCrop.midY)
                         context!.drawPDFPage(page)
                     }
                 }
