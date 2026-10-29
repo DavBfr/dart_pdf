@@ -26,6 +26,28 @@ class PdfName extends PdfDataType {
   @override
   void output(PdfObjectBase o, PdfStream s, [int? indent]) {
     assert(value[0] == '/');
+    // Practically every name is undelimited printable ASCII; write those
+    // straight through instead of building an escape buffer char by char.
+    var clean = true;
+    for (var i = 0; i < value.length; i++) {
+      final c = value.codeUnitAt(i);
+      if (c < 0x21 ||
+          c > 0x7E ||
+          c == 0x23 ||
+          (c == 0x2f && i > 0) ||
+          c == 0x5b ||
+          c == 0x5d ||
+          c == 0x28 ||
+          c == 0x3c ||
+          c == 0x3e) {
+        clean = false;
+        break;
+      }
+    }
+    if (clean) {
+      s.putString(value);
+      return;
+    }
     final bytes = <int>[];
     for (final c in value.codeUnits) {
       assert(c > 0x00 && c < 0xff);
