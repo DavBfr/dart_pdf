@@ -27,7 +27,8 @@
 
 class print_job {
  private:
-  // Owned reference: the job may outlive the plugin instance that created it.
+  // Owned reference. Raster work may outlive the method-call handler and the
+  // plugin instance that created the job.
   FlMethodChannel* channel;
   const int index;
   GtkPrintJob* printJob = nullptr;

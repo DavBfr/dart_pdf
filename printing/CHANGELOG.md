@@ -3,6 +3,7 @@
 ## 5.15.2
 
 - Fix print jobs on Linux never being released and `layoutPdf` not completing when the document cannot be spooled: each job now holds its own reference to the method channel, sends `onCompleted` once on completion, cancellation or a spool error, and is deleted afterwards. The selected printer is no longer kept in a process-wide global, and the printer and page setup chosen in the print dialog are retained until the job is created
+- Fix `raster` blocking the GTK main thread on Linux: pages are rendered by PDFium on a background worker and delivered on the main thread; empty documents, invalid page sizes and bitmaps complete with an error
 
 ## 5.15.1
 

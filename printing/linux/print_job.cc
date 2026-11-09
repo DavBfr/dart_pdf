@@ -23,7 +23,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <cerrno>
+#include <cmath>
 #include <cstring>
+#include <limits>
 #include <mutex>
 #include <string>
 
@@ -33,6 +35,9 @@
 // only the last one destroys it.
 static int library_ref_count = 0;
 static std::mutex library_mutex;
+// The Linux plugin used to raster on the GTK thread, which serialized PDFium
+// accidentally. Background raster jobs must retain that process-wide ordering.
+static std::mutex pdfium_work_mutex;
 
 static void acquire_pdfium() {
   const std::lock_guard<std::mutex> lock{library_mutex};
@@ -347,6 +352,7 @@ void print_job::raster_pdf(const uint8_t data[],
                            const int32_t pages[],
                            size_t pages_count,
                            double scale) {
+  const std::lock_guard<std::mutex> work_lock{pdfium_work_mutex};
   acquire_pdfium();
 
   auto doc = FPDF_LoadMemDocument64(data, size, nullptr);
@@ -366,7 +372,7 @@ void print_job::raster_pdf(const uint8_t data[],
 
   for (auto pn = 0; pn < pages_count; pn++) {
     auto n = allPages ? pn : pages[pn];
-    if (n >= pageCount) {
+    if (n < 0 || n >= pageCount) {
       continue;
     }
 
@@ -378,18 +384,51 @@ void print_job::raster_pdf(const uint8_t data[],
     auto width = FPDF_GetPageWidth(page);
     auto height = FPDF_GetPageHeight(page);
 
-    auto bWidth = static_cast<int>(width * scale);
-    auto bHeight = static_cast<int>(height * scale);
+    const double pixelWidth = width * scale;
+    const double pixelHeight = height * scale;
+    if (!std::isfinite(pixelWidth) || !std::isfinite(pixelHeight) ||
+        pixelWidth < 1.0 || pixelHeight < 1.0 ||
+        pixelWidth > std::numeric_limits<int>::max() ||
+        pixelHeight > std::numeric_limits<int>::max()) {
+      FPDF_ClosePage(page);
+      FPDF_CloseDocument(doc);
+      release_pdfium();
+      on_page_raster_end(this, "Invalid raster dimensions");
+      return;
+    }
+    const auto bWidth = static_cast<int>(pixelWidth);
+    const auto bHeight = static_cast<int>(pixelHeight);
 
     auto bitmap = FPDFBitmap_Create(bWidth, bHeight, 1);
+    if (bitmap == nullptr) {
+      FPDF_ClosePage(page);
+      FPDF_CloseDocument(doc);
+      release_pdfium();
+      on_page_raster_end(this, "Unable to allocate raster bitmap");
+      return;
+    }
     FPDFBitmap_FillRect(bitmap, 0, 0, bWidth, bHeight, 0x00ffffff);
 
     FPDF_RenderPageBitmap(bitmap, page, 0, 0, bWidth, bHeight, 0,
                           FPDF_ANNOT | FPDF_LCD_TEXT | FPDF_NO_NATIVETEXT);
 
     uint8_t* p = static_cast<uint8_t*>(FPDFBitmap_GetBuffer(bitmap));
-    auto stride = FPDFBitmap_GetStride(bitmap);
-    size_t l = static_cast<size_t>(bHeight * stride);
+    const int stride = FPDFBitmap_GetStride(bitmap);
+    // Check both the minimum RGBA row size and multiplication *before*
+    // calculating the image length. The old int multiplication could overflow.
+    if (p == nullptr || stride <= 0 ||
+        static_cast<size_t>(stride) < static_cast<size_t>(bWidth) * 4u ||
+        static_cast<size_t>(bHeight) >
+            std::numeric_limits<size_t>::max() / static_cast<size_t>(stride)) {
+      FPDFBitmap_Destroy(bitmap);
+      FPDF_ClosePage(page);
+      FPDF_CloseDocument(doc);
+      release_pdfium();
+      on_page_raster_end(this, "Invalid PDFium raster buffer");
+      return;
+    }
+    const size_t l = static_cast<size_t>(bHeight) *
+                     static_cast<size_t>(stride);
 
     // BGRA to RGBA conversion
     for (auto y = 0; y < bHeight; y++) {

@@ -16,13 +16,17 @@
 
 #include "include/printing/printing_plugin.h"
 
+#include <atomic>
 #include <cstring>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <flutter_linux/flutter_linux.h>
 #include <gtk/gtk.h>
 
 #include "print_job.h"
+#include "raster_dispatch.h"
 
 #define PRINTING_PLUGIN(obj)                                     \
   (G_TYPE_CHECK_INSTANCE_CAST((obj), printing_plugin_get_type(), \
@@ -32,9 +36,69 @@ struct _PrintingPlugin {
   GObject parent_instance;
 
   FlMethodChannel* channel;
+  GThreadPool* raster_pool;
+  // Ref-counted because a native raster task may outlive plugin disposal.
+  std::shared_ptr<std::atomic<int>>* raster_inflight;
 };
 
 G_DEFINE_TYPE(PrintingPlugin, printing_plugin, g_object_get_type())
+
+struct RasterTask {
+  std::unique_ptr<print_job> job;
+  std::vector<uint8_t> document;
+  std::vector<int32_t> pages;
+  std::shared_ptr<std::atomic<int>> raster_inflight;
+  double scale;
+
+  ~RasterTask() {
+    if (raster_inflight) {
+      raster_inflight->fetch_sub(1, std::memory_order_release);
+    }
+  }
+};
+
+// One executing raster and at most one queued request. This bounds the number
+// of retained PDF documents without rejecting a large *single* document.
+static constexpr int kMaxOutstandingRasterRequests = 2;
+static bool reserve_raster_slot(const std::shared_ptr<std::atomic<int>>& counter) {
+  int count = counter->load(std::memory_order_acquire);
+  while (count < kMaxOutstandingRasterRequests) {
+    if (counter->compare_exchange_weak(
+            count, count + 1, std::memory_order_acq_rel)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+static gboolean keep_raster_task(gpointer data) {
+  (void)data;
+  return G_SOURCE_REMOVE;
+}
+
+static void release_raster_task(gpointer data) {
+  delete static_cast<RasterTask*>(data);
+}
+
+static void raster_task_run(gpointer data, gpointer user_data) {
+  (void)user_data;
+  std::unique_ptr<RasterTask> task(static_cast<RasterTask*>(data));
+  try {
+    task->job->raster_pdf(
+        task->document.data(), task->document.size(),
+        task->pages.empty() ? nullptr : task->pages.data(), task->pages.size(),
+        task->scale);
+  } catch (const std::exception& error) {
+    on_page_raster_end(task->job.get(), error.what());
+  } catch (...) {
+    on_page_raster_end(task->job.get(), "Raster worker failed");
+  }
+  std::vector<uint8_t>().swap(task->document);
+  // The job may hold the last channel reference after engine shutdown, and
+  // disposing FlMethodChannel off the GTK thread touches the messenger.
+  printing_raster::post_message(keep_raster_task, task.release(),
+                                release_raster_task);
+}
 
 // Called when a method call is received from Flutter.
 static void printing_plugin_handle_method_call(PrintingPlugin* self,
@@ -89,25 +153,68 @@ static void printing_plugin_handle_method_call(PrintingPlugin* self,
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 
   } else if (strcmp(method, "rasterPdf") == 0) {
-    auto doc = fl_value_get_uint8_list(fl_value_lookup_string(args, "doc"));
-    auto size = fl_value_get_length(fl_value_lookup_string(args, "doc"));
+    auto doc_value = fl_value_lookup_string(args, "doc");
+    if (doc_value == nullptr ||
+        fl_value_get_type(doc_value) != FL_VALUE_TYPE_UINT8_LIST ||
+        fl_value_get_length(doc_value) == 0) {
+      // Empty or malformed document arguments must not be passed through
+      // pointer arithmetic into the native raster task.
+      auto job_value = fl_value_lookup_string(args, "job");
+      if (job_value != nullptr &&
+          fl_value_get_type(job_value) == FL_VALUE_TYPE_INT) {
+        auto failed_job = std::make_unique<print_job>(
+            self->channel, fl_value_get_int(job_value));
+        on_page_raster_end(failed_job.get(), "PDF document is empty or invalid");
+      }
+      g_autoptr(FlValue) result = fl_value_new_bool(false);
+      response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+      fl_method_call_respond(method_call, response, nullptr);
+      return;
+    }
+    auto doc = fl_value_get_uint8_list(doc_value);
+    auto size = fl_value_get_length(doc_value);
     auto v_pages = fl_value_lookup_string(args, "pages");
-    int32_t* pages = nullptr;
-    size_t pages_count = 0;
-    if (fl_value_get_type(v_pages) == FL_VALUE_TYPE_LIST) {
-      pages_count = fl_value_get_length(v_pages);
-      pages = (int32_t*)malloc(sizeof(int32_t) * pages_count);
-      for (auto n = 0; n < pages_count; n++) {
-        pages[n] = fl_value_get_int(fl_value_get_list_value(v_pages, n));
+    std::vector<int32_t> pages;
+    if (v_pages != nullptr && fl_value_get_type(v_pages) == FL_VALUE_TYPE_LIST) {
+      const auto pages_count = fl_value_get_length(v_pages);
+      pages.reserve(pages_count);
+      for (size_t n = 0; n < pages_count; n++) {
+        pages.push_back(
+            static_cast<int32_t>(fl_value_get_int(fl_value_get_list_value(v_pages, n))));
       }
     }
     auto scale = fl_value_get_float(fl_value_lookup_string(args, "scale"));
     auto jobNum = fl_value_get_int(fl_value_lookup_string(args, "job"));
-    auto job = std::make_unique<print_job>(self->channel, jobNum);
-    job->raster_pdf(doc, size, pages, pages_count, scale);
-    free(pages);
 
-    g_autoptr(FlValue) result = fl_value_new_bool(true);
+    g_autoptr(GError) worker_error = nullptr;
+    if (self->raster_pool == nullptr) {
+      self->raster_pool =
+          printing_raster::create_pool(raster_task_run, &worker_error);
+    }
+    bool queued = false;
+    if (self->raster_pool != nullptr &&
+        reserve_raster_slot(*self->raster_inflight)) {
+      auto task = std::make_unique<RasterTask>();
+      task->raster_inflight = *self->raster_inflight;
+      task->job = std::make_unique<print_job>(self->channel, jobNum);
+      task->document.assign(doc, doc + size);
+      task->pages = std::move(pages);
+      task->scale = scale;
+
+      // The exclusive pool already owns its worker; enqueue cannot spawn one.
+      g_thread_pool_push(self->raster_pool, task.release(), nullptr);
+      queued = true;
+    } else {
+      auto failed_job = std::make_unique<print_job>(self->channel, jobNum);
+      on_page_raster_end(
+          failed_job.get(),
+          self->raster_pool == nullptr
+              ? (worker_error != nullptr ? worker_error->message
+                                         : "Raster worker is unavailable")
+              : "Raster queue is full");
+    }
+
+    g_autoptr(FlValue) result = fl_value_new_bool(queued);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 
   } else {
@@ -118,6 +225,16 @@ static void printing_plugin_handle_method_call(PrintingPlugin* self,
 }
 
 static void printing_plugin_dispose(GObject* object) {
+  auto self = PRINTING_PLUGIN(object);
+  if (self->raster_pool != nullptr) {
+    // Do not join native PDFium work on the GTK/UI thread. Each queued task
+    // owns its input, channel reference and admission counter; callbacks post
+    // to the main context and may safely arrive after plugin disposal.
+    g_thread_pool_free(self->raster_pool, FALSE, FALSE);
+    self->raster_pool = nullptr;
+  }
+  delete self->raster_inflight;
+  self->raster_inflight = nullptr;
   G_OBJECT_CLASS(printing_plugin_parent_class)->dispose(object);
 }
 
@@ -125,7 +242,10 @@ static void printing_plugin_class_init(PrintingPluginClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = printing_plugin_dispose;
 }
 
-static void printing_plugin_init(PrintingPlugin* self) {}
+static void printing_plugin_init(PrintingPlugin* self) {
+  self->raster_inflight =
+      new std::shared_ptr<std::atomic<int>>(std::make_shared<std::atomic<int>>(0));
+}
 
 static void method_call_cb(FlMethodChannel* channel,
                            FlMethodCall* method_call,
@@ -151,30 +271,86 @@ void printing_plugin_register_with_registrar(FlPluginRegistrar* registrar) {
   g_object_unref(plugin);
 }
 
+struct RasterPageMessage {
+  FlMethodChannel* channel;
+  int job;
+  std::vector<uint8_t> image;
+  int width;
+  int height;
+};
+
+static gboolean deliver_raster_page(gpointer data) {
+  auto message = static_cast<RasterPageMessage*>(data);
+  g_autoptr(FlValue) map = fl_value_new_map();
+  fl_value_set_string(
+      map, "image",
+      fl_value_new_uint8_list(message->image.data(), message->image.size()));
+  fl_value_set_string(map, "width", fl_value_new_int(message->width));
+  fl_value_set_string(map, "height", fl_value_new_int(message->height));
+  fl_value_set_string(map, "job", fl_value_new_int(message->job));
+  fl_method_channel_invoke_method(message->channel, "onPageRasterized", map,
+                                  nullptr, nullptr, nullptr);
+  return G_SOURCE_REMOVE;
+}
+
+static void destroy_raster_page(gpointer data) {
+  std::unique_ptr<RasterPageMessage> message(
+      static_cast<RasterPageMessage*>(data));
+  g_object_unref(message->channel);
+}
+
 void on_page_rasterized(print_job* job,
                         const uint8_t* data,
                         size_t size,
                         int width,
                         int height) {
-  g_autoptr(FlValue) map = fl_value_new_map();
-  fl_value_set_string(map, "image", fl_value_new_uint8_list(data, size));
-  fl_value_set_string(map, "width", fl_value_new_int(width));
-  fl_value_set_string(map, "height", fl_value_new_int(height));
-  fl_value_set_string(map, "job", fl_value_new_int(job->get_id()));
+  auto message = std::make_unique<RasterPageMessage>();
+  message->channel =
+      FL_METHOD_CHANNEL(g_object_ref(job->get_channel()));
+  message->job = job->get_id();
+  message->image.assign(data, data + size);
+  message->width = width;
+  message->height = height;
+  printing_raster::post_message(deliver_raster_page, message.release(),
+                                destroy_raster_page);
+}
 
-  fl_method_channel_invoke_method(job->get_channel(), "onPageRasterized", map,
+struct RasterEndMessage {
+  FlMethodChannel* channel;
+  int job;
+  std::string error;
+  bool has_error;
+};
+
+static gboolean deliver_raster_end(gpointer data) {
+  auto message = static_cast<RasterEndMessage*>(data);
+  g_autoptr(FlValue) map = fl_value_new_map();
+  fl_value_set_string(map, "job", fl_value_new_int(message->job));
+  if (message->has_error) {
+    fl_value_set_string(map, "error", fl_value_new_string(message->error.c_str()));
+  }
+  fl_method_channel_invoke_method(message->channel, "onPageRasterEnd", map,
                                   nullptr, nullptr, nullptr);
+  return G_SOURCE_REMOVE;
+}
+
+static void destroy_raster_end(gpointer data) {
+  std::unique_ptr<RasterEndMessage> message(
+      static_cast<RasterEndMessage*>(data));
+  g_object_unref(message->channel);
 }
 
 void on_page_raster_end(print_job* job, const char* error) {
-  g_autoptr(FlValue) map = fl_value_new_map();
-  fl_value_set_string(map, "job", fl_value_new_int(job->get_id()));
+  auto message = std::make_unique<RasterEndMessage>();
+  message->channel =
+      FL_METHOD_CHANNEL(g_object_ref(job->get_channel()));
+  message->job = job->get_id();
+  message->has_error = error != nullptr;
   if (error != nullptr) {
-    fl_value_set_string(map, "error", fl_value_new_string(error));
+    message->error = error;
   }
-
-  fl_method_channel_invoke_method(job->get_channel(), "onPageRasterEnd", map,
-                                  nullptr, nullptr, nullptr);
+  printing_raster::post_message(deliver_raster_end, message.release(),
+                                destroy_raster_end);
 }
 
 static void on_layout_response_cb(GObject* object,
