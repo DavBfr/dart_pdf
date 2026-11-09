@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.13.2
+
+- Fix TrueType subsets embedding the next glyph outline for zero-length glyphs such as the space
+
 ## 3.13.1
 
 - Add output-stream serialization for memory-bounded PDF generation.
