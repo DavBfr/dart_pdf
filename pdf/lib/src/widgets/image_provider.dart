@@ -40,9 +40,9 @@ abstract class ImageProvider {
   /// The internal orientation of the image
   final PdfImageOrientation orientation;
 
-  // Distinguish original-resolution images (null, null) from resized images.
-  // Both dimensions matter for providers with non-proportional image resizing.
-  final _cache = <(int?, int?), PdfImage>{};
+  // Per document, weakly keyed: a long-lived provider must not keep finished
+  // documents alive. (null, null) is the original, unresampled image.
+  final _cache = Expando<Map<(int?, int?), PdfImage>>();
 
   PdfImage buildImage(Context context, {int? width, int? height});
 
@@ -75,12 +75,8 @@ abstract class ImageProvider {
       }
     }
 
-    final cached = _cache[key];
-    if (cached != null && cached.pdfDocument == context.document) {
-      return cached;
-    }
-
-    return _cache[key] = buildImage(context, width: key.$1, height: key.$2);
+    final images = _cache[context.document] ??= {};
+    return images[key] ??= buildImage(context, width: key.$1, height: key.$2);
   }
 }
 
