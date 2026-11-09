@@ -41,7 +41,7 @@ class Context {
     inherited: HashMap<Type, Inherited>(),
   );
 
-  const Context._({
+  Context._({
     required this.document,
     PdfPage? page,
     PdfGraphics? canvas,
@@ -62,7 +62,22 @@ class Context {
 
   final PdfDocument document;
 
-  int get _pageNumber => document.pdfPageList.pages.indexOf(page);
+  // A page number is read repeatedly by headers, footers and layout.
+  // Remember the index after the first lookup, but validate it because
+  // users may still insert pages ahead of an existing page.
+  int? _cachedPageIndex;
+
+  int get _pageNumber {
+    final pages = document.pdfPageList.pages;
+    final index = _cachedPageIndex;
+    if (index != null &&
+        index >= 0 &&
+        index < pages.length &&
+        identical(pages[index], page)) {
+      return index;
+    }
+    return _cachedPageIndex = pages.indexOf(page);
+  }
 
   int get pageNumber => _pageNumber + 1;
 
@@ -84,12 +99,16 @@ class Context {
     Matrix4? ctm,
     HashMap<Type, Inherited>? inherited,
   }) {
-    return Context._(
+    final result = Context._(
       document: document,
       page: page ?? _page,
       canvas: canvas ?? _canvas,
       inherited: inherited ?? _inherited,
     );
+    if (page == null || identical(page, _page)) {
+      result._cachedPageIndex = _cachedPageIndex;
+    }
+    return result;
   }
 
   T? dependsOn<T>() {
