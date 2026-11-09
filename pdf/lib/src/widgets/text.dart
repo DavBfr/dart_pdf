@@ -842,10 +842,13 @@ class RichText extends Widget with SpanningWidget {
 
         final font = style!.font!.getFont(context);
 
-        var text = span.text!.runes.toList();
+        final runes = span.text!.runes.toList();
+        var fragmentStart = 0;
 
-        for (var index = 0; index < text.length; index++) {
-          final rune = text[index];
+        // Keep one immutable rune list. Repeatedly slicing off an unsupported
+        // rune otherwise copies the entire remaining tail (quadratic work).
+        for (var index = 0; index < runes.length; index++) {
+          final rune = runes[index];
           const spaces = {
             0x0a,
             0x09,
@@ -871,10 +874,11 @@ class RichText extends Widget with SpanningWidget {
           }
 
           if (!font.isRuneSupported(rune)) {
-            if (index > 0) {
+            if (index > fragmentStart) {
               spans.add(
                 _addText(
-                  text: text,
+                  text: runes,
+                  start: fragmentStart,
                   end: index,
                   style: style,
                   baseline: span.baseline,
@@ -934,14 +938,14 @@ class RichText extends Widget with SpanningWidget {
                 return true;
               }());
             }
-            text = text.sublist(index + 1);
-            index = -1;
+            fragmentStart = index + 1;
           }
         }
 
         spans.add(
           _addText(
-            text: text,
+            text: runes,
+            start: fragmentStart,
             style: style,
             baseline: span.baseline,
             annotation: annotation,
