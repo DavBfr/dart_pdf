@@ -29,7 +29,7 @@
 #include <mutex>
 #include <string>
 
-#include <fpdfview.h>
+#include "pdfium_isolate.h"
 
 // PDFium is a process-wide library: only the first job initializes it and
 // only the last one destroys it.
@@ -41,20 +41,24 @@ static std::mutex pdfium_work_mutex;
 
 static void acquire_pdfium() {
   const std::lock_guard<std::mutex> lock{library_mutex};
-  if (library_ref_count++ == 0) {
+  // Resolve the private namespace *before* mutating the ref count. If
+  // dlmopen/dlsym fails, the exception is handled by raster_task_run.
+  const auto& api = printing_pdfium::functions();
+  if (library_ref_count == 0) {
     FPDF_LIBRARY_CONFIG config;
     config.version = 2;
     config.m_pUserFontPaths = nullptr;
     config.m_pIsolate = nullptr;
     config.m_v8EmbedderSlot = 0;
-    FPDF_InitLibraryWithConfig(&config);
+    api.initialize(&config);
   }
+  ++library_ref_count;
 }
 
 static void release_pdfium() {
   const std::lock_guard<std::mutex> lock{library_mutex};
   if (--library_ref_count == 0) {
-    FPDF_DestroyLibrary();
+    printing_pdfium::functions().destroy();
   }
 }
 
@@ -355,14 +359,14 @@ void print_job::raster_pdf(const uint8_t data[],
   const std::lock_guard<std::mutex> work_lock{pdfium_work_mutex};
   acquire_pdfium();
 
-  auto doc = FPDF_LoadMemDocument64(data, size, nullptr);
+  auto doc = printing_pdfium::functions().load_document(data, size, nullptr);
   if (!doc) {
     release_pdfium();
     on_page_raster_end(this, "Cannot raster a malformed PDF file");
     return;
   }
 
-  auto pageCount = FPDF_GetPageCount(doc);
+  auto pageCount = printing_pdfium::functions().page_count(doc);
   auto allPages = false;
 
   if (pages_count == 0) {
@@ -376,13 +380,13 @@ void print_job::raster_pdf(const uint8_t data[],
       continue;
     }
 
-    auto page = FPDF_LoadPage(doc, n);
+    auto page = printing_pdfium::functions().load_page(doc, n);
     if (!page) {
       continue;
     }
 
-    auto width = FPDF_GetPageWidth(page);
-    auto height = FPDF_GetPageHeight(page);
+    auto width = printing_pdfium::functions().page_width(page);
+    auto height = printing_pdfium::functions().page_height(page);
 
     const double pixelWidth = width * scale;
     const double pixelHeight = height * scale;
@@ -390,8 +394,8 @@ void print_job::raster_pdf(const uint8_t data[],
         pixelWidth < 1.0 || pixelHeight < 1.0 ||
         pixelWidth > std::numeric_limits<int>::max() ||
         pixelHeight > std::numeric_limits<int>::max()) {
-      FPDF_ClosePage(page);
-      FPDF_CloseDocument(doc);
+      printing_pdfium::functions().close_page(page);
+      printing_pdfium::functions().close_document(doc);
       release_pdfium();
       on_page_raster_end(this, "Invalid raster dimensions");
       return;
@@ -399,30 +403,30 @@ void print_job::raster_pdf(const uint8_t data[],
     const auto bWidth = static_cast<int>(pixelWidth);
     const auto bHeight = static_cast<int>(pixelHeight);
 
-    auto bitmap = FPDFBitmap_Create(bWidth, bHeight, 1);
+    auto bitmap = printing_pdfium::functions().bitmap_create(bWidth, bHeight, 1);
     if (bitmap == nullptr) {
-      FPDF_ClosePage(page);
-      FPDF_CloseDocument(doc);
+      printing_pdfium::functions().close_page(page);
+      printing_pdfium::functions().close_document(doc);
       release_pdfium();
       on_page_raster_end(this, "Unable to allocate raster bitmap");
       return;
     }
-    FPDFBitmap_FillRect(bitmap, 0, 0, bWidth, bHeight, 0x00ffffff);
+    printing_pdfium::functions().bitmap_fill(bitmap, 0, 0, bWidth, bHeight, 0x00ffffff);
 
-    FPDF_RenderPageBitmap(bitmap, page, 0, 0, bWidth, bHeight, 0,
+    printing_pdfium::functions().bitmap_render(bitmap, page, 0, 0, bWidth, bHeight, 0,
                           FPDF_ANNOT | FPDF_LCD_TEXT | FPDF_NO_NATIVETEXT);
 
-    uint8_t* p = static_cast<uint8_t*>(FPDFBitmap_GetBuffer(bitmap));
-    const int stride = FPDFBitmap_GetStride(bitmap);
+    uint8_t* p = static_cast<uint8_t*>(printing_pdfium::functions().bitmap_buffer(bitmap));
+    const int stride = printing_pdfium::functions().bitmap_stride(bitmap);
     // Check both the minimum RGBA row size and multiplication *before*
     // calculating the image length. The old int multiplication could overflow.
     if (p == nullptr || stride <= 0 ||
         static_cast<size_t>(stride) < static_cast<size_t>(bWidth) * 4u ||
         static_cast<size_t>(bHeight) >
             std::numeric_limits<size_t>::max() / static_cast<size_t>(stride)) {
-      FPDFBitmap_Destroy(bitmap);
-      FPDF_ClosePage(page);
-      FPDF_CloseDocument(doc);
+      printing_pdfium::functions().bitmap_destroy(bitmap);
+      printing_pdfium::functions().close_page(page);
+      printing_pdfium::functions().close_document(doc);
       release_pdfium();
       on_page_raster_end(this, "Invalid PDFium raster buffer");
       return;
@@ -443,11 +447,11 @@ void print_job::raster_pdf(const uint8_t data[],
 
     on_page_rasterized(this, p, l, bWidth, bHeight);
 
-    FPDFBitmap_Destroy(bitmap);
-    FPDF_ClosePage(page);
+    printing_pdfium::functions().bitmap_destroy(bitmap);
+    printing_pdfium::functions().close_page(page);
   }
 
-  FPDF_CloseDocument(doc);
+  printing_pdfium::functions().close_document(doc);
 
   release_pdfium();
 

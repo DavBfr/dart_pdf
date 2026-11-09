@@ -19,8 +19,12 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 set(PDFIUM_VERSION "5200" CACHE STRING "Version of pdfium used")
 string(REPLACE "linux-" "" TARGET_ARCH ${FLUTTER_TARGET_PLATFORM})
 set(PDFIUM_ARCH ${TARGET_ARCH} CACHE STRING "Architecture of pdfium used")
+set(PRINTING_PDFIUM_DIR "$ENV{PRINTING_PDFIUM_DIR}" CACHE PATH
+    "Existing pdfium build to use instead of downloading one")
 
-if(${PDFIUM_VERSION} STREQUAL "latest")
+if(PRINTING_PDFIUM_DIR)
+  set(pdfium_SOURCE_DIR ${PRINTING_PDFIUM_DIR})
+elseif(${PDFIUM_VERSION} STREQUAL "latest")
   set(
     PDFIUM_URL
     "https://github.com/bblanchon/pdfium-binaries/releases/latest/download/pdfium-linux-${PDFIUM_ARCH}.tgz"
@@ -32,18 +36,39 @@ else()
     )
 endif()
 
-# Download pdfium
-include(../windows/DownloadProject.cmake)
-download_project(PROJ
-                 pdfium
-                 URL
-                 ${PDFIUM_URL})
+if(NOT PRINTING_PDFIUM_DIR)
+  # Download pdfium
+  include(../windows/DownloadProject.cmake)
+  download_project(PROJ
+                   pdfium
+                   URL
+                   ${PDFIUM_URL})
+endif()
 
 # This value is used when generating builds using this plugin, so it must not be
 # changed
 set(PLUGIN_NAME "printing_plugin")
 
-include(${pdfium_SOURCE_DIR}/PDFiumConfig.cmake)
+# Never link the printing plugin against an application's libpdfium.so.
+# An application may load another PDFium build (e.g. through pdfrx), while
+# printing ships the pinned Chromium 5200 headers and binary. Two uncoordinated
+# sets of PDFium globals in the ELF base namespace are unsafe even if renamed.
+set(PRINTING_PDFIUM_SOURCE
+    "${pdfium_SOURCE_DIR}/lib/libpdfium.so")
+set(PRINTING_PDFIUM_INCLUDE
+    "${pdfium_SOURCE_DIR}/include")
+if(NOT EXISTS "${PRINTING_PDFIUM_SOURCE}" OR
+   NOT EXISTS "${PRINTING_PDFIUM_INCLUDE}/fpdfview.h")
+  message(FATAL_ERROR
+      "Pinned printing PDFium is incomplete at ${pdfium_SOURCE_DIR}")
+endif()
+
+# A separate file name is used only to give the isolated runtime loader a
+# stable exact path; the real isolation is dlmopen(LM_ID_NEWLM), not the name.
+set(PRINTING_PRIVATE_PDFIUM
+    "${CMAKE_CURRENT_BINARY_DIR}/libpdfium_printing.so")
+configure_file("${PRINTING_PDFIUM_SOURCE}"
+               "${PRINTING_PRIVATE_PDFIUM}" COPYONLY)
 
 # System-level dependencies.
 find_package(PkgConfig REQUIRED)
@@ -56,25 +81,25 @@ add_library(${PLUGIN_NAME} SHARED
             "printing_plugin.cc"
             "include/printing/printing_plugin.h"
             "print_job.cc"
-            "print_job.h")
+            "print_job.h"
+            "pdfium_isolate.cc"
+            "pdfium_isolate.h")
 
 apply_standard_settings(${PLUGIN_NAME})
-set_target_properties(${PLUGIN_NAME} PROPERTIES CXX_VISIBILITY_PRESET hidden)
+set_target_properties(${PLUGIN_NAME} PROPERTIES
+                      CXX_VISIBILITY_PRESET hidden
+                      BUILD_WITH_INSTALL_RPATH TRUE
+                      INSTALL_RPATH "$ORIGIN")
 target_compile_definitions(${PLUGIN_NAME} PRIVATE FLUTTER_PLUGIN_IMPL)
 target_include_directories(${PLUGIN_NAME}
-                           INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(${PLUGIN_NAME} PRIVATE flutter)
-target_link_libraries(${PLUGIN_NAME}
-                      PRIVATE PkgConfig::GTK PkgConfig::GTKUnixPrint)
-target_link_libraries(${PLUGIN_NAME} PRIVATE pdfium)
-get_filename_component(PDFium_lib_path "${PDFium_LIBRARY}" DIRECTORY)
-set_target_properties(${PLUGIN_NAME}
-                      PROPERTIES SKIP_BUILD_RPATH
-                                 FALSE
-                                 BUILD_WITH_INSTALL_RPATH
-                                 TRUE
-                                 INSTALL_RPATH
-                                 "$ORIGIN:${PDFium_lib_path}")
+                           INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include"
+                           PRIVATE "${PRINTING_PDFIUM_INCLUDE}")
+target_link_libraries(${PLUGIN_NAME} PRIVATE flutter
+                      PkgConfig::GTK PkgConfig::GTKUnixPrint
+                      ${CMAKE_DL_LIBS})
+# Do not add "pdfium" to target_link_libraries or to the standard bundle.
+# The custom loader resolves a fixed symbol set from the private PDFium in a
+# separate ELF namespace, ensuring neither version interposes on the other.
 
-# List of absolute paths to libraries that should be bundled with the plugin
-set(printing_bundled_libraries "${PDFium_LIBRARY}" PARENT_SCOPE)
+# The Flutter runner installs these files next to libprinting_plugin.so.
+set(printing_bundled_libraries "${PRINTING_PRIVATE_PDFIUM}" PARENT_SCOPE)

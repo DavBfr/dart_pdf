@@ -4,6 +4,8 @@
 
 - Fix print jobs on Linux never being released and `layoutPdf` not completing when the document cannot be spooled: each job now holds its own reference to the method channel, sends `onCompleted` once on completion, cancellation or a spool error, and is deleted afterwards. The selected printer is no longer kept in a process-wide global, and the printer and page setup chosen in the print dialog are retained until the job is created
 - Fix `raster` blocking the GTK main thread on Linux: pages are rendered by PDFium on a background worker and delivered on the main thread; empty documents, invalid page sizes and bitmaps complete with an error
+- Load PDFium on Linux in a private linker namespace (`dlmopen`) from a bundled `libpdfium_printing.so`, so its global state and symbols are not shared with another PDFium loaded by the application, and the plugin no longer links `libpdfium.so`
+- Add the `PRINTING_PDFIUM_DIR` CMake option (or environment variable) on Linux to use an existing PDFium build instead of downloading one
 
 ## 5.15.1
 
