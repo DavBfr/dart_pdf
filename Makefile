@@ -87,13 +87,16 @@ pdf/pubspec.lock: pdf/pubspec.yaml
 printing/pubspec.lock: printing/pubspec.yaml
 	cd printing; $(FLUTTER_BIN) pub get
 
+widget_wrapper/pubspec.lock: widget_wrapper/pubspec.yaml
+	cd widget_wrapper; $(FLUTTER_BIN) pub get
+
 demo/pubspec.lock: demo/pubspec.yaml
 	cd demo; $(FLUTTER_BIN) pub get
 
 test/pubspec.lock: test/pubspec.yaml
 	cd test; $(FLUTTER_BIN) pub get
 
-get: $(FONTS) pdf/pubspec.lock printing/pubspec.lock demo/pubspec.lock test/pubspec.lock
+get: $(FONTS) pdf/pubspec.lock printing/pubspec.lock widget_wrapper/pubspec.lock demo/pubspec.lock test/pubspec.lock
 
 get-all: $(FONTS) demo/assets/logo.svg demo/assets/profile.jpg get
 
@@ -107,6 +110,9 @@ test-pdf: svg $(FONTS) pdf/pubspec.lock .coverage
 test-printing: $(FONTS) printing/pubspec.lock .coverage
 	cd printing; $(FLUTTER_BIN) test --coverage --coverage-path lcov.info
 
+test-widget-wrapper: widget_wrapper/pubspec.lock
+	cd widget_wrapper; $(FLUTTER_BIN) test --coverage --coverage-path lcov.info
+
 test-demo: $(FONTS) demo/pubspec.lock .coverage
 	cd demo; $(FLUTTER_BIN) test --coverage --coverage-path lcov.info
 
@@ -114,8 +120,8 @@ test-readme: $(FONTS) test/pubspec.lock
 	cd test; $(DART_BIN) extract_readme.dart
 	cd test; $(DART_BIN) analyze
 
-test: test-pdf test-printing test-demo node_modules
-	cat pdf/lcov.info printing/lcov.info demo/lcov.info | node_modules/.bin/lcov-summary
+test: test-pdf test-printing test-widget-wrapper test-demo node_modules
+	cat pdf/lcov.info printing/lcov.info widget_wrapper/lcov.info demo/lcov.info | node_modules/.bin/lcov-summary
 
 clean:
 	git clean -fdx -e .vscode -e ref
@@ -158,7 +164,11 @@ analyze-printing: .pana
 	$(DART_BIN) pub global run pana --no-warning --source path printing
 	find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
-analyze: analyze-pdf analyze-printing
+analyze-widget-wrapper: widget_wrapper/pubspec.lock
+	# Infos (e.g. new SDK deprecations) are reported but do not fail the build.
+	cd widget_wrapper; $(FLUTTER_BIN) analyze --no-pub --no-fatal-infos
+
+analyze: analyze-pdf analyze-printing analyze-widget-wrapper
 
 .dartfix:
 	which dartfix || $(DART_BIN) pub global activate dartfix
