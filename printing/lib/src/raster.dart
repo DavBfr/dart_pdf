@@ -44,8 +44,16 @@ class PdfRaster extends PdfRasterBase {
   @override
   Future<Uint8List> toPng() async {
     final image = await toImage();
-    final data = await image.toByteData(format: ui.ImageByteFormat.png);
-    return data!.buffer.asUint8List();
+    try {
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (data == null) {
+        throw StateError('Unable to encode PDF raster image as PNG');
+      }
+      return data.buffer.asUint8List();
+    } finally {
+      // toImage() creates an owned engine image for each conversion.
+      image.dispose();
+    }
   }
 }
 
