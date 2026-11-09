@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.13.2
+
+- Fix the searchRange, entrySelector and rangeShift fields of subset TrueType font headers
+
 ## 3.13.1
 
 - Add output-stream serialization for memory-bounded PDF generation.

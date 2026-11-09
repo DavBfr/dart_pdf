@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'ttf_parser.dart';
@@ -332,13 +331,17 @@ class TtfWriter {
       final start = ByteData(12 + numTables * 16);
       start.setUint32(0, 0x00010000);
       start.setUint16(4, numTables);
-      var pot = numTables;
-      while (pot & (pot - 1) != 0) {
-        pot++;
+      // sfnt uses the largest power of two <= numTables, not the next one.
+      var searchPower = 1;
+      var entrySelector = 0;
+      while (searchPower * 2 <= numTables) {
+        searchPower *= 2;
+        entrySelector++;
       }
-      start.setUint16(6, pot * 16);
-      start.setUint16(8, math.log(pot).toInt());
-      start.setUint16(10, pot * 16 - numTables * 16);
+      final searchRange = searchPower * 16;
+      start.setUint16(6, searchRange);
+      start.setUint16(8, entrySelector);
+      start.setUint16(10, numTables * 16 - searchRange);
 
       // Create the table directory
       var count = 0;
