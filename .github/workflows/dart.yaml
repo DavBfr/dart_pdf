@@ -95,6 +95,8 @@ jobs:
       - name: Prepare build
         run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
       - name: Build example for Windows
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: cd printing/example; flutter build -v windows
 
   windows-arm:
@@ -113,6 +115,8 @@ jobs:
       - name: Prepare build
         run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
       - name: Build example for Windows
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: cd printing/example; flutter build -v windows
 
   macos:
@@ -184,6 +188,8 @@ jobs:
       - name: Prepare build
         run: cd printing/example; flutter create -t app --no-overwrite --org net.nfet --project-name example .
       - name: Build example for Windows
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: cd printing/example; flutter build -v windows
 
   macos-dev:
