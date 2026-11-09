@@ -186,7 +186,7 @@ static void on_layout_response_cb(GObject* object,
   g_autoptr(FlMethodResponse) response =
       fl_method_channel_invoke_method_finish(channel, result, &error);
   if (!response) {
-    job->cancel_job(error->message);
+    job->cancel_job(error != nullptr ? error->message : "Layout callback failed");
     delete job;
     return;
   }
@@ -194,15 +194,26 @@ static void on_layout_response_cb(GObject* object,
   if (FL_IS_METHOD_SUCCESS_RESPONSE(response)) {
     FlValue* result = fl_method_success_response_get_result(
         FL_METHOD_SUCCESS_RESPONSE(response));
+    if (result == nullptr ||
+        fl_value_get_type(result) != FL_VALUE_TYPE_UINT8_LIST) {
+      job->cancel_job("Layout callback did not provide PDF bytes");
+      delete job;
+      return;
+    }
     auto data = fl_value_get_uint8_list(result);
     auto size = fl_value_get_length(result);
-    job->write_job(data, size);
+    if (!job->write_job(data, size)) {
+      delete job;
+    }
   } else if (FL_IS_METHOD_ERROR_RESPONSE(response)) {
     FlMethodErrorResponse* error_response = FL_METHOD_ERROR_RESPONSE(response);
     // fl_method_error_response_get_code(error_response);
     auto message = fl_method_error_response_get_message(error_response);
     //  fl_method_error_response_get_details(error_response);
     job->cancel_job(message);
+    delete job;
+  } else {
+    job->cancel_job("Unsupported layout callback response");
     delete job;
   }
 }

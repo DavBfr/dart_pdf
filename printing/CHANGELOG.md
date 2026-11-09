@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.15.2
+
+- Fix print jobs on Linux never being released and `layoutPdf` not completing when the document cannot be spooled: each job now holds its own reference to the method channel, sends `onCompleted` once on completion, cancellation or a spool error, and is deleted afterwards. The selected printer is no longer kept in a process-wide global, and the printer and page setup chosen in the print dialog are retained until the job is created
+
 ## 5.15.1
 
 - Fix iOS use-after-free crash in `CGPDFDocumentGetNumberOfPages`: UIKit reads the PDF document from a background page-count thread while dynamic layout replaces it on the main thread; document access is now lock-guarded
