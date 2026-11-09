@@ -79,26 +79,30 @@ class WidgetWrapper extends pw.ImageProvider {
     final wrappedWidget =
         key.currentContext!.findRenderObject() as RenderRepaintBoundary;
     final image = await wrappedWidget.toImage(pixelRatio: pixelRatio);
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+    try {
+      final byteData =
+          await image.toByteData(format: ui.ImageByteFormat.rawRgba);
 
-    if (byteData == null) {
+      if (byteData == null) {
+        return WidgetWrapper._(
+          Uint8List(0),
+          0,
+          0,
+          PdfImageOrientation.topLeft,
+          dpi,
+        );
+      }
+
       return WidgetWrapper._(
-        Uint8List(0),
-        0,
-        0,
-        PdfImageOrientation.topLeft,
+        byteData.buffer.asUint8List(),
+        image.width,
+        image.height,
+        orientation ?? PdfImageOrientation.topLeft,
         dpi,
       );
+    } finally {
+      image.dispose();
     }
-
-    final imageData = byteData.buffer.asUint8List();
-    return WidgetWrapper._(
-      imageData,
-      image.width,
-      image.height,
-      orientation ?? PdfImageOrientation.topLeft,
-      dpi,
-    );
   }
 
   /// Wrap a Flutter Widget to an ImageProvider.
@@ -195,18 +199,22 @@ class WidgetWrapper extends pw.ImageProvider {
       ..flushPaint();
 
     final image = await repaintBoundary.toImage(pixelRatio: pixelRatio);
-    final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-    if (bytes == null) {
-      throw Exception('Unable to read image data');
-    }
+    try {
+      final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      if (bytes == null) {
+        throw Exception('Unable to read image data');
+      }
 
-    return WidgetWrapper._(
-      bytes.buffer.asUint8List(),
-      image.width,
-      image.height,
-      orientation ?? PdfImageOrientation.topLeft,
-      dpi,
-    );
+      return WidgetWrapper._(
+        bytes.buffer.asUint8List(),
+        image.width,
+        image.height,
+        orientation ?? PdfImageOrientation.topLeft,
+        dpi,
+      );
+    } finally {
+      image.dispose();
+    }
   }
 
   /// The image data
