@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import 'dart:convert';
 import 'dart:typed_data';
 
 import '../document.dart';
@@ -73,6 +72,23 @@ class PdfTtfFont extends PdfFont {
   late PdfObject<PdfArray> widthsObject;
 
   final TtfParser font;
+
+  // Cache Unicode -> CID lookups for repeated text runs. Rebuild if callers
+  // append directly to the public cmap list.
+  final _cidByRune = <int, int>{};
+  int _indexedCmapLength = 0;
+
+  void _syncCmapIndex() {
+    final cmap = unicodeCMap.cmap;
+    if (_indexedCmapLength == cmap.length) {
+      return;
+    }
+    _cidByRune.clear();
+    for (var i = 0; i < cmap.length; i++) {
+      _cidByRune.putIfAbsent(cmap[i], () => i);
+    }
+    _indexedCmapLength = cmap.length;
+  }
 
   @override
   String get fontName => font.fontName;
@@ -188,17 +204,29 @@ class PdfTtfFont extends PdfFont {
       return super.putText(stream, text);
     }
 
-    final runes = text.runes;
+    _syncCmapIndex();
+    const hex = '0123456789abcdef';
 
     stream.putByte(0x3c);
-    for (final rune in runes) {
-      var char = unicodeCMap.cmap.indexOf(rune);
-      if (char == -1) {
-        char = unicodeCMap.cmap.length;
+    for (final rune in text.runes) {
+      var cid = _cidByRune[rune];
+      if (cid == null) {
+        cid = unicodeCMap.cmap.length;
         unicodeCMap.cmap.add(rune);
+        _cidByRune[rune] = cid;
+        _indexedCmapLength++;
       }
 
-      stream.putBytes(latin1.encode(char.toRadixString(16).padLeft(4, '0')));
+      if (cid > 0xffff) {
+        throw StateError('A Type0 font cannot encode more than 65536 CIDs');
+      }
+      // Encode the two-byte CID directly, without creating a string and a
+      // Latin-1 byte list for every character in long text exports.
+      stream
+        ..putByte(hex.codeUnitAt((cid >> 12) & 0xf))
+        ..putByte(hex.codeUnitAt((cid >> 8) & 0xf))
+        ..putByte(hex.codeUnitAt((cid >> 4) & 0xf))
+        ..putByte(hex.codeUnitAt(cid & 0xf));
     }
     stream.putByte(0x3e);
   }
@@ -209,11 +237,7 @@ class PdfTtfFont extends PdfFont {
       return super.stringMetrics(s, letterSpacing: letterSpacing);
     }
 
-    final runes = s.runes;
-    final bytes = <int>[];
-    runes.forEach(bytes.add);
-
-    final metrics = bytes.map(glyphMetrics);
+    final metrics = s.runes.map(glyphMetrics);
     return PdfFontMetrics.append(metrics, letterSpacing: letterSpacing);
   }
 
