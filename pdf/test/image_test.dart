@@ -68,6 +68,30 @@ void main() {
     }
   });
 
+  test('RGB input preserves byte-window boundaries without staging copies', () {
+    final backing = Uint8List.fromList([99, 1, 2, 3, 4, 5, 6, 77, 88]);
+    final pixels = Uint8List.sublistView(backing, 1, 7);
+    final image = PdfImage(
+      PdfDocument(),
+      image: pixels,
+      width: 2,
+      height: 1,
+      alpha: false,
+    );
+    expect(image.buf.output(), [1, 2, 3, 4, 5, 6]);
+    expect(backing, [99, 1, 2, 3, 4, 5, 6, 77, 88]);
+
+    // Additional trailing bytes are not part of the declared pixel area.
+    final padded = PdfImage(
+      PdfDocument(),
+      image: Uint8List.fromList([1, 2, 3, 4, 5, 6, 7, 8]),
+      width: 2,
+      height: 1,
+      alpha: false,
+    );
+    expect(padded.buf.output(), [1, 2, 3, 4, 5, 6]);
+  });
+
   test('PdfImage constructor without alpha channel', () async {
     final img = createTestImage(300, 200, withAlpha: false);
 

@@ -96,22 +96,20 @@ class PdfImage extends PdfXObject {
     final w = width;
     final h = height;
     final s = w * h;
-    final out = Uint8List(s * 3);
     if (alpha) {
+      final rgb = Uint8List(s * 3);
       for (var i = 0; i < s; i++) {
-        out[i * 3] = image[i * 4];
-        out[i * 3 + 1] = image[i * 4 + 1];
-        out[i * 3 + 2] = image[i * 4 + 2];
+        rgb[i * 3] = image[i * 4];
+        rgb[i * 3 + 1] = image[i * 4 + 1];
+        rgb[i * 3 + 2] = image[i * 4 + 2];
       }
+      im.buf.putBytes(rgb);
     } else {
-      for (var i = 0; i < s; i++) {
-        out[i * 3] = image[i * 3];
-        out[i * 3 + 1] = image[i * 3 + 1];
-        out[i * 3 + 2] = image[i * 3 + 2];
-      }
+      // RGB input already has the PDF stream's exact channel layout.
+      // Avoid allocating and filling an entire duplicate RGB buffer.
+      // Bound the view to the expected pixel count, as before.
+      im.buf.putBytes(Uint8List.sublistView(image, 0, s * 3));
     }
-
-    im.buf.putBytes(out);
     assert(() {
       im.stopStopwatch();
       return true;
