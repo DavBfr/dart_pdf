@@ -126,6 +126,7 @@ class TtfWriter {
     }
 
     final glyphsInfo = <TtfGlyphInfo>[];
+    final usedGlyphs = <int>{};
 
     for (final char in chars) {
       final glyphsIndex = charMap[char];
@@ -148,11 +149,15 @@ class TtfWriter {
             'or strip/normalize the character before passing it to the PDF.',
           );
         }
-        glyphsMap.remove(glyphsIndex);
+        // Several chars can share one glyph: look it up without consuming it,
+        // so each of them gets its own entry and later CIDs do not shift.
+        usedGlyphs.add(glyphsIndex);
       }
     }
 
-    glyphsInfo.addAll(glyphsMap.values);
+    glyphsInfo.addAll(
+      glyphsMap.values.where((glyph) => !usedGlyphs.contains(glyph.index)),
+    );
 
     // Add compound glyphs
     for (final compound in compounds.keys) {

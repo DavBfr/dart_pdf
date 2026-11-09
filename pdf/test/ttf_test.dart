@@ -118,4 +118,33 @@ void main() {
     final output = File('${font.fontName}.ttf');
     output.writeAsBytesSync(data);
   });
+
+  test('Font SubSetting keeps a glyph shared by several code points', () {
+    final fontData = File('open-sans.ttf').readAsBytesSync();
+    final font = TtfParser(fontData.buffer.asByteData());
+
+    // Two distinct code points that map to the same glyph index, followed by
+    // other characters. The subset glyph order is the order of [chars].
+    const a = 0x41; // A
+    const alias = 0xF0000; // private use, mapped to the glyph of A
+    const b = 0x42; // B
+    const c = 0x43; // C
+    font.charToGlyphIndexMap[alias] = font.charToGlyphIndexMap[a]!;
+    final chars = [a, alias, b, c];
+
+    final subset = TtfParser(
+      TtfWriter(font).withChars(chars).buffer.asByteData(),
+    );
+
+    // The subset keeps one glyph per entry of [chars], in order.
+    for (var i = 0; i < chars.length; i++) {
+      final expected = font.readGlyph(font.charToGlyphIndexMap[chars[i]]!);
+      expect(
+        subset.readGlyph(i).data,
+        equals(expected.data),
+        reason: 'subset glyph $i must be the glyph of U+'
+            '${chars[i].toRadixString(16).toUpperCase()}',
+      );
+    }
+  });
 }
