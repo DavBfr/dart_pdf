@@ -374,7 +374,9 @@ class PdfXrefTable extends PdfDataType with PdfDiagnostic {
       params['/Index'] = PdfArray.fromNum(blocks);
     }
 
-    final bytes = ((math.log(offset) / math.ln2).ceil() / 8).ceil();
+    // A byte boundary (e.g. 0x100 or 0x10000) needs one more byte to
+    // represent the offset; logarithms also introduce rounding errors.
+    final bytes = math.max(1, (offset.bitLength + 7) ~/ 8);
     final w = [1, bytes, 1];
     params['/W'] = PdfArray.fromNum(w);
     final wl = w.reduce((a, b) => a + b);
