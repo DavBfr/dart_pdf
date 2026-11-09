@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.13.2
+
+- Subset TrueType fonts with many compound glyphs in linear time, and no longer overflow the stack on cyclic compound glyphs
+
 ## 3.13.1
 
 - Add output-stream serialization for memory-bounded PDF generation.

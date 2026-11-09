@@ -87,8 +87,8 @@ class TtfWriter {
     // Create the glyphs table
     final glyphsMap = <int, TtfGlyphInfo>{};
     final charMap = <int, int>{};
-    final overflow = <int>{};
     final compounds = <int, int>{};
+    final visited = <int>{};
 
     for (final char in chars) {
       if (char == 32) {
@@ -111,13 +111,21 @@ class TtfWriter {
         continue;
       }
 
-      void addGlyph(glyphIndex) {
+      void addGlyph(int glyphIndex) {
+        // Marked before the components are visited, so shared or cyclic
+        // references are decoded once and cannot recurse forever.
+        if (!visited.add(glyphIndex)) {
+          return;
+        }
+        if (glyphIndex < 0 || glyphIndex >= ttf.glyphOffsets.length) {
+          throw FormatException('Compound glyph index $glyphIndex is invalid');
+        }
         final glyph = ttf.readGlyph(glyphIndex).copy();
         for (final g in glyph.compounds) {
           compounds[g] = -1;
-          overflow.add(g);
           addGlyph(g);
         }
+        // Components first: this order decides the subset glyph ids.
         glyphsMap[glyph.index] = glyph;
       }
 
@@ -154,13 +162,18 @@ class TtfWriter {
 
     glyphsInfo.addAll(glyphsMap.values);
 
-    // Add compound glyphs
+    // Build an original-GID -> subset-GID index once; a linear search for
+    // every compound component scales quadratically on complex fonts.
+    final subsetIndices = <int, int>{};
+    for (var index = 0; index < glyphsInfo.length; index++) {
+      subsetIndices.putIfAbsent(glyphsInfo[index].index, () => index);
+    }
     for (final compound in compounds.keys) {
-      final index = glyphsInfo.firstWhere(
-        (TtfGlyphInfo glyph) => glyph.index == compound,
-      );
-      compounds[compound] = glyphsInfo.indexOf(index);
-      assert((compounds[compound] ?? 0) >= 0, 'Unable to find the glyph');
+      final index = subsetIndices[compound];
+      if (index == null) {
+        throw FormatException('Missing compound glyph $compound in subset');
+      }
+      compounds[compound] = index;
     }
 
     // update compound indices
