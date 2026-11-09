@@ -257,12 +257,11 @@ mixin PdfPreviewRaster on State<PdfPreviewCustom> {
         ),
       );
 
-      if (mounted) {
+      if (mounted && !_rasterPending) {
         setState(() {
           error = exception;
         });
       }
     }
-
   }
 }
