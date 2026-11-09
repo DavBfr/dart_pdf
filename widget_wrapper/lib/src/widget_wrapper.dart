@@ -135,7 +135,7 @@ class WidgetWrapper extends pw.ImageProvider {
   }) async {
     assert(pixelRatio > 0);
 
-    if (!constraints.hasBoundedHeight || !constraints.hasBoundedHeight) {
+    if (!constraints.hasBoundedWidth || !constraints.hasBoundedHeight) {
       throw Exception(
         'Unable to convert an unbounded widget. Add maxWidth and maxHeight to the constraints.',
       );
@@ -157,7 +157,7 @@ class WidgetWrapper extends pw.ImageProvider {
 
     if (computedConstraints == null ||
         !computedConstraints.hasBoundedWidth ||
-        !computedConstraints.hasBoundedWidth) {
+        !computedConstraints.hasBoundedHeight) {
       throw Exception('Unable to convert an unbounded widget.');
     }
 

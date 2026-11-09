@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.5
+
+- Fix `fromWidget` constraint checks testing the same dimension twice
+
 ## 1.0.4
 
 - Add compatibility with Flutter 3.20.0-7.0.pre.48
