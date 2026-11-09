@@ -28,6 +28,10 @@ import 'page.dart';
 import 'text_style.dart';
 import 'theme.dart';
 
+class _PageIndexCache {
+  int? index;
+}
+
 @immutable
 class Context {
   factory Context({
@@ -46,9 +50,11 @@ class Context {
     PdfPage? page,
     PdfGraphics? canvas,
     required HashMap<Type, Inherited> inherited,
+    _PageIndexCache? pageIndexCache,
   }) : _page = page,
        _canvas = canvas,
-       _inherited = inherited;
+       _inherited = inherited,
+       _pageIndexCache = pageIndexCache ?? _PageIndexCache();
 
   final PdfPage? _page;
 
@@ -62,21 +68,20 @@ class Context {
 
   final PdfDocument document;
 
-  // A page number is read repeatedly by headers, footers and layout.
-  // Remember the index after the first lookup, but validate it because
-  // users may still insert pages ahead of an existing page.
-  int? _cachedPageIndex;
+  // Shared by contexts copied for the same page. The index is checked
+  // before use because pages can still be inserted or removed before it.
+  final _PageIndexCache _pageIndexCache;
 
   int get _pageNumber {
     final pages = document.pdfPageList.pages;
-    final index = _cachedPageIndex;
+    final index = _pageIndexCache.index;
     if (index != null &&
         index >= 0 &&
         index < pages.length &&
         identical(pages[index], page)) {
       return index;
     }
-    return _cachedPageIndex = pages.indexOf(page);
+    return _pageIndexCache.index = pages.indexOf(page);
   }
 
   int get pageNumber => _pageNumber + 1;
@@ -99,16 +104,15 @@ class Context {
     Matrix4? ctm,
     HashMap<Type, Inherited>? inherited,
   }) {
-    final result = Context._(
+    return Context._(
       document: document,
       page: page ?? _page,
       canvas: canvas ?? _canvas,
       inherited: inherited ?? _inherited,
+      pageIndexCache: page == null || identical(page, _page)
+          ? _pageIndexCache
+          : null,
     );
-    if (page == null || identical(page, _page)) {
-      result._cachedPageIndex = _cachedPageIndex;
-    }
-    return result;
   }
 
   T? dependsOn<T>() {
