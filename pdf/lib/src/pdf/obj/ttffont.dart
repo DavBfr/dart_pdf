@@ -212,14 +212,14 @@ class PdfTtfFont extends PdfFont {
       var cid = _cidByRune[rune];
       if (cid == null) {
         cid = unicodeCMap.cmap.length;
+        if (cid > 0xffff) {
+          throw StateError('A Type0 font cannot encode more than 65536 CIDs');
+        }
         unicodeCMap.cmap.add(rune);
         _cidByRune[rune] = cid;
         _indexedCmapLength++;
       }
 
-      if (cid > 0xffff) {
-        throw StateError('A Type0 font cannot encode more than 65536 CIDs');
-      }
       // Encode the two-byte CID directly, without creating a string and a
       // Latin-1 byte list for every character in long text exports.
       stream
