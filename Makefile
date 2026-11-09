@@ -165,7 +165,9 @@ analyze-printing: .pana
 	find printing -name pubspec.yaml -exec sed -i -e 's/^_dependency_overrides:/dependency_overrides:/g' '{}' ';'
 
 analyze-widget-wrapper: widget_wrapper/pubspec.lock
-	cd widget_wrapper; $(FLUTTER_BIN) analyze --no-pub
+	# Flutter dev snapshots may emit migration deprecation infos before stable.
+	# Keep analyzer errors and warnings fatal, but not informational notices.
+	cd widget_wrapper; $(FLUTTER_BIN) analyze --no-pub --no-fatal-infos
 
 analyze: analyze-pdf analyze-printing analyze-widget-wrapper
 
