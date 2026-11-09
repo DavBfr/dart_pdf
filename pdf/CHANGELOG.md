@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.13.2
+
+- Speed up font fallback in rich text when many characters are missing from the primary font
+
 ## 3.13.1
 
 - Add output-stream serialization for memory-bounded PDF generation.
