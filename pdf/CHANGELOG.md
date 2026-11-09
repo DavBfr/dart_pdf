@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.13.2
+
+- Grow the PDF output buffer geometrically, and make PdfStream.putStream append only the written bytes
+- Fix truncated compressed xref offsets when the xref stream starts exactly at a power of 256
+- Speed up TrueType text output with a Unicode to CID lookup table
+- Subset TrueType fonts with many compound glyphs in linear time, and no longer overflow the stack on cyclic compound glyphs
+- Fix the searchRange, entrySelector and rangeShift fields of subset TrueType font headers
+- Fix ImageProvider reusing a resampled image for a different target height, and keep its image cache per document without retaining finished documents
+- Fix the ToUnicode CMap: split mappings into blocks of at most 100 entries and encode characters above U+FFFF as UTF-16 surrogate pairs, so text with emoji and large character sets extracts correctly
+- Speed up font fallback in rich text when many characters are missing from the primary font
+- Avoid a full-size intermediate copy when embedding raw RGB images (PdfImage with alpha: false)
+- Cache the page index in Context so repeated pageNumber and pageLabel reads no longer scan the page list
+
 ## 3.13.1
 
 - Add output-stream serialization for memory-bounded PDF generation.
