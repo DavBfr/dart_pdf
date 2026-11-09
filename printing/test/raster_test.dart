@@ -31,8 +31,37 @@ void main() {
       Uint8List.fromList(List<int>.filled(10 * 10 * 4, 0)),
     );
     expect(raster.toString(), 'Image 10x10 400 bytes');
-    expect(await raster.toImage(), isA<ui.Image>());
+    final image = await raster.toImage();
+    expect(image, isA<ui.Image>());
+    image.dispose();
     expect(await raster.toPng(), isA<Uint8List>());
+  });
+
+  test('PdfRaster.toPng disposes its temporary image', () async {
+    final raster = PdfRaster(
+      10,
+      10,
+      Uint8List.fromList(List<int>.filled(10 * 10 * 4, 0)),
+    );
+
+    final created = <ui.Image>[];
+    final disposed = <ui.Image>[];
+    final previousOnCreate = ui.Image.onCreate;
+    final previousOnDispose = ui.Image.onDispose;
+    ui.Image.onCreate = created.add;
+    ui.Image.onDispose = disposed.add;
+    addTearDown(() {
+      ui.Image.onCreate = previousOnCreate;
+      ui.Image.onDispose = previousOnDispose;
+    });
+
+    for (var i = 0; i < 3; i++) {
+      final png = await raster.toPng();
+      expect(png.take(8).toList(), <int>[137, 80, 78, 71, 13, 10, 26, 10]);
+    }
+
+    expect(created, hasLength(3));
+    expect(disposed, unorderedEquals(created));
   });
 
   testWidgets('PdfRasterImage', (WidgetTester tester) async {
