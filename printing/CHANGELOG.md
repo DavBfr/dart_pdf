@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.15.2
+
+- Fix print jobs on Linux never being released and `layoutPdf` not completing when the document cannot be spooled: each job now holds its own reference to the method channel, sends `onCompleted` once on completion, cancellation or a spool error, and is deleted afterwards. The selected printer is no longer kept in a process-wide global, and the printer and page setup chosen in the print dialog are retained until the job is created
+- Fix `raster` blocking the GTK main thread on Linux: pages are rendered by PDFium on a background worker and delivered on the main thread; empty documents, invalid page sizes and bitmaps complete with an error
+- Load PDFium on Linux in a private linker namespace (`dlmopen`) from a bundled `libpdfium_printing.so`, so its global state and symbols are not shared with another PDFium loaded by the application, and the plugin no longer links `libpdfium.so`
+- Add the `PRINTING_PDFIUM_DIR` CMake option (or environment variable) on Linux to use an existing PDFium build instead of downloading one
+
 ## 5.15.1
 
 - Fix iOS use-after-free crash in `CGPDFDocumentGetNumberOfPages`: UIKit reads the PDF document from a background page-count thread while dynamic layout replaces it on the main thread; document access is now lock-guarded
@@ -12,6 +19,7 @@
 - Fix Windows and Linux callbacks being routed to the wrong isolate with multiple `FlutterEngine`s (multi-window): the method channel is now owned by the plugin instance instead of a global
 - Fix PDFium being destroyed on Windows while another plugin instance is still using it: the library is now reference counted on Windows and Linux
 - Fix the Windows print dialog not being owned by the window that started the job with multiple windows
+- Fix `layoutPdf` and `directPrintPdf` never completing on Linux when the `onLayout` callback throws: the job is now cancelled and completes with the error, as on Android, iOS and macOS
 
 ## 5.15.0
 

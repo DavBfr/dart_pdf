@@ -27,10 +27,13 @@
 
 class print_job {
  private:
-  // Not owned: belongs to the plugin instance this job was created by.
+  // Owned reference. Raster work may outlive the method-call handler and the
+  // plugin instance that created the job.
   FlMethodChannel* channel;
   const int index;
   GtkPrintJob* printJob = nullptr;
+  // set_source_fd does not own the descriptor; retain it until completion.
+  int source_fd = -1;
 
  public:
   GtkPrintUnixDialog* dialog = nullptr;
@@ -59,7 +62,8 @@ class print_job {
                  double marginRight,
                  double marginBottom);
 
-  void write_job(const uint8_t data[], size_t size);
+  // Returns false on I/O or GTK source errors; the caller then deletes job.
+  bool write_job(const uint8_t data[], size_t size);
 
   void cancel_job(const gchar* error);
 
