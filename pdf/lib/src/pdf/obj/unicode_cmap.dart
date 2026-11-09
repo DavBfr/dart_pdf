@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import '../../base/exceptions.dart';
 import '../document.dart';
 import 'object_stream.dart';
 
@@ -32,7 +33,7 @@ class PdfUnicodeCmap extends PdfObjectStream {
   // values. Supplementary characters must be emitted as surrogate pairs.
   String _utf16Hex(int codepoint) {
     if (codepoint < 0 || codepoint > 0x10ffff) {
-      throw FormatException('Invalid Unicode codepoint: $codepoint');
+      throw PdfException('Invalid Unicode codepoint: $codepoint');
     }
     if (codepoint <= 0xffff) {
       return codepoint.toRadixString(16).toUpperCase().padLeft(4, '0');
