@@ -17,7 +17,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart' show FlutterError;
+import 'package:flutter/foundation.dart' show FlutterError, protected;
 import 'package:http/http.dart' as http;
 
 /// Store data in a cache
@@ -44,7 +44,8 @@ abstract class PdfBaseCache {
   Future<void> clear();
 
   /// Download the font
-  Future<Uint8List?> _download(Uri uri, {Map<String, String>? headers}) async {
+  @protected
+  Future<Uint8List?> download(Uri uri, {Map<String, String>? headers}) async {
     final response = await http.get(uri, headers: headers);
     if (response.statusCode != 200) {
       return null;
@@ -60,11 +61,15 @@ abstract class PdfBaseCache {
     bool cache = true,
     Map<String, String>? headers,
   }) async {
-    if (cache && await contains(name)) {
-      return (await get(name))!;
+    if (cache) {
+      // One lookup avoids a contains/get race and duplicate asynchronous work.
+      final cached = await get(name);
+      if (cached != null) {
+        return cached;
+      }
     }
 
-    final bytes = await _download(uri, headers: headers);
+    final bytes = await download(uri, headers: headers);
 
     if (bytes == null) {
       throw FlutterError('Unable to download $uri');
@@ -84,6 +89,45 @@ class PdfMemoryCache extends PdfBaseCache {
   PdfMemoryCache();
 
   final _imageCache = <String, Uint8List>{};
+
+  // Sharing a pending fetch avoids downloading the same asset multiple times
+  // when several pages request it simultaneously.
+  final _pending = <String, Future<Uint8List>>{};
+
+  @override
+  Future<Uint8List> resolve({
+    required String name,
+    required Uri uri,
+    bool cache = true,
+    Map<String, String>? headers,
+  }) {
+    if (!cache) {
+      return super.resolve(
+        name: name,
+        uri: uri,
+        cache: false,
+        headers: headers,
+      );
+    }
+
+    return _pending.putIfAbsent(
+      name,
+      () => _resolveAndForget(name, uri, headers),
+    );
+  }
+
+  Future<Uint8List> _resolveAndForget(
+    String name,
+    Uri uri,
+    Map<String, String>? headers,
+  ) async {
+    try {
+      return await super.resolve(name: name, uri: uri, headers: headers);
+    } finally {
+      // In particular, a failed download must not poison future attempts.
+      _pending.remove(name);
+    }
+  }
 
   Timer? _timer;
 
