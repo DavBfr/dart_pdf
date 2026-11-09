@@ -31,8 +31,19 @@ void main() {
       Uint8List.fromList(List<int>.filled(10 * 10 * 4, 0)),
     );
     expect(raster.toString(), 'Image 10x10 400 bytes');
-    expect(await raster.toImage(), isA<ui.Image>());
-    expect(await raster.toPng(), isA<Uint8List>());
+    final image = await raster.toImage();
+    expect(image, isA<ui.Image>());
+    image.dispose();
+
+    // Encoding the same raster repeatedly must remain valid even though
+    // each temporary engine image is disposed after PNG creation.
+    for (var i = 0; i < 3; i++) {
+      final png = await raster.toPng();
+      expect(png, isA<Uint8List>());
+      expect(png.take(8).toList(), <int>[
+        137, 80, 78, 71, 13, 10, 26, 10,
+      ]);
+    }
   });
 
   testWidgets('PdfRasterImage', (WidgetTester tester) async {
