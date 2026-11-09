@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.15.2
+
+- Fix `PdfPreview` dropping a page format change or refresh requested while a slow build or raster was running
+
 ## 5.15.1
 
 - Fix iOS use-after-free crash in `CGPDFDocumentGetNumberOfPages`: UIKit reads the PDF document from a background page-count thread while dynamic layout replaces it on the main thread; document access is now lock-guarded
