@@ -17,7 +17,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart' show FlutterError, protected;
+import 'package:flutter/foundation.dart' show FlutterError;
 import 'package:http/http.dart' as http;
 
 /// Store data in a cache
@@ -44,8 +44,7 @@ abstract class PdfBaseCache {
   Future<void> clear();
 
   /// Download the font
-  @protected
-  Future<Uint8List?> download(Uri uri, {Map<String, String>? headers}) async {
+  Future<Uint8List?> _download(Uri uri, {Map<String, String>? headers}) async {
     final response = await http.get(uri, headers: headers);
     if (response.statusCode != 200) {
       return null;
@@ -69,7 +68,7 @@ abstract class PdfBaseCache {
       }
     }
 
-    final bytes = await download(uri, headers: headers);
+    final bytes = await _download(uri, headers: headers);
 
     if (bytes == null) {
       throw FlutterError('Unable to download $uri');
