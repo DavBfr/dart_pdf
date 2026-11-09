@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.13.2
+
+- Fix `PdfStream.putStream` appending the unused capacity of the source buffer
+
 ## 3.13.1
 
 - Add output-stream serialization for memory-bounded PDF generation.

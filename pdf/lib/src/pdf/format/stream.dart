@@ -50,7 +50,8 @@ class PdfStream {
   }
 
   void putStream(PdfStream s) {
-    putBytes(s._stream);
+    // The backing buffer includes unused capacity, which is not PDF content.
+    putBytes(Uint8List.sublistView(s._stream, 0, s._offset));
   }
 
   int get offset => _offset;
