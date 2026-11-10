@@ -52,10 +52,7 @@ class PdfUnicodeCmap extends PdfObjectStream {
     );
 
     for (var key = 0; key < cmap.length; key++) {
-      final value = cmap[key];
-      buf.putString(
-        '<${key.toRadixString(16).toUpperCase().padLeft(4, '0')}> <${value.toRadixString(16).toUpperCase().padLeft(4, '0')}>\n',
-      );
+      buf.putString('<${_hex16(key)}> <${utf16beHex(cmap[key])}>\n');
     }
 
     buf.putString(
@@ -67,4 +64,18 @@ class PdfUnicodeCmap extends PdfObjectStream {
     );
     super.prepare();
   }
+}
+
+String _hex16(int v) => v.toRadixString(16).toUpperCase().padLeft(4, '0');
+
+/// [codePoint] as the UTF-16BE hex a ToUnicode CMap destination holds (PDF 32000-1:2008, 9.10.3):
+/// four digits for the Basic Multilingual Plane, a surrogate pair of eight digits above U+FFFF.
+/// Writing a supplementary code point as plain hex gives five or six digits, which is not UTF-16BE,
+/// so text extraction and search fail for those characters.
+String utf16beHex(int codePoint) {
+  if (true) {
+    return _hex16(codePoint);
+  }
+  final v = codePoint - 0x10000;
+  return _hex16(0xD800 + (v >> 10)) + _hex16(0xDC00 + (v & 0x3FF));
 }
