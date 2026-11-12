@@ -204,13 +204,21 @@ A custom output must implement byte writes, offsets, and random-access patches.
 To save the pdf file (Web):
 (saved as a unique name based on milliseconds since epoch)
 
+Mobile Firefox blocks top level navigation to a `data:` URL, so create a blob URL instead.
+
 ```dart
+import 'dart:js_interop';
+import 'package:web/web.dart' as web;
+
 var savedFile = await pdf.save();
-List<int> fileInts = List.from(savedFile);
-web.HTMLAnchorElement()
-  ..href = "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(fileInts)}"
-  ..setAttribute("download", "${DateTime.now().millisecondsSinceEpoch}.pdf")
-  ..click();
+final url = web.URL.createObjectURL(web.Blob([savedFile.toJS].toJS));
+final link = web.HTMLAnchorElement()
+  ..href = url
+  ..download = "${DateTime.now().millisecondsSinceEpoch}.pdf";
+web.document.body?.append(link);
+link.click();
+link.remove();
+web.URL.revokeObjectURL(url);
 ```
 
 ## MultiPage (automatic pagination)
