@@ -29,6 +29,7 @@ export 'src/preview/action_bar_theme.dart';
 export 'src/preview/actions.dart';
 export 'src/preview/pdf_preview.dart';
 export 'src/printer.dart';
+export 'src/printer_paper.dart';
 export 'src/printing.dart';
 export 'src/printing_info.dart';
 export 'src/raster.dart';

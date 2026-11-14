@@ -91,11 +91,15 @@ class PrintingPlugin : public flutter::Plugin {
       if (it != arguments->end() && !it->second.IsNull()) {
         windowsModernDialog = std::get<bool>(it->second);
       }
+      auto vPaper = arguments->find(flutter::EncodableValue("paper"));
+      auto paper = vPaper != arguments->end() && !vPaper->second.IsNull()
+                       ? std::get<std::string>(vPaper->second)
+                       : std::string{};
       auto vJob = arguments->find(flutter::EncodableValue("job"));
       auto jobNum = vJob != arguments->end() ? std::get<int>(vJob->second) : -1;
       auto job = new PrintJob{&printing, jobNum};
       auto res = job->printPdf(name, printer, width, height, usePrinterSettings,
-                               windowsModernDialog);
+                               windowsModernDialog, paper);
       if (!res) {
         delete job;
       }
@@ -135,6 +139,27 @@ class PrintingPlugin : public flutter::Plugin {
         mp[flutter::EncodableValue("available")] =
             flutter::EncodableValue(printer.available);
         pl.push_back(mp);
+      }
+      result->Success(pl);
+    } else if (method_call.method_name().compare("listPaperSizes") == 0) {
+      const auto* arguments =
+          std::get_if<flutter::EncodableMap>(method_call.arguments());
+      auto vPrinter = arguments->find(flutter::EncodableValue("printer"));
+      auto printer = vPrinter != arguments->end()
+                         ? std::get<std::string>(vPrinter->second)
+                         : std::string{};
+      auto job = std::make_unique<PrintJob>(&printing, -1);
+      auto pl = flutter::EncodableList{};
+      for (const auto& paper : job->listPaperSizes(printer)) {
+        pl.push_back(flutter::EncodableMap{
+            {flutter::EncodableValue("id"), flutter::EncodableValue(paper.id)},
+            {flutter::EncodableValue("name"),
+             flutter::EncodableValue(paper.name)},
+            {flutter::EncodableValue("width"),
+             flutter::EncodableValue(paper.width)},
+            {flutter::EncodableValue("height"),
+             flutter::EncodableValue(paper.height)},
+        });
       }
       result->Success(pl);
     } else if (method_call.method_name().compare("rasterPdf") == 0) {

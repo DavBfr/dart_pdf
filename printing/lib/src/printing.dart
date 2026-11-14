@@ -24,6 +24,7 @@ import 'callback.dart';
 import 'interface.dart';
 import 'output_type.dart';
 import 'printer.dart';
+import 'printer_paper.dart';
 import 'printing_info.dart';
 import 'raster.dart';
 
@@ -69,6 +70,7 @@ mixin Printing {
       outputType,
       forceCustomPrintPaper,
       windowsModernDialog,
+      null,
     );
   }
 
@@ -78,6 +80,19 @@ mixin Printing {
   /// find at runtime if this feature is available or not.
   static Future<List<Printer>> listPrinters() {
     return PrintingPlatform.instance.listPrinters();
+  }
+
+  /// Enumerate the paper sizes the driver of [printer] supports.
+  ///
+  /// Pass one of them to [directPrintPdf] to print on that paper. The list is
+  /// empty when the printer is not available. Asking the driver can take a
+  /// while, for example for a network printer.
+  ///
+  /// This is not supported on all platforms. Check
+  /// [PrintingInfo.canListPaperSizes] of [info] to find at runtime if this
+  /// feature is available or not. (Supported platforms: Windows)
+  static Future<List<PrinterPaper>> listPaperSizes(Printer printer) {
+    return PrintingPlatform.instance.listPaperSizes(printer);
   }
 
   /// Opens the native printer picker interface, and returns the URL of the
@@ -157,6 +172,17 @@ mixin Printing {
   /// Use value `true` to use [format] as custom paper size, when the printer
   /// driver will not allows the user to use papers which are actually supported by the printer.
   /// (Supported platforms: iOS)
+  ///
+  /// Set [paper] to one of the papers returned by [listPaperSizes] for
+  /// [printer] to print on that paper. The other settings of the printer
+  /// driver, such as borderless printing, are kept as they are configured for
+  /// the printer, regardless of [usePrinterSettings]. The page orientation
+  /// follows [format]. (Supported platforms: Windows)
+  ///
+  /// Without [paper] and with [usePrinterSettings] set to false, the paper of
+  /// the printer that has the size of [format] is used. When several papers
+  /// have that size, such as a paper with and without border, the first one
+  /// is used; set [paper] to choose. (Supported platforms: Windows)
   static FutureOr<bool> directPrintPdf({
     required Printer printer,
     required LayoutCallback onLayout,
@@ -167,6 +193,7 @@ mixin Printing {
     OutputType outputType = OutputType.generic,
     bool forceCustomPrintPaper = false,
     bool windowsModernDialog = false,
+    PrinterPaper? paper,
   }) {
     return PrintingPlatform.instance.layoutPdf(
       printer,
@@ -178,6 +205,7 @@ mixin Printing {
       outputType,
       forceCustomPrintPaper,
       windowsModernDialog,
+      paper,
     );
   }
 

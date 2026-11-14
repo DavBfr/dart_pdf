@@ -22,6 +22,8 @@
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <tchar.h>
+#include <algorithm>
+#include <cmath>
 #include <codecvt>
 #include <fstream>
 #include <iterator>
@@ -73,41 +75,158 @@ std::wstring fromUtf8(std::string str) {
 PrintJob::PrintJob(Printing* printing, int index)
     : printing{printing}, index{index} {}
 
+// A paper name takes up to 64 characters, which are not always terminated or
+// padded with null characters.
+const auto paperNameLength = 64;
+
+// The paper that has the size of the page, in either orientation.
+static const Paper* findPaper(const std::vector<Paper>& papers,
+                              double width,
+                              double height) {
+  const auto tolerance = pdfDpi / 25.4;  // 1 mm
+  for (const auto& paper : papers) {
+    if ((fabs(paper.width - width) < tolerance &&
+         fabs(paper.height - height) < tolerance) ||
+        (fabs(paper.width - height) < tolerance &&
+         fabs(paper.height - width) < tolerance)) {
+      return &paper;
+    }
+  }
+  return nullptr;
+}
+
+// Whether a page of width by height is turned on paper.
+static bool isLandscapeOn(const Paper& paper, double width, double height) {
+  return (width > height) != (paper.width > paper.height);
+}
+
+// The default settings of the printer driver with paperId selected. Starting
+// from the defaults keeps the settings that are specific to the driver, such as
+// borderless printing. Returns nullptr and sets error when the printer cannot
+// be opened or the driver does not accept the paper.
+static DEVMODE* devModeForPaper(const std::string& printer,
+                                short paperId,
+                                bool landscape,
+                                std::string& error) {
+  auto name = fromUtf8(printer);
+  auto device = const_cast<LPWSTR>(name.c_str());
+  HANDLE hPrinter = nullptr;
+  if (!OpenPrinter(device, &hPrinter, nullptr)) {
+    error = "Unable to open printer " + printer;
+    return nullptr;
+  }
+
+  DEVMODE* dm = nullptr;
+  auto size =
+      DocumentProperties(nullptr, hPrinter, device, nullptr, nullptr, 0);
+  if (size > 0) {
+    dm = static_cast<DEVMODE*>(GlobalAlloc(GMEM_FIXED, size));
+  }
+
+  if (!dm || DocumentProperties(nullptr, hPrinter, device, dm, nullptr,
+                                DM_OUT_BUFFER) != IDOK) {
+    error = "Unable to read the settings of printer " + printer;
+  } else {
+    dm->dmFields |= DM_PAPERSIZE | DM_ORIENTATION;
+    dm->dmFields &= ~(DM_PAPERLENGTH | DM_PAPERWIDTH);
+    dm->dmPaperSize = paperId;
+    dm->dmOrientation = landscape ? DMORIENT_LANDSCAPE : DMORIENT_PORTRAIT;
+
+    // Let the driver validate the paper and update its own settings to match.
+    // A driver can also replace a paper it does not accept by another one.
+    if (DocumentProperties(nullptr, hPrinter, device, dm, dm,
+                           DM_IN_BUFFER | DM_OUT_BUFFER) != IDOK) {
+      error = "The printer driver rejected paper " + std::to_string(paperId);
+    } else if (dm->dmPaperSize != paperId) {
+      error = "The printer driver replaced paper " + std::to_string(paperId) +
+              " by paper " + std::to_string(dm->dmPaperSize);
+    }
+  }
+
+  if (!error.empty() && dm) {
+    GlobalFree(dm);
+    dm = nullptr;
+  }
+
+  ClosePrinter(hPrinter);
+  return dm;
+}
+
 bool PrintJob::printPdf(const std::string& name,
                         std::string printer,
                         double width,
                         double height,
                         bool usePrinterSettings,
-                        bool windowsModernDialog) {
+                        bool windowsModernDialog,
+                        const std::string& paper) {
   documentName = name;
 
-  std::size_t dmSize = sizeof(DEVMODE);
-  std::size_t dmExtra = 0;
+  DEVMODE* dm = nullptr;  // nullptr to use default driver config
 
-  if (!printer.empty()) {
-    dmExtra = DeviceCapabilities(fromUtf8(printer).c_str(), NULL, DC_EXTRA,
-                                 NULL, NULL);
-  }
+  if (!printer.empty() && !paper.empty()) {
+    // A paper from listPaperSizes, with the other settings of the driver.
+    auto papers = listPaperSizes(printer);
+    if (papers.empty()) {
+      printing->onCompleted(this, false,
+                            "Unable to list the papers of printer " + printer);
+      return false;
+    }
 
-  auto dm = static_cast<DEVMODE*>(GlobalAlloc(0, dmSize + dmExtra));
+    auto selected =
+        std::find_if(papers.begin(), papers.end(),
+                     [&paper](const Paper& p) { return p.id == paper; });
+    if (selected == papers.end()) {
+      printing->onCompleted(this, false,
+                            "The printer has no paper with id " + paper);
+      return false;
+    }
 
-  if (usePrinterSettings) {
-    dm = nullptr;  // to use default driver config
-  } else {
+    auto error = std::string{};
+    dm = devModeForPaper(printer, static_cast<short>(std::stoi(selected->id)),
+                         isLandscapeOn(*selected, width, height), error);
+    if (!dm) {
+      printing->onCompleted(this, false, error);
+      return false;
+    }
+  } else if (!usePrinterSettings) {
+    std::size_t dmSize = sizeof(DEVMODE);
+    std::size_t dmExtra = 0;
+
+    if (!printer.empty()) {
+      dmExtra = DeviceCapabilities(fromUtf8(printer).c_str(), NULL, DC_EXTRA,
+                                   NULL, NULL);
+    }
+
+    dm = static_cast<DEVMODE*>(GlobalAlloc(0, dmSize + dmExtra));
     ZeroMemory(dm, dmSize + dmExtra);
     dm->dmSize = (WORD)dmSize;
     dm->dmDriverExtra = (WORD)dmExtra;
-    dm->dmFields =
-        DM_ORIENTATION | DM_PAPERSIZE | DM_PAPERLENGTH | DM_PAPERWIDTH;
-    dm->dmPaperSize = 0;
-    if (width > height) {
-      dm->dmOrientation = DMORIENT_LANDSCAPE;
-      dm->dmPaperWidth = static_cast<short>(round(height * 254 / pdfDpi));
-      dm->dmPaperLength = static_cast<short>(round(width * 254 / pdfDpi));
+
+    // Many drivers ignore a custom paper size, so prefer a paper of the
+    // printer that has the size of the page.
+    auto papers =
+        printer.empty() ? std::vector<Paper>{} : listPaperSizes(printer);
+    auto known = findPaper(papers, width, height);
+
+    if (known) {
+      dm->dmFields = DM_ORIENTATION | DM_PAPERSIZE;
+      dm->dmPaperSize = static_cast<short>(std::stoi(known->id));
+      dm->dmOrientation = isLandscapeOn(*known, width, height)
+                              ? DMORIENT_LANDSCAPE
+                              : DMORIENT_PORTRAIT;
     } else {
-      dm->dmOrientation = DMORIENT_PORTRAIT;
-      dm->dmPaperWidth = static_cast<short>(round(width * 254 / pdfDpi));
-      dm->dmPaperLength = static_cast<short>(round(height * 254 / pdfDpi));
+      dm->dmFields =
+          DM_ORIENTATION | DM_PAPERSIZE | DM_PAPERLENGTH | DM_PAPERWIDTH;
+      dm->dmPaperSize = 0;
+      if (width > height) {
+        dm->dmOrientation = DMORIENT_LANDSCAPE;
+        dm->dmPaperWidth = static_cast<short>(round(height * 254 / pdfDpi));
+        dm->dmPaperLength = static_cast<short>(round(width * 254 / pdfDpi));
+      } else {
+        dm->dmOrientation = DMORIENT_PORTRAIT;
+        dm->dmPaperWidth = static_cast<short>(round(width * 254 / pdfDpi));
+        dm->dmPaperLength = static_cast<short>(round(height * 254 / pdfDpi));
+      }
     }
   }
 
@@ -192,6 +311,10 @@ bool PrintJob::printPdf(const std::string& name,
   } else {
     hDC = CreateDC(TEXT("WINSPOOL"), fromUtf8(printer).c_str(), nullptr, dm);
     if (!hDC) {
+      if (dm) {
+        GlobalFree(dm);
+      }
+      printing->onCompleted(this, false, "Unable to open printer " + printer);
       return false;
     }
     hDevMode = dm;
@@ -263,6 +386,53 @@ std::vector<Printer> PrintJob::listPrinters() {
   free(buffer);
   free(defaultPrinter);
   return printers;
+}
+
+std::vector<Paper> PrintJob::listPaperSizes(const std::string& printer) {
+  auto papers = std::vector<Paper>{};
+  auto device = fromUtf8(printer);
+
+  // The buffers are sized by the first call. DeviceCapabilities takes no
+  // buffer size, so this relies on the driver reporting the same papers for
+  // each call.
+  auto count =
+      DeviceCapabilities(device.c_str(), nullptr, DC_PAPERS, nullptr, nullptr);
+  if (count <= 0) {
+    return papers;
+  }
+
+  auto ids = std::vector<WORD>(count);
+  auto names = std::vector<WCHAR>(count * paperNameLength);
+  auto sizes = std::vector<POINT>(count);
+
+  if (DeviceCapabilities(device.c_str(), nullptr, DC_PAPERS,
+                         reinterpret_cast<LPWSTR>(ids.data()),
+                         nullptr) != count ||
+      DeviceCapabilities(device.c_str(), nullptr, DC_PAPERNAMES, names.data(),
+                         nullptr) != count ||
+      DeviceCapabilities(device.c_str(), nullptr, DC_PAPERSIZE,
+                         reinterpret_cast<LPWSTR>(sizes.data()),
+                         nullptr) != count) {
+    return papers;
+  }
+
+  for (auto i = 0; i < count; i++) {
+    // Sizes are in tenths of a millimeter. Some drivers list reserved papers
+    // without a size.
+    if (sizes[i].x <= 0 || sizes[i].y <= 0) {
+      continue;
+    }
+
+    auto nameStart = names.data() + i * paperNameLength;
+    auto paperName =
+        std::wstring{nameStart, wcsnlen(nameStart, paperNameLength)};
+
+    papers.push_back(Paper{std::to_string(ids[i]), toUtf8(paperName),
+                           sizes[i].x * pdfDpi / 254.0,
+                           sizes[i].y * pdfDpi / 254.0});
+  }
+
+  return papers;
 }
 
 void PrintJob::writeJob(std::vector<uint8_t> data) {
@@ -432,8 +602,10 @@ void PrintJob::rasterPdf(std::vector<uint8_t> data,
 
 std::map<std::string, bool> PrintJob::printingInfo() {
   return std::map<std::string, bool>{
-      {"directPrint", true},     {"dynamicLayout", true}, {"canPrint", true},
-      {"canListPrinters", true}, {"canShare", true},      {"canRaster", true},
+      {"directPrint", true},       {"dynamicLayout", true},
+      {"canPrint", true},          {"canListPrinters", true},
+      {"canListPaperSizes", true}, {"canShare", true},
+      {"canRaster", true},
   };
 }
 

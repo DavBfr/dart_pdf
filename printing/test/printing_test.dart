@@ -65,6 +65,30 @@ void main() {
     );
   });
 
+  test('listPaperSizes', () async {
+    expect(await Printing.listPaperSizes(const Printer(url: 'test')), [_paper]);
+  });
+
+  test('directPrintPdf on a paper', () async {
+    final mock = PrintingPlatform.instance as MockPrinting;
+
+    expect(
+      await Printing.directPrintPdf(
+        onLayout: (_) => Uint8List(0),
+        printer: const Printer(url: 'test'),
+        paper: _paper,
+      ),
+      true,
+    );
+    expect(mock.lastPaper, _paper);
+  });
+
+  test('PrinterPaper', () {
+    expect(PrinterPaper.fromMap(_paper.toMap()), _paper);
+    expect(_paper.format, PdfPageFormat(_paper.width, _paper.height));
+    expect(_paper.toString(), isA<String>());
+  });
+
   test('raster', () async {
     expect(Printing.raster(Uint8List(0)), isInstanceOf<Stream>());
   });
@@ -83,9 +107,18 @@ void main() {
   });
 }
 
+const _paper = PrinterPaper(
+  id: '153',
+  name: 'North America 4x 6',
+  width: 288,
+  height: 432,
+);
+
 class MockPrinting extends Mock
     with MockPlatformInterfaceMixin
     implements PrintingPlatform {
+  PrinterPaper? lastPaper;
+
   @override
   Future<PrintingInfo> info() async => PrintingInfo.unavailable;
 
@@ -100,7 +133,14 @@ class MockPrinting extends Mock
     OutputType outputType,
     bool forceCustomPrintPaper,
     bool windowsModernDialog,
-  ) async => true;
+    PrinterPaper? paper,
+  ) async {
+    lastPaper = paper;
+    return true;
+  }
+
+  @override
+  Future<List<PrinterPaper>> listPaperSizes(Printer printer) async => [_paper];
 
   @override
   Future<bool> sharePdf(

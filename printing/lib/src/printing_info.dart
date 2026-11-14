@@ -23,6 +23,7 @@ class PrintingInfo {
     this.canPrint = false,
     this.canConvertHtml = false,
     this.canListPrinters = false,
+    this.canListPaperSizes = false,
     this.canShare = false,
     this.canRaster = false,
   });
@@ -34,6 +35,7 @@ class PrintingInfo {
     canPrint: map['canPrint'] ?? false,
     canConvertHtml: map['canConvertHtml'] ?? false,
     canListPrinters: map['canListPrinters'] ?? false,
+    canListPaperSizes: map['canListPaperSizes'] ?? false,
     canShare: map['canShare'] ?? false,
     canRaster: map['canRaster'] ?? false,
   );
@@ -57,6 +59,10 @@ class PrintingInfo {
   /// The platform implementation is able list the available printers on the system
   final bool canListPrinters;
 
+  /// The platform implementation is able to list the paper sizes a printer
+  /// supports, and to print directly on one of them
+  final bool canListPaperSizes;
+
   /// The platform implementation is able to share a Pdf document
   /// to other applications
   final bool canShare;
@@ -74,6 +80,7 @@ $runtimeType:
   dynamicLayout: $dynamicLayout
   canConvertHtml: $canConvertHtml
   canListPrinters: $canListPrinters
+  canListPaperSizes: $canListPaperSizes
   canShare: $canShare
   canRaster: $canRaster''';
 }

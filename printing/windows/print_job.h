@@ -55,6 +55,20 @@ struct Printer {
         available(available) {}
 };
 
+struct Paper {
+  const std::string id;
+  const std::string name;
+  // In points, as reported by the printer driver
+  const double width;
+  const double height;
+
+  Paper(const std::string& id,
+        const std::string& name,
+        double width,
+        double height)
+      : id(id), name(name), width(width), height(height) {}
+};
+
 class PrintJob {
  private:
   Printing* printing;
@@ -71,12 +85,15 @@ class PrintJob {
 
   std::vector<Printer> listPrinters();
 
+  std::vector<Paper> listPaperSizes(const std::string& printer);
+
   bool printPdf(const std::string& name,
                 std::string printer,
                 double width,
                 double height,
                 bool usePrinterSettings,
-                bool windowsModernDialog);
+                bool windowsModernDialog,
+                const std::string& paper);
 
   void writeJob(std::vector<uint8_t> data);
 

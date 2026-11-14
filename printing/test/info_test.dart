@@ -27,6 +27,7 @@ void main() {
     expect(info.dynamicLayout, false);
     expect(info.canPrint, false);
     expect(info.canConvertHtml, false);
+    expect(info.canListPaperSizes, false);
     expect(info.canShare, false);
     expect(info.canRaster, false);
 
@@ -34,12 +35,16 @@ void main() {
   });
 
   test('PrintingInfo.fromMap', () async {
-    final info = PrintingInfo.fromMap(<dynamic, dynamic>{'canPrint': true});
+    final info = PrintingInfo.fromMap(<dynamic, dynamic>{
+      'canPrint': true,
+      'canListPaperSizes': true,
+    });
 
     expect(info.canConvertHtml, false);
     expect(info.directPrint, false);
     expect(info.dynamicLayout, false);
     expect(info.canPrint, true);
+    expect(info.canListPaperSizes, true);
     expect(info.canConvertHtml, false);
     expect(info.canShare, false);
     expect(info.canRaster, false);

@@ -32,6 +32,7 @@ import 'src/mutex.dart';
 import 'src/output_type.dart';
 import 'src/pdfjs.dart';
 import 'src/printer.dart';
+import 'src/printer_paper.dart';
 import 'src/printing_info.dart';
 import 'src/raster.dart';
 
@@ -128,6 +129,7 @@ class PrintingPlugin extends PrintingPlatform {
     OutputType outputType,
     bool forceCustomPrintPaper,
     bool windowsModernDialog,
+    PrinterPaper? paper,
   ) async {
     late Uint8List result;
     try {

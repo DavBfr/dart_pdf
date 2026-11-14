@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.16.0
+
+- Add `Printing.listPaperSizes` and `PrinterPaper` to list the paper sizes a printer supports (Windows)
+- Add `paper` to `Printing.directPrintPdf` to print on one of those papers, keeping the other settings of the printer driver such as borderless printing, regardless of `usePrinterSettings` (Windows)
+- Windows: select the paper of the printer that matches `format` when `usePrinterSettings` is false, instead of a custom paper size that many drivers ignore (#1425)
+- Windows: complete `directPrintPdf` with an error when the printer cannot be opened, instead of never completing
+
 ## 5.15.1
 
 - Fix iOS use-after-free crash in `CGPDFDocumentGetNumberOfPages`: UIKit reads the PDF document from a background page-count thread while dynamic layout replaces it on the main thread; document access is now lock-guarded

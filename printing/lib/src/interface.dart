@@ -25,6 +25,7 @@ import 'callback.dart';
 import 'method_channel.dart';
 import 'output_type.dart';
 import 'printer.dart';
+import 'printer_paper.dart';
 import 'printing_info.dart';
 import 'raster.dart';
 
@@ -60,6 +61,9 @@ abstract class PrintingPlatform extends PlatformInterface {
   /// returns a future with a `bool` set to true if the document is printed
   /// and false if it is canceled.
   /// throws an exception in case of error
+  ///
+  /// [paper] selects one of the papers reported by [listPaperSizes] when
+  /// printing directly to [printer].
   Future<bool> layoutPdf(
     Printer? printer,
     LayoutCallback onLayout,
@@ -70,10 +74,15 @@ abstract class PrintingPlatform extends PlatformInterface {
     OutputType outputType,
     bool forceCustomPrintPaper,
     bool windowsModernDialog,
+    PrinterPaper? paper,
   );
 
   /// Enumerate the available printers on the system.
   Future<List<Printer>> listPrinters();
+
+  /// Enumerate the paper sizes supported by [printer].
+  Future<List<PrinterPaper>> listPaperSizes(Printer printer) =>
+      throw UnimplementedError('listPaperSizes is not supported');
 
   /// Opens the native printer picker interface, and returns the URL of the selected printer.
   Future<Printer?> pickPrinter(Rect bounds);

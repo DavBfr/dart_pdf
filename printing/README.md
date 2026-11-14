@@ -138,6 +138,21 @@ Or share the document to other applications:
 await Printing.sharePdf(bytes: await doc.save(), filename: 'my-document.pdf');
 ```
 
+To print directly on a paper the printer driver supports, such as a borderless paper (Windows):
+
+```dart
+if ((await Printing.info()).canListPaperSizes) {
+  final papers = await Printing.listPaperSizes(printer);
+  final paper = papers.firstWhere((paper) => paper.name.contains('Borderless'));
+  await Printing.directPrintPdf(
+    printer: printer,
+    paper: paper,
+    format: paper.format,
+    onLayout: (PdfPageFormat format) async => doc.save(),
+  );
+}
+```
+
 To print an HTML document:
 
 import [HTMLtoPDFWidgets](https://pub.dev/packages/htmltopdfwidgets)
