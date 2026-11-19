@@ -95,9 +95,18 @@ mixin TableHelper {
 
     final rows = <TableRow>[];
 
+    // Resolve the table direction once: an explicit [tableDirection] wins,
+    // otherwise the ambient [Directionality] is used (LTR when there is no
+    // context). In a RTL table the first logical column is laid out on the
+    // right, so each row is reversed before being added to the table.
+    final textDirection =
+        tableDirection ??
+        (context == null ? TextDirection.ltr : Directionality.of(context));
+    final isRtl = textDirection == TextDirection.rtl;
+
     var rowNum = 0;
     if (headers != null) {
-      final tableRow = <Widget>[];
+      var tableRow = <Widget>[];
 
       for (final dynamic cell in headers) {
         tableRow.add(
@@ -113,10 +122,13 @@ mixin TableHelper {
                         ? cell.toString()
                         : headerFormat(tableRow.length, cell),
                     style: headerStyle,
-                    textDirection: headerDirection,
+                    textDirection: headerDirection ?? textDirection,
                   ),
           ),
         );
+      }
+      if (isRtl) {
+        tableRow = tableRow.reversed.toList();
       }
       rows.add(
         TableRow(
@@ -128,11 +140,8 @@ mixin TableHelper {
       rowNum++;
     }
 
-    final textDirection = context == null
-        ? TextDirection.ltr
-        : Directionality.of(context);
     for (final row in data) {
-      final tableRow = <Widget>[];
+      var tableRow = <Widget>[];
       final isOdd = (rowNum - headerCount) % 2 != 0;
       if (rowNum < headerCount) {
         for (final dynamic cell in row) {
@@ -152,7 +161,7 @@ mixin TableHelper {
                           : headerFormat(tableRow.length, cell),
                       style: headerStyle,
                       textAlign: textAlign,
-                      textDirection: headerDirection,
+                      textDirection: headerDirection ?? textDirection,
                     ),
             ),
           );
@@ -183,11 +192,15 @@ mixin TableHelper {
                               ) ??
                               (isOdd ? oddCellStyle : cellStyle),
                           textAlign: _textAlign(align.resolve(textDirection)),
-                          textDirection: tableDirection,
+                          textDirection: textDirection,
                         ),
             ),
           );
         }
+      }
+
+      if (isRtl) {
+        tableRow = tableRow.reversed.toList();
       }
 
       var decoration = isOdd ? oddRowDecoration : rowDecoration;
