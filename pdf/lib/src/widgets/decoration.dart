@@ -355,9 +355,21 @@ class BoxDecoration {
             );
             break;
         }
+        // PDF colors carry no alpha channel: the opacity has to be set on the
+        // graphics state (ISO 32000-1:2008, 11.6.4.4).
+        final background = color!;
+        final fillOpacity = background.alpha < 1.0 ? background.alpha : null;
+        if (fillOpacity != null) {
+          context.canvas
+            ..saveContext()
+            ..setGraphicState(PdfGraphicState(fillOpacity: fillOpacity));
+        }
         context.canvas
-          ..setFillColor(color)
+          ..setFillColor(background)
           ..fillPath();
+        if (fillOpacity != null) {
+          context.canvas.restoreContext();
+        }
       }
 
       if (gradient != null) {
