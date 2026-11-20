@@ -73,11 +73,34 @@ abstract class BoxBorder {
     BorderRadius? borderRadius,
   });
 
+  /// PDF stroke colors carry no alpha channel, so the opacity of [color] has
+  /// to be set on the graphics state
+  /// (ISO 32000-1:2008, 11.6.4.4).
+  ///
+  /// Returns true when a graphic state has been saved and the caller has to
+  /// call [endStroke] once the side is painted.
+  static bool _beginStroke(Context context, PdfColor color) {
+    if (color.alpha >= 1.0) {
+      return false;
+    }
+    context.canvas
+      ..saveContext()
+      ..setGraphicState(PdfGraphicState(strokeOpacity: color.alpha));
+    return true;
+  }
+
+  static void _endStroke(Context context, bool restore) {
+    if (restore) {
+      context.canvas.restoreContext();
+    }
+  }
+
   static void _paintUniformBorderWithCircle(
     Context context,
     PdfRect box,
     BorderSide side,
   ) {
+    final restore = _beginStroke(context, side.color);
     side.style.setStyle(context);
     context.canvas
       ..setStrokeColor(side.color)
@@ -90,6 +113,7 @@ abstract class BoxBorder {
       )
       ..strokePath();
     side.style.unsetStyle(context);
+    _endStroke(context, restore);
   }
 
   static void _paintUniformBorderWithRadius(
@@ -98,6 +122,7 @@ abstract class BoxBorder {
     BorderSide side,
     BorderRadius borderRadius,
   ) {
+    final restore = _beginStroke(context, side.color);
     side.style.setStyle(context);
     context.canvas
       ..setLineJoin(PdfLineJoin.miter)
@@ -107,6 +132,7 @@ abstract class BoxBorder {
     borderRadius.paint(context, box);
     context.canvas.strokePath();
     side.style.unsetStyle(context);
+    _endStroke(context, restore);
   }
 
   static void _paintUniformBorderWithRectangle(
@@ -114,6 +140,7 @@ abstract class BoxBorder {
     PdfRect box,
     BorderSide side,
   ) {
+    final restore = _beginStroke(context, side.color);
     side.style.setStyle(context);
     context.canvas
       ..setLineJoin(PdfLineJoin.miter)
@@ -123,6 +150,7 @@ abstract class BoxBorder {
       ..drawBox(box)
       ..strokePath();
     side.style.unsetStyle(context);
+    _endStroke(context, restore);
   }
 }
 
@@ -273,6 +301,7 @@ class Border extends BoxBorder {
       ..setLineJoin(PdfLineJoin.miter);
 
     if (top.style.paint) {
+      final restore = BoxBorder._beginStroke(context, top.color);
       top.style.setStyle(context);
       context.canvas
         ..setStrokeColor(top.color)
@@ -280,9 +309,11 @@ class Border extends BoxBorder {
         ..drawLine(box.left, box.top, box.right, box.top)
         ..strokePath();
       top.style.unsetStyle(context);
+      BoxBorder._endStroke(context, restore);
     }
 
     if (right.style.paint) {
+      final restore = BoxBorder._beginStroke(context, right.color);
       right.style.setStyle(context);
       context.canvas
         ..setStrokeColor(right.color)
@@ -290,9 +321,11 @@ class Border extends BoxBorder {
         ..drawLine(box.right, box.top, box.right, box.bottom)
         ..strokePath();
       right.style.unsetStyle(context);
+      BoxBorder._endStroke(context, restore);
     }
 
     if (bottom.style.paint) {
+      final restore = BoxBorder._beginStroke(context, bottom.color);
       bottom.style.setStyle(context);
       context.canvas
         ..setStrokeColor(bottom.color)
@@ -300,9 +333,11 @@ class Border extends BoxBorder {
         ..drawLine(box.right, box.bottom, box.left, box.bottom)
         ..strokePath();
       bottom.style.unsetStyle(context);
+      BoxBorder._endStroke(context, restore);
     }
 
     if (left.style.paint) {
+      final restore = BoxBorder._beginStroke(context, left.color);
       left.style.setStyle(context);
       context.canvas
         ..setStrokeColor(left.color)
@@ -310,6 +345,7 @@ class Border extends BoxBorder {
         ..drawLine(box.left, box.top, box.left, box.bottom)
         ..strokePath();
       left.style.unsetStyle(context);
+      BoxBorder._endStroke(context, restore);
     }
   }
 }
