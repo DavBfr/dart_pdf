@@ -292,6 +292,8 @@ class Table extends Widget with SpanningWidget {
     BoxDecoration? headerCellDecoration,
     BoxDecoration? rowDecoration,
     BoxDecoration? oddRowDecoration,
+    TextDirection? headerDirection,
+    TextDirection? tableDirection,
   }) => TableHelper.fromTextArray(
     context: context,
     data: data,
@@ -319,6 +321,8 @@ class Table extends Widget with SpanningWidget {
     headerCellDecoration: headerCellDecoration,
     rowDecoration: rowDecoration,
     oddRowDecoration: oddRowDecoration,
+    headerDirection: headerDirection,
+    tableDirection: tableDirection,
   );
 
   @override
