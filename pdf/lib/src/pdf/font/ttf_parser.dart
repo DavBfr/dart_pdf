@@ -462,7 +462,10 @@ class TtfParser {
 
     final start = tableOffsets[glyf_table]! + glyphOffsets[index];
 
-    if (start >= tableSize[glyf_table]! + tableOffsets[glyf_table]! ||
+    // A zero-length glyph (e.g. space) has no outline: its offset points at
+    // the next glyph's data.
+    if (glyphSizes[index] == 0 ||
+        start >= tableSize[glyf_table]! + tableOffsets[glyf_table]! ||
         start == 0) {
       return TtfGlyphInfo(index, Uint8List(0), const <int>[]);
     }
